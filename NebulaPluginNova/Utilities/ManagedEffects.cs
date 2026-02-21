@@ -247,6 +247,10 @@ public static class ManagedEffects
 
     static public void StartOnScene(this IEnumerator coroutine) => NebulaManager.Instance.StartCoroutine(coroutine.WrapToIl2Cpp());
     static public void StartOnProcess(this IEnumerator coroutine) => ModSingleton<ResidentBehaviour>.Instance.StartCoroutine(coroutine.WrapToIl2Cpp());
+    static public void StartOn(this IEnumerator coroutine, MonoBehaviour behaviour) => behaviour.StartCoroutine(coroutine.WrapToIl2Cpp());
+    static public void StartOnScene(this Il2CppSystem.Collections.IEnumerator coroutine) => NebulaManager.Instance.StartCoroutine(coroutine);
+    static public void StartOnProcess(this Il2CppSystem.Collections.IEnumerator coroutine) => ModSingleton<ResidentBehaviour>.Instance.StartCoroutine(coroutine);
+    static public void StartOn(this Il2CppSystem.Collections.IEnumerator coroutine, MonoBehaviour behaviour) => behaviour.StartCoroutine(coroutine);
 
     static public RemoteProcess<(Vector3 pos, int layer)> RpcDisappearEffect = new("DisappearEffect", (message, _) => NebulaManager.Instance.StartCoroutine(ManagedEffects.CoDisappearEffect(message.layer, null, message.pos, 1f).WrapToIl2Cpp()));
 }

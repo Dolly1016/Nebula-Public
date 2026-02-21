@@ -1,0 +1,19 @@
+# Categories
+
+"role.category.crewmate" : "Crewmate Roles"
+"role.category.impostor" : "Impostor Roles"
+"role.category.neutral" : "Neutral Roles"
+"role.category.ghost" : "Ghost Roles"
+"role.category.modifier" : "Modifiers"
+
+# Document
+
+"document.canAssignTo" : "Assignable"
+"document.caption.configuration" : "* Parts changeable in options are displayed in <var>light blue</var>, and parts changeable in client options are displayed in <client>green</client>."
+"document.configurations.title" : "Options"
+"document.configurations.none" : "None"
+"document.configurations.empty" : "None"
+"document.tips.title" : "Tips"
+"document.winCond.title" : "Win Conditions"
+"document.titles.title" : "Titles"
+"document.titles.none" : "None"

@@ -1,0 +1,62 @@
+"achievement.omikuji.title" : "超吉！おみくじ乱れ撃ち"
+"achievement.omikuji.goal" : "1ゲームでパークを3つ手に入れる。"
+"achievement.omikuji.cond" : "January title"
+"achievement.omikuji.splitted.1" : "おみくじ"
+
+"achievement.setsubun.title" : "笑門来福"
+"achievement.setsubun.goal" : "タスクをすべてこなし、最後まで生き残った上で<br>インポスターを全員追放し、勝利する。"
+"achievement.setsubun.cond" : "February title"
+
+"achievement.graduation2.title" : "別れの季節"
+"achievement.graduation2.goal" : "自身の票によって3人のプレイヤーを追放する。"
+"achievement.graduation2.cond" : "March title"
+"achievement.graduation2.splitted.2" : "季節"
+
+"achievement.sakura.title" : "すすめ！桜前線"
+"achievement.sakura.goal" : "ゲーム中に黄緑色から桜色に変化して開花する。"
+"achievement.sakura.cond" : "4月限定"
+
+"achievement.koinobori.title" : "空泳ぐ恋のぼり"
+"achievement.koinobori.goal" : "天空にて、ラバーズの二人で並んで悠々と走る。"
+"achievement.koinobori.cond" : "5月限定+Loversで二人とも<b>加速効果</b>が付与されていること+<b>5秒間</b>、移動しながら近くにいつづけること+MIRA HQ, Airship限定"
+
+"achievement.rainyStep.title" : "雨降る日の足どり"
+"achievement.rainyStep.goal" : "速度低下効果を受けながら歩き続ける。"
+"achievement.rainyStep.cond" : "6月限定+6秒間、止まらずに移動しつづけること+Polus, The Fungle限定"
+"achievement.rainyStep.flavor" : ""でんでんむし、みつけた""
+"achievement.rainyStep.splitted.1" : "日の"
+
+"achievement.rainyStepAnother.title" : "星降る日の足どり"
+"achievement.rainyStepAnother.goal" : "速度上昇効果を受けながら歩き続ける。"
+"achievement.rainyStepAnother.cond" : "6月限定+6秒間、止まらずに移動しつづけること+The Skeld限定"
+"achievement.rainyStepAnother.flavor" : ""超光速で、あなたのもとへ""
+
+"achievement.tanabata.title" : "天の川渡航不能"
+"achievement.tanabata.goal" : "昇降機を使用中のプレイヤーを、斧かスナイパーライフルでキルする。"
+"achievement.tanabata.cond" : "7月限定+Airship限定"
+
+"achievement.watermelon.title" : "スイカ・スプラッタ"
+"achievement.watermelon.goal" : "The Fungleの浜辺で緑色か黒色の<b>ブラッディ</b>をキルする。"
+"achievement.watermelon.cond" : "8月限定"
+"achievement.watermelon.flavor" : "ほのかに甘い、赤の味。"
+
+"achievement.autumnSky.title" : "わたしは空に似ている"
+"achievement.autumnSky.goal" : "5回以上役職が変化する。"
+"achievement.autumnSky.cond" : "9月限定"
+"achievement.autumnSky.splitted.1" : "空に"
+
+"achievement.halloween.title" : "いたずらしちゃうぞ！"
+"achievement.halloween.goal" : "死体を通算で50m運ぶ。"
+"achievement.halloween.cond" : "10月限定"
+"achievement.halloween.flavor" : ""死んだらお菓子もあげられないよ。"<br>ほんもののオバケは言いました。"
+"achievement.halloween.splitted.0" : "いたずら"
+
+"achievement.freshWine.title" : "ジョーカーの極上バレル"
+"achievement.freshWine.goal" : "死後間もない新鮮な死体を捕食あるいは消去する。"
+"achievement.freshWine.cond" : "11月限定+死後5秒以内に捕食・消去すること+自身がキルした死体は除く"
+"achievement.freshWine.flavor" : ""100年に一度の出来とされた2XXX年を超す今世紀最高の出来を超える宇宙一の出来""
+
+"achievement.christmas.title" : "末永くご爆発下さい"
+"achievement.christmas.goal" : "ラバーズで追放される。"
+"achievement.christmas.cond" : "12月限定"
+"achievement.christmas.splitted.1" : "ご爆発"

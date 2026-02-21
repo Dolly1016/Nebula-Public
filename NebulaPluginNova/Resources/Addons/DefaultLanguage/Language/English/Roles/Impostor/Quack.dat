@@ -1,0 +1,40 @@
+# Assignable
+
+"role.quack.name" : "Quack"
+"role.quack.short" : "Q"
+"role.quack.blurb" : "Here ... and There"
+
+# Document
+
+"role.quack.doc" : "An impostor who can report corpses from anywhere."
+"role.quack.ability.title" : "Inherent Ability "Tools of a bush doctor's work""
+"role.quack.ability.main" : "Can check vital information at any time.<br>Furthermore, can report corpses through the vital terminal opened with the unique ability."
+"role.quack.ability.vital" : "<title>Vitals</title> Open the vitals."
+
+# Options
+
+"options.role.quack.detail" : "Quack has vitals that allow quack to report dead bodies."
+
+# Game
+
+
+# UI
+
+"button.label.vital" : "vitals"
+
+# Stats
+
+"stats.quack.report" : "Num of Reporting with Vitals"
+
+# Titles
+
+"achievement.quack.common1.title" : "Quack Quack"
+"achievement.quack.common1.goal" : "Remotely report a corpse using the vital."
+
+"achievement.quack.another1.title" : "Annoying"
+"achievement.quack.another1.goal" : "Be exiled in an emergency meeting you started yourself."
+
+"achievement.quack.challenge.title" : "Beast's Rebellion"
+"achievement.quack.challenge.goal" : "Exile a total of 3 players in emergency meetings you started yourself and win."
+"achievement.quack.challenge.flavor" : ""There are no rules here." —A note at the edge of the medical record"
+"achievement.quack.challenge.splitted.0" : "Beast's "

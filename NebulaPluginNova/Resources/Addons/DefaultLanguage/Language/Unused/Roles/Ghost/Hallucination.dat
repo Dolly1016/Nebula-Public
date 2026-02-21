@@ -1,0 +1,41 @@
+# Assignable
+
+"role.hallucination.name" : "Hallucination"
+"role.hallucination.blurb" : "False Memory"
+"role.hallucination.short" : "H"
+
+# Document
+
+"role.hallucination.doc" : "生存者の幻像を作り出し、操作できます。"
+
+# Options
+
+"options.role.hallucination.detail" : "Hallucination invokes false-player and operates."
+"options.role.hallucination.hallucinationCooldown" : "Hallucination Cooldown"
+"options.role.hallucination.hallucinationDuration" : "Hallucination Duration"
+
+# Game
+
+"gameAction.hallucination.hallucination" : "幻像召喚"
+
+# UI
+
+"button.label.hallucination" : "hallucination"
+
+# Stats
+
+"stats.hallucination.hallucinations" : "Num of Hallucinations"
+
+# Titles
+
+"achievement.hallucination.common2.title" : "幻想彗星"
+"achievement.hallucination.common2.goal" : "生存者の近くで幻像を召喚する。"
+"achievement.hallucination.common2.splitted.0" : "幻想"
+
+"achievement.hallucination.common3.title" : "どっちが本物？"
+"achievement.hallucination.common3.goal" : "操作中の幻像と同じ見た目のプレイヤーと出会う。"
+"achievement.hallucination.common3.splitted.2" : "？"
+
+"achievement.hallucination.another1.title" : "幻想はいつも気まぐれ"
+"achievement.hallucination.another1.goal" : "相方に化けた直後の会議で相方が追放される。"
+"achievement.hallucination.another1.splitted.1" : "いつも"

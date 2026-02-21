@@ -1,0 +1,65 @@
+# Assignable
+
+"role.climber.name" : "Climber"
+"role.climber.short" : "C"
+"role.climber.blurb" : "Like The Wind"
+
+# Document
+
+"role.climber.doc" : "フックショットを使って長距離移動ができるクルーメイトです。"
+"role.climber.ability.title" : "固有能力 "フックショット""
+"role.climber.ability.main" : "フックショットを遠くの壁に引っ掛けて、一気に大移動できます。"
+"role.climber.ability.hookshot" : "<title>フックショット</title>フックショットを発射します。<br>うまく壁に引っかかると、引っ掛けた地点にクライマーを引き寄せます。"
+"role.climber.tips" : "Airshipの昇降機や船外、Fungleの崖など、開けた場所ではより遠くまでフックショットを飛ばせます。"
+
+# Options
+
+"options.role.climber.detail" : "Climber can travel long distances using their hookshots."
+"options.role.climber.gustCooldown" : "Hookshot Cooldown"
+"options.role.climber.canSeeInShadow" : "Can See Hookshot In Shadow"
+
+# Game
+
+"gameAction.climber.hookshot" : "フックショット"
+
+# UI
+
+"button.label.gust" : "hookshot"
+
+# Stats
+
+"stats.climber.gust" : "Uses of Hookshots"
+"stats.climber.distance" : "Hookshot Distance Traveled"
+
+# Titles
+
+"achievement.climber.common1.title" : "冒険家"
+"achievement.climber.common1.goal" : "フックショットを使って5m以上移動する。"
+"achievement.climber.common1.flavor" : ""未知"を求めて、彼はその山に挑んだ。"
+"achievement.climber.common1.splitted.2" : "冒険家"
+
+"achievement.climber.common2.title" : "人類未踏の頂へ"
+"achievement.climber.common2.goal" : "フックショットを使って通算で1,000m移動する。"
+"achievement.climber.common2.flavor" : ""そこに道がなくてもいい。 私が征けばそこが道になるから。"<br>まずはどこを目指そうか。"だ。"
+"achievement.climber.common2.splitted.0" : "人類未踏の"
+
+"achievement.climber.common3.title" : "不死の山"
+"achievement.climber.common3.goal" : "フックショットを使って通算で3,776m移動する。"
+"achievement.climber.common3.flavor" : "NOTE: 人類到達済"
+"achievement.climber.common3.splitted.0" : "不死の"
+
+"achievement.climber.common4.title" : "地球最高峰"
+"achievement.climber.common4.goal" : "フックショットを使って通算で8,848m移動する。"
+"achievement.climber.common4.flavor" : "NOTE: これも人類到達済"
+
+"achievement.climber.common5.title" : "神域"
+"achievement.climber.common5.goal" : "フックショットを使って通算で21,230m移動する。"
+"achievement.climber.common5.flavor" : ""最高の眺めだ。""
+
+"achievement.climber.another1.title" : "飛んで火に入る"
+"achievement.climber.another1.goal" : "フックショットで移動中かその直後に死亡する。"
+
+"achievement.climber.challenge.title" : "聖域たる秘峰"
+"achievement.climber.challenge.goal" : "インポスター、マッドメイトあるいはジャッカルが<br>周囲に2人以上いる場所からフックショットで脱出し、生き延びる。"
+"achievement.climber.challenge.splitted.0" : "聖域たる"
+"achievement.climber.challenge.splitted.2" : "秘峰"

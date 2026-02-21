@@ -1,0 +1,47 @@
+# Assignable
+
+"role.viper.name" : "Viper"
+"role.viper.short" : "V"
+"role.viper.blurb" : "Kill to dissolve bodies"
+
+# Document
+
+"role.viper.doc" : "An impostor who kills with poison that dissolves corpses."
+
+# Options
+
+"options.role.viper.detail" : "Vipers are imposters who kill using poison that dissolves corpses."
+"options.role.viper.acidCooldown" : "Kill Cooldown"
+"options.role.viper.dissolveDuration" : "Dissolve Duration"
+"options.role.viper.acidLeavesBone" : "Acid Leaves Bone"
+"options.role.viper.canReportBone" : "Can Report Bone"
+
+# Game
+
+
+# UI
+
+"button.label.acid" : "acid"
+
+# Status
+
+"state.dissolved" : "Dissolved"
+
+# Stats
+
+
+# Titles
+
+"achievement.viper.common1.title" : "Too Late"
+"achievement.viper.common1.goal" : "Someone passes by the side of a completely dissolved corpse."
+"achievement.viper.common1.splitted.0" : "Already "
+
+"achievement.viper.common2.title" : "Flying Python"
+"achievement.viper.common2.goal" : "Kill someone in another way before performing an acid kill."
+"achievement.viper.common2.splitted.0" : "Flying "
+
+"achievement.combination.2.viper.sidekick.common3.title" : "Over-Titration"
+"achievement.combination.2.viper.sidekick.common3.goal" : "Change from Viper to Sidekick."
+
+"achievement.viper.challenge.title" : "Corrode the Beating Heart"
+"achievement.viper.challenge.goal" : "Survive and win without any corpses from your kills being reported."

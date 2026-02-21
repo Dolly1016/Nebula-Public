@@ -1,0 +1,50 @@
+# Assignable
+
+"role.painter.name" : "Painter"
+"role.painter.short" : "Pa"
+"role.painter.blurb" : "No One Knows You Anymore"
+
+# Document
+
+"role.painter.doc" : "An impostor who can paint other players' appearances."
+"role.painter.ability.title" : "Inherent Ability "Malicious Body Paint""
+"role.painter.ability.main" : ""
+"role.painter.ability.sample" : "<title>Sample</title>Sample the current appearance of the player.<br><var>%SAMPLE%</var>"
+"role.painter.ability.paint" : "<title>Paint</title>Paint the sampled appearance on a player.%PAINT%"
+"role.painter.ability.sample.loseSample" : "Sampled appearances disappear after a meeting."
+"role.painter.ability.sample.keepSample" : "Sampled appearances can be carried over across meetings."
+"role.painter.ability.paint.afterMeeting" : "The appearance changes <var>after the meeting</var>."
+"role.painter.ability.paint.immediate" : "The appearance changes <var>immediately</var>."
+
+# Options
+
+"options.role.painter.detail" : "Painter samples the appearance of the player<br>and paints the form onto players."
+"options.role.painter.sampleCoolDown" : "Sample Cooldown"
+"options.role.painter.paintCoolDown" : "Paint Cooldown"
+"options.role.painter.loseSampleOnMeeting" : "Lose Sample On Meeting"
+"options.role.painter.transformAfterMeeting" : "Transform After Meeting"
+
+# Game
+
+
+# UI
+
+"button.label.paint" : "paint"
+
+# Stats
+
+"stats.painter.sample" : "Num of Taking Samples"
+"stats.painter.morph" : "Number of Transformations"
+"stats.painter.paint" : "Num of Painting"
+
+# Titles
+
+"achievement.painter.common1.title" : "Farewell to Persona"
+"achievement.painter.common1.goal" : "Sample and repaint an appearance."
+"achievement.painter.common1.cond" : "Can also be cleared with Illusioner"
+
+"achievement.painter.challenge.title" : "Unidentified Witness"
+"achievement.painter.challenge.goal" : "Paint the appearances of 3 players 2 or more times each"
+"achievement.painter.challenge.cond" : "Painting to the same appearance is not counted"
+"achievement.painter.challenge.splitted.0" : "Unidentified "
+"achievement.painter.challenge.splitted.2" : "Witness"

@@ -1,0 +1,73 @@
+# Assignable
+
+"role.gimlet.name" : "Gimlet"
+"role.gimlet.short" : "G"
+"role.gimlet.blurb" : "Unstoppable Revolution"
+"role.gimlet.hint" : "ドリルで突進しよう"
+
+# Document
+
+"role.gimlet.doc" : "ドリルに変身して突進するインポスターです。ドリルに触れたプレイヤーは死亡します。"
+"role.gimlet.ability.title" : "固有能力 "ドリル猛突進""
+"role.gimlet.ability.main" : ""
+"role.gimlet.ability.drill" : "<title>ドリル</title>ドリルに変身して突進します。マウスカーソルの向きに突進します。<br>壁に激突すると突進を終了し、元の姿に戻ります。"
+"role.gimlet.tips" : "・浅い角度で壁に触れると、壁にこすりながら突進しつづけます。"
+
+# Options
+
+"options.role.gimlet.detail" : "Gimlet is an imposter who can transform into a drill."
+"options.role.gimlet.drillCooldown" : "Drill Cooldown"
+"options.role.gimlet.drillSize" : "Drill Size"
+"options.role.gimlet.drillSpeed" : "Drill Speed"
+"options.role.gimlet.drillSpeed.detail" : "ドリルの速度を設定します。<br>プレイヤーの移動速度の2倍が基準値です。"
+"options.role.gimlet.canKillImpostor" : "Can Kill Impostor"
+"options.role.gimlet.drillSeStrength" : "Drill SE Strength"
+"options.role.gimlet.frictionResistance" : "Friction Resistance"
+"options.role.gimlet.frictionResistance.detail" : "ドリルが壁に擦れる際の耐性を変更します。<br>大きな値にするほど、壁により直角に突き刺さっても突進し続けます。"
+
+# Game
+
+"gameAction.gimlet.drill" : "ドリル発進"
+
+# UI
+
+"button.label.drill" : "drill"
+
+# Status
+
+"state.drill" : "Drill"
+
+# Stats
+
+"stats.gimlet.drill" : "Uses of Drill"
+"ui.action.gimlet.drill" : "Transform into a drill and take off."
+"role.gimlet.soundRange" : "Sniper: <color=white>Sound Range</color>"
+"role.gimlet.drillSize" : "Sniper<color=white>: Drill Size</color>"
+
+# Titles
+
+"achievement.gimlet.common1.title" : "アウトオブ労災"
+"achievement.gimlet.common1.goal" : "ドリルでキルを決める。"
+"achievement.gimlet.common1.splitted.1" : "オブ"
+
+"achievement.gimlet.common3.title" : "響く金属音"
+"achievement.gimlet.common3.goal" : "5秒以上壁にドリルを擦り付けて、2キル以上決める。"
+
+"achievement.gimlet.another1.title" : "猪突りドリル"
+"achievement.gimlet.another1.goal" : "誰もキルしないドリルを撃つ。"
+"achievement.gimlet.another1.splitted.0" : "猪突り"
+
+"achievement.gimlet.another2.title" : "安全第一の現場"
+"achievement.gimlet.another2.goal" : "はじめてドリルに変身した直後の会議で追放あるいは推察される。"
+"achievement.gimlet.another2.flavor" : ""ご安全に" ―工具ですがなにか？"
+"achievement.gimlet.another2.splitted.0" : "安全第一の"
+
+"achievement.gimlet.common2.title" : "不幸な事故"
+"achievement.gimlet.common2.goal" : "1回のドリルで4人以上キルする。"
+"achievement.gimlet.common2.flavor" : ""それは不幸な事故だった。" ―彼らは口々にそう言った。"
+"achievement.gimlet.common2.splitted.0" : "不幸な"
+
+"achievement.gimlet.challenge.title" : "希望の掘削者"
+"achievement.gimlet.challenge.goal" : "ドリルで4人以上キルし、サボタージュの復旧を試みたプレイヤーを<br>最後の犠牲者にしたうえで、サボタージュ勝利する。"
+"achievement.gimlet.challenge.cond" : "サボタージュの復旧を開始して10秒以内のプレイヤーをキルすること"
+"achievement.gimlet.challenge.splitted.2" : "掘削者"

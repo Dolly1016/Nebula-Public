@@ -1,0 +1,32 @@
+# Header
+
+"options.meeting" : "Meeting Options"
+"options.meeting.detail" : "About meeting"
+
+# Groups
+
+"options.meeting.group.gameStart" : "Shorten Cooldown Settings"
+"options.meeting.group.earlySettings" : "In The Early Settings"
+"options.meeting.group.nonCrewmateInformation" : "Information for Non-Crewmate Settings"
+
+# Options
+
+"options.meeting.noticeExtraVictims" : "Notice Extra Victims"
+"options.meeting.noticeExtraVictims.detail" : "Notify when there are additional victims due to involvement or follow-up suicide during exile."
+"options.meeting.deathPenalty" : "Death Penalty"
+"options.meeting.deathPenalty.detail" : "The meeting time is reduced by the set value multiplied by the number of deceased players in seconds."
+"options.meeting.numOfMeeting" : "# Emergency Meetings"
+"options.meeting.emergencyCooldownAtGameStart" : "Emergency Cooldown At Game Start"
+"options.meeting.showRoleOfExiled" : "Confirm Role Of Exiled"
+"options.meeting.extraEmergencyCooldownInTheEarly" : "Extra Emergency Cooldown In The Early"
+"options.meeting.extraEmergencyCooldownInTheEarly.detail" : "Further extend the emergency cooldown until a certain number of deaths occur."
+"options.meeting.earlyDiscussionReduction" : "Discussion Reduction In The Early"
+"options.meeting.extraEmergencyCooldownInTheEarlyCondition" : "# Deaths Required To End The Early"
+"options.meeting.extraEmergencyCooldownInTheEarlyCondition.detail" : "When the set number of players die, the extension of the emergency cooldown due to the additional early emergency cooldown ends."
+"options.meeting.waitingForHost" : "Please Wait..."
+"options.meeting.showVoteState" : "Show Vote State"
+"options.meeting.prohibitMeetingTool" : "Prohibit Meeting Tool"
+"options.meeting.shortenCooldownAtGameStart" : "Shorten Cooldown At Game Start"
+"options.meeting.shortenCooldown" : "Shorten Cooldown"
+"options.meeting.nonCrewCanSeeTaskTracker" : "# Can See Task Tracker"
+"options.meeting.nonCrewCanSeeSabotageStatus" : "# Can See Sabotage Status"

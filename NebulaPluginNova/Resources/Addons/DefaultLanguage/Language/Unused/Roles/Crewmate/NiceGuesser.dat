@@ -1,0 +1,26 @@
+# Assignable
+
+"role.niceGuesser.name" : "Nice Guesser"
+"role.niceGuesser.short" : "G"
+"role.niceGuesser.blurb" : "Guess and Shoot"
+
+# Document
+
+"role.niceGuesser.doc" : "会議中にプレイヤーの能力を推察してキルできるクルーメイトです。<br>推察を誤ると代わりに自身が死亡します。"
+"role.niceGuesser.tips" : "・会議中に使用できる能力が複数ある場合、能力のアイコンを右クリックすると能力を切り替えられます。"
+
+# Options
+
+"options.role.niceGuesser.detail" : "Guesser can shoot players in the meeting by guessing the role.<br>If the guess is wrong, guesser dies instead."
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+
+# Titles
+

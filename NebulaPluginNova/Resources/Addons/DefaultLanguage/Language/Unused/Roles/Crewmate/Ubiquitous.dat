@@ -1,0 +1,57 @@
+# Assignable
+
+"role.ubiquitous.name" : "Ubiquitous"
+"role.ubiquitous.short" : "U"
+"role.ubiquitous.blurb" : "Anytime, Anywhere"
+
+# Language
+
+"role.ubiquitous.doc" : "周囲の様子を確認できる<b>ドローン</b>を操作するクルーメイトです。"
+"role.ubiquitous.ability.title" : "固有能力 "遍在する監視網""
+"role.ubiquitous.ability.main" : "タスクフェイズごとに最大1つの<b>アタッチ</b>されたドローンを使用できます。<br>会議を挟むと、アタッチ中のドローンは<b>デタッチ</b>され、他プレイヤーからも視認できるようになります。<br>デタッチされたドローンは操作できなくなる代わりに、ミニマップ上に周囲のプレイヤー情報を映し出します。"
+"role.ubiquitous.ability.drone" : "<title>ドローン</title>アタッチされたドローンに視点を切り替え、操作します。<br>アタッチ中のドローンが存在しなければ手元に新しいドローンを召喚します。"
+"role.ubiquitous.ability.callBack" : "<title>呼び戻し</title>アタッチ中のドローンを呼び戻します。"
+"role.ubiquitous.ability.doorHack" : "<title>ドアハック</title>アタッチ中のドローンの周辺にあるドアをハッキングしてこじ開けます。"
+"role.ubiquitous.tips" : "・アタッチ中のドローンを操作していない間であっても、画面左下の小窓からドローン周囲の様子を確認できます。"
+
+# Options
+
+"options.role.ubiquitous.detail" : "Ubiquitous can operate drones. After the meeting,<br>the used drone will display the location of nearby players on the map."
+"options.role.ubiquitous.microphoneRadious" : "Microphone Radious"
+"options.role.ubiquitous.droneCoolDown" : "Drone Cooldown"
+"options.role.ubiquitous.droneDuration" : "Drone Duration"
+"options.role.ubiquitous.detectionRadious" : "Detection Radious"
+"options.role.ubiquitous.doorHackCoolDown" : "Door Hacking Cooldown"
+"options.role.ubiquitous.doorHackRadious" : "Door Hacking Radious"
+
+# Game
+
+"role.ubiquitous.droneRange" : "Ubiquitous<color=white>: Drone Detection Radious</color>"
+"gameAction.ubiquitous.invoke" : "ドローン召喚"
+
+# UI
+
+"button.label.drone" : "drone"
+"button.label.doorHack" : "door hack"
+"button.label.callBack" : "call back"
+"ui.action.ubiquitous.drone" : "Summon a drone.<br>Or switch the camera between the drone and you."
+"ui.action.ubiquitous.doorHack" : "Pry open the nearby doors."
+
+# Stats
+
+"stats.ubiquitous.drones" : "Num of Used Drones"
+
+# Titles
+
+"achievement.ubiquitous.common1.title" : "ドアハッカー"
+"achievement.ubiquitous.common1.goal" : "ドローンを使ってゲーム中に合計5回ドアを開く。"
+"achievement.ubiquitous.common1.splitted.2" : "ハッカー"
+
+"achievement.ubiquitous.common2.title" : "無礙"
+"achievement.ubiquitous.common2.goal" : "ドローンを使って通算20個のドアを開く。"
+"achievement.ubiquitous.common2.flavor" : ""あれが近未来の技術なのだろうか？"<br>"―いいえ、あれはただ物理的にこじ開けているに過ぎません。""
+
+"achievement.ubiquitous.challenge.title" : "ユビキタスネットワーク"
+"achievement.ubiquitous.challenge.goal" : "マップ上で全生存者の位置を同時に確認する。"
+"achievement.ubiquitous.challenge.cond" : "自身を除く生存者: 10人以上+検出範囲: 3m未満"
+"achievement.ubiquitous.challenge.splitted.2" : "ネットワーク"

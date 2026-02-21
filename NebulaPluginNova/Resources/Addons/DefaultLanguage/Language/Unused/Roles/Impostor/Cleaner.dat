@@ -1,0 +1,51 @@
+# Assignable
+
+"role.cleaner.name" : "Cleaner"
+"role.cleaner.short" : "Cl"
+"role.cleaner.blurb" : "Kill Everyone and Leave No Traces"
+"role.cleaner.hint" : "死体を消し去って証拠隠滅しよう"
+
+# Document
+
+"role.cleaner.doc" : "死体を消し去れます。<br>%COOLDOWN%"
+"role.cleaner.doc.cooldown" : "<br>キルと死体消去のクールダウンは<var>同期</var>しています。<br>キルか死体消去の片方を発動すると、もう片方のクールダウンも同時にリセットされます。"
+"role.cleaner.doc.notSyncCooldown" : "<br>キルと同時に死体消去のクールダウンが<var>5秒だけあがります</var>。"
+"role.cleaner.ability.title" : "固有能力 "死体消去""
+"role.cleaner.ability.main" : ""
+"role.cleaner.ability.clean" : "<title>消去</title>死体を消し去ります。"
+
+# Options
+
+"options.role.cleaner.detail" : "Cleaner can obliterate corpses."
+"options.role.cleaner.cleanCoolDown" : "Clean Cooldown"
+"options.role.cleaner.syncKillAndCleanCoolDown" : "Sync Kill And Clean Cooldown"
+"options.role.cleaner.syncKillAndCleanCoolDown.detail" : "オンにすると、キル時・能力使用時にキルクールダウンと能力クールダウンが共々リセットされます。"
+
+# Game
+
+"gameAction.cleaner.clean" : "死体消去"
+
+# UI
+
+"button.label.clean" : "clean"
+"ui.action.cleaner.clean" : "Clean corpses.<br>Kill cooldown will start with the action."
+
+# Game Statictics
+
+"statistics.events.clean" : "Clean"
+
+# Stats
+
+"stats.cleaner.clean" : "Num of Cleaned Corpses"
+
+# Titles
+
+"achievement.cleaner.common1.title" : "忘却の彼方"
+"achievement.cleaner.common1.goal" : "死体を1つ消去する。"
+
+"achievement.cleaner.common2.title" : "自己完結型"
+"achievement.cleaner.common2.goal" : "自身がキルした相手の死体を消去する。"
+"achievement.cleaner.common2.splitted.0" : "自己完結型"
+
+"achievement.cleaner.challenge.title" : "その死に意味は無い"
+"achievement.cleaner.challenge.goal" : "2つ以上の死体を消した上でボタンによる緊急会議が始まる。"

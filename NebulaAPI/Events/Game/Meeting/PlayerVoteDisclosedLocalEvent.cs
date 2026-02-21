@@ -17,11 +17,13 @@ public class PlayerVoteDisclosedLocalEvent : AbstractPlayerEvent
 {
     public bool VoteToWillBeExiled { get; private init; }
     public Virial.Game.Player? VoteFor { get; private init; }
+    public Virial.Game.Player? VoteForOriginal { get; private init; }
     public Virial.Game.Player Voter => Player;
 
-    internal PlayerVoteDisclosedLocalEvent(Virial.Game.Player voter, Virial.Game.Player? voteTo, bool voteToWillBeExiled) : base(voter)
+    internal PlayerVoteDisclosedLocalEvent(Virial.Game.Player voter, Virial.Game.Player? voteTo, Virial.Game.Player? voteToOriginal, bool voteToWillBeExiled) : base(voter)
     {
         this.VoteFor = voteTo;
+        this.VoteForOriginal = voteToOriginal;
         this.VoteToWillBeExiled = voteToWillBeExiled;
     }
 }

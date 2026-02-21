@@ -1,0 +1,66 @@
+# Assignable
+
+"role.jekyllAndHyde.name.jekyll" : "Jekyll"
+"role.jekyllAndHyde.name.hyde" : "Hyde"
+"role.jekyllAndHyde.name.combination" : "%J% & %H%"
+"role.hydeImpostor.name" : "Hyde"
+"role.hydeImpostor.short" : "Hy"
+"role.jekyllAndHyde.blurb" : "The Evil Aspect Flickers"
+
+# Document
+
+"role.jekyllAndHyde.doc" : "緊急会議を終えるたびに人格が入れ替わります。<br>ジキルはクルーメイトの味方で、ハイドはインポスターの味方です。"
+"role.jekyllAndHyde.winCond" : "ジキルの場合: タスクをこなしているとクルーメイト勝利で勝利します。<br>ハイドの場合: インポスター勝利で勝利します。"
+"role.jekyllAndHyde.ability.title" : "固有能力 "多重人格""
+"role.jekyllAndHyde.ability.main" : "2つの人格が互いに入れ替わります。ジキルは変身薬を手に入れられ、ハイドは回数制限のあるキルボタンを持ちます。<br>ハイドがインポスターをキルするとハイドはインポスターの一員になり、人格がハイドで固定されます。"
+"role.jekyllAndHyde.ability.drug" : "<title>変身</title>ジキルはタスクをこなすと<b>変身薬</b>を手に入れます。<br>変身薬を飲むと即座にハイドに変身します。"
+"role.jekyllAndHyde.tips" : "・人格は追放と同時に入れ替わります。追放によってゲームが終了する場合、<br>　勝敗は入れ替わり後の人格で判定されます。<br>・ゲーム開始時の人格はランダムに決定します。<br>・死亡後は人格は入れ替わりません。"
+
+# Options
+
+"options.role.jekyllAndHyde.detail" : "Jekyll and Hyde are only one player.<br>They switches role after each meeting."
+"options.role.jekyllAndHyde.numOfKill" : "Can Kill # Players"
+"options.role.jekyllAndHyde.killCooldown" : "Kill Cooldown"
+"options.role.jekyllAndHyde.hasImpostorVision" : "Hyde Has Impostor Vision"
+"options.role.jekyllAndHyde.canUseVents" : "Hyde Can Use Vents"
+"options.role.jekyllAndHyde.canMoveInVents" : "Hyde Can Move In Vents"
+
+# Game
+
+"role.jekyllAndHyde.short.jekyll" : "J"
+"role.jekyllAndHyde.short.hyde" : "H"
+"role.jekyllAndHyde.short.combination" : "%J%%H%"
+"role.jekyllAndHyde.changedToText" : "You're now %R%."
+
+# UI
+
+"button.label.medicine" : "medicine"
+
+# Stats
+
+"stats.jekyllAndHyde.medicine" : "Num of Used Medicines"
+
+# Titles
+
+"achievement.jekyllAndHyde.common1.title" : "甘美なひととき"
+"achievement.jekyllAndHyde.common1.goal" : "薬を飲んでハイドに変身する。"
+"achievement.jekyllAndHyde.common1.flavor" : ""そのすべてが新しく、甘美なひとときだった。" ―博士の手記より"
+"achievement.jekyllAndHyde.common1.splitted.2" : "ひととき"
+
+"achievement.jekyllAndHyde.another1.title" : "パリは燃えているか"
+"achievement.jekyllAndHyde.another1.goal" : "ハイドで死亡し、敗北する。"
+"achievement.jekyllAndHyde.another1.flavor" : ""その問いかけに応答はなかった。" ―署名のない回顧録"
+
+"achievement.jekyllAndHyde.common2.title" : "決別"
+"achievement.jekyllAndHyde.common2.goal" : "ハイドでインポスターをキルする。"
+"achievement.jekyllAndHyde.common2.flavor" : ""これが最後である。" ―博士の手記より"
+
+"achievement.jekyllAndHyde.common3.title" : "闇黒"
+"achievement.jekyllAndHyde.common3.goal" : "ジキルでクルーメイトをキルする。"
+"achievement.jekyllAndHyde.common3.flavor" : ""それは私が恐れてやまない考えだった。" ―博士の手記より"
+
+"achievement.jekyllAndHyde.challenge.title" : "人間"
+"achievement.jekyllAndHyde.challenge.goal" : "ハイドでキルをしながら、ジキルとしてクルーメイト勝利で勝利する。"
+"achievement.jekyllAndHyde.challenge.cond" : "クルーメイト陣営のプレイヤーをキルすること"
+"achievement.jekyllAndHyde.challenge.flavor" : ""それでも、生きてゆく" ―ヘンリー・ジキル？"
+"achievement.jekyllAndHyde.challenge.splitted.2" : "人間"

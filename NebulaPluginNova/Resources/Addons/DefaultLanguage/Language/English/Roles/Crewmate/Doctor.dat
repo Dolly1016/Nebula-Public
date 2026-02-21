@@ -1,0 +1,38 @@
+# Assignable
+
+"role.doctor.name" : "Doctor"
+"role.doctor.short" : "D"
+"role.doctor.blurb" : "Thus They Died"
+
+# Document
+
+"role.doctor.doc" : "A crewmate with a portable vital that can be carried around."
+"role.doctor.ability.title" : "Inherent Ability "Portable Vital""
+"role.doctor.ability.main" : "Carries a rechargeable vital terminal.<br>The battery of the vital terminal can be recharged by completing tasks."
+"role.doctor.ability.vital" : "<title>Vitals</title>Open the portable vital.<br>Can also check the cause of death of deceased players whose bodies are no longer present (= grayed out)."
+
+# Options
+
+"options.role.doctor.detail" : "Doctor has portable vitals."
+"options.role.doctor.portableVitalsCharge" : "Portable Vitals Charge"
+"options.role.doctor.maxPortableVitalsCharge" : "Max Portable Vitals Charge"
+"options.role.doctor.chargesPerTasks" : "Charges Per Tasks"
+
+# Game
+
+"role.doctor.gadgetLeft" : "%SECOND%s"
+
+# UI
+
+# Stats
+
+# Titles
+
+"achievement.doctor.common1.title" : "Prompt Death Diagnosis"
+"achievement.doctor.common1.goal" : "Open the portable vital."
+
+"achievement.doctor.challenge.title" : "Thus They Died"
+"achievement.doctor.challenge.goal" : "Witness the moment of death with the portable vital."
+"achievement.doctor.challenge.cond" : "-Initial usable time: 10 seconds or less<br>-Task charge time: 2 seconds or less"
+"achievement.doctor.challenge.flavor" : ""A white ceiling, an inorganic sound" —Monologue on the Battlefield"
+"achievement.doctor.challenge.splitted.1" : "They "

@@ -1,0 +1,41 @@
+# Assignable
+
+"role.grudge.name" : "Grudge"
+"role.grudge.blurb" : "Resentment"
+"role.grudge.short" : "G"
+
+# Document
+
+"role.grudge.doc" : "Get an extra victory by standing beside survivors."
+
+# Options
+
+"options.role.grudge.detail" : "Grudge is a ghost that appears nearby."
+"options.role.grudge.totalStandingTimeToWin" : "Total Standing Time To Win"
+
+# Game
+
+"role.grudge.taskText" : "Stand Beside Players"
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.grudge.common1.title" : "Resentment!"
+"achievement.grudge.common1.goal" : "Materialize in front of a survivor."
+
+"achievement.grudge.common2.title" : "I've Been Waiting"
+"achievement.grudge.common2.goal" : "Materialize in an empty place and wait for survivors."
+"achievement.grudge.common2.cond" : "Wait materialized in an empty place for 5 seconds or more"
+"achievement.grudge.common2.splitted.0" : "I've Been "
+
+"achievement.grudge.common3.title" : "Second Chance"
+"achievement.grudge.common3.goal" : "Win with an extra victory."
+
+# Team
+
+"end.extra.grudge" : " <color=#FFFFFF>with</color> Grudge"

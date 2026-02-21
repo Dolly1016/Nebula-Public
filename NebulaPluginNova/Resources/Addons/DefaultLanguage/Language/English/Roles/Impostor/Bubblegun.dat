@@ -1,0 +1,64 @@
+# Assignable
+
+"role.bubblegun.name" : "Bubblegun"
+"role.bubblegun.short" : "Bu"
+"role.bubblegun.blurb" : "Silence Even the Crying"
+"role.bubblegun.hint" : "Trap players with bubbles"
+
+# Document
+
+"role.bubblegun.doc" : "Can trap players with a <b>bubble gun</b> that shoots huge bubbles.<br>Players trapped in bubbles die. Corpses trapped in bubbles cannot be reported."
+"role.bubblegun.ability.title" : "Inherent Ability "Uchinuke! Bubble Gun""
+"role.bubblegun.ability.main" : "Can trap and kill players with bubbles.<br>The cooldown of the bubble gun is <var>kill cooldown %BUBBLE%</var> (<var>%SEC%</var> seconds)."
+"role.bubblegun.ability.sec.longer" : "Longer"
+"role.bubblegun.ability.sec.shorter" : "Shorter"
+"role.bubblegun.ability.sec.just" : "The same as"
+"role.bubblegun.ability.equip" : "<title>Equip</title>Ready the bubble gun.<br>The readied bubble gun is visible to other players."
+"role.bubblegun.ability.kill" : "<title>Bubble</title>Shoot bubbles. Adjust the direction to shoot with the mouse cursor.<br>Shooting bubbles puts away the bubble gun."
+
+# Options
+
+"options.role.bubblegun.detail" : "Bubblegun has a gun that shoots bubbles that trap and kill players."
+"options.role.bubblegun.bubbleCooldown" : "Bubble Cooldown"
+"options.role.bubblegun.bubbleSize" : "Bubble Size"
+"options.role.bubblegun.bubbleSpeed" : "Bubble Speed"
+"options.role.bubblegun.bubbleDuration" : "Bubble Duration"
+"options.role.bubblegun.maxBubbles" : "Max Bubbles"
+"options.role.bubblegun.eraseBubblesOnMeeting" : "Erase Bubbles On Meeting"
+"options.role.bubblegun.canKillImpostor" : "Can Kill Impostor"
+"options.role.bubblegun.bubblePopWhenHitWall" : "Bubble Pop When Hit Wall"
+
+# Game
+
+
+# UI
+
+"button.label.bubble" : "bubble"
+"ui.action.bubblegun.equip" : "Equip and store the bubblegun. While the bubblegun is equipped,<br>the kill button will change to a bubble firing button."
+"ui.action.bubblegun.kill" : "Shoot bubbles. <br>After shooting, the bubblegun will automatically retract."
+
+# Game Statictics
+
+"statistics.events.bubbled" : "Bubbled"
+
+# Status
+
+"state.bubbled" : "Bubbled"
+
+# Stats
+
+"stats.bubblegun.bubble" : "Num of Bubblegun Firing"
+
+# Titles
+
+"achievement.bubblegun.common1.title" : "Got You!"
+"achievement.bubblegun.common1.goal" : "Trap 1 player with bubbles."
+
+"achievement.bubblegun.another1.title" : "Broken and Disappeared"
+"achievement.bubblegun.another1.goal" : "Be exiled or guessed in the meeting immediately after firing the bubble gun for the first time."
+"achievement.bubblegun.another1.flavor" : ""To the blue ceiling on the plane""
+
+"achievement.bubblegun.challenge.title" : "80's Reminiscence"
+"achievement.bubblegun.challenge.goal" : "Bubbles fired diagonally upward trap 3 or more players and then burst."
+"achievement.bubblegun.challenge.flavor" : ""Those were good times. Because I wasn't even born yet." —An unsigned memoir"
+"achievement.bubblegun.challenge.splitted.0" : "80's "

@@ -1,0 +1,22 @@
+# Options
+
+"options.role.guesser.detail" : "Guesser can shoot players in the meeting by guessing the role.<br>If the guess is wrong, guesser dies instead."
+"options.role.guesser.numOfGuess" : "# Guessing"
+"options.role.guesser.numOfGuessPerMeeting" : "# Guess Per Meeting"
+"options.role.guesser.canCallEmergencyMeeting" : "Can Call Emergency Meeting"
+"options.role.guesser.leftGuess" : "Left Guess"
+"role.guesser.guessableFilter" : "Guessable Filter"
+
+# Game
+
+"role.guesser.leftGuess" : "Left Guess"
+
+# Game Statictics
+
+"statistics.events.guess" : "Guess"
+"statistics.events.missed" : "Missed"
+
+# Status
+
+"state.guessed" : "Guessed"
+"state.misguessed" : "Misguessed"

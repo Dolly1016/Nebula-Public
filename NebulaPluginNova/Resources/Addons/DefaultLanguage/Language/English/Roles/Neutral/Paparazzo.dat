@@ -1,0 +1,83 @@
+# Assignable
+
+"role.paparazzo.name" : "Paparazzo"
+"role.paparazzo.short" : "P"
+"role.paparazzo.blurb" : "Take a Best Shot!"
+"role.paparazzo.taskText" : "Take a Photo and Disclose<br>(%DETAIL%)"
+"role.paparazzo.taskTextSubject" : "Subjects: %CS%/%GS%"
+"role.paparazzo.taskTextDisclosed" : "Disclosed: %CD%/%GD%"
+"role.paparazzo.taskTextPhoto" : "Photos: %CP%/%GP%"
+
+# Document
+
+"role.paparazzo.doc" : "A neutral member who takes photos and discloses them in emergency meetings."
+"role.paparazzo.winCond" : "Survive, take photos of <var>%SUBJECT%</var> different people, and disclose <var>%DISCLOSED%</var> different people in meetings.<br>Both are total non-repetitive counts, and do not need to be included in one photo."
+"role.paparazzo.ability.title" : "Inherent Ability "First-hand Information""
+"role.paparazzo.ability.main" : "During the task phase, a viewfinder appears on the screen, allowing you to take photos.<br>Taken photos are stocked at the bottom left of the screen. Photos with no one in them are discarded.<br><br>Click on a photo during a meeting to disclose it to everyone.<br>If the timer displayed on the hourglass runs out, you cannot disclose photos in that meeting."
+"role.paparazzo.ability.camera" : "<title>Camera</title>Take a photo. Can also be taken by clicking near the center of the screen."
+"role.paparazzo.tips" : "・Change the direction of the viewfinder from the sub-action.<br>・While holding down the right mouse button, the direction of the viewfinder is fixed."
+
+# Options
+
+"options.role.paparazzo.detail" : "Paparazzo takes a photo and disclose it at a meeting."
+"options.role.paparazzo.shotCoolDown" : "Shot Cooldown"
+"options.role.paparazzo.requiredSubjects" : "Required Subjects"
+"options.role.paparazzo.requiredSubjects.detail" : "To win, you need to include the set number of people in photos.<br>Even if you take photos of the same player multiple times, it counts as 1 person."
+"options.role.paparazzo.requiredDisclosed" : "Required Disclosed"
+"options.role.paparazzo.requiredDisclosed.detail" : "To win, you need to include the set number of people in photos and disclose them during meetings.<br>Even if you disclose photos with the same player multiple times, it counts as 1 person."
+"options.role.paparazzo.requiredPhotos" : "Required Photos"
+"options.role.paparazzo.telephotoFinderSize" : "Telephoto Finder Size"
+"options.role.paparazzo.wideAngleFinderSize" : "Wide-angle Finder Size"
+
+# Game
+
+
+# UI
+
+"button.label.shot" : "shot"
+"ui.action.paparazzo.camera" : "Take a photo."
+"ui.action.paparazzo.toggle" : "Change the direction of the viewfinder."
+
+# Stats
+
+"stats.paparazzo.photo" : "Num of Taking Photos"
+"stats.paparazzo.players" : "Num of Players Taken Photos"
+
+# Titles
+
+"achievement.paparazzo.common1.title" : "Daylight Case File"
+"achievement.paparazzo.common1.goal" : "Take 3 valid photos."
+"achievement.paparazzo.common1.splitted.0" : "Daylight "
+
+"achievement.paparazzo.common2.title" : "Scoop! Secret Meeting"
+"achievement.paparazzo.common2.goal" : "Capture 4 or more players in one photo."
+"achievement.paparazzo.common2.flavor" : ""Keep public facts secret. That's what gives them value." ―"The Art of Gossip""
+"achievement.paparazzo.common2.splitted.1" : "Secret "
+
+"achievement.paparazzo.common3.title" : "Unmissable Shot"
+"achievement.paparazzo.common3.goal" : "Photograph the moment a player enters or exits a vent."
+"achievement.paparazzo.common3.flavor" : ""Exaggerate the facts when passing them on. Stir up anxiety excessively." ―"The Art of Gossip""
+
+"achievement.paparazzo.common4.title" : "Conclusive Evidence"
+"achievement.paparazzo.common4.goal" : "Capture a corpse and its killer in one photo."
+"achievement.paparazzo.common4.flavor" : ""Leave room for explanation. That will cause new upheaval." ―"The Art of Gossip""
+
+"achievement.paparazzo.another1.title" : "Impostor IN POSTOR"
+"achievement.paparazzo.another1.goal" : "You are an imposter and a photo of yourself is revealed."
+"achievement.paparazzo.another1.splitted.1" : "In "
+# Key "achievement.paparazzo.another1.flavor" not found in source
+
+"achievement.paparazzo.challenge.title" : "Swaying Public Opinion"
+"achievement.paparazzo.challenge.goal" : "Have 4 or more players die for some reason during the meeting where the photo is revealed."
+"achievement.paparazzo.challenge.cond" : "Invalid if you die during that meeting"
+"achievement.paparazzo.challenge.flavor" : ""This is a cursed article. It must be disposed of immediately." —From a broken meeting minutes"
+
+# Team
+
+"teams.paparazzo" : "Paparazzo"
+"end.paparazzo" : "Paparazzo Wins%EXTRA%"
+
+# Document
+
+"document.tip.winCond.paparazzo.title" : "Special Trigger"
+"document.tip.winCond.paparazzo" : "The paparazzo wins by disclosing a photo with the specified number of players,<br>and by capturing the specified number of players in the photo."

@@ -1,0 +1,54 @@
+# Assignable
+
+"role.jackal.name" : "Jackal"
+"role.jackal.short" : "J"
+"role.jackal.blurb" : "Kill Everyone"
+
+# Document
+
+"role.jackal.doc" : "A neutral member who wins by annihilating enemies."
+
+# Options
+
+"options.role.jackal.detail" : "Jackal annihilates players to win.<br>Exile of the Jackal is a common goal for Impostors and Crewmates."
+"options.role.jackal.killCoolDown" : "Kill Cooldown"
+"options.role.jackal.canCreateSidekick" : "Can Create Sidekick"
+"options.role.jackal.numOfKillingToCreateSidekick" : "# Killing to Create Sidekick"
+"options.role.jackal.numOfKillingToWin" : "# Killing to Win"
+"options.role.jackal.jacklizedImpostor" : "Impostor Jackalization"
+
+# Game
+
+
+# UI
+
+"button.label.sidekick" : "sidekick"
+
+# Stats
+
+"stats.jackal.sidekick" : "Num of Creating Sidekick"
+
+# Titles
+
+"achievement.jackal.common1.title" : "Friendship"
+"achievement.jackal.common1.goal" : "Create someone into the Sidekick role."
+
+"achievement.jackal.challenge.title" : "Bloody Fierce Final Showdown"
+"achievement.jackal.challenge.goal" : "Win from a state where only you and the Impostor remain."
+"achievement.jackal.challenge.cond" : "The game ends with a kill"
+"achievement.jackal.challenge.flavor" : ""Let's have a heated battle!""
+"achievement.jackal.challenge.splitted.0" : "Bloody Fierce "
+
+# Team
+
+"teams.jackal" : "Jackal"
+"end.jackal" : "Team Jackal Wins%EXTRA%"
+
+# Document
+
+"document.tip.winCond.teams.jackal" : "Jackal"
+
+"document.tip.winCond.jackal.kill.title" : "Kill Trigger"
+"document.tip.winCond.jackal.kill" : "Jackals win when jackal team players account for more than half of all alive players. <br>%LOVER% whose partner is still alive are not counted in jackal team."
+"document.tip.winCond.jackal.extinction.title" : "Complete Domination Trigger"
+"document.tip.winCond.jackal.extinction" : "Jackals win when only jackal team players survive. <br>%LOVER% whose partner is still alive are not counted in jackal team."

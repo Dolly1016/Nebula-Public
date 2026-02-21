@@ -1,0 +1,130 @@
+"achievement.firstKill.title" : "Vanitas"
+"achievement.firstKill.goal" : "Become the first victim 10 times in total."
+
+"achievement.firstKill2.title" : "Spirit World Welcomer"
+"achievement.firstKill2.goal" : "Be killed first a total of 50 times."
+"achievement.firstKill2.splitted.2" : "Welcomer"
+
+"achievement.firstKill3.title" : "Recognizable Game"
+"achievement.firstKill3.goal" : "Be killed first a total of 100 times."
+"achievement.firstKill3.flavor" : ""Was that your doing?" ―■■■"
+
+"achievement.death1.title" : "Start of Suspense"
+"achievement.death1.goal" : "Die a total of 50 times."
+
+"achievement.death2.title" : "Mountain of Corpses"
+"achievement.death2.goal" : "Die a total of 100 times."
+"achievement.death2.splitted.2" : "Mountain"
+
+"achievement.death3.title" : "Uninterrupted Karmic Wind"
+"achievement.death3.goal" : "Die a total of 500 times."
+"achievement.death3.flavor" : ""―――""
+"achievement.death3.splitted.0" : "Uninterrupted "
+
+"achievement.challenge.impostor.title" : "Ruin"
+"achievement.challenge.impostor.goal" : "Win by your killing while all Imposters are alive."
+"achievement.challenge.impostor.cond" : "Kill 2 or more people"
+
+"achievement.challenge.lastCrewmate.title" : "Steep Peak"
+"achievement.challenge.lastCrewmate.goal" : "Survive as the last Crewmate and win with Crewmate victory."
+"achievement.challenge.lastCrewmate.cond" : "Madmate is not counted as part of the Crewmate faction"
+
+"achievement.challenge.death2.title" : "All Kinds of Tricks"
+"achievement.challenge.death2.goal" : "Cause players to die from 4 or more types of causes of death."
+"achievement.challenge.death2.cond" : "Excludes your own death and deaths you are not involved in+Includes exiles you contributed to with your vote"
+
+"achievement.noCrewmate.title" : "Time Limit"
+"achievement.noCrewmate.goal" : "Win with task victory while all Crewmates are dead."
+"achievement.noCrewmate.cond" : "You must belong to the Crewmate faction+Madmate is not counted as part of the Crewmate faction"
+
+"achievement.challenge.crewmate.title" : "The Ordinary"
+"achievement.challenge.crewmate.goal" : "Win by tasks without anyone dying."
+
+"achievement.speedAttribute.title" : "Is It Good or Bad?"
+"achievement.speedAttribute.goal" : "Receive both movement speed increase and movement speed decrease effects at the same time."
+
+"achievement.threeRoles.title" : "Trilemma"
+"achievement.threeRoles.goal" : "Acquire the roles/modifiers at the same time.<br> -Any Impostor Role<br> -Lover<br> -Sidekick (Modifier)"
+
+"achievement.doTaskEvenDead.title" : "Hardworking Ghost"
+"achievement.doTaskEvenDead.goal" : "Complete all tasks while dead."
+"achievement.doTaskEvenDead.cond" : "Total number of tasks: 8 or more"
+
+"achievement.noMeeting.title" : "Long Night's Dream"
+"achievement.noMeeting.goal" : "Win without having a meeting."
+"achievement.noMeeting.flavor" : ""The worst awakening to you""
+"achievement.noMeeting.splitted.2" : "Dream"
+
+"achievement.extraVictim.title" : "That Relief Is Fleeting"
+"achievement.extraVictim.goal" : "Die by additional exile in a meeting."
+"achievement.extraVictim.splitted.0" : "That "
+
+"achievement.spectator.dead.title" : "Death Camera"
+"achievement.spectator.dead.goal" : "The player you are spectating is killed and dies."
+
+"achievement.spectator.murderer.title" : "Heart-Pounding Moment"
+"achievement.spectator.murderer.goal" : "The player you are spectating kills someone."
+
+"achievement.teleporter1.title" : "Strange Sensation"
+"achievement.teleporter1.goal" : "Use the teleporter."
+"achievement.teleporter1.splitted.0" : "Strange "
+
+"achievement.teleporter2.title" : "Mystery"
+"achievement.teleporter2.goal" : "Use the teleporter a total of 50 times."
+
+"achievement.movable.title" : "Orchid"
+"achievement.movable.goal" : "Fall into a state where you cannot move at all<br>due to multiple movement restrictions."
+
+"achievement.dragCorpse.title" : "Journey Continues"
+"achievement.dragCorpse.goal" : "Drag a corpse 100 meters in total."
+"achievement.dragCorpse.flavor" : ""The vibrant days come to mind,<br>and the journey continues.""
+
+"achievement.allWayKill.title" : "Maestro of Death"
+"achievement.allWayKill.goal" : "Cause players to die from all causes of death."
+
+"achievement.allWayDeath.title" : "Wind Blowing in Hell"
+"achievement.allWayDeath.goal" : "Experience death from all causes of death."
+
+"achievement.perk.screen.title" : "Game Changer"
+"achievement.perk.screen.goal" : "Acquire a screen flip perk as part of the Crewmate faction."
+"achievement.perk.screen.flavor" : ""I'll show you a big upset!""
+
+"achievement.perk.meteor.title" : "Starfall Apocalypse"
+"achievement.perk.meteor.goal" : "Kill 3 or more people with the "Death Meteor Storm" perk."
+
+"achievement.perk.blank.title" : "For No Reason"
+"achievement.perk.blank.goal" : "Leave fake traces a total of 10 times using the "Blank Shot" or "Rage" perk."
+"achievement.perk.blank.splitted.0" : "Just "
+
+"record.perk.manyPerks1.flipX" : "Welcome to the Mirror World"
+"record.perk.manyPerks1.flipY" : "Opportunity for Upheaval"
+"record.perk.manyPerks1.flipXY" : "Reversal Drama"
+"record.perk.manyPerks1.invisible" : "Traveler of Parallel Universes"
+"record.perk.manyPerks1.meteor" : "Death Meteor Storm"
+"record.perk.manyPerks1.rotation" : "Unconsciousness"
+"record.perk.manyPerks1.blankShot" : "Blank Shot"
+"record.perk.manyPerks1.fakeAxe" : "Rage"
+
+"achievement.perk.manyPerks1.title" : "The Plant from Another World"
+"achievement.perk.manyPerks1.goal" : "Use all specified perks in total."
+
+"achievement.costume.animals.title" : "Moi! Contact Land"
+"achievement.costume.animals.goal" : "Play the game with many animals."
+"achievement.costume.animals.cond" : "5 or more animals must gather"
+"achievement.costume.animals.flavor" : ""There are no monsters!" Or so I thought."
+"achievement.costume.animals.splitted.0" : "Moi! "
+
+"achievement.costume.music.title" : "Eclectic Philharmony"
+"achievement.costume.music.goal" : "Form an orchestra and play the game."
+"achievement.costume.music.cond" : "Play with 3 or more musicians and 1 conductor"
+
+"achievement.costume.party.title" : "Party Night Fantastica"
+"achievement.costume.party.goal" : "Dress perfectly in party style."
+"achievement.costume.party.cond" : "Party requires at least 3 people+Wear stylish items around the eyes+Boost your mood with vivid colors+No duplicates allowed"
+"achievement.costume.party.flavor" : ""Only when you hide darkness in your heart does your smile shine brighter than anyone else's.""
+
+"achievement.costume.partyCamo.title" : "Bond☆Forever"
+"achievement.costume.partyCamo.goal" : "Gather with energetic members at the moment camouflage ends."
+"achievement.costume.partyCamo.cond" : "Gather with 3 or more party members"
+"achievement.costume.partyCamo.flavor" : ""I thought we could get through any pinch." ―Probably written by a non-gal"
+"achievement.costume.partyCamo.splitted.1" : "☆ "

@@ -1,0 +1,60 @@
+# Assignable
+
+"role.psychic.name" : "Psychic"
+"role.psychic.short" : "P"
+"role.psychic.blurb" : "Let Me Hear More"
+
+# Document
+
+"role.psychic.doc" : "死体を捜索できるクルーメイトです。"
+"role.psychic.ability.title" : "固有能力 "死霊の囁き""
+"role.psychic.ability.main" : "死体を通報すると、追加の情報を得られます。"
+"role.psychic.ability.search" : "<title>死体探索</title>しばらくの間、死体の位置を指す矢印が現れます。"
+
+# Options
+
+"options.role.psychic.detail" : "Psychics can obtain more information about reported bodies."
+"options.role.psychic.searchCooldown" : "Search Cooldown"
+"options.role.psychic.searchDuration" : "Search Duration"
+"options.role.psychic.message.elapsedTime" : "I died about %SEC%s ago..."
+"options.role.psychic.message.killersColor" : "My killer color was %COLOR%"
+"options.role.psychic.message.killersRole" : "My killer's role is %ROLE%"
+"options.role.psychic.message.killerIsDead" : "My murderer is already dead..."
+"options.role.psychic.message.myRole" : "My role is %ROLE%"
+"options.role.psychic.message.myState" : "I have been %STATE%..."
+"options.role.psychic.message.inner.darkColor" : "dark"
+"options.role.psychic.message.inner.lightColor" : "light"
+"options.role.psychic.message.header" : "Sprit Message"
+
+# Game
+
+
+# UI
+
+"button.label.search" : "search"
+
+# Stats
+
+"stats.psychic.searching" : "Num of Searching"
+"stats.psychic.messages" : "Num of Hearing Messages"
+
+# Titles
+
+"achievement.psychic.common1.title" : "死口"
+"achievement.psychic.common1.goal" : "霊媒メッセージを聴く。"
+
+"record.psychic.common2.elapsedTime" : "死後経過時間"
+"record.psychic.common2.killersColor" : "キラー色の明暗"
+"record.psychic.common2.killersRole" : "キラー役職"
+"record.psychic.common2.killerIsDead" : "キラー死亡済み"
+"record.psychic.common2.myRole" : "自役職"
+"record.psychic.common2.myState" : "死因"
+
+"achievement.psychic.common2.title" : "霊媒マイスタ"
+"achievement.psychic.common2.goal" : "全霊媒メッセージを聴く。"
+"achievement.psychic.common2.splitted.2" : "マイスタ"
+
+"achievement.psychic.challenge.title" : "その命に手向ける言葉を"
+"achievement.psychic.challenge.goal" : "死後20秒以上が経過した死体の霊媒メッセージで得た<br>キラーの手がかりをもとに、その会議でキラーを追放あるいは推察する。"
+"achievement.psychic.challenge.flavor" : "辿れないまでに深く、それでもすぐ傍にいる"
+"achievement.psychic.challenge.splitted.1" : "手向ける"

@@ -134,15 +134,12 @@ public class Language
         };
     }
 
-    public static Stream? OpenDefaultLangStream() => StreamHelper.OpenFromResource("Nebula.Resources.Lang.dat");
     static IEnumerator Preprocess(NebulaPreprocessor preprocessor)
     {
         yield return preprocessor.SetLoadingText("Loading Language Data");
 
-        DefaultLanguage = new Language();
-        using (var stream = StreamHelper.OpenFromResource("Nebula.Resources.Color.dat")) DefaultLanguage.Deserialize(stream);
-        using (var stream = OpenDefaultLangStream()) DefaultLanguage.Deserialize(stream);
-        //using (var stream = StreamHelper.OpenFromResource("Nebula.Resources.SecretLang.dat")) DefaultLanguage.Deserialize(stream);
+        DefaultLanguage = LoadLanguage("Japanese");
+        LoadLanguage("English", DefaultLanguage);
         DefaultLanguage.translationMap["empty"] = "";
 
         EastAsianFontChanger.LoadFont();
@@ -169,20 +166,29 @@ public class Language
 
         string lang = GetLanguage(language);
         EastAsianFontChanger.SetUpFont(lang);
+        CurrentLanguage = LoadLanguage(lang);
+        UpdateRealtimeTexts();
+    }
 
-        CurrentLanguage = new Language();
+    private static Language LoadLanguage(string lang)
+    {
+        var result = new Language();
+        LoadLanguage(lang, result);
+        return result;
+    }
 
-        foreach(var addon in NebulaAddon.AllAddons)
+    private static void LoadLanguage(string lang, Language language)
+    {
+        foreach (var addon in NebulaAddon.AllAddons)
         {
             using var stream = addon.OpenStream("Language/" + lang + ".dat");
-            if (stream != null) CurrentLanguage.Deserialize(stream, name => addon.OpenStream("Language/" + lang + "_" + name + ".dat"));
+            if (stream != null) language.Deserialize(stream, name => addon.OpenStream("Language/" + lang + "_" + name + ".dat"));
 
-            foreach(var s in addon.FindStreams("Language/" + lang + "/", path => path.EndsWith(".dat")))
+            foreach (var s in addon.FindStreams("Language/" + lang + "/", path => path.EndsWith(".dat")))
             {
-                CurrentLanguage.Deserialize(s);
+                language.Deserialize(s);
             }
         }
-        UpdateRealtimeTexts();
     }
 
     public void Deserialize(Stream? stream, Func<string, Stream?>? subStreamProvider = null) => Deserialize(stream, (key, text) => translationMap[key] = text, subStreamProvider: subStreamProvider);

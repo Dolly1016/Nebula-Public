@@ -1,0 +1,61 @@
+# Assignable
+
+"role.agent.name" : "Agent"
+"role.agent.short" : "A"
+"role.agent.blurb" : "Do Tasks More"
+
+# Document
+
+"role.agent.doc" : "A crewmate who can take over other players' tasks."
+"role.agent.ability.title" : "Inherent Ability "Reliable Agent""
+"role.agent.ability.main" : "Complete more tasks to lead the crewmates to task victory."
+"role.agent.ability.agent" : "<title>Agent</title>Can be activated when all tasks you hold are completed.<br>Obtain <b>extra tasks</b> that can take over other players' task quotas."
+
+# Options
+
+"options.role.agent.detail" : "You can gain extra tasks to cover someone else's incomplete ones."
+"options.role.agent.numOfExemptedTasks" : "# Exempted Tasks"
+"options.role.agent.numOfExemptedTasks.detail" : "Reduce the agent's total number of tasks by the specified number.<br>The fewer the total tasks, the shorter the time it takes to obtain additional tasks."
+"options.role.agent.numOfExtraTasks" : "# Extra Tasks"
+"options.role.agent.numOfExtraTasks.detail" : "Set the number of tasks obtained with one time agents.<br>No <b>further</b> tasks can be obtained via agenting after death."
+"options.role.agent.suicideIfSomeoneElseCompletesTasksBeforeAgent" : "Suicide If Someone Else Completes Tasks Before Agent"
+"options.role.agent.suicideIfSomeoneElseCompletesTasksBeforeAgent.detail" : "If another survivor completes all tasks before the agent, the agent dies on the spot.<br>The agent will not commit suicide if they have completed all tasks or already obtained additional tasks."
+
+# Game
+
+# UI
+
+"button.label.agent" : "agent"
+
+# Game Statictics
+
+"statistics.events.layoff" : "Layoff"
+
+# Status
+
+"state.layoff" : "Layoff"
+
+# Stats
+
+"stats.agent.agent" : "Num of Gaining Extra Tasks"
+
+# Titles
+
+"achievement.agent.common1.title" : "Invisible Devotion"
+"achievement.agent.common1.goal" : "Complete extra tasks and win."
+"achievement.agent.common1.cond" : "Number of exempted tasks: 3 or less+Total number of tasks: 8 or more"
+"achievement.agent.common1.splitted.0" : "Invisible "
+
+"achievement.agent.another1.title" : "Layoff"
+"achievement.agent.another1.goal" : "Be outperformed in task completion and self-destruct."
+"achievement.agent.another1.flavor" : ""You're always like this." —Excerpt from the Musings of Anonymous Hope"
+
+"achievement.agent.common2.title" : "Professional's Trick"
+"achievement.agent.common2.goal" : "Complete the next task within 15 seconds after the previous task completion, including vent movement."
+"achievement.agent.common2.splitted.0" : "Professional's "
+
+"achievement.agent.challenge.title" : "Perfect Crewmate"
+"achievement.agent.challenge.goal" : "Complete 5 or more extra tasks and win by tasks."
+"achievement.agent.challenge.cond" : "Number of exempted tasks: 3 or less"
+"achievement.agent.challenge.splitted.0" : "Perfect "
+"achievement.agent.challenge.splitted.2" : "Crewmate"

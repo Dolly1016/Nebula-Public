@@ -1,0 +1,53 @@
+# Assignable
+
+"role.vulture.name" : "Vulture"
+"role.vulture.short" : "V"
+"role.vulture.blurb" : "Eat Corpses to Win"
+
+# Document
+
+"role.vulture.doc" : "A Third faction member who eats corpses."
+"role.vulture.winCond" : "Eat <var>%NUM%</var> corpses."
+"role.vulture.ability.title" : "Inherent Ability "Predator""
+"role.vulture.ability.main" : ""
+"role.vulture.ability.eat" : "<title>Eat</title> Eat corpses."
+
+# Options
+
+"options.role.vulture.detail" : "Vulture eats dead bodies to win.<br>Crewmates must report before the corpse is eaten."
+"options.role.vulture.eatCoolDown" : "Eat Cooldown"
+"options.role.vulture.numOfTheEatenToWin" : "# the Eaten to Win"
+
+# Game
+
+"gameAction.vulture.eat" : "Eat Corpses"
+
+# UI
+
+"button.label.eat" : "eat"
+
+# Game Statictics
+
+"statistics.events.eat" : "Eat"
+
+# Stats
+
+"stats.vulture.eaten" : "Num of Eaten Corpses"
+
+# Titles
+
+"achievement.vulture.common1.title" : "Predator"
+"achievement.vulture.common1.goal" : "Eat 1 corpse."
+
+"achievement.vulture.challenge.title" : "Unnatural Peace"
+"achievement.vulture.challenge.goal" : "Win without any corpses being reported."
+
+# Team
+
+"teams.vulture" : "Vulture"
+"end.vulture" : "Vulture Wins%EXTRA%"
+
+# Document
+
+"document.tip.winCond.vulture.title" : "Special Trigger"
+"document.tip.winCond.vulture" : "The vulture wins when vulture captures the specified number of corpses."

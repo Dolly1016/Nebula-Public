@@ -1,0 +1,56 @@
+# Assignable
+
+"role.sculptor.name" : "Sculptor"
+"role.sculptor.short" : "Sc"
+"role.sculptor.blurb" : "Chaos Creation"
+
+# Document
+
+"role.sculptor.doc" : "An impostor who can summon walking idols."
+"role.sculptor.ability.title" : "Inherent Ability "Chaos Creature""
+"role.sculptor.ability.main" : ""
+"role.sculptor.ability.sample" : "<title>Sample</title>Sample an appearance applicable to the idol."
+"role.sculptor.ability.map" : "<title>Mini Map</title>Open a map to summon the idol.<br>Select the idol's destination and appearance on the map, and the idol will appear there and start walking."
+"role.sculptor.tips" : "・If the idol is killed, it disappears on the spot, and no one actually dies."
+
+# Options
+
+"options.role.sculptor.detail" : "Sculptor will spawn idols of players that walk around the map.<br>Crewmates will not know if they are the real deal when they pass by!"
+"options.role.sculptor.sampleCoolDown" : "Sample Cooldown"
+"options.role.sculptor.createCoolDown" : "Create Cooldown"
+"options.role.sculptor.maxSamples" : "Max Samples"
+"options.role.sculptor.stayDurationAfterMoving" : "Stay Duration After Moving"
+"options.role.sculptor.detectionRadius" : "Player Detection Radius"
+
+# Game
+
+"gameAction.sculptor.summon" : "Idol Summon"
+
+# UI
+
+"button.label.sculptor.command" : "command"
+
+# Stats
+
+"stats.sculptor.sample" : "Num of Samples"
+"stats.sculptor.create" : "Num of Creation"
+"ui.action.sculptor.sample" : "Get sample of the player."
+"ui.action.sculptor.create" : "Specify the destination of the idol and<br>generate the idol."
+
+# Titles
+
+"achievement.sculptor.common1.title" : "MUDA, MUDA, MUDAAA!"
+"achievement.sculptor.common1.goal" : "A player other than an ally attempts to kill the idol."
+
+"achievement.sculptor.common2.title" : "Idola Deus"
+"achievement.sculptor.common2.goal" : "Summon a total of 20 idols."
+
+"achievement.sculptor.common3.title" : "Puppet Planet"
+"achievement.sculptor.common3.goal" : "The number of appearing idols exceeds the number of survivors."
+"achievement.sculptor.common3.splitted.2" : "Planet"
+
+"achievement.sculptor.challenge.title" : "Possession of Sin"
+"achievement.sculptor.challenge.goal" : "The sample player of the summoned idol is exiled in the meeting immediately after spawn."
+"achievement.sculptor.challenge.cond" : "Excluding yourself and allies"
+"achievement.sculptor.challenge.splitted.0" : "Sin's "
+"achievement.sculptor.challenge.splitted.2" : "Possession"

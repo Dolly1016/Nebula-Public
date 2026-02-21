@@ -1,0 +1,35 @@
+# Assignable
+
+"role.noiseghost.name" : "Noiseghost"
+"role.noiseghost.blurb" : "Corpse Sound"
+"role.noiseghost.short" : "N"
+
+# Document
+
+"role.noiseghost.doc" : "Can sound an alert on the spot."
+
+# Options
+
+"options.role.noiseghost.detail" : "Noiseghost can send an alert anywhere."
+"options.role.noiseghost.noiseDuration" : "Noise Duration"
+"options.role.noiseghost.numOfNoise" : "# Noises"
+"options.role.noiseghost.noiseCooldown" : "Noise Cooldown"
+
+# Game
+
+
+# UI
+
+"button.label.noise" : "noise"
+
+# Stats
+
+"stats.noiseghost.alert" : "Num of Noises"
+
+# Titles
+
+"achievement.noiseghost.common1.title" : "Noisy Ghost"
+"achievement.noiseghost.common1.goal" : "Activate an alert."
+
+"achievement.noiseghost.common2.title" : "Unceasing Alarm"
+"achievement.noiseghost.common2.goal" : "Activate an alert a total of 20 times."

@@ -1,0 +1,46 @@
+# Assignable
+
+"role.extraMission.name" : "Extra Mission"
+"role.extraMission.generalBlurb" : "Special Top Secret Mission"
+
+# Document
+
+"role.extraMission.doc" : "You cannot win unless the specified player is dead.<br>While aiming for your own victory, complete the extra mission as well."
+
+# Options
+
+"options.role.extraMission.detail" : "Your mission is to make certain players die.<br>Otherwise you won't win."
+
+# Game
+
+"role.extraMission.taskText" : "[Extra Mission] Death of %PLAYER%."
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.extraMission.common1.title" : "Mission Accomplished"
+"achievement.extraMission.common1.goal" : "The extra mission target dies."
+
+"achievement.extraMission.another1.title" : "Predestined Harmony"
+"achievement.extraMission.another1.goal" : "The extra mission target dies after your death."
+
+"achievement.extraMission.common2.title" : "Escape"
+"achievement.extraMission.common2.goal" : "Survive until the end while being the extra mission target."
+
+"achievement.extraMission.common3.title" : "Unexpected Betrayal"
+"achievement.extraMission.common3.goal" : "Vote for the extra mission target and exile them."
+"achievement.extraMission.common3.cond" : "Both you and the target must be from the Crewmate team (excluding Madmate)"
+"achievement.extraMission.common3.splitted.0" : "Unexpected "
+
+"achievement.extraMission.another2.title" : "Silence"
+"achievement.extraMission.another2.goal" : "Lose the game without the extra mission target dying."
+"achievement.extraMission.another2.flavor" : ""...This concludes the report.""
+
+"achievement.extraMission.challenge.title" : "Each One's Motive"
+"achievement.extraMission.challenge.goal" : "The extra mission target dies, and you survive<br>while being designated as someone else's extra mission target, then win."
+"achievement.extraMission.challenge.splitted.0" : "Each One's "

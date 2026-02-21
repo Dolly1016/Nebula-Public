@@ -1,0 +1,60 @@
+"options.role.count" : "Role Assignment"
+"options.role.chance" : "Assignment Chance"
+"options.role.secondaryChance" : "2nd Onward"
+"options.role.count.jackalized" : "Jacalized Assignment"
+"options.role.chance.jackalized" : "Jackalized Assignment Chance"
+"options.role.count.madden" : "Madden Assignment"
+"options.role.chance.madden" : "Madden Assignment Chance"
+"options.role.count.tyrant" : "Tyrant Assignment"
+"options.role.chance.tyrant" : "Tyrant Assignment Chance"
+"options.role.count.short" : "Assignment"
+"options.modifier.chance" : "Assignment Chance"
+"options.role.crewmateCount" : "Crewmate Assignment"
+"options.role.impostorCount" : "Impostor Assignment"
+"options.role.neutralCount" : "Neutral Assignment"
+"options.role.definiteCount" : "Definitely"
+"options.role.randomCount" : "Randomly"
+"options.role.maxCount" : "Max Assignment"
+"options.role.maxCount.unlimited" : "Unlimited"
+
+"options.killCoolDown.type.immediate" : "Immediate"
+"options.killCoolDown.type.relative" : "Relative"
+"options.killCoolDown.type.ratio" : "Ratio"
+
+"options.commonSetting" : "Common Settings"
+
+"role.general.canUseVent" : "Can Use Vent"
+"role.general.ventOption" : "Vent Option"
+"role.general.ventCoolDown" : "Cooldown"
+"role.general.ventCoolDown.short" : "Cool"
+"role.general.ventDuration" : "Duration"
+"role.general.ventDuration.short" : "Duration"
+"role.general.ventUses" : "Max Uses"
+"role.general.ventUses.short" : "Uses"
+
+# Tabs
+
+"options.tab.setting" : "Game [Settings]"
+"options.tab.crewmate" : "[Crewmate] Roles"
+"options.tab.impostor" : "[Impostor] Roles"
+"options.tab.neutral" : "[Neutral] Roles"
+"options.tab.ghost" : "[Ghost] Roles"
+"options.tab.modifier" : "[Modifiers]"
+
+# Vanilla Options
+
+"options.vanilla.header" : "Among Us"
+"options.vanilla.header.impostor" : "Impostor Settings"
+"options.vanilla.header.crewmate" : "Crewmate Settings"
+"options.vanilla.header.meeting" : "Meeting Settings"
+"options.vanilla.header.task" : "Task Settings"
+
+# UI
+
+"ui.options.nav.1.left" : "Open option"
+"ui.options.nav.1.middle" : "Toggle display style"
+"ui.options.nav.1.right" : "Copy role name and details"
+"ui.options.nav.2.middle" : "Back to options list"
+
+"ui.configuration.click" : "LeftClick: Open Configurations<br>RightClick: Copy Role Summary"
+"ui.configuration.copied" : "Copied!"

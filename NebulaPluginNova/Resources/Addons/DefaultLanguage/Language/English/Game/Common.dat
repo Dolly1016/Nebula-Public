@@ -1,0 +1,76 @@
+# No Team
+
+"end.gameEnd" : "Game Set"
+"end.nogame" : "No Game"
+
+"end.status.noWinners" : "No Winners"
+
+# No Team Statictics
+
+"statistics.events.startGame" : "Game Start"
+"statistics.events.endGame" : "Game Set"
+"statistics.events.kill" : "Kill"
+"statistics.events.exiled" : "Exiled"
+"statistics.events.report" : "Report"
+"statistics.events.emergency" : "Emergency"
+"statistics.events.endMeeting" : "Meeting End"
+"statistics.events.disconnect" : "Disconnect"
+"statistics.events.revive" : "Revive"
+
+# Console
+
+"console.notAvailable" : "Not Available"
+
+# Tasks
+
+"task.unknownPlace" : "???"
+"task.divertPower" : "Divert Power"
+
+# Meta Information
+
+"metaInfo.meeting.sabotage" : "Current Sabotage"
+"metaInfo.meeting.sabotage.electrical" : "Power Outage"
+"metaInfo.meeting.sabotage.communications" : "Communications"
+"metaInfo.meeting.task" : "Ave. Completed: "
+
+# Meta Command
+
+"help.tabs.myInfo" : "My Role"
+"help.tabs.roles" : "Roles"
+"help.tabs.modifiers" : "Modifiers"
+"help.tabs.overview" : "Overview"
+"help.tabs.options" : "Options"
+"help.tabs.slides" : "Slides"
+"help.tabs.achievements" : "Titles"
+"help.tabs.stamps" : "Stamps"
+"help.slides.share" : "Share"
+"help.overview.pattern.realCount" : "Actual"
+"help.overview.pattern.custom" : "%NUM% Players"
+"help.overview.simulate" : "Specify the number of people for the simulation."
+"help.command" : "Commands"
+"help.command.nogame" : "No Game"
+"help.command.quickStart" : "Quick Start"
+"help.command.cancelStarting" : "Cancel Starting"
+"help.command.console" : "Console"
+"help.command.saveResult" : "Save Result Image"
+"help.command.toggleSocial" : "Toggle Appealing"
+"help.command.hideHud" : "Hide/Show Hud"
+"help.command.vcState" : "Toggle VC Info Display"
+
+# Button
+
+"button.label.rejoin" : "rejoin"
+"button.label.show" : "show"
+"button.label.spectator" : "spectator"
+"button.label.spectatorChange" : "change"
+"button.label.spectatorExit" : "exit"
+"button.label.task" : "task"
+"button.label.marketplace" : "marketplace"
+"button.label.costume" : "costume"
+"button.label.appeal" : "appeal"
+"button.label.playAchievement" : "recap"
+"button.label.suicide" : "suicide"
+"button.label.fixPos" : "restore"
+"button.label.mobile.switch" : "toggle"
+"button.label.afk" : "afk"
+"button.label.scan" : "scan"

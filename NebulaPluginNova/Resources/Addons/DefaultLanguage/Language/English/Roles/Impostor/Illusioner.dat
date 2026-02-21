@@ -1,0 +1,56 @@
+# Assignable
+
+"role.illusioner.name" : "Illusioner"
+"role.illusioner.short" : "Il"
+"role.illusioner.blurb" : "What Wonderful True Love!"
+
+# Document
+
+"role.illusioner.doc" : "An impostor who can transform and morph other players' appearances."
+"role.illusioner.ability.title" : "Inherent Ability "Illusion of Confusion""
+"role.illusioner.ability.main" : "Possesses both the transformation ability of Morphing and the repainting ability of Painter."
+"role.illusioner.ability.sample" : "<title>Sample</title>Sample the <var>%LOOK%</var> appearance of the player.<br>The sampled appearance can be used for <b>Transformation</b> and <b>Paint</b>.<br><var>%SAMPLE%</var>"
+"role.illusioner.ability.morph" : "<title>Morph</title>morph into the sampled appearance.<br>The effect ends or activates the ability again while the ability is active returns you to your original appearance."
+"role.illusioner.ability.paint" : "<title>Paint</title>Paint the sampled appearance on a player.%PAINT%"
+"role.illusioner.ability.look.original" : "original"
+"role.illusioner.ability.look.current" : "current"
+"role.illusioner.ability.sample.loseSample" : "Sampled appearances disappear after a meeting."
+"role.illusioner.ability.sample.keepSample" : "Sampled appearances can be carried over across meetings."
+"role.illusioner.ability.paint.afterMeeting" : "The appearance changes <var>after the meeting</var>."
+"role.illusioner.ability.paint.immediate" : "The appearance changes <var>immediately</var>."
+
+# Options
+
+"options.role.illusioner.detail" : "Illusioner combines the abilities of Painter and Morphing."
+"options.role.illusioner.sampleCoolDown" : "Sample Cooldown"
+"options.role.illusioner.morphCoolDown" : "Morph Cooldown"
+"options.role.illusioner.morphDuration" : "Morph Duration"
+"options.role.illusioner.paintCoolDown" : "Paint Cooldown"
+"options.role.illusioner.loseSampleOnMeeting" : "Lose Sample On Meeting"
+"options.role.illusioner.transformAfterMeeting" : "Transform After Meeting"
+"options.role.illusioner.sampleOriginalLook" : "Sample Original Look"
+
+# Game
+
+
+# UI
+
+"ui.action.illusioner.sample" : "Sample the outfit."
+"ui.action.illusioner.paint" : "Paint the sampled outfit on the player."
+"ui.action.illusioner.morph" : "Transform into the outfit you sampled."
+"ui.action.illusioner.switch" : "Toggles the action triggered by keystrokes<br>between painting and morphing abilities."
+
+# Stats
+
+"stats.illusioner.sample" : "Num of Taking Samples"
+"stats.illusioner.morph" : "Num of Morphing"
+"stats.illusioner.paint" : "Num of Painting"
+
+# Titles
+
+"achievement.illusioner.common1.title" : "Higher Compatibility"
+"achievement.illusioner.common1.goal" : "Use both the Paint ability and Transformation ability at least once each."
+
+"achievement.illusioner.challenge.title" : "Unsubstantiated Slander"
+"achievement.illusioner.challenge.goal" : "Exile 1 or more sample source players of either Paint or Transformation in a meeting,<br>and kill 1 or more with your own hands."
+"achievement.illusioner.challenge.splitted.0" : "Unsubstantiated"

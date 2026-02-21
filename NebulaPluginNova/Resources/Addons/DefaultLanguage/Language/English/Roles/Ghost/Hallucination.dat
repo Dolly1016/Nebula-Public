@@ -1,0 +1,41 @@
+# Assignable
+
+"role.hallucination.name" : "Hallucination"
+"role.hallucination.blurb" : "False Memory"
+"role.hallucination.short" : "H"
+
+# Document
+
+"role.hallucination.doc" : "Create and operate illusions of survivors."
+
+# Options
+
+"options.role.hallucination.detail" : "Hallucination invokes false-player and operates."
+"options.role.hallucination.hallucinationCooldown" : "Hallucination Cooldown"
+"options.role.hallucination.hallucinationDuration" : "Hallucination Duration"
+
+# Game
+
+"gameAction.hallucination.hallucination" : "Illusion Summon"
+
+# UI
+
+"button.label.hallucination" : "hallucination"
+
+# Stats
+
+"stats.hallucination.hallucinations" : "Num of Hallucinations"
+
+# Titles
+
+"achievement.hallucination.common2.title" : "Phantom Comet"
+"achievement.hallucination.common2.goal" : "Summon an illusion near a survivor."
+"achievement.hallucination.common2.splitted.0" : "Phantom "
+
+"achievement.hallucination.common3.title" : "Which One Is Real?"
+"achievement.hallucination.common3.goal" : "Meet a player who looks the same as the illusion you are operating."
+"achievement.hallucination.common3.splitted.2" : "?"
+
+"achievement.hallucination.another1.title" : "Illusions Are Always Capricious"
+"achievement.hallucination.another1.goal" : "An ally is exiled in the meeting immediately after impersonating them."
+"achievement.hallucination.another1.splitted.1" : "Always "

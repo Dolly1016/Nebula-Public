@@ -2,7 +2,9 @@
 using Nebula.Behavior;
 using Nebula.Modules.GUIWidget;
 using Nebula.Roles;
+using Nebula.Utilities;
 using UnityEngine;
+using UnityEngine.Device;
 using UnityEngine.Rendering;
 using Virial.Media;
 using static Nebula.Modules.IMetaWidgetOld;
@@ -1201,6 +1203,7 @@ public class MetaScreen : MonoBehaviour, GUIScreen
     static public Image BackFrameImage => backFrameSprite;
     static public Image BackInnerImage => backInnerSprite;
     static private MultiImage closeButtonSprite = DividedSpriteLoader.FromResource("Nebula.Resources.GUI.CloseButton.png", 100f, 2, 1);
+    static private MultiImage navButtonSprite = DividedSpriteLoader.FromResource("Nebula.Resources.GUI.NavButton.png", 100f, 2, 2);
     static public MetaScreen GenerateScreen(Vector2 size, Transform? parent, Vector3 localPos, bool withBackground, bool withBlackScreen, bool withClickGuard)
         => GenerateScreen(size, parent, localPos, withBackground ? BackgroundSetting.Old : BackgroundSetting.Off, withBlackScreen, withClickGuard);
     static public MetaScreen GenerateScreen(Vector2 size,Transform? parent,Vector3 localPos,BackgroundSetting backgroundSetting,bool withBlackScreen,bool withClickGuard)
@@ -1332,6 +1335,72 @@ public class MetaScreen : MonoBehaviour, GUIScreen
         }
 
         return screen;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="widgetGenerator"></param>
+    /// <param name="index"></param>
+    /// <param name="range">minを含み、maxを含まないページ範囲</param>
+    /// <param name="size"></param>
+    /// <param name="parent"></param>
+    /// <param name="localPos"></param>
+    /// <param name="withBlackScreen"></param>
+    /// <param name="closeOnClickOutside"></param>
+    /// <param name="withMask"></param>
+    /// <param name="withCloseButton"></param>
+    /// <returns></returns>
+    static public MetaScreen GenerateWindow(Func<int, Virial.Media.GUIWidget> widgetGenerator, int index, (int min, int max) range, Vector2 size, Transform? parent, Vector3 localPos, bool withBlackScreen, bool closeOnClickOutside, bool withMask = false, bool withCloseButton = true)
+    {
+        var window = GenerateWindow(size, parent, localPos, withBlackScreen, closeOnClickOutside, withMask, BackgroundSetting.Modern, withCloseButton);
+
+        SetUpNavButton(window, increment =>
+        {
+            if (increment)
+            {
+                index++;
+                if (index >= range.max) index = range.min;
+            }
+            else
+            {
+                index--;
+                if (index < range.min) index = range.max - 1;
+            }
+            window.SetWidget(widgetGenerator.Invoke(index), out _);
+        });
+
+        window.SetWidget(widgetGenerator.Invoke(index), out _);
+        return window;
+    }
+
+    static public void SetUpNavButton(MetaScreen screen, Action<bool> navFunc)
+    {
+        var obj = screen.transform.parent.gameObject;
+
+        PassiveButton GenerateButton(float x, int img)
+        {
+            var collider = UnityHelper.CreateObject<BoxCollider2D>("NavButton", obj.transform, new Vector3(screen.Border.x / 2f + 0.3f - x, screen.Border.y / 2f + 0.25f, -1f));
+            collider.transform.localScale = new(0.57f, 0.57f, 1f);
+            collider.isTrigger = true;
+            collider.gameObject.layer = LayerExpansion.GetUILayer();
+            collider.size = new(0.65f, 0.65f);
+            SpriteRenderer? renderer = null;
+            renderer = collider.gameObject.AddComponent<SpriteRenderer>();
+            renderer.sprite = navButtonSprite.GetSprite(img);
+            var button = collider.gameObject.SetUpButton(true);
+            button.OnMouseOver.AddListener(() => renderer.sprite = navButtonSprite.GetSprite(img + 1));
+            button.OnMouseOut.AddListener(() => renderer.sprite = navButtonSprite.GetSprite(img));
+            return button;
+        }
+
+        GenerateButton(0.7f, 0).OnClick.AddListener(() => {
+            navFunc.Invoke(false);
+        });
+        GenerateButton(0.3f, 2).OnClick.AddListener(() =>
+        {
+            navFunc.Invoke(true);
+        });
     }
 
     public void SetBorder(Vector2 border)

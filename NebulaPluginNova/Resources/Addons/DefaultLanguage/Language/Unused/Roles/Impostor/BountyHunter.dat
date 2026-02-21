@@ -1,0 +1,43 @@
+# Assignable
+
+"role.bountyHunter.name" : "Bounty Hunter"
+"role.bountyHunter.short" : "Bo"
+"role.bountyHunter.blurb" : "Get Rich Quick!"
+"role.bountyHunter.hint" : "賞金首をキルしよう"
+
+# Document
+
+"role.bountyHunter.doc" : "<b>賞金首</b>をキルして、より短いキルクールダウンを得られるインポスターです。<br>賞金首は生存者の中から一人が選ばれ、<var>%SEC%</var>秒ごとに更新されます。また、<b>賞金首</b>をキルすると即座に更新されます。<br>賞金首<b>以外</b>のプレイヤーをキルすると次のキルクールダウンが長くなってしまいます。"
+
+# Options
+
+"options.role.bountyHunter.detail" : "Bounty Hunter can gain a special Cooldown.<br>If they kill them but the bounty, they'll gain penalty Cooldown."
+"options.role.bountyHunter.bountyKillCoolDown" : "Bounty Kill Cooldown"
+"options.role.bountyHunter.othersKillCoolDown" : "Others Kill Cooldown"
+"options.role.bountyHunter.changeBountyInterval" : "Change Bounty Interval"
+"options.role.bountyHunter.showBountyArrow" : "Show Bounty Arrow"
+"options.role.bountyHunter.arrowUpdateInterval" : "Arrow Update Interval"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.bountyHunter.bountyKill" : "Num of Bounty Kill"
+"stats.bountyHunter.othersKill" : "Num of Non-bounty Kill"
+
+# Titles
+
+"achievement.bountyHunter.common1.title" : "欲深き凶行"
+"achievement.bountyHunter.common1.goal" : "賞金首をキルする。"
+"achievement.bountyHunter.common1.splitted.0" : "欲深き"
+
+"achievement.bountyHunter.another1.title" : "はした金にもならない"
+"achievement.bountyHunter.another1.goal" : "賞金首以外をキルする。"
+
+"achievement.bountyHunter.challenge.title" : "誰も逃しはしない"
+"achievement.bountyHunter.challenge.goal" : "30秒以内に3キルを決める。"
+"achievement.bountyHunter.challenge.splitted.2" : "しない"

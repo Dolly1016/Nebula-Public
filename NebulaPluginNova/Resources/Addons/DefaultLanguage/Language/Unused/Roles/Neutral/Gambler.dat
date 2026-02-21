@@ -1,0 +1,95 @@
+# Assignable
+
+"role.gambler.name" : "Gambler"
+"role.gambler.short" : "G"
+"role.gambler.blurb" : "Thrilling Game!"
+
+# Document
+
+"role.gambler.doc" : "チップを賭け、ギャンブルに興じる第三陣営です。"
+"role.gambler.winCond" : "生存しながら賭けに勝ち、<var>%NUM%</var>枚のチップを手に入れる。"
+"role.gambler.ability.title" : "固有能力 "打算的な勝負師""
+"role.gambler.ability.main" : "ギャンブラーは緊急会議で投票する代わりに<b>投票結果を予想</b>し、<b>チップ</b>を賭けます。<br>所持チップがすべて無くなると死亡します。<br>より有利に立ち回るため、タスクフェイズ中には<b>イカサマ</b>に勤しみます。<br><br>緊急会議では次の2種類の賭けができます。予想的中すると賭けた2倍のチップを手に入れます。<br>・<b>ゼロ票賭け</b>: 票を全く集めない3人を選んで賭けます。3人とも全く票を集めなければ予想的中です。<br>・<b>最多票賭け</b>: 最多数の票を集める1人を選んで賭けます。選んだプレイヤーが最多票を集めれば予想的中です。<br>"
+"role.gambler.ability.deceive" : "<title>イカサマ</title>プレイヤーにイカサマを仕掛けます。<br>直後の会議でそのプレイヤーの投票先を即座に把握できます。"
+
+# Options
+
+"options.role.gambler.detail" : "Bet on the results of votes in the meeting to get chips. <br>Deceive to understand your opponent's movements and get an advantage."
+"options.role.gambler.deceiveCooldown" : "Deceive Cooldown"
+"options.role.gambler.deceiveDuration" : "Deceive Duration"
+"options.role.gambler.initialChips" : "# Initial Chips"
+"options.role.gambler.goalChips" : "# Chips Required To Win"
+"options.role.gambler.maxBettingPatterns" : "Max Betting Patterns"
+"options.role.gambler.canVote" : "Can Vote"
+"options.role.gambler.canVote.detail" : "オンにするとギャンブラーは賭け方に応じてスキップか賭け先に票を投じます。<br>-<b>最多票賭けをしている場合</b>: 最多票賭け先に投票します。<br>-<b>最多票賭けをしていない場合</b>: スキップに投票します。"
+"options.role.gambler.chipsLimitForNoVoteBetting" : "Chips Limit For Zero Vote Betting"
+"options.role.gambler.chipsLimitForNoVoteBetting.detail" : "ゼロ票賭けに賭けられるチップ数の上限を設定します。"
+"options.role.gambler.noticeFirstSuccess" : "Notify Of First Successful Betting"
+
+# Game
+
+"gambler.betting.control" : "L Click: Add a chip<br>Shift + L Click: Decrease a chip<br>R Click: Cancel betting"
+"gambler.ui.selectingHint" : "Select the player to bet and press the + button again.<br><b>Zero Vote Betting</b>: Select %NV% players who will not be voted<br><b>Max Vote Betting</b>: Select %MV% players who will be got most votes."
+"gambler.ui.multiSelecting" : "Players cannot be overlapped across multiple bets."
+"gambler.ui.lackOfChips" : "You have no chips to bet!"
+"gambler.ui.zeroBetting" : "Zero Vote Betting"
+"gambler.ui.maxBetting" : "Max Vote Betting"
+"gambler.currentChips" : "Chips:"
+"gambler.ui.help.add" : "Select a player and press to <b>add your bet</b>."
+"gambler.ui.help.check" : "Your current bet will be <b>confirmed</b>."
+"gambler.ui.firstSuccess" : "Someone is excited."
+
+# UI
+
+"button.label.deceive" : "deceive"
+
+# Status
+
+"state.lost" : "Lost"
+
+# Stats
+
+"stats.gambler.bet" : "Num of Betting"
+"stats.gambler.bet.success" : "Num of Bets Won"
+"stats.gambler.bet.failed" : "Num of Bets Lost"
+"stats.gambler.deceive" : "Num of Deceive"
+
+# Titles
+
+"achievement.gambler.common1.title" : "堅実な一手"
+"achievement.gambler.common1.goal" : "3人以上にイカサマを仕掛けたうえで賭けに勝つ。"
+"achievement.gambler.common1.splitted.0" : "堅実な"
+
+"achievement.gambler.common2.title" : "耽溺"
+"achievement.gambler.common2.goal" : "累計で20回賭けをする。"
+"achievement.gambler.common2.flavor" : ""次はいけそうな気がするんだよね。" ―なんか言ってらぁ。"
+
+"achievement.gambler.another1.title" : "一片の悔いも無し"
+"achievement.gambler.another1.goal" : "オールインして賭けに負け、死亡する。"
+
+"achievement.gambler.common3.title" : "滾ってきたァ！"
+"achievement.gambler.common3.goal" : "オールインして賭けに勝つ。"
+
+"achievement.gambler.common4.title" : "ヒリつく勝負"
+"achievement.gambler.common4.goal" : "1回の会議で3通り以上賭けて、その全てで勝利する。"
+"achievement.gambler.common4.splitted.0" : "ヒリつく"
+
+"achievement.combination.2.gambler.lover.another.title" : "人生異聞"
+"achievement.combination.2.gambler.lover.another.goal" : "惨敗し、恋人に後追いさせる。"
+"achievement.combination.2.gambler.lover.another.flavor" : "※適度に楽しむ遊びです。のめり込みに注意しましょう。"
+
+"achievement.gambler.challenge.title" : "生粋のギャンブラー"
+"achievement.gambler.challenge.goal" : "イカサマをせずに、すべての賭けに勝って正々堂々勝利する。"
+"achievement.gambler.challenge.flavor" : ""運を味方につけて？笑わせるな、運だなんて。" ―勝負師のひとりごと"
+"achievement.gambler.challenge.splitted.0" : "生粋の"
+"achievement.gambler.challenge.splitted.2" : "ギャンブラー"
+
+# Team
+
+"teams.gambler" : "Gambler"
+"end.gambler" : "Gambler Wins %EXTRA%"
+
+# Document
+
+"document.tip.winCond.gambler.title" : "Special Trigger"
+"document.tip.winCond.gambler" : "The gambler win if they survive, and get %NUM% chips."

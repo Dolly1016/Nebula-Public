@@ -1,0 +1,69 @@
+# Assignable
+
+"role.damned.name" : "Damned"
+"role.damnedImpostor.name" : "Damned"
+"role.damned.short" : "Da"
+"role.damnedImpostor.short" : "D"
+
+# Document
+
+"role.damned.doc" : "An unconscious modifier.<br>Prevent a kill once and activate a curse."
+
+# Options
+
+"options.role.damned.detail" : "Damned is unconscious modifier.<br>The curse of Damned prevents one kill and has a dynamic effect for game."
+
+# Game
+
+"role.damned.prefix" : "Damned"
+"role.damned.generalBlurb" : "The creeping"
+"options.role.damned.takeOverRoleOfKiller" : "Take Over Role Of Killer"
+"options.role.damned.damnedMurderMyKiller" : "Damned Murder My Killer"
+"options.role.damned.killDelay" : "Kill Delay"
+"options.role.damned.damnedAction" : "Damned Action"
+"options.role.damned.damnedAction.impostor" : "Impostor"
+"options.role.damned.damnedAction.madmate" : "Madmate"
+"options.role.damned.damnedAction.takeOver" : "Take Over"
+"options.role.damned.canBecomeAwareOfDamned" : "Can Become Aware Of Damned"
+"options.role.damned.taskProgressRequiredForSelfAdmission" : "# Tasks Required For Self-admission"
+"options.role.damned.group.task" : "Self-admission Settings"
+
+# UI
+
+
+# Game Statictics
+
+"statistics.events.curse" : "Curse"
+
+# Status
+
+"state.cursed" : "Cursed"
+
+# Stats
+
+
+# Titles
+
+"achievement.damned.common1.title" : "Spreading Evil"
+"achievement.damned.common1.goal" : "Change from the crewmate team to the Impostor faction by curse."
+
+"achievement.damned.common2.title" : "Cursed One"
+"achievement.damned.common2.goal" : "Change into a Damned with Impostor role by curse."
+
+"achievement.damned.common3.title" : "Red Reversal"
+"achievement.damned.common3.goal" : "Change from the neutral to the Impostor faction by curse."
+"achievement.damned.common3.flavor" : ""Do not be mistaken. Even if their roles changes, they remain your enemy." ―From a broken meeting minutes"
+
+"achievement.damned.another1.title" : "Price of Betrayal"
+"achievement.damned.another1.goal" : "Defect from Impostors to non-Impostor team, then die by exile, suspicion, or kill by Impostor."
+
+"achievement.damned.challenge.title" : "Curse of Severance"
+"achievement.damned.challenge.goal" : "Defect from the impostor team to the crewmate team by curse and win with crewmates victory."
+"achievement.damned.challenge.flavor" : ""......" ―Notes from a destiny study on cursed victories"
+"achievement.damned.challenge.splitted.2" : "Curse"
+
+"achievement.combination.2.damned.avenger.hard.title" : "Curtain Call for the Tragedy"
+"achievement.combination.2.damned.avenger.hard.goal" : "Kill the cursed revenge target, inherit their role, and win.<br><br><size=75%><color=#aaaaaa>If the revenge target was Damned, the curse transforms.<br>Damned dies, and the role-changing curse is activated on the Avenger.</color></size>"
+"achievement.combination.2.damned.avenger.hard.cond" : "The original lover must be defeated"
+"achievement.combination.2.damned.avenger.hard.flavor" : ""Shall we continue the game?"<br>He didn't know the face peeking through the defiant smile."
+"achievement.combination.2.damned.avenger.hard.splitted.2" : "Curtain Call"

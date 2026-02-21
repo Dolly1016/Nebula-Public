@@ -1,0 +1,15 @@
+# Header
+
+"options.consoleRestriction" : "Console Restriction"
+"options.consoleRestriction.detail" : "About restriction for vitals, admin and cameras"
+
+# Groups
+
+# Options
+
+"options.consoleRestriction.unlimited" : "Unlimited"
+"options.consoleRestriction.adminRestriction" : "Admin"
+"options.consoleRestriction.vitalsRestriction" : "Vitals"
+"options.consoleRestriction.cameraRestriction" : "Security Cams & Logs"
+"options.consoleRestriction.resetRestrictions" : "Reset Restrictions Per Meetings"
+"options.consoleRestriction.showDeadBodiesOnAdmin" : "Show Dead Bodies On Admin"

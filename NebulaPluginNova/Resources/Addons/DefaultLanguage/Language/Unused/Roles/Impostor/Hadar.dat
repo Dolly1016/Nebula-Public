@@ -1,0 +1,70 @@
+# Assignable
+
+"role.hadar.name" : "Hadar"
+"role.hadar.short" : "H"
+"role.hadar.blurb" : "Crawling Darkness"
+"role.hadar.hint" : "地底に潜って自在に移動しよう"
+
+# Document
+
+"role.hadar.doc" : "地底に潜って移動できるインポスターです。"
+"role.hadar.ability.title" : "固有能力 "地底の変光星""
+"role.hadar.ability.main" : "地底に潜って、自在に移動できます。地底にいる間、視界はごく狭く薄らになります。<br>地底潜伏中、周囲のプレイヤーの場所が定期的に通知されます。"
+"role.hadar.ability.dive" : "<title>潜入</title>地底に潜ります。"
+"role.hadar.ability.gush" : "<title>顕現</title>地上に脱出します。"
+"role.hadar.ability.gush.vent" : "<title>顕現</title><var>近くのベントから</var>地上に脱出します。"
+"role.hadar.ability.evidence" : "<title>潜入の痕跡</title>地底に潜入したとき、その場に穴を残します。<br>穴は会議を跨ぐたびに小さくなります。"
+"role.hadar.tips" : "・地底に潜伏している間、キルクールダウンは進行しません。"
+
+# Options
+
+"options.role.hadar.detail" : "Hadar can move freely underground.<br>Underground Hadar is invisible to other players."
+"options.role.hadar.diveCooldown" : "Dive Cooldown"
+"options.role.hadar.accelRateUnderground" : "Accel Rate Underground"
+"options.role.hadar.gushFromVents" : "Gush From Vents"
+"options.role.hadar.gushFromVents.detail" : "オンにすると、ハダルは近辺のベントからのみ顕現できます。<br>オフの場合は、ハダルはマップ内のどこででも顕現できます。"
+"options.role.hadar.ventDetectionRange" : "Vent Detection Range"
+"options.role.hadar.leftDivingEvidence" : "Left Diving Evidence"
+"options.role.hadar.leftDivingEvidence.detail" : "オンにすると、地底への潜入時に地面に穴を残します。<br>穴は会議を跨ぐたびに小さくなり、やがて消えてしまいます。"
+
+# Game
+
+"gameAction.hadar.disappear" : "地底潜入"
+"gameAction.hadar.appear" : "地上脱出"
+
+# UI
+
+"button.label.dive" : "dive"
+"button.label.gush" : "gush"
+
+# Stats
+
+"stats.hadar.dive" : "Num of Diving"
+
+# Titles
+
+"achievement.hadar.common1.title" : "地に潜む殺意"
+"achievement.hadar.common1.goal" : "顕現から8秒以内にキルする。"
+"achievement.hadar.common1.splitted.2" : "殺意"
+
+"achievement.hadar.common2.title" : "追跡不能"
+"achievement.hadar.common2.goal" : "キルから8秒以内に地底に潜入する。"
+
+"achievement.hadar.common3.title" : "地底の変光星"
+"achievement.hadar.common3.goal" : "通算で10回、地底から顕現する。"
+"achievement.hadar.common3.splitted.0" : "地底の"
+"achievement.hadar.common3.splitted.2" : "変光星"
+
+"achievement.hadar.another1.title" : "墓標たる大地"
+"achievement.hadar.another1.goal" : "地底に潜入した直後の会議で追放されるか推測されて死亡する。"
+
+"achievement.hadar.common4.title" : "いないいない...ばぁ！"
+"achievement.hadar.common4.goal" : "生存者のすぐ近くで地底から顕現する。"
+"achievement.hadar.common4.splitted.1" : "..."
+
+"achievement.hadar.common5.title" : "モグラネットワーク"
+"achievement.hadar.common5.goal" : "1回の地底潜入で30m以上移動する。"
+
+"achievement.hadar.challenge.title" : "アングラの帝王"
+"achievement.hadar.challenge.goal" : "1ゲーム中に50秒以上地底に身を潜めたうえで3人以上キルし、生きて勝利する。"
+"achievement.hadar.challenge.splitted.2" : "帝王"

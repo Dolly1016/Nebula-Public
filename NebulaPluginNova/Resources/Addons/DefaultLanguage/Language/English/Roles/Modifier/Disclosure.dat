@@ -1,0 +1,32 @@
+# Assignable
+
+"role.disclosure.name" : "Disclosure"
+"role.disclosure.generalBlurb" : "It Is Not A Revelation"
+
+# Document
+
+"role.disclosure.doc" : "Your cursor is revealed to everyone during emergency meetings."
+
+# Options
+
+"options.role.disclosure.detail" : "Disclosure makes their cursor visible to everyone during an emergency meeting."
+"options.role.disclosure.anonymousCursor" : "Anonymous Cursor"
+"options.role.disclosure.showCursorAtLateVoting" : "Show Cursor At Late Voting"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.disclosure.common1.title" : "On Air"
+"achievement.disclosure.common1.goal" : "Vote while the cursor is revealed."
+
+"achievement.disclosure.challenge.title" : "Inciter Of Turbulent Times"
+"achievement.disclosure.challenge.goal" : "Have 3 or more players vote for the same target as you 5 seconds or more after your vote,<br>and exile players from a different team than you 3 or more times."
+"achievement.disclosure.challenge.splitted.2" : "Inciter"

@@ -1,0 +1,55 @@
+# Assignable
+
+"role.navvy.name" : "Navvy"
+"role.navvy.short" : "N"
+"role.navvy.blurb" : "Slipshod Job"
+
+# Document
+
+"role.navvy.doc" : "ベントやドアを封鎖できるクルーメイトです。"
+"role.navvy.ability.title" : "固有能力 "宇宙船の配管工""
+"role.navvy.ability.main" : ""
+"role.navvy.ability.seal" : "<title>封鎖</title>ベントやドアをテープで封鎖します。"
+
+# Options
+
+"options.role.navvy.detail" : "Navvy can cover the vents with tape. <br>Players who have access to vents can remove the tape from blocked vents."
+"options.role.navvy.sealCooldown" : "Seal Cooldown"
+"options.role.navvy.maxCost" : "Initial Costs"
+"options.role.navvy.costForVentSealing" : "Costs For Vent Sealing"
+"options.role.navvy.costForDoorSealing" : "Costs For Door Sealing"
+"options.role.navvy.removeDuration" : "Remove Tape Duration"
+"options.role.navvy.numOfVentRemovalSteps" : "# Removal Steps For Vents"
+"options.role.navvy.numOfDoorRemovalSteps" : "# Removal Steps For Doors"
+"options.role.navvy.redundantSealing" : "Redundant Sealing"
+
+# Game
+
+
+# UI
+
+"button.label.seal" : "seal"
+"button.label.vent.seal.remove" : "remove"
+
+# Stats
+
+"stats.navvy.sealVent" : "Num of Vent Sealing"
+"stats.navvy.sealDoor" : "Num of Door Sealing"
+"stats.navvy.removeVent" : "Num of Vent Removing"
+"stats.navvy.removeDoor" : "Num of Door Removing"
+
+# Titles
+
+"achievement.navvy.common1.title" : "抵抗するぜ、テープで"
+"achievement.navvy.common1.goal" : "通算で10回テープを貼る。"
+"achievement.navvy.common1.flavor" : ""もちろん。""
+"achievement.navvy.common1.splitted.1" : "ぜ、"
+
+"achievement.navvy.common2.title" : "妨害の妨害を妨害"
+"achievement.navvy.common2.goal" : "通算で5回テープをはがす。"
+
+"achievement.navvy.challenge.title" : "風通しのよい職場"
+"achievement.navvy.challenge.goal" : "部屋のドアを全てテープでふさぐ。"
+"achievement.navvy.challenge.cond" : "2つ以上のドアがある部屋に限る"
+"achievement.navvy.challenge.flavor" : ""フラットでオープンな労働環境が、インポスターの早期発見を後押しします。"<br>―「窓を開ける宇宙航行ノウハウ」より"
+"achievement.navvy.challenge.splitted.0" : "風通しのよい"

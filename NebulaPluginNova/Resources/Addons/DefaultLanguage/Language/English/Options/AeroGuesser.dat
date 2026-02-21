@@ -1,0 +1,28 @@
+# Header
+
+"options.aeroGuesser" : "AeroGuesser Options"
+"options.aeroGuesser.detail" : "About AeroGuesser mode"
+
+# Groups
+
+"options.aeroGuesser.group.hurryTimer" : "Hurry Timer Settings"
+"options.aeroGuesser.group.filter.difficulty" : "Difficulty Settings"
+"options.aeroGuesser.group.filter.map" : "Map Settings"
+
+# Options
+
+"options.aeroGuesser.guessTime" : "Guess Time"
+"options.aeroGuesser.numOfQuiz" : "# Quizzes"
+"options.aeroGuesser.monochromeMode" : "Monochrome Mode"
+"options.aeroGuesser.monochromeMode.detail" : "When turned on, the question images are displayed in monochrome."
+"options.aeroGuesser.hurryTimer" : "Hurry Timer"
+"options.aeroGuesser.hurryTimer.detail" : "When turned on, the remaining answer time can be shortened when someone confirms a guess."
+"options.aeroGuesser.hurryTimerDuration" : "Hurry Timer Duration"
+"options.aeroGuesser.hurryTimerDuration.detail" : "The remaining answer time after shortening.<br>If the remaining answer time is already shorter than the set time, it will not be extended."
+"options.aeroGuesser.skeld" : "Skeld"
+"options.aeroGuesser.mira" : "MIRA HQ"
+"options.aeroGuesser.polus" : "Polus"
+"options.aeroGuesser.airship" : "Airship"
+"options.aeroGuesser.fungle" : "Fungle"
+"options.aeroGuesser.normal" : "Normal"
+"options.aeroGuesser.hard" : "Hard"

@@ -1,0 +1,57 @@
+# Assignable
+
+"role.raider.name" : "Raider"
+"role.raider.short" : "Ra"
+"role.raider.blurb" : "Let's Rampage"
+
+# Document
+
+"role.raider.doc" : "通常のキルができない代わりに、斧を投げて大量キルができるインポスターです。"
+"role.raider.ability.title" : "固有能力 "暴乱の戦斧""
+"role.raider.ability.main" : "斧は投擲後、壁に刺さるまでに触れたプレイヤー全員をキルします。"
+"role.raider.ability.equip" : "<title>装備/格納</title>斧を構える、あるいは格納します。<br>構えている斧は他人からも視認されます。"
+"role.raider.ability.kill" : "<title>投擲</title>斧を構えている間のみ投擲ボタンが光ります。斧はマウスカーソルの方向に飛びます。<br>キルのキーボードショートカットを使うか、画面中央付近で左クリックして投擲するのがおすすめです。"
+"role.raider.tips" : "・生存者の当たり判定はキャラクターの中心付近にあります。<br>　お腹を狙って投げましょう。"
+
+# Options
+
+"options.role.raider.detail" : "Raider throws axes to kill players.<br>Thrown axe remains and serves as evidence."
+"options.role.raider.throwCoolDown" : "Throw Cooldown"
+"options.role.raider.axeSize" : "Axe Size"
+"options.role.raider.axeSpeed" : "Axe Speed"
+"options.role.raider.canKillImpostor" : "Can Kill Impostor"
+
+# Game
+
+"role.raider.axeSize" : "Raider<color=white>: Axe Size</color>"
+"gameAction.raider.equip" : "斧装備"
+"gameAction.raider.throw" : "斧投擲"
+
+# UI
+
+"button.label.throw" : "throw"
+"ui.action.raider.equip" : "Equip and store the axe."
+"ui.action.raider.kill" : "Throws the equipped axe."
+
+# Status
+
+"state.beaten" : "Beaten"
+
+# Stats
+
+"stats.raider.thrown" : "Num of Axes Thrown"
+
+# Titles
+
+"achievement.raider.common1.title" : "乱暴者"
+"achievement.raider.common1.goal" : "斧でプレイヤーをキルする。"
+
+"achievement.raider.another1.title" : "悪い子にはお仕置き！"
+"achievement.raider.another1.goal" : "斧を投げた直後の会議で追放されるか推測されて死亡する。"
+"achievement.raider.another1.flavor" : ""それでも奴は、不気味な笑みを浮かべていた。" ―署名の無い回顧録"
+
+"achievement.raider.challenge.title" : "宇宙一のあばれん坊"
+"achievement.raider.challenge.goal" : "一回の投擲で3人のプレイヤーをキルし、ゲームを終わらせる。"
+"achievement.raider.challenge.flavor" : ""宇宙船はゴミ処理場ではないとあれほど言っただろう！" ―出典不明"
+"achievement.raider.challenge.splitted.0" : "宇宙一の"
+"achievement.raider.challenge.splitted.2" : "あばれん坊"

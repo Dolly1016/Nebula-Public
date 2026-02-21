@@ -1,0 +1,92 @@
+# Assignable
+
+"role.opportunist.name" : "Opportunist"
+"role.opportunist.short" : "O"
+"role.opportunist.blurb" : "The Planet Goes"
+
+# Document
+
+"role.opportunist.doc" : "最後まで生存していると勝利する第三陣営です。"
+
+# Options
+
+"options.role.opportunist.detail" : "Opportunists can earn additional wins by completing tasks and surviving."
+"options.role.opportunist.numOfTasks" : "# Staying Tasks"
+"options.role.opportunist.numOfTasks.detail" : "オポチュニストには<b>指定の場所</b>にしばらくの間<b>滞在</b>するタスクが割り当てられます。"
+"options.role.opportunist.stayingDuration" : "Staying Duration Per Tasks"
+"options.role.opportunist.canFixComms" : "Can Fix Comms"
+"options.role.opportunist.canFixLight" : "Can Fix Light"
+
+# Game
+
+"role.opportunist.task.veiled" : "Locked Task"
+"role.opportunist.task" : "Stay at %LOC%"
+"role.opportunist.task.room" : "Stay in the Room"
+"role.opportunist.task.loc.skeld.cafeteria.window" : "Window"
+"role.opportunist.task.loc.skeld.storage.trash" : "ごみ排出口"
+"role.opportunist.task.loc.skeld.electrical.electrical" : "電気室奥"
+"role.opportunist.task.loc.skeld.lowerEngine.lowerEngine" : "給油口"
+"role.opportunist.task.loc.skeld.reactor.upper" : "原子炉上部"
+"role.opportunist.task.loc.skeld.medbay.scan" : "Scanner"
+"role.opportunist.task.loc.mira.balcony.antenna" : "Antenna"
+"role.opportunist.task.loc.mira.cafeteria.vendingMachine" : "Vending Machiene"
+"role.opportunist.task.loc.polus.security.camera" : "Camera"
+"role.opportunist.task.loc.polus.comms.table" : "Table"
+"role.opportunist.task.loc.polus.lab.hole" : "the Hole"
+"role.opportunist.task.loc.polus.lab.toilet" : "Toilet"
+"role.opportunist.task.loc.polus.admin.bookshelf" : "Bookshelf"
+"role.opportunist.task.loc.polus.lifesupport.bottle" : "酸素サーバー"
+"role.opportunist.task.loc.polus.outside.ejection" : "Ejection"
+"role.opportunist.task.loc.polus.outside.comms" : "Snowman"
+"role.opportunist.task.loc.airship.meetingRoom.meetingRoom" : "会議室奥"
+"role.opportunist.task.loc.airship.mainHall.cleaning" : "Cleaning Room"
+"role.opportunist.task.loc.airship.mainHall.treasureBox" : "Treasure Box"
+"role.opportunist.task.loc.airship.mainHall.darkRoom" : "Dark Room"
+"role.opportunist.task.loc.airship.lounge.toilet" : "Toilet"
+"role.opportunist.task.loc.airship.cargoBay.safe" : "Safe"
+"role.opportunist.task.loc.airship.medical.vitals" : "Vitals"
+"role.opportunist.task.loc.airship.security.outside" : "Deck"
+"role.opportunist.task.loc.airship.viewingDeck.outside" : "Deck"
+"role.opportunist.task.loc.fungle.highlands.bigGem" : "the Huge Gem"
+"role.opportunist.task.loc.fungle.highlands.landing" : "the Landing"
+"role.opportunist.task.loc.fungle.jungle.monitoring" : "Monitoring Point"
+"options.role.opportunist.group.fallback" : "Opportunist Fallback Settings"
+"options.role.opportunist.fallback" : "Opportunist Fallback"
+"options.role.opportunist.fallback.tasks" : "# Staying Tasks"
+
+# UI
+
+
+# Stats
+
+"stats.opportunist.task" : "滞在タスクの完了数"
+
+# Titles
+
+"achievement.opportunist.common1.title" : "後は野となれ山となれ"
+"achievement.opportunist.common1.goal" : "オポチュニスト追加勝利で勝利する。"
+
+"achievement.opportunist.another1.title" : "急展開"
+"achievement.opportunist.another1.goal" : "最後まで生存しながら敗北する。"
+
+"achievement.opportunist.another2.title" : "ちょっとだけでいいのに"
+"achievement.opportunist.another2.goal" : "自身が死亡した直後にゲームが終了する。"
+"achievement.opportunist.another2.splitted.0" : "ちょっとだけ"
+
+"achievement.opportunist.common3.title" : "宇宙船の妖精さん"
+"achievement.opportunist.common3.goal" : "滞在タスクを通算で10回完了する。"
+"achievement.opportunist.common3.splitted.2" : "妖精さん"
+
+"achievement.opportunist.common2.title" : "そこのけそこのけ"
+"achievement.opportunist.common2.goal" : "最後まで生存し、一人で勝利する。"
+"achievement.opportunist.common2.flavor" : ""そこのけそこのけ、私が通る。""
+"achievement.opportunist.common2.splitted.0" : "そこのけ"
+
+"achievement.opportunist.challenge.title" : "風の吹くまま"
+"achievement.opportunist.challenge.goal" : "生存者を1人以上敗北させて追加勝利する。"
+"achievement.opportunist.challenge.cond" : "クルーメイト勝利を除く"
+
+# Team
+
+"teams.opportunist" : "Opportunist"
+"end.extra.opportunist" : " <color=#FFFFFF>with</color> Opportunist"

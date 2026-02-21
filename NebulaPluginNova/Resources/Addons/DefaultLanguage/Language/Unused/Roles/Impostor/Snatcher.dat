@@ -1,0 +1,62 @@
+# Assignable
+
+"role.snatcher.name" : "Snatcher"
+"role.snatcher.short" : "Sna"
+"role.snatcher.blurb" : "What Is Yours Is Mine"
+"role.snatcher.prefix" : "Snatched"
+
+# Document
+
+"role.snatcher.doc" : "プレイヤーから能力を奪って自身のものにできるインポスターです。"
+"role.snatcher.ability.title" : "固有能力 "力の簒奪者""
+"role.snatcher.ability.main" : "プレイヤーから能力を奪います。能力を奪われたプレイヤーは、能力を奪われた事実に即座に気付けません。<br>奪われた能力は実際に使おうとしたときに壊れ、この時点でプレイヤーに能力が奪われた事実を知らせます。"
+"role.snatcher.ability.snatch.taskPhase" : "<title>推察</title>プレイヤーから能力を奪います。"
+"role.snatcher.ability.snatch.meeting" : "<title>推察</title>会議中にプレイヤーの能力を推察できます。推察に成功すると能力を奪えます。<br>推察に失敗すると壊れた能力を手に入れます。"
+"role.snatcher.ability.clock.taskPhase" : "<title>クールダウン変速</title>奪える能力がない場合、代わりにクールダウン変速能力を獲得します。"
+"role.snatcher.ability.clock.meeting" : "奪える能力がない役職を推察した場合、代わりに<b>クールダウン変速</b>能力を獲得します。"
+
+# Options
+
+"options.role.snatcher.detail" : "Snatchers can steal abilities from players and use them."
+"options.role.snatcher.snatchMethod" : "Snatch Method"
+"options.role.snatcher.snatchMethod.guess" : "Guess"
+"options.role.snatcher.snatchMethod.interaction" : "Interaction"
+"options.role.snatcher.snatchCoolDown" : "Snatch Cooldown"
+"options.role.snatcher.obviousGuessFailure" : "Obvious Guess Failure"
+"options.role.snatcher.clockCoolDown" : "Clock Cooldown"
+"options.role.snatcher.clockDuration" : "Clock Duration"
+"options.role.snatcher.clockRatio" : "Clock Ratio"
+"options.role.snatcher.killCooldownRewindAfterUsurp" : "Kill Cooldown Rewind After Snatching"
+"options.role.snatcher.killCooldownRewindAfterUsurp.detail" : "スナイパーなどの特殊キルが盗まれると、代わりに通常キル能力が解禁されます。<br>通常キル能力を獲得した際にキルクールダウンをどの程度巻き戻すか設定します。"
+"options.role.snatcher.group.snatch" : "Snatching Settings"
+"options.role.snatcher.group.clock" : "Cooldown Accel. Settings"
+
+# Game
+
+
+# UI
+
+"button.label.snatch" : "snatch"
+"button.label.clock" : "clock"
+"ui.action.snatcher.snatch" : "Steals player's ability."
+"ui.action.snatcher.clock" : "Change cooldown speed."
+
+# Stats
+
+"stats.snatcher.snatch" : "Num of Snatching"
+
+# Titles
+
+"achievement.snatcher.common1.title" : "いただきっ！"
+"achievement.snatcher.common1.goal" : "他人の能力を奪う。"
+
+"achievement.snatcher.another1.title" : "亡失"
+"achievement.snatcher.another1.goal" : "スナッチャーに能力を奪われる。"
+
+"achievement.snatcher.common2.title" : "跳梁跋扈"
+"achievement.snatcher.common2.goal" : "能力を奪った相手が死亡し、敗北したうえで自身が生きて勝利する。"
+
+"achievement.snatcher.challenge.title" : "力に息衝く情熱"
+"achievement.snatcher.challenge.goal" : "死にゆく仲間の力を引き継ぎ、生きて勝利する。"
+"achievement.snatcher.challenge.flavor" : ""脈打つ心臓の半分は、キミだ。""
+"achievement.snatcher.challenge.splitted.2" : "情熱"

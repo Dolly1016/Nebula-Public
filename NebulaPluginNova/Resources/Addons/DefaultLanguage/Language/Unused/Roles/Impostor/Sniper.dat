@@ -1,0 +1,75 @@
+# Assignable
+
+"role.sniper.name" : "Sniper"
+"role.sniper.short" : "Sni"
+"role.sniper.blurb" : "Shoot Up!"
+
+# Document
+
+"role.sniper.doc" : "通常のキルができない代わりに、スナイパーライフルで遠隔キルができるインポスターです。"
+"role.sniper.ability.title" : "固有能力 "スナイパーライフル""
+"role.sniper.ability.main" : "スナイパーライフルで遠くのプレイヤーを狙撃できます。<br>壁を隔てた先にいるプレイヤーもキルできます。"
+"role.sniper.ability.equip" : "<title>装備/格納</title>スナイパーライフルを構える、あるいは格納します。<br>構えているスナイパーライフルは他人からも視認されます。"
+"role.sniper.ability.kill" : "<title>狙撃</title>スナイパーライフルを構えている間のみ狙撃ボタンが光ります。マウスカーソルの方向に照準を合わせます。<br>キルのキーボードショートカットを使うか、画面中央付近で左クリックして狙撃するのがおすすめです。"
+"role.sniper.tips" : "・生存者の当たり判定はキャラクターの中心付近にあります。<br>・発砲時、周囲<var>%SOUND%m</var>以内のプレイヤーは発砲通知を受け取ります。%AIMASSIST%"
+"role.sniper.tips.aimAssist" : "<br>・スナイパーライフルを構えて<var>%DELAY%</var>秒後に、生存者や死体を指す<var>ガイドライン</var>が表示されます。<br>　線に沿って発砲すればキルが格段に決まりやすくなります。"
+
+# Options
+
+"options.role.sniper.detail" : "Sniper has a rifle to snipe players.<br>When sniper shoots, players nearby they see a notification."
+"options.role.sniper.snipeCoolDown" : "Snipe Cooldown"
+"options.role.sniper.shotSize" : "Shot Size"
+"options.role.sniper.shotEffectiveRange" : "Shot Effective Range"
+"options.role.sniper.shotNoticeRange" : "Snipe Notice Range"
+"options.role.sniper.shotNoticeRange.detail" : "この範囲内にいるプレイヤーは、スナイパーの発砲時に<br>その発砲位置を示す通知を受け取ります。"
+"options.role.sniper.storeRifleOnFire" : "Store Rifle On Fire"
+"options.role.sniper.storeRifleOnUsingUtility" : "Store Rifle On Using Utility"
+"options.role.sniper.storeRifleOnUsingUtility.detail" : "オンにすると、はしご等の使用時に装備していたライフルをしまいます。"
+"options.role.sniper.canSeeRifleInShadow" : "Can See Rifle In Shadow"
+"options.role.sniper.canKillHidingPlayer" : "Can Kill Hiding Player"
+"options.role.sniper.aimAssist" : "Aim Assist"
+"options.role.sniper.aimAssist.detail" : "オンにすると、プレイヤーの位置を示すガイド線が表示されるようになります。"
+"options.role.sniper.delayInAimAssistActivation" : "Delay In Aim Assist Activation"
+"options.role.sniper.canKillImpostor" : "Can Kill Impostor"
+
+# Game
+
+"role.sniper.shotRange" : "Sniper: <color=white>Shot Effective Range</color>"
+"role.sniper.soundRange" : "Sniper: <color=white>Shot Notice Effective Range</color>"
+"role.sniper.shotSize" : "Sniper<color=white>: Shot Size</color>"
+"gameAction.sniper.equip" : "スナイパーライフル装備"
+
+# UI
+
+"button.label.equip" : "equip"
+"button.label.unequip" : "unequip"
+"button.label.snipe" : "snipe"
+"ui.action.sniper.equip" : "Equip and store the rifle."
+"ui.action.sniper.kill" : "Fire with the rifle."
+
+# Status
+
+"state.sniped" : "Sniped"
+
+# Stats
+
+"stats.sniper.misshot" : "Num of Misshot"
+"stats.sniper.shot" : "Num of Firing"
+
+# Titles
+
+"achievement.sniper.common1.title" : "精度よし"
+"achievement.sniper.common1.goal" : "狙撃によってプレイヤー1人をキルする。"
+
+"achievement.sniper.another1.title" : "轟音"
+"achievement.sniper.another1.goal" : "発砲直後の会議で追放されるか推測されて死亡する。"
+
+"achievement.sniper.common2.title" : "空は我が手中にあり"
+"achievement.sniper.common2.goal" : "吹っ飛ばされているプレイヤーをキルする。"
+"achievement.sniper.common2.cond" : "プレイヤーの吹っ飛ばしはカノンの固有能力です。"
+"achievement.sniper.common2.splitted.0" : "空は"
+
+"achievement.sniper.challenge.title" : "狙撃の名手"
+"achievement.sniper.challenge.goal" : "20m以上離れた位置から合計2人のプレイヤーをキルする。"
+"achievement.sniper.challenge.cond" : "有効射程: 20x以上"
+"achievement.sniper.challenge.splitted.2" : "名手"

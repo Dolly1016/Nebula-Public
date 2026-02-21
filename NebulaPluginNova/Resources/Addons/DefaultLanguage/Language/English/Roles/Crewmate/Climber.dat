@@ -1,0 +1,65 @@
+# Assignable
+
+"role.climber.name" : "Climber"
+"role.climber.short" : "C"
+"role.climber.blurb" : "Like The Wind"
+
+# Document
+
+"role.climber.doc" : "A crewmate who can move long distances using a hookshot."
+"role.climber.ability.title" : "Inherent Ability "Hookshot""
+"role.climber.ability.main" : "Hook the hookshot to a distant wall for a big move at once."
+"role.climber.ability.hookshot" : "<title>Hookshot</title>Fire the hookshot.<br>If it successfully hooks onto a wall, the climber is pulled to the hooked location."
+"role.climber.tips" : "The hookshot can be fired farther in open places such as the elevator and outside of Airship, and the cliffs of Fungle."
+
+# Options
+
+"options.role.climber.detail" : "Climber can travel long distances using their hookshots."
+"options.role.climber.gustCooldown" : "Hookshot Cooldown"
+"options.role.climber.canSeeInShadow" : "Can See Hookshot In Shadow"
+
+# Game
+
+"gameAction.climber.hookshot" : "Hookshot"
+
+# UI
+
+"button.label.gust" : "hookshot"
+
+# Stats
+
+"stats.climber.gust" : "Uses of Hookshots"
+"stats.climber.distance" : "Hookshot Distance Traveled"
+
+# Titles
+
+"achievement.climber.common1.title" : "Adventurer"
+"achievement.climber.common1.goal" : "Move 5m or more using the hookshot."
+"achievement.climber.common1.flavor" : "Seeking the "unknown," he challenged that mountain."
+"achievement.climber.common1.splitted.2" : "Adventurer"
+
+"achievement.climber.common2.title" : "To the Unreached Peak"
+"achievement.climber.common2.goal" : "Move 1,000m in total using the hookshot."
+"achievement.climber.common2.flavor" : ""It doesn't matter if there's no path there. Because if I conquer it, it will become a path."<br>First, where should I aim for?" he said."
+"achievement.climber.common2.splitted.0" : "Unreached "
+
+"achievement.climber.common3.title" : "Immortal Mountain"
+"achievement.climber.common3.goal" : "Move 3,776m in total using the hookshot."
+"achievement.climber.common3.flavor" : "NOTE: Already reached by humans"
+"achievement.climber.common3.splitted.0" : "Immortal "
+
+"achievement.climber.common4.title" : "Earth's Highest Peak"
+"achievement.climber.common4.goal" : "Move 8,848m in total using the hookshot."
+"achievement.climber.common4.flavor" : "NOTE: This has also been reached by humans"
+
+"achievement.climber.common5.title" : "Divine Realm"
+"achievement.climber.common5.goal" : "Move 21,230m in total using the hookshot."
+"achievement.climber.common5.flavor" : ""It's the best view.""
+
+"achievement.climber.another1.title" : "Fly Into the Flame"
+"achievement.climber.another1.goal" : "Die while moving with the hookshot or immediately after."
+
+"achievement.climber.challenge.title" : "Sacred Secret Peak"
+"achievement.climber.challenge.goal" : "Escape with the hookshot from a place<br>there are 2 or more impostors, madmates, or jackals nearby and survive."
+"achievement.climber.challenge.splitted.0" : "Sacred "
+"achievement.climber.challenge.splitted.2" : "Secret Peak"

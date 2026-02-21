@@ -1,0 +1,15 @@
+# Tutorial
+
+"tutorial.guide.canClose" : "This tutorial remains while the cursor is hovering.<br>Click to close the tutorial."
+"tutorial.guide.cannotClose" : "This tutorial remains while the cursor is hovering."
+"tutorial.variations.subAction" : "There are subactions that can be activated by keystrokes."
+"tutorial.variations.helpInGame.title" : "Game Help"
+"tutorial.variations.helpInGame.caption" : "Press the %KEY% key to open the help screen.<br>Check your abilities and goals!"
+"tutorial.variations.meetingTool.title" : "Meeting Tool"
+"tutorial.variations.meetingTool.caption" : "You can place icons and draw lines on the map during the meeting.<br>It can be used for reasoning."
+"tutorial.variations.stamp.title" : "Stamps"
+"tutorial.variations.stamp.caption" : "You can send stamps by pressing the %KEY% key."
+"tutorial.variations.ambienceOnMeeting.title" : "Mute Ambience Option"
+"tutorial.variations.ambienceOnMeeting.caption" : "Instead you can use the "Mute Ambience On Meeting" option."
+"tutorial.variations.meetingTool.line.title" : "The shortcut for generating player icons"
+"tutorial.variations.meetingTool.line.caption" : "Draw a line on the minimap and right-click <b>just before</b> releasing the mouse to<br>generate icons of all players in the game."

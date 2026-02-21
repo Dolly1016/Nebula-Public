@@ -1,0 +1,66 @@
+# Assignable
+
+"role.obsessional.name" : "Obsessional"
+"role.obsessional.blurb" : "You're obsessed by the %NAME%"
+"role.obsessional.generalBlurb" : "Watching You"
+
+# Document
+
+"role.obsessional.doc" : "Your victory condition changes to the victory of your obsession target. %SUICIDE%"
+"role.obsessional.doc.suicide" : "If your obsession target dies, you <var>die following them</var>."
+"role.obsessional.winCond" : "%WIN%"
+"role.obsessional.winCond.canWinEvenIfTargetDie" : "%SELF% if your obsession target wins, you also get an extra win together.<br>Your original role's victory condition is <b><color=#ff0000ff>lost</color></b>."
+"role.obsessional.winCond.cannotWinIfTargetDie" : "%SELF% if your obsession target wins <var>while alive</var>, you also get an extra win together.<br>Your original role's victory condition is <b><color=#ff0000ff>lost</color></b>."
+"role.obsessional.winCond.cannotWinIfSelfDie" : "You must be <var>alive</var>, and"
+
+# Options
+
+"options.role.obsessional.detail" : "Obsessional is obsessed by specific target.<br>Obsessional can only win when the target wins."
+"options.role.obsessional.canWinEvenIfObsessionalTargetDie" : "Can Win Even If Obsessional Target Dies"
+"options.role.obsessional.canWinEvenIfObsessionalDie" : "Can Win Even If Obsessional Dies"
+"options.role.obsessional.obsessionalSuicideWhenObsessionalTargetDie" : "Obsessional Suicides When Obsessional Target Dies"
+"options.role.obsessional.impostorObsessionalObsessesOver" : "Impostor Obsessional Obsesses Over..."
+"options.role.obsessional.impostorObsessionalObsessesOver.default" : "Default"
+"options.role.obsessional.impostorObsessionalObsessesOver.neutralOnly" : "Neutral Only"
+"options.role.obsessional.impostorObsessionalObsessesOver.nonCrewmate" : "Non-Crewmate"
+
+# Game
+
+"role.obsessional.taskText" : "[Obsessional] Target is %PLAYER%."
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.obsessional.common1.title" : "Watching You"
+"achievement.obsessional.common1.goal" : "Win together with your obsession target."
+"achievement.obsessional.common1.splitted.0" : "Watching You"
+
+"achievement.obsessional.another1.title" : "Wherever You Go"
+"achievement.obsessional.another1.goal" : "Die following your obsession target's death."
+"achievement.obsessional.another1.flavor" : ""(Blood letters... No, maybe it's ketchup)" —next to the empty pizza box"
+
+"achievement.obsessional.another2.title" : "Unexpected Development"
+"achievement.obsessional.another2.goal" : "Become Obsessional as an Impostor and lose due to Impostor victory."
+"achievement.obsessional.another2.splitted.0" : "Unexpected "
+
+"achievement.obsessional.lover1.title" : "Infatuation Fantasy"
+"achievement.obsessional.lover1.goal" : "Your obsession target wins by Lovers solo victory, and you win together."
+"achievement.obsessional.lover1.flavor" : "A fragile bond maintains a delicate balance."
+"achievement.obsessional.lover1.splitted.2" : "Fantasy"
+
+"achievement.obsessional.lover2.title" : "There's a Wedding Favor"
+"achievement.obsessional.lover2.goal" : "Your obsession target wins by Lovers extra victory, and you miss out on victory."
+
+"achievement.obsessional.challenge.title" : "Only You Are Reflected"
+"achievement.obsessional.challenge.goal" : "Win with only you and your obsession target remaining."
+"achievement.obsessional.challenge.splitted.0" : "Only "
+
+# Team
+
+"end.extra.obsessional" : " <color=#FFFFFF>with</color> Obsessional"
+

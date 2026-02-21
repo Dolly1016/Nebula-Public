@@ -1,0 +1,37 @@
+# Assignable
+
+"role.confused.name" : "Confused"
+"role.confused.generalBlurb" : "幸せの理由は"
+
+# Document
+
+"role.confused.doc" : "会議のたびに、他のプレイヤーの見た目がシャッフルされます。"
+
+# Options
+
+"options.role.confused.detail" : "Every emergency meetings, the appearance of others changes."
+"options.role.confused.chanceOfShuffle" : "% Shuffle"
+"options.role.confused.numOfMaxShuffledPairs" : "# Max Shuffled Pairs"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.confused.common1.title" : "何を信じて生きるのか"
+"achievement.confused.common1.goal" : "コンフューズドの能力が発動する。"
+"achievement.confused.common1.splitted.1" : "信じて"
+
+"achievement.confused.another1.title" : "水面下の渦動"
+"achievement.confused.another1.goal" : "コンフューズドの能力が発動する前に死亡する。"
+
+"achievement.confused.challenge.title" : "我々はどう生きるか"
+"achievement.confused.challenge.goal" : "最後まで生き残り、クルーメイト陣営のみが生存した状態でクルーメイト勝利する。"
+"achievement.confused.challenge.cond" : "第三陣営: 2人以上+インポスター: 2人以上"
+"achievement.confused.challenge.splitted.1" : "どう"

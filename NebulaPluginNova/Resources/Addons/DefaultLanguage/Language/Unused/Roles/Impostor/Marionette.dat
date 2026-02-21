@@ -1,0 +1,66 @@
+# Assignable
+
+"role.marionette.name" : "Marionette"
+"role.marionette.short" : "Ma"
+"role.marionette.blurb" : "There Is No Intention"
+
+# Document
+
+"role.marionette.doc" : "自身と位置を入れ替えられる人形を操るインポスターです。"
+"role.marionette.ability.title" : "固有能力 "マリオネット人形""
+"role.marionette.ability.main" : "%DOC%"
+"role.marionette.ability.main.player" : "<var>マリオネット本人と同じ見た目</var>の人形を設置できます。"
+"role.marionette.ability.main.player.keep" : "<var>マリオネット本人と同じ見た目</var>の人形を設置できます。<br><var>人形を設置した後に自身の見た目が変わっても、人形の見た目は変わりません。</var>"
+"role.marionette.ability.main.mannequin" : "<var>マネキンの見た目</var>をした人形を設置できます。"
+"role.marionette.ability.place" : "<title>設置</title>その場に人形を設置します。"
+"role.marionette.ability.destroy" : "<title>破壊</title>人形を撤去します。"
+"role.marionette.ability.monitor" : "<title>監視</title>人形とマリオネット自身の間で視点を切り替えます。<br>人形を監視している間、自身はその場で硬直します。"
+"role.marionette.ability.swap" : "<title>スワップ</title>人形と自身の位置をスワップします。"
+"role.marionette.ability.arrow" : "<title>矢印</title>マリオネットは人形の位置を指す矢印を視認できます。"
+"role.marionette.tips" : "・人形は会議を挟むと撤去されます。"
+
+# Options
+
+"options.role.marionette.detail" : "Marionette can place the decoy.<br>they and the decoy swap position each other."
+"options.role.marionette.mannequinMode" : "Decoy Appearance"
+"options.role.marionette.mannequinMode.mannequin" : "Mannequin"
+"options.role.marionette.mannequinMode.player" : "Player"
+"options.role.marionette.fixDecoyAppearance" : "Fix Decoy Appearance"
+"options.role.marionette.placeCoolDown" : "Place Cooldown"
+"options.role.marionette.swapCoolDown" : "Swap Cooldown"
+"options.role.marionette.decoyDuration" : "Decoy Duration"
+"options.role.marionette.canSeeDecoyInShadow" : "Can See Decoy In Shadow"
+
+# Game
+
+"gameAction.marionette.placement" : "人形設置"
+
+# UI
+
+"button.label.swap" : "swap"
+"button.label.monitor" : "monitor"
+"ui.action.marionette.place" : "Place a decoy."
+"ui.action.marionette.destroy" : "Destroy the decoy."
+"ui.action.marionette.monitor" : "Switch the camera between you and the decoy."
+"ui.action.marionette.swap" : "Swap positions between you and the decoy."
+"ui.action.marionette.switch" : "Toggles the action triggered by keystrokes<br>between monitoring and swapping abilities."
+
+# Stats
+
+"stats.marionette.decoy" : "Num of Placing Decoy"
+"stats.marionette.swap" : "Num of Swapping"
+
+# Titles
+
+"achievement.marionette.common1.title" : "寸劇"
+"achievement.marionette.common1.goal" : "人形を設置する。"
+
+"achievement.marionette.another1.title" : "喜劇"
+"achievement.marionette.another1.goal" : "人形とスワップした直後の会議で追放されるか推測されて死亡する。"
+
+"achievement.marionette.common2.title" : "怱劇"
+"achievement.marionette.common2.goal" : "10秒以内に2回、人形と位置をスワップする。"
+
+"achievement.marionette.challenge.title" : "血の劇作法"
+"achievement.marionette.challenge.goal" : "キルの直後に人形とスワップして30m以上移動する。"
+"achievement.marionette.challenge.splitted.0" : "血の"

@@ -1,0 +1,41 @@
+# Assignable
+
+"role.grudge.name" : "Grudge"
+"role.grudge.blurb" : "うらめしや"
+"role.grudge.short" : "G"
+
+# Document
+
+"role.grudge.doc" : "生存者のそばに佇み続けると追加勝利します。"
+
+# Options
+
+"options.role.grudge.detail" : "Grudge is a ghost that appears nearby."
+"options.role.grudge.totalStandingTimeToWin" : "Total Standing Time To Win"
+
+# Game
+
+"role.grudge.taskText" : "Stand Beside Players"
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.grudge.common1.title" : "うらめしや！"
+"achievement.grudge.common1.goal" : "生存者の目の前で実体化する。"
+
+"achievement.grudge.common2.title" : "ずっと待っているよ"
+"achievement.grudge.common2.goal" : "誰もいない場所で実体化し、生存者を出迎える。"
+"achievement.grudge.common2.cond" : "5秒以上、誰もいない場所で実体化したまま待機すること"
+"achievement.grudge.common2.splitted.0" : "ずっと"
+
+"achievement.grudge.common3.title" : "セカンダリチャンス"
+"achievement.grudge.common3.goal" : "グラッジ追加勝利で勝利する。"
+
+# Team
+
+"end.extra.grudge" : " <color=#FFFFFF>with</color> Grudge"

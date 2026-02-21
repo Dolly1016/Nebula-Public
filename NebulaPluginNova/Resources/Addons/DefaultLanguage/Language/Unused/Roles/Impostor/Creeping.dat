@@ -1,0 +1,63 @@
+# Assignable
+
+"role.creeping.name" : "Creeping"
+"role.creeping.short" : "Cr"
+"role.creeping.blurb" : "It's Too Late Now"
+"role.creeping.hint" : "遅効性の毒でキルしよう"
+
+# Document
+
+"role.creeping.doc" : "プレイヤーに遅効性の毒を仕掛けると<b>遅延キル</b>ができます。<br>通常のキルと使い分けて巧みに立ち回りましょう。"
+"role.creeping.ability.title" : "固有能力 "這い寄る終焉""
+"role.creeping.ability.main" : "プレイヤーに毒を仕掛けます。毒を仕掛けられたプレイヤーは、指定の時間内に解毒しないと死亡してしまいます。"
+"role.creeping.ability.poison" : "<title>毒</title>プレイヤーに毒を仕掛けます。<br>このとき<b>ブリンク</b>が発生します。<br>毒のクールダウンは<var>キルクールダウン%POISON%</var>(<var>%SEC%</var>秒)です。"
+"role.creeping.ability.sec.longer" : "より長い"
+"role.creeping.ability.sec.shorter" : "より短い"
+"role.creeping.ability.sec.just" : "と同じ"
+"role.creeping.ability.depoison" : "<title>救急箱</title>毒を仕掛けられたプレイヤーは救急箱を使用して<b>解毒</b>できます。<br>救急箱はマップ中に1つだけ出現します。"
+"role.creeping.tips" : "・緊急会議中にも毒はプレイヤーを蝕みます。毒が回りきれば、会議中でも死亡します。<br>・救急箱の出現位置<br>　-Skeld: 医務室<br>　-MIRA HQ: 発射台 or 保管庫奥<br>　-Polus: 研究室奥 or 酸素ルーム(ボンベの部屋奥)<br>　-Airship: メインホール(左上のベッド) or 電気室左下<br>　-Fungle: スプラッシュゾーン部屋内 or 研究室左下"
+
+# Options
+
+"options.role.creeping.detail" : "Creeping uses a slow-acting poison that will kill them if they do not cure<br>themselves of the poison within a certain time frame."
+"options.role.creeping.depoisonDuration" : "Depoison Duration"
+"options.role.creeping.poisonDelay" : "Posion Kill Delay"
+"options.role.creeping.poisonCooldown" : "Poison Cooldown"
+
+# Game
+
+"role.creeping.minigame.depoison" : "Depoison"
+
+# UI
+
+"button.label.poison" : "poison"
+
+# Game Statictics
+
+"statistics.events.poisoned" : "Poisoned"
+
+# Status
+
+"state.poisoned" : "Poisoned"
+
+# Stats
+
+
+# Titles
+
+"achievement.creeping.common1.title" : "毒浸し"
+"achievement.creeping.common1.goal" : "毒で1回遅延キルを決める。"
+
+"achievement.creeping.common2.title" : "急変"
+"achievement.creeping.common2.goal" : "2秒以内に連続してプレイヤーをキルする。"
+
+"achievement.creeping.another1.title" : "虚しい足掻き"
+"achievement.creeping.another1.goal" : "緊急会議中に毒が回り、死亡する。"
+
+"achievement.creeping.common3.title" : "最後の言葉は"
+"achievement.creeping.common3.goal" : "緊急会議中にゲームが終了し、勝利する。"
+"achievement.creeping.common3.cond" : "自身が生存していること"
+"achievement.creeping.common3.flavor" : ""生きていたかった。" ―署名のない回顧録"
+
+"achievement.creeping.challenge.title" : "蠱独の宇宙船"
+"achievement.creeping.challenge.goal" : "自身が毒に侵された状態で毒を仕掛けるか、自身が毒に侵されている間に<br>毒によるキルを決めて、唯一の生存者になって勝利する。"

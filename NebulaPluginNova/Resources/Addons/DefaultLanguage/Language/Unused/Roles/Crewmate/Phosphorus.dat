@@ -1,0 +1,48 @@
+# Assignable
+
+"role.phosphorus.name" : "Phosphorus"
+"role.phosphorus.short" : "P"
+"role.phosphorus.blurb" : "Pierce the Darkness"
+
+# Document
+
+"role.phosphorus.doc" : "周囲を明るく照らすランタンを設置できるクルーメイトです。"
+"role.phosphorus.ability.title" : "固有能力 "ランタン""
+"role.phosphorus.ability.main" : "ランタンの光は壁を跨いで周囲を照らします。"
+"role.phosphorus.ability.place" : "<title>設置</title>ランタンを設置します。全てのランタンを設置するとこのボタンは消滅し、<br>会議を挟んだのちに下のランタンボタンが使用できるようになります。"
+"role.phosphorus.ability.lantern" : "<title>ランタン</title>ランタンを点灯させます。効果時間が終了するとランタンは消灯します。"
+
+# Options
+
+"options.role.phosphorus.detail" : "Lamps that Phosphorus places give a better view of the surroundings.<br>Imposters will avoid kills around lamps. "
+"options.role.phosphorus.numOfLamps" : "Num of Lamps"
+"options.role.phosphorus.placeCoolDown" : "Place Cooldown"
+"options.role.phosphorus.lampCoolDown" : "Lamp Cooldown"
+"options.role.phosphorus.lampDuration" : "Lamp Duration"
+"options.role.phosphorus.lampStrength" : "Lamp Strength"
+
+# Game
+
+"gameAction.phosphorus.placement" : "ランタン設置"
+
+# UI
+
+"button.label.lantern" : "lantern"
+
+# Stats
+
+"stats.phosphorus.lantern" : "Num of Lamp Placed"
+"stats.phosphorus.lighting" : "Num of Lighting"
+
+# Titles
+
+"achievement.phosphorus.common1.title" : "光あれ"
+"achievement.phosphorus.common1.goal" : "ランタンを通算3個設置する。"
+"achievement.phosphorus.common1.splitted.2" : "あれ"
+
+"achievement.phosphorus.common2.title" : "遍く照らす燐光"
+"achievement.phosphorus.common2.goal" : "ランタンを通算20個設置する。"
+
+"achievement.phosphorus.challenge.title" : "死にせめてもの救済を"
+"achievement.phosphorus.challenge.goal" : "死体をランタンの光で照らす。"
+"achievement.phosphorus.challenge.splitted.1" : "せめてもの"

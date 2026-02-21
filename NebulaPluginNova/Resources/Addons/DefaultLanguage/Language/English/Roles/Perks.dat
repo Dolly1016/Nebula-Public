@@ -1,0 +1,102 @@
+# Perks
+
+"perkui.message.noncrew" : "Crewmates cannot acquire non-crewmate-only perks."
+"perkui.message.noncrewWarning" : "**This is NON-crewmate-ONLY perks!**"
+"perkui.message.swap" : "Obtain it by exchanging it with the park you own."
+"perkui.message.obtain" : "Interact to earn perks."
+
+"perk.common.maxSpawn" : "Max Spawn"
+"perk.common.maxSpawn.unlimited" : "Unlimited"
+
+"perk.empty.name" : "Empty Perk"
+"perk.empty.detail" : "Get perks from blooming <b>plants</b>."
+
+"perk.empty.noncrewmate.name" : "Empty NON-CREWMATE-ONLY Perk"
+"perk.empty.noncrewmate.detail" : "Get the perk from the blooming <b>Warped Plant</b>."
+
+"perk.acceleration.name" : "Agile"
+"perk.acceleration.detail" : "You can move %R% times faster for %D% seconds.<br>This perk has a %CD% second cooldown. "
+"perk.acceleration.cooldown" : "Accel Cooldown"
+"perk.acceleration.duration" : "Accel Duration"
+"perk.acceleration.rate" : "Accel Rate"
+
+"perk.flipX.name" : "Behind the Mirror"
+"perk.flipX.detail" : "All players' screens are flipped horizontally."
+
+"perk.flipY.name" : "Revolution"
+"perk.flipY.detail" : "All players' screens are flipped vertically."
+
+"perk.flipXY.name" : "Plot Twist"
+"perk.flipXY.detail" : "All players' screens are flipped."
+
+"perk.sniperIcon.name" : "Blank Shot"
+"perk.sniperIcon.detail" : "Shoot blanks on the spot.<br>This perk has a %CD% second cooldown. "
+
+"perk.raiderEvidence.name" : "Rampage"
+"perk.raiderEvidence.detail" : "Punch the axe into the nearby wall.<br>This perk has a %CD% second cooldown.<br>Raider CANNOT use this perk."
+
+"perk.fakeBubble.name" : "Boom"
+"perk.fakeBubble.detail" : "Shoots bubbles that have no kill ability on the spot.<br>This perk has a %CD% second cooldown. "
+
+"perk.accelTrap.name" : "Amplifying"
+"perk.accelTrap.detail" : "Place an acceleration trap. <br>The placed traps will be activated after the meeting. "
+
+"perk.decelTrap.name" : "Restraint"
+"perk.decelTrap.detail" : "Place an deceleration trap. <br>The placed traps will be activated after the meeting. "
+
+"perk.taskReduction.name" : "Recalculation"
+"perk.taskReduction.detail" : "Reduces task quota by 1.<br>For players without crewmate tasks, nothing happens."
+
+"perk.ventRelocate.name" : "Transforming Spaceship"
+"perk.ventRelocate.detail" : "You can relocate the vent only once. <br>You can drag the vent for %D% seconds after grabbing it. <br>If you use it again during the effect time, you will let go of the vent and the effect will end."
+"perk.ventRelocate.duration" : "Relocating Duration"
+
+"perk.emergencyButton.name" : "Emergency Call"
+"perk.emergencyButton.detail" : "You can press the emergency button from anywhere. <br>This perk does not change the limit on<br>the number of times the emergency button can be used."
+
+"perk.teamLook.name" : "Crystal Gazing"
+"perk.teamLook.detail" : "During an emergency meeting,<br>you can learn the faction of one selected survivor."
+"perk.teamLook.ui.title" : "Crystal Gazing"
+"perk.teamLook.ui.team" : "%TEAM% Team"
+
+"perk.ghostLook.name" : "Detective Report"
+"perk.ghostLook.detail" : "During an emergency meeting,<br>you can learn the cause of death of one selected deceased."
+"perk.ghostLook.ui.title" : "Detective Report"
+
+"perk.invisible.name" : "Transcendent"
+"perk.invisible.detail" : "When activated, it makes itself invisible for %D% seconds.<br>This perk can only be activated once."
+
+"perk.hookshot.name" : "Hookshot"
+"perk.hookshot.detail" : "You can use the hookshot once.<br>The hookshot will shoot in the direction of your cursor."
+
+"perk.doubleVote.name" : "Insistence"
+"perk.doubleVote.detail" : "Only once, double the number of votes other than blank votes or skip votes."
+
+"perk.monowayX.name" : "Crab Walking"
+"perk.monowayX.detail" : "When activated, vertical movement is prohibited for %D% seconds.<br>This perk has a %CD% second cooldown."
+
+"perk.monowayY.name" : "Heaven Or Hell"
+"perk.monowayY.detail" : "When activated, lateral movement is prohibited for %D% seconds.<br>This perk has a %CD% second cooldown."
+
+"perk.monowayRotate.name" : "Disorder"
+"perk.monowayRotate.detail" : "When activated, the direction of movement will randomly rotate for %D% seconds.<br>This perk has a %CD% second cooldown."
+
+"perk.meteor.name" : "Meteor Storm"
+"perk.meteor.detail" : "10 seconds after activation, meteorites will be dropped.<br>This perk can only be activated once.<br>From activation to the time the meteor crashes, the emergency button will be blocked and<br>players near the crash site will be alerted by a red flash.<br><br>Valture can not use this perk."
+"perk.meteor.sabotageText" : "Meteorite Warning: Run to a safe place!"
+"perk.meteor.meetingButtonText" : "The emergency meeting cannot be started<br>due to the warning of a meteorite."
+
+"perk.footprint.name" : "Presence"
+"perk.footprint.detail" : "You leave footprints visible to everyone."
+
+"perk.sacrifice.name" : "Sacrifice"
+"perk.sacrifice.detail" : "Summons a decoy at the location.<br>If the decoy is killed, the perk user will not die.<br>The decoy will disappear after %D% seconds."
+"perk.sacrifice.duration" : "Decoy Duration"
+
+# Game Statictics
+
+"statistics.events.meteor" : "Meteor"
+
+# Status
+
+"state.meteor" : "Meteor"

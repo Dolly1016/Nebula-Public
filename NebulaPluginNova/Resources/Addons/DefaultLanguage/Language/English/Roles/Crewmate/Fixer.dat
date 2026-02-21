@@ -1,0 +1,49 @@
+# Assignable
+
+"role.fixer.name" : "Fixer"
+"role.fixer.short" : "F"
+"role.fixer.blurb" : "Unsung Hero"
+
+# Document
+
+"role.fixer.doc" : "A crewmate who mediates power relations by restricting ability activation and voting during meetings."
+"role.fixer.ability.title" : "Inherent Ability "Mediator of Emergency Meetings""
+"role.fixer.ability.main" : ""
+"role.fixer.ability.jamming" : "<title>Jamming</title>Block the tablet communication of the selected player.<br>There is a limit to the number of times this ability can be activated."
+"role.fixer.ability.blocked" : "<title>Blocked Player</title>Players whose communication is blocked will have the mark on the left.<br>Players with blocked communication lose their right to vote and cannot use abilities during that meeting.<br>Additionally, players with blocked communication cannot be voted for by others and cannot use abilities."
+
+# Options
+
+"options.role.fixer.detail" : "Fixer is Crewmates who manage the game by restricting<br>ability activation and voting during meetings."
+"options.role.fixer.numOfJamming" : "# Of Jamming"
+"options.role.fixer.canJamPlayerContinuously" : "Can Jam Same Player Constinously"
+"options.role.fixer.jammingSealsVoteRight" : "Jamming Seals Vote Rights"
+"options.role.fixer.maxLeftVotingTimeForJamming" : "Max Left Voting Time For Jamming"
+
+# Game
+
+"roles.fixer.jamming" : "Left Jamming"
+
+# UI
+
+
+# Stats
+
+"stats.fixer.jamming" : "Num of Jamming"
+
+# Titles
+
+"achievement.fixer.common1.title" : "Secret Maneuvering"
+"achievement.fixer.common1.goal" : "Block tablet communication a total of 5 times."
+
+"achievement.fixer.common2.title" : "Turnaround"
+"achievement.fixer.common2.goal" : "Block the tablet communication of an ally who has gathered 5 or more votes and exile the enemy."
+
+"achievement.fixer.secret1.title" : "Communication Weakling"
+"achievement.fixer.secret1.goal" : "Have your tablet communication blocked."
+"achievement.fixer.secret1.splitted.2" : "Weakling"
+
+"achievement.fixer.challenge.title" : "That's Why Games Are Fun"
+"achievement.fixer.challenge.goal" : "Block the tablet communication of an enemy faction player brought to P.P.<br>and exile that player's ally."
+"achievement.fixer.challenge.flavor" : ""I will overturn it. The common sense that lies even deeper than the rules.""
+"achievement.fixer.challenge.splitted.0" : "That's Why "

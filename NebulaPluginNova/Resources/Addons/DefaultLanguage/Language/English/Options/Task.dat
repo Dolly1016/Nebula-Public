@@ -1,0 +1,35 @@
+# Header
+
+"options.task" : "Task Options"
+"options.task.detail" : "About crewmate tasks"
+
+# Groups
+
+"options.task.group.wiring" : "Wiring Task Settings"
+"options.task.group.noGuide" : "No Guide Task Settings"
+
+# Options
+
+"options.map.randomizedWiring" : "Randomized Wiring"
+"options.map.stepsOfWiringGame" : "Steps Of Wiring Game"
+"options.task.fakeScan" : "Fake Scan"
+"options.task.fakeScan.detail" : "Allow players without tasks to move onto the scan platform."
+
+"options.task.noGuide.wiring" : "Fix Wiring Task"
+"options.task.noGuide.wiring.detail" : "When turned on, the location of the derivation point (second and subsequent locations) of the wiring task becomes unknown."
+"options.task.noGuide.upload" : "Upload Data Task"
+"options.task.noGuide.upload.detail" : "When turned on, the location of the download task (first location) becomes unknown."
+"options.task.noGuide.divertPower" : "Divert Power Task"
+"options.task.noGuide.divertPower.detail" : "When turned on, the location of the power diversion target task becomes unknown."
+"options.task.noGuide.garbage" : "Empty Garbage Task"
+"options.task.noGuide.garbage.detail" : "When turned on, the location of the garbage collection task (first location) becomes unknown."
+"options.task.noGuide.sortRecords" : "Sort Records Task"
+"options.task.noGuide.sortRecords.detail" : "When turned on, the storage location of the records becomes unknown."
+"options.task.noGuide.marshmallow" : "Roast Marshmallow Task"
+"options.task.noGuide.marshmallow.detail" : "When turned on, the location of the stick collection task becomes unknown."
+"options.task.noGuide.helpCritter" : "Help Critter Task"
+"options.task.noGuide.helpCritter.detail" : "When turned on, the location of the egg collection task becomes unknown."
+"options.task.noGuide.replaceParts" : "Replace Parts Task"
+"options.task.noGuide.replaceParts.detail" : "When turned on, the location of the parts collection task becomes unknown."
+"options.task.noGuide.collectSamples" : "Collect Samples Task"
+"options.task.noGuide.collectSamples.detail" : "When turned on, the location of the sample collection task becomes unknown."

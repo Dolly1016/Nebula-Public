@@ -1,0 +1,27 @@
+# Assignable
+
+"role.evilGuesser.name" : "Evil Guesser"
+"role.evilGuesser.short" : "G"
+"role.evilGuesser.blurb" : "Guess and Shoot"
+"role.evilGuesser.hint" : "能力を推察しよう"
+
+# Document
+
+"role.evilGuesser.doc" : "会議中にプレイヤーの能力を推察してキルできるインポスターです。<br>推察を誤ると代わりに自身が死亡します。"
+"role.evilGuesser.tips" : "・会議中に使用できる能力が複数ある場合、能力のアイコンを右クリックすると能力を切り替えられます。"
+
+# Options
+
+"options.role.evilGuesser.detail" : "Guesser can shoot players in the meeting by guessing the role.<br>If the guess is wrong, guesser dies instead."
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+
+# Titles
+

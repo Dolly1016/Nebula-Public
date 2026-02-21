@@ -1,0 +1,62 @@
+"achievement.omikuji.title" : "Super Lucky! Random Omikuji Shots"
+"achievement.omikuji.goal" : "Obtain 3 perks in one game."
+"achievement.omikuji.cond" : "January title"
+"achievement.omikuji.splitted.1" : "Omikuji "
+
+"achievement.setsubun.title" : "Fortune Smiles at the Laughing Gate"
+"achievement.setsubun.goal" : "Complete all tasks, survive until the end, exile all Impostors, and win."
+"achievement.setsubun.cond" : "February title"
+
+"achievement.graduation2.title" : "Season of Farewells"
+"achievement.graduation2.goal" : "Exile 3 players with your own votes."
+"achievement.graduation2.cond" : "March title"
+"achievement.graduation2.splitted.2" : "Season"
+
+"achievement.sakura.title" : "Advance! Cherry Blossom Front"
+"achievement.sakura.goal" : "Change from yellow-green to cherry blossom pink and bloom during the game."
+"achievement.sakura.cond" : "April title"
+
+"achievement.koinobori.title" : "Love Streamers Swimming in the Sky"
+"achievement.koinobori.goal" : "Run side by side leisurely as two lovers in the sky."
+"achievement.koinobori.cond" : "May title+Both Lovers must have the <b>acceleration effect</b>+Must stay close while moving for <b>5 seconds</b>+MIRA HQ, Airship only"
+
+"achievement.rainyStep.title" : "Footsteps on a Rainy Day"
+"achievement.rainyStep.goal" : "Keep walking while under the effect of reduced speed."
+"achievement.rainyStep.cond" : "June title+Must keep moving without stopping for 6 seconds+Polus, The Fungle only"
+"achievement.rainyStep.flavor" : ""Found a pill bug""
+"achievement.rainyStep.splitted.1" : "Day "
+
+"achievement.rainyStepAnother.title" : "Footsteps on a Starry Day"
+"achievement.rainyStepAnother.goal" : "Keep walking while under the effect of increased speed."
+"achievement.rainyStepAnother.cond" : "June title+Must keep moving without stopping for 6 seconds+The Skeld only"
+"achievement.rainyStepAnother.flavor" : ""At faster-than-light speed, to your side""
+
+"achievement.tanabata.title" : "Unable to Cross the Milky Way"
+"achievement.tanabata.goal" : "Kill a player who is using an elevator with an axe or sniper rifle."
+"achievement.tanabata.cond" : "July title+Airship only"
+
+"achievement.watermelon.title" : "Watermelon Splash"
+"achievement.watermelon.goal" : "Kill a green or black <b>Bloody</b> on The Fungle's beach."
+"achievement.watermelon.cond" : "August title"
+"achievement.watermelon.flavor" : "A faint sweet, red taste."
+
+"achievement.autumnSky.title" : "I Resemble the Sky"
+"achievement.autumnSky.goal" : "Change roles 5 or more times."
+"achievement.autumnSky.cond" : "September title"
+"achievement.autumnSky.splitted.1" : "Sky "
+
+"achievement.halloween.title" : "Trick! Trick! Trick!"
+"achievement.halloween.goal" : "Carry a corpse a total of 50 meters."
+"achievement.halloween.cond" : "October title"
+"achievement.halloween.flavor" : ""If you die, I can't give you candy."<br>A real ghost said so."
+"achievement.halloween.splitted.0" : "Trick "
+
+"achievement.freshWine.title" : "Joker's Premium Barrel"
+"achievement.freshWine.goal" : "Prey on or erase a fresh corpse that has just died."
+"achievement.freshWine.cond" : "November title"
+"achievement.freshWine.flavor" : ""A once-in-a-century event in 2XXX, surpassing the best events of this century, the best in space.""
+
+"achievement.christmas.title" : "How to Spend the Holidays"
+"achievement.christmas.goal" : "Exiled as lovers"
+"achievement.christmas.cond" : "December title"
+"achievement.christmas.splitted.1" : "Explosion "

@@ -90,9 +90,19 @@ public class GameStartManagerUpdatePatch
         LastChecked = canStart;
         __instance.StartButton.SetButtonEnableState(canStart);
         ActionMapGlyphDisplay startButtonGlyph = __instance.StartButtonGlyph;
-        
-        startButtonGlyph?.SetColor(canStart ? Palette.EnabledColor : Palette.DisabledClear);
-        
+        if(startButtonGlyph != null) startButtonGlyph?.SetColor(canStart ? Palette.EnabledColor : Palette.DisabledClear);
+
+        if (canStart)
+        {
+            __instance.StartButton.ChangeButtonText(DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.StartLabel));
+            __instance.GameStartTextClient.text = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.WaitingForHost);
+        }
+        else
+        {
+            __instance.StartButton.ChangeButtonText(DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.WaitingForPlayers));
+            __instance.GameStartTextClient.text = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.WaitingForPlayers);
+        }
+
         if (DestroyableSingleton<DiscordManager>.InstanceExists)
         {
             if (AmongUsClient.Instance.AmHost && AmongUsClient.Instance.NetworkMode == NetworkModes.OnlineGame)
@@ -280,7 +290,20 @@ public class DelayPlayDropshipAmbiencePatch
         logo.color = new(1f, 1f, 1f, 0.75f);
         logo.transform.localScale = new(0.45f, 0.45f, 1f);
 
-        var versionText = new NoSGUIText(Virial.Media.GUIAlignment.Right, GUI.API.GetAttribute(Virial.Text.AttributeAsset.VersionShower), new RawTextComponent(NebulaPlugin.VisualVersion)) { PostBuilder = t => t.color = new(1f, 1f, 1f, 0.75f) };
+        var versionText = new NoSGUIText(Virial.Media.GUIAlignment.Right, GUI.API.GetAttribute(Virial.Text.AttributeAsset.VersionShower), new RawTextComponent(NebulaPlugin.VisualVersion)) { PostBuilder = t =>
+        {
+            t.color = new(1f, 1f, 1f, 0.75f);
+
+            var buttonObj = UnityHelper.CreateObject("CopyButton", t.transform, Vector3.zero);
+            buttonObj.SetUpButton().OnClick.AddListener(() => {
+                ClipboardHelper.PutClipboardString(t.text);
+                DebugScreen.Push(Language.Translate("ui.version.copied"), 3f);
+            });
+            var buttonCollider = buttonObj.AddComponent<BoxCollider2D>();
+            buttonCollider.size = t.rectTransform.sizeDelta;
+            buttonCollider.isTrigger = true;
+        }
+        };
         var instantiatedVersionText = versionText.Instantiate(new Virial.Media.Anchor(new(1f,0.5f), new(0f,0f,0f)), new(100f,100f), out _)!;
         instantiatedVersionText.transform.SetParent(logoHolder.transform, false);
         instantiatedVersionText.transform.localPosition += new Vector3(1f, -0.26f, -0.1f);

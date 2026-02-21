@@ -1,0 +1,62 @@
+# Assignable
+
+"role.snatcher.name" : "Snatcher"
+"role.snatcher.short" : "Sna"
+"role.snatcher.blurb" : "What Is Yours Is Mine"
+"role.snatcher.prefix" : "Snatched"
+
+# Document
+
+"role.snatcher.doc" : "An impostor who can steal abilities from players and make them their own."
+"role.snatcher.ability.title" : "Inherent Ability "Usurper of Power""
+"role.snatcher.ability.main" : "Steal abilities from players. Players whose abilities are stolen are not immediately aware of it.<br>Stolen abilities break when you actually try to use them, and at this point, the player is notified that their ability has been stolen."
+"role.snatcher.ability.snatch.taskPhase" : "<title>Snatch</title>Steal an ability from a player."
+"role.snatcher.ability.snatch.meeting" : "<title>Steal Guess</title>Can guess a player's ability during a meeting. Successfully guessing steals the ability.<br>Failed guessing gives you a broken ability."
+"role.snatcher.ability.clock.taskPhase" : "<title>Time Clock</title>If there are no abilities to steal, gain the time clock ability instead."
+"role.snatcher.ability.clock.meeting" : "If you guess a role with no stealable abilities, gain <b>time clock</b> ability instead."
+
+# Options
+
+"options.role.snatcher.detail" : "Snatchers can steal abilities from players and use them."
+"options.role.snatcher.snatchMethod" : "Snatch Method"
+"options.role.snatcher.snatchMethod.guess" : "Guess"
+"options.role.snatcher.snatchMethod.interaction" : "Interaction"
+"options.role.snatcher.snatchCoolDown" : "Snatch Cooldown"
+"options.role.snatcher.obviousGuessFailure" : "Obvious Guess Failure"
+"options.role.snatcher.clockCoolDown" : "Clock Cooldown"
+"options.role.snatcher.clockDuration" : "Clock Duration"
+"options.role.snatcher.clockRatio" : "Clock Ratio"
+"options.role.snatcher.killCooldownRewindAfterUsurp" : "Kill Cooldown Rewind After Snatching"
+"options.role.snatcher.killCooldownRewindAfterUsurp.detail" : "If a special kill such as a sniper is stolen, the normal kill ability is unlocked instead.<br>Set how much to rewind the kill cooldown when gaining the normal kill ability."
+"options.role.snatcher.group.snatch" : "Snatching Settings"
+"options.role.snatcher.group.clock" : "Cooldown Accel. Settings"
+
+# Game
+
+
+# UI
+
+"button.label.snatch" : "snatch"
+"button.label.clock" : "clock"
+"ui.action.snatcher.snatch" : "Steals player's ability."
+"ui.action.snatcher.clock" : "Change cooldown speed."
+
+# Stats
+
+"stats.snatcher.snatch" : "Num of Snatching"
+
+# Titles
+
+"achievement.snatcher.common1.title" : "Take It!"
+"achievement.snatcher.common1.goal" : "Steal an ability from someone else."
+
+"achievement.snatcher.another1.title" : "Loss"
+"achievement.snatcher.another1.goal" : "Have your ability stolen by a Snatcher."
+
+"achievement.snatcher.common2.title" : "Arrogance"
+"achievement.snatcher.common2.goal" : "The person from whom you stole the ability dies and loses, and you win while alive."
+
+"achievement.snatcher.challenge.title" : "Passion Throbbing with Power"
+"achievement.snatcher.challenge.goal" : "Inherit the power of a dying ally and win while alive."
+"achievement.snatcher.challenge.flavor" : ""Half of my beating heart is you.""
+"achievement.snatcher.challenge.splitted.2" : "Passion"

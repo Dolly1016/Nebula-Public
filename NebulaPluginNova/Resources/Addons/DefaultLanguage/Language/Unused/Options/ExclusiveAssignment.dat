@@ -1,0 +1,19 @@
+# Header
+
+"options.exclusiveAssignment" : "Exclusive Assignment"
+"options.exclusiveAssignment.detail" : "Role groups appear exclusively"
+
+# Groups
+
+# Options
+
+"options.exclusiveAssignment.category.0" : "Category 1"
+"options.exclusiveAssignment.category.1" : "Category 2"
+"options.exclusiveAssignment.category.2" : "Category 3"
+"options.exclusiveAssignment.category.3" : "Category 4"
+"options.exclusiveAssignment.category.4" : "Category 5"
+"options.exclusiveAssignment.category.5" : "Category 6"
+"options.exclusiveAssignment.category.6" : "Category 7"
+"options.exclusiveAssignment.category.7" : "Category 8"
+"options.exclusiveAssignment.category.8" : "Category 9"
+"options.exclusiveAssignment.category.9" : "Category 10"

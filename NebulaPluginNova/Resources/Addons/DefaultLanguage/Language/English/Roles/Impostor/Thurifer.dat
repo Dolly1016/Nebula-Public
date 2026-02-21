@@ -1,0 +1,67 @@
+# Assignable
+
+"role.thurifer.name" : "Thurifer"
+"role.thurifer.short" : "T"
+"role.thurifer.blurb" : "The One Who Edifies"
+
+# Document
+
+"role.thurifer.doc" : "An impostor who sets up delayed kills by making players inhale incense smoke from a thurible."
+"role.thurifer.ability.title" : "Inherent Ability "Curse's Influence""
+"role.thurifer.ability.main" : "Ignite at the thuribulum on the map to afflict the player with "Curse Incense".<br>The more the player's "Curse Incense" progresses, the longer the delay for Thurifer's kill will be."
+"role.thurifer.ability.curse" : "<title>Curse</title>Activate the thuribulum to produce smoke.<br>Activated thuribulums become cules to reason.<br>Activated thuribulums will lose their activation after some time."
+"role.thurifer.ability.impute" : "<title>Impute</title>If your "Curse Incense" is 50%+ full, transfer it to an inactive thuribulum (resets level) once.<br>Crewmate transfers = thuribulums stay active forever. Watch out.<br>Thurifer can't transfer their own level."
+
+# Options
+
+"options.role.thurifer.detail" : "Thurifer uses Thuribulum for delayed kills."
+"options.role.thurifer.inhalationSpeed" : "Inhalation Speed"
+"options.role.thurifer.inhalationSpeed.detail" : "Sets how fast players inhale incense.<br>Larger value = faster inhalation."
+"options.role.thurifer.curseDuration" : "Curse Duration"
+"options.role.thurifer.numOfThuribulums" : "# Thuribulums"
+"options.role.thurifer.numOfThuribulums.detail" : "Sets max number of thuribulums on the map.<br>Actual number may be less than set (depends on map)."
+"options.role.thurifer.thuribulumRange" : "Thuribulum Range"
+"options.role.thurifer.maxKillDelay" : "Max Kill Delay"
+"options.role.thurifer.maxKillDelay.detail" : "Sets max kill delay when a player inhales max incense.<br>Kill delay changes with this setting and incense intake."
+"options.role.thurifer.showBlink" : "Show Blink"
+"options.role.thurifer.showBlink.detail" : "When turned off, no blinks for delayed kills (3+ seconds)."
+"options.role.thurifer.activationDelay" : "Activation Delay"
+"options.role.thurifer.activationDelay.detail" : "Adds delay between interacting with a thuribulum and it activating.<br>This delay makes it harder to tell who interacted with the thuribulum."
+
+# Game
+
+"gameAction.thurifer.activate" : "Activate Thurible"
+"gameAction.thurifer.impute" : "Transfer Thurible"
+
+# UI
+
+"button.label.thurifer.curse" : "curse"
+"button.label.thurifer.impute" : "impute"
+"ui.action.thurifer.curse" : "Activate the thurible."
+
+# Game Statictics
+
+"statistics.events.gassed" : "Gassed"
+
+# Status
+
+"state.gassed" : "Gassed"
+
+# Stats
+
+"stats.thurifer.activate" : "Num of Activated Thuribulums"
+"stats.thurifer.impute" : "Num of Imputing"
+
+# Titles
+
+"achievement.thurifer.common1.title" : "Cursed Ritual"
+"achievement.thurifer.common1.goal" : "Activate a total of 10 thuribles."
+"achievement.thurifer.common1.splitted.0" : "Cursed "
+
+"achievement.thurifer.common2.title" : "Turn Curse into Curse"
+"achievement.thurifer.common2.goal" : "Transfer the "Cursed Aura" to the thurible."
+"achievement.thurifer.common2.flavor" : ""Rising smoke, evil creeping into that heart." —Apocrypha"
+
+"achievement.thurifer.challenge.title" : "Cursed Charisma"
+"achievement.thurifer.challenge.goal" : "Have 8 or more people receive 50% or more of the "Cursed Incense", <br>get 4 or more kills with delayed kills.<br>Get at least 1 kill with maximum delay, and have at least 1 person die during the meeting due to delay."
+"achievement.thurifer.challenge.splitted.2" : "Charisma"

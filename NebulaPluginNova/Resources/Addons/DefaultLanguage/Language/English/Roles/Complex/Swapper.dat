@@ -1,0 +1,15 @@
+# Document
+
+"role.swapper.ability.swap" : "<title>Swap</title>Swap the cast votes.<br>This ability can be used up to <var>%NUM%</var> times during the game."
+
+# Options
+
+"options.role.swapper.canSelectSwapper" : "Can Swap Own Votes"
+
+# Game
+
+"roles.swapper.leftSwap" : "Left Swap"
+
+# UI
+
+# Status

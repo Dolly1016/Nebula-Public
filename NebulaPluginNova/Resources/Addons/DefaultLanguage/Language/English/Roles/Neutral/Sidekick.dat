@@ -1,0 +1,54 @@
+# Assignable
+
+"role.sidekick.name" : "Sidekick"
+"role.sidekick.short" : "S"
+"role.sidekick.blurb" : "We Are A Tag Team!"
+"role.sidekick.generalBlurb" : "We Are A Tag Team!"
+
+# Document
+
+"role.sidekick.doc" : "Jackal's ally."
+
+# Options
+
+"options.role.sidekick.detail" : "Sidekick assists Jackal.<br>Sidekick is promoted to Jackal upon Jackal's death."
+"options.role.sidekick.canKill" : "Has Kill Ability"
+"options.role.sidekick.killCoolDown" : "Kill Cooldown"
+"options.role.sidekick.isModifier" : "Is Modifier"
+"options.role.sidekick.canCreateSidekickChainly" : "Can Create Sidekick Chainly"
+"options.role.sidekick.inheritanceRule" : "Inheritance Rule"
+"options.role.sidekick.inheritanceRule.inherit" : "Inherit"
+"options.role.sidekick.inheritanceRule.suicide" : "Suicide"
+"options.role.sidekick.inheritanceRule.none" : "None"
+"options.role.sidekick.assignedSidekick" : "Initial Assignment"
+"options.role.sidekick.canSuicide" : "Can Suicide"
+"options.role.sidekick.suicideCooldown" : "Suicide Cooldown"
+"options.role.sidekick.canFixLight" : "Can Fix Light"
+"options.role.sidekick.canFixComms" : "Can Fix Comms"
+"options.role.sidekick.hasImpostorVision" : "Has Impostor Vision"
+"options.role.sidekick.canUseVents" : "Can Use Vents"
+"options.role.sidekick.canMoveInVents" : "Can Move In Vents"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.sidekick.common1.title" : "Forever Friends"
+"achievement.sidekick.common1.goal" : "Promote from Sidekick to Jackal."
+"achievement.sidekick.common1.splitted.2" : "Friends"
+
+"achievement.sidekick.common2.title" : "Chain Of Friendship"
+"achievement.sidekick.common2.goal" : "After being promoted from Sidekick to Jackal,<br>grant Sidekick to someone else."
+"achievement.sidekick.common2.splitted.0" : "Chain Of "
+
+"achievement.sidekick.challenge.title" : "Underworld Survival Skills"
+"achievement.sidekick.challenge.goal" : "Change from Impostor to Sidekick and win as Jackal."
+"achievement.sidekick.challenge.cond" : "Achievable even if promoted to Jackal during the game"
+"achievement.sidekick.challenge.splitted.0" : "Underworld "

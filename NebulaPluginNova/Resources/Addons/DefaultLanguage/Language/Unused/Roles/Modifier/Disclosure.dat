@@ -1,0 +1,32 @@
+# Assignable
+
+"role.disclosure.name" : "Disclosure"
+"role.disclosure.generalBlurb" : "それは啓示ではない"
+
+# Document
+
+"role.disclosure.doc" : "緊急会議中に自身のカーソルが全員に公開されます。"
+
+# Options
+
+"options.role.disclosure.detail" : "Disclosure makes their cursor visible to everyone during an emergency meeting."
+"options.role.disclosure.anonymousCursor" : "Anonymous Cursor"
+"options.role.disclosure.showCursorAtLateVoting" : "Show Cursor At Late Voting"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.disclosure.common1.title" : "オンエア"
+"achievement.disclosure.common1.goal" : "カーソルが開示されたまま投票する。"
+
+"achievement.disclosure.challenge.title" : "乱世の扇動者"
+"achievement.disclosure.challenge.goal" : "自身と同じ投票先に、自身の投票の5秒以上後に3人以上投票したうえで、<br>自身と異なる陣営のプレイヤーを3回以上追放せしめる。"
+"achievement.disclosure.challenge.splitted.2" : "扇動者"

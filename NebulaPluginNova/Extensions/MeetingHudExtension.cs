@@ -29,7 +29,8 @@ public static class MeetingHudExtension
     static private int VoteForMask = 0;
     static private int CanVoteMask = 0;
     static private int SealedMask = 0;
-    
+    static internal string SpreaderAndBG = "VoteSpreaderAndBG";
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     static private bool CanVoteForByMask(byte playerId) => (VoteForMask & (1 << playerId)) != 0;
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

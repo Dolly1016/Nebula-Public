@@ -9,6 +9,16 @@ public static class VersionShowerPatch
         int last = text.IndexOf('(');
         if(last != -1)text = text.Substring(0, last);
         __instance.text.text = NebulaPlugin.GetNebulaVersionString() + " on AU " + text;
+        __instance.text.ForceMeshUpdate();
+
+        var buttonObj = UnityHelper.CreateObject("CopyButton", __instance.text.transform, Vector3.zero);
+        buttonObj.SetUpButton().OnClick.AddListener(()=> {
+            ClipboardHelper.PutClipboardString(__instance.text.text);
+            DebugScreen.Push(Language.Translate("ui.version.copied"), 3f);
+        });
+        var buttonCollider = buttonObj.AddComponent<BoxCollider2D>();
+        buttonCollider.size = __instance.text.rectTransform.sizeDelta;
+        buttonCollider.isTrigger = true;
 
 
         ModManager.Instance.ShowModStamp();

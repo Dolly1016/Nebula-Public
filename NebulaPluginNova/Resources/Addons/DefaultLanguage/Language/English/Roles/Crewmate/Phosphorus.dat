@@ -1,0 +1,48 @@
+# Assignable
+
+"role.phosphorus.name" : "Phosphorus"
+"role.phosphorus.short" : "P"
+"role.phosphorus.blurb" : "Pierce the Darkness"
+
+# Document
+
+"role.phosphorus.doc" : "A crewmate who can place lanterns that brightly illuminate the surroundings."
+"role.phosphorus.ability.title" : "Inherent Ability "Lantern""
+"role.phosphorus.ability.main" : "The light of the lantern illuminates the surroundings through walls."
+"role.phosphorus.ability.place" : "<title>Place</title>Place a lantern. Once all lanterns are placed, this button disappears,<br>and the lantern button below becomes usable after a meeting is held."
+"role.phosphorus.ability.lantern" : "<title>Lantern</title>Turn on the lantern. The lantern turns off when the effect time ends."
+
+# Options
+
+"options.role.phosphorus.detail" : "Lamps that Phosphorus places give a better view of the surroundings.<br>Imposters will avoid kills around lamps. "
+"options.role.phosphorus.numOfLamps" : "Num of Lamps"
+"options.role.phosphorus.placeCoolDown" : "Place Cooldown"
+"options.role.phosphorus.lampCoolDown" : "Lamp Cooldown"
+"options.role.phosphorus.lampDuration" : "Lamp Duration"
+"options.role.phosphorus.lampStrength" : "Lamp Strength"
+
+# Game
+
+"gameAction.phosphorus.placement" : "Lantern Placement"
+
+# UI
+
+"button.label.lantern" : "lantern"
+
+# Stats
+
+"stats.phosphorus.lantern" : "Num of Lamp Placed"
+"stats.phosphorus.lighting" : "Num of Lighting"
+
+# Titles
+
+"achievement.phosphorus.common1.title" : "Let There Be Light"
+"achievement.phosphorus.common1.goal" : "Place a total of 3 lanterns."
+"achievement.phosphorus.common1.splitted.2" : "Light"
+
+"achievement.phosphorus.common2.title" : "Phosphorescence"
+"achievement.phosphorus.common2.goal" : "Place a total of 20 lanterns."
+
+"achievement.phosphorus.challenge.title" : "A Last Remedy for Death"
+"achievement.phosphorus.challenge.goal" : "Illuminate a corpse with the light of a lantern."
+"achievement.phosphorus.challenge.splitted.1" : "Last Remedy for "

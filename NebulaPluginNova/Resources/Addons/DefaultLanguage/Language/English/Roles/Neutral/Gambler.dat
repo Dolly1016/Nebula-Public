@@ -1,0 +1,95 @@
+# Assignable
+
+"role.gambler.name" : "Gambler"
+"role.gambler.short" : "G"
+"role.gambler.blurb" : "Thrilling Game!"
+
+# Document
+
+"role.gambler.doc" : "A neutral member who bets chips and engages in gambling."
+"role.gambler.winCond" : "Win bets while alive and obtain <var>%NUM%</var> chips."
+"role.gambler.ability.title" : "Inherent Ability "A Deliberate Gambler""
+"role.gambler.ability.main" : "Instead of voting in emergency meetings, the Gambler <b>predicts the voting result</b> and <b>bets chips</b>.<br>If you run out of all chips, you die.<br>To gain an advantage, engage in <b>cheating</b> during the task phase.<br><br>In emergency meetings, you can make two types of bets. If your prediction is correct, you get twice the number of chips you bet.<br>・<b>Zero Vote Bet</b>: Choose 3 players who will receive no votes at all to bet. Your prediction is correct only if all 3 receive no votes.<br>・<b>Most Votes Bet</b>: Choose 1 player who will receive the most votes to bet. Your prediction is correct if the chosen player receives the most votes.<br>"
+"role.gambler.ability.deceive" : "<title>Deceive</title>Deceive a player.<br>Immediately know the player's voting target in the next meeting."
+
+# Options
+
+"options.role.gambler.detail" : "Bet on the results of votes in the meeting to get chips. <br>Deceive to understand your opponent's movements and get an advantage."
+"options.role.gambler.deceiveCooldown" : "Deceive Cooldown"
+"options.role.gambler.deceiveDuration" : "Deceive Duration"
+"options.role.gambler.initialChips" : "# Initial Chips"
+"options.role.gambler.goalChips" : "# Chips Required To Win"
+"options.role.gambler.maxBettingPatterns" : "Max Betting Patterns"
+"options.role.gambler.canVote" : "Can Vote"
+"options.role.gambler.canVote.detail" : "When turned on, the Gambler votes for skip or the bet target depending on the bet type.<br>-<b>When making a Most Votes Bet</b>: Vote for the Most Votes Bet target.<br>-<b>When not making a Most Votes Bet</b>: Vote for skip."
+"options.role.gambler.chipsLimitForNoVoteBetting" : "Chips Limit For Zero Vote Betting"
+"options.role.gambler.chipsLimitForNoVoteBetting.detail" : "Set the upper limit of chips that can be bet on Zero Vote Bets."
+"options.role.gambler.noticeFirstSuccess" : "Notify Of First Successful Betting"
+
+# Game
+
+"gambler.betting.control" : "L Click: Add a chip<br>Shift + L Click: Decrease a chip<br>R Click: Cancel betting"
+"gambler.ui.selectingHint" : "Select the player to bet and press the + button again.<br><b>Zero Vote Betting</b>: Select %NV% players who will not be voted<br><b>Max Vote Betting</b>: Select %MV% players who will be got most votes."
+"gambler.ui.multiSelecting" : "Players cannot be overlapped across multiple bets."
+"gambler.ui.lackOfChips" : "You have no chips to bet!"
+"gambler.ui.zeroBetting" : "Zero Vote Betting"
+"gambler.ui.maxBetting" : "Max Vote Betting"
+"gambler.currentChips" : "Chips:"
+"gambler.ui.help.add" : "Select a player and press to <b>add your bet</b>."
+"gambler.ui.help.check" : "Your current bet will be <b>confirmed</b>."
+"gambler.ui.firstSuccess" : "Someone is excited."
+
+# UI
+
+"button.label.deceive" : "deceive"
+
+# Status
+
+"state.lost" : "Lost"
+
+# Stats
+
+"stats.gambler.bet" : "Num of Betting"
+"stats.gambler.bet.success" : "Num of Bets Won"
+"stats.gambler.bet.failed" : "Num of Bets Lost"
+"stats.gambler.deceive" : "Num of Deceive"
+
+# Titles
+
+"achievement.gambler.common1.title" : "Steady Move"
+"achievement.gambler.common1.goal" : "Deceive 3 or more players and win a bet."
+"achievement.gambler.common1.splitted.0" : "Steady "
+
+"achievement.gambler.common2.title" : "Addiction"
+"achievement.gambler.common2.goal" : "Make a total of 20 bets."
+"achievement.gambler.common2.flavor" : ""I feel like we have got a good shot next time." —Say something, dammit"
+
+"achievement.gambler.another1.title" : "No Regrets"
+"achievement.gambler.another1.goal" : "Go all-in, lose the bet and die."
+
+"achievement.gambler.common3.title" : "Rolling In!"
+"achievement.gambler.common3.goal" : "Go all-in and win the bet."
+
+"achievement.gambler.common4.title" : "Thrilling Bet"
+"achievement.gambler.common4.goal" : "Make 3 or more types of bets in one meeting and win all of them."
+"achievement.gambler.common4.splitted.0" : "Thrilling "
+
+"achievement.combination.2.gambler.lover.another.title" : "Unusual Life Story"
+"achievement.combination.2.gambler.lover.another.goal" : "Suffer a crushing defeat and make your lover follow you."
+"achievement.combination.2.gambler.lover.another.flavor" : "※ This is a game to enjoy moderately. Be careful not to get addicted."
+
+"achievement.gambler.challenge.title" : "Genuine Gambler"
+"achievement.gambler.challenge.goal" : "Win fairly without deceiving and win all bets."
+"achievement.gambler.challenge.flavor" : ""Leave it to luck? Don't make me laugh. Luck is everything." —A gambler's muttering"
+"achievement.gambler.challenge.splitted.0" : "Genuine "
+"achievement.gambler.challenge.splitted.2" : "Gambler"
+
+# Team
+
+"teams.gambler" : "Gambler"
+"end.gambler" : "Gambler Wins %EXTRA%"
+
+# Document
+
+"document.tip.winCond.gambler.title" : "Special Trigger"
+"document.tip.winCond.gambler" : "The gambler win if they survive, and get %NUM% chips."

@@ -1,0 +1,60 @@
+# Assignable
+
+"role.psychic.name" : "Psychic"
+"role.psychic.short" : "P"
+"role.psychic.blurb" : "Let Me Hear More"
+
+# Document
+
+"role.psychic.doc" : "A crewmate who can search for corpses."
+"role.psychic.ability.title" : "Inherent Ability "Whispers of the Dead""
+"role.psychic.ability.main" : "When reporting a corpse, get additional information."
+"role.psychic.ability.search" : "<title>Corpse Search</title>For a while, an arrow indicating the location of the corpse appears."
+
+# Options
+
+"options.role.psychic.detail" : "Psychics can obtain more information about reported bodies."
+"options.role.psychic.searchCooldown" : "Search Cooldown"
+"options.role.psychic.searchDuration" : "Search Duration"
+"options.role.psychic.message.elapsedTime" : "I died about %SEC%s ago..."
+"options.role.psychic.message.killersColor" : "My killer color was %COLOR%"
+"options.role.psychic.message.killersRole" : "My killer's role is %ROLE%"
+"options.role.psychic.message.killerIsDead" : "My murderer is already dead..."
+"options.role.psychic.message.myRole" : "My role is %ROLE%"
+"options.role.psychic.message.myState" : "I have been %STATE%..."
+"options.role.psychic.message.inner.darkColor" : "dark"
+"options.role.psychic.message.inner.lightColor" : "light"
+"options.role.psychic.message.header" : "Sprit Message"
+
+# Game
+
+
+# UI
+
+"button.label.search" : "search"
+
+# Stats
+
+"stats.psychic.searching" : "Num of Searching"
+"stats.psychic.messages" : "Num of Hearing Messages"
+
+# Titles
+
+"achievement.psychic.common1.title" : "Death's Message"
+"achievement.psychic.common1.goal" : "Listen to a message."
+
+"record.psychic.common2.elapsedTime" : "Time Elapsed After Death"
+"record.psychic.common2.killersColor" : "Brightness of Killer's Color"
+"record.psychic.common2.killersRole" : "Killer's Role"
+"record.psychic.common2.killerIsDead" : "Killer Already Dead"
+"record.psychic.common2.myRole" : "Own Role"
+"record.psychic.common2.myState" : "Cause of Death"
+
+"achievement.psychic.common2.title" : "Medium Master"
+"achievement.psychic.common2.goal" : "Listen to all medium messages."
+"achievement.psychic.common2.splitted.2" : "Master"
+
+"achievement.psychic.challenge.title" : "Words Offered to That Life"
+"achievement.psychic.challenge.goal" : "Based on clues about the killer.<br>exile or guess the killer in that meeting."
+"achievement.psychic.challenge.flavor" : "Deep beyond reach, yet still right beside you."
+"achievement.psychic.challenge.splitted.1" : "Offered to "

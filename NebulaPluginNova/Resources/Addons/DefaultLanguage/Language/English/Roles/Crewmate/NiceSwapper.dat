@@ -1,0 +1,31 @@
+# Assignable
+
+"role.niceSwapper.name" : "Nice Swapper"
+"role.niceSwapper.short" : "S"
+"role.niceSwapper.blurb" : "No Limits on Decisiveness"
+"role.niceSwapper.hint" : "Change players votes"
+
+# Document
+
+"role.niceSwapper.doc" : "A crewmate who can swap cast votes during emergency meetings."
+"role.niceSwapper.ability.title" : "Inherent Ability "Voting Swap""
+"role.niceSwapper.ability.main" : "The Nice Swapper can swap the votes of 2 selected players during emergency meetings."
+
+# Options
+
+"options.role.niceSwapper.detail" : "The Nice Swapper is a crewmate who can swap cast votes during emergency meetings."
+"options.role.niceSwapper.numOfSwap" : "Num of Swap"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.niceSwapper.another1.title" : "Collapse of Realism"
+"achievement.niceSwapper.another1.goal" : "Swap votes between a non-crewmate with the most votes and a crewmate,<br>and exile the crewmate."

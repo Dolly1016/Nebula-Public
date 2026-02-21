@@ -9,7 +9,7 @@
 "role.whammy.doc" : "タスクや緊急タスクに<b>風船</b>を仕掛けて、ゲームの進行を妨害するインポスターです。"
 "role.whammy.ability.title" : "固有能力 "それを付けられたら、終わり？""
 "role.whammy.ability.main" : "タスク等に風船を仕掛けて、タスクに触れたプレイヤーに風船を拾わせます。<br>風船を手にしたプレイヤーは、制限時間内に風船を割らないと死亡してしまいます。"
-"role.whammy.ability.place" : "<title>設置</title>タスクや緊急タスクに風船を仕掛けます。<var>%SOUND%</var><br>自身以外のプレイヤーがそのタスクに触れると、風船を手にします。"
+"role.whammy.ability.place" : "<title>設置</title>タスクや緊急タスクに風船を仕掛けます。<var>%SOUND%</var><br>自身を含むプレイヤーがそのタスクに触れると、風船を手にします。"
 "role.whammy.ability.place.sound" : "風船を仕掛けると、周囲に聞こえる音が発生します。"
 "role.whammy.ability.minigame" : "<title>パチンコ</title>マップ内にいくつかあるパチンコで風船を割れます。<br>最大で<var>%MINIGAME%</var>箇所回れば確実に風船を割れます。"
 "role.whammy.tips" : "・風船は風になびきます。強い風が吹きそうな場所に行ってみると...？"

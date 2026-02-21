@@ -1,0 +1,29 @@
+"achievement.aeroGuesser.oneGame.title" : "Aero Guesser"
+"achievement.aeroGuesser.oneGame.goal" : "Play Aero Guesser once."
+
+"achievement.aeroGuesser.mapMismatch.title" : "Unknown Star"
+"achievement.aeroGuesser.mapMismatch.goal" : "Mistake the map in Aero Guesser."
+"achievement.aeroGuesser.mapMismatch.splitted.0" : "Unknown "
+
+"achievement.aeroGuesser.doubleScore2.title" : "Only I Know"
+"achievement.aeroGuesser.doubleScore2.goal" : "Score 800pt or more with a double score difference from the second place."
+"achievement.aeroGuesser.doubleScore2.cond" : "Participants: 5 or more"
+"achievement.aeroGuesser.doubleScore2.splitted.2" : "Know"
+
+"achievement.aeroGuesser.total0.title" : "Welcome to Interstellar Travel"
+"achievement.aeroGuesser.total0.goal" : "Earn a total of 10,000pt in Aero Guesser."
+
+"achievement.aeroGuesser.total1.title" : "Cosmic Guide"
+"achievement.aeroGuesser.total1.goal" : "Earn a total of 50,000pt in Aero Guesser."
+
+"achievement.aeroGuesser.total2.title" : "Akashic Record"
+"achievement.aeroGuesser.total2.goal" : "Earn a total of 100,000pt in Aero Guesser."
+
+"achievement.aeroGuesser.perfectScore.title" : "Pro Guesser"
+"achievement.aeroGuesser.perfectScore.goal" : "Make a perfect guess 10 times in total."
+"achievement.aeroGuesser.perfectScore.splitted.0" : "Pro "
+
+"achievement.aeroGuesser.allMore900.title" : "Know Everything"
+"achievement.aeroGuesser.allMore900.goal" : "Score 900pt or more in all questions."
+"achievement.aeroGuesser.allMore900.cond" : "Questions: Hard only+Number of questions: 10+Maps: 2 or more"
+"achievement.aeroGuesser.allMore900.splitted.0" : "Everything "

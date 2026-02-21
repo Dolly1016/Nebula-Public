@@ -1,0 +1,48 @@
+# Assignable
+
+"role.zeal.name" : "Zeal"
+"role.zeal.short" : "Z"
+"role.zeal.blurb" : "Go crazy!"
+
+# Document
+
+"role.zeal.doc" : "プレイヤーから熱狂を吸収し、キルボタンをストックするインポスターです。"
+"role.zeal.ability.title" : "固有能力 "赤熱する殺意""
+"role.zeal.ability.main" : "ゲーム開始時、ジールはキルボタンを持っていません。<br>プレイヤーから熱狂を吸収し、キルボタンをストックして大量キルを決めます。"
+"role.zeal.ability.absorb" : "<title>吸収</title>プレイヤーから熱狂を吸収し、キルボタンを獲得します。"
+"role.zeal.ability.kill" : "<title>キル</title>キルボタンは使い切り式で、同時に複数のキルボタンをストックできます。<br>キルボタンが残っている間、上がったキルクールダウンはリセットされません。"
+
+# Options
+
+"options.role.zeal.detail" : "Zeal steals the enthusiasm, or kill button, from crewmates.<br>They can kill multiple players at once."
+"options.role.zeal.killCooldown" : "Kill Cooldown"
+"options.role.zeal.absorbCooldown" : "Absorb Cooldown"
+"options.role.zeal.absorbDuration" : "Absorb Duration"
+"options.role.zeal.absorbAdditionalDuration" : "Absorb Additional Duration"
+"options.role.zeal.absorbAdditionalDuration.detail" : "熱狂の吸収に要する時間は、(吸収の所要時間)＋(吸収の追加所要時間)×(キルボタンの数) で計算されます。<br>このオプションの値をより大きくすると、同時に多数のキルボタンを所有するのがより困難になります。"
+"options.role.zeal.enthusiasmCooldown" : "Enthusiasm Cooldown"
+"options.role.zeal.enthusiasmCooldown.detail" : "同じプレイヤーから熱狂を再度吸収できるまでのクールダウンです。"
+
+# Game
+
+
+# UI
+
+"button.label.absorb" : "absorb"
+
+# Stats
+
+
+# Titles
+
+"achievement.zeal.common1.title" : "迸る熱"
+"achievement.zeal.common1.goal" : "2連続キルを決める。"
+
+"achievement.zeal.another1.title" : "熱いうちに打て"
+"achievement.zeal.another1.goal" : "2つ以上のキルボタンを持ちながら死亡する。"
+
+"achievement.zeal.common2.title" : "激アツ最強ターン！"
+"achievement.zeal.common2.goal" : "4つ以上のキルボタンを同時に保持する。"
+
+"achievement.zeal.challenge.title" : "最後の狂宴"
+"achievement.zeal.challenge.goal" : "3人以上を連続キルしてゲームを終わらせ、勝利する。"

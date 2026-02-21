@@ -1,0 +1,55 @@
+# Assignable
+
+"role.navvy.name" : "Navvy"
+"role.navvy.short" : "N"
+"role.navvy.blurb" : "Slipshod Job"
+
+# Document
+
+"role.navvy.doc" : "A crewmate who can block vents and doors."
+"role.navvy.ability.title" : "Inherent Ability "Spaceship Plumber""
+"role.navvy.ability.main" : ""
+"role.navvy.ability.seal" : "<title>Seal</title>Seal vents and doors with tape."
+
+# Options
+
+"options.role.navvy.detail" : "Navvy can cover the vents with tape. <br>Players who have access to vents can remove the tape from blocked vents."
+"options.role.navvy.sealCooldown" : "Seal Cooldown"
+"options.role.navvy.maxCost" : "Initial Costs"
+"options.role.navvy.costForVentSealing" : "Costs For Vent Sealing"
+"options.role.navvy.costForDoorSealing" : "Costs For Door Sealing"
+"options.role.navvy.removeDuration" : "Remove Tape Duration"
+"options.role.navvy.numOfVentRemovalSteps" : "# Removal Steps For Vents"
+"options.role.navvy.numOfDoorRemovalSteps" : "# Removal Steps For Doors"
+"options.role.navvy.redundantSealing" : "Redundant Sealing"
+
+# Game
+
+
+# UI
+
+"button.label.seal" : "seal"
+"button.label.vent.seal.remove" : "remove"
+
+# Stats
+
+"stats.navvy.sealVent" : "Num of Vent Sealing"
+"stats.navvy.sealDoor" : "Num of Door Sealing"
+"stats.navvy.removeVent" : "Num of Vent Removing"
+"stats.navvy.removeDoor" : "Num of Door Removing"
+
+# Titles
+
+"achievement.navvy.common1.title" : "Resist with Tape!"
+"achievement.navvy.common1.goal" : "Use tape a total of 10 times."
+"achievement.navvy.common1.flavor" : ""It's just a small effort.""
+"achievement.navvy.common1.splitted.1" : "With "
+
+"achievement.navvy.common2.title" : "Counter Interference"
+"achievement.navvy.common2.goal" : "Remove tape a total of 5 times."
+
+"achievement.navvy.challenge.title" : "Well-Ventilated Workplace"
+"achievement.navvy.challenge.goal" : "Seal all doors of a room with tape."
+"achievement.navvy.challenge.cond" : "Limited to rooms with 2 or more doors"
+"achievement.navvy.challenge.flavor" : ""I don't know why there's tape everywhere here..."<br>"It was just a small favor, no need to thank me.""
+"achievement.navvy.challenge.splitted.0" : "Well-Ventilated "

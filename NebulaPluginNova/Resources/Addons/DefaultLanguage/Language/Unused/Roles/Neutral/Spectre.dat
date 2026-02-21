@@ -1,0 +1,96 @@
+# Assignable
+
+"role.spectre.name" : "Spectre"
+"role.spectre.short" : "S"
+"role.spectre.blurb" : "The Chaotic"
+
+# Document
+
+"role.spectre.doc" : "お揚げを食べながら最後まで生存すると勝利する第三陣営です。"
+"role.spectre.winCond" : "満腹度を<var>%NUM%</var>以上キープした状態で、ゲームが終了する。(サボタージュによる終了を除く。)"
+"role.spectre.ability.title" : "固有能力 "妖の生きる道""
+"role.spectre.ability.main" : "他プレイヤーにバレないよう潜伏しながらお揚げを食べてまわります。<br>透明化能力もうまく活用しましょう。"
+"role.spectre.ability.fries" : "<title>お揚げ</title>マップ中に皿が出現します。お揚げが載っている皿にインタラクトすると<br>お揚げを食べるミニゲームが始まります。満腹度が尽きると餓死してしまいます。<br>勝利のためには、ゲーム終了時にある程度の満腹度を保っておく必要があります。"
+"role.spectre.ability.vanish" : "<title>透明化</title>しばらくの間透明化します。透明化を発動すると満腹度を消費します。<br>満腹度を消費してもお揚げ1つ分の満腹度を保てるときのみ発動できます。"
+
+# Options
+
+"options.role.spectre.detail" : "Spectre survives until the end and takes over the other victories. <br>However, if you don't eat fried food for a while, you will starve."
+"options.role.spectre.vanishCost" : "# Fries For Vanish"
+"options.role.spectre.vanishCooldown" : "Vanish Cooldown"
+"options.role.spectre.vanishDuration" : "Vanish Duration"
+"options.role.spectre.numOfDishes" : "# Of Dishes Spawning"
+"options.role.spectre.satiety" : "Satiety Duration Per Fries"
+"options.role.spectre.maxSatiety" : "Max Satiety"
+"options.role.spectre.initialSatiety" : "Initial Satiety"
+"options.role.spectre.requiredSatietyForWinning" : "Required Satiety For Winning"
+"options.role.spectre.friesReplenishmentCooldown" : "Fries Replenishment Cooldown"
+"options.role.spectre.showWhereKillersAre" : "Show Where Killers Are"
+"options.role.spectre.showDishesOnMap" : "Show Dishes On Map"
+"options.role.spectre.clairvoyance" : "Has Clairvoyance"
+"options.role.spectre.immoralistVariation" : "Immoralist Assignment"
+"options.role.spectre.immoralistVariation.none" : "None"
+"options.role.spectre.immoralistVariation.spectreFollower" : "S. Follower"
+"options.role.spectre.immoralistVariation.immoralist" : "Immoralist"
+"options.role.spectre.immoralistVariation.random" : "Random"
+"options.role.spectre.immoralistVariation.alternate" : "Alternate"
+"options.role.spectre.spectreFollowerChance" : "Spectre Follower Spawn Chance"
+"options.role.spectre.group.immoralist" : "Immoralist Settings"
+"options.role.spectre.group.dish" : "Dish Settings"
+"options.role.spectre.group.vanish" : "Vanish Ability Settings"
+
+# Game
+
+
+# UI
+
+"button.label.vanish" : "vanish"
+
+# Status
+
+"state.starved" : "Starved"
+
+# Stats
+
+"stats.spectre.vanish" : "Num of Vanish"
+"stats.spectre.eatFries" : "Num of Eaten Dishes"
+"role.spectre.gui.gauge" : "Dish Gauge"
+
+# Titles
+
+"achievement.spectre.common1.title" : "食いしん坊"
+"achievement.spectre.common1.goal" : "通算で20回お揚げを食べる。"
+
+"achievement.spectre.common2.title" : "幻妖の秘術"
+"achievement.spectre.common2.goal" : "通算で10回透明化する。"
+
+"achievement.spectre.another1.title" : "私が食べました"
+"achievement.spectre.another1.goal" : "はじめてお揚げを食べた直後の会議で追放あるいは推察される。"
+"achievement.spectre.another1.flavor" : ""このパネルでも提げて反省してなさい！"<br>ペットかなんかじゃないんだからさぁ。"
+"achievement.spectre.another1.splitted.0" : "私が"
+
+"achievement.spectre.another2.title" : "おなかが空いたよ"
+"achievement.spectre.another2.goal" : "餓死する。"
+
+"achievement.spectre.costume1.title" : "真の姿"
+"achievement.spectre.costume1.goal" : "九尾の狐の姿で妖狐をプレイし、妖狐勝利で勝利する。"
+"achievement.spectre.costume1.flavor" : ""逃げも隠れもしないさ。" ―大妖怪はかく語りき"
+"achievement.spectre.costume1.splitted.0" : "真の"
+
+"achievement.spectre.common3.title" : "嘲弄"
+"achievement.spectre.common3.goal" : "特殊な条件の勝利を妖狐勝利で乗っ取り、勝利する。"
+
+"achievement.spectre.challenge.title" : "夏草は赤く燃ゆ"
+"achievement.spectre.challenge.goal" : "インポスターが全員生存したまま妖狐勝利で勝利する。"
+"achievement.spectre.challenge.cond" : "インポスター: 2人以上"
+"achievement.spectre.challenge.flavor" : ""足の踏み場もない骸の山" ―旅人の手記より"
+
+# Team
+
+"teams.spectre" : "Spectre"
+"end.spectre" : "Spectre Wins%EXTRA%"
+
+# Document
+
+"document.tip.winCond.spectre.title" : "Overwrite Winning"
+"document.tip.winCond.spectre" : "If Spectre is still alive, it will overwrite the winning."

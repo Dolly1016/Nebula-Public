@@ -42,6 +42,8 @@
 
 # Stats
 
+"stats.creeping.poison" : "毒を仕掛けた回数"
+"stats.creeping.depoison" : "解毒した回数"
 
 # Titles
 

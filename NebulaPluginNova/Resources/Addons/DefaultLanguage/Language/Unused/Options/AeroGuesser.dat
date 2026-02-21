@@ -1,0 +1,28 @@
+# Header
+
+"options.aeroGuesser" : "AeroGuesser Options"
+"options.aeroGuesser.detail" : "About AeroGuesser mode"
+
+# Groups
+
+"options.aeroGuesser.group.hurryTimer" : "Hurry Timer Settings"
+"options.aeroGuesser.group.filter.difficulty" : "Difficulty Settings"
+"options.aeroGuesser.group.filter.map" : "Map Settings"
+
+# Options
+
+"options.aeroGuesser.guessTime" : "Guess Time"
+"options.aeroGuesser.numOfQuiz" : "# Quizzes"
+"options.aeroGuesser.monochromeMode" : "Monochrome Mode"
+"options.aeroGuesser.monochromeMode.detail" : "オンにすると、問題画像がモノクロで表示されます。"
+"options.aeroGuesser.hurryTimer" : "Hurry Timer"
+"options.aeroGuesser.hurryTimer.detail" : "オンにすると、誰かが推察を確定したときに<br>残り解答時間を短縮できます。"
+"options.aeroGuesser.hurryTimerDuration" : "Hurry Timer Duration"
+"options.aeroGuesser.hurryTimerDuration.detail" : "短縮後の残り解答時間です。<br>既に残り解答時間が設定された時間より短くなっている場合、残り時間は延長されません。"
+"options.aeroGuesser.skeld" : "Skeld"
+"options.aeroGuesser.mira" : "MIRA HQ"
+"options.aeroGuesser.polus" : "Polus"
+"options.aeroGuesser.airship" : "Airship"
+"options.aeroGuesser.fungle" : "Fungle"
+"options.aeroGuesser.normal" : "Normal"
+"options.aeroGuesser.hard" : "Hard"

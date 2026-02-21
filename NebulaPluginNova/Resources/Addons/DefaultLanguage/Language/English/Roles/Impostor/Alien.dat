@@ -1,0 +1,62 @@
+# Assignable
+
+"role.alien.name" : "Alien"
+"role.alien.short" : "Al"
+"role.alien.blurb" : "The Being Beyond Intelligence"
+"role.alien.hint" : "Conceal information"
+
+# Document
+
+"role.alien.doc" : "An impostor who skillfully manipulates the information of admin and vitals to confuse crewmates."
+"role.alien.ability.title" : "Inherent Ability "Space Invaders""
+"role.alien.ability.main" : "Interfere with crewmates using strange alien technology."
+"role.alien.ability.emi" : "<title>E.M.I.</title>Temporarily stop updating information on admin and vitals."
+"role.alien.ability.invalidate" : "<title>Invalidate</title>Erase nearby players from admin and vitals."
+"role.alien.tips" : "・This role is a <color=#ff7f00>Super</color><color=#ff0000>New</color><color=#00ff00>Roles</color> collaboration role (original roles: コウモリ, クラッカー)."
+
+# Options
+
+"options.role.alien.detail" : "Alien manipulates the information of admin and vitals,<br>causing confusion."
+"options.role.alien.emiCoolDown" : "E.M.I. Cooldown"
+"options.role.alien.emiDuration" : "E.M.I. Duration"
+"options.role.alien.invalidateCoolDown" : "Invalidate Cooldown"
+"options.role.alien.numOfInvalidations" : "# Invalidations"
+
+# Game
+
+
+# UI
+
+"button.label.emi" : "e.m.i."
+"button.label.invalidate" : "invalidate"
+
+# Stats
+
+
+# Titles
+
+"achievement.alien.common1.title" : "Alien Custom"
+"achievement.alien.common1.goal" : "Kill while E.M.I. is active."
+"achievement.alien.common1.flavor" : ""Um, on this planet, people say 'hello', right?" —A certain alien"
+"achievement.alien.common1.splitted.0" : "Alien's "
+
+"achievement.alien.common2.title" : "Memory Manipulation"
+"achievement.alien.common2.goal" : "Hide a player from admin information a total of 10 times."
+"achievement.alien.common2.flavor" : ""Indeed, I was there!" —A missing crewmate"
+
+"achievement.alien.common3.title" : "Good Neighbor"
+"achievement.alien.common3.goal" : "Conceal an impostor's kill with E.M.I."
+"achievement.alien.common3.flavor" : ""Phew, that was a relief. If I had been seen, it would have been over." ——Another killer"
+"achievement.alien.common3.splitted.0" : "Good "
+"achievement.alien.common3.splitted.2" : "Neighbor"
+
+"achievement.alien.common4.title" : "On a Star Mourning Death"
+"achievement.alien.common4.goal" : "A player hidden from admin information is killed by an impostor."
+"achievement.alien.common4.flavor" : "Where on earth did they go......?"
+"achievement.alien.common4.splitted.2" : "On a Star"
+
+"achievement.alien.challenge.title" : "Alien Invader"
+"achievement.alien.challenge.goal" : "Conceal the moment of a kill a total of 5 times with E.M.I."
+"achievement.alien.challenge.cond" : "Kills by yourself: 3 or more"
+"achievement.alien.challenge.flavor" : ""Didn't you say that at least you wouldn't be here!"<br>The cornered crewmate had a face crushed by despair."
+"achievement.alien.challenge.splitted.0" : "Alien "

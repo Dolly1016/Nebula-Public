@@ -1,0 +1,11 @@
+# Header
+
+"options.quality" : "Quality Options"
+"options.quality.detail" : "About game quality settings"
+
+# Groups
+
+# Options
+
+"options.quality.lowLatencyPlayerSync" : "Low Latency Player Sync"
+"options.quality.lowLatencyPlayerSync.detail" : "<b>カスタムサーバー限定</b><br>プレイヤーの位置を同期するタイミングをより短くします。"

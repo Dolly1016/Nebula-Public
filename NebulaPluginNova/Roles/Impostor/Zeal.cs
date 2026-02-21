@@ -68,6 +68,8 @@ internal class Zeal : DefinedSingleAbilityRoleTemplate<Zeal.Ability>, DefinedRol
             if (AmOwner)
             {
                 HudContent emptyContent = HudContent.InstantiateContent("Empty", false, false, true, false);
+                GameOperatorManager.Instance?.RegisterOnReleased(() => emptyContent.gameObject.SetActive(false), this);
+
                 List<(IPlayerlike player, float time)> killHistory = [];
 
                 GameTimer cooldownTimer = NebulaAPI.Modules.Timer(this, KillCoolDownOption.GetCooldown(MyPlayer.TeamKillCooldown)).SetAsKillCoolTimer().ResetsAtTaskPhase();

@@ -1,0 +1,90 @@
+# Assignable
+
+"role.scarlet.name" : "Scarlet"
+"role.scarlet.short" : "S"
+"role.scarlet.blurb" : ""I'm still in Love""
+
+# Document
+
+"role.scarlet.doc" : "本命とともに勝利を目指す第三陣営です。<br>誑かしたキープもうまく使ってやりましょう。"
+"role.scarlet.winCond" : "本命が生存しながらゲームに勝利する。スカーレット勝利に上書きしたうえで勝利します。"
+"role.scarlet.ability.title" : "固有能力 "魔性""
+"role.scarlet.ability.main" : "誑かしたキープをうまく使って、本命の勝利をサポートします。"
+"role.scarlet.ability.favorite" : "<title>本命</title>プレイヤーを本命にします。<br>スカーレットと本命は、どちらかが死亡するともう一方は後を追って自殺します。"
+"role.scarlet.ability.flirt" : "<title>キープ</title>プレイヤーを誑かしてキープにします。スカーレットはキープの役職を知ることができます。<br>スカーレットとキープは一方が死亡しても後を追って自殺することはありません。"
+"role.scarlet.ability.hourglass" : "<title>時間制限</title>制限時間内に本命を決定できないと、寂しさから死亡してしまいます。<br>このタイマーは会議中・会議終了直後は進行しません。"
+"role.scarlet.ability.meeting" : "<title>深紅の号令</title>緊急会議中に使用できます。<br>本命およびキープの投票先を自身の投票先に合わせさせます。"
+
+# Options
+
+"options.role.scarlet.detail" : "Scarlet is a strategic neutral who aims for victory<br>by skillfully manipulating favorites and keeps."
+"options.role.scarlet.graceUntilDecidingFavorite" : "Grace Until Deciding Favorite"
+"options.role.scarlet.graceUntilDecidingFavorite.detail" : "設定した時間内に本命を決定しないとスカーレットは死亡してしまいます。<br>会議中や会議直後は猶予時間のタイマーは進行しません。<br>※ この時間を短く設定しすぎてしまうと、ゲーム終盤の誑かしがキープであることが透けてしまいます。"
+"options.role.scarlet.numOfKept" : "# Of Kept"
+"options.role.scarlet.numOfCommand" : "# Of Commands"
+"options.role.scarlet.numOfCommand.detail" : "スカーレットは会議中に<b>深紅の号令</b>を発動することで、本命とキープの投票先を<br>自身の投票先に合わせさせられます。"
+"options.role.scarlet.canOverrideTaskWin" : "Can Override Task Win"
+"options.role.scarlet.favoriteGauge" : "Favorite Gauge"
+"options.role.scarlet.favoriteGauge.detail" : "オンにすると、スカーレットは勝利のために「本命ゲージ」を<br>溜めなければならなくなります。<br>本命ゲージは本命のそばに居続けると溜まり、離れると減少します。"
+"options.role.scarlet.requiredGaugeToWin" : "Required Gauge To Win"
+"options.role.scarlet.requiredGaugeToWin.detail" : "スカーレットは本命のそばに設定した時間だけ居続ける必要があります。<br>継続して傍に居続ける必要はありませんが、本命から離れるとゲージは少しずつ減少します。"
+"options.role.scarlet.surplusGauge" : "Surplus Gauge"
+"options.role.scarlet.surplusGauge.detail" : "スカーレットは必要量より多くゲージを溜められます。<br>この値を大きくするほど、本命から離れて立ち回る余裕が生まれます。"
+"options.role.scarlet.gaugeReductionRatio" : "Reduction Ratio"
+"options.role.scarlet.gaugeReductionRatio.detail" : "本命のそばにいない間、溜まる速度にこの設定値を乗じた速度でゲージが減少します。<br>1xで溜まる速度と同じ速度で減少します。1未満の数値を推奨します。"
+"options.role.scarlet.canLocateLovers" : "Can Locate Lovers"
+"options.role.scarlet.group.gauge" : "Gauge Option"
+
+# Game
+
+"role.scarlet.gui.gauge" : "Favorite Gauge"
+"role.scarlet.gui.favorite" : "Favorite"
+
+# UI
+
+"button.label.scarlet.grance" : "grance"
+"button.label.favorite" : "favorite"
+"button.label.seduce" : "seduce"
+"button.label.scarlet.command" : "command"
+"ui.action.scarlet.suicide" : "You will die if you do not decide your favorite in time.<br>The timer will not run during the meeting or immediately after the meeting ends."
+
+# Stats
+
+"stats.scarlet.kept" : "Num of Kept"
+
+# Titles
+
+"achievement.scarlet.common1.title" : "もうひとつの顔"
+"achievement.scarlet.common1.goal" : "1人を誑かし、1人を本命にする。"
+"achievement.scarlet.common1.splitted.0" : "もうひとつの"
+
+"achievement.scarlet.common2.title" : "女王の名に懸けて"
+"achievement.scarlet.common2.goal" : "深紅の号令によって通算で3人のプレイヤーを追放する。"
+"achievement.scarlet.common2.splitted.1" : "名に"
+
+"achievement.scarlet.another1.title" : "或る紳士"
+"achievement.scarlet.another1.goal" : "スカーレットに誑かされ、そのまま死亡する。"
+"achievement.scarlet.another1.splitted.0" : "或る"
+
+"achievement.scarlet.another2.title" : "恋敵"
+"achievement.scarlet.another2.goal" : "会議で、深紅の号令によって追放される。"
+"achievement.scarlet.another2.flavor" : ""月明かりがもったいないわ。夜を統べるのは一人で十分。" ―破られた議事録より"
+
+"achievement.scarlet.love.title" : "愛、それは"
+"achievement.scarlet.love.goal" : "自身が自身の本命になり、スカーレット勝利で勝利する。"
+"achievement.scarlet.love.cond" : "自身のみが勝利すること"
+"achievement.scarlet.love.flavor" : ""―それは、逃れられぬ呪縛。""
+
+"achievement.scarlet.challenge.title" : "不夜城の女帝"
+"achievement.scarlet.challenge.goal" : "深紅の号令によって1人のプレイヤーを追放し、<br>誑かしたプレイヤーが2人以上死亡、2人以上生存しながら本命とともに勝利する。"
+"achievement.scarlet.challenge.splitted.2" : "女帝"
+
+# Team
+
+"teams.scarlet" : "Scarlet"
+"end.scarlet" : "Scarlet Wins%EXTRA%"
+
+# Document
+
+"document.tip.winCond.scarlet.title" : "Overwrite Winning"
+"document.tip.winCond.scarlet" : "If the favorite survives and wins, it overwrites the winning. The favorite and Scarlet win."

@@ -1,0 +1,64 @@
+# Assignable
+
+"role.destroyer.name" : "Destroyer"
+"role.destroyer.short" : "De"
+"role.destroyer.blurb" : "Ruthless"
+"role.destroyer.hint" : "プレイヤーを押し潰そう！"
+
+# Document
+
+"role.destroyer.doc" : "プレイヤーを押し潰すパワー系のインポスターです。"
+"role.destroyer.ability.title" : "固有能力 "クラッシュキル""
+"role.destroyer.ability.main" : "デストロイヤーは通常のキルの代わりに、プレイヤーを押し潰す<b>クラッシュキル</b>ができます。<br>クラッシュキルは少し時間がかかりますが、その場に死体を残しません。"
+"role.destroyer.ability.leftEvidence" : "<title>血痕</title>キルの現場にはプレイヤー色の<var>血痕</var>が残ります。<br>血痕は通報できませんが、重要な推理材料のひとつになります。"
+"role.destroyer.tips" : "・キルする相手の左右に十分なスペースがない場合、キルできません。<br>　狭い場所に気を付けましょう。<br>・押しつぶしている間、周囲にもその音が漏れ聞こえます。%REPORT%"
+"role.destroyer.tips.report" : "<br>・押し潰している間のキル現場を通報できます。"
+
+# Options
+
+"options.role.destroyer.detail" : "Destroyer can kill players without corpse.<br>But killing takes more effort."
+"options.role.destroyer.destroyCoolDown" : "Kill Cooldown"
+"options.role.destroyer.phasesOfDestroying" : "Phases Of Destroying"
+"options.role.destroyer.phasesOfDestroying.detail" : "デストロイヤーのキルにかかる時間を設定します。<br>実際にキルに要する時間を括弧書きで示しています。"
+"options.role.destroyer.killSEStrength" : "Kill SE Strength"
+"options.role.destroyer.leaveKillEvidence" : "Leave Kill Evidence"
+"options.role.destroyer.leaveKillEvidence.detail" : "オンにすると、キル現場に被害者の色の血痕が残ります。<br>血痕は会議を跨いでも消えません。"
+"options.role.destroyer.canReportKillScene" : "Can Report Kill Scene"
+"options.role.destroyer.canReportKillScene.detail" : "オンにすると、キル現場で通報ボタンが光ります。<br>デストロイヤーがプレイヤーを潰しきると通報できなくなってしまいます。"
+
+# Game
+
+
+# UI
+
+"button.label.destroyerKill" : "kill"
+"ui.action.destroyer.kill" : "Stand next to the player and crush them."
+
+# Game Statictics
+
+"statistics.events.destroy" : "Destroy"
+
+# Status
+
+"state.crushed" : "Crushed"
+
+# Stats
+
+"stats.destroyer.reported" : "Num of Reported During Kill"
+
+# Titles
+
+"achievement.destroyer.common1.title" : "禁じられた力"
+"achievement.destroyer.common1.goal" : "ゲーム中に1回、クラッシュキルをする。"
+"achievement.destroyer.common1.splitted.2" : "力"
+
+"achievement.destroyer.common2.title" : "駆逐艦"
+"achievement.destroyer.common2.goal" : "通算で10回以上クラッシュキルをする。"
+
+"achievement.destroyer.another1.title" : "理の裏を征く"
+"achievement.destroyer.another1.goal" : "クラッシュキルをしている途中の死体を通報される。"
+
+"achievement.destroyer.challenge.title" : "非道の航路"
+"achievement.destroyer.challenge.goal" : "ゲーム中に3回以上クラッシュキルをした上で勝利する。"
+"achievement.destroyer.challenge.flavor" : ""その航路は道に非ず。それでもこの船はゆく。" ―破られた議事録より"
+"achievement.destroyer.challenge.splitted.2" : "航路"

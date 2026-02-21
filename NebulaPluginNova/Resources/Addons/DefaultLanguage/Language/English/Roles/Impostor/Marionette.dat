@@ -1,0 +1,66 @@
+# Assignable
+
+"role.marionette.name" : "Marionette"
+"role.marionette.short" : "Ma"
+"role.marionette.blurb" : "There Is No Intention"
+
+# Document
+
+"role.marionette.doc" : "An impostor who controls a doll that can swap positions with themselves."
+"role.marionette.ability.title" : "Inherent Ability "Louis' Doll""
+"role.marionette.ability.main" : "%DOC%"
+"role.marionette.ability.main.player" : "Can place a doll with <var>the same appearance as the Marionette themselves</var>."
+"role.marionette.ability.main.player.keep" : "Can place a doll with <var>the same appearance as the Marionette themselves</var>.<br><var>Even if your own appearance changes after placing the doll, the doll's appearance does not change.</var>"
+"role.marionette.ability.main.mannequin" : "Can place a doll with <var>the appearance of a mannequin</var>."
+"role.marionette.ability.place" : "<title>Place</title>Place a doll on the spot."
+"role.marionette.ability.destroy" : "<title>Destroy</title>Remove the doll."
+"role.marionette.ability.monitor" : "<title>Monitor</title>Toggle the viewpoint between the doll and the Marionette themselves.<br>While monitoring the doll, you are stunned in place."
+"role.marionette.ability.swap" : "<title>Swap</title>Swap positions with the doll."
+"role.marionette.ability.arrow" : "<title>Arrow</title>The Marionette can see an arrow pointing to the doll's position."
+"role.marionette.tips" : "・Dolls are removed after a meeting."
+
+# Options
+
+"options.role.marionette.detail" : "Marionette can place the decoy.<br>they and the decoy swap position each other."
+"options.role.marionette.mannequinMode" : "Decoy Appearance"
+"options.role.marionette.mannequinMode.mannequin" : "Mannequin"
+"options.role.marionette.mannequinMode.player" : "Player"
+"options.role.marionette.fixDecoyAppearance" : "Fix Decoy Appearance"
+"options.role.marionette.placeCoolDown" : "Place Cooldown"
+"options.role.marionette.swapCoolDown" : "Swap Cooldown"
+"options.role.marionette.decoyDuration" : "Decoy Duration"
+"options.role.marionette.canSeeDecoyInShadow" : "Can See Decoy In Shadow"
+
+# Game
+
+"gameAction.marionette.placement" : "Doll Placement"
+
+# UI
+
+"button.label.swap" : "swap"
+"button.label.monitor" : "monitor"
+"ui.action.marionette.place" : "Place a decoy."
+"ui.action.marionette.destroy" : "Destroy the decoy."
+"ui.action.marionette.monitor" : "Switch the camera between you and the decoy."
+"ui.action.marionette.swap" : "Swap positions between you and the decoy."
+"ui.action.marionette.switch" : "Toggles the action triggered by keystrokes<br>between monitoring and swapping abilities."
+
+# Stats
+
+"stats.marionette.decoy" : "Num of Placing Decoy"
+"stats.marionette.swap" : "Num of Swapping"
+
+# Titles
+
+"achievement.marionette.common1.title" : "Skit"
+"achievement.marionette.common1.goal" : "Place a doll."
+
+"achievement.marionette.another1.title" : "Comedy"
+"achievement.marionette.another1.goal" : "Be exiled or guessed to death in the meeting immediately after swapping with the doll."
+
+"achievement.marionette.common2.title" : "Tragedy"
+"achievement.marionette.common2.goal" : "Swap positions with the doll twice within 10 seconds."
+
+"achievement.marionette.challenge.title" : "Bloody Dramaturgy"
+"achievement.marionette.challenge.goal" : "Swap with the doll immediately after killing and move 30m or more."
+"achievement.marionette.challenge.splitted.0" : "Bloody "

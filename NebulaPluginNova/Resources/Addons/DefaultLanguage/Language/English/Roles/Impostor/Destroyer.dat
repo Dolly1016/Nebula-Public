@@ -1,0 +1,64 @@
+# Assignable
+
+"role.destroyer.name" : "Destroyer"
+"role.destroyer.short" : "De"
+"role.destroyer.blurb" : "Ruthless"
+"role.destroyer.hint" : "Crush players!"
+
+# Document
+
+"role.destroyer.doc" : "A power-type impostor who crushes players."
+"role.destroyer.ability.title" : "Inherent Ability "Destruction Kill""
+"role.destroyer.ability.main" : "Instead of normal kills, Destroyer can perform <b>destruction kills</b> to crush players.<br>Destruction kills take a little time but do not leave a corpse on the spot."
+"role.destroyer.ability.leftEvidence" : "<title>Blood Evidence</title>A <var>blood evidence</var> of the player's color remains at the kill site.<br>Blood evidences cannot be reported but are one of the important reasoning materials."
+"role.destroyer.tips" : "・You cannot kill if there is not enough space on either side of the target.<br> Be careful in narrow places.<br>・The sound of crushing leaks to the surroundings while crushing.%REPORT%"
+"role.destroyer.tips.report" : "<br>・The kill site can be reported while destroying."
+
+# Options
+
+"options.role.destroyer.detail" : "Destroyer can kill players without corpse.<br>But killing takes more effort."
+"options.role.destroyer.destroyCoolDown" : "Kill Cooldown"
+"options.role.destroyer.phasesOfDestroying" : "Phases Of Destroying"
+"options.role.destroyer.phasesOfDestroying.detail" : "Set the time it takes for the destroyer to kill.<br>The actual time required for the kill is shown in parentheses."
+"options.role.destroyer.killSEStrength" : "Kill SE Strength"
+"options.role.destroyer.leaveKillEvidence" : "Leave Kill Evidence"
+"options.role.destroyer.leaveKillEvidence.detail" : "When turned on, a blood evidence of the victim's color remains at the kill site.<br>Blood evidences do not disappear even after meetings."
+"options.role.destroyer.canReportKillScene" : "Can Report Kill Scene"
+"options.role.destroyer.canReportKillScene.detail" : "When turned on, the report button lights up at the kill site.<br>Once the destroyer finishes crushing the player, reporting is no longer possible."
+
+# Game
+
+
+# UI
+
+"button.label.destroyerKill" : "kill"
+"ui.action.destroyer.kill" : "Stand next to the player and crush them."
+
+# Game Statictics
+
+"statistics.events.destroy" : "Destroy"
+
+# Status
+
+"state.crushed" : "Crushed"
+
+# Stats
+
+"stats.destroyer.reported" : "Num of Reported During Kill"
+
+# Titles
+
+"achievement.destroyer.common1.title" : "Forbidden Power"
+"achievement.destroyer.common1.goal" : "Crush 1 player during the game."
+"achievement.destroyer.common1.splitted.2" : "Power"
+
+"achievement.destroyer.common2.title" : "Destroyer"
+"achievement.destroyer.common2.goal" : "Perform 10 or more destruction kills in total."
+
+"achievement.destroyer.another1.title" : "Conquering Beyond Reason"
+"achievement.destroyer.another1.goal" : "The corpse being destroied is reported."
+
+"achievement.destroyer.challenge.title" : "Path of Cruelty"
+"achievement.destroyer.challenge.goal" : "Perform 3 or more destruction kills during the game and win."
+"achievement.destroyer.challenge.flavor" : ""That course is not a path. Even so, this ship will proceed." —From the Broken Minutes"
+"achievement.destroyer.challenge.splitted.2" : "Path"

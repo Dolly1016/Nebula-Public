@@ -1,0 +1,98 @@
+"achievement.innersloth.wins_skeld.title" : "Wandering Spaceship"
+"achievement.innersloth.wins_skeld.goal" : "Win 3 times on Skeld."
+
+"achievement.innersloth.wins_mira.title" : "Headquarters Lockdown"
+"achievement.innersloth.wins_mira.goal" : "Win 3 times on Mira."
+
+"achievement.innersloth.wins_polus.title" : "Excavation"
+"achievement.innersloth.wins_polus.goal" : "Win 3 times on Polus."
+
+"achievement.innersloth.wins_airship.title" : "Top Hat Crew"
+"achievement.innersloth.wins_airship.goal" : "Win 3 times on Airship."
+
+"achievement.innersloth.survive_crewmate.title" : "Survivor"
+"achievement.innersloth.survive_crewmate.goal" : "Survive and win as a crewmate."
+
+"achievement.innersloth.win_all_tasks.title" : "Smooth Sailing"
+"achievement.innersloth.win_all_tasks.goal" : "Complete all tasks and win as a crewmate."
+
+"achievement.innersloth.win_always_correct_votes.title" : "Famous Detective"
+"achievement.innersloth.win_always_correct_votes.goal" : "Vote only for impostors and win as a crewmate."
+
+"achievement.innersloth.win_kills.title" : "Slasher"
+"achievement.innersloth.win_kills.goal" : "Kill all crewmates and win as an impostor."
+
+"achievement.innersloth.win_impostor_vote.title" : "Clever Rhetoric"
+"achievement.innersloth.win_impostor_vote.goal" : "Win by voting as an impostor."
+
+"achievement.innersloth.win_sabotage.title" : "Sabotage Master"
+"achievement.innersloth.win_sabotage.goal" : "Sabotage important systems and win as an impostor."
+
+"achievement.innersloth.no_vents_impostor_win.title" : "No Vents"
+"achievement.innersloth.no_vents_impostor_win.goal" : "Win as an impostor without using vents."
+
+"achievement.innersloth.survive_two_impostors.title" : "Acting Master"
+"achievement.innersloth.survive_two_impostors.goal" : "Win in a game with two impostors without either impostor dying."
+
+"achievement.innersloth.kill_while_shifted.title" : "No One Can Be Trusted"
+"achievement.innersloth.kill_while_shifted.goal" : "Impersonate someone and kill them."
+
+"achievement.innersloth.block_kill_as_guardian.title" : "I'm Your Ally"
+"achievement.innersloth.block_kill_as_guardian.goal" : "Block a kill as a Guardian Angel."
+
+"achievement.innersloth.task_complete_easy.title" : "Intern"
+"achievement.innersloth.task_complete_easy.goal" : "Complete 10 tasks."
+
+"achievement.innersloth.task_complete_medium.title" : "Manager"
+"achievement.innersloth.task_complete_medium.goal" : "Complete 100 tasks."
+
+"achievement.innersloth.task_complete_hard.title" : "Task Master"
+"achievement.innersloth.task_complete_hard.goal" : "Complete 500 tasks."
+
+"achievement.innersloth.card_first_try.title" : "Impossible Task"
+"achievement.innersloth.card_first_try.goal" : "Swipe the card successfully on the first try."
+
+"achievement.innersloth.die_during_medscan.title" : "Behold My Scan"
+"achievement.innersloth.die_during_medscan.goal" : "Be killed while scanning in the medbay."
+
+"achievement.innersloth.kills_first.title" : "First Experience"
+"achievement.innersloth.kills_first.goal" : "Achieve the first kill."
+
+"achievement.innersloth.kills_easy.title" : "Killer"
+"achievement.innersloth.kills_easy.goal" : "Achieve 5 kills."
+
+"achievement.innersloth.kills_medium.title" : "Assassin"
+"achievement.innersloth.kills_medium.goal" : "Achieve 50 kills."
+
+"achievement.innersloth.kills_hard.title" : "Executioner"
+"achievement.innersloth.kills_hard.goal" : "Achieve 150 kills."
+
+"achievement.innersloth.three_kills_before_meeting.title" : "Consecutive Kills"
+"achievement.innersloth.three_kills_before_meeting.goal" : "Achieve 3 kills before a meeting is called."
+
+"achievement.innersloth.fix_own_sabotage.title" : "Crew Poster"
+"achievement.innersloth.fix_own_sabotage.goal" : "Fix a sabotage you caused yourself."
+
+"achievement.innersloth.kill_during_lights.title" : "Blackout"
+"achievement.innersloth.kill_during_lights.goal" : "Achieve 1 kill during a lights sabotage."
+
+"achievement.innersloth.hns_survive_crewmate.title" : "Hidden Skill"
+"achievement.innersloth.hns_survive_crewmate.goal" : "Participate in the game as a crewmate in Hide and Seek mode and survive."
+
+"achievement.innersloth.hns_impostor_kill_all.title" : "Don't Hide"
+"achievement.innersloth.hns_impostor_kill_all.goal" : "Kill all hiders as an impostor in Hide and Seek mode."
+
+"achievement.innersloth.hns_complete_all_tasks.title" : "Pressure Resistant"
+"achievement.innersloth.hns_complete_all_tasks.goal" : "Perform all tasks in Hide and Seek mode."
+
+"achievement.innersloth.hns_crewmate_wins_easy.title" : "Can't Escape"
+"achievement.innersloth.hns_crewmate_wins_easy.goal" : "Win 10 times in Hide and Seek mode."
+
+"achievement.innersloth.hns_crewmate_wins_hard.title" : "But It's Okay to Hide"
+"achievement.innersloth.hns_crewmate_wins_hard.goal" : "Win 50 times in Hide and Seek mode."
+
+"achievement.innersloth.hns_impostor_kills_easy.title" : "It's Okay to Run"
+"achievement.innersloth.hns_impostor_kills_easy.goal" : "Get 100 kills as a seeker in Hide and Seek mode."
+
+"achievement.innersloth.hns_impostor_kills_hard.title" : "But Don't Hide"
+"achievement.innersloth.hns_impostor_kills_hard.goal" : "Get 200 kills as a seeker in Hide and Seek mode."

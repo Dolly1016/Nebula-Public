@@ -1,0 +1,58 @@
+# Assignable
+
+"role.stirrer.name" : "Stirrer"
+"role.stirrer.short" : "St"
+"role.stirrer.blurb" : "Fiction Kills You"
+
+# Document
+
+"role.stirrer.doc" : "An impostor who disrupts players with fake sabotage."
+"role.stirrer.ability.title" : "Inherent Ability "Fake Sabotage""
+"role.stirrer.ability.main" : "Stir for the players and cause a fake sabotage."
+"role.stirrer.ability.stir" : "<title>Stir</title>Give the target a fake sabotage charge needed to activate fake sabotage."
+"role.stirrer.ability.fakeSabo" : "<title>Fake Sabotage</title> Consume 1 charge the player has to cause fake sabotage.<br>The type of fake sabotage is randomly determined for each player."
+"role.stirrer.tips" : "・Fake sabotage is immediately canceled if you try to restore the sabotage yourself.<br>・If a fake emergency sabotage is left unrestored until time runs out, the player who received the fake sabotage will die."
+
+# Options
+
+"options.role.stirrer.detail" : "Stirrer inflicts fake sabotage on players.<br>Unsolved fake emergency sabotage would eventually kill them."
+"options.role.stirrer.stirCoolDown" : "Stir Cooldown"
+"options.role.stirrer.sabotageCharge" : "Sabotage Charge"
+"options.role.stirrer.sabotageMaxCharge" : "Sabotage Max Charge"
+"options.role.stirrer.sabotageCoolDown" : "Sabotage Cooldown"
+"options.role.stirrer.sabotageInterval" : "Sabotage Interval"
+"options.role.stirrer.sabotageInterval.detail" : "After activating fake sabotage, an additional cooldown is set before<br>fake sabotage can be activated again.<br><br>"
+
+# Game
+
+
+# UI
+
+"button.label.stir" : "stir"
+"button.label.fakeSabotage" : "fake sabo"
+"ui.action.stirrer.stir" : "Gives the player a fake sabotage charge."
+"ui.action.stirrer.fakeSabo" : "Consumes charges to cause fake sabotage."
+
+# Game Statictics
+
+"statistics.events.fakeSabotage" : "Fake Sabotage"
+
+# Status
+
+"state.deranged" : "Deranged"
+
+# Stats
+
+"stats.stirrer.stir" : "Num of Stirring"
+"stats.stirrer.sabo" : "Num of Fake Sabotage"
+
+# Titles
+
+"achievement.stirrer.common1.title" : "Trigger of Chaos"
+"achievement.stirrer.common1.goal" : "Cause fake sabotage."
+
+"achievement.stirrer.challenge.title" : "False Big Dipper"
+"achievement.stirrer.challenge.goal" : "Cause fake sabotage to 7 players at once."
+"achievement.stirrer.challenge.cond" : "-Maximum number of charges granted at once: 3 or less<br>-Stir cooldown: 10 seconds or more"
+"achievement.stirrer.challenge.splitted.0" : "False "
+"achievement.stirrer.challenge.splitted.2" : "Big Dipper"

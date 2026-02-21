@@ -1,0 +1,28 @@
+# Assignable
+
+"role.evilSwapper.name" : "Evil Swapper"
+"role.evilSwapper.short" : "ES"
+"role.evilSwapper.blurb" : "Collapse of Majority Rule"
+"role.evilSwapper.hint" : "Swap votes to manipulate the meeting"
+
+# Document
+
+"role.evilSwapper.doc" : "An impostor who can swap cast votes during emergency meetings."
+"role.evilSwapper.ability.title" : "Inherent Ability "Voting Swap""
+"role.evilSwapper.ability.main" : "The Evil Swapper can swap the votes of 2 selected players during emergency meetings."
+
+# Options
+
+"options.role.evilSwapper.detail" : "The Evil Swapper is an impostor who can swap cast votes during emergency meetings."
+"options.role.evilSwapper.numOfSwap" : "Num of Swap"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+
+# Titles

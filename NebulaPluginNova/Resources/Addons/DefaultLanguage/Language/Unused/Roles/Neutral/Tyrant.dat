@@ -1,0 +1,47 @@
+# Assignable
+
+"role.tyrant.name" : "Tyrant"
+"role.tyrant.short" : "T"
+"role.tyrant.blurb" : "Intense Sunburst"
+
+# Document
+
+"role.tyrant.doc" : "指定数キルすると勝利する第三陣営です。"
+
+# Options
+
+"options.role.tyrant.detail" : "Tyrant will win by killing some players.<br>Get rid of them quickly!"
+"options.role.tyrant.killCooldown" : "Kill Cooldown"
+"options.role.tyrant.numOfKillingToWin" : "# Killing to Win"
+"options.role.tyrant.useImpostorAbility" : "Use Impostor Ability"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.tyrant.kill" : "Num of Killing"
+
+# Titles
+
+"achievement.tyrant.common1.title" : "暴君"
+"achievement.tyrant.common1.goal" : "通算で6回キルする。"
+
+"achievement.tyrant.another1.title" : "愛こそはすべて"
+"achievement.tyrant.another1.goal" : "勝利まであと1キル届かないまま死亡する。"
+
+"achievement.tyrant.challenge.title" : "極楽焦土"
+"achievement.tyrant.challenge.goal" : "3陣営以上に十分な勝機がある中で勝利する。"
+
+# Team
+
+"teams.tyrant" : "Tyrant"
+"end.tyrant" : "Tyrant Wins %EXTRA%"
+
+# Document
+
+"document.tip.winCond.tyrant.title" : "Kill Trigger"
+"document.tip.winCond.tyrant" : "The Tyrant wins by killing %NUM% players."

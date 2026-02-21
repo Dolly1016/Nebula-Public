@@ -1,0 +1,64 @@
+# Assignable
+
+"role.bubblegun.name" : "Bubblegun"
+"role.bubblegun.short" : "Bu"
+"role.bubblegun.blurb" : "Silence Even the Crying"
+"role.bubblegun.hint" : "バブルでプレイヤーを捕まえよう"
+
+# Document
+
+"role.bubblegun.doc" : "巨大なバブルを撃ちだす<b>バブルガン</b>でプレイヤーを捕まえられます。<br>バブルに捕まったプレイヤーは死亡します。バブルに捕まった死体は通報できません。"
+"role.bubblegun.ability.title" : "固有能力 "うちぬけ！バブルガン""
+"role.bubblegun.ability.main" : "バブルでプレイヤーを捕らえてキルできます。<br>バブルガンのクールダウンは<var>キルクールダウン%BUBBLE%</var>(<var>%SEC%</var>秒)です。"
+"role.bubblegun.ability.sec.longer" : "より長い"
+"role.bubblegun.ability.sec.shorter" : "より短い"
+"role.bubblegun.ability.sec.just" : "と同じ"
+"role.bubblegun.ability.equip" : "<title>装備</title>バブルガンを構えます。<br>構えているバブルガンは他プレイヤーからも視認できます。"
+"role.bubblegun.ability.kill" : "<title>バブル</title>バブルを撃ち出します。撃ち出す向きはマウスカーソルで調整できます。<br>バブルを撃ち出すとバブルガンをしまいます。"
+
+# Options
+
+"options.role.bubblegun.detail" : "Bubblegun has a gun that shoots bubbles that trap and kill players."
+"options.role.bubblegun.bubbleCooldown" : "Bubble Cooldown"
+"options.role.bubblegun.bubbleSize" : "Bubble Size"
+"options.role.bubblegun.bubbleSpeed" : "Bubble Speed"
+"options.role.bubblegun.bubbleDuration" : "Bubble Duration"
+"options.role.bubblegun.maxBubbles" : "Max Bubbles"
+"options.role.bubblegun.eraseBubblesOnMeeting" : "Erase Bubbles On Meeting"
+"options.role.bubblegun.canKillImpostor" : "Can Kill Impostor"
+"options.role.bubblegun.bubblePopWhenHitWall" : "Bubble Pop When Hit Wall"
+
+# Game
+
+
+# UI
+
+"button.label.bubble" : "bubble"
+"ui.action.bubblegun.equip" : "Equip and store the bubblegun. While the bubblegun is equipped,<br>the kill button will change to a bubble firing button."
+"ui.action.bubblegun.kill" : "Shoot bubbles. <br>After shooting, the bubblegun will automatically retract."
+
+# Game Statictics
+
+"statistics.events.bubbled" : "Bubbled"
+
+# Status
+
+"state.bubbled" : "Bubbled"
+
+# Stats
+
+"stats.bubblegun.bubble" : "Num of Bubblegun Firing"
+
+# Titles
+
+"achievement.bubblegun.common1.title" : "つーかまえたッ！"
+"achievement.bubblegun.common1.goal" : "泡でプレイヤーを1人捕らえる。"
+
+"achievement.bubblegun.another1.title" : "こわれて消えた"
+"achievement.bubblegun.another1.goal" : "はじめてバブルガンを発砲した直後の会議で追放あるいは推察される。"
+"achievement.bubblegun.another1.flavor" : ""机上の青天井へ""
+
+"achievement.bubblegun.challenge.title" : "80'sのレミニセンス"
+"achievement.bubblegun.challenge.goal" : "右上方向に発射したバブルが3人以上巻き添えにしたうえで弾ける。"
+"achievement.bubblegun.challenge.flavor" : ""あの頃はよかった。だって僕は生まれてすらいなかったのだから。" ―持ち主不明の手記"
+"achievement.bubblegun.challenge.splitted.0" : "80'sの"

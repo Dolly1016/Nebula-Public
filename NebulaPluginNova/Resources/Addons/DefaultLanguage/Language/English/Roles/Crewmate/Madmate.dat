@@ -1,0 +1,76 @@
+# Assignable
+
+"role.madmate.name" : "Madmate"
+"role.madmate.short" : "Ma"
+"role.madmate.prefix" : "Mad"
+"role.madmate.blurb" : "Assist Impostors"
+
+# Document
+
+"role.madmate.doc" : "A madman who sides with the impostors."
+"role.madmate.winCond" : "Win if the impostors win."
+"role.madmate.ability.title" : "Inherent Ability "Fanatic""
+"role.madmate.ability.main" : ""
+"role.madmate.ability.suicide" : "<title>Suicide</title>Can commit suicide at any time."
+"role.madmate.tips" : ""
+
+# Options
+
+"options.role.madmate.detail" : "Madmate is on the side of imposters.<br>Obstruct crewmates to help imposters win."
+"options.role.madmate.canIdentifyImpostors" : "Can Identify Impostors"
+"options.role.madmate.canIdentifyImpostors.detail" : "Set the maximum number of impostors that can be discovered by completing tasks."
+"options.role.madmate.requiredTasksForIdentifying0" : "# Tasks To Identify (1st)"
+"options.role.madmate.requiredTasksForIdentifying1" : "# Tasks To Identify (2nd)"
+"options.role.madmate.requiredTasksForIdentifying2" : "# Tasks To Identify (3rd)"
+"options.role.madmate.group.embroil" : "Embroil Settings"
+"options.role.madmate.group.identification" : "Identification Settings"
+"options.role.madmate.embroilPlayersOnExile" : "Embroil Players On Exile"
+"options.role.madmate.embroilPlayersOnExile.detail" : "Can embroil one other survivor when exiled.<br>Involvement targets are limited to non-impostors."
+"options.role.madmate.limitEmbroiledPlayersToVoters" : "Limit Embroiled Players To Voters"
+"options.role.madmate.limitEmbroiledPlayersToVoters.detail" : "When turned on, embroilment targets can be limited to<br>non-impostors who voted for you."
+"options.role.madmate.embroilDelay" : "Embroil Delay"
+"options.role.madmate.embroilDelay.detail" : "Delay the embroilment of survivors when exiled.<br>After the madmate is exiled, embroilment occurs after the specified number of meetings.<br><br>If set to 0, embroilment occurs immediately upon exile."
+"options.role.madmate.canSuicide" : "Can Suicide"
+"options.role.madmate.suicideCooldown" : "Suicide Cooldown"
+"options.role.madmate.canFixLight" : "Can Fix Light"
+"options.role.madmate.canFixComms" : "Can Fix Comms"
+"options.role.madmate.hasImpostorVision" : "Has Impostor Vision"
+"options.role.madmate.canUseVents" : "Can Use Vents"
+"options.role.madmate.canMoveInVents" : "Can Move In Vents"
+"options.role.madmate.maddenRole" : "Maddened Role"
+
+# Game
+
+
+# UI
+
+"button.label.madmate.suicide" : "Suicide"
+
+# Stats
+
+"stats.madmate.foundImpostors" : "Num of Impostors Found"
+"stats.madmate.embroil" : "Num of Embroil"
+
+# Titles
+
+"achievement.madmate.common1.title" : "Sacrifice"
+"achievement.madmate.common1.goal" : "Be exiled in a meeting while the impostors are alive."
+
+"achievement.madmate.another1.title" : "Strategic Death, or"
+"achievement.madmate.another1.goal" : "Be killed by an impostor and die."
+
+"achievement.madmate.common2.title" : "Scarlet Oath"
+"achievement.madmate.common2.goal" : "Discover an impostor by completing tasks."
+"achievement.madmate.common2.splitted.0" : "Scarlet's "
+
+"achievement.madmate.another2.title" : "Yet I Still Believe"
+"achievement.madmate.another2.goal" : "Be killed by an impostor you discovered by completing tasks."
+"achievement.madmate.another2.splitted.0" : "Yet "
+
+"achievement.madmate.another3.title" : "Accidents Happen"
+"achievement.madmate.another3.goal" : "Discover one or more impostors by completing tasks,<br>then be killed by an undiscovered impostor."
+
+"achievement.madmate.challenge.title" : "Chaotic Ending"
+"achievement.madmate.challenge.goal" : "Win as an impostor while all impostors are alive."
+"achievement.madmate.challenge.splitted.0" : "Chaotic "
+"achievement.madmate.challenge.splitted.2" : "Ending"

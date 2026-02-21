@@ -32,7 +32,7 @@ public static class VentCanUsePatch
         else {
             //ベント外にいる場合
             couldUse &= (modInfo?.Role.CanUseVent ?? false) || @object.inVent || @object.walkingToVent;
-            if (modInfo?.Role.TaskType != Virial.Assignable.RoleTaskType.NoTask) couldUse &= !@object.MustCleanVent(__instance.Id);
+            if (modInfo?.Role.HaveNormalTask ?? false) couldUse &= !@object.MustCleanVent(__instance.Id);
             couldUse &= !pc.IsDead && @object.CanMove;
         }
 
@@ -267,7 +267,7 @@ public static class ConsoleCanUsePatch
 
         if (__instance.AllowImpostor) return true;
 
-        if (info.Role.TaskType == Virial.Assignable.RoleTaskType.NoTask)
+        if (!info.Role.HaveNormalTask)
         {
             __result = float.MaxValue;
             return false;

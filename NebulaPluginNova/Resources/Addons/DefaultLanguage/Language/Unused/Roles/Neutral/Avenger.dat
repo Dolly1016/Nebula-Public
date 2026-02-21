@@ -1,0 +1,64 @@
+# Assignable
+
+"role.avenger.name" : "Avenger"
+"role.avenger.short" : "A"
+"role.avenger.blurb" : "愛に生きるということ"
+
+# Document
+
+"role.avenger.doc" : "恋人の命を奪われ、復讐に燃える第三陣営です。"
+"role.avenger.winCond" : "復讐対象をキルし、最後まで生存する。"
+
+# Options
+
+"options.role.avenger.detail" : "When a Lovers partner is killed, the remaining becomes Avenger.<br>Achieve your revenge and steal the victory."
+"options.role.avenger.killCoolDown" : "Kill Cooldown"
+"options.role.avenger.canKnowExistanceOfAvenger" : "Can Know Existance Of Avenger"
+"options.role.avenger.canKnowExistanceOfAvenger.off" : "Off"
+"options.role.avenger.canKnowExistanceOfAvenger.onlyTarget" : "Only Target"
+"options.role.avenger.canKnowExistanceOfAvenger.on" : "On"
+"options.role.avenger.targetCanKnowAvenger" : "Target Can Know Avenger"
+"options.role.avenger.showAvengerFlashForTarget" : "Show Avenger Flash"
+"options.role.avenger.notificationForAvengerInterval" : "Notification For Avenger Interval"
+"options.role.avenger.notificationForTargetInterval" : "Notification For Target Interval"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.avenger.killTarget" : "Num of Killing Target"
+"stats.avenger.failed" : "Num of Killed By Target"
+"stats.avenger.defend" : "Num of Killing Avenger"
+"role.avenger.hudText" : "You became AVENGER."
+
+# Titles
+
+"achievement.avenger.common1.title" : "報復"
+"achievement.avenger.common1.goal" : "復讐対象をキルする。"
+
+"achievement.avenger.common2.title" : "孤独は愛より強し"
+"achievement.avenger.common2.goal" : "復讐対象になったうえでアヴェンジャーをキルする。"
+"achievement.avenger.common2.flavor" : ""笑わせるな。" ―ピザの空き箱の裏側"
+
+"achievement.avenger.another1.title" : "果たせぬ誓い"
+"achievement.avenger.another1.goal" : "復讐対象にキルされる。"
+
+"achievement.avenger.another2.title" : "愛に死ぬ"
+"achievement.avenger.another2.goal" : "復讐対象をキルした上で死亡する。"
+"achievement.avenger.another2.splitted.2" : "死ぬ"
+
+"achievement.avenger.challenge.title" : "アベンジャーズ"
+"achievement.avenger.challenge.goal" : "相方と自身がともにアヴェンジャーになったうえで、アヴェンジャー勝利する。"
+
+# Team
+
+"end.avenger" : "Avenger Wins%EXTRA%"
+
+# Document
+
+"document.tip.winCond.avenger.title" : "Overwrite Winning"
+"document.tip.winCond.avenger" : "Kill the avenge target with your own hands, stay alive, <br>and take over winning,"

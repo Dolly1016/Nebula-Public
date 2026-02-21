@@ -1,0 +1,73 @@
+# Assignable
+
+"role.gimlet.name" : "Gimlet"
+"role.gimlet.short" : "G"
+"role.gimlet.blurb" : "Unstoppable Revolution"
+"role.gimlet.hint" : "Rush with a drill"
+
+# Document
+
+"role.gimlet.doc" : "An impostor who transforms into a drill and rushes. Players touched by the drill die."
+"role.gimlet.ability.title" : "Inherent Ability "Drill Fierce Charge""
+"role.gimlet.ability.main" : ""
+"role.gimlet.ability.drill" : "<title>Drill</title>Transform into a drill and rush. Rush in the direction of the mouse cursor.<br>Colliding with a wall ends the rush and returns you to your original form."
+"role.gimlet.tips" : "・Touching a wall at a shallow angle allows you to continue rushing while scraping against the wall."
+
+# Options
+
+"options.role.gimlet.detail" : "Gimlet is an imposter who can transform into a drill."
+"options.role.gimlet.drillCooldown" : "Drill Cooldown"
+"options.role.gimlet.drillSize" : "Drill Size"
+"options.role.gimlet.drillSpeed" : "Drill Speed"
+"options.role.gimlet.drillSpeed.detail" : "Set the speed of the drill.<br>Twice the player's movement speed is the standard value."
+"options.role.gimlet.canKillImpostor" : "Can Kill Impostor"
+"options.role.gimlet.drillSeStrength" : "Drill SE Strength"
+"options.role.gimlet.frictionResistance" : "Friction Resistance"
+"options.role.gimlet.frictionResistance.detail" : "Change the resistance when the drill rubs against walls.<br>The larger the value, the more you can continue rushing even if you stab the wall at a right angle."
+
+# Game
+
+"gameAction.gimlet.drill" : "Drill Crush"
+
+# UI
+
+"button.label.drill" : "drill"
+
+# Status
+
+"state.drill" : "Drill"
+
+# Stats
+
+"stats.gimlet.drill" : "Uses of Drill"
+"ui.action.gimlet.drill" : "Transform into a drill and take off."
+"role.gimlet.soundRange" : "Sniper: <color=white>Sound Range</color>"
+"role.gimlet.drillSize" : "Sniper<color=white>: Drill Size</color>"
+
+# Titles
+
+"achievement.gimlet.common1.title" : "Out of Industrial Accident"
+"achievement.gimlet.common1.goal" : "Get a kill with the drill."
+"achievement.gimlet.common1.splitted.1" : "Of "
+
+"achievement.gimlet.common3.title" : "Resonant Metal Sound"
+"achievement.gimlet.common3.goal" : "Transform into the drill against a wall for 5 seconds or more and get 2 or more kills."
+
+"achievement.gimlet.another1.title" : "Reckless Drill"
+"achievement.gimlet.another1.goal" : "Transform into a drill but doesn't kill anyone."
+"achievement.gimlet.another1.splitted.0" : "Reckless "
+
+"achievement.gimlet.another2.title" : "Safety-First Site"
+"achievement.gimlet.another2.goal" : "Be exiled or guessed in the meeting immediately after transforming into a drill for the first time."
+"achievement.gimlet.another2.flavor" : ""Stay safe" —It's a tool, but what is it?"
+"achievement.gimlet.another2.splitted.0" : "Safety-First "
+
+"achievement.gimlet.common2.title" : "Unfortunate Accident"
+"achievement.gimlet.common2.goal" : "Get 4 or more kills with one drill."
+"achievement.gimlet.common2.flavor" : ""It was an unfortunate accident." —They all said so in unison."
+"achievement.gimlet.common2.splitted.0" : "Unfortunate "
+
+"achievement.gimlet.challenge.title" : "Hope Driller"
+"achievement.gimlet.challenge.goal" : "Get 4 or more kills with the drill,<br>make a player who attempted to restore sabotage the last victim,<br>and win with sabotage victory."
+"achievement.gimlet.challenge.cond" : "Kill a player within 10 seconds of starting to restore sabotage"
+"achievement.gimlet.challenge.splitted.2" : "Driller"

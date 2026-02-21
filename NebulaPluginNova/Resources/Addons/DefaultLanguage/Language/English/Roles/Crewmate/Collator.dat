@@ -1,0 +1,88 @@
+# Assignable
+
+"role.collator.name" : "Collator"
+"role.collator.short" : "C"
+"role.collator.blurb" : "Do Experiments"
+
+# Document
+
+"role.collator.doc" : "A crewmate who can check players' factions by collating samples collected from players."
+"role.collator.ability.title" : "Inherent Ability "Sample Testing""
+"role.collator.ability.main" : "Sample from players and collate them during meetings.<br>Collate two different samples and observe the results.<br>There are two patterns of inspection results: <b><color=#33FF33>Matched</color></b> and <b><color=#FF3333>Unmatched</color></b>.<br>If the players from whom the samples were collected are <b>the same faction</b>, both samples will <b><color=#33FF33>Match</color></b>.<br>%SELECTIVE%"
+"role.collator.ability.nonSelective" : "If two samples are collected during the task phase, a notification of the inspection result will be displayed at the top of the screen <var>during the meeting</var>."
+"role.collator.ability.selective" : "If two or more samples are collected during the task phase, you can <var>select two samples</var> to start the inspection during the meeting.<br>The inspection result can be confirmed immediately from the notification displayed at the top of the screen."
+"role.collator.ability.sample" : "<title>Sample</title>Sample from a nearby player.<br>Up to <var>%NUM%</var> test tubes can be used at the same time."
+"role.collator.ability.meeting" : "<title>Collate</title>During the meeting, a button to select the subjects will appear.<br>Select two samples to start the inspection."
+"role.collator.tips" : "・This role is a <color=#ff7f00>Super</color><color=#ff0000>New</color><color=#00ff00>Roles</color> collaboration role (original role: 臨床検査技師)."
+
+# Options
+
+"options.role.collator.detail" : "Collator can compare the roles of players<br>with the samples collected."
+"options.role.collator.sampleCoolDown" : "Sample Cooldown"
+"options.role.collator.selectiveCollating" : "Selective Collating"
+"options.role.collator.selectiveCollating.detail" : "When turned on, you can freely select pairs from two or more collected samples for collation."
+"options.role.collator.maxTrials" : "Max Trials"
+"options.role.collator.maxTrialsPerMeeting" : "Max Trials Per Meeting"
+"options.role.collator.numOfTubes" : "# Tubes"
+"options.role.collator.carringOverSamples" : "Carring Over Samples"
+"options.role.collator.canTakeDuplicateSample" : "Can Take Duplicate Samples"
+"options.role.collator.canTakeDuplicateSample.detail" : "When turned on, you can collect two or more samples from the same player at the same time."
+"options.role.collator.strictClassificationForNeutralRoles" : "Strict Classification For Neutral Roles"
+"options.role.collator.strictClassificationForNeutralRoles.detail" : "When turned on, third factions are distinguished and collated by faction.<br>When turned off, the collation result between third factions always matches."
+"options.role.collator.madmateIsClassifiedAs" : "Madmate Is Classified As..."
+"options.role.collator.madmateIsClassifiedAs.detail" : "Set the faction that matches the madmate's sample."
+"options.role.collator.madmateIsClassifiedAs.impostor" : "Impostor"
+"options.role.collator.madmateIsClassifiedAs.crewmate" : "Crewmate"
+
+# Game
+
+"role.collator.ui.title" : "Samples Collation"
+"role.collator.ui.target" : "Target:"
+"role.collator.ui.result" : "Result:"
+"role.collator.ui.matched" : "Matched"
+"role.collator.ui.unmatched" : "Unmatched"
+"role.collator.gui.results" : "Collation Results"
+"role.collator.gui.results.zero" : "None"
+
+# UI
+
+"button.label.collatorSample" : "sample"
+
+# Stats
+
+"stats.collator.collating" : "Num of Collations"
+"stats.collator.matched" : "Num of Matched Collations"
+"stats.collator.unmatched" : "Num of Unmatched Collations"
+
+# Titles
+
+"achievement.collator.common3.title" : "Interesting Record"
+"achievement.collator.common3.goal" : "Confirm a mismatch as a result of collation."
+"achievement.collator.common3.flavor" : """We have confirmed an imposter has infiltrated." ―From materials stored in an abandoned laboratory"."
+"achievement.collator.common3.splitted.0" : "Interesting "
+
+"achievement.collator.common1.title" : "Good Experiment Day"
+"achievement.collator.common1.goal" : "Obtain samples 5 or more times in one game."
+"achievement.collator.common1.flavor" : ""It is bad to show an opening to get blood drawn!" —Overheard from a researcher."
+"achievement.collator.common1.splitted.2" : "Weather"
+
+"achievement.collator.common2.title" : "Dangerous Collector"
+"achievement.collator.common2.goal" : "Sample 20 times in total."
+"achievement.collator.common2.flavor" : ""Who gave that madman the right to draw blood without permission?" —From a scribble in a certain report."
+"achievement.collator.common2.splitted.0" : "Dangerous "
+
+"achievement.collator.common4.title" : "Compatible Hazardous Substance"
+"achievement.collator.common4.goal" : "Collate samples of impostors with each other."
+"achievement.collator.common4.flavor" : ""Run... Fast... This place... is full of impostors...!" —The words written next to the traces of blood stained on the floor"
+"achievement.collator.common4.splitted.2" : "Hazardous Substance"
+
+"achievement.collator.another1.title" : "Dangerous Curiosity"
+"achievement.collator.another1.goal" : "Be killed by the target from whom you sampled."
+"achievement.collator.another1.cond" : "Be killed within 5 seconds after collection"
+"achievement.collator.another1.flavor" : "The fate of those driven by a little sense of duty and great curiosity, unable to judge the right moment."
+"achievement.collator.another1.splitted.2" : "Curiosity"
+
+"achievement.collator.challenge.title" : "Great Scientific Civilization"
+"achievement.collator.challenge.goal" : "Use the samples of all impostors for collation, exile them, and win as a crewmate."
+"achievement.collator.challenge.flavor" : ""Finally, I can get back to my regular work," her words echoed in the lab."
+"achievement.collator.challenge.splitted.1" : "Scientific "

@@ -45,6 +45,7 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
     static public Lover MyRole = new Lover();
     RuntimeModifier RuntimeAssignableGenerator<RuntimeModifier>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments.Get(0, 0));
 
+    SpecialAssignment[] DefinedAllocatableModifier.SpecialAssignment => NumOfPairsOption > 0 ? [new(this, NumOfPairsOption, RoleChanceOption.GetValue(), null, null)] : [];
 
     void HasAssignmentRoutine.TryAssign(Virial.Assignable.IRoleTable roleTable){
         var impostors = roleTable.GetPlayers(RoleCategory.ImpostorRole).Where(p => p.role.CanLoad(this)).OrderBy(_=>Guid.NewGuid()).ToArray();

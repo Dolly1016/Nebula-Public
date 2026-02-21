@@ -1,0 +1,56 @@
+# Assignable
+
+"role.comet.name" : "Comet"
+"role.comet.short" : "C"
+"role.comet.blurb" : "Run Through"
+
+# Document
+
+"role.comet.doc" : "A crewmate who can move at high speed while becoming invisible."
+"role.comet.ability.title" : "Inherent Ability "Comet on the Ship""
+"role.comet.ability.main" : ""
+"role.comet.ability.blaze" : "<title>Blaze</title>Become invisible and increase movement speed.<br>You will not receive interactions from other players while invisible."
+"role.comet.tips" : "・Comet is not affected by blackouts."
+
+# Options
+
+"options.role.comet.detail" : "You move fastly and secretly.<br>While your ability is activated, your body can not be seen anyone."
+"options.role.comet.blazeCoolDown" : "Blaze Cooldown"
+"options.role.comet.blazeSpeed" : "Blaze Speed"
+"options.role.comet.blazeDuration" : "Blaze Duration"
+"options.role.comet.blazeVisionRate" : "Blaze Vision Rate"
+"options.role.comet.blazeScreenRate" : "Blaze Screen Rate"
+
+# Game
+
+# UI
+
+"button.label.blaze" : "blaze"
+
+# Stats
+
+"stats.comet.blazing" : "Num of Blazing"
+
+# Titles
+
+"achievement.comet.common1.title" : "Comet on the Ship"
+"achievement.comet.common1.goal" : "Use the invisibility ability."
+"achievement.comet.common1.cond" : "The Skeld or Airship only"
+"achievement.comet.common1.splitted.0" : "On the Ship "
+
+"achievement.comet.common2.title" : "Comet on the Ground"
+"achievement.comet.common2.goal" : "Blaze at the first time."
+"achievement.comet.common2.cond" : "MIRA HQ, Polus, or The Fungle only"
+"achievement.comet.common2.splitted.0" : "On the Ground "
+
+"achievement.comet.common3.title" : "Speedster"
+"achievement.comet.common3.goal" : "Move 45m or more in a straight line using the invisibility ability."
+"achievement.comet.common3.cond" : "Acceleration time: 15 seconds or less+Acceleration multiplier: 2.5x or less"
+"achievement.comet.common3.flavor" : ""You bear all the suspicions." —From the Broken Minutes"
+
+"achievement.comet.common4.title" : "Top Gear"
+"achievement.comet.common4.goal" : "Accelerates while being affected by the effects of the Speed Trap and Park "Agile"."
+
+"achievement.comet.challenge.title" : "Invisible Witness"
+"achievement.comet.challenge.goal" : "Witness a kill scene up close while blazing."
+"achievement.comet.challenge.splitted.0" : "Invisible "

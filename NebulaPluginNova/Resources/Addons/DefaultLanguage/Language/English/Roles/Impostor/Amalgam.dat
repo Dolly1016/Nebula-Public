@@ -1,0 +1,47 @@
+# Assignable
+
+"role.amalgam.name" : "Amalgam"
+"role.amalgam.short" : "Am"
+"role.amalgam.blurb" : "Amorphous Being"
+"role.amalgam.hint" : "Use all abilities to your heart's content!"
+
+# Document
+
+"role.amalgam.doc" : "An impostor who can use the abilities of amalgamate roles simultaneously."
+"role.amalgam.ability.title" : "Inherent Ability "Unknown Viscous Substance""
+"role.amalgam.ability.main" : "%ABILITY%"
+"role.amalgam.ability.main.selection" : "<var>Can amalgamate role abilities.</var>"
+"role.amalgam.ability.main.random" : "<var>The abilities of several roles are combined.</var><br>You can easily check the combined roles by opening the "My Role" tab on the help screen."
+"role.amalgam.ability.amalgam" : "<title>Select</title>Select abilities to amalgamate.<br>Once amalgamated, abilities cannot be removed."
+"role.amalgam.tips" : "・You can amalgamate to one <b>kill/aim ability</b> and one <b>mini map ability</b> at the same time.<br>・Key assignments are only valid for kill and aim abilities."
+
+# Options
+
+"options.role.amalgam.detail" : "Amalgam can combine the abilities of various roles."
+"options.role.amalgam.maxRoles" : "# of Roles Can Load"
+"options.role.amalgam.randomAssignment" : "Random Assignment"
+"options.role.amalgam.abilityFilter" : "Ability Role Filter"
+"options.role.amalgam.canBeGuessedAsLoadedRoles" : "Can Be Guessed As Loaded Roles"
+
+# Game
+
+"role.amalgam.tabs.kill" : "Kill Roles"
+"role.amalgam.tabs.map" : "Map Roles"
+"role.amalgam.tabs.others" : "Other Roles"
+
+# UI
+
+"button.label.select" : "select"
+
+# Stats
+
+
+# Titles
+
+"achievement.amalgam.common1.title" : "Second Blade"
+"achievement.amalgam.common1.goal" : "Amalgamate an ability."
+
+"achievement.amalgam.challenge.title" : "Ultimate Amalgamated Life Form"
+"achievement.amalgam.challenge.goal" : "Achieve 2 or more challenge titles of combined roles."
+"achievement.amalgam.challenge.splitted.0" : "Ultimate "
+"achievement.amalgam.challenge.splitted.2" : "Life Form"

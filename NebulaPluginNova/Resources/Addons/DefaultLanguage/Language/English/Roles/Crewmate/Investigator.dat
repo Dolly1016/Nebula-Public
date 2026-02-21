@@ -1,0 +1,59 @@
+# Assignable
+
+"role.investigator.name" : "Investigator"
+"role.investigator.short" : "I"
+"role.investigator.blurb" : "Never Miss"
+
+# Document
+
+"role.investigator.doc" : "A crewmate who obtains information by investigating footprints left at crime scenes."
+"role.investigator.ability.title" : "Inherent Ability "Seeker of Truth""
+"role.investigator.ability.main" : ""
+"role.investigator.ability.investigate" : "<title>Investigate</title>Start investigating on the spot. During investigation, your field of view changes, and footprints become visible.<br>Approaching a footprint starts the investigation of that footprint."
+
+# Options
+
+"options.role.investigator.detail" : "Investigators follow footprints<br>and look for information about the murder."
+"options.role.investigator.investigateCooldown" : "Investigate Cooldown"
+"options.role.investigator.investigateDuration" : "Investigate Duration"
+"options.role.investigator.investigateSpeed" : "Investigate Speed"
+"options.role.investigator.investigateSpeed.detail" : "It takes a little time to examine the details of footprints.<br>The larger the value, the faster the investigation will be."
+"options.role.investigator.investigateEyesight" : "Investigate Eyesight"
+"options.role.investigator.investigateEyesight.detail" : "The narrower your field of view during investigation,<br>the more difficult it is to investigate footprints."
+"options.role.investigator.footprintDuration" : "Footprint Duration"
+"options.role.investigator.footprintDuration.detail" : "Set how many seconds the killer will continue to leave footprints after a kill."
+
+# Game
+
+"role.investigator.overlay.title.unchecked" : "Unchecked footprint"
+"role.investigator.overlay.title.checked" : "Footprint in %ROOM%"
+"role.investigator.overlay.notFound" : "It has not been investigated."
+"role.investigator.overlay.fastFind" : "It was discovered BEFORE the report was made!"
+"role.investigator.overlay.reportedImmediately" : "The emergency meeting began immediately after death."
+"role.investigator.overlay.elapsed" : "The emergency meeting began %ELAPSED% seconds after death."
+"role.investigator.overlay.killer" : "This appears to have been committed by %TEAM%."
+
+# UI
+
+"button.label.investigate" : "investigate"
+
+# Stats
+
+"stats.investigator.found" : "Num of Finding Footprints"
+
+# Titles
+
+"achievement.investigator.common1.title" : "I See"
+"achievement.investigator.common1.goal" : "Investigate footprints a total of 10 times."
+"achievement.investigator.common1.flavor" : ""There are still things that can be done. Until I do what must be done." —An unsigned memoir"
+
+"achievement.investigator.another1.title" : "SNOBBISM"
+"achievement.investigator.another1.goal" : "Die near footprints during investigation."
+
+"achievement.investigator.another2.title" : "COLD CASE"
+"achievement.investigator.another2.goal" : "The game ends without anyone being able to exile<br>the culprit of the footprints found through investigation."
+
+"achievement.investigator.challenge.title" : "Seeker of Truth"
+"achievement.investigator.challenge.goal" : "Exile the culprit in the meeting immediately after discovering footprints."
+"achievement.investigator.challenge.splitted.0" : "Truth's "
+

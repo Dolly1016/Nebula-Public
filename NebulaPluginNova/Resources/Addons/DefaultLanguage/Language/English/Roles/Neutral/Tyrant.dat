@@ -1,0 +1,47 @@
+# Assignable
+
+"role.tyrant.name" : "Tyrant"
+"role.tyrant.short" : "T"
+"role.tyrant.blurb" : "Intense Sunburst"
+
+# Document
+
+"role.tyrant.doc" : "A neutral member who wins by getting a specified number of kills."
+
+# Options
+
+"options.role.tyrant.detail" : "Tyrant will win by killing some players.<br>Get rid of them quickly!"
+"options.role.tyrant.killCooldown" : "Kill Cooldown"
+"options.role.tyrant.numOfKillingToWin" : "# Killing to Win"
+"options.role.tyrant.useImpostorAbility" : "Use Impostor Ability"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.tyrant.kill" : "Num of Killing"
+
+# Titles
+
+"achievement.tyrant.common1.title" : "Tyrant"
+"achievement.tyrant.common1.goal" : "Get a total of 6 kills."
+
+"achievement.tyrant.another1.title" : "All You Need Is Love"
+"achievement.tyrant.another1.goal" : "Die one kill away from victory."
+
+"achievement.tyrant.challenge.title" : "Paradise On Ashes"
+"achievement.tyrant.challenge.goal" : "Win while 3 or more teams have a good chance of winning."
+
+# Team
+
+"teams.tyrant" : "Tyrant"
+"end.tyrant" : "Tyrant Wins %EXTRA%"
+
+# Document
+
+"document.tip.winCond.tyrant.title" : "Kill Trigger"
+"document.tip.winCond.tyrant" : "The Tyrant wins by killing %NUM% players."

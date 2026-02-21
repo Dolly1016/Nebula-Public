@@ -44,6 +44,11 @@ public enum RoleTaskType
     /// </summary>
     RoleTask,
     /// <summary>
+    /// 特別なタスク。
+    /// タスクノルマを持つものの、通常のタスクにはインタラクトできません。
+    /// </summary>
+    SpecialTask,
+    /// <summary>
     /// タスクを持たない。
     /// 主にインポスターや第三陣営が該当します。
     /// </summary>
@@ -633,6 +638,10 @@ public interface HasAssignmentRoutine
 
 public interface DefinedAllocatableModifier : DefinedModifier, ICodeName, HasRoleFilter, HasAssignmentRoutine, ISpawnable, IAssignToCategorizedRole
 {
+    /// <summary>
+    /// 特殊割り当ての情報を返します。
+    /// </summary>
+    SpecialAssignment[] SpecialAssignment => [];
 }
 
 /// <summary>
@@ -873,6 +882,7 @@ public interface RuntimeRole : RuntimeAssignable
     string DisplayColoredShort => Role.DisplayColoredShort;
 
     RoleTaskType TaskType => Role.Category == RoleCategory.CrewmateRole ? RoleTaskType.CrewmateTask : RoleTaskType.NoTask;
+    bool HaveNormalTask => TaskType == RoleTaskType.CrewmateTask || TaskType == RoleTaskType.RoleTask;
 
     string DisplayIntroBlurb => Role.DisplayIntroBlurb;
     string DisplayIntroRoleName => Role.DisplayColoredName;

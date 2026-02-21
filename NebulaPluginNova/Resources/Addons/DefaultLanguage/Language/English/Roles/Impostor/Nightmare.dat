@@ -1,0 +1,63 @@
+# Assignable
+
+"role.nightmare.name" : "Nightmare"
+"role.nightmare.short" : "N"
+"role.nightmare.blurb" : "The Bad Omen"
+
+# Document
+
+"role.nightmare.doc" : "An impostor who can create <b>night zones</b> that extremely limit the field of view."
+"role.nightmare.ability.title" : "Inherent Ability "Release of the Night Darkness""
+"role.nightmare.ability.main" : "Can interfere with players' fields of view using <b>nightmare</b> that create night zones."
+"role.nightmare.ability.place" : "<title>Place</title>Place a <b>nightmare</b> on the spot.<br>Placed nightmare is not visible to other players until night is activated."
+"role.nightmare.ability.nightmare" : "<title>Night</title>The nightmare deploy a night zone. Within the night zone, the field of view is extremely limited.%DESTROY%"
+"role.nightmare.ability.nightmare.destroy" : "<br><var>The nightmare that deployed the night zone disappears.</var>"
+"role.nightmare.tips" : "・Nightmare themselves and ally players can see the situation inside the night zone."
+
+# Options
+
+"options.role.nightmare.detail" : "Nightmare controls the night,<br>casting shadows all around the seeds."
+"options.role.nightmare.placeCooldown" : "Place Cooldown"
+"options.role.nightmare.nightmareCooldown" : "Nightmare Cooldown"
+"options.role.nightmare.nightmareDuration" : "Nightmare Duration"
+"options.role.nightmare.nightSize" : "Size Of Night"
+"options.role.nightmare.nightSize.detail" : "Change the size of the nightmare deployed by the night lantern."
+"options.role.nightmare.disposableNightSeed" : "Disposable Night Seed"
+"options.role.nightmare.disposableNightSeed.detail" : "When turned on, the nightmare disappears when night is activated."
+"options.role.nightmare.numOfNightSeed" : "# Of Night Seed"
+"options.role.nightmare.inShadowLightSize" : "Light Size In Night"
+"options.role.nightmare.inShadowLightSize.detail" : "Set the width of the field of view within the night zone.<br>The set value corresponds to the width of the field of view during a blackout."
+
+# Game
+
+"gameAction.nightmare.nightSeed" : "Nightmare Placement"
+
+# UI
+
+"button.label.nightmare" : "nightmare"
+"ui.action.nightmare.place" : "Place a nightmare seed.<br>When nightmare is activated, a shadow will fall around the seed."
+"ui.action.nightmare.nightmare" : "Casts a shadow around the seed you place."
+
+# Stats
+
+"stats.nightmare.place" : "Num of the Seed Placement"
+"stats.nightmare.nightmare" : "Num of Invoked Nightmare"
+
+# Titles
+
+"achievement.nightmare.common1.title" : "Ruler of Night"
+"achievement.nightmare.common1.goal" : "Activate night a total of 10 times."
+"achievement.nightmare.common1.splitted.2" : "Ruler"
+
+"achievement.nightmare.common2.title" : "Mob"
+"achievement.nightmare.common2.goal" : "Get 5 kills in total within the night zone."
+
+"achievement.nightmare.another1.title" : "Be Careful in the Dark"
+"achievement.nightmare.another1.goal" : "Die within the night zone."
+
+"achievement.nightmare.another2.title" : "Someone Pinch Me"
+"achievement.nightmare.another2.goal" : "Be exiled or guessed in the meeting immediately after activating night for the first time."
+
+"achievement.nightmare.challenge.title" : "Horror of a Certain Night"
+"achievement.nightmare.challenge.goal" : "3 or more deaths occur within the night zone with one night activation."
+"achievement.nightmare.challenge.cond" : "Nightmare themselves must also get 1 or more kills within the night zone"

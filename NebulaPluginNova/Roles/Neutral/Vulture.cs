@@ -63,6 +63,7 @@ public class Vulture : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignabl
             if (acTokenChallenge != null) acTokenChallenge.Value = false;
         }
 
+        public DeadbodyArrowAbility ArrowAbility { get; private set; }
         public override void OnActivated()
         {
             if (AmOwner)
@@ -70,8 +71,10 @@ public class Vulture : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignabl
                 acTokenChallenge = new("vulture.challenge", true, (val, _) =>  val && NebulaGameManager.Instance!.EndState!.EndCondition == NebulaGameEnd.VultureWin && NebulaGameManager.Instance!.EndState!.Winners.Test(MyPlayer) );
 
                 //死体を指す矢印を表示する
-                var ability = new DeadbodyArrowAbility().Register(this);
-                GameOperatorManager.Instance?.Subscribe<GameUpdateEvent>(ev => ability.ShowArrow = !MyPlayer.IsDead, this);
+                ArrowAbility = new DeadbodyArrowAbility();
+                ArrowAbility.Bind(this);
+                ArrowAbility.RegisterSelf();
+                GameOperatorManager.Instance?.Subscribe<GameUpdateEvent>(ev => ArrowAbility.ShowArrow = !MyPlayer.IsDead, this);
 
                 StaticAchievementToken? acTokenCommon = null;
 

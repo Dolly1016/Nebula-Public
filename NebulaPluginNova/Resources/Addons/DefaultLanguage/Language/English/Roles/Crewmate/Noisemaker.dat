@@ -1,0 +1,35 @@
+# Assignable
+
+"role.noisemaker.name" : "Noisemaker"
+"role.noisemaker.short" : "N"
+"role.noisemaker.blurb" : "Send out an alert when killed"
+
+# Document
+
+"role.noisemaker.doc" : "A crewmate who sends out an alert indicating their death location when killed."
+
+# Options
+
+"options.role.noisemaker.detail" : "Noisemaker send out an alert when killed."
+"options.role.noisemaker.noiseDuration" : "Noise Duration"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.noisemaker.common1.title" : "Security Awareness"
+"achievement.noisemaker.common1.goal" : "Die and send out an alert."
+"achievement.noisemaker.common1.flavor" : ""Let's sound the security buzzer before losing our lives" —Excerpt from "Life Safety Training""
+
+"achievement.noisemaker.challenge.title" : "A Good Kid's Secret Strategy"
+"achievement.noisemaker.challenge.goal" : "The player who killed you is exiled in the meeting immediately after the alert is generated."
+"achievement.noisemaker.challenge.splitted.0" : "A Good Kid's "
+"achievement.noisemaker.challenge.splitted.1" : "Secret "
+"achievement.noisemaker.challenge.splitted.2" : "Strategy"

@@ -1,0 +1,50 @@
+# Assignable
+
+"role.painter.name" : "Painter"
+"role.painter.short" : "Pa"
+"role.painter.blurb" : "No One Knows You Anymore"
+
+# Document
+
+"role.painter.doc" : "他プレイヤーの見た目を塗り替えられるインポスターです。"
+"role.painter.ability.title" : "固有能力 "悪意のボディペイント""
+"role.painter.ability.main" : ""
+"role.painter.ability.sample" : "<title>採取</title>プレイヤーの現在の見た目を採取します。<var>%SAMPLE%</var>"
+"role.painter.ability.paint" : "<title>ペイント</title>プレイヤーに採取した見た目を塗ります。%PAINT%"
+"role.painter.ability.sample.loseSample" : "採取した見た目は会議を挟むと消失します。"
+"role.painter.ability.sample.keepSample" : "採取した見た目は会議を跨いで持ち越せます。"
+"role.painter.ability.paint.afterMeeting" : "見た目は<var>会議後</var>に変化します。"
+"role.painter.ability.paint.immediate" : "見た目は<var>即座</var>に変化します。"
+
+# Options
+
+"options.role.painter.detail" : "Painter samples the appearance of the player<br>and paints the form onto players."
+"options.role.painter.sampleCoolDown" : "Sample Cooldown"
+"options.role.painter.paintCoolDown" : "Paint Cooldown"
+"options.role.painter.loseSampleOnMeeting" : "Lose Sample On Meeting"
+"options.role.painter.transformAfterMeeting" : "Transform After Meeting"
+
+# Game
+
+
+# UI
+
+"button.label.paint" : "paint"
+
+# Stats
+
+"stats.painter.sample" : "Num of Taking Samples"
+"stats.painter.morph" : "変身回数"
+"stats.painter.paint" : "Num of Painting"
+
+# Titles
+
+"achievement.painter.common1.title" : "ペルソナとの永訣"
+"achievement.painter.common1.goal" : "サンプルを採取し、見た目を塗り替える。"
+"achievement.painter.common1.cond" : "イリュージョナーでもクリア可能"
+
+"achievement.painter.challenge.title" : "正体不明の証人"
+"achievement.painter.challenge.goal" : "3人のプレイヤーの見た目をそれぞれ2回以上塗り替える"
+"achievement.painter.challenge.cond" : "同じ見た目への塗り替えはカウント対象外"
+"achievement.painter.challenge.splitted.0" : "正体不明の"
+"achievement.painter.challenge.splitted.2" : "証人"

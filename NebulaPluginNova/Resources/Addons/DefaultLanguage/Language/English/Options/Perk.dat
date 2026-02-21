@@ -1,0 +1,24 @@
+# Header
+
+"options.perk" : "Perk Options"
+"options.perk.detail" : "Plants that appear all over the map provide perks.<br>Perks provide benefits to their owners."
+
+# Groups
+
+# Options
+
+"options.perk.numOfPlants" : "# Plants"
+"options.perk.numOfPlants.detail" : "Plants grow each time a meeting is held.<br>All survivors can get perks from blooming plants."
+"options.perk.numOfWarpedPlants" : "# Warped Plants"
+"options.perk.numOfWarpedPlants.detail" : "Warped plants can only be used by non-crew players.<br>Blooming warped plants provide perks suitable for interference and confusion."
+"options.perk.maxBloomsPerPlant" : "Max Blooms (Per Plant)"
+"options.perk.growSpeed" : "Plant Growing Speed"
+"options.perk.growSpeed.detail" : "Adjust the growth speed of plants.<br>The larger the value, the faster they grow."
+"options.perk.shortcut.standard" : "Shortcut (Common Perks)"
+"options.perk.shortcut.standard.0" : "Set Spawn Rate To 0"
+"options.perk.shortcut.standard.100" : "Set Spawn Rate To 100"
+"options.perk.shortcut.warped" : "Shortcut (Non-crewmate Perks)"
+"options.perk.shortcut.warped.0" : "Set Spawn Rate To 0"
+"options.perk.shortcut.warped.100" : "Set Spawn Rate To 100"
+"options.perk.movementRestrictionPerksAlsoAffectCasters" : "Movement Restriction Perks Also Affect Casters"
+"options.perk.movementRotationPerksAlsoAffectCasters" : "Movement Rotation Perks Also Affect Casters"

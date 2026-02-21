@@ -1,0 +1,45 @@
+# Assignable
+
+"role.chainShifter.name" : "Chain Shifter"
+"role.chainShifter.short" : "C"
+"role.chainShifter.blurb" : "Suffer The Calamity"
+
+# Document
+
+"role.chainShifter.doc" : "A neutral member with no victory condition. Swap roles with someone."
+
+# Options
+
+"options.role.chainShifter.detail" : "Chain Shifter has no way to win."
+"options.role.chainShifter.shiftCoolDown" : "Shift Cooldown"
+"options.role.chainShifter.canCallEmergencyMeeting" : "Can Call Emergency Meeting"
+
+# Game
+
+
+# UI
+
+"button.label.shift" : "shift"
+
+# Stats
+
+"stats.chainShifter.shift" : "Num of Shifting Roles"
+
+# Titles
+
+"achievement.chainShifter.common1.title" : "Outcome Of Events"
+"achievement.chainShifter.common1.goal" : "Kill the Chain Shifter."
+"achievement.chainShifter.common1.flavor" : "Sometimes it's better to end the story."
+
+"achievement.chainShifter.another1.title" : "Inevitable"
+"achievement.chainShifter.another1.goal" : "Receive the Chain Shifter role and lose without changing it."
+"achievement.chainShifter.another1.flavor" : "「Forced Defeat」"
+
+"achievement.chainShifter.challenge.title" : "Suffer The Calamity"
+"achievement.chainShifter.challenge.goal" : "The game ends immediately after swapping roles and you win."
+"achievement.chainShifter.challenge.flavor" : ""I'll give you the best ending." —From the Broken Minutes"
+"achievement.chainShifter.challenge.splitted.2" : "Approaches"
+
+# Team
+
+"teams.chainShifter" : "Chain Shifter"

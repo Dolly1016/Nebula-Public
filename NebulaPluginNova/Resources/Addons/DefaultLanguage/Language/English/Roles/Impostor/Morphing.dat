@@ -1,0 +1,55 @@
+# Assignable
+
+"role.morphing.name" : "Morphing"
+"role.morphing.short" : "Mo"
+"role.morphing.blurb" : "Change Your Look to Not Get Caught"
+
+# Document
+
+"role.morphing.doc" : "An impostor who can sample other players' appearances and morph into them."
+"role.morphing.ability.title" : "Inherent Ability "Morphing""
+"role.morphing.ability.main" : ""
+"role.morphing.ability.sample" : "<title>Sample</title>Sample the current appearance of the player.<br><var>%SAMPLE%</var>"
+"role.morphing.ability.morph" : "<title>Morph</title>Morph into the sampled appearance.<br>The effect ends or activates the ability again while the ability is active returns you to your original appearance."
+"role.morphing.ability.sample.loseSample" : "Sampled appearances disappear after a meeting."
+"role.morphing.ability.sample.keepSample" : "Sampled appearances can be carried over across meetings."
+
+# Options
+
+"options.role.morphing.detail" : "Morphing samples the appearance of the player<br>and transforms into that form."
+"options.role.morphing.sampleCoolDown" : "Sample Cooldown"
+"options.role.morphing.morphCoolDown" : "Morph Cooldown"
+"options.role.morphing.morphDuration" : "Morph Duration"
+"options.role.morphing.loseSampleOnMeeting" : "Lose Sample On Meeting"
+
+# Game
+
+
+# UI
+
+"button.label.morph" : "morph"
+"button.label.sample" : "sample"
+
+# Stats
+
+"stats.morphing.sample" : "Num of Taking Samples"
+"stats.morphing.morph" : "Num of Morphing"
+"stats.morphing.paint" : "Number of Paints"
+
+# Titles
+
+"achievement.morphing.common1.title" : "Floating Alibi"
+"achievement.morphing.common1.goal" : "Sample and morph."
+"achievement.morphing.common1.cond" : "Can also be cleared with Illusioner"
+"achievement.morphing.common1.splitted.0" : "Floating "
+
+"achievement.morphing.another1.title" : "Death Mask"
+"achievement.morphing.another1.goal" : "Kill someone with the same appearance as the sample."
+
+"achievement.morphing.another2.title" : "Doppelganger Encounter"
+"achievement.morphing.another2.goal" : "Pass a player with the same appearance at close range while morph."
+"achievement.morphing.another2.flavor" : ""...(for the time being)..." —From the surveillance camera footage"
+
+"achievement.morphing.challenge.title" : "Unlocated Sin"
+"achievement.morphing.challenge.goal" : "Kill while morph and have the sample source player in possession exiled during the meeting."
+"achievement.morphing.challenge.splitted.0" : "Unlocated "

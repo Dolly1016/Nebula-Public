@@ -137,7 +137,7 @@ internal class Doppelganger : DefinedSingleAbilityRoleTemplate<Doppelganger.Abil
                     _ => !(fakePlayer?.UsingSomeUtility ?? false), _ => fakePlayer != null).SetAsUsurpableButton(this);
                 swapButton.OnEffectStart = (button) =>
                 {
-                    MyPlayer.GainSpeedAttribute(0f, 2f, false, 0);
+                    MyPlayer.GainSpeedAttribute(0f, SwapDurationOption + 0.25f, false, 0);
                     currentWalkCommandId++; //現在の移動を中断する
                 };
                 swapButton.OnEffectEnd = (button) =>

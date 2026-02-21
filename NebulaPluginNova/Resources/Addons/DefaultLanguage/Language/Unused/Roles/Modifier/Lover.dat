@@ -1,0 +1,62 @@
+# Assignable
+
+"role.lover.name" : "Lover"
+
+# Document
+
+"role.lover.doc" : "2人1組のモディファイアです。%SUICIDE%"
+"role.lover.doc.standard" : "相方が死亡すると、後を追って死亡します。"
+"role.lover.doc.avenger" : "相方がキルされると、%AVENGER%になって復讐劇がはじまります。<br>追放等の理由で復讐相手がいない場合はそのまま後を追って自殺します。"
+"role.lover.winCond" : "全生存者が3人以下になった段階で、相方とともに生存していること。%EXTRA%"
+"role.lover.winCond.additional" : "<br>または、相方が勝利しかつ生存していると自身も<var>追加勝利</var>します。"
+
+# Options
+
+"options.role.lover.detail" : "While the number of ways to win increases, so does the risk of death."
+
+# Game
+
+"role.lover.blurb" : "You're in <color=#fc04bdff>Love</color> with %NAME%"
+"role.lover.generalBlurb" : "恋は落ちるもの"
+"options.role.lover.numOfPairs" : "# Pairs"
+"options.role.lover.chanceOfAssigningImpostors" : "% Assigning Impostors"
+"options.role.lover.allowExtraWin" : "Allow Extra Win"
+"options.role.lover.allowExtraWin.detail" : "オンにすると、相方が生きて勝利すれば自身も一緒に勝利できます。"
+"options.role.lover.allowExtraWinViaCrewmateWin" : "Extra Win Via Crewmate Win"
+"options.role.lover.blockRoleWin" : "Block Role Win"
+"options.role.lover.blockRoleWin.detail" : "オンにすると、自身の役職によって勝利できなくなります。<br><br>・オフの場合: ラバーズとして勝利できなくとも、自身の役職で勝利すれば勝利できます。<br>・オンの場合: ラバーズの勝利条件以外で勝利できなくなります。"
+"options.role.lover.avengerMode" : "Avenger Mode"
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.lover.common1.title" : "それはときに盲目"
+"achievement.lover.common1.goal" : "ラバーズ単独勝利する。"
+"achievement.lover.common1.splitted.0" : "それは"
+
+"achievement.lover.another1.title" : "それはときに激情"
+"achievement.lover.another1.goal" : "相方を失い、後追い自殺する。"
+"achievement.lover.another1.splitted.1" : "ときに"
+
+"achievement.lover.challenge.title" : "未必の恋"
+"achievement.lover.challenge.goal" : "インポスターが2人生存しており、<br>自身はインポスターではない状態でラバーズ単独勝利する。"
+"achievement.lover.challenge.splitted.2" : "恋"
+
+# Team
+
+"end.lover" : "Lovers Win%EXTRA%"
+"end.extra.lover" : " <color=#FFFFFF>with</color> Lovers"
+
+# Document
+
+"document.tip.winCond.teams.lover" : "Lovers"
+
+"document.tip.winCond.lovers.normal.title" : "Lovers Solo Trigger"
+"document.tip.winCond.lovers.normal" : "When there are only 3 survivors, lovers win if each other survive."
+"document.tip.winCond.lovers.extra.title" : "Lovers Extra Winning"
+"document.tip.winCond.lovers.extra" : "If lovers partner survives and wins, the others also win."

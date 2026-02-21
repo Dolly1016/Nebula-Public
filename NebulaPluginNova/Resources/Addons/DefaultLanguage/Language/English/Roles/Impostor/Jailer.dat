@@ -1,0 +1,57 @@
+# Assignable
+
+"role.jailer.name" : "Jailer"
+"role.jailer.short" : "J"
+"role.jailer.blurb" : "Be Under the Control"
+
+# Document
+
+"role.jailer.doc" : "An impostor who can check admin information at any time."
+"role.jailer.ability.title" : "Inherent Ability "The Unescapable Eye of the Jailer""
+"role.jailer.ability.main" : "%DOC%"
+"role.jailer.ability.main.canWalk" : "The Jailer can check admin information <var>while walking</var> at any time.%INHERIT%"
+"role.jailer.ability.main.cannotWalk" : "The Jailer can check admin information at any time.<br>You <var>cannot move</var> while viewing the admin.%INHERIT%"
+"role.jailer.ability.iconColor.both" : "<title>Mini Map</title>Corpses are displayed in <var>gray</var> and impostors are displayed in <var>red</var>."
+"role.jailer.ability.iconColor.deadBodyOnly" : "<title>Mini Map</title>Corpses are displayed in <var>gray</var>."
+"role.jailer.ability.iconColor.impostorOnly" : "<title>Mini Map</title>Impostors are displayed in <var>red</var>."
+"role.jailer.ability.main.inherit" : "<br>Additionally, when the Jailer dies, this unique ability is <var>inherited</var> by ally impostors."
+"role.jailer.tips" : "・Regardless of game settings, corpses are counted in the Jailer's admin."
+
+"role.jailerModifier.doc" : "Can check admin information at any time."
+"role.jailerModifier.ability.title" : "Inherent Ability "The Unescapable Eye of the Jailer""
+"role.jailerModifier.ability.main" : "%DOC%"
+"role.jailerModifier.tips" : "・According to game options, corpses are counted in the Jailer's admin."
+
+# Options
+
+"options.role.jailer.detail" : "Jailer is an impostor who commits crimes in a planned way.<br>They has the portable admin."
+"options.role.jailer.canMoveWithMapWatching" : "Can Move With Map Watching"
+"options.role.jailer.canUseAdminOnMeeting" : "Can Use Admin On Meeting"
+"options.role.jailer.canIdentifyDeadBodies" : "Can Identify Dead Bodies"
+"options.role.jailer.canIdentifyImpostors" : "Can Identify Impostors"
+"options.role.jailer.inheritAbilityOnDying" : "Inherit Ability On Dying"
+"options.role.jailer.inheritAbilityOnDying.detail" : "When the Jailer dies, the Jailer's ability moves to other surviving impostors.<br>Even if the Jailer ability has moved, the ally's role is not changed."
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.jailer.common1.title" : "Higher Being"
+"achievement.jailer.common1.goal" : "Kill after opening the map."
+"achievement.jailer.common1.splitted.2" : "Being"
+
+"achievement.jailer.common2.title" : "Prison Guard"
+"achievement.jailer.common2.goal" : "Lay in wait near a corpse for 10 seconds or more."
+"achievement.jailer.common2.splitted.2" : "Guard"
+
+"achievement.jailer.challenge.title" : "Absolute Concealment Doctrine"
+"achievement.jailer.challenge.goal" : "Kill a total of 2 players in a room with a corpse."
+"achievement.jailer.challenge.flavor" : ""Since then, there has been no word at all." —A note left in the kitchen"
+"achievement.jailer.challenge.splitted.0" : "Absolute "

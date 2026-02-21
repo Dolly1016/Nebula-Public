@@ -1,0 +1,40 @@
+# Assignable
+
+"role.clog.name" : "Clog"
+"role.clog.blurb" : "A nuisance anytime, anywhere"
+"role.clog.short" : "C"
+
+# Document
+
+"role.clog.doc" : "Can summon ghosts that interfere with survivors' movement."
+# Options
+
+"options.role.clog.detail" : "Clog can invoke the ghost with collider."
+"options.role.clog.ghostDuration" : "Ghost Duration"
+"options.role.clog.numOfGhost" : "# Of Ghost"
+"options.role.clog.ghostSize" : "Ghost Size"
+
+# Game
+
+"role.clog.ghostSize" : "Clog<color=white>: Ghost Size</color>"
+"gameAction.clog.ghost" : "Ghost Summon"
+
+# UI
+
+"button.label.ghost" : "ghost"
+
+# Stats
+
+"stats.clog.ghosts" : "Num of Summoned Ghosts"
+
+# Titles
+
+"achievement.clog.common1.title" : "Manifested Resentment"
+"achievement.clog.common1.goal" : "Summon a ghost."
+
+"achievement.clog.another1.title" : "Was I a Nuisance?"
+"achievement.clog.another1.goal" : "An ally approaches near the ghost."
+"achievement.clog.another1.splitted.0" : "Was I "
+
+"achievement.clog.common2.title" : "Desperate Game End"
+"achievement.clog.common2.goal" : "Interfere with survivors' movements and win by sabotage."

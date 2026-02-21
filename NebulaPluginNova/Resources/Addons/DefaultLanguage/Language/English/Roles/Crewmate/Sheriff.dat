@@ -1,0 +1,74 @@
+# Assignable
+
+"role.sheriff.name" : "Sheriff"
+"role.sheriff.short" : "S"
+"role.sheriff.blurb" : "Shoot the Impostor"
+
+# Document
+
+"role.sheriff.doc" : "A crewmate who can kill non-crew members."
+"role.sheriff.ability.title" : "Inherent Ability "Execution of Justice""
+"role.sheriff.ability.main" : ""
+"role.sheriff.ability.kill" : "<title>Kill</title>Attempt to kill. If the target is a crewmate, you <b>misfire</b> and die yourself.<br>%VENT%"
+"role.sheriff.ability.kill.vent" : "<var>Can also kill players in vents.</var>"
+"role.sheriff.ability.seal" : "<title>Ability Seal</title>The kill ability is sealed until a corpse is reported or the report button can use."
+
+# Options
+
+"options.role.sheriff.detail" : "Sheriff can kill other members.<br>Attempting to kill a Crewmate will die instead."
+"options.role.sheriff.canKillMadmate" : "Can Kill Madmate"
+"options.role.sheriff.canKillLovers" : "Can Kill Lovers"
+"options.role.sheriff.killCoolDown" : "Kill Cooldown"
+"options.role.sheriff.numOfShots" : "Num Of Shots"
+"options.role.sheriff.canKillHidingPlayer" : "Can Kill Hiding Player"
+"options.role.sheriff.canKillHidingPlayer.detail" : "When turned on, can kill players hiding in vents."
+"options.role.sheriff.sealAbilityUntilReportingDeadBodies" : "Seal Ability Until Reporting Dead Bodies"
+"options.role.sheriff.sealAbilityUntilReportingDeadBodies.detail" : "When turned on, seals the kill ability until an emergency meeting occurs due to someone's death."
+"options.role.sheriff.unsealOnReportButtonTurningOn" : "Unseal Ability On Report Button Turning On"
+
+# Game
+
+
+# UI
+
+
+# Game Statictics
+
+"statistics.events.misfire" : "Misfire"
+
+# Status
+
+"state.misfired" : "Misfired"
+
+# Stats
+
+"stats.sheriff.shot" : "Num of Trying Kill"
+"stats.sheriff.misshot" : "Num of Misshot"
+
+# Titles
+
+"achievement.sheriff.common1.title" : "Sheriff's Mission"
+"achievement.sheriff.common1.goal" : "Kill an impostor."
+"achievement.sheriff.common1.splitted.2" : "Mission"
+
+"achievement.sheriff.another1.title" : "Pale Gunsmoke"
+"achievement.sheriff.another1.goal" : "Die from a misfire."
+"achievement.sheriff.another1.splitted.0" : "Pale "
+
+"achievement.sheriff.another2.title" : "Timid Sheriff"
+"achievement.sheriff.another2.goal" : "Win as a crewmate without exercising the kill ability and surviving until the end."
+"achievement.sheriff.another2.splitted.0" : "Timid "
+
+"achievement.sheriff.another3.title" : "Unpraised Valor"
+"achievement.sheriff.another3.goal" : "Be exiled in the emergency meeting immediately after killing."
+"achievement.sheriff.another3.flavor" : ""Fame may be silent, but it does not fade" —That is what he left behind."
+"achievement.sheriff.another3.splitted.2" : "Valor"
+
+"achievement.sheriff.common2.title" : "Last-Minute Hero"
+"achievement.sheriff.common2.goal" : "Kill the player you voted for in the previous meeting."
+"achievement.sheriff.common2.splitted.2" : "Hero"
+
+"achievement.sheriff.challenge.title" : "Executor of Justice"
+"achievement.sheriff.challenge.goal" : "Kill all impostors with your own hands."
+"achievement.sheriff.challenge.cond" : "Impostors: 2 or more"
+"achievement.sheriff.challenge.splitted.0" : "Justice's "

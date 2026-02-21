@@ -1,0 +1,43 @@
+# Assignable
+
+"role.spectreFollower.name" : "Spectre Follower"
+"role.spectreFollower.short" : "F"
+"role.spectreFollower.blurb" : "Follow a Dream"
+
+# Document
+
+"role.spectreFollower.doc" : "Spectre's ally. Can help fill Spectre's satiety by eating fries."
+"role.spectre.follower.winCond" : "The parent Spectre wins. (Die following the parent Spectre if they die.)"
+"role.spectre.follower.ability.title" : "Inherent Ability "Growing""
+"role.spectre.follower.ability.main" : "The follower shares the satiety gauge with the Spectre.<br>Eat fries to contribute to maintaining the Spectre's satiety."
+"role.spectre.follower.ability.fries" : "<title>Fries</title>Plates appear on the map.<br>Interact with plates with fries to start a mini-game of eating fries."
+
+# Options
+
+"options.role.spectreFollower.detail" : "Spectre Follower is a teammate of Spectre. <br>By eating fries, Spectre Follower can help maintain Spectre's fullness gauge."
+"options.role.spectreFollower.satietyRate" : "Satiety Duration Per Fries"
+"options.role.spectreFollower.showDishesOnMap" : "Show Dishes On Map"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.spectreFollower.eatFries" : "Num of Eaten Dishes"
+
+# Titles
+
+"achievement.spectreFollower.common1.title" : "Love Delicious Food"
+"achievement.spectreFollower.common1.goal" : "Eat fries a total of 10 times."
+
+"achievement.spectreFollower.hard1.title" : "Fox's Steady Gaze"
+"achievement.spectreFollower.hard1.goal" : "Change to Spectre and win. The original Spectre must be defeated."
+
+"achievement.spectreFollower.challenge.title" : "Energetic Fox In Growth Spurt"
+"achievement.spectreFollower.challenge.goal" : "Recover more satiety than the Spectre and win."
+"achievement.spectreFollower.challenge.flavor" : "Eat a lot and grow big."
+"achievement.spectreFollower.challenge.splitted.0" : "Growth Spurt "
+"achievement.spectreFollower.challenge.splitted.2" : "Energetic Fox"

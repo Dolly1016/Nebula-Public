@@ -18,5 +18,10 @@ public interface Assignables
     Assignable.DefinedModifier? GetModifierById(int id);
     Assignable.DefinedGhostRole? GetGhostRole(string internalName);
     Assignable.DefinedGhostRole? GetGhostRoleById(int id);
-
+    /// <summary>
+    /// 指定の人数、あるいは現在の人数で役職割り当てをシミュレートします。
+    /// </summary>
+    /// <param name="players"></param>
+    /// <returns></returns>
+    AssignmentSummary CalcAssignmentSummary(int? players = null);
 }

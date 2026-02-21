@@ -1,0 +1,58 @@
+# Assignable
+
+"role.effacer.name" : "Effacer"
+"role.effacer.short" : "E"
+"role.effacer.blurb" : "Death That No One Remember"
+"role.effacer.hint" : "仲間や他プレイヤーを透明にしよう"
+
+# Document
+
+"role.effacer.doc" : "仲間や他プレイヤーを透明にさせられるインポスターです。透明になったプレイヤーは自身が透明化していることに気づけません。<br>しかし、インポスターは透明化したプレイヤーを視認でき、自身がイフェイサーによって透明化させられても自覚できます。"
+"role.effacer.ability.title" : "固有能力 "記憶改変ジャミング""
+"role.effacer.ability.main" : ""
+"role.effacer.ability.efface" : "<title>透明化</title>対象のプレイヤーを透明化させます。"
+"role.effacer.tips" : "・この役職は、<color=#ff7f00>Super</color><color=#ff0000>New</color><color=#00ff00>Roles</color>コラボ役職 (元役職: ジャマー)です。"
+
+# Options
+
+"options.role.effacer.detail" : "Effacer turns other players invisible to confuse crewmates."
+"options.role.effacer.effaceCoolDown" : "Efface Cooldown"
+"options.role.effacer.effaceDuration" : "Efface Duration"
+
+# Game
+
+
+# UI
+
+"button.label.efface" : "efface"
+
+# Stats
+
+"stats.effacer.efface" : "Num of Effaced Players"
+
+# Titles
+
+"achievement.effacer.common1.title" : "消えた痕跡"
+"achievement.effacer.common1.goal" : "プレイヤーを透明化させる。"
+"achievement.effacer.common1.flavor" : ""彼は、私とすれ違ったと証言していますが―(中略)― したがって..." ―破られた議事録より"
+"achievement.effacer.common1.splitted.0" : "消えた"
+
+"achievement.effacer.common2.title" : "見えざる刺客"
+"achievement.effacer.common2.goal" : "相方のインポスターを透明化させる。"
+"achievement.effacer.common2.flavor" : ""私がタスクしている横で彼の上半身が突然吹き飛んだんだ！<br>私を疑ったシェリフの死かもしれない..." ―通報者の発言より"
+"achievement.effacer.common2.splitted.0" : "見えざる"
+
+"achievement.effacer.common3.title" : "大舞台のお膳立て"
+"achievement.effacer.common3.goal" : "透明化させたプレイヤーが相方のインポスターによってキルされる。"
+"achievement.effacer.common3.flavor" : "なんの手掛かりも掴めず、単独行動をしていたクルーメイトが追放された。<br>その決断を嘲笑う者がいるとも知らずに..."
+
+"achievement.effacer.common4.title" : "抗うなかれ"
+"achievement.effacer.common4.goal" : "イフェイサーの能力によって透明化した状態で<br>シェリフ, アヴェンジャーあるいはジャッカルをキルする。"
+"achievement.effacer.common4.flavor" : ""自分の能力を過信していたんだろう？" ―死体に書かれた文字"
+
+"achievement.effacer.challenge.title" : "瑕疵なき布陣"
+"achievement.effacer.challenge.goal" : "自分以外のインポスターが全員生存した状態でインポスター勝利する。<br>自身の生死は問わない。"
+"achievement.effacer.challenge.cond" : "仲間のインポスター全員が透明化されたことがある、あるいは透明化されたプレイヤーをキルしていること"
+"achievement.effacer.challenge.flavor" : ""実際に見た物事しか信じずに身を亡ぼすなど、なんと愚かなことか！" ―誰もいない飛空艇に残されていた文章"
+"achievement.effacer.challenge.splitted.0" : "瑕疵なき"
+"achievement.effacer.challenge.splitted.2" : "布陣"

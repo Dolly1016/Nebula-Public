@@ -13,6 +13,7 @@ using Nebula.Modules.GUIWidget;
 using Virial.Game;
 using Virial.Events.Player;
 using Nebula.Modules.Cosmetics;
+using Hazel;
 
 namespace Nebula.Roles.Crewmate;
 
@@ -46,6 +47,7 @@ public class Psychic : DefinedSingleAbilityRoleTemplate<Psychic.Ability>, Define
     public class Ability : AbstractPlayerUsurpableAbility, IGameOperator, IPlayerAbility
     {
         int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
+        public DeadbodyArrowAbility? ArrowAbility { get; private set; } = null;
         public Ability(GamePlayer player, bool isUsurped) : base(player, isUsurped)
         {
             if (AmOwner)
@@ -56,8 +58,10 @@ public class Psychic : DefinedSingleAbilityRoleTemplate<Psychic.Ability>, Define
                 searchButton.OnEffectStart = (button) => StatsSearching.Progress();
 
                 //死体を指す矢印を表示する
-                var ability = new DeadbodyArrowAbility().Register(this);
-                GameOperatorManager.Instance?.Subscribe<GameUpdateEvent>(ev => ability.ShowArrow = searchButton.IsInEffect && !MyPlayer.IsDead, this);
+                ArrowAbility = new DeadbodyArrowAbility();
+                ArrowAbility.Bind(this);
+                ArrowAbility.RegisterSelf();
+                GameOperatorManager.Instance?.Subscribe<GameUpdateEvent>(ev => ArrowAbility.ShowArrow = searchButton.IsInEffect && !MyPlayer.IsDead, this);
             }
         }
 

@@ -1,0 +1,63 @@
+# Assignable
+
+"role.evilTracker.name" : "Evil Tracker"
+"role.evilTracker.short" : "Tk"
+"role.evilTracker.blurb" : "Insidious Creeping"
+
+# Document
+
+"role.evilTracker.doc" : "プレイヤーの位置やタスクを追跡できるインポスターです。"
+"role.evilTracker.ability.title" : "固有能力 "邪悪な追跡者""
+"role.evilTracker.ability.main" : ""
+"role.evilTracker.ability.track.cannotChange" : "<title>選択</title>位置を追跡するプレイヤーを選択します。"
+"role.evilTracker.ability.track.canChange" : "<title>選択</title>位置を追跡するプレイヤーを選択します。<var>選択しなおすと追跡対象を変更します。</var>"
+"role.evilTracker.ability.arrow.withImpostor" : "<title>矢印</title>イビルトラッカーは追跡対象を指す白い矢印と<var>インポスターを指す赤い矢印</var>を見ることができます。<br>矢印がさす位置は<var>%ARROWSEC%</var>秒ごとに更新されます。"
+"role.evilTracker.ability.arrow.onlyTarget" : "<title>矢印</title>イビルトラッカーは追跡対象を指す白い矢印を見ることができます。<br>矢印がさす位置は<var>%ARROWSEC%</var>秒ごとに更新されます。"
+"role.evilTracker.ability.track.minimap" : "<title>ミニマップ</title>追跡しているプレイヤーの位置が<var>ミニマップ</var>上に表示されます。"
+"role.evilTracker.ability.task" : "<title>タスク追跡</title><var>会議中に追跡したタスク進捗を確認できます。</var>"
+"role.evilTracker.ability.meeting.changeOnly" : "<var>会議中、追跡するプレイヤーを変更できます。</var>"
+"role.evilTracker.ability.meeting.targetOnly" : "<var>会議中、追跡しているプレイヤーのタスク進捗を確認できます。</var>"
+"role.evilTracker.ability.meeting.checkChange" : "<var>会議中、追跡するプレイヤーを変更できます。<br>さらに、選択したプレイヤーのタスク進捗を確認できます。</var>"
+"role.evilTracker.ability.meeting.checkOnly" : "<var>会議中、プレイヤー1人のタスク進捗を確認できます。</var>"
+
+# Options
+
+"options.role.evilTracker.detail" : "Evil Tracker can track the player and see where they are.<br>They can also check the progress of tasks on the meeting."
+"options.role.evilTracker.showKillFlash" : "Show Kill Flash"
+"options.role.evilTracker.trackCoolDown" : "Track Cooldown"
+"options.role.evilTracker.taskTracking" : "Task Tracking"
+"options.role.evilTracker.taskTracking.off" : "Off"
+"options.role.evilTracker.taskTracking.onlyTarget" : "Only Target"
+"options.role.evilTracker.taskTracking.on" : "On"
+"options.role.evilTracker.updateArrowInterval" : "Update Arrow Interval"
+"options.role.evilTracker.canChangeTarget" : "Can Change Target On Task Phase"
+"options.role.evilTracker.canChangeTargetOnMeeting" : "Can Change Target On Meeting"
+"options.role.evilTracker.trackImpostors" : "Track Impostors"
+"options.role.evilTracker.showTrackingTargetOnMap" : "Show Tracking Target On Map"
+"options.role.evilTracker.canCheckTrackingTasksInTaskPhase" : "Can Check Tracking Tasks In Task Phase"
+"options.role.evilTracker.showWhereTrackingIs" : "Show Where Tracking Is"
+"options.role.evilTracker.group.playerTracking" : "Tracking Settings"
+"options.role.evilTracker.group.taskTracking" : "Task Tracking Settings"
+
+# Game
+
+
+# UI
+
+"button.label.track" : "track"
+
+# Stats
+
+
+# Titles
+
+"achievement.evilTracker.common1.title" : "監視者"
+"achievement.evilTracker.common1.goal" : "プレイヤーのタスクを一度追跡する。"
+
+"achievement.evilTracker.another1.title" : "音信不通"
+"achievement.evilTracker.another1.goal" : "自身が生存している間に、追跡対象のプレイヤーが死亡する。"
+"achievement.evilTracker.another1.flavor" : ""故障の場合はカスタマーサービスまでお問い合わせください。" ―追跡端末の取扱説明書"
+
+"achievement.evilTracker.challenge.title" : "陰湿な追跡"
+"achievement.evilTracker.challenge.goal" : "3つ以下のタスクを追跡したプレイヤーを、そのタスクの周辺でキルする。"
+"achievement.evilTracker.challenge.splitted.0" : "陰湿な"

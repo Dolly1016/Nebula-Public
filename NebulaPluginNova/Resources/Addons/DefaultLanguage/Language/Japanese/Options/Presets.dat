@@ -16,3 +16,5 @@
 "preset.delete" : "プリセット削除"
 "preset.delete.confirm" : "プリセットを削除します。<br>よろしいですか？"
 "preset.openFailed" : "プリセットファイルが<br>見つかりませんでした。"
+"preset.confirmLoadOld" : "このプリセットは古い形式で記述されています。正しく読み込めない<br>可能性がありますが、読み込んでもよろしいですか？"
+"preset.confirmLoadUnknown" : "このプリセットは新しい形式で記述されています。正しく読み込めない<br>可能性がありますが、読み込んでもよろしいですか？"

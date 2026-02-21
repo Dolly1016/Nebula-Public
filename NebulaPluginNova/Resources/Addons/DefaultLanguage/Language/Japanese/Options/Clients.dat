@@ -5,7 +5,7 @@
 "config.client.vcSettings" : "VC設定"
 "config.client.vcSettings.detail" : "VCの設定を開きます。"
 "config.client.vcRejoin" : "VC再更新"
-"config.client.vcRejoin.detail" : "VCのステータスを最更新します。VCの調子が悪い時にお試しください。"
+"config.client.vcRejoin.detail" : "VCのステータスを再更新します。VCの調子が悪い時にお試しください。"
 "config.client.outputHash" : "画像ハッシュ値の出力"
 "config.client.outputHash.detail" : "コスチュームデザイナー向けの機能です。<br>オンにすると、コスチューム画像をダウンロードしたとき<br>そのハッシュ値をログに出力します。"
 "config.client.processorAffinity" : "プロセッサ制限"

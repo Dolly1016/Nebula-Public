@@ -1,0 +1,57 @@
+# Assignable
+
+"role.raider.name" : "Raider"
+"role.raider.short" : "Ra"
+"role.raider.blurb" : "Let's Rampage"
+
+# Document
+
+"role.raider.doc" : "An impostor who cannot perform normal kills but can get mass kills by throwing an axe."
+"role.raider.ability.title" : "Inherent Ability "Riot Battle Axe""
+"role.raider.ability.main" : "The axe kills all players it touches before sticking into a wall."
+"role.raider.ability.equip" : "<title>Equip/Unequip</title> Ready or store the axe.<br>The readied axe is visible to others."
+"role.raider.ability.kill" : "<title>Throw</title> The throw button lights up only while the axe is readied. The axe flies in the direction of the mouse cursor.<br>It is recommended to throw using the keyboard shortcut for killing or LeftClick near the center of the screen."
+"role.raider.tips" : "・The hitbox of survivors is near the center of the character.<br> Aim for the stomach."
+
+# Options
+
+"options.role.raider.detail" : "Raider throws axes to kill players.<br>Thrown axe remains and serves as evidence."
+"options.role.raider.throwCoolDown" : "Throw Cooldown"
+"options.role.raider.axeSize" : "Axe Size"
+"options.role.raider.axeSpeed" : "Axe Speed"
+"options.role.raider.canKillImpostor" : "Can Kill Impostor"
+
+# Game
+
+"role.raider.axeSize" : "Raider<color=white>: Axe Size</color>"
+"gameAction.raider.equip" : "Axe Equip"
+"gameAction.raider.throw" : "Axe Throw"
+
+# UI
+
+"button.label.throw" : "throw"
+"ui.action.raider.equip" : "Equip and store the axe."
+"ui.action.raider.kill" : "Throws the equipped axe."
+
+# Status
+
+"state.beaten" : "Beaten"
+
+# Stats
+
+"stats.raider.thrown" : "Num of Axes Thrown"
+
+# Titles
+
+"achievement.raider.common1.title" : "The Violent"
+"achievement.raider.common1.goal" : "Kill a player with the axe."
+
+"achievement.raider.another1.title" : "Bad Kids Get Punished!"
+"achievement.raider.another1.goal" : "Be exiled or guessed to death in the meeting immediately after throwing the axe."
+"achievement.raider.another1.flavor" : ""Even so, he had a creepy smile on his face." —An unsigned memoir"
+
+"achievement.raider.challenge.title" : "The Wildest in the Universe"
+"achievement.raider.challenge.goal" : "Kill 3 players with one throw and end the game."
+"achievement.raider.challenge.flavor" : "Here's Johnny!"
+"achievement.raider.challenge.splitted.0" : "The Wildest in the "
+"achievement.raider.challenge.splitted.2" : "Universe"

@@ -1,0 +1,56 @@
+# Assignable
+
+"role.rokurokubi.name" : "Rokurokubi"
+"role.rokurokubi.short" : "Ro"
+"role.rokurokubi.blurb" : "Eagerly Waiting The Opportunity"
+
+# Document
+
+"role.rokurokubi.doc" : "An impostor who can stretch their neck to kill players far away."
+"role.rokurokubi.ability.title" : "Inherent Ability "Yōkai Rokurokubi""
+"role.rokurokubi.ability.main" : "Stretch the neck loooong. The neck can stretch across walls."
+"role.rokurokubi.ability.rokurokubi" : "<title>Crane</title>Stretch the neck. Press and hold the %KEY% key to stop the neck extension."
+"role.rokurokubi.ability.reset" : "<title>Reset</title>Press the retset button or kill to return the neck to its original length."
+
+# Options
+
+"options.role.rokurokubi.detail" : "Rokurokubi can stretch its neck to straddle walls<br>and kill players above it."
+"options.role.rokurokubi.craneSpeed" : "Crane Speed"
+"options.role.rokurokubi.maxNeckLength" : "Max Neck Length"
+"options.role.rokurokubi.autoKillInCraning" : "Auto Kill"
+
+# Game
+
+
+# UI
+
+"button.label.rokuro" : "crane"
+"button.label.rokuro.reset" : "reset"
+"ui.action.rokurokubi.pause" : "While holding down,<br>stop extending your neck."
+
+# Stats
+
+
+# Titles
+
+"achievement.rokurokubi.common1.title" : "Running Chills"
+"achievement.rokurokubi.common1.goal" : "Stretch the neck and kill twice."
+"achievement.rokurokubi.common1.splitted.0" : "Running "
+
+"achievement.rokurokubi.common2.title" : "Waiting for You"
+"achievement.rokurokubi.common2.goal" : "Kill while pausing the neck extension for 3 seconds or more."
+"achievement.rokurokubi.common2.flavor" : ""I'll be waiting with bated breath forever." —A voice comes from somewhere."
+
+"achievement.rokurokubi.common3.title" : "Spiritual Disturbance"
+"achievement.rokurokubi.common3.goal" : "Kill while stretching the neck and being invisible."
+"achievement.rokurokubi.common3.cond" : "Kill a player 10m or more away from the main body"
+
+"achievement.rokurokubi.another1.title" : "Hanging Body"
+"achievement.rokurokubi.another1.goal" : "Be killed and die while stretching the neck."
+"achievement.rokurokubi.another1.flavor" : ""How unguarded!""
+"achievement.rokurokubi.another1.splitted.0" : "Hanging "
+
+"achievement.rokurokubi.challenge.title" : "I Wanna Be Your Buddy"
+"achievement.rokurokubi.challenge.goal" : "Stretch the neck and kill shortly after an ally's kill to get a double kill."
+"achievement.rokurokubi.challenge.cond" : "Excluding allies who already look like monsters"
+"achievement.rokurokubi.challenge.splitted.1" : "I Wanna Be "

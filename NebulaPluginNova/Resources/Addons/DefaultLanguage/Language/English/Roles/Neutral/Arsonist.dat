@@ -1,0 +1,55 @@
+# Assignable
+
+"role.arsonist.name" : "Arsonist"
+"role.arsonist.short" : "A"
+"role.arsonist.blurb" : "Let Them Burn"
+
+# Document
+
+"role.arsonist.doc" : "A neutral member who spreads oil on all survivors."
+"role.arsonist.winCond" : "Spread oil on all survivors and set them on fire."
+"role.arsonist.ability.title" : "Inherent Ability "Dangerous Arsonist""
+"role.arsonist.ability.main" : ""
+"role.arsonist.ability.douse" : "<title>Douse</title>Spread oil on players. It takes a little time to spread the oil.<br>If you move away from the player <b>while spreading oil</b>, the oil spreading action is interrupted.<br>Once you finish spreading oil, this button changes to the ignite button."
+"role.arsonist.ability.ignite" : "<title>Ignite</title>Can be activated after spreading oil on all survivors. Set survivors on fire and win."
+
+# Options
+
+"options.role.arsonist.detail" : "Arsonist douses all of the alive to burn."
+"options.role.arsonist.douseCoolDown" : "Douse Cooldown"
+"options.role.arsonist.douseDuration" : "Douse Duration"
+
+# Game
+
+
+# UI
+
+"button.label.douse" : "douse"
+"button.label.ignite" : "ignite"
+
+# Stats
+
+"stats.arsonist.doused" : "Num of Doused Players"
+"role.arsonist.gui.left" : "Left Players"
+"role.arsonist.gui.left.dead" : "Dead"
+
+# Titles
+
+"achievement.arsonist.common1.title" : "Oily Meeting Room"
+"achievement.arsonist.common1.goal" : "Have 3 doused players participate in the meeting while alive."
+"achievement.arsonist.common1.splitted.0" : "Oily "
+
+"achievement.arsonist.challenge.title" : "Meeting Soaked In Strategy"
+"achievement.arsonist.challenge.goal" : "Exile the last undoused player in the meeting, then ignite and win."
+"achievement.arsonist.challenge.flavor" : ""It's unstable. You look like you're hiding something." —A note held down by a pizza box"
+"achievement.arsonist.challenge.splitted.2" : "Meeting"
+
+# Team
+
+"teams.arsonist" : "Arsonist"
+"end.arsonist" : "Arsonist Wins%EXTRA%"
+
+# Document
+
+"document.tip.winCond.arsonist.title" : "Special Trigger"
+"document.tip.winCond.arsonist" : "The arsonist wins by dousing all survivers and setting them on fire."

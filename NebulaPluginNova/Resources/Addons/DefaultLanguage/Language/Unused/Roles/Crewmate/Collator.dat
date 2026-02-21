@@ -1,0 +1,88 @@
+# Assignable
+
+"role.collator.name" : "Collator"
+"role.collator.short" : "C"
+"role.collator.blurb" : "Do Experiments"
+
+# Document
+
+"role.collator.doc" : "プレイヤーから採取したサンプルを照合し、プレイヤーの陣営を調べられるクルーメイトです。"
+"role.collator.ability.title" : "固有能力 "検体検査""
+"role.collator.ability.main" : "プレイヤーからサンプルを採取して、会議中に検査できます。<br>2つの異なるサンプルを照合し、結果を観察します。<br>検査結果は<b><color=#33FF33>適合</color></b>と<b><color=#FF3333>不適合</color></b>の2パターンがあり、採取元プレイヤーが<b>同陣営</b>ならば両サンプルは<b><color=#33FF33>適合</color></b>します。<br>%SELECTIVE%"
+"role.collator.ability.nonSelective" : "タスクフェイズ中に2つのサンプルを採取すると、<var>会議時</var>、画面上方に検査結果の通知が表示されます。"
+"role.collator.ability.selective" : "タスクフェイズ中に2つ以上のサンプルを採取すると、会議時に<var>サンプルを2つ選択</var>して検査を始められます。<br>検査結果は、画面上方に表示される通知から即座に確認できます。"
+"role.collator.ability.sample" : "<title>採取</title>近くのプレイヤーのサンプルを採取します。<br>試験管は同時に最大<var>%NUM%</var>本まで使用できます。"
+"role.collator.ability.meeting" : "<title>照合</title>会議中、被検体を選択できるボタンが現れます。<br>2つのサンプルを選択すると検査を開始します。"
+"role.collator.tips" : "・この役職は、<color=#ff7f00>Super</color><color=#ff0000>New</color><color=#00ff00>Roles</color>コラボ役職 (元役職: 臨床検査技師)です。"
+
+# Options
+
+"options.role.collator.detail" : "Collator can compare the roles of players<br>with the samples collected."
+"options.role.collator.sampleCoolDown" : "Sample Cooldown"
+"options.role.collator.selectiveCollating" : "Selective Collating"
+"options.role.collator.selectiveCollating.detail" : "オンにすると、採取した2本以上のサンプルから<br>自由に組を選んで照合ができます。"
+"options.role.collator.maxTrials" : "Max Trials"
+"options.role.collator.maxTrialsPerMeeting" : "Max Trials Per Meeting"
+"options.role.collator.numOfTubes" : "# Tubes"
+"options.role.collator.carringOverSamples" : "Carring Over Samples"
+"options.role.collator.canTakeDuplicateSample" : "Can Take Duplicate Samples"
+"options.role.collator.canTakeDuplicateSample.detail" : "オンにすると、同じプレイヤーから同時に2本以上のサンプルを採取できます。"
+"options.role.collator.strictClassificationForNeutralRoles" : "Strict Classification For Neutral Roles"
+"options.role.collator.strictClassificationForNeutralRoles.detail" : "オンにすると、第三陣営を陣営ごとに区別して照合します。<br>オフの場合は第三陣営同士の照合結果は常に適合します。"
+"options.role.collator.madmateIsClassifiedAs" : "Madmate Is Classified As..."
+"options.role.collator.madmateIsClassifiedAs.detail" : "マッドメイトのサンプルと適合する陣営を設定します。"
+"options.role.collator.madmateIsClassifiedAs.impostor" : "Impostor"
+"options.role.collator.madmateIsClassifiedAs.crewmate" : "Crewmate"
+
+# Game
+
+"role.collator.ui.title" : "Samples Collation"
+"role.collator.ui.target" : "Target:"
+"role.collator.ui.result" : "Result:"
+"role.collator.ui.matched" : "Matched"
+"role.collator.ui.unmatched" : "Unmatched"
+"role.collator.gui.results" : "Collation Results"
+"role.collator.gui.results.zero" : "None"
+
+# UI
+
+"button.label.collatorSample" : "sample"
+
+# Stats
+
+"stats.collator.collating" : "Num of Collations"
+"stats.collator.matched" : "Num of Matched Collations"
+"stats.collator.unmatched" : "Num of Unmatched Collations"
+
+# Titles
+
+"achievement.collator.common3.title" : "興味深い記録"
+"achievement.collator.common3.goal" : "照合の結果、不一致を確認する。"
+"achievement.collator.common3.flavor" : ""クルーメイトならざる者が紛れこんだという確証が得られた。" ―放棄済みの研究室に保管されていた資料より"
+"achievement.collator.common3.splitted.0" : "興味深い"
+
+"achievement.collator.common1.title" : "実験日和"
+"achievement.collator.common1.goal" : "1ゲームで5回以上サンプルを取得する。"
+"achievement.collator.common1.flavor" : ""採血するスキを見せてるのが悪いんです！" ―ある研究者の傍聞き"
+"achievement.collator.common1.splitted.2" : "日和"
+
+"achievement.collator.common2.title" : "あぶない蒐集家"
+"achievement.collator.common2.goal" : "通算で20回サンプルを取得する。"
+"achievement.collator.common2.flavor" : ""誰だあの許可を得ずいきなり採血しだすマッドに権限を持たせた奴は" ―ある報告書の殴り書きより"
+"achievement.collator.common2.splitted.0" : "あぶない"
+
+"achievement.collator.common4.title" : "親和する劇物"
+"achievement.collator.common4.goal" : "インポスターのサンプル同士を照合する。"
+"achievement.collator.common4.flavor" : ""彼らは...自分の相方と対立しあっていたんだ...！" ―床に染み付いた血の跡の傍に書かれていた言葉"
+"achievement.collator.common4.splitted.2" : "劇物"
+
+"achievement.collator.another1.title" : "危険な探求心"
+"achievement.collator.another1.goal" : "サンプルを採取した対象にキルされる。"
+"achievement.collator.another1.cond" : "採取後5秒以内にキルされること"
+"achievement.collator.another1.flavor" : "少しの義務感と大きな探求心に突き動かされ、引き際を見定められなかった者の末路"
+"achievement.collator.another1.splitted.2" : "探求心"
+
+"achievement.collator.challenge.title" : "偉大なる科学文明"
+"achievement.collator.challenge.goal" : "全インポスターについて、そのサンプルを照合に使用した上で追放し、<br>クルーメイト勝利する。"
+"achievement.collator.challenge.flavor" : "「やっと通常業務に戻れますね」彼女の言葉が研究室に響いた。"
+"achievement.collator.challenge.splitted.1" : "科学"

@@ -1,0 +1,54 @@
+# Assignable
+
+"role.jackal.name" : "Jackal"
+"role.jackal.short" : "J"
+"role.jackal.blurb" : "Kill Everyone"
+
+# Document
+
+"role.jackal.doc" : "敵を殲滅すると勝利する第三陣営です。"
+
+# Options
+
+"options.role.jackal.detail" : "Jackal annihilates players to win.<br>Exile of the Jackal is a common goal for Impostors and Crewmates."
+"options.role.jackal.killCoolDown" : "Kill Cooldown"
+"options.role.jackal.canCreateSidekick" : "Can Create Sidekick"
+"options.role.jackal.numOfKillingToCreateSidekick" : "# Killing to Create Sidekick"
+"options.role.jackal.numOfKillingToWin" : "# Killing to Win"
+"options.role.jackal.jacklizedImpostor" : "Impostor Jackalization"
+
+# Game
+
+
+# UI
+
+"button.label.sidekick" : "sidekick"
+
+# Stats
+
+"stats.jackal.sidekick" : "Num of Creating Sidekick"
+
+# Titles
+
+"achievement.jackal.common1.title" : "友情"
+"achievement.jackal.common1.goal" : "誰かにサイドキックを付与する。"
+
+"achievement.jackal.challenge.title" : "血の騒ぐ最終決戦"
+"achievement.jackal.challenge.goal" : "インポスターと自身の2人だけが残った状態から勝利する。"
+"achievement.jackal.challenge.cond" : "キルによってゲームが終了すること"
+"achievement.jackal.challenge.flavor" : ""アツい戦いをしようぜ！" ―破られた議事録より"
+"achievement.jackal.challenge.splitted.0" : "血の騒ぐ"
+
+# Team
+
+"teams.jackal" : "Jackal"
+"end.jackal" : "Team Jackal Wins%EXTRA%"
+
+# Document
+
+"document.tip.winCond.teams.jackal" : "Jackal"
+
+"document.tip.winCond.jackal.kill.title" : "Kill Trigger"
+"document.tip.winCond.jackal.kill" : "Jackals win when jackal team players account for more than half of all alive players. <br>%LOVER% whose partner is still alive are not counted in jackal team."
+"document.tip.winCond.jackal.extinction.title" : "Complete Domination Trigger"
+"document.tip.winCond.jackal.extinction" : "Jackals win when only jackal team players survive. <br>%LOVER% whose partner is still alive are not counted in jackal team."

@@ -1,0 +1,30 @@
+# Assignable
+
+"role.tieBreaker.name" : "Tie Breaker"
+"role.tieBreaker.generalBlurb" : "Give It A Shot, Comeback Victory"
+
+# Document
+
+"role.tieBreaker.doc" : "Cast an additional vote when a tie occurs in voting."
+
+# Options
+
+"options.role.tieBreaker.detail" : "When the vote results in a tie, Tie Breaker cast an additional vote."
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.tieBreaker.tieBreaking" : "Num of Tie Breaking"
+
+# Titles
+
+"achievement.tieBreaker.common1.title" : "Revolutionary"
+"achievement.tieBreaker.common1.goal" : "Decide the additional vote."
+
+"achievement.tieBreaker.challenge.title" : "Obsessive Vote"
+"achievement.tieBreaker.challenge.goal" : "Exile the enemy with your additional vote."

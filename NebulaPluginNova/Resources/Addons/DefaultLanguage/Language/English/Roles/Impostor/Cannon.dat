@@ -1,0 +1,67 @@
+# Assignable
+
+"role.cannon.name" : "Cannon"
+"role.cannon.short" : "C"
+"role.cannon.blurb" : "Blow It Away!"
+"role.cannon.hint" : "Blow players away!"
+
+# Document
+
+"role.cannon.doc" : "An impostor with an <b>air cannon</b> that blows away nearby players."
+"role.cannon.ability.title" : "Inherent Ability "Air Cannon""
+"role.cannon.ability.main" : "Mark the impact point and request an air cannon from the dedicated mini map."
+"role.cannon.ability.mark" : "<title>Mark</title>Mark the impact point where the air cannon will be fired.<br>The mark is not visible to other players."
+"role.cannon.ability.cannon" : "<title>Air Cannon</title>Open the dedicated map, specify the impact point, and fire the air cannon."
+
+# Options
+
+"options.role.cannon.detail" : "Canon's air cannon blows away surrounding players."
+"options.role.cannon.markCooldown" : "Mark Cooldown"
+"options.role.cannon.numOfMarks" : "# Marks Can Be Placed At The Same Time"
+"options.role.cannon.cannonCooldown" : "Cannon Cooldown"
+"options.role.cannon.cannonPower" : "Cannon Power"
+"options.role.cannon.cannonPower.detail" : "Increasing this value enhances the power of the air cannon to blow away players."
+"options.role.cannon.cannonPowerAttenuation" : "Cannon Power Attenuation"
+"options.role.cannon.cannonPowerAttenuation.detail" : "Increasing this value makes it harder to blow away players far from the air cannon's impact point."
+"options.role.cannon.canBlowPlayerUsingConsole" : "Can Blow Player Using Console"
+
+# Game
+
+"gameAction.cannon.placement" : "Mark Placement"
+
+# UI
+
+"button.label.mark" : "mark"
+"button.label.cannon" : "cannon"
+"ui.action.cannon.mark" : "Mark where the air cannon will fire."
+"ui.action.cannon.cannon" : "Open the special map to fire the air cannon."
+
+# Stats
+
+"stats.cannon.fire" : "Num of Cannon Firing"
+"stats.cannon.players" : "Num of the Blown by Cannon"
+
+# Titles
+
+"achievement.cannon.common3.title" : "Blow It Away!"
+"achievement.cannon.common3.goal" : "Fire the air cannon."
+
+"achievement.cannon.common1.title" : "Coming From Above!"
+"achievement.cannon.common1.goal" : "Immediately kill a player you meet after being blown away."
+"achievement.cannon.common1.cond" : "-The cannon itself must be blown away<br>-Complete from landing to killing within 3 seconds"
+"achievement.cannon.common1.splitted.0" : "From Above "
+
+"achievement.cannon.common2.title" : "Scatter!"
+"achievement.cannon.common2.goal" : "Blow away impostors as well."
+"achievement.cannon.common2.cond" : "-Blow away 5 or more players<br>-Blow away 1 or more impostors excluding yourself"
+
+"achievement.cannon.another1.title" : "Lonely Alert"
+"achievement.cannon.another1.goal" : "Fire an air cannon that doesn't blow away anyone."
+"achievement.cannon.another1.splitted.1" : "Lonely "
+
+"achievement.cannon.another2.title" : "I'll Be Right Back"
+"achievement.cannon.another2.goal" : "Be blown away 10m or more after having your task interrupted."
+
+"achievement.cannon.challenge.title" : "Bugle Announcing Collapse"
+"achievement.cannon.challenge.goal" : "All players blown away die from different causes during that turn."
+"achievement.cannon.challenge.cond" : "-Blow away 3 or more players<br>-Includes exile and extra exile from the subsequent meeting"

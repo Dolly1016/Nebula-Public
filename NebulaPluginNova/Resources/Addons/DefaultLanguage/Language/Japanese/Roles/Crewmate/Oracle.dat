@@ -23,8 +23,8 @@
 "options.role.oracle.oracleAdditionalCooldown" : "占いの追加クールダウン"
 "options.role.oracle.oracleDuration" : "占いの所要時間"
 "options.role.oracle.numOfCandidates" : "役職候補数"
-"options.role.oracle.dieOnDividingOpportunist" : "オポチュニストを占うと自殺"
-"options.role.oracle.dieOnDividingOracle" : "オラクルを占うと自殺"
+"options.role.oracle.dieOnDiviningOpportunist" : "オポチュニストを占うと自殺"
+"options.role.oracle.dieOnDiviningOracle" : "オラクルを占うと自殺"
 
 # Game
 

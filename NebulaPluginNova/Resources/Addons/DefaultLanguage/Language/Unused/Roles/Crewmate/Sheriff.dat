@@ -1,0 +1,74 @@
+# Assignable
+
+"role.sheriff.name" : "Sheriff"
+"role.sheriff.short" : "S"
+"role.sheriff.blurb" : "Shoot the Impostor"
+
+# Document
+
+"role.sheriff.doc" : "非クルーをキルできるクルーメイトです。"
+"role.sheriff.ability.title" : "固有能力 "正義の執行""
+"role.sheriff.ability.main" : ""
+"role.sheriff.ability.kill" : "<title>キル</title>キルを試みます。相手がクルーメイトであった場合、<b>誤射</b>し自分が死亡します。<br>%VENT%"
+"role.sheriff.ability.kill.vent" : "<var>ベント内のプレイヤーもキルできます。</var>"
+"role.sheriff.ability.seal" : "<title>能力封印</title>死体が報告されるまで、あるいはレポートボタンが光るまでキル能力は封印されています。"
+
+# Options
+
+"options.role.sheriff.detail" : "Sheriff can kill other members.<br>Attempting to kill a Crewmate will die instead."
+"options.role.sheriff.canKillMadmate" : "Can Kill Madmate"
+"options.role.sheriff.canKillLovers" : "Can Kill Lovers"
+"options.role.sheriff.killCoolDown" : "Kill Cooldown"
+"options.role.sheriff.numOfShots" : "Num Of Shots"
+"options.role.sheriff.canKillHidingPlayer" : "Can Kill Hiding Player"
+"options.role.sheriff.canKillHidingPlayer.detail" : "オンに設定すると、ベントに潜っているプレイヤーをキルできるようになります。"
+"options.role.sheriff.sealAbilityUntilReportingDeadBodies" : "Seal Ability Until Reporting Dead Bodies"
+"options.role.sheriff.sealAbilityUntilReportingDeadBodies.detail" : "オンに設定すると、誰かが死亡した緊急会議が発生するまでキル能力を封印します。"
+"options.role.sheriff.unsealOnReportButtonTurningOn" : "Unseal Ability On Report Button Turning On"
+
+# Game
+
+
+# UI
+
+
+# Game Statictics
+
+"statistics.events.misfire" : "Misfire"
+
+# Status
+
+"state.misfired" : "Misfired"
+
+# Stats
+
+"stats.sheriff.shot" : "Num of Trying Kill"
+"stats.sheriff.misshot" : "Num of Misshot"
+
+# Titles
+
+"achievement.sheriff.common1.title" : "保安官の使命"
+"achievement.sheriff.common1.goal" : "インポスターを撃ち抜く。"
+"achievement.sheriff.common1.splitted.2" : "使命"
+
+"achievement.sheriff.another1.title" : "青白い硝煙"
+"achievement.sheriff.another1.goal" : "誤射で死亡する。"
+"achievement.sheriff.another1.splitted.0" : "青白い"
+
+"achievement.sheriff.another2.title" : "みんなのまちのおまわりさん"
+"achievement.sheriff.another2.goal" : "キル能力を行使せず、最後まで生存した上でクルーメイト勝利する。"
+"achievement.sheriff.another2.splitted.0" : "みんなの"
+
+"achievement.sheriff.another3.title" : "賞賛なき義勇"
+"achievement.sheriff.another3.goal" : "キルした直後の緊急会議で追放される。"
+"achievement.sheriff.another3.flavor" : ""誉れは黙すれど翳らず" ―彼はそう遺した。"
+"achievement.sheriff.another3.splitted.2" : "義勇"
+
+"achievement.sheriff.common2.title" : "土壇場のヒーロー"
+"achievement.sheriff.common2.goal" : "直前の会議で自身が票を投じたプレイヤーをキルする。"
+"achievement.sheriff.common2.splitted.2" : "ヒーロー"
+
+"achievement.sheriff.challenge.title" : "正義の執行者"
+"achievement.sheriff.challenge.goal" : "インポスター全員を自身の手で始末する。"
+"achievement.sheriff.challenge.cond" : "インポスター: 2人以上"
+"achievement.sheriff.challenge.splitted.0" : "正義の"

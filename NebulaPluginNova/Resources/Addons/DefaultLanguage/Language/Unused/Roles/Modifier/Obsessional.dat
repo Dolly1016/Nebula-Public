@@ -1,0 +1,66 @@
+# Assignable
+
+"role.obsessional.name" : "Obsessional"
+"role.obsessional.blurb" : "You're obsessed by the %NAME%"
+"role.obsessional.generalBlurb" : "あなたを見ている"
+
+# Document
+
+"role.obsessional.doc" : "自身の勝利条件が、執着対象の勝利に変わります。%SUICIDE%"
+"role.obsessional.doc.suicide" : "執着対象が死亡すると、後を追って<var>自殺します</var>。"
+"role.obsessional.winCond" : "%WIN%"
+"role.obsessional.winCond.canWinEvenIfTargetDie" : "%SELF%執着対象が勝利すると自身も一緒に追加勝利します。<br>自身の役職の勝利条件は<b><color=#ff0000ff>失われます</color></b>。"
+"role.obsessional.winCond.cannotWinIfTargetDie" : "%SELF%執着対象が<var>生きたまま</var>勝利すると自身も一緒に追加勝利します。<br>自身の役職の勝利条件は<b><color=#ff0000ff>失われます</color></b>。"
+"role.obsessional.winCond.cannotWinIfSelfDie" : "自身が<var>生存</var>しており、かつ"
+
+# Options
+
+"options.role.obsessional.detail" : "Obsessional is obsessed by specific target.<br>Obsessional can only win when the target wins."
+"options.role.obsessional.canWinEvenIfObsessionalTargetDie" : "Can Win Even If Obsessional Target Dies"
+"options.role.obsessional.canWinEvenIfObsessionalDie" : "Can Win Even If Obsessional Dies"
+"options.role.obsessional.obsessionalSuicideWhenObsessionalTargetDie" : "Obsessional Suicides When Obsessional Target Dies"
+"options.role.obsessional.impostorObsessionalObsessesOver" : "Impostor Obsessional Obsesses Over..."
+"options.role.obsessional.impostorObsessionalObsessesOver.default" : "Default"
+"options.role.obsessional.impostorObsessionalObsessesOver.neutralOnly" : "Neutral Only"
+"options.role.obsessional.impostorObsessionalObsessesOver.nonCrewmate" : "Non-Crewmate"
+
+# Game
+
+"role.obsessional.taskText" : "[Obsessional] Target is %PLAYER%."
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.obsessional.common1.title" : "あなたを見ている"
+"achievement.obsessional.common1.goal" : "執着対象とともに勝利する。"
+"achievement.obsessional.common1.splitted.0" : "あなたを"
+
+"achievement.obsessional.another1.title" : "執念は地の果てまで"
+"achievement.obsessional.another1.goal" : "執着対象の死亡によって後追い自殺する。"
+"achievement.obsessional.another1.flavor" : ""(血文字...いや、ケチャップかもしれない)" ―ピザの空き箱の横側"
+
+"achievement.obsessional.another2.title" : "望まれぬ展開"
+"achievement.obsessional.another2.goal" : "インポスターでオブセッショナルになり、インポスター勝利によって敗北する。"
+"achievement.obsessional.another2.splitted.0" : "望まれぬ"
+
+"achievement.obsessional.lover1.title" : "傍惚れのファンタジア"
+"achievement.obsessional.lover1.goal" : "執着対象がラバーズ単独勝利で勝利し、自身もともに勝利する。"
+"achievement.obsessional.lover1.flavor" : "脆い結合が絶妙なバランスを保っている。"
+"achievement.obsessional.lover1.splitted.2" : "ファンタジア"
+
+"achievement.obsessional.lover2.title" : "バウムクーヘンエンド"
+"achievement.obsessional.lover2.goal" : "執着対象がラバーズ追加勝利で勝利し、自身は勝利を逃す。"
+
+"achievement.obsessional.challenge.title" : "もう君しか映らない"
+"achievement.obsessional.challenge.goal" : "執着対象と2人だけで勝利する。"
+"achievement.obsessional.challenge.splitted.0" : "もう"
+
+# Team
+
+"end.extra.obsessional" : " <color=#FFFFFF>with</color> Obsessional"
+

@@ -1,0 +1,35 @@
+# Assignable
+
+"role.noiseghost.name" : "Noiseghost"
+"role.noiseghost.blurb" : "死体音響"
+"role.noiseghost.short" : "N"
+
+# Document
+
+"role.noiseghost.doc" : "その場でアラートを鳴らせます。"
+
+# Options
+
+"options.role.noiseghost.detail" : "Noiseghost can send an alert anywhere."
+"options.role.noiseghost.noiseDuration" : "Noise Duration"
+"options.role.noiseghost.numOfNoise" : "# Noises"
+"options.role.noiseghost.noiseCooldown" : "Noise Cooldown"
+
+# Game
+
+
+# UI
+
+"button.label.noise" : "noise"
+
+# Stats
+
+"stats.noiseghost.alert" : "Num of Noises"
+
+# Titles
+
+"achievement.noiseghost.common1.title" : "お騒がせガイスト"
+"achievement.noiseghost.common1.goal" : "アラートを発動する。"
+
+"achievement.noiseghost.common2.title" : "鳴りやまぬ警鐘"
+"achievement.noiseghost.common2.goal" : "通算で20回、アラートを発動する。"

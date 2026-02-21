@@ -272,6 +272,7 @@ internal class NoSVCRoom
             {
                 this.mappedPlayer = null!;
                 this.mappedModPlayer = null!;
+                this.volumeEntry = null;
             }
 
             public void CheckMappedPlayer()
@@ -286,28 +287,11 @@ internal class NoSVCRoom
                 if (mappedPlayer == null && (LobbyBehaviour.Instance || ShipStatus.Instance))
                 {
                     mappedPlayer = PlayerControl.AllPlayerControls.GetFastEnumerator().FirstOrDefault(p => p.PlayerId == playerId)!;
-
-                    IEnumerator CoSetVolumeEntry(PlayerControl player)
-                    {
-                        string puid = "";
-                        int trial = 0;
-                        /*
-                        while (puid.Length == 0 && trial < 4)
-                        {
-                            if (!player) yield break;
-                            LogUtils.WriteToConsole($"Try Get PUID of {player.name} ({player.PlayerId})");
-                            yield return PropertyRPC.CoGetProperty<string>(player.PlayerId, "myPuid", result => puid = result, null);
-                            yield return new WaitForSeconds(1f);
-                            trial++;
-                        }
-                        */
-                        LogUtils.WriteToConsole($"Gain PUID of {player.name} ({player.PlayerId} : {puid})");
-                        if (puid.Length == 0) puid = player.name;
+                    if (mappedPlayer) {
+                        string puid = mappedPlayer.name;
                         volumeEntry = VCSettings.GetPlayerVolumeEntry(puid);
                         myVCPlayer.SetVolume(volumeEntry.Value);
-                        yield break;
                     }
-                    if(mappedPlayer) NebulaManager.Instance.StartCoroutine(CoSetVolumeEntry(mappedPlayer).WrapToIl2Cpp());
                 }
 
                 if (mappedModPlayer == null && mappedPlayer)

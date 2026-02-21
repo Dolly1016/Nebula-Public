@@ -1,0 +1,69 @@
+# Assignable
+
+"role.berserker.name" : "Berserker"
+"role.berserker.short" : "Be"
+"role.berserker.blurb" : "[FATAL ERROR] Out of Control!!"
+"role.berserker.hint" : "Go berserk and get lots of kills!"
+
+# Document
+
+"role.berserker.doc" : "A short-term decisive battle-type impostor who goes berserk and gets lots of kills at once."
+"role.berserker.ability.title" : "Inherent Ability "Roar of Selflessness""
+"role.berserker.ability.main" : "Reveal the impostor's true nature, transform, and <b>go berserk</b>. During berserk, the kill cooldown is shortened and movement speed increases.<br>However, accumulating kills in berserk mode gradually makes you lose yourself.<br>If you get <var>%KILL%</var> kills in one berserk mode, you enter <b>trance</b> mode and can no longer distinguish players by appearance.<br>In trance mode, you can kill players regardless of ally or enemy."
+"role.berserker.ability.berserk" : "<title>Berserk</title>Transform and power up.<br>At this time, a roar is heard by players within <var>%SE%</var>."
+"role.berserker.ability.berserk.se.short" : "very close"
+"role.berserker.ability.berserk.se.middle" : "surroundings"
+"role.berserker.ability.berserk.se.long" : "wide area"
+"role.berserker.ability.calmDown" : "<title>Calm Down</title><var>Click this button or wait for the effect time to end to return to your original form.</var><br>There is a slight stun time when returning to your original form."
+"role.berserker.tips" : "・Berserk mode is canceled when an emergency meeting starts or you die."
+
+# Options
+
+"options.role.berserker.detail" : "Berserk and get lots of kills!<br>Berserker is an imposter who reveals its true identity and powers up."
+"options.role.berserker.killCooldown" : "Kill Cooldown"
+"options.role.berserker.accelRate" : "Accel Rate"
+"options.role.berserker.canCalmDown" : "Can Calm Down"
+"options.role.berserker.canCalmDown.detail" : "When turned on, you can end berserk mode by timeout or button action."
+"options.role.berserker.berserkCooldown" : "Berserk Cooldown"
+"options.role.berserker.maxBerserkDuration" : "Max Berserk Duration"
+"options.role.berserker.killingForTrance" : "Killing For Trance"
+"options.role.berserker.killingForTrance.detail" : "Accumulating kills in berserk mode gradually makes you lose yourself. When entering trance mode, you can no longer distinguish others.<br>In trance mode, you can even kill ally impostors."
+"options.role.berserker.bersekSEStrength" : "Berserk SE Distance"
+
+# Game
+
+"gameAction.berserker.berserk" : "Berserk"
+
+# UI
+
+"button.label.berserk" : "berserk"
+"button.label.calmDown" : "calm down"
+
+# Stats
+
+"stats.berserker.berserk" : "Num of Berserk"
+
+# Titles
+
+"achievement.berserker.common1.title" : "Limiter Removal"
+"achievement.berserker.common1.goal" : "Go berserk at least once."
+
+"achievement.berserker.common2.title" : "Fighting Spirit Roar"
+"achievement.berserker.common2.goal" : "Go berserk 10 or more times in total."
+"achievement.berserker.common2.splitted.0" : "Fighting Spirit "
+
+"achievement.berserker.common3.title" : "Swoosh..."
+"achievement.berserker.common3.goal" : "Calm down voluntarily after a kill."
+
+"achievement.berserker.another1.title" : "Black Sheep"
+"achievement.berserker.another1.goal" : "Be exiled or guessed in the meeting immediately after going berserk for the first time."
+
+"achievement.berserker.another2.title" : "Wild Beast of the Wilderness"
+"achievement.berserker.another2.goal" : "Kill an impostor while in berserk mode."
+"achievement.berserker.another2.splitted.1" : "Wild "
+
+"achievement.berserker.common4.title" : "Unstoppable"
+"achievement.berserker.common4.goal" : "Survive the meeting immediately after killing in berserk mode."
+
+"achievement.berserker.challenge.title" : "Beast King"
+"achievement.berserker.challenge.goal" : "Get 3 kills within 20 seconds in berserk mode and win while surviving."

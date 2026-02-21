@@ -1,0 +1,57 @@
+# Assignable
+
+"role.busker.name" : "Busker"
+"role.busker.short" : "B"
+"role.busker.blurb" : "Unfailing Wonder"
+
+# Document
+
+"role.busker.doc" : "<b>偽装死</b>で幽霊になって移動できるクルーメイトです。"
+"role.busker.ability.title" : "固有能力 "大道芸人の矜持""
+"role.busker.ability.main" : "偽装死して幽霊状態のままマップ上を移動できます。<br>しかし、しばらくの間復活しなかったり、会議が始まってしまうと本当に死亡してしまいます。"
+"role.busker.ability.pseudocide" : "<title>偽装死</title>幽霊になって移動できます。"
+"role.busker.ability.revive" : "<title>復活</title>その場で復活します。マップ内でのみ復活できます。<br>偽装死の効果時間中に復活しないと、以後は復活できなくなってしまいます。"
+
+# Options
+
+"options.role.busker.detail" : "Busker disguises your death.<br>If you revive within the time limit,your body will teleport to your ghost's position."
+"options.role.busker.pseudocideCoolDown" : "Pseudocide Cooldown"
+"options.role.busker.pseudocideDuration" : "Pseudocide Duration"
+"options.role.busker.hidePseudocideFromVitals" : "Hide Pseudocide From Vitals"
+"options.role.busker.hidePseudocideFromVitals.detail" : "オンに設定すると、偽装死中、バイタルでは<br>バスカーが生存しているように見えます。"
+
+# Game
+
+"gameAction.busker.revive" : "復活"
+
+# UI
+
+"button.label.pseudocide" : "pseudocide"
+
+# Game Statictics
+
+"statistics.events.accident" : "Accident"
+
+# Status
+
+"state.pseudocide" : "Pseudocide"
+
+# Stats
+
+"stats.busker.pseudocide" : "Num of Pseudocide"
+"stats.busker.missed" : "Num of Missed"
+
+# Titles
+
+"achievement.busker.common1.title" : "イッツ・ショータイム"
+"achievement.busker.common1.goal" : "偽装死ののち、復活する。"
+"achievement.busker.common1.splitted.1" : "・"
+
+"achievement.busker.another1.title" : "危険な大道芸"
+"achievement.busker.another1.goal" : "偽装死ののち、復活に失敗する。"
+"achievement.busker.another1.splitted.0" : "危険な"
+
+"achievement.busker.challenge.title" : "手に汗握る瞬間を"
+"achievement.busker.challenge.goal" : "復活から2秒以内に会議が開かれる。"
+"achievement.busker.challenge.cond" : "自身による死体の通報、緊急ボタンは無効"
+"achievement.busker.challenge.flavor" : ""その緊張感は、私の良く知っているそれによく似ている。" ―署名の無い回顧録"

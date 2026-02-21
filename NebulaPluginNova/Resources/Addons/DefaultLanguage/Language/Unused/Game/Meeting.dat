@@ -1,0 +1,30 @@
+# Meeting Tool
+
+"meeting.memo.page" : "Page: "
+"meeting.memo.player.line" : "%PLAYER%"
+"meeting.memo.player.type" : "Icon Type"
+"meeting.memo.player.color" : "Player"
+"meeting.memo.control.icon" : "L Click: Edit<br>R Click: Delete"
+"meeting.memo.control.line" : "L Click: Edit<br>R Click: Delete"
+
+# Prespawn Minigame
+
+"game.prespawn.countdown" : "Time Remaining: %SECOND%"
+"game.prespawn.waiting" : "Wait For Other Players..."
+"game.prespawn.spawnIn" : "You Spawn In"
+
+# Emergency Button
+
+"game.meeting.cannotUseEmergencyButton" : "Emergency Button is LOCKED."
+
+# Exile Scene
+
+"game.meeting.someoneDisappeared" : "Someone disappeared too."
+"game.meeting.roleText" : "%PLAYER% is %ROLE%."
+"game.meeting.multiple" : "Both were exiled."
+"game.meeting.obvious" : "The result is as clear as day."
+
+# UI
+
+"ui.meeting.leftClick" : "LeftClick: Use Ability"
+"None" : "None"

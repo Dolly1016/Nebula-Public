@@ -1,0 +1,39 @@
+# Assignable
+
+"role.reaper.name" : "Reaper"
+"role.reaper.short" : "Re"
+"role.reaper.blurb" : "Kill and Deceive the Crewmates"
+
+# Document
+
+"role.reaper.doc" : "An impostor who can carry corpses.<var>%VENT%</var>"
+"role.reaper.doc.vent" : "All vents are connected, allowing large movements while holding a corpse."
+"role.reaper.doc.vent.cannotEnter" : "Additionally, all vents are connected."
+"role.reaper.ability.title" : "Inherent Ability "Final Destination""
+"role.reaper.ability.main" : "Yes, without warning, right behind you."
+"role.reaper.ability.drag" : "<title>Grag/Release</title> Grab and carry a corpse."
+"role.reaper.ability.drag.cannotEnter" : "<title>Grag/Release</title> Grab and carry a corpse.<br><var>Cannot use vents while holding a corpse.</var>"
+
+# Options
+
+"options.role.reaper.detail" : "Reaper can drag dead bodies."
+"options.role.reaper.useVentWhileHoldingDeadbody" : "Use Vent While Holding Deadbody"
+"options.role.reaper.connectAllVents" : "Connect All Vents"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.reaper.ventWithDeadBody" : "Num of Using Vents With Corpses"
+
+# Titles
+
+"achievement.reaper.common1.title" : "Dragging Around the Ship"
+"achievement.reaper.common1.goal" : "Grag a corpse and enter a vent."
+
+"achievement.reaper.challenge.title" : "The Reaper Tool Away"
+"achievement.reaper.challenge.goal" : "Hide 5 corpses in the dark without them being reported."

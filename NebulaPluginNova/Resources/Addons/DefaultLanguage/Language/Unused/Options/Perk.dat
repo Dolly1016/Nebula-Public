@@ -1,0 +1,24 @@
+# Header
+
+"options.perk" : "Perk Options"
+"options.perk.detail" : "Plants that appear all over the map provide perks.<br>Perks provide benefits to their owners."
+
+# Groups
+
+# Options
+
+"options.perk.numOfPlants" : "# Plants"
+"options.perk.numOfPlants.detail" : "プラントは会議を挟むたびに成長します。<br>全生存者は開花したプラントからパークを手に入れられます。"
+"options.perk.numOfWarpedPlants" : "# Warped Plants"
+"options.perk.numOfWarpedPlants.detail" : "歪んだプラントは非クループレイヤーのみ使用できます。<br>開花した歪んだプラントは妨害や錯乱に適したパークをもたらします。"
+"options.perk.maxBloomsPerPlant" : "Max Blooms (Per Plant)"
+"options.perk.growSpeed" : "Plant Growing Speed"
+"options.perk.growSpeed.detail" : "プラントが成長する速度を調整できます。<br>大きな値にするほど早く成長します。"
+"options.perk.shortcut.standard" : "Shortcut (Common Perks)"
+"options.perk.shortcut.standard.0" : "Set Spawn Rate To 0"
+"options.perk.shortcut.standard.100" : "Set Spawn Rate To 100"
+"options.perk.shortcut.warped" : "Shortcut (Non-crewmate Perks)"
+"options.perk.shortcut.warped.0" : "Set Spawn Rate To 0"
+"options.perk.shortcut.warped.100" : "Set Spawn Rate To 100"
+"options.perk.movementRestrictionPerksAlsoAffectCasters" : "Movement Restriction Perks Also Affect Casters"
+"options.perk.movementRotationPerksAlsoAffectCasters" : "Movement Rotation Perks Also Affect Casters"

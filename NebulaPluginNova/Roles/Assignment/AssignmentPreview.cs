@@ -1,4 +1,5 @@
 ﻿using Il2CppSystem.Collections.Concurrent;
+using Nebula.Modules.GUIWidget;
 using Nebula.Patches;
 using System;
 using System.Collections.Generic;
@@ -6,6 +7,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Virial.Assignable;
+using Virial.Game;
+using Virial.Media;
+using Virial.Text;
+using static Nebula.Modules.HelpScreen;
 
 namespace Nebula.Roles.Assignment;
 
@@ -325,4 +330,129 @@ internal class AssignmentPreview
 
         return result;
     }
+
+    private static AssignmentFlag CombineFlags(IEnumerable<AssignmentFlag> flags)
+    {
+        AssignmentFlag result = (AssignmentFlag)0;
+        flags.Do(f => result |= f);
+        return result;
+    }
+
+    public static AssignmentSummary CalcSummary(AssignmentFlag allFlag) {
+        List<ProbabilityAssignment> roles = [];
+        List<AdditionalAssignment> additionalRoles = [];
+        List<ModifierlikeAssignment<DefinedAllocatableModifier>> modifiers = [];
+        List<ModifierlikeAssignment<DefinedGhostRole>> ghostRoles = [];
+        List<SpecialAssignment> specials = [];
+
+        IEnumerable<ProbabilityAssignment> CheckRoles(IEnumerable<DefinedRole> roles, bool with100View, bool withRandomView, AssignmentType? type = null)
+        {
+            void ConsiderAdditionalAssignment(DefinedRole role)
+            {
+                if (type != null) return;
+                role.AdditionalRoles.Do(r => additionalRoles.Add(new(r, role)));
+            }
+
+            foreach (var role in roles)
+            {
+                var param = type == null ? role.AllocationParameters : role.GetCustomAllocationParameters(type);
+
+                int countSum = param?.RoleCountSum ?? 0;
+                if (countSum == 0) continue;
+
+                int count100 = param!.RoleCount100;
+                if (count100 == countSum)
+                {
+                    if (!with100View) continue;
+
+                    yield return new(role, type, count100, 100, null, null);
+
+                }
+                else if (count100 > 0)
+                {
+                    //100%割り当てと1通りの確率割り当て
+
+                    int countRandom = param!.RoleCountRandom;
+                    int chanceRandom = param!.GetRoleChance(count100 + 1);
+
+                    if (with100View) yield return new(role, type, count100, 100, withRandomView ? countRandom : null, withRandomView ? chanceRandom : null);
+                    else if (withRandomView) yield return new(role, type, countRandom, chanceRandom, null, null);
+                    else continue;
+                }
+                else
+                {
+                    if (!withRandomView) continue;
+
+                    int chanceRandom1 = param!.GetRoleChance(1);
+                    int chanceRandom2 = param!.GetRoleChance(countSum);
+
+                    //1通りあるいは2通りの確率割り当て
+                    bool hasDoubleAssignmentPattern = chanceRandom1 != chanceRandom2;
+                    if (hasDoubleAssignmentPattern)
+                    {
+                        int countRandom1 = 0;
+                        for (int i = 0; i < countSum; i++)
+                        {
+                            if (param.GetRoleChance(i + 1) != chanceRandom1) break;
+                            countRandom1++;
+                        }
+                        int countRandom2 = countSum - countRandom1;
+                        yield return new(role, type, countRandom1, chanceRandom1, countRandom2, chanceRandom2);
+                    }
+                    else
+                    {
+                        yield return new(role, type, countSum, chanceRandom1, null, null);
+                    }
+                }
+
+                //何らかの割り当てをした場合にのみここに到達する。
+                ConsiderAdditionalAssignment(role);
+            }
+        }
+
+        void DoForCategory(RoleCategory category, bool with100View, bool withRandomView)
+        {
+            roles.AddRange(CheckRoles(Roles.AllRoles.Where(r => r.Category == category), with100View, withRandomView, null));
+
+            void AddCategorizedAssignable<Modifierlike>(IEnumerable<Modifierlike> modifierlikes, List<ModifierlikeAssignment<Modifierlike>> list) where Modifierlike : IAssignToCategorizedRole
+            {
+                foreach (var m in modifierlikes)
+                {
+                    m.GetAssignProperties(category, out var assign100, out var assignRandom, out var assignChance);
+                    if (assign100 > 0)
+                    {
+                        if (assignRandom == 0)
+                            list.Add(new(m, category, assign100, 100, null, null));
+                        else
+                            list.Add(new(m, category, assign100, 100, assignRandom, assignChance));
+                    }
+                    else if (assignRandom > 0)
+                    {
+                        list.Add(new(m, category, assignRandom, assignChance, null, null));
+                    }
+                }
+            }
+
+            AddCategorizedAssignable(Roles.AllAllocatableModifiers(), modifiers);
+            AddCategorizedAssignable(Roles.AllGhostRoles, ghostRoles);
+        }
+
+        DoForCategory(RoleCategory.ImpostorRole, allFlag.HasFlag(AssignmentFlag.ModImpostor100), allFlag.HasFlag(AssignmentFlag.ModImpostorPrb));
+        DoForCategory(RoleCategory.NeutralRole, allFlag.HasFlag(AssignmentFlag.ModNeutral100), allFlag.HasFlag(AssignmentFlag.ModNeutralPrb));
+        DoForCategory(RoleCategory.CrewmateRole, allFlag.HasFlag(AssignmentFlag.ModCrewmate100), allFlag.HasFlag(AssignmentFlag.ModCrewmatePrb));
+
+        foreach (var type in AssignmentType.AllTypes)
+        {
+            if (!type.IsActive) continue;
+
+            roles.AddRange(CheckRoles(Roles.AllRoles, allFlag.HasFlag(AssignmentFlag.ModImpostor100), allFlag.HasFlag(AssignmentFlag.ModImpostorPrb), type));
+        }
+
+        foreach (var modifier in Roles.AllAllocatableModifiers()) specials.AddRange(modifier.SpecialAssignment);
+
+        return new AssignmentSummary(roles, modifiers, ghostRoles, specials, additionalRoles);
+    }
+
+    public static AssignmentSummary CalcSummary(AssignmentFlag[] flags) => CalcSummary(CombineFlags(flags));
+    public static AssignmentSummary CalcSummary(int players) => CalcSummary(CalcPreview(players));
 }

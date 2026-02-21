@@ -1,0 +1,98 @@
+"achievement.innersloth.wins_skeld.title" : "さまよう宇宙船"
+"achievement.innersloth.wins_skeld.goal" : "スケルドで3回勝利する。"
+
+"achievement.innersloth.wins_mira.title" : "本社ロックダウン"
+"achievement.innersloth.wins_mira.goal" : "ミラで3回勝利する。"
+
+"achievement.innersloth.wins_polus.title" : "出土"
+"achievement.innersloth.wins_polus.goal" : "ポーラスで3回勝利する。"
+
+"achievement.innersloth.wins_airship.title" : "トップパット・クルー"
+"achievement.innersloth.wins_airship.goal" : "Airshipで3回勝利する。"
+
+"achievement.innersloth.survive_crewmate.title" : "サバイバー"
+"achievement.innersloth.survive_crewmate.goal" : "クルー側で生き延びて勝利する。"
+
+"achievement.innersloth.win_all_tasks.title" : "順風満帆"
+"achievement.innersloth.win_all_tasks.goal" : "全タスクを完了してクルー側で勝利する。"
+
+"achievement.innersloth.win_always_correct_votes.title" : "名探偵"
+"achievement.innersloth.win_always_correct_votes.goal" : "インポスターにだけ投票してクルー側で勝利する。"
+
+"achievement.innersloth.win_kills.title" : "スラッシャー"
+"achievement.innersloth.win_kills.goal" : "すべてのクルーをキルで倒してインポスター側で勝利する。"
+
+"achievement.innersloth.win_impostor_vote.title" : "巧みな話術"
+"achievement.innersloth.win_impostor_vote.goal" : "インポスター側で投票により勝利する。"
+
+"achievement.innersloth.win_sabotage.title" : "サボタージュ名人"
+"achievement.innersloth.win_sabotage.goal" : "重要システムにサボタージュを行いインポスター側で勝利する。"
+
+"achievement.innersloth.no_vents_impostor_win.title" : "通風孔なし"
+"achievement.innersloth.no_vents_impostor_win.goal" : "インポスター側で通気孔を使わずに勝利する。"
+
+"achievement.innersloth.survive_two_impostors.title" : "演技の名人"
+"achievement.innersloth.survive_two_impostors.goal" : "インポスター2人のゲームでインポスターがどちらも死亡せずに勝利する。"
+
+"achievement.innersloth.kill_while_shifted.title" : "誰も信用できない"
+"achievement.innersloth.kill_while_shifted.goal" : "相手になりすまし、その相手をキルする。"
+
+"achievement.innersloth.block_kill_as_guardian.title" : "あなたの味方よ"
+"achievement.innersloth.block_kill_as_guardian.goal" : "守護天使としてキルを阻止する。"
+
+"achievement.innersloth.task_complete_easy.title" : "インターン"
+"achievement.innersloth.task_complete_easy.goal" : "タスク10個を完了する。"
+
+"achievement.innersloth.task_complete_medium.title" : "マネージャー"
+"achievement.innersloth.task_complete_medium.goal" : "タスク100個を完了する。"
+
+"achievement.innersloth.task_complete_hard.title" : "タスクマスター"
+"achievement.innersloth.task_complete_hard.goal" : "タスク500個を完了する。"
+
+"achievement.innersloth.card_first_try.title" : "不可能なタスク"
+"achievement.innersloth.card_first_try.goal" : "初挑戦でカードのスワイプに成功する。"
+
+"achievement.innersloth.die_during_medscan.title" : "我がスキャンを見よ"
+"achievement.innersloth.die_during_medscan.goal" : "医務室でのスキャン中にキルされる。"
+
+"achievement.innersloth.kills_first.title" : "初めての経験"
+"achievement.innersloth.kills_first.goal" : "初キル達成する。"
+
+"achievement.innersloth.kills_easy.title" : "キラー"
+"achievement.innersloth.kills_easy.goal" : "5キル達成する。"
+
+"achievement.innersloth.kills_medium.title" : "アサシン"
+"achievement.innersloth.kills_medium.goal" : "50キル達成する。"
+
+"achievement.innersloth.kills_hard.title" : "処刑人"
+"achievement.innersloth.kills_hard.goal" : "150キル達成する。"
+
+"achievement.innersloth.three_kills_before_meeting.title" : "連続キル"
+"achievement.innersloth.three_kills_before_meeting.goal" : "会議招集前に3キル達成する。"
+
+"achievement.innersloth.fix_own_sabotage.title" : "クルーポスター"
+"achievement.innersloth.fix_own_sabotage.goal" : "自分で起こしたサボタージュを解決する。"
+
+"achievement.innersloth.kill_during_lights.title" : "ブラックアウト"
+"achievement.innersloth.kill_during_lights.goal" : "照明のサボタージュ中に1キル達成する。"
+
+"achievement.innersloth.hns_survive_crewmate.title" : "隠し芸"
+"achievement.innersloth.hns_survive_crewmate.goal" : "かくれんぼモードでクルーとしてゲームに参加し、生き残る。"
+
+"achievement.innersloth.hns_impostor_kill_all.title" : "隠れちゃ駄目"
+"achievement.innersloth.hns_impostor_kill_all.goal" : "かくれんぼモードでインポスターとしてすべてのかくれものを殺す。"
+
+"achievement.innersloth.hns_complete_all_tasks.title" : "プレッシャーに強い"
+"achievement.innersloth.hns_complete_all_tasks.goal" : "かくれんぼモードですべてのタスクを実行する。"
+
+"achievement.innersloth.hns_crewmate_wins_easy.title" : "逃げられない"
+"achievement.innersloth.hns_crewmate_wins_easy.goal" : "かくれんぼモードで10勝する。"
+
+"achievement.innersloth.hns_crewmate_wins_hard.title" : "でも、隠れていいよ"
+"achievement.innersloth.hns_crewmate_wins_hard.goal" : "かくれんぼモードで50勝する。"
+
+"achievement.innersloth.hns_impostor_kills_easy.title" : "逃げてもいいよ"
+"achievement.innersloth.hns_impostor_kills_easy.goal" : "かくれんぼモードで捜索者として100キルする。"
+
+"achievement.innersloth.hns_impostor_kills_hard.title" : "でも、隠れちゃ駄目"
+"achievement.innersloth.hns_impostor_kills_hard.goal" : "かくれんぼモードで捜索者として200キルする。"

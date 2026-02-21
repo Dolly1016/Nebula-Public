@@ -1,0 +1,33 @@
+# Assignable
+
+"role.ember.name" : "Ember"
+"role.ember.short" : "E"
+"role.ember.blurb" : "The Demise"
+
+# Document
+
+"role.ember.doc" : "A wreck burned out by the Damned's curse after losing to the Avenger in a showdown.<br>There is no hope here."
+
+# Options
+
+"options.role.ember.detail" : "Ember was defeated in a decisive battle with the Avengers<br>and burned by the curse of the Damned."
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.ember.another1.title" : "Impermanence"
+"achievement.ember.another1.goal" : "Lose to the Avenger in a showdown,<br>die from your own Damned's curse and lose."
+"achievement.ember.another1.flavor" : ""That's your choice.""
+
+"achievement.ember.another2.title" : "The Sea Calms"
+"achievement.ember.another2.goal" : "Lose to the Avenger in a showdown,<br>die from your own Damned's curse and win."
+"achievement.ember.another2.flavor" : ""No matter what kind of storm it is, it will surely be all right.""
+"achievement.ember.another2.splitted.0" : "The Sea "

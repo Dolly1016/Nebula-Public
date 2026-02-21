@@ -1,0 +1,68 @@
+# Assignable
+
+"role.vanity.name" : "Vanity"
+"role.vanity.short" : "V"
+"role.vanity.blurb" : "What the Gratest Power!"
+
+# Document
+
+"role.vanity.doc" : "A Third faction member who thinks they are the Sheriff."
+"role.vanity.winCond" : "%WIN%"
+"role.vanity.winCond.independent" : "If you have not killed any Crewmates, get an extra win if Crewmates win.<br><var>If you have killed Crewmates, win when you annihilate other killing teams and the total number of survivors is 2 or less.</var>"
+"role.vanity.winCond.extra" : "If you have not killed any Crewmates, get an extra win if Crewmates win.<br><var>If you have killed Crewmates, get an extra win if Crewmates lose.</var>"
+"role.vanity.ability.title" : "Inherent Ability "Justice Execution?""
+"role.vanity.ability.main" : "Unlike the Sheriff, never fails to kill."
+"role.vanity.ability.kill" : "Can kill regardless of the opponent's faction."
+
+# Options
+
+"options.role.vanity.detail" : "Vanity fancies themselve the Sheriff."
+"options.role.vanity.canExtraWinEvenIfVanityDied" : "Can Extra Win Even If Vanity Died"
+"options.role.vanity.independentTeam" : "Independent Killer Team"
+"options.role.vanity.becomeAwareOfVanityWhenKillCrewmate" : "Become Aware Of Vanity When Kill Crewmate"
+"options.role.vanity.canBecomeAwareOfVanity" : "Can Become Aware Of Vanity via Task"
+"options.role.vanity.taskProgressRequiredForSelfAdmission" : "# Tasks Required For Self-admission"
+"options.role.vanity.group.task" : "Self-admission Settings"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.vanity.kill" : "Num of Killing"
+
+# Titles
+
+"achievement.vanity.common1.title" : "Reversing Fate"
+"achievement.vanity.common1.goal" : "Realize you are Vanity."
+
+"achievement.vanity.another1.title" : "Arrogance"
+"achievement.vanity.another1.goal" : "Kill a Crewmate and then die from a cause other than exile or guess."
+
+"achievement.combination.2.sheriff.vanity.common2.title" : "If I Had Justice"
+"achievement.combination.2.sheriff.vanity.common2.goal" : "Kill a non-Crewmate as Sheriff, and finally exile a Crewmate to lose."
+"achievement.combination.2.sheriff.vanity.common2.cond" : "Obtainable only in games where Vanity can appear"
+"achievement.combination.2.sheriff.vanity.common2.flavor" : ""I just let the devil take me." —From an unsigned memoir"
+
+"achievement.vanity.challenge.title" : "Farewell, Ally Of Tomorrow"
+"achievement.vanity.challenge.goal" : "Kill the last Crewmate and win."
+"achievement.vanity.challenge.splitted.0" : "Farewell, "
+
+# Team
+
+"teams.vanity" : "Vanity"
+"end.vanity" : "Vanity Wins %EXTRA%"
+"end.extra.vanity" : " <color=#FFFFFF>with</color> Vanity"
+
+# Document
+
+"document.tip.winCond.vanity.kill.title" : "Kill Trigger"
+"document.tip.winCond.vanity.kill" : "If Vanity has killed a Crewmate, Vanity will win when they have wiped out the other killing teams and<br>accounts for more than half of all alive players."
+"document.tip.winCond.vanity.extra.crewOnly.title" : "Extra Winning"
+"document.tip.winCond.vanity.extra.crewOnly" : "If Vanity has not killed any crewmates and crewmates win, Vanity will also win."
+"document.tip.winCond.vanity.extra.title" : "Extra Winning"
+"document.tip.winCond.vanity.extra" : "If Vanity has not killed any crewmates and crewmates win, Vanity will also win.<br>If Vanity has not killed any crewmates and crewmates lose, Vanity will win together."
+"document.tip.winCond.vanity.extra.surviveCond" : "Vanity must be ALIVE to win."

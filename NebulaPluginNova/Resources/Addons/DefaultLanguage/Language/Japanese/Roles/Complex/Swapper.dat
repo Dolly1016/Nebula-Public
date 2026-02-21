@@ -1,0 +1,15 @@
+# Document
+
+"role.swapper.ability.swap" : "<title>スワップ</title>投じられた票を入れ替えます。<br>この能力はゲーム中に最大<var>%NUM%</var>回使用できます。"
+
+# Options
+
+"options.role.swapper.canSelectSwapper" : "自身の票をスワップ可能"
+
+# Game
+
+"roles.swapper.leftSwap" : "残りスワップ回数"
+
+# UI
+
+# Status

@@ -1,0 +1,49 @@
+# Assignable
+
+"role.doppelganger.name" : "Doppelganger"
+"role.doppelganger.short" : "D"
+"role.doppelganger.blurb" : "Face Me"
+
+# Document
+
+"role.doppelganger.doc" : "A crewmate with a freely controllable illusion."
+"role.doppelganger.ability.title" : "Inherent Ability "Floating Self-awareness""
+"role.doppelganger.ability.main" : "Can summon an <b>illusion</b> that looks exactly like yourself."
+"role.doppelganger.ability.map" : "<title>Mini Map</title>Open a mini map to instruct the illusion's destination. Can also summon from the normal map.<br>If you instruct a destination when there's no illusion on the map, the illusion will be summoned there."
+"role.doppelganger.ability.swap" : "<title>Swap</title>Swap positions with the illusion. Swapping takes a little time."
+"role.doppelganger.ability.despawn" : "<title>Despawn</title>Make the illusion disappear."
+"role.doppelganger.tips" : "・If the illusion is killed, the doppelganger themselves will <b>die</b> too.<br>・On the mini map, you can check the position and color shade of players near the illusion."
+
+# Options
+
+"options.role.doppelganger.detail" : "Doppelgangers can create a illusion of themselves.<br>This can be used for long distance travel."
+"options.role.doppelganger.swapCooldown" : "Swap Cooldown"
+"options.role.doppelganger.swapDuration" : "Swap Duration"
+"options.role.doppelganger.detectionRadius" : "Player Detection Radius"
+
+# Game
+
+"gameAction.doppelganger.summon" : "Summon Illusion"
+
+# UI
+
+"button.label.doppelganger.command" : "command"
+"button.label.despawn" : "despawn"
+"ui.action.doppelganger.swap" : "Swap positions with the illusion."
+"ui.action.doppelganger.despawn" : "It Despawns the illusion."
+
+# Stats
+
+# Titles
+
+"achievement.doppelganger.common1.title" : "Bilocation"
+"achievement.doppelganger.common1.goal" : "Swap positions with the illusion and move 20m or more."
+
+"achievement.doppelganger.another1.title" : "Shared Fate"
+"achievement.doppelganger.another1.goal" : "The illusion is killed, and you die along with it."
+
+"achievement.doppelganger.challenge.title" : "Reliable Partner"
+"achievement.doppelganger.challenge.goal" : "Cooperate with the illusion to complete tasks extremely quickly."
+"achievement.doppelganger.challenge.cond" : "When tasks are completed, all crewmates have 4 or more task quotas remaining"
+"achievement.doppelganger.challenge.splitted.0" : "Reliable "
+"achievement.doppelganger.challenge.splitted.2" : "Partner"

@@ -1,0 +1,62 @@
+# Assignable
+
+"role.lover.name" : "Lover"
+
+# Document
+
+"role.lover.doc" : "A modifier for pairs of 2. %SUICIDE%"
+"role.lover.doc.standard" : "If your partner dies, you die following them."
+"role.lover.doc.avenger" : "If your partner is killed, you become %AVENGER% and start a revenge drama.<br>If there is no revenge target due to exile etc., you die following them directly."
+"role.lover.winCond" : "Survive with your partner when the total number of survivors is 3 or less. %EXTRA%"
+"role.lover.winCond.additional" : "<br>Alternatively, if your partner wins and survives, you also get an <var>extra win</var>."
+
+# Options
+
+"options.role.lover.detail" : "While the number of ways to win increases, so does the risk of death."
+
+# Game
+
+"role.lover.blurb" : "You're in <color=#fc04bdff>Love</color> with %NAME%"
+"role.lover.generalBlurb" : "Love Falls"
+"options.role.lover.numOfPairs" : "# Pairs"
+"options.role.lover.chanceOfAssigningImpostors" : "% Assigning Impostors"
+"options.role.lover.allowExtraWin" : "Allow Extra Win"
+"options.role.lover.allowExtraWin.detail" : "When turned on, if your partner survives and wins, you win together."
+"options.role.lover.allowExtraWinViaCrewmateWin" : "Extra Win Via Crewmate Win"
+"options.role.lover.blockRoleWin" : "Block Role Win"
+"options.role.lover.blockRoleWin.detail" : "When turned on, you cannot win by your own role.<br><br>・When off: Even if you cannot win as Lovers, you can win by your own role.<br>・When on: You can only win by the Lovers' victory condition."
+"options.role.lover.avengerMode" : "Avenger Mode"
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.lover.common1.title" : "It Is Sometimes Blind"
+"achievement.lover.common1.goal" : "Win solo as Lovers."
+"achievement.lover.common1.splitted.0" : "It Is "
+
+"achievement.lover.another1.title" : "It Is Sometimes Passionate"
+"achievement.lover.another1.goal" : "Lose your partner and die following them."
+"achievement.lover.another1.splitted.1" : "Sometimes "
+
+"achievement.lover.challenge.title" : "Dolus Eventualis"
+"achievement.lover.challenge.goal" : "Win solo as Lovers when 2 Impostors are alive<br>and you are not an Impostor."
+"achievement.lover.challenge.splitted.2" : "Love"
+
+# Team
+
+"end.lover" : "Lovers Win%EXTRA%"
+"end.extra.lover" : " <color=#FFFFFF>with</color> Lovers"
+
+# Document
+
+"document.tip.winCond.teams.lover" : "Lovers"
+
+"document.tip.winCond.lovers.normal.title" : "Lovers Solo Trigger"
+"document.tip.winCond.lovers.normal" : "When there are only 3 survivors, lovers win if each other survive."
+"document.tip.winCond.lovers.extra.title" : "Lovers Extra Winning"
+"document.tip.winCond.lovers.extra" : "If lovers partner survives and wins, the others also win."

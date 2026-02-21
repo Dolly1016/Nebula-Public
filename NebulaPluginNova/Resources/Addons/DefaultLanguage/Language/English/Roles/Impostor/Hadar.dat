@@ -1,0 +1,70 @@
+# Assignable
+
+"role.hadar.name" : "Hadar"
+"role.hadar.short" : "H"
+"role.hadar.blurb" : "Crawling Darkness"
+"role.hadar.hint" : "Dive underground for free movement"
+
+# Document
+
+"role.hadar.doc" : "An impostor who can move by diving underground."
+"role.hadar.ability.title" : "Inherent Ability "Chitei no Henkosei""
+"role.hadar.ability.main" : "Dive underground and move freely. While underground, your field of view is very narrow and faint.<br>While moving underground, the location of nearby players is notified periodically."
+"role.hadar.ability.dive" : "<title>Dive</title>Dive underground."
+"role.hadar.ability.gush" : "<title>Gush</title>Escape to the ground."
+"role.hadar.ability.gush.vent" : "<title>Gush</title><var>Escape to the ground from a nearby vent.</var>"
+"role.hadar.ability.evidence" : "<title>Dive Evidence</title> When diving underground, a hole is left on the spot.<br>The hole becomes smaller each time a meeting is held."
+"role.hadar.tips" : "・The kill cooldown does not progress while lurking underground."
+
+# Options
+
+"options.role.hadar.detail" : "Hadar can move freely underground.<br>Underground Hadar is invisible to other players."
+"options.role.hadar.diveCooldown" : "Dive Cooldown"
+"options.role.hadar.accelRateUnderground" : "Accel Rate Underground"
+"options.role.hadar.gushFromVents" : "Gush From Vents"
+"options.role.hadar.gushFromVents.detail" : "When turned on, Hadar can only emerge from nearby vents.<br>When turned off, Hadar can emerge anywhere on the map."
+"options.role.hadar.ventDetectionRange" : "Vent Detection Range"
+"options.role.hadar.leftDivingEvidence" : "Left Diving Evidence"
+"options.role.hadar.leftDivingEvidence.detail" : "When turned on, a hole is left on the ground when diving underground.<br>The hole becomes smaller each time a meeting is held and eventually disappears."
+
+# Game
+
+"gameAction.hadar.disappear" : "Underground Dive"
+"gameAction.hadar.appear" : "Gush"
+
+# UI
+
+"button.label.dive" : "dive"
+"button.label.gush" : "gush"
+
+# Stats
+
+"stats.hadar.dive" : "Num of Diving"
+
+# Titles
+
+"achievement.hadar.common1.title" : "Killing Intent Lurking Underground"
+"achievement.hadar.common1.goal" : "Kill within 8 seconds of gushing."
+"achievement.hadar.common1.splitted.2" : "Killing Intent"
+
+"achievement.hadar.common2.title" : "Untraceable"
+"achievement.hadar.common2.goal" : "Dive underground within 8 seconds of killing."
+
+"achievement.hadar.common3.title" : "Variable Star Underground"
+"achievement.hadar.common3.goal" : "Gush from underground 10 times in total."
+"achievement.hadar.common3.splitted.0" : "Underground "
+"achievement.hadar.common3.splitted.2" : "Variable Star"
+
+"achievement.hadar.another1.title" : "Gravestone Earth"
+"achievement.hadar.another1.goal" : "Be exiled or guessed to death in the meeting immediately after diving underground."
+
+"achievement.hadar.common4.title" : "Peek-a-boo!"
+"achievement.hadar.common4.goal" : "Gush from underground right next to a survivor.""
+"achievement.hadar.common4.splitted.1" : "..."
+
+"achievement.hadar.common5.title" : "Mole Network"
+"achievement.hadar.common5.goal" : "Move 30m or more with one underground dive."
+
+"achievement.hadar.challenge.title" : "Underground Emperor"
+"achievement.hadar.challenge.goal" : "Move underground for 50 seconds or more in one game,<br>get 3 or more kills, and win while alive."
+"achievement.hadar.challenge.splitted.2" : "Emperor"

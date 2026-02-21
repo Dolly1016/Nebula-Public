@@ -1,0 +1,46 @@
+# Assignable
+
+"role.extraMission.name" : "Extra Mission"
+"role.extraMission.generalBlurb" : "特別極秘任務"
+
+# Document
+
+"role.extraMission.doc" : "指定されたプレイヤーが死亡していないと勝利できません。<br>自身の勝利を目指す傍ら、追加ミッションも完遂しましょう。"
+
+# Options
+
+"options.role.extraMission.detail" : "Your mission is to make certain players die.<br>Otherwise you won't win."
+
+# Game
+
+"role.extraMission.taskText" : "[Extra Mission] Death of %PLAYER%."
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.extraMission.common1.title" : "任務遂行"
+"achievement.extraMission.common1.goal" : "追加ミッションのターゲットが死亡する。"
+
+"achievement.extraMission.another1.title" : "予定調和"
+"achievement.extraMission.another1.goal" : "自身の死後に追加ミッションのターゲットが死亡する。"
+
+"achievement.extraMission.common2.title" : "エスケイプ"
+"achievement.extraMission.common2.goal" : "追加ミッションのターゲットになりながらも最後まで生存する。"
+
+"achievement.extraMission.common3.title" : "予想外の裏切り"
+"achievement.extraMission.common3.goal" : "追加ミッションのターゲットに票を投じ、追放する。"
+"achievement.extraMission.common3.cond" : "自身とターゲットがともにクルーメイト陣営(マッドメイト除く)であること"
+"achievement.extraMission.common3.splitted.0" : "予想外の"
+
+"achievement.extraMission.another2.title" : "沈黙"
+"achievement.extraMission.another2.goal" : "追加ミッションのターゲットが死亡せず、ゲームに敗北する。"
+"achievement.extraMission.another2.flavor" : ""...報告は以上であります""
+
+"achievement.extraMission.challenge.title" : "それぞれの思惑"
+"achievement.extraMission.challenge.goal" : "追加ミッションのターゲットが死亡し、かつ自身も誰かの追加ミッションの<br>ターゲットに指定された上で生存し、勝利する。"
+"achievement.extraMission.challenge.splitted.0" : "それぞれの"

@@ -1,0 +1,83 @@
+# Assignable
+
+"role.paparazzo.name" : "Paparazzo"
+"role.paparazzo.short" : "P"
+"role.paparazzo.blurb" : "Take a Best Shot!"
+"role.paparazzo.taskText" : "Take a Photo and Disclose<br>(%DETAIL%)"
+"role.paparazzo.taskTextSubject" : "Subjects: %CS%/%GS%"
+"role.paparazzo.taskTextDisclosed" : "Disclosed: %CD%/%GD%"
+"role.paparazzo.taskTextPhoto" : "Photos: %CP%/%GP%"
+
+# Document
+
+"role.paparazzo.doc" : "写真を撮影し、緊急会議で写真を開示する第三陣営です。"
+"role.paparazzo.winCond" : "生存しながら、異なる<var>%SUBJECT%</var>人を撮影し、会議にて異なる<var>%DISCLOSED%</var>人を開示する。<br>いずれも重複しない合計であり、1枚の写真に収める必要はない。"
+"role.paparazzo.ability.title" : "固有能力 "激震を呼ぶスクープ""
+"role.paparazzo.ability.main" : "タスクフェイズ中、画面にはファインダーが現れ、写真を撮影できます。<br>撮影した写真は画面左下にストックされます。誰も映っていない写真は破棄されます。<br><br>会議中に写真をクリックすると、全員に対しその写真を開示できます。<br>砂時計に表示されたタイマーが時間切れになると、その会議では写真を開示できなくなります。"
+"role.paparazzo.ability.camera" : "<title>撮影</title>写真を撮影します。画面中央付近ではクリック操作によっても撮影できます。"
+"role.paparazzo.tips" : "・サブアクションからファインダーの向きを変えられます。<br>・マウス右ボタンを押下している間、ファインダーの向きが固定されます。"
+
+# Options
+
+"options.role.paparazzo.detail" : "Paparazzo takes a photo and disclose it at a meeting."
+"options.role.paparazzo.shotCoolDown" : "Shot Cooldown"
+"options.role.paparazzo.requiredSubjects" : "Required Subjects"
+"options.role.paparazzo.requiredSubjects.detail" : "勝利のためには設定した人数だけ写真に収める必要があります。<br>同じプレイヤーを複数回撮影しても1人分としてカウントされます。"
+"options.role.paparazzo.requiredDisclosed" : "Required Disclosed"
+"options.role.paparazzo.requiredDisclosed.detail" : "勝利のためには設定した人数分だけプレイヤーを写真に収めて会議中に開示する必要があります。<br>同じプレイヤーが映った写真を複数回開示しても1人分としてカウントされます。"
+"options.role.paparazzo.requiredPhotos" : "Required Photos"
+"options.role.paparazzo.telephotoFinderSize" : "Telephoto Finder Size"
+"options.role.paparazzo.wideAngleFinderSize" : "Wide-angle Finder Size"
+
+# Game
+
+
+# UI
+
+"button.label.shot" : "shot"
+"ui.action.paparazzo.camera" : "Take a photo."
+"ui.action.paparazzo.toggle" : "Change the direction of the viewfinder."
+
+# Stats
+
+"stats.paparazzo.photo" : "Num of Taking Photos"
+"stats.paparazzo.players" : "Num of Players Taken Photos"
+
+# Titles
+
+"achievement.paparazzo.common1.title" : "白日の事件簿"
+"achievement.paparazzo.common1.goal" : "有効な写真を3枚撮影する。"
+"achievement.paparazzo.common1.splitted.0" : "白日の"
+
+"achievement.paparazzo.common2.title" : "スクープ！秘密の会合"
+"achievement.paparazzo.common2.goal" : "一枚の写真に4人以上のプレイヤーを写す。"
+"achievement.paparazzo.common2.flavor" : ""公然の事実を秘密にせよ。それが価値になるのだから。" ―『ゴシップの心得』"
+"achievement.paparazzo.common2.splitted.1" : "秘密の"
+
+"achievement.paparazzo.common3.title" : "見逃せない一枚"
+"achievement.paparazzo.common3.goal" : "ベントに出入りする瞬間を撮影する。"
+"achievement.paparazzo.common3.flavor" : ""事実を誇張して伝えること。不安は過度に煽ること。" ―『ゴシップの心得』"
+
+"achievement.paparazzo.common4.title" : "決定的証拠"
+"achievement.paparazzo.common4.goal" : "死体とそのキルの犯人を一枚に収める。"
+"achievement.paparazzo.common4.flavor" : ""弁明の余地を残すこと。それが新たな波乱を呼ぶだろう。" ―『ゴシップの心得』"
+
+"achievement.paparazzo.another1.title" : "インポスター・イン・ポスター"
+"achievement.paparazzo.another1.goal" : "インポスターがパパラッチに撮影され、会議で写真を開示される。"
+"achievement.paparazzo.another1.splitted.1" : "イン"
+"achievement.paparazzo.another1.flavor" : "Say Hello! 3年前のあなたへ"
+
+"achievement.paparazzo.challenge.title" : "揺れる輿論"
+"achievement.paparazzo.challenge.goal" : "写真を公開した会議内で、何らかの理由で4人以上死亡する。"
+"achievement.paparazzo.challenge.cond" : "自身がその会議で死亡してしまった場合は無効"
+"achievement.paparazzo.challenge.flavor" : ""これは呪われた記事だ。すぐに処分せねばなるまい。" ―破られた議事録より"
+
+# Team
+
+"teams.paparazzo" : "Paparazzo"
+"end.paparazzo" : "Paparazzo Wins%EXTRA%"
+
+# Document
+
+"document.tip.winCond.paparazzo.title" : "Special Trigger"
+"document.tip.winCond.paparazzo" : "The paparazzo wins by disclosing a photo with the specified number of players,<br>and by capturing the specified number of players in the photo."

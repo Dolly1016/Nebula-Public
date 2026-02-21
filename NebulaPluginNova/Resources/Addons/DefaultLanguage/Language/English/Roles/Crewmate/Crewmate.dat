@@ -1,0 +1,39 @@
+# Assignable
+
+"role.crewmate.name" : "Crewmate"
+"role.crewmate.short" : "C"
+"role.crewmate.blurb" : "Do Tasks"
+
+# Document
+
+"role.crewmate.doc" : "A normal crewmate with no special abilities."
+
+# Options
+
+"options.role.crewmate.detail" : "Crewmates with no special abilities."
+
+# Game
+
+# UI
+
+# Status
+
+"state.alive" : "Alive"
+"state.dead" : "Dead"
+"state.disconnected" : "Disconnected"
+"state.exiled" : "Exiled"
+"state.suicide" : "Suicide"
+
+# Stats
+
+# Titles
+
+# Team
+
+"teams.crewmate" : "Crewmate"
+"end.crewmate" : "Crewmates Win%EXTRA%"
+
+"document.tip.winCond.crewmate.task.title" : "Task Trigger"
+"document.tip.winCond.crewmate.task" : "Crewmates win when they complete all task quotas."
+"document.tip.winCond.crewmate.exile.title" : "Exile Trigger"
+"document.tip.winCond.crewmate.exile" : "Crewmates win by exiling all %IMPOSTOR% team and %JACKAL% team players."

@@ -1,0 +1,42 @@
+# Assignable
+
+"role.impostor.name" : "Impostor"
+"role.impostor.short" : "I"
+"role.impostor.blurb" : "Kill and Sabotage"
+
+# Document
+
+"role.impostor.doc" : "特殊な能力を持たない普通のインポスターです。"
+
+# Options
+
+"options.role.impostor.detail" : "Impostors with no special abilities."
+"options.role.impostor.canKillHidingPlayer" : "Can Kill Hiding Player"
+
+# Game
+
+
+# UI
+
+"button.label.kill" : "kill"
+
+# Stats
+
+
+# Titles
+
+# Team
+
+"teams.impostor" : "Impostor"
+"end.impostor" : "Impostors Win%EXTRA%"
+
+# Document
+
+"document.tip.winCond.teams.impostor" : "Impostor"
+
+"document.tip.winCond.impostor.kill.title" : "Kill Trigger"
+"document.tip.winCond.impostor.kill" : "Impostors win when impostor team players account for more than half of all alive players. <br>%LOVER% whose partner is still alive are not counted in impostor team."
+"document.tip.winCond.impostor.extinction.title" : "Complete Domination Trigger"
+"document.tip.winCond.impostor.extinction" : "Impostors win when only impostor team players survive. <br>%LOVER% whose partner is still alive are not counted in impostor team."
+"document.tip.winCond.impostor.sabotage.title" : "Sabotage Trigger"
+"document.tip.winCond.impostor.sabotage" : "Impostors win if the time runs out without the emergency sabotage being restored."

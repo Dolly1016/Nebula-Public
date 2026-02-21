@@ -1,0 +1,218 @@
+# Title
+
+"title.buttons.nebula" : "NEBULA"
+"title.label.nebula" : "Nebula on the Ship"
+
+"title.label.discord" : "Click to join our Discord!"
+
+"title.buttons.update" : "Update to Latest NoS"
+"title.buttons.achievements" : "Titles"
+"title.buttons.addons" : "Add-ons"
+"title.buttons.developersStudio" : "Dev. Studio"
+"title.buttons.marketplace" : "Marketplace"
+"title.buttons.stats" : "Stats"
+"title.buttons.form" : "Bug Report"
+
+"ui.update.waitFinishing" : "Wait for updating..."
+"ui.update.finishUpdate" : "Update finished!<br>Please restart the game."
+"ui.update.autoUpdate" : "Automatic updates have been enabled."
+
+# AFK
+
+"ui.afk.title" : "AFK"
+"ui.afk.detail" : "When you return, press any key to come back."
+
+# Certification
+
+"certification.waiting" : "Checking..."
+"certification.waiting.detail" : "Checking the player version and installed NoS."
+"certification.waiting.client" : "Checking the player version and installed NoS."
+"certification.uncertified" : "Uncertified"
+"certification.uncertified.detail" : "This player does not have NoS installed."
+"certification.uncertified.client" : "Do not participate in vanilla games<br>with NoS installed."
+"certification.unmatchedEpoch" : "Unmatched Epoch"
+"certification.unmatchedEpoch.detail" : "The version of NoS this player has installed is far from ours.<br>Guide they to get the same version of NoS from <b>GitHub</b>."
+"certification.unmatchedEpoch.client" : "The version of NoS the host has installed is far from yours.<br>Get the same version of NoS from <b>GitHub</b>!"
+"certification.unmatchedBuild" : "Unmatched Build"
+"certification.unmatchedBuild.detail" : "This player has a different version of NoS installed.<br>Guide they to get the same version of NoS from <b>the title screen</b>."
+"certification.unmatchedBuild.client" : "The host has a different version of NoS installed.<br>Get the same version of NoS from <b>the title screen</b>!"
+"certification.unmatchedAddon" : "Unmatched Addon"
+"certification.unmatchedAddon.detail" : "This player's add-on configuration is different.<br>Some add-ons must be installed by everyone."
+"certification.unmatchedAddon.client" : "The add-on configuration is different.<br>Some add-ons must be installed by everyone."
+"certification.unmatchedVanilla" : "Unmatched Vanilla"
+"certification.unmatchedVanilla.detail" : "The version of Among Us is far from ours."
+"certification.unmatchedVanilla.client" : "The version of Among Us is different."
+
+# Versions
+
+"version.category.all" : "All"
+"version.category.major" : "Stable"
+"version.category.snapshot" : "Snapshot"
+"version.category.preRelease" : "Pre-Release"
+"version.category.custom" : "Custom"
+"version.category.unknown" : "Unknown"
+"version.category.auto" : "Auto"
+"version.fetching.autoUpdate.major" : "Latest Stable"
+"version.fetching.autoUpdate.snapshot" : "Latest Snapshot"
+"version.fetching.gainPackage" : "Gain"
+"version.fetching.setAutoUpdate" : "Apply"
+"version.fetching.current" : "Current"
+"version.fetching.mismatched" : "Mismatched"
+"version.fetching.applied" : "Applied"
+"version.fetching.mismatched.detail" : "The version of Among Us is too far apart to change. <br>Please reinstall. Sorry!"
+"version.fetching.loadMore" : "More"
+
+# Game Mode
+
+"options.gamemode" : "Game Mode"
+
+"gamemode.standard" : "Standard"
+"gamemode.freeplay" : "Free Play"
+"gamemode.aeroguesser" : "AeroGuesser"
+
+# Notification
+
+"notification.lobby.noTitleForFreeplay" : "Titles cannot be earned in free play."
+"notification.lobby.noTitleForOP" : "Titles cannot be earned in games where the host has the OP permission."
+
+# Inventory
+
+"inventory.palette.catalogue" : "Catalogue"
+"inventory.palette.colorCode" : "Color Code"
+"inventory.palette.colorCode.mainColor" : "Main Color"
+"inventory.palette.colorCode.shadowColor" : "Shadow Color"
+"inventory.palette.colorCode.visorColor" : "Visor Color"
+"inventory.palette.colorCode.colorName" : "Color Name"
+"inventory.palette.colorCode.copy" : "Copy"
+"inventory.palette.colorCode.paste" : "Paste"
+"inventory.palette.colorCode.copied" : "Copied Successfully!"
+"inventory.palette.colorCode.pasted" : "Pasted Successfully!"
+"inventory.palette.colorCode.pasted.failed" : "The format is incorrect."
+"inventory.catalogue.innersloth" : "Vanilla Collection"
+"inventory.color.vanilla0" : "Red"
+"inventory.color.vanilla1" : "Blue"
+"inventory.color.vanilla2" : "Green"
+"inventory.color.vanilla3" : "Pink"
+"inventory.color.vanilla4" : "Orange"
+"inventory.color.vanilla5" : "Yellow"
+"inventory.color.vanilla6" : "Black"
+"inventory.color.vanilla7" : "White"
+"inventory.color.vanilla8" : "Purple"
+"inventory.color.vanilla9" : "Brown"
+"inventory.color.vanilla10" : "Cyan"
+"inventory.color.vanilla11" : "Lime"
+"inventory.color.vanilla12" : "Maroon"
+"inventory.color.vanilla13" : "Rose"
+"inventory.color.vanilla14" : "Banana"
+"inventory.color.vanilla15" : "Gray"
+"inventory.color.vanilla16" : "Tan"
+"inventory.color.vanilla17" : "Coral"
+"inventory.color.visor" : "Default"
+"inventory.costume.variants" : "Variants"
+"inventory.costume.tag.0" : "This costume has animations!"
+"inventory.costume.tag.1" : "This costume is functional!"
+"inventory.costume.tag.2" : "This costume has some variants."
+
+# Logs
+
+"log.loadCostume" : "Costume loaded!"
+"log.awaiting" : "Waiting for response... (Tag: %TAG%)"
+
+# Regions
+
+"regions.Modded NA (MNA)" : "北米 (Mod)"
+"regions.Modded EU (MEU)" : "欧州 (Mod)"
+"regions.Modded Asia (MAS)" : "アジア (Mod)"
+
+# Free Play
+
+"role.metaRole.ui.roles" : "Roles"
+"button.label.operate" : "operate"
+"game.metaAbility.tabs.roles" : "Roles"
+"game.metaAbility.tabs.modifiers" : "Modifiers"
+"game.metaAbility.tabs.ghostRoles" : "Ghost Roles"
+"game.metaAbility.tabs.perks" : "Perks"
+"game.metaAbility.perks.standard" : "Common Perks"
+"game.metaAbility.perks.noncrewmateOnly" : "Non-crewmate Only Perks"
+"game.metaAbility.equipped" : "Equipped"
+"game.metaAbility.unequipped" : "Unequipped"
+
+# Social
+
+"social.appeal.detail" : "Appeals can be used to introduce yourself.<br>Should not be used for actual games!"
+"social.appeal.lobby" : "Appeal In Lobby"
+"social.appeal.lobby.detail" : "When turned on, you can use <b>Appeal</b> to draw attention to yourself in the lobby."
+"social.appeal.game" : "Appeal In Game"
+"social.appeal.game.detail" : "When turned on, you can use <b>Appeal</b> to draw attention to yourself in-game. <br>Note that use it as an opening for self-introduction, not a regular game!"
+
+"achievement.social.firstClear" : "%PLAYER% got"
+"achievement.social.clear" : "%PLAYER% got"
+"achievement.social.clearMultiple" : "%PLAYER% and %OTHERS% players got"
+"achievement.social.noAchievement" : "There are no titles to mention..."
+
+# Stats
+
+"stats.ui.title" : "Stats"
+"stats.ui.caption" : "*Statistics from v2.13 onwards has been aggregated."
+"stats.group.kill" : "Kills"
+"stats.group.death" : "Deaths"
+"stats.group.game" : "Game"
+"stats.group.roles" : "Roles"
+"stats.group.perks" : "Perks"
+"stats.group.aeroGuesser" : "Aero Guesser"
+"stats.role.common.assigned" : "Played %ROLE%"
+"stats.role.common.won" : "Won as %ROLE%"
+"stats.modifier.common.assigned" : "Played %MODIFIER%"
+"stats.modifier.common.won" : "Won as %MODIFIER%"
+"stats.ghostRole.common.assigned" : "Played %GHOSTROLE%"
+"stats.ghostRole.common.won" : "Won as %GHOSTROLE%"
+"stats.common.kill" : "%STATE%"
+"stats.common.death" : "%STATE%"
+"stats.common.win" : "Won with %END%"
+"stats.common.defeat" : "Defeated with %END%"
+"stats.gamePlay" : "Play Games"
+"stats.plants.gain.normal" : "Num of Gained Perks from Normal Plants"
+"stats.plants.gain.warped" : "Num of Gained Perks from Warped Plants"
+"stats.perk.common.gain" : "Gained %PERK%"
+"stats.aeroGuesser.gamePlay" : "Play Games"
+"stats.aeroGuesser.totalScore" : "Total Score"
+"stats.aeroGuesser.perfectScore" : "Number of Perfect Score Recoreded"
+
+# Common UI
+
+"ui.dialog.yes" : "Yes"
+"ui.dialog.no" : "No"
+"ui.dialog.ok" : "OK"
+"ui.dialog.confirmation" : "Confirm"
+"ui.dialog.exit" : "Exit"
+"ui.dialog.search" : "Search"
+"ui.dialog.keyword" : "Keyword"
+"ui.common.loading" : "Now Loading..."
+
+# Button UI
+
+"ui.button.mainAction" : "Action"
+"ui.button.aidAction" : "Sub Action"
+"ui.action.mouseClick" : "Actions can also be triggered by clicking near the player."
+
+# Other UI
+
+"ui.citation.openUrl" : "Click to open the link."
+"ui.costume.missedCostume" : "Unowned global costume"
+"ui.costume.unownedCostume" : "Unowned global costume"
+"ui.error.stamp.notLoaded" : "Loading stamps.<br>Try again later!"
+"ui.error.stamp.notAllowed" : "Stamps are not allowed in this room!"
+"ui.error.emote.notAllowed" : "Emotes are not allowed in this room!"
+"ui.error.emote.cooldown" : "You can send the emote again a little later."
+"ui.stamp.onTable" : "Stamps on menu"
+"ui.stamp.all" : "All stamps"
+"ui.stamp.full" : "There is no space left for the stamp. <br>Please select a stamp to replace it."
+"ui.stamp.select" : "Please select a stamp to replace."
+"ui.stamp.click.top.1" : "Click to select the stamp<br>you want to replace from the list below."
+"ui.stamp.click.top.2" : "Click to change the stamp."
+"ui.stamp.click.bottom.1" : "Click to add this stamp."
+"ui.stamp.click.bottom.2" : "Click to remove this stamp."
+"ui.stamp.loading" : " (loading or unknown stamp)"
+"ui.warning.unrecommendedResolution" : "Resolutions that do not have<br>a 16:9 aspect ratio are not recommended."
+"ui.error.failedToSearchRoom" : "Room search failed in the following regions:"
+"ui.error.quickStart.cannotStart" : "Not enough players to start the game!"

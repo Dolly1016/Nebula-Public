@@ -1,0 +1,57 @@
+# Assignable
+
+"role.ubiquitous.name" : "Ubiquitous"
+"role.ubiquitous.short" : "U"
+"role.ubiquitous.blurb" : "Anytime, Anywhere"
+
+# Language
+
+"role.ubiquitous.doc" : "A crewmate who operates <b>drones</b> to check the surroundings."
+"role.ubiquitous.ability.title" : "Inherent Ability "Ubiquitous Surveillance Network""
+"role.ubiquitous.ability.main" : "Can use up to 1 <b>attached</b> drone per task phase.<br>After a meeting is held, the attached drone is <b>detached</b> and becomes visible to other players.<br>Detached drones cannot be operated, but display information about nearby players on the mini map."
+"role.ubiquitous.ability.drone" : "<title>Drone</title>Switch the viewpoint to the attached drone and operate it.<br>If there is no attached drone, summon a new drone at hand."
+"role.ubiquitous.ability.callBack" : "<title>Call Back</title>Call back the attached drone."
+"role.ubiquitous.ability.doorHack" : "<title>Door Hack</title>Hack and pry open doors near the attached drone."
+"role.ubiquitous.tips" : "・Even when not operating the attached drone,<br>you can check the surroundings of the drone from the small window at the bottom left of the screen."
+
+# Options
+
+"options.role.ubiquitous.detail" : "Ubiquitous can operate drones. After the meeting,<br>the used drone will display the location of nearby players on the map."
+"options.role.ubiquitous.microphoneRadious" : "Microphone Radious"
+"options.role.ubiquitous.droneCoolDown" : "Drone Cooldown"
+"options.role.ubiquitous.droneDuration" : "Drone Duration"
+"options.role.ubiquitous.detectionRadious" : "Detection Radious"
+"options.role.ubiquitous.doorHackCoolDown" : "Door Hacking Cooldown"
+"options.role.ubiquitous.doorHackRadious" : "Door Hacking Radious"
+
+# Game
+
+"role.ubiquitous.droneRange" : "Ubiquitous<color=white>: Drone Detection Radious</color>"
+"gameAction.ubiquitous.invoke" : "Drone Summon"
+
+# UI
+
+"button.label.drone" : "drone"
+"button.label.doorHack" : "door hack"
+"button.label.callBack" : "call back"
+"ui.action.ubiquitous.drone" : "Summon a drone.<br>Or switch the camera between the drone and you."
+"ui.action.ubiquitous.doorHack" : "Pry open the nearby doors."
+
+# Stats
+
+"stats.ubiquitous.drones" : "Num of Used Drones"
+
+# Titles
+
+"achievement.ubiquitous.common1.title" : "Door Hacker"
+"achievement.ubiquitous.common1.goal" : "Open doors a total of 5 times during the game using a drone."
+"achievement.ubiquitous.common1.splitted.2" : "Hacker"
+
+"achievement.ubiquitous.common2.title" : "Unobstructed"
+"achievement.ubiquitous.common2.goal" : "Open a total of 20 doors using a drone."
+"achievement.ubiquitous.common2.flavor" : ""Is that some kind of advanced technology?"<br>"—No, it's just a lock-picking technique.""
+
+"achievement.ubiquitous.challenge.title" : "Ubiquitous Network"
+"achievement.ubiquitous.challenge.goal" : "Simultaneously check the positions of all survivors on the map."
+"achievement.ubiquitous.challenge.cond" : "-Survivors excluding yourself: 10 or more<br>-Detection range: Less than 3m"
+"achievement.ubiquitous.challenge.splitted.2" : "Network"

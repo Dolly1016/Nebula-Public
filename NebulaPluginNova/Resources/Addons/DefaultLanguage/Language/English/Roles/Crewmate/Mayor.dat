@@ -1,0 +1,58 @@
+# Assignable
+
+"role.mayor.name" : "Mayor"
+"role.mayor.short" : "M"
+"role.mayor.blurb" : "Find and Vote out the Impostors"
+
+# Document
+
+"role.mayor.doc" : "A crewmate who can use multiple votes in meetings."
+
+# Options
+
+"options.role.mayor.detail" : "Mayor can save vote on meetings.<br>Saved votes are used other meetings all at once."
+"options.role.mayor.fixedVotes" : "Fixed Votes"
+"options.role.mayor.fixedVotes.detail" : "Optimize the options so you can make the mayor use a fixed number of votes per meeting."
+"options.role.mayor.minVote" : "# Min Vote"
+"options.role.mayor.minVote.detail" : "The minimum number of votes use per meeting."
+"options.role.mayor.maxVote" : "# Max Vote"
+"options.role.mayor.maxVote.detail" : "The maximum number of votes use per meeting."
+"options.role.mayor.maxVotesStock" : "# Max Votes Stock"
+"options.role.mayor.maxVotesStock.detail" : "The mayor votes by consuming stocked votes.<br>Any unused votes from the allocated votes are stocked for the next meeting."
+"options.role.mayor.voteAssignment" : "# Vote Assignment On Meeting"
+"options.role.mayor.voteAssignment.detail" : "The mayor gains stock of votes at the start of each meeting.<br>This setting allows you to change the number of votes the mayor receives per meeting."
+"options.role.mayor.voteAssignmentOnReporting" : "# Vote Assignment On Reporting"
+"options.role.mayor.voteAssignmentPerTasks" : "# Vote Assignment Per Tasks"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.mayor.votes" : "Num of Used Votes"
+"role.mayor.hud.votes" : "Current Votes"
+
+# Titles
+
+"achievement.mayor.common1.title" : "A Single Word"
+"achievement.mayor.common1.goal" : "Exile a player by using multiple votes."
+"achievement.mayor.common1.cond" : "Invalid if you did not vote for the exiled player"
+"achievement.mayor.common1.flavor" : ""I don't mean that I agree with your opinion, but however..." —From the Broken Minutes"
+"achievement.mayor.common1.splitted.0" : "Crane's "
+
+"achievement.mayor.another1.title" : "Death in Vain"
+"achievement.mayor.another1.goal" : "Die while holding all your votes."
+"achievement.mayor.another1.cond" : "Have participated in 3 or more meetings"
+
+"achievement.mayor.common2.title" : "Less is More"
+"achievement.mayor.common2.goal" : "Conceal the mayor's existence by voting only once consecutively for 3 or more meetings at first.<br>After concealment, exile someone by using multiple votes at least once."
+"achievement.mayor.common2.cond" : "After being concealed, use multiple votes more than once to exile someone"
+"achievement.mayor.common2.splitted.2" : "Beauty"
+
+"achievement.mayor.challenge.title" : "Isolated Ruler"
+"achievement.mayor.challenge.goal" : "Exile an enemy team player with only your own votes."
+"achievement.mayor.challenge.cond" : "Excluding targets for whom exile is advantageous (Jester)"
+"achievement.mayor.challenge.flavor" : "You have no choice."

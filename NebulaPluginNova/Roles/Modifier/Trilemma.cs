@@ -67,6 +67,7 @@ internal class Trilemma : DefinedModifierTemplate, DefinedAllocatableModifier, R
     bool IAssignableDocument.HasTips => false;
     bool IAssignableDocument.HasAbility => false;
     bool IAssignableDocument.HasWinCondition => true;
+    SpecialAssignment[] DefinedAllocatableModifier.SpecialAssignment => NumOfTrilemmaOption > 0 ? [new(this, NumOfTrilemmaOption, RoleChanceOption.GetValue(), null, null)] : [];
 
     IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
     {

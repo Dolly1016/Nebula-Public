@@ -1,0 +1,28 @@
+# Assignable
+
+"role.evilSwapper.name" : "イビルスワッパー"
+"role.evilSwapper.short" : "ス"
+"role.evilSwapper.blurb" : "多数決原理の崩壊"
+"role.evilSwapper.hint" : "票を入れ替えて会議を操ろう"
+
+# Document
+
+"role.evilSwapper.doc" : "緊急会議で、投じられた票を入れ替えられるインポスターです。"
+"role.evilSwapper.ability.title" : "固有能力 "投票スワップ""
+"role.evilSwapper.ability.main" : "イビルスワッパーは、緊急会議中に選択した2人の得票を入れ替えられます。"
+
+# Options
+
+"options.role.evilSwapper.detail" : "ナイススワッパーは、緊急会議で投じられた票を入れ替えられるクルーメイトです。"
+"options.role.evilSwapper.numOfSwap" : "最大スワップ数"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+
+# Titles

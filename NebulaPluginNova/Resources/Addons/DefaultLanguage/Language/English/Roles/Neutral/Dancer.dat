@@ -1,0 +1,108 @@
+# Assignable
+
+"role.dancer.name" : "Dancer"
+"role.dancer.short" : "D"
+"role.dancer.blurb" : "Carpe Diem"
+
+# Document
+
+"role.dancer.doc" : "A neutral member who confuses players by dancing."
+"role.dancer.winCond" : "Survive and fulfill the prophecy of death for <var>%NUM%</var> players. %ADD%"
+"role.dancer.winCond.main.lastDance" : "<br>Additionally, when the above condition is met, show the <var>Last Dance</var> to the survivors."
+"role.dancer.ability.title" : "Inherent Ability "Dance of Death""
+"role.dancer.ability.main" : "The Dancer can dance by moving their body slightly.<br>Survivors who witness the dance receive a <b>Prophecy of Death</b>.<br>The Prophecy of Death has an expiration time, and it is fulfilled when the target player dies within the expiration time.<br>If the expiration time passes, the Prophecy of Death is canceled.<br>If a player with a Prophecy of Death dances next to someone, they can <b>pass on</b> the Prophecy of Death to them.<br><br>Witnesses of the dance will choose their actions mainly from three options: -<br>share fate with the Dancer,<br>-pass on the prophecy to someone,<br>-endure until the prophecy expires."
+"role.dancer.ability.dance" : "<title>Dance</title>Continue moving slightly on the spot to dance. Cannot be <b>activated</b> by button click/key input.<br>If you dance until the button timer is full, you cast a <b>Prophecy of Death</b>."
+"role.dancer.ability.danceKill" : "<title>Death Dance</title>Dancing next to a corpse changes your next dance to a <b>Death Dance</b> that can kill players.<br>Kills by <b>Death Dance</b> are counted as fulfilled Prophecies of Death."
+"role.dancer.tips" : "・While under a <b>Prophecy of Death</b>, the target player's victory is blocked.<br>・If you pass the <b>Prophecy of Death</b> to the Dancer themselves, the Prophecy of Death disappears.<br>・Even if you witness a dance, you cannot tell if the player is the Dancer or someone who rubbed off the Prophecy of Death.<br>・When the Dancer wins, players with fulfilled Prophecies of Death <b>win together</b> with the Dancer."
+
+# Options
+
+"options.role.dancer.detail" : "Dancer casts a curse on the player by dancing.<br>Players must consider the effects of the curse in their discussions."
+"options.role.dancer.numOfSuccessfulForecastToWin" : "Num Of Successful Forecast To Win"
+"options.role.dancer.danceCoolDown" : "Dance Cooldown"
+"options.role.dancer.danceDuration" : "Dance Duration"
+"options.role.dancer.danceRange" : "Dance Range"
+"options.role.dancer.forecastDuration" : "Forecast Duration"
+"options.role.dancer.finalDance" : "Last Dance Mode"
+"options.role.dancer.deathNotification" : "Death Notification"
+"options.role.dancer.forecastedFollowingSuicide" : "Following Suicide Of The Forecasted"
+
+# Game
+
+"role.dancer.taskDanceText" : "Predict Death with Dance"
+"role.dancer.taskFinalText" : "Show Players The Last Dance To Win"
+
+# UI
+
+"button.label.dance" : "dance"
+"ui.action.danceAction" : "Triggered by small, wiggling movements."
+
+# Game Statictics
+
+"statistics.events.dance" : "Dance"
+
+# Status
+
+"state.frenzied" : "Frenzied"
+
+# Stats
+
+"stats.dancer.dance" : "Num of Dancing"
+
+# Titles
+
+"achievement.dancer.common1.title" : "Cursed Dance"
+"achievement.dancer.common1.goal" : "Dance near a survivor."
+"achievement.dancer.common1.splitted.0" : "Cursed "
+
+"achievement.dancer.another2.title" : "Accompany The Burning Night"
+"achievement.dancer.another2.goal" : "Dance near 2 or more survivors."
+"achievement.dancer.another2.splitted.1" : "Night "
+
+"achievement.dancer.common8.title" : "Enchanting Dancer"
+"achievement.dancer.common8.goal" : "Cast the Prophecy of Death on survivors a total of 20 times."
+"achievement.dancer.common8.splitted.2" : "Dancer"
+
+"achievement.dancer.common2.title" : "Dance Of Death"
+"achievement.dancer.common2.goal" : "Dance near a corpse."
+"achievement.dancer.common2.flavor" : "It is a bearer of the deathly illness."
+
+"achievement.dancer.common3.title" : "If you see "that," is it the end?"
+"achievement.dancer.common3.goal" : "Witness the Dancer's dance."
+"achievement.dancer.common3.splitted.0" : ""That" is "
+
+"achievement.dancer.common4.title" : "Memento Mori"
+"achievement.dancer.common4.goal" : "Survive until the end and win while witnessing the Dancer's dance."
+
+"achievement.dancer.common5.title" : "Dream of a Sunday Afternoon"
+"achievement.dancer.common5.goal" : "Die as predicted by the Dancer but win as Crewmate."
+"achievement.dancer.common5.flavor" : "We will stand up. No matter what."
+"achievement.dancer.common5.splitted.0" : "Sunday "
+"achievement.dancer.common5.splitted.1" : "Afternoon "
+
+"achievement.dancer.common6.title" : "The Last Dance Is Mine"
+"achievement.dancer.common6.goal" : "Become a witness to the Last Dance."
+
+"achievement.dancer.common7.title" : "Crazy Bean Dancers"
+"achievement.dancer.common7.goal" : "Dance with the Dancer alone."
+"achievement.dancer.common7.splitted.1" : "Bean "
+
+"achievement.dancer.another1.title" : "Hallucinatory Afterglow"
+"achievement.dancer.another1.goal" : "Be guessed by a player who witnessed the dance.<br>Or be exiled by receiving votes."
+"achievement.dancer.another1.splitted.2" : "Afterglow"
+
+"achievement.dancer.challenge.title" : "Dancer Bringing Disaster"
+"achievement.dancer.challenge.goal" : "Successfully cast the Prophecy of Death on Jackals or Impostors<br>and win as Dancer."
+"achievement.dancer.challenge.flavor" : "—A monster that disturbs people's hearts with its beauty."
+"achievement.dancer.challenge.splitted.1" : "Bringing "
+"achievement.dancer.challenge.splitted.2" : "Dancer"
+
+# Team
+
+"teams.dancer" : "Dancer"
+"end.dancer" : "Dancer Wins <color=#FFFFFF>with Ghosts</color>%EXTRA%"
+
+# Document
+
+"document.tip.winCond.dancer.title" : "Special Trigger"
+"document.tip.winCond.dancer" : "The dancer wins by completing the prophecy of death the specified number of times."

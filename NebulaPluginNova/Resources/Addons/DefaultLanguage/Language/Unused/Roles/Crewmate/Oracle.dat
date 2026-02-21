@@ -1,0 +1,59 @@
+# Assignable
+
+"role.oracle.name" : "Oracle"
+"role.oracle.short" : "O"
+"role.oracle.blurb" : "Everything I Know"
+
+# Document
+
+"role.oracle.doc" : "占いで他人の役職を調べられるクルーメイトです。"
+"role.oracle.ability.title" : "固有能力 "神託を告げる宝玉""
+"role.oracle.ability.main" : "プレイヤーの役職を占い、そのプレイヤーの役職%CAND%。"
+"role.oracle.ability.main.one" : "を<var>占います</var>"
+"role.oracle.ability.main.multiple" : "の候補を<var>%NUM%つに絞れます</var>"
+"role.oracle.ability.oracle" : "<title>占う</title>プレイヤーの現在の役職を占います。<br>%DIE%"
+"role.oracle.ability.oracle.die" : "ただし、%ROLES%を占うと<var>死亡してしまいます</var>。"
+"role.oracle.ability.oracle.die.split" : "、"
+
+# Options
+
+"options.role.oracle.detail" : "Oracle can narrow down other player's roles to a few candidates."
+"options.role.oracle.maxOracle" : "Max # Oracle"
+"options.role.oracle.oracleCooldown" : "Oracle Cooldown"
+"options.role.oracle.oracleAdditionalCooldown" : "Oracle Additional Cooldown"
+"options.role.oracle.oracleDuration" : "Oracle Duration"
+"options.role.oracle.numOfCandidates" : "# Role Candidates"
+"options.role.oracle.dieOnDividingOpportunist" : "Die On Dividing Opportunist"
+"options.role.oracle.dieOnDividingOracle" : "Die On Dividing Oracle"
+
+# Game
+
+"role.oracle.gui.results" : "Oracle Results"
+"role.oracle.gui.results.zero" : "None"
+
+# UI
+
+"button.label.oracle" : "oracle"
+
+# Status
+
+"status.punished" : "Punished"
+
+# Stats
+
+"stats.oracle.oracle" : "Num of Oracle"
+
+# Titles
+
+"achievement.oracle.common1.title" : "神は言った"
+"achievement.oracle.common1.goal" : "通算で10回役職を占う。"
+"achievement.oracle.common1.splitted.0" : "神は"
+"achievement.oracle.common1.splitted.2" : "言った"
+
+"achievement.oracle.another1.title" : "私は言った"
+"achievement.oracle.another1.goal" : "占ったクルーメイトを追放するか、誰かを誤射する。"
+"achievement.oracle.another1.splitted.0" : "私は"
+
+"achievement.oracle.challenge.title" : "我々の見解"
+"achievement.oracle.challenge.goal" : "占ったインポスターが1人以上クルーメイトに推察され、<br>マッドメイト除くクルーメイトを一人も追放せず勝利する。"
+"achievement.oracle.challenge.splitted.0" : "我々の"

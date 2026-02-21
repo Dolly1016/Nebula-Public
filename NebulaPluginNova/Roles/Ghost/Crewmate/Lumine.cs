@@ -56,20 +56,28 @@ public class Lumine : DefinedGhostRoleTemplate, DefinedGhostRole
         SpriteRenderer lightRenderer = AmongUsUtil.GenerateCustomLight(pos);
         lightRenderer.transform.localScale *= LightSizeOption;
 
+        Color GetColor(float alpha) => new Color(1, 1, (GamePlayer.LocalPlayer?.IsDead ?? false) ? 0 : 1, alpha);
+
         float p = 0f;
         while (p < 1f)
         {
             p += Time.deltaTime * 0.85f;
-            lightRenderer.material.color = new Color(1, 1, 1, p);
+            lightRenderer.material.color = GetColor(p);
             yield return null;
         }
 
-        lightRenderer.material.color = Color.white;
-        yield return Effects.Wait(LightDurationOption);
+        float duration = LightDurationOption;
+        while(duration > 0f)
+        {
+            lightRenderer.material.color = GetColor(1f);
+            duration -= Time.deltaTime;
+            yield return null;
+        }
+
         while (p > 0f)
         {
             p -= Time.deltaTime * 0.75f;
-            lightRenderer.material.color = new Color(1, 1, 1, p);
+            lightRenderer.material.color = GetColor(p);
             yield return null;
         }
 

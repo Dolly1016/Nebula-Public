@@ -1,0 +1,92 @@
+# Assignable
+
+"role.opportunist.name" : "Opportunist"
+"role.opportunist.short" : "O"
+"role.opportunist.blurb" : "The Planet Goes"
+
+# Document
+
+"role.opportunist.doc" : "A neural member who wins by surviving until the end."
+
+# Options
+
+"options.role.opportunist.detail" : "Opportunists can earn additional wins by completing tasks and surviving."
+"options.role.opportunist.numOfTasks" : "# Staying Tasks"
+"options.role.opportunist.numOfTasks.detail" : "The Opportunist is assigned tasks to <b>stay</b> at a <b>designated location</b> for a while."
+"options.role.opportunist.stayingDuration" : "Staying Duration Per Tasks"
+"options.role.opportunist.canFixComms" : "Can Fix Comms"
+"options.role.opportunist.canFixLight" : "Can Fix Light"
+
+# Game
+
+"role.opportunist.task.veiled" : "Locked Task"
+"role.opportunist.task" : "Stay at %LOC%"
+"role.opportunist.task.room" : "Stay in the Room"
+"role.opportunist.task.loc.skeld.cafeteria.window" : "Window"
+"role.opportunist.task.loc.skeld.storage.trash" : "Trash Chute"
+"role.opportunist.task.loc.skeld.electrical.electrical" : "Back of Electrical Room"
+"role.opportunist.task.loc.skeld.lowerEngine.lowerEngine" : "Fuel Intake"
+"role.opportunist.task.loc.skeld.reactor.upper" : "Upper Reactor"
+"role.opportunist.task.loc.skeld.medbay.scan" : "Scanner"
+"role.opportunist.task.loc.mira.balcony.antenna" : "Antenna"
+"role.opportunist.task.loc.mira.cafeteria.vendingMachine" : "Vending Machiene"
+"role.opportunist.task.loc.polus.security.camera" : "Camera"
+"role.opportunist.task.loc.polus.comms.table" : "Table"
+"role.opportunist.task.loc.polus.lab.hole" : "the Hole"
+"role.opportunist.task.loc.polus.lab.toilet" : "Toilet"
+"role.opportunist.task.loc.polus.admin.bookshelf" : "Bookshelf"
+"role.opportunist.task.loc.polus.lifesupport.bottle" : "Oxygen Server"
+"role.opportunist.task.loc.polus.outside.ejection" : "Ejection"
+"role.opportunist.task.loc.polus.outside.comms" : "Snowman"
+"role.opportunist.task.loc.airship.meetingRoom.meetingRoom" : "Back of Meeting Room"
+"role.opportunist.task.loc.airship.mainHall.cleaning" : "Cleaning Room"
+"role.opportunist.task.loc.airship.mainHall.treasureBox" : "Treasure Box"
+"role.opportunist.task.loc.airship.mainHall.darkRoom" : "Dark Room"
+"role.opportunist.task.loc.airship.lounge.toilet" : "Toilet"
+"role.opportunist.task.loc.airship.cargoBay.safe" : "Safe"
+"role.opportunist.task.loc.airship.medical.vitals" : "Vitals"
+"role.opportunist.task.loc.airship.security.outside" : "Deck"
+"role.opportunist.task.loc.airship.viewingDeck.outside" : "Deck"
+"role.opportunist.task.loc.fungle.highlands.bigGem" : "the Huge Gem"
+"role.opportunist.task.loc.fungle.highlands.landing" : "the Landing"
+"role.opportunist.task.loc.fungle.jungle.monitoring" : "Monitoring Point"
+"options.role.opportunist.group.fallback" : "Opportunist Fallback Settings"
+"options.role.opportunist.fallback" : "Opportunist Fallback"
+"options.role.opportunist.fallback.tasks" : "# Staying Tasks"
+
+# UI
+
+
+# Stats
+
+"stats.opportunist.task" : "Number of completed stay tasks"
+
+# Titles
+
+"achievement.opportunist.common1.title" : "Afterward, Let It Be Wild"
+"achievement.opportunist.common1.goal" : "Win with Opportunist extra victory."
+
+"achievement.opportunist.another1.title" : "Sudden Development"
+"achievement.opportunist.another1.goal" : "Survive until the end but lose."
+
+"achievement.opportunist.another2.title" : "Just A Little Bit"
+"achievement.opportunist.another2.goal" : "The game ends immediately after your death."
+"achievement.opportunist.another2.splitted.0" : "Just A Little "
+
+"achievement.opportunist.common3.title" : "Spaceship Fairy"
+"achievement.opportunist.common3.goal" : "Complete a total of 10 stay tasks."
+"achievement.opportunist.common3.splitted.2" : "Fairy"
+
+"achievement.opportunist.common2.title" : "Out Of The Way, Out Of The Way"
+"achievement.opportunist.common2.goal" : "Survive until the end and win alone."
+"achievement.opportunist.common2.flavor" : ""Out of my way, out of my way—let me pass.""
+"achievement.opportunist.common2.splitted.0" : "Out Of The Way "
+
+"achievement.opportunist.challenge.title" : "As The Wind Blows"
+"achievement.opportunist.challenge.goal" : "Defeat 1 or more survivors and get an extra victory."
+"achievement.opportunist.challenge.cond" : "Excluding Crewmate victory"
+
+# Team
+
+"teams.opportunist" : "Opportunist"
+"end.extra.opportunist" : " <color=#FFFFFF>with</color> Opportunist"

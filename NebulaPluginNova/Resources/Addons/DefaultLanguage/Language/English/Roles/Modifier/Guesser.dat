@@ -1,0 +1,33 @@
+# Assignable
+
+"role.guesser.name" : "Guesser"
+"role.guesser.generalBlurb" : "Expose The True Identity"
+"role.guesser.blurb" : "and You Can Guess Anyone"
+
+# Document
+
+"role.guesser.doc" : "Guess other players' abilities to kill them.<br>If the guess fails, you die instead."
+
+# Options
+
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.guesser.allGuess" : "Num of Guess"
+"stats.guesser.misguessed" : "Num of Misguessed"
+
+# Titles
+
+"achievement.guesser.common1.title" : "Once You Show Your Tail"
+"achievement.guesser.common1.goal" : "Kill 1 player by guess."
+"achievement.guesser.common1.flavor" : ""He's aiming for it. From every word, he's quietly watching for an opening." —From the Broken Minutes"
+
+"achievement.guesser.challenge.title" : "Dispel Evil And Reveal Justice"
+"achievement.guesser.challenge.goal" : "Kill 3 players by guess."
+"achievement.guesser.challenge.flavor" : "—The meeting room was extremely quiet afterward."

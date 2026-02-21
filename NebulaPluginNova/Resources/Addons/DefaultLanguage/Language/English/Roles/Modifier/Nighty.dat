@@ -1,0 +1,39 @@
+# Assignable
+
+"role.nighty.name" : "Nighty"
+"role.nighty.generalBlurb" : "Don't Sleep!"
+
+# Document
+
+"role.nighty.doc" : "Can place <b>Sleep Bombs</b> that take away players' vision."
+"role.nighty.ability.title" : "Inherent Ability "Sleep Bomb""
+"role.nighty.ability.main" : "Players who step on a Sleep Bomb will have their vision extremely restricted for a while.<br>You and allied Impostors will <b>not</b> step on Sleep Bombs."
+"role.nighty.ability.place" : "<title>Place</title>Place a Sleep Bomb on the spot.<br>Sleep Bombs are visible to all Impostors."
+
+# Options
+
+"options.role.nighty.detail" : "Nighty can place bombs that narrow the player's field of vision."
+"options.role.nighty.placeCooldown" : "Bomb Place Cooldown"
+"options.role.nighty.mineDuration" : "Bomb Duration"
+"options.role.nighty.mineSize" : "Bomb Size"
+"options.role.nighty.blindDuration" : "Blind Effect Duration"
+
+# Game
+
+"gameAction.nighty.place" : "Place Sleep Bomb"
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.nighty.common1.title" : "Go to Sleep!"
+"achievement.nighty.common1.goal" : "Hit players with Sleep Bombs a total of 3 times."
+"achievement.nighty.common1.splitted.0" : "Sleep "
+
+"achievement.nighty.challenge.title" : "A Thousand And One Nights Of Sleep"
+"achievement.nighty.challenge.goal" : "Your placed Sleep Bombs activate 8 or more times, players die by 8 or more types of causes,<br>and Impostors win with all allies surviving."
+"achievement.nighty.challenge.cond" : "Impostors: 2 or more"

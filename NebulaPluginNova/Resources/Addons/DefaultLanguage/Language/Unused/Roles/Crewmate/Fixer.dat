@@ -1,0 +1,49 @@
+# Assignable
+
+"role.fixer.name" : "Fixer"
+"role.fixer.short" : "F"
+"role.fixer.blurb" : "Unsung Hero"
+
+# Document
+
+"role.fixer.doc" : "会議中の能力発動や投票を制限し、力関係を調停するクルーメイトです。"
+"role.fixer.ability.title" : "固有能力 "緊急会議の調停者""
+"role.fixer.ability.main" : ""
+"role.fixer.ability.jamming" : "<title>妨害工作</title>選択したプレイヤーのタブレット通信を遮断します。<br>能力の発動回数には制限があります。"
+"role.fixer.ability.blocked" : "<title>遮断されたプレイヤー</title>通信を遮断されたプレイヤーには左のマークが付きます。<br>通信を遮断されたプレイヤーは投票権を失い、その会議で能力を使用できなくなります。<br>また、通信を遮断されたプレイヤーは他人から投票されず、会議中に能力も行使されません。"
+
+# Options
+
+"options.role.fixer.detail" : "Fixer is Crewmates who manage the game by restricting<br>ability activation and voting during meetings."
+"options.role.fixer.numOfJamming" : "# Of Jamming"
+"options.role.fixer.canJamPlayerContinuously" : "Can Jam Same Player Constinously"
+"options.role.fixer.jammingSealsVoteRight" : "Jamming Seals Vote Rights"
+"options.role.fixer.maxLeftVotingTimeForJamming" : "Max Left Voting Time For Jamming"
+
+# Game
+
+"roles.fixer.jamming" : "Left Jamming"
+
+# UI
+
+
+# Stats
+
+"stats.fixer.jamming" : "Num of Jamming"
+
+# Titles
+
+"achievement.fixer.common1.title" : "暗躍"
+"achievement.fixer.common1.goal" : "通算で5回、タブレット通信を遮断する。"
+
+"achievement.fixer.common2.title" : "形勢逆転"
+"achievement.fixer.common2.goal" : "5票以上集めた味方のタブレット通信を遮断し、敵を追放する。"
+
+"achievement.fixer.secret1.title" : "回線弱者"
+"achievement.fixer.secret1.goal" : "タブレット通信を遮断される。"
+"achievement.fixer.secret1.splitted.2" : "弱者"
+
+"achievement.fixer.challenge.title" : "だからゲームは面白い"
+"achievement.fixer.challenge.goal" : "P.P.に持ち込んだ敵陣営のプレイヤーのタブレット通信を遮断し、<br>そのプレイヤーの仲間を追放する。"
+"achievement.fixer.challenge.flavor" : ""覆すのだ。ルールの更に深くにある常識を。""
+"achievement.fixer.challenge.splitted.0" : "だから"

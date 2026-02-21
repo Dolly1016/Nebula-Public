@@ -1,0 +1,38 @@
+# Assignable
+
+"role.doctor.name" : "Doctor"
+"role.doctor.short" : "D"
+"role.doctor.blurb" : "Thus They Died"
+
+# Document
+
+"role.doctor.doc" : "持ち歩き可能なポータブルバイタルを持つクルーメイトです。"
+"role.doctor.ability.title" : "固有能力 "ポータブルバイタル""
+"role.doctor.ability.main" : "充電式のバイタル端末を持ち歩いています。<br>バイタル端末のバッテリーは、タスクをこなすと充電できます。"
+"role.doctor.ability.vital" : "<title>バイタル</title>ポータブルバイタルを開きます。<br>死体が残っていない(=グレーアウトした)死亡者の死因も確認できます。"
+
+# Options
+
+"options.role.doctor.detail" : "Doctor has portable vitals."
+"options.role.doctor.portableVitalsCharge" : "Portable Vitals Charge"
+"options.role.doctor.maxPortableVitalsCharge" : "Max Portable Vitals Charge"
+"options.role.doctor.chargesPerTasks" : "Charges Per Tasks"
+
+# Game
+
+"role.doctor.gadgetLeft" : "%SECOND%s"
+
+# UI
+
+# Stats
+
+# Titles
+
+"achievement.doctor.common1.title" : "速やかな死亡診断"
+"achievement.doctor.common1.goal" : "ポータブルバイタルをひらく。"
+
+"achievement.doctor.challenge.title" : "斯くして奴は死んだ"
+"achievement.doctor.challenge.goal" : "ポータブルバイタルで死の瞬間を目撃する。"
+"achievement.doctor.challenge.cond" : "初期使用可能時間: 10秒以下+タスクによるチャージ: 2秒以下"
+"achievement.doctor.challenge.flavor" : ""白い天井に、無機質な音" ―戦場の独白"
+"achievement.doctor.challenge.splitted.1" : "奴は"

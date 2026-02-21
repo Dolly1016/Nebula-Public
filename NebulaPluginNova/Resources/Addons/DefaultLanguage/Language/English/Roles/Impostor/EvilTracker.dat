@@ -1,0 +1,63 @@
+# Assignable
+
+"role.evilTracker.name" : "Evil Tracker"
+"role.evilTracker.short" : "Tk"
+"role.evilTracker.blurb" : "Insidious Creeping"
+
+# Document
+
+"role.evilTracker.doc" : "An impostor who can track players' positions and tasks."
+"role.evilTracker.ability.title" : "Inherent Ability "Evil Tracking""
+"role.evilTracker.ability.main" : ""
+"role.evilTracker.ability.track.cannotChange" : "<title>Select</title>Choose the player to track positions."
+"role.evilTracker.ability.track.canChange" : "<title>Select</title>Choose the player to track positions.<var>Re-select to change the tracking target.</var>"
+"role.evilTracker.ability.arrow.withImpostor" : "<title>Arrow</title>The Evil Tracker can see a white arrow pointing to the tracking target and <var>a red arrow pointing to impostors</var>.<br>The position indicated by the arrow updates every <var>%ARROWSEC%</var> seconds."
+"role.evilTracker.ability.arrow.onlyTarget" : "<title>Arrow</title>The Evil Tracker can see a white arrow pointing to the tracking target.<br>The position indicated by the arrow updates every <var>%ARROWSEC%</var> seconds."
+"role.evilTracker.ability.track.minimap" : "<title>Mini Map</title>The position of the tracked player is displayed <var>on the mini map</var>."
+"role.evilTracker.ability.task" : "<title>Task Tracking</title><var>Check the tracked task progress during meetings.</var>"
+"role.evilTracker.ability.meeting.changeOnly" : "<var>Change the tracked player during meetings.</var>"
+"role.evilTracker.ability.meeting.targetOnly" : "<var>Check the task progress of the tracked player during meetings.</var>"
+"role.evilTracker.ability.meeting.checkChange" : "<var>Change the tracked player during meetings.<br>Additionally, check the task progress of the selected player.</var>"
+"role.evilTracker.ability.meeting.checkOnly" : "<var>Check the task progress of 1 player during meetings.</var>"
+
+# Options
+
+"options.role.evilTracker.detail" : "Evil Tracker can track the player and see where they are.<br>They can also check the progress of tasks on the meeting."
+"options.role.evilTracker.showKillFlash" : "Show Kill Flash"
+"options.role.evilTracker.trackCoolDown" : "Track Cooldown"
+"options.role.evilTracker.taskTracking" : "Task Tracking"
+"options.role.evilTracker.taskTracking.off" : "Off"
+"options.role.evilTracker.taskTracking.onlyTarget" : "Only Target"
+"options.role.evilTracker.taskTracking.on" : "On"
+"options.role.evilTracker.updateArrowInterval" : "Update Arrow Interval"
+"options.role.evilTracker.canChangeTarget" : "Can Change Target On Task Phase"
+"options.role.evilTracker.canChangeTargetOnMeeting" : "Can Change Target On Meeting"
+"options.role.evilTracker.trackImpostors" : "Track Impostors"
+"options.role.evilTracker.showTrackingTargetOnMap" : "Show Tracking Target On Map"
+"options.role.evilTracker.canCheckTrackingTasksInTaskPhase" : "Can Check Tracking Tasks In Task Phase"
+"options.role.evilTracker.showWhereTrackingIs" : "Show Where Tracking Is"
+"options.role.evilTracker.group.playerTracking" : "Tracking Settings"
+"options.role.evilTracker.group.taskTracking" : "Task Tracking Settings"
+
+# Game
+
+
+# UI
+
+"button.label.track" : "track"
+
+# Stats
+
+
+# Titles
+
+"achievement.evilTracker.common1.title" : "Monitor"
+"achievement.evilTracker.common1.goal" : "Track a player's task once."
+
+"achievement.evilTracker.another1.title" : "No Contact"
+"achievement.evilTracker.another1.goal" : "The tracked player dies while you are alive."
+"achievement.evilTracker.another1.flavor" : ""In case of a malfunction, please contact customer service." —Tracking Device Instruction Manual"
+
+"achievement.evilTracker.challenge.title" : "Sneaky Tracking"
+"achievement.evilTracker.challenge.goal" : "Kill a player who has 3 or fewer tracked tasks near those tasks."
+"achievement.evilTracker.challenge.splitted.0" : "Sneaky "

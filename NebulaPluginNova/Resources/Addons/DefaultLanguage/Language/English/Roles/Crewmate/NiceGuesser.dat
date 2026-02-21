@@ -1,0 +1,26 @@
+# Assignable
+
+"role.niceGuesser.name" : "Nice Guesser"
+"role.niceGuesser.short" : "G"
+"role.niceGuesser.blurb" : "Guess and Shoot"
+
+# Document
+
+"role.niceGuesser.doc" : "A crewmate who can kill players by guessing their abilities during meetings.<br>If you guess incorrectly, you will die instead."
+"role.niceGuesser.tips" : "・If there are multiple abilities that can be used during a meeting, right-click the ability icon to switch between abilities."
+
+# Options
+
+"options.role.niceGuesser.detail" : "Guesser can shoot players in the meeting by guessing the role.<br>If the guess is wrong, guesser dies instead."
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+
+# Titles
+

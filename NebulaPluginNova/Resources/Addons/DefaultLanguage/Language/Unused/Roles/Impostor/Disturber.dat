@@ -1,0 +1,54 @@
+# Assignable
+
+"role.disturber.name" : "Disturber"
+"role.disturber.short" : "Di"
+"role.disturber.blurb" : "Block The Way"
+"role.disturber.hint" : "障壁で移動を妨害しよう"
+
+# Document
+
+"role.disturber.doc" : "電気障壁でプレイヤーの移動を妨害できるインポスターです。"
+"role.disturber.ability.title" : "固有能力 "電気障壁""
+"role.disturber.ability.main" : "専用のミニマップからポールを設置し、ポール間に障壁を発生させます。"
+"role.disturber.ability.place" : "<title>設置</title>ミニマップを開き、ポールを設置します。同時に設置できるポールの本数は<var>%POLES%</var>本です。<br>一続きのポール配置が決まったら、右下の設置ボタンを押してポールを設置できます。"
+"role.disturber.ability.disturb" : "<title>妨害</title>しばらくの間、ポール間に障壁を発生させます。"
+
+# Options
+
+"options.role.disturber.detail" : "Disturber can place a pole to create barriers between poles.<br>The barriers prevent players movement."
+"options.role.disturber.placeCoolDown" : "Place Cooldown"
+"options.role.disturber.disturbCoolDown" : "Disturb Cooldown"
+"options.role.disturber.disturbDuration" : "Disturb Duration"
+"options.role.disturber.maxNumOfPoles" : "# Max Poles"
+"options.role.disturber.maxDistanceBetweenPoles" : "Max Distance Between Poles"
+
+# Game
+
+
+# UI
+
+"button.label.place" : "place"
+"button.label.destroy" : "destroy"
+"button.label.disturb" : "disturb"
+"ui.action.disturber.place" : "Place poles.<br>The poles should be placed close together."
+"ui.action.disturber.disturb" : "Put up a barrier between the poles.<br>After the disturbance ends, the oldest pole will be broken."
+
+# Stats
+
+"stats.disturber.pole" : "Num of Poles Placed"
+"stats.disturber.disturb" : "Num of Disturb"
+
+# Titles
+
+"achievement.disturber.common1.title" : "立ち入り禁止"
+"achievement.disturber.common1.goal" : "妨害能力で障壁を起動する。"
+
+"achievement.disturber.common2.title" : "電気仕掛けの大蛇"
+"achievement.disturber.common2.goal" : "ポールを6本繋ぎにして障壁を起動する。"
+"achievement.disturber.common2.splitted.0" : "電気仕掛けの"
+
+"achievement.disturber.challenge.title" : "苦悶は怒涛の如く"
+"achievement.disturber.challenge.goal" : "妨害能力を活用し、停電あるいは通信障害を40秒以上<br>長引かせたうえで3人が死亡する。"
+"achievement.disturber.challenge.cond" : "会議を跨いだサボタージュは無効"
+"achievement.disturber.challenge.flavor" : ""それ"は最悪のタイミングでやってくる。"
+"achievement.disturber.challenge.splitted.1" : "怒涛の"

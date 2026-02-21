@@ -1,0 +1,57 @@
+# Assignable
+
+"role.busker.name" : "Busker"
+"role.busker.short" : "B"
+"role.busker.blurb" : "Unfailing Wonder"
+
+# Document
+
+"role.busker.doc" : "A crewmate who can become a ghost and move by pseudociding."
+"role.busker.ability.title" : "Inherent Ability "It's Showtime!""
+"role.busker.ability.main" : "Pseudocide and move on the map as a ghost.<br>However, if you do not revive after a while or a meeting starts, you will die for real."
+"role.busker.ability.pseudocide" : "<title>Pseudocide</title>Become a ghost and move."
+"role.busker.ability.revive" : "<title>Revive</title>Revive on the spot. Can only revive within the map.<br>If you do not revive during the effect time of feigning death, you will not be able to revive afterward."
+
+# Options
+
+"options.role.busker.detail" : "Busker disguises your death.<br>If you revive within the time limit,your body will teleport to your ghost's position."
+"options.role.busker.pseudocideCoolDown" : "Pseudocide Cooldown"
+"options.role.busker.pseudocideDuration" : "Pseudocide Duration"
+"options.role.busker.hidePseudocideFromVitals" : "Hide Pseudocide From Vitals"
+"options.role.busker.hidePseudocideFromVitals.detail" : "When turned on, the busker appears to be alive on vitals while feigning death."
+
+# Game
+
+"gameAction.busker.revive" : "Revive"
+
+# UI
+
+"button.label.pseudocide" : "pseudocide"
+
+# Game Statictics
+
+"statistics.events.accident" : "Accident"
+
+# Status
+
+"state.pseudocide" : "Pseudocide"
+
+# Stats
+
+"stats.busker.pseudocide" : "Num of Pseudocide"
+"stats.busker.missed" : "Num of Missed"
+
+# Titles
+
+"achievement.busker.common1.title" : "It's Showtime"
+"achievement.busker.common1.goal" : "Pseudocide and then revive."
+"achievement.busker.common1.splitted.1" : "・"
+
+"achievement.busker.another1.title" : "Dangerous Street Performance"
+"achievement.busker.another1.goal" : "Pseudocide and then fail to revive."
+"achievement.busker.another1.splitted.0" : "Dangerous "
+
+"achievement.busker.challenge.title" : "A Heart-Pounding Moment"
+"achievement.busker.challenge.goal" : "A meeting is held within 2 seconds after revival."
+"achievement.busker.challenge.cond" : "Reporting the corpse by yourself and the emergency button are invalid"
+"achievement.busker.challenge.flavor" : ""The tension is very similar to the one I know well." —An unsigned memoir"

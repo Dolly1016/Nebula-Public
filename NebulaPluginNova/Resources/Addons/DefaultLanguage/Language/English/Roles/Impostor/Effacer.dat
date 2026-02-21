@@ -1,0 +1,58 @@
+# Assignable
+
+"role.effacer.name" : "Effacer"
+"role.effacer.short" : "E"
+"role.effacer.blurb" : "Death That No One Remember"
+"role.effacer.hint" : "Make allies and other players invisible"
+
+# Document
+
+"role.effacer.doc" : "An impostor who can make allies and other players invisible. Players who become invisible are not aware that they are invisible.<br>However, impostors can see invisible players and are aware if they themselves are made invisible by Effacer."
+"role.effacer.ability.title" : "Inherent Ability "Memory Alteration Jamming""
+"role.effacer.ability.main" : ""
+"role.effacer.ability.efface" : "<title>Efface</title>Make the target player invisible."
+"role.effacer.tips" : "・This role is a <color=#ff7f00>Super</color><color=#ff0000>New</color><color=#00ff00>Roles</color> collaboration role (original role: ジャマー)."
+
+# Options
+
+"options.role.effacer.detail" : "Effacer turns other players invisible to confuse crewmates."
+"options.role.effacer.effaceCoolDown" : "Efface Cooldown"
+"options.role.effacer.effaceDuration" : "Efface Duration"
+
+# Game
+
+
+# UI
+
+"button.label.efface" : "efface"
+
+# Stats
+
+"stats.effacer.efface" : "Num of Effaced Players"
+
+# Titles
+
+"achievement.effacer.common1.title" : "Vanished Trace"
+"achievement.effacer.common1.goal" : "Make a player invisible."
+"achievement.effacer.common1.flavor" : ""He testified that he passed by me, but—(omitted)— therefore..." —From the broken minutes"
+"achievement.effacer.common1.splitted.0" : "Vanished "
+
+"achievement.effacer.common2.title" : "Invisible Assassin"
+"achievement.effacer.common2.goal" : "Make an ally impostor invisible."
+"achievement.effacer.common2.flavor" : ""While I was doing the task, his upper body suddenly blew off!<br>It might be the death of the sheriff who suspected me..." —From the statement of the informant"
+"achievement.effacer.common2.splitted.0" : "Invisible "
+
+"achievement.effacer.common3.title" : "Setting the Stage"
+"achievement.effacer.common3.goal" : "A player made invisible is killed by an ally impostor."
+"achievement.effacer.common3.flavor" : "A crewmate who acted alone without any clues was exiled.<br>Unaware that someone was mocking that decision..."
+
+"achievement.effacer.common4.title" : "Do Not Resist"
+"achievement.effacer.common4.goal" : "Kill a Sheriff, Avenger, or Jackal while invisible due to Effacer's ability."
+"achievement.effacer.common4.flavor" : ""Were you overconfident in your own abilities?" —The words written on the corpse"
+
+"achievement.effacer.challenge.title" : "Flawless Formation"
+"achievement.effacer.challenge.goal" : "Win as an impostor with all other impostors alive.<br>Your own life or death does not matter."
+"achievement.effacer.challenge.cond" : "All ally impostors have been made invisible or have killed an invisible player"
+"achievement.effacer.challenge.flavor" : ""How foolish it is to lose one's life by only believing what one has actually seen!" <br>—A passage left in an airship with no one on board"
+"achievement.effacer.challenge.splitted.0" : "Flawless "
+"achievement.effacer.challenge.splitted.2" : "Formation"

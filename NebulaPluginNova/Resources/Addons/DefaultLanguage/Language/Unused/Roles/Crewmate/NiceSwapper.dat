@@ -1,0 +1,31 @@
+# Assignable
+
+"role.niceSwapper.name" : "ナイススワッパー"
+"role.niceSwapper.short" : "ス"
+"role.niceSwapper.blurb" : "時論の代弁者"
+"role.niceSwapper.hint" : "票を入れ替えて会議を操ろう"
+
+# Document
+
+"role.niceSwapper.doc" : "緊急会議で、投じられた票を入れ替えられるクルーメイトです。"
+"role.niceSwapper.ability.title" : "固有能力 "投票スワップ""
+"role.niceSwapper.ability.main" : "ナイススワッパーは、緊急会議中に選択した2人の得票を入れ替えられます。"
+
+# Options
+
+"options.role.niceSwapper.detail" : "ナイススワッパーは、緊急会議で投じられた票を入れ替えられるクルーメイトです。"
+"options.role.niceSwapper.numOfSwap" : "最大スワップ数"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.niceSwapper.another1.title" : "リアリズムの崩壊"
+"achievement.niceSwapper.another1.goal" : "最多得票を集めた非クルーメイトとクルーメイト間で票を入れ替え、<br>クルーメイトを追放する。"

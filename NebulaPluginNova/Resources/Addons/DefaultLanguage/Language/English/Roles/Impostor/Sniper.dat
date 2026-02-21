@@ -1,0 +1,75 @@
+# Assignable
+
+"role.sniper.name" : "Sniper"
+"role.sniper.short" : "Sni"
+"role.sniper.blurb" : "Shoot Up!"
+
+# Document
+
+"role.sniper.doc" : "An impostor who cannot perform normal kills but can get long-range kills with a sniper rifle."
+"role.sniper.ability.title" : "Inherent Ability "Sniper Rifle""
+"role.sniper.ability.main" : "Can snipe players far away with a sniper rifle.<br>Can also kill players across walls."
+"role.sniper.ability.equip" : "<title>Equip/Unequip</title>Ready or store the sniper rifle.<br>The readied sniper rifle is visible to others."
+"role.sniper.ability.kill" : "<title>Snipe</title>The sniper button lights up only while the sniper rifle is readied. Aim in the direction of the mouse cursor.<br>It is recommended to snipe using the keyboard shortcut for killing or LeftClick near the center of the screen."
+"role.sniper.tips" : "・Survivor hitboxes are near the center of the character.<br>・When firing, players within <var>%SOUND%m</var> around will receive a firing notification. %AIMASSIST%"
+"role.sniper.tips.aimAssist" : "<br>・After aiming with the sniper rifle for <var>%DELAY%</var> seconds, a <var>guideline</var> pointing to survivors or corpses will be displayed.<br>　Firing along the line makes it much easier to get kills."
+
+# Options
+
+"options.role.sniper.detail" : "Sniper has a rifle to snipe players.<br>When sniper shoots, players nearby they see a notification."
+"options.role.sniper.snipeCoolDown" : "Snipe Cooldown"
+"options.role.sniper.shotSize" : "Shot Size"
+"options.role.sniper.shotEffectiveRange" : "Shot Effective Range"
+"options.role.sniper.shotNoticeRange" : "Snipe Notice Range"
+"options.role.sniper.shotNoticeRange.detail" : "Players within this range will receive a notification indicating the firing position<br>when the sniper fires."
+"options.role.sniper.storeRifleOnFire" : "Store Rifle On Fire"
+"options.role.sniper.storeRifleOnUsingUtility" : "Store Rifle On Using Utility"
+"options.role.sniper.storeRifleOnUsingUtility.detail" : "When turned on, the equipped rifle will be stored when using ladders etc."
+"options.role.sniper.canSeeRifleInShadow" : "Can See Rifle In Shadow"
+"options.role.sniper.canKillHidingPlayer" : "Can Kill Hiding Player"
+"options.role.sniper.aimAssist" : "Aim Assist"
+"options.role.sniper.aimAssist.detail" : "When turned on, a guide line indicating the player's position will be displayed."
+"options.role.sniper.delayInAimAssistActivation" : "Delay In Aim Assist Activation"
+"options.role.sniper.canKillImpostor" : "Can Kill Impostor"
+
+# Game
+
+"role.sniper.shotRange" : "Sniper: <color=white>Shot Effective Range</color>"
+"role.sniper.soundRange" : "Sniper: <color=white>Shot Notice Effective Range</color>"
+"role.sniper.shotSize" : "Sniper<color=white>: Shot Size</color>"
+"gameAction.sniper.equip" : "Equip Sniper Rifle"
+
+# UI
+
+"button.label.equip" : "equip"
+"button.label.unequip" : "unequip"
+"button.label.snipe" : "snipe"
+"ui.action.sniper.equip" : "Equip and store the rifle."
+"ui.action.sniper.kill" : "Fire with the rifle."
+
+# Status
+
+"state.sniped" : "Sniped"
+
+# Stats
+
+"stats.sniper.misshot" : "Num of Misshot"
+"stats.sniper.shot" : "Num of Firing"
+
+# Titles
+
+"achievement.sniper.common1.title" : "Good Accuracy"
+"achievement.sniper.common1.goal" : "Kill 1 player with a sniper rifle."
+
+"achievement.sniper.another1.title" : "Loud Bang"
+"achievement.sniper.another1.goal" : "Be exiled or guessed to die in the meeting immediately after firing."
+
+"achievement.sniper.common2.title" : "The Sky Is In My Hands"
+"achievement.sniper.common2.goal" : "Kill a player who is being blown away."
+"achievement.sniper.common2.cond" : "Blowing players away is the Cannon's unique ability."
+"achievement.sniper.common2.splitted.0" : "The Sky Is "
+
+"achievement.sniper.challenge.title" : "Master Sniper"
+"achievement.sniper.challenge.goal" : "Kill a total of 2 players from a distance of 20m or more."
+"achievement.sniper.challenge.cond" : "Effective range: 20x or more"
+"achievement.sniper.challenge.splitted.2" : "Master"

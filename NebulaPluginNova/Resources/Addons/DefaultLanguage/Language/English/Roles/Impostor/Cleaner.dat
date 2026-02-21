@@ -1,0 +1,51 @@
+# Assignable
+
+"role.cleaner.name" : "Cleaner"
+"role.cleaner.short" : "Cl"
+"role.cleaner.blurb" : "Kill Everyone and Leave No Traces"
+"role.cleaner.hint" : "Clean corpses to cover up evidence"
+
+# Document
+
+"role.cleaner.doc" : "Can clean corpses.<br>%COOLDOWN%"
+"role.cleaner.doc.cooldown" : "<br>The cooldowns for killing and cleaning corpses are <var>synchronized</var>.<br>Activating either killing or cleaning a corpse resets the cooldown of the other at the same time."
+"role.cleaner.doc.notSyncCooldown" : "<br>The cooldown for cleaning corpses increases by <var>only 5 seconds</var> when killing."
+"role.cleaner.ability.title" : "Inherent Ability "Corpse Elimination""
+"role.cleaner.ability.main" : ""
+"role.cleaner.ability.clean" : "<title>Clean</title>Clean the corpse."
+
+# Options
+
+"options.role.cleaner.detail" : "Cleaner can obliterate corpses."
+"options.role.cleaner.cleanCoolDown" : "Clean Cooldown"
+"options.role.cleaner.syncKillAndCleanCoolDown" : "Sync Kill And Clean Cooldown"
+"options.role.cleaner.syncKillAndCleanCoolDown.detail" : "When turned on, the kill cooldown and ability cooldown are both reset when killing or using the ability."
+
+# Game
+
+"gameAction.cleaner.clean" : "Corpse Erasure"
+
+# UI
+
+"button.label.clean" : "clean"
+"ui.action.cleaner.clean" : "Clean corpses.<br>Kill cooldown will start with the action."
+
+# Game Statictics
+
+"statistics.events.clean" : "Clean"
+
+# Stats
+
+"stats.cleaner.clean" : "Num of Cleaned Corpses"
+
+# Titles
+
+"achievement.cleaner.common1.title" : "Beyond Forgetting"
+"achievement.cleaner.common1.goal" : "Clean 1 corpse."
+
+"achievement.cleaner.common2.title" : "Self-Contained"
+"achievement.cleaner.common2.goal" : "Clean the corpse of someone you killed yourself."
+"achievement.cleaner.common2.splitted.0" : "Self-Contained "
+
+"achievement.cleaner.challenge.title" : "Meaningless"
+"achievement.cleaner.challenge.goal" : "Clean 2 or more corpses and then start an emergency meeting via the button."

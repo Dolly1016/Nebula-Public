@@ -1,0 +1,23 @@
+# Header
+
+"options.voiceChat" : "Voice Chat Options"
+"options.voiceChat.detail" : "Let's play while talking with nearby players!"
+
+# Groups
+
+# Options
+
+"options.voiceChat.useVoiceChat" : "Use Voice Chat"
+"options.voiceChat.canTalkInWanderingPhase" : "Can Talk In Wandering Phase"
+"options.voiceChat.wallsBlockAudio" : "Walls Block Audio"
+"options.voiceChat.killersHearDead" : "Killers Hear Dead"
+"options.voiceChat.killersHearDead.onlyMyKiller" : "Only My Killer"
+"options.voiceChat.killersHearDead.onlyImpostors" : "Only Impostors"
+"options.voiceChat.killersHearDead.allKillers" : "Only Killers"
+"options.voiceChat.affectedByCommsSab" : "Affected By Comms. Sabotage"
+"options.voiceChat.isolateGhostsStrictly" : "Isolate Ghosts Strictly"
+"options.voiceChat.radio" : "Radio Settings"
+"options.voiceChat.impostorsRadio" : "Impostors Radio"
+"options.voiceChat.jackalRadio" : "Jackal Radio"
+"options.voiceChat.loversRadio" : "Lovers Radio"
+"options.voiceChat.scarletRadio" : "Scarlet Radio"

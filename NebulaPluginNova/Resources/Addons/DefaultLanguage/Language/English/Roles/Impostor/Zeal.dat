@@ -1,0 +1,48 @@
+# Assignable
+
+"role.zeal.name" : "Zeal"
+"role.zeal.short" : "Z"
+"role.zeal.blurb" : "Go crazy!"
+
+# Document
+
+"role.zeal.doc" : "An impostor who absorbs enthusiasm from players and stocks up kill buttons."
+"role.zeal.ability.title" : "Inherent Ability "Burning Killing Intent""
+"role.zeal.ability.main" : "At the start of the game, Zeal does not have a kill button.<br>Absorb enthusiasm from players to stock up kill buttons and get multiple kills."
+"role.zeal.ability.absorb" : "<title>Absorb</title>Absorb enthusiasm from players to gain kill buttons."
+"role.zeal.ability.kill" : "<title>Kill</title>Kill buttons are one-time use, and multiple kill buttons can be stocked at the same time.<br>While there are remaining kill buttons, the increased kill cooldown will not reset."
+
+# Options
+
+"options.role.zeal.detail" : "Zeal steals the enthusiasm, or kill button, from crewmates.<br>They can kill multiple players at once."
+"options.role.zeal.killCooldown" : "Kill Cooldown"
+"options.role.zeal.absorbCooldown" : "Absorb Cooldown"
+"options.role.zeal.absorbDuration" : "Absorb Duration"
+"options.role.zeal.absorbAdditionalDuration" : "Absorb Additional Duration"
+"options.role.zeal.absorbAdditionalDuration.detail" : "The time required to absorb enthusiasm is calculated as (base absorption time) + (additional absorption time) × (number of kill buttons).<br>Increasing the value of this option makes it more difficult to own a large number of kill buttons at the same time."
+"options.role.zeal.enthusiasmCooldown" : "Enthusiasm Cooldown"
+"options.role.zeal.enthusiasmCooldown.detail" : "Cooldown before being able to absorb enthusiasm from the same player again."
+
+# Game
+
+
+# UI
+
+"button.label.absorb" : "absorb"
+
+# Stats
+
+
+# Titles
+
+"achievement.zeal.common1.title" : "Burning Passion"
+"achievement.zeal.common1.goal" : "Get 2 consecutive kills."
+
+"achievement.zeal.another1.title" : "Strike While It's Hot"
+"achievement.zeal.another1.goal" : "Die while holding 2 or more kill buttons."
+
+"achievement.zeal.common2.title" : "Ultra Hot Strongest Turn!"
+"achievement.zeal.common2.goal" : "Hold 4 or more kill buttons at the same time."
+
+"achievement.zeal.challenge.title" : "Final Orgy"
+"achievement.zeal.challenge.goal" : "Get 3 or more consecutive kills to end the game and win."

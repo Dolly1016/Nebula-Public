@@ -1,0 +1,34 @@
+# Assignable
+
+"role.bloody.name" : "Bloody"
+"role.bloody.generalBlurb" : "Continuously, entrust thoughts to that blood"
+
+# Document
+
+"role.bloody.doc" : "Players who kill you will leave a trail of blood for a while."
+
+# Options
+
+"options.role.bloody.detail" : "When Bloody is murdered, the killer lefts bloody footprints for a while."
+"options.role.bloody.curseDuration" : "Curse Duration"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.bloody.bloody" : "Num of Invoking Bloody Curse"
+"stats.bloody.killer" : "Num of Received Bloody Curse"
+
+# Titles
+
+"achievement.bloody.common1.title" : "Even in Death"
+"achievement.bloody.common1.goal" : "Apply the "Bloody Footprints" effect."
+"achievement.bloody.common1.flavor" : ""Even if this life ends, my mission is not yet over.""
+
+"achievement.bloody.challenge.title" : "I'll Leave the Rest to You!"
+"achievement.bloody.challenge.goal" : "The target who was given the "Bloody Footprints" effect by your ability is exiled in the next meeting."
+"achievement.bloody.challenge.flavor" : ""Cheers to the cursed blood!""

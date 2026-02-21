@@ -1,0 +1,40 @@
+# Assignable
+
+"role.clog.name" : "Clog"
+"role.clog.blurb" : "いつでもどこでも、おじゃまむし"
+"role.clog.short" : "C"
+
+# Document
+
+"role.clog.doc" : "生存者の移動を妨害する幽霊を召喚できます。"
+# Options
+
+"options.role.clog.detail" : "Clog can invoke the ghost with collider."
+"options.role.clog.ghostDuration" : "Ghost Duration"
+"options.role.clog.numOfGhost" : "# Of Ghost"
+"options.role.clog.ghostSize" : "Ghost Size"
+
+# Game
+
+"role.clog.ghostSize" : "Clog<color=white>: Ghost Size</color>"
+"gameAction.clog.ghost" : "幽霊召喚"
+
+# UI
+
+"button.label.ghost" : "ghost"
+
+# Stats
+
+"stats.clog.ghosts" : "Num of Summoned Ghosts"
+
+# Titles
+
+"achievement.clog.common1.title" : "具現化する怨念"
+"achievement.clog.common1.goal" : "幽霊を召喚する。"
+
+"achievement.clog.another1.title" : "もしかしてお邪魔でしたか？"
+"achievement.clog.another1.goal" : "相方が幽霊のそばに近寄る。"
+"achievement.clog.another1.splitted.0" : "もしかして"
+
+"achievement.clog.common2.title" : "絶望のゲームエンド"
+"achievement.clog.common2.goal" : "生存者の動きを妨害して、サボタージュ勝利する。"

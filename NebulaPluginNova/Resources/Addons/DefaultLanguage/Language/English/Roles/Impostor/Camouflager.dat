@@ -1,0 +1,43 @@
+# Assignable
+
+"role.camouflager.name" : "Camouflager"
+"role.camouflager.short" : "Ca"
+"role.camouflager.blurb" : "Camouflage and Kill"
+"role.camouflager.hint" : "Make everyone look the same!"
+
+# Document
+
+"role.camouflager.doc" : "Can activate <b>camouflage</b> that turns all players completely black."
+"role.camouflager.ability.main" : ""
+"role.camouflager.ability.title" : "Inherent Ability "Camouflage""
+"role.camouflager.ability.camo" : "Activate <b>Camouflage</b>."
+
+# Options
+
+"options.role.camouflager.detail" : "Camouflager prevents players from identify each other."
+"options.role.camouflager.camoCoolDown" : "Camo. Cooldown"
+"options.role.camouflager.camoDuration" : "Camo. Duration"
+"options.role.camouflager.canInvokeCamoAfterDeath" : "Can Invoke Camo. After Death"
+"options.role.camouflager.canInvokeCamoAfterDeath.detail" : "When turned on, the camouflage ability can be activated even after death."
+
+# Game
+
+
+# UI
+
+"button.label.camo" : "camo"
+
+# Stats
+
+"stats.camouflager.camo" : "Num of Camo"
+
+# Titles
+
+"achievement.camouflager.common1.title" : "Who Are You?"
+"achievement.camouflager.common1.goal" : "Activate camouflage."
+"achievement.camouflager.common1.splitted.0" : "Who "
+
+"achievement.camouflager.challenge.title" : "Unrestrained Cruelty"
+"achievement.camouflager.challenge.goal" : "A total of 4 or more kills occur regardless of friend or foe while camouflage is active."
+"achievement.camouflager.challenge.flavor" : ""The forensic work was extremely difficult." —An unsigned memoir"
+"achievement.camouflager.challenge.splitted.0" : "Unrestrained "

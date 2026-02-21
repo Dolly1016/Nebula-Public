@@ -1,0 +1,65 @@
+# Assignable
+
+"role.cupid.name" : "Cupid"
+"role.cupid.short" : "Cu"
+"role.cupid.blurb" : "The Fallen"
+"role.cupid.hint" : "Create Lovers for laser kills!"
+
+# Document
+
+"role.cupid.doc" : "An impostor who can create Lovers. Furthermore, manifest a <b>red thread</b> between Lovers to aim for mass kills."
+"role.cupid.ability.title" : "Inherent Ability "Fate's Red Thread""
+"role.cupid.ability.main" : "Choose guides to destruction. Select two players to bind them as Lovers."
+"role.cupid.ability.lover" : "<title>Select</title>Choose the players to bind as Lovers.<br>Once 2 players are selected, the <b>red thread</b> becomes usable."
+"role.cupid.ability.laser" : "<title>Red Thread</title>Manifest a red thread between Lovers.<br>The laser of the red thread appears <var>%CUPID_DELAY%</var> seconds after clicking the button.<br>The red thread can be manifested a total of 4 times: once by each Lover and twice by Cupid."
+"role.cupid.tips" : "・Cupid and the Lovers are <b>not allies</b> with each other. Find a way to deal with them before the game ends.<br> After all, they are just playthings.<br>・Cupid cannot kill the Lovers they created.<br>・If a selected player is dead when selecting the second player or manifesting the red thread for the first time,<br> the dead player is excluded from the selection, and you can select a player again."
+
+# Options
+
+"options.role.cupid.detail" : "Cupid is an imposter who can create lovers. <br> The lovers cupid has a red thread that can kill the player."
+"options.role.cupid.selectCooldown" : "Select Cooldown"
+"options.role.cupid.laserDelayByCupid" : "Fate Delay By Cupid"
+"options.role.cupid.laserDelayByLover" : "Fate Delay By Lovers"
+"options.role.cupid.laserCooldown" : "Fate Cooldown"
+"options.role.cupid.laserDuration" : "Fate Duration"
+"options.role.cupid.laserRadius" : "Fate Laser Radius"
+"options.role.cupid.laserSeStrength" : "Fate Laser SE Strength"
+
+# Game
+
+
+# UI
+
+"button.label.cupid.lover" : "select"
+"button.label.cupid.string" : "fate"
+"ui.action.cupid.lover" : "Select the players you want to make lovers."
+"ui.action.cupid.string" : "Makes Fate lasers appear between lovers.<br>There is a delay before the laser appears."
+"ui.action.cupid.lover.string" : "Manifest the red thread.<br>Can be used once per game."
+
+# Status
+
+"state.laser" : "Laser"
+
+# Stats
+
+"stats.cupid.lovers" : "Num of Making Lovers"
+"stats.cupid.laserCupid" : "Num of Fate as Cupid"
+"stats.cupid.laserLover" : "Num of Fate as Lover"
+
+# Titles
+
+"achievement.cupid.common1.title" : "Long-Distance Love"
+"achievement.cupid.common1.goal" : "Manifest the red thread while 30m or more apart."
+
+"achievement.combination.2.cupid.lover.common1.title" : "Bond Redder Than Blood"
+"achievement.combination.2.cupid.lover.common1.goal" : "As Lovers bound by Cupid, get 2 or more kills with the red thread<br>and win with Lover victory."
+"achievement.combination.2.cupid.lover.common1.splitted.1" : "Red "
+
+"achievement.cupid.another1.title" : "This Isn't Right"
+"achievement.cupid.another1.goal" : "Be killed by the red thread of the Lovers you created."
+"achievement.cupid.another1.splitted.0" : "This Isn't "
+
+"achievement.cupid.challenge.title" : "To the Beloved's Children"
+"achievement.cupid.challenge.goal" : "Create Lovers, get 4 or more kills with the red thread, kill the Lovers,<br>and survive alone to win with impostor victory."
+"achievement.cupid.challenge.flavor" : ""Foolish, funny, and lovely" —Cupid"
+"achievement.cupid.challenge.splitted.0" : "Beloved "

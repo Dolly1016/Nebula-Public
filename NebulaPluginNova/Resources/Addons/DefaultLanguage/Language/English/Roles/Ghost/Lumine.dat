@@ -1,0 +1,36 @@
+# Assignable
+
+"role.lumine.name" : "Lumine"
+"role.lumine.blurb" : "Light of Life"
+"role.lumine.short" : "L"
+
+# Document
+
+"role.lumine.doc" : "Can light up the place once."
+
+# Options
+
+"options.role.lumine.detail" : "Lumine can emit light once during the game."
+"options.role.lumine.lightSize" : "Light Size"
+"options.role.lumine.lightDuration" : "Light Duration"
+
+# Game
+
+
+# UI
+
+"button.label.lumine" : "Light Up"
+
+# Stats
+
+
+# Titles
+
+"achievement.lumine.common1.title" : "Spirit World Trance"
+"achievement.lumine.common1.goal" : "light up a corpse with Lumine's light."
+"achievement.lumine.common1.cond" : ""
+"achievement.lumine.common1.splitted.2" : "Trance"
+
+"achievement.lumine.another1.title" : "Regret"
+"achievement.lumine.another1.goal" : "light up your own corpse with Lumine's light."
+"achievement.lumine.another1.cond" : ""

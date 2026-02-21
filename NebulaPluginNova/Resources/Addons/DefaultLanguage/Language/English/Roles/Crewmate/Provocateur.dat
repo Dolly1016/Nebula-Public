@@ -1,0 +1,55 @@
+# Assignable
+
+"role.provocateur.name" : "Provocateur"
+"role.provocateur.short" : "P"
+"role.provocateur.blurb" : "Go To The Grave Together"
+
+# Document
+
+"role.provocateur.doc" : "An aggressive crewmate who takes other players down with them when leaving."
+"role.provocateur.ability.title" : "Inherent Ability "Counter-kill""
+"role.provocateur.ability.main" : "Takes other players down with them when dying.<br>Additionally, when exiled in a meeting, randomly selects <b>one</b> player from those who voted for you to take down with them."
+"role.provocateur.ability.embroil" : "<title>Embroil</title>If killed while the ability is active, takes the killer down with them."
+
+# Options
+
+"options.role.provocateur.detail" : "On death, Provocateur embroils their murderer."
+"options.role.provocateur.embroilCoolDown" : "Embroil Cooldown"
+"options.role.provocateur.embroilAdditionalCoolDown" : "Embroil Additional Cooldown"
+"options.role.provocateur.embroilAdditionalCoolDown.detail" : "If no embroilment occurs during the effect time of the ability, it may not trigger.<br>This option allows you to further extend the ability cooldown each time embroilment fails.<br>The longer the additional cooldown, the more players need to time the use of the ability carefully."
+"options.role.provocateur.embroilDuration" : "Embroil Duration"
+
+# Game
+
+
+# UI
+
+"button.label.embroil" : "embroil"
+
+# Game Statictics
+
+"statistics.events.embroil" : "Embroil"
+
+# Status
+
+"state.embroiled" : "Embroiled"
+
+# Stats
+
+"stats.provocateur.taskPhase" : "Num of Embroiling on Task Phase"
+"stats.provocateur.exile" : "Num of Embroiling on Exile"
+
+# Titles
+
+"achievement.provocateur.common1.title" : "Final Struggle"
+"achievement.provocateur.common1.goal" : "Take a player down with you in a meeting."
+"achievement.provocateur.common1.splitted.2" : "Struggle"
+
+"achievement.provocateur.common2.title" : "Die Together"
+"achievement.provocateur.common2.goal" : "Take the killer down with you using the embroilment ability."
+
+"achievement.provocateur.challenge.title" : "Liberation of Sixth Sense"
+"achievement.provocateur.challenge.goal" : "Take down a raider or sniper who is 10m or more away and die."
+"achievement.provocateur.challenge.flavor" : ""Particles and the observer mutually influence each other."—From modern physics?"
+"achievement.provocateur.challenge.splitted.0" : "Sixth Sense's "
+"achievement.provocateur.challenge.splitted.2" : "Liberation"

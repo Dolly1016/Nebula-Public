@@ -1,0 +1,28 @@
+# Document
+
+"role.trapper.ability.accelTrap" : "<title>Speed Trap</title>A trap that increases movement speed when stepped on."
+"role.trapper.ability.decelTrap" : "<title>Deceleration Trap</title>A trap that decreases movement speed when stepped on."
+
+# Options
+
+"options.role.trapper.placeCoolDown" : "Place Cooldown"
+"options.role.trapper.placeDuration" : "Place Duration"
+"options.role.trapper.numOfCharges" : "Num Of Charges"
+"options.role.trapper.speedTrapSize" : "Speed Trap Size"
+"options.role.trapper.accelRate" : "Accel Rate"
+"options.role.trapper.decelRate" : "Decel Rate"
+"options.role.trapper.speedDuration" : "Accel / Decel Duration"
+
+# Game
+
+"gameAction.trapper.placement.evil" : "Trap Placement"
+"gameAction.trapper.placement.nice" : "Trap Placement"
+
+# UI
+
+"ui.action.trapper.place" : "Place trap."
+"ui.action.trapper.switch" : "Switch the type of trap to place."
+
+# Status
+
+"state.trapped" : "Trapped"

@@ -2468,7 +2468,7 @@ public class NebulaCosmeticsLayer : MonoBehaviour
             if (BodyHatPreMask != null) BodyHatPreMask.transform.SetLocalZ(MyLayer.zIndexSpacing * 0.125f);
             if (BodyHatPostMask != null) BodyHatPostMask.transform.SetLocalZ(MyLayer.zIndexSpacing * -0.125f);
             if (BodyVisorPreMask != null) BodyVisorPreMask.transform.SetLocalZ(MyLayer.zIndexSpacing * 0.125f);
-            if (BodyVisorPostMask != null) BodyVisorPostMask.transform.SetLocalZ(MyLayer.zIndexSpacing * -0.125f);
+            if (BodyVisorPostMask != null) BodyVisorPostMask.transform.SetLocalZ(0.001f/*MyLayer.zIndexSpacing * -0.125f*/);
         }
 
         UpdateZ();

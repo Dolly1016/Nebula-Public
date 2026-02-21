@@ -1,0 +1,28 @@
+# Document
+
+"role.trapper.ability.accelTrap" : "<title>加速トラップ</title>踏むと移動速度が上昇するトラップです。"
+"role.trapper.ability.decelTrap" : "<title>減速トラップ</title>踏むと移動速度が低下するトラップです。"
+
+# Options
+
+"options.role.trapper.placeCoolDown" : "Place Cooldown"
+"options.role.trapper.placeDuration" : "Place Duration"
+"options.role.trapper.numOfCharges" : "Num Of Charges"
+"options.role.trapper.speedTrapSize" : "Speed Trap Size"
+"options.role.trapper.accelRate" : "Accel Rate"
+"options.role.trapper.decelRate" : "Decel Rate"
+"options.role.trapper.speedDuration" : "Accel / Decel Duration"
+
+# Game
+
+"gameAction.trapper.placement.evil" : "トラップ設置"
+"gameAction.trapper.placement.nice" : "トラップ設置"
+
+# UI
+
+"ui.action.trapper.place" : "Place trap."
+"ui.action.trapper.switch" : "Switch the type of trap to place."
+
+# Status
+
+"state.trapped" : "Trapped"

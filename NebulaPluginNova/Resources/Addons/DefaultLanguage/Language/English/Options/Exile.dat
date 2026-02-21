@@ -1,0 +1,22 @@
+# Header
+
+"options.exile" : "Exile Options"
+"options.exile.detail" : "About Player Exile"
+
+# Groups
+
+# Options
+
+"options.exile.group.confirmEject" : "Settings for Confirm Eject"
+"options.exile.confirmEjectCondition" : "# Can Check The Remaining Number"
+"options.exile.confirmEjectTarget" : "# Is Counted As Remaining Number"
+"options.exile.confirmEject.all" : "All"
+"options.exile.confirmEject.impostors" : "Impostors"
+"options.exile.confirmEject.killers" : "Killers"
+"options.exile.confirmEject.nonCrewmates" : "Non-Crewmates"
+"exile.confirmEject.impostor.s" : "%NUM% Impostor Is Remaining..."
+"exile.confirmEject.impostor.p" : "%NUM% Impostors Are Remaining..."
+"exile.confirmEject.killer.s" : "%NUM% Killer Is Remaining..."
+"exile.confirmEject.killer.p" : "%NUM% Killers Are Remaining..."
+"exile.confirmEject.nonCrewmate.s" : "%NUM% Non-crewmate Is Remaining..."
+"exile.confirmEject.nonCrewmate.p" : "%NUM% Non-crewmates Are Remaining..."

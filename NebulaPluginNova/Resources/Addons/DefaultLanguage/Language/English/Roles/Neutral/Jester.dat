@@ -1,0 +1,58 @@
+# Assignable
+
+"role.jester.name" : "Jester"
+"role.jester.short" : "J"
+"role.jester.blurb" : "Get Voted Out"
+
+# Document
+
+"role.jester.doc" : "A neutral member who wins by being lynched."
+"role.jetster.winCond" : "Be exiled in a meeting."
+"role.jester.ability.title" : "Inherent Ability "Clown's Mischief""
+"role.jester.ability.main" : ""
+"role.jester.ability.drag" : "<title>Grag/Release</title> Can carry corpses."
+
+# Options
+
+"options.role.jester.detail" : "Jester schemes to be exiled to win.<br>Crewmates must not vote for the Jester!"
+"options.role.jester.canDragDeadBody" : "Can Drag Dead Body"
+"options.role.jester.canFixComms" : "Can Fix Comms"
+"options.role.jester.canFixLight" : "Can Fix Light"
+"options.role.jester.task" : "Requires Tasks For Winning"
+
+# Game
+
+"game.meeting.roleJesterText" : "Hahaha..."
+
+# UI
+
+"button.label.drag" : "drag"
+"button.label.release" : "release"
+
+# Stats
+
+
+# Titles
+
+"achievement.jester.common1.title" : "Swayed By Frivolous Words"
+"achievement.jester.common1.goal" : "Receive 1 or more votes in a meeting."
+"achievement.jester.common1.cond" : "Your own vote is not counted"
+
+"achievement.jester.common2.title" : "Love Toys!"
+"achievement.jester.common2.goal" : "Use the "Blank Shot" or "Rage" perk to leave fake traces and get exiled to win."
+"achievement.jester.common2.splitted.0" : "Toys "
+
+"achievement.jester.challenge.title" : "Clown Dancing On The Gallows"
+"achievement.jester.challenge.goal" : "Be exiled unanimously and win."
+"achievement.jester.challenge.flavor" : ""That strange laughter is burned into my mind and won't leave." ―Unsigned memoir"
+"achievement.jester.challenge.splitted.2" : "Jester"
+
+# Team
+
+"teams.jester" : "Jester"
+"end.jester" : "Jester Wins%EXTRA%"
+
+# Document
+
+"document.tip.winCond.jester.title" : "Special Trigger"
+"document.tip.winCond.jester" : "The jester wins if jester is exiled in an emergency meeting."

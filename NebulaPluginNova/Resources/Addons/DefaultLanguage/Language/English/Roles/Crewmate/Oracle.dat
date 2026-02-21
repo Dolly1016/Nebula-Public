@@ -1,0 +1,59 @@
+# Assignable
+
+"role.oracle.name" : "Oracle"
+"role.oracle.short" : "O"
+"role.oracle.blurb" : "Everything I Know"
+
+# Document
+
+"role.oracle.doc" : "A crewmate who can check other players' roles through divination."
+"role.oracle.ability.title" : "Inherent Ability "Prophecy of God""
+"role.oracle.ability.main" : "Divine a player's role and narrow down the player's role %CAND%."
+"role.oracle.ability.main.one" : "<var>divine</var> it"
+"role.oracle.ability.main.multiple" : "<var>narrow down to %NUM% candidates</var>"
+"role.oracle.ability.oracle" : "<title>Oracle</title>Divine the player's current role.<br>%DIE%"
+"role.oracle.ability.oracle.die" : "However, if you divine %ROLES%, you will <var>die</var>."
+"role.oracle.ability.oracle.die.split" : ", "
+
+# Options
+
+"options.role.oracle.detail" : "Oracle can narrow down other player's roles to a few candidates."
+"options.role.oracle.maxOracle" : "Max # Oracle"
+"options.role.oracle.oracleCooldown" : "Oracle Cooldown"
+"options.role.oracle.oracleAdditionalCooldown" : "Oracle Additional Cooldown"
+"options.role.oracle.oracleDuration" : "Oracle Duration"
+"options.role.oracle.numOfCandidates" : "# Role Candidates"
+"options.role.oracle.dieOnDiviningOpportunist" : "Die On Divining Opportunist"
+"options.role.oracle.dieOnDiviningOracle" : "Die On Divining Oracle"
+
+# Game
+
+"role.oracle.gui.results" : "Oracle Results"
+"role.oracle.gui.results.zero" : "None"
+
+# UI
+
+"button.label.oracle" : "oracle"
+
+# Status
+
+"status.punished" : "Punished"
+
+# Stats
+
+"stats.oracle.oracle" : "Num of Oracle"
+
+# Titles
+
+"achievement.oracle.common1.title" : "God Said"
+"achievement.oracle.common1.goal" : "Divining roles a total of 10 times."
+"achievement.oracle.common1.splitted.0" : "God "
+"achievement.oracle.common1.splitted.2" : "Said"
+
+"achievement.oracle.another1.title" : "I Said"
+"achievement.oracle.another1.goal" : "Exile a crewmate you divined or misfire and kill someone."
+"achievement.oracle.another1.splitted.0" : "I "
+
+"achievement.oracle.challenge.title" : "Our Opinion"
+"achievement.oracle.challenge.goal" : "One or more impostors you divined are guessed by crewmates,<br>and win without exiling any crewmates except madmates."
+"achievement.oracle.challenge.splitted.0" : "Our "

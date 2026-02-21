@@ -16,6 +16,7 @@
 "ui.update.waitFinishing" : "バージョン変更中です"
 "ui.update.finishUpdate" : "処理が完了しました！<br>ゲームを再起動してください。"
 "ui.update.autoUpdate" : "自動更新が有効になりました。"
+"ui.version.copied" : "バージョンテキストをコピーしました。"
 
 # AFK
 

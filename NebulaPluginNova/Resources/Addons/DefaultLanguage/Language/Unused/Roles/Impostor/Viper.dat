@@ -1,0 +1,47 @@
+# Assignable
+
+"role.viper.name" : "Viper"
+"role.viper.short" : "V"
+"role.viper.blurb" : "Kill to dissolve bodies"
+
+# Document
+
+"role.viper.doc" : "死体を溶かす毒でキルするインポスターです。"
+
+# Options
+
+"options.role.viper.detail" : "Vipers are imposters who kill using poison that dissolves corpses."
+"options.role.viper.acidCooldown" : "Kill Cooldown"
+"options.role.viper.dissolveDuration" : "Dissolve Duration"
+"options.role.viper.acidLeavesBone" : "Acid Leaves Bone"
+"options.role.viper.canReportBone" : "Can Report Bone"
+
+# Game
+
+
+# UI
+
+"button.label.acid" : "acid"
+
+# Status
+
+"state.dissolved" : "Dissolved"
+
+# Stats
+
+
+# Titles
+
+"achievement.viper.common1.title" : "もう遅い"
+"achievement.viper.common1.goal" : "完全に溶解した死体のそばを誰かが通りかかる。"
+"achievement.viper.common1.splitted.0" : "もう"
+
+"achievement.viper.common2.title" : "空飛ぶパイソン"
+"achievement.viper.common2.goal" : "アシッドキルをする前に他の方法で誰かをキルする。"
+"achievement.viper.common2.splitted.0" : "空飛ぶ"
+
+"achievement.combination.2.viper.sidekick.common3.title" : "過滴定"
+"achievement.combination.2.viper.sidekick.common3.goal" : "ヴァイパーからサイドキックに変化する。"
+
+"achievement.viper.challenge.title" : "蝕え尽く鼓動"
+"achievement.viper.challenge.goal" : "自身のキルによる死体を一切通報されずに<br>生きて勝利する。"

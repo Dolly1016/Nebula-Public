@@ -1,0 +1,64 @@
+# Assignable
+
+"role.avenger.name" : "Avenger"
+"role.avenger.short" : "A"
+"role.avenger.blurb" : "To Live For Love"
+
+# Document
+
+"role.avenger.doc" : "A neutral member burning with revenge after their lover's life is taken."
+"role.avenger.winCond" : "Kill the revenge target and survive until the end."
+
+# Options
+
+"options.role.avenger.detail" : "When a Lovers partner is killed, the remaining becomes Avenger.<br>Achieve your revenge and steal the victory."
+"options.role.avenger.killCoolDown" : "Kill Cooldown"
+"options.role.avenger.canKnowExistanceOfAvenger" : "Can Know Existance Of Avenger"
+"options.role.avenger.canKnowExistanceOfAvenger.off" : "Off"
+"options.role.avenger.canKnowExistanceOfAvenger.onlyTarget" : "Only Target"
+"options.role.avenger.canKnowExistanceOfAvenger.on" : "On"
+"options.role.avenger.targetCanKnowAvenger" : "Target Can Know Avenger"
+"options.role.avenger.showAvengerFlashForTarget" : "Show Avenger Flash"
+"options.role.avenger.notificationForAvengerInterval" : "Notification For Avenger Interval"
+"options.role.avenger.notificationForTargetInterval" : "Notification For Target Interval"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.avenger.killTarget" : "Num of Killing Target"
+"stats.avenger.failed" : "Num of Killed By Target"
+"stats.avenger.defend" : "Num of Killing Avenger"
+"role.avenger.hudText" : "You became AVENGER."
+
+# Titles
+
+"achievement.avenger.common1.title" : "Retaliation"
+"achievement.avenger.common1.goal" : "Kill the revenge target."
+
+"achievement.avenger.common2.title" : "Loneliness Is Stronger Than Love"
+"achievement.avenger.common2.goal" : "Become the revenge target and kill the Avenger."
+"achievement.avenger.common2.flavor" : ""Don't make me laugh." ― The back of an empty pizza box"
+
+"achievement.avenger.another1.title" : "Unfulfilled Oath"
+"achievement.avenger.another1.goal" : "Be killed by the revenge target."
+
+"achievement.avenger.another2.title" : "Die For Love"
+"achievement.avenger.another2.goal" : "Kill the revenge target and then die."
+"achievement.avenger.another2.splitted.2" : "Die"
+
+"achievement.avenger.challenge.title" : "Avengers"
+"achievement.avenger.challenge.goal" : "Both you and your partner become Avengers and win as Avengers."
+
+# Team
+
+"end.avenger" : "Avenger Wins%EXTRA%"
+
+# Document
+
+"document.tip.winCond.avenger.title" : "Overwrite Winning"
+"document.tip.winCond.avenger" : "Kill the avenge target with your own hands, stay alive, <br>and take over winning,"

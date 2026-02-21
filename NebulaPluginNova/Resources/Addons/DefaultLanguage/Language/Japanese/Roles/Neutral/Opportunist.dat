@@ -59,8 +59,32 @@
 
 # Stats
 
+"stats.opportunist.task" : "滞在タスクの完了数"
 
 # Titles
+
+"achievement.opportunist.common1.title" : "後は野となれ山となれ"
+"achievement.opportunist.common1.goal" : "オポチュニスト追加勝利で勝利する。"
+
+"achievement.opportunist.another1.title" : "急展開"
+"achievement.opportunist.another1.goal" : "最後まで生存しながら敗北する。"
+
+"achievement.opportunist.another2.title" : "ちょっとだけでいいのに"
+"achievement.opportunist.another2.goal" : "自身が死亡した直後にゲームが終了する。"
+"achievement.opportunist.another2.splitted.0" : "ちょっとだけ"
+
+"achievement.opportunist.common3.title" : "宇宙船の妖精さん"
+"achievement.opportunist.common3.goal" : "滞在タスクを通算で10回完了する。"
+"achievement.opportunist.common3.splitted.2" : "妖精さん"
+
+"achievement.opportunist.common2.title" : "そこのけそこのけ"
+"achievement.opportunist.common2.goal" : "最後まで生存し、一人で勝利する。"
+"achievement.opportunist.common2.flavor" : ""そこのけそこのけ、私が通る。""
+"achievement.opportunist.common2.splitted.0" : "そこのけ"
+
+"achievement.opportunist.challenge.title" : "風の吹くまま"
+"achievement.opportunist.challenge.goal" : "生存者を1人以上敗北させて追加勝利する。"
+"achievement.opportunist.challenge.cond" : "クルーメイト勝利を除く"
 
 # Team
 

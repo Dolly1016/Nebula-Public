@@ -1,0 +1,40 @@
+# Assignable
+
+"role.quack.name" : "Quack"
+"role.quack.short" : "Q"
+"role.quack.blurb" : "Here ... and There"
+
+# Document
+
+"role.quack.doc" : "どこからでも死体を通報できるインポスターです。"
+"role.quack.ability.title" : "固有能力 "藪医者の仕事道具""
+"role.quack.ability.main" : "いつでもバイタル情報を確認できます。<br>さらに、固有能力で開いたバイタル端末を通じて死体を通報できます。"
+"role.quack.ability.vital" : "<title>バイタル</title>バイタルを開きます。"
+
+# Options
+
+"options.role.quack.detail" : "Quack has vitals that allow quack to report dead bodies."
+
+# Game
+
+
+# UI
+
+"button.label.vital" : "vitals"
+
+# Stats
+
+"stats.quack.report" : "Num of Reporting with Vitals"
+
+# Titles
+
+"achievement.quack.common1.title" : "ガァガァ"
+"achievement.quack.common1.goal" : "バイタルを使って、遠隔で死体を通報する。"
+
+"achievement.quack.another1.title" : "うるせぇ"
+"achievement.quack.another1.goal" : "自ら始めた緊急会議で追放される。"
+
+"achievement.quack.challenge.title" : "畜生のリベリオン"
+"achievement.quack.challenge.goal" : "自ら始めた緊急会議で計3人のプレイヤーを追放し、勝利する。"
+"achievement.quack.challenge.flavor" : ""ここにルールなんてない。" ―カルテの端書き"
+"achievement.quack.challenge.splitted.0" : "畜生の"

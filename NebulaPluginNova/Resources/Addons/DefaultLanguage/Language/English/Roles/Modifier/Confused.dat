@@ -1,0 +1,37 @@
+# Assignable
+
+"role.confused.name" : "Confused"
+"role.confused.generalBlurb" : "The Reason For Happiness Is"
+
+# Document
+
+"role.confused.doc" : "Each time a meeting is held, the appearances of other players are shuffled."
+
+# Options
+
+"options.role.confused.detail" : "Every emergency meetings, the appearance of others changes."
+"options.role.confused.chanceOfShuffle" : "% Shuffle"
+"options.role.confused.numOfMaxShuffledPairs" : "# Max Shuffled Pairs"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.confused.common1.title" : "What Do You Believe In To Live"
+"achievement.confused.common1.goal" : "Activate Confused's ability."
+"achievement.confused.common1.splitted.1" : "Believe In "
+
+"achievement.confused.another1.title" : "Undercurrent"
+"achievement.confused.another1.goal" : "Die before Confused's ability is activated."
+
+"achievement.confused.challenge.title" : "How Do We Live"
+"achievement.confused.challenge.goal" : "Survive until the end and win as Crewmate with only the Crewmate faction remaining."
+"achievement.confused.challenge.cond" : "-Neutral: 2 or more<br>-Impostors: 2 or more"
+"achievement.confused.challenge.splitted.1" : "How "

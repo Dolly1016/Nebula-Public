@@ -1,0 +1,25 @@
+# Header
+
+"options.assignment" : "Assignment Options"
+"options.assignment.detail" : "About the number of role assignments"
+
+# Groups
+
+"options.assignment.group.assignment" : "Role Assignment"
+
+# Options
+
+"options.assignment.crewmate" : "Crewmate Role"
+"options.assignment.impostor" : "Impostor Role"
+"options.assignment.neutral" : "Neutral Role"
+"options.assignment.unlimited" : "Unlimited"
+"options.assignment.assignOpToHost" : "Assign Op To Host"
+"options.assignment.assignOpToHost.detail" : "オンにすると、ホストはゲーム中にコマンドを使用できるようになります。<br>特にコマンドを使用しない場合はオフにすることをお勧めします。"
+"options.assignment.ghostAssignmentMethod" : "Ghost Assignment Method"
+"options.assignment.ghostAssignmentMethod.detail" : "幽霊役職の割り当て方法を変更できます。<br> -<b>標準</b>: 死亡者には割り当てられる役職の何れかが必ず割り当てられます。<br> -<b>スリリング</b>: 割当確率が役職を割り当てられるか否かにまで影響を及ぼします。"
+"options.assignment.ghostAssignmentMethod.normal" : "Normal"
+"options.assignment.ghostAssignmentMethod.thrilling" : "Thrilling"
+"options.assignment.preview" : "Assignment Preview"
+"options.assignment.preview.withoutCrewmate" : "Impostors: %IMP% (%RIMP% of them have a mod role), Neutral: %NEU%"
+"options.assignment.preview.withCrewmate" : "Impostors: %IMP% (%RIMP% of them have a mod role), Neutral: %NEU%, Crewmates with mod role: %CREW%"
+"options.assignment.preview.hint" : "※ Players outlined in yellow will be assigned roles.<br>※ You can change <b>the total number</b> of imposters in <b>Among Us settings</b>."

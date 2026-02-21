@@ -1,0 +1,55 @@
+# Assignable
+
+"role.arsonist.name" : "Arsonist"
+"role.arsonist.short" : "A"
+"role.arsonist.blurb" : "Let Them Burn"
+
+# Document
+
+"role.arsonist.doc" : "生存者全員に油を塗ってまわる第三陣営です。"
+"role.arsonist.winCond" : "生存者全員に油を塗り、火をつける。"
+"role.arsonist.ability.title" : "固有能力 "あぶない放火魔""
+"role.arsonist.ability.main" : ""
+"role.arsonist.ability.douse" : "<title>塗る</title>プレイヤーに油を塗ります。油を塗るのには少しの時間を要します。<br><b>油塗り</b>中にプレイヤーから離れてしまうと油塗りアクションは中断されます。<br>油を塗り切るとこのボタンは点火ボタンに変化します。"
+"role.arsonist.ability.ignite" : "<title>点火</title>生存者全員に油を塗り終わると発動できます。生存者に火をつけ、勝利します。"
+
+# Options
+
+"options.role.arsonist.detail" : "Arsonist douses all of the alive to burn."
+"options.role.arsonist.douseCoolDown" : "Douse Cooldown"
+"options.role.arsonist.douseDuration" : "Douse Duration"
+
+# Game
+
+
+# UI
+
+"button.label.douse" : "douse"
+"button.label.ignite" : "ignite"
+
+# Stats
+
+"stats.arsonist.doused" : "Num of Doused Players"
+"role.arsonist.gui.left" : "Left Players"
+"role.arsonist.gui.left.dead" : "Dead"
+
+# Titles
+
+"achievement.arsonist.common1.title" : "油臭い会議室"
+"achievement.arsonist.common1.goal" : "油を塗った3人を生きたまま会議に参加させる。"
+"achievement.arsonist.common1.splitted.0" : "油臭い"
+
+"achievement.arsonist.challenge.title" : "策略に浸された会議"
+"achievement.arsonist.challenge.goal" : "油が塗れていない最後の一人を会議で追放したうえで発火させ、勝利する。"
+"achievement.arsonist.challenge.flavor" : ""不穏だ。何かを隠している顔をしている。" ―ピザ箱で押さえられたメモ書き"
+"achievement.arsonist.challenge.splitted.2" : "会議"
+
+# Team
+
+"teams.arsonist" : "Arsonist"
+"end.arsonist" : "Arsonist Wins%EXTRA%"
+
+# Document
+
+"document.tip.winCond.arsonist.title" : "Special Trigger"
+"document.tip.winCond.arsonist" : "The arsonist wins by dousing all survivers and setting them on fire."

@@ -1,0 +1,45 @@
+# Assignable
+
+"role.chainShifter.name" : "Chain Shifter"
+"role.chainShifter.short" : "C"
+"role.chainShifter.blurb" : "Suffer The Calamity"
+
+# Document
+
+"role.chainShifter.doc" : "勝利条件を持たない第三陣営です。誰かと役職を交換しましょう。"
+
+# Options
+
+"options.role.chainShifter.detail" : "Chain Shifter has no way to win."
+"options.role.chainShifter.shiftCoolDown" : "Shift Cooldown"
+"options.role.chainShifter.canCallEmergencyMeeting" : "Can Call Emergency Meeting"
+
+# Game
+
+
+# UI
+
+"button.label.shift" : "shift"
+
+# Stats
+
+"stats.chainShifter.shift" : "Num of Shifting Roles"
+
+# Titles
+
+"achievement.chainShifter.common1.title" : "事の顛末"
+"achievement.chainShifter.common1.goal" : "チェインシフターをキルする。"
+"achievement.chainShifter.common1.flavor" : "物語は、終わらせておく方が良いこともある。"
+
+"achievement.chainShifter.another1.title" : "回避不能"
+"achievement.chainShifter.another1.goal" : "チェインシフターを受け取り、そのまま敗北する。"
+"achievement.chainShifter.another1.flavor" : "「強制敗北」"
+
+"achievement.chainShifter.challenge.title" : "厄災が襲い来る"
+"achievement.chainShifter.challenge.goal" : "役職を入れ替えた直後にゲームが終了し、勝利する。"
+"achievement.chainShifter.challenge.flavor" : ""最高の結末をくれてやろう" ―破られた議事録より"
+"achievement.chainShifter.challenge.splitted.2" : "襲い来る"
+
+# Team
+
+"teams.chainShifter" : "Chain Shifter"

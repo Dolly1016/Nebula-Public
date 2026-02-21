@@ -1,0 +1,90 @@
+# Assignable
+
+"role.scarlet.name" : "Scarlet"
+"role.scarlet.short" : "S"
+"role.scarlet.blurb" : ""I'm still in Love""
+
+# Document
+
+"role.scarlet.doc" : "A neutral member aiming for victory with the favorite.<br>Make good use of the deceived keeps."
+"role.scarlet.winCond" : "The favorite survives and wins the game. Overwrites it as Scarlet victory and wins."
+"role.scarlet.ability.title" : "Inherent Ability "Charm""
+"role.scarlet.ability.main" : "Make good use of the deceived keeps to support the favorite's victory."
+"role.scarlet.ability.favorite" : "<title>Favorite</title>Designate a player as your favorite.<br>If either Scarlet or the favorite dies, the other dies following them."
+"role.scarlet.ability.flirt" : "<title>Keep</title>Deceive a player to make them your keep. Scarlet can know the keep's role.<br>If either Scarlet or the keep dies, the other does not die following them."
+"role.scarlet.ability.hourglass" : "<title>Time Limit</title>If you do not designate a favorite within the time limit, you die of loneliness.<br>This timer does not progress during meetings or immediately after meetings end."
+"role.scarlet.ability.meeting" : "<title>Scarlet Command</title>Can be used during emergency meetings.<br>Make the favorite and keep's voting targets match your own voting target."
+
+# Options
+
+"options.role.scarlet.detail" : "Scarlet is a strategic neutral who aims for victory<br>by skillfully manipulating favorites and keeps."
+"options.role.scarlet.graceUntilDecidingFavorite" : "Grace Until Deciding Favorite"
+"options.role.scarlet.graceUntilDecidingFavorite.detail" : "If you do not designate a favorite within the set time, Scarlet dies.<br>The grace period timer does not progress during meetings or immediately after meetings.<br>※ If this time is set too short, it will be obvious that the deceived one is a keep in the late game."
+"options.role.scarlet.numOfKept" : "# Of Kept"
+"options.role.scarlet.numOfCommand" : "# Of Commands"
+"options.role.scarlet.numOfCommand.detail" : "By activating <b>Scarlet Command</b> during a meeting, Scarlet can make the favorite and keep's voting targets<br>match their own voting target."
+"options.role.scarlet.canOverrideTaskWin" : "Can Override Task Win"
+"options.role.scarlet.favoriteGauge" : "Favorite Gauge"
+"options.role.scarlet.favoriteGauge.detail" : "When activated, Scarlet must fill the <b>Favourite Gauge</b> in order to achieve victory.<br>The gauge fills as long as staying near the favourite, and reduces when is apart."
+"options.role.scarlet.requiredGaugeToWin" : "Required Gauge To Win"
+"options.role.scarlet.requiredGaugeToWin.detail" : "Scarlet needs to stay near the favorite for the set time.<br>It is not necessary to stay continuously, but the gauge decreases little by little when moving away from the favorite."
+"options.role.scarlet.surplusGauge" : "Surplus Gauge"
+"options.role.scarlet.surplusGauge.detail" : "Scarlet can fill the gauge more than the required amount.<br>The larger this value, the more leeway you have to move around away from the favorite."
+"options.role.scarlet.gaugeReductionRatio" : "Reduction Ratio"
+"options.role.scarlet.gaugeReductionRatio.detail" : "While not near the favorite, the gauge decreases at a speed multiplied by this set value to the filling speed.<br>At 1x, it decreases at the same speed as the filling speed. A value less than 1 is recommended."
+"options.role.scarlet.canLocateLovers" : "Can Locate Lovers"
+"options.role.scarlet.group.gauge" : "Gauge Option"
+
+# Game
+
+"role.scarlet.gui.gauge" : "Favorite Gauge"
+"role.scarlet.gui.favorite" : "Favorite"
+
+# UI
+
+"button.label.scarlet.grance" : "grance"
+"button.label.favorite" : "favorite"
+"button.label.seduce" : "seduce"
+"button.label.scarlet.command" : "command"
+"ui.action.scarlet.suicide" : "You will die if you do not decide your favorite in time.<br>The timer will not run during the meeting or immediately after the meeting ends."
+
+# Stats
+
+"stats.scarlet.kept" : "Num of Kept"
+
+# Titles
+
+"achievement.scarlet.common1.title" : "Another Face"
+"achievement.scarlet.common1.goal" : "Deceive 1 person and designate 1 person as your favorite."
+"achievement.scarlet.common1.splitted.0" : "Another "
+
+"achievement.scarlet.common2.title" : "In The Name Of The Queen"
+"achievement.scarlet.common2.goal" : "Exile a total of 3 players using Scarlet Command."
+"achievement.scarlet.common2.splitted.1" : "In The Name Of "
+
+"achievement.scarlet.another1.title" : "A Certain Gentleman"
+"achievement.scarlet.another1.goal" : "Be deceived by Scarlet and die as you are."
+"achievement.scarlet.another1.splitted.0" : "A "
+
+"achievement.scarlet.another2.title" : "Love Rival"
+"achievement.scarlet.another2.goal" : "Be exiled by Scarlet Command during a meeting."
+"achievement.scarlet.another2.flavor" : ""What a waste of moonlight. One person is enough to rule the night." —From a broken meeting minutes"
+
+"achievement.scarlet.love.title" : "Love, It Is"
+"achievement.scarlet.love.goal" : "Become your own favorite and win with Scarlet victory."
+"achievement.scarlet.love.cond" : "Only yourself wins"
+"achievement.scarlet.love.flavor" : ""—It is an inescapable curse.""
+
+"achievement.scarlet.challenge.title" : "Empress Of The Everlasting Night"
+"achievement.scarlet.challenge.goal" : "Exile 1 player with Scarlet Command,<br>have 2 or more deceived players die and 2 or more survive, then win with your favorite."
+"achievement.scarlet.challenge.splitted.2" : "Empress"
+
+# Team
+
+"teams.scarlet" : "Scarlet"
+"end.scarlet" : "Scarlet Wins%EXTRA%"
+
+# Document
+
+"document.tip.winCond.scarlet.title" : "Overwrite Winning"
+"document.tip.winCond.scarlet" : "If the favorite survives and wins, it overwrites the winning. The favorite and Scarlet win."

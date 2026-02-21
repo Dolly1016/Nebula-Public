@@ -440,9 +440,9 @@ public static class Helpers
         return tmPro;
     }
 
-    static public Vector3 TransformPointLocalToLocal(this Transform transform, Vector3 vector, Transform toTransform)
+    static public Vector3 TransformPointLocalToLocal(this Transform transform, Vector3 position, Transform toTransform)
     {
-        return toTransform.InverseTransformPoint(transform.TransformPoint(vector));
+        return toTransform.InverseTransformPoint(transform.TransformPoint(position));
     }
 
     internal static void SetColors(ArchivedColor color, SpriteRenderer renderer)

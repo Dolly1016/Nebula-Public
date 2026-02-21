@@ -1,0 +1,31 @@
+# Assignable
+
+"role.poltergeist.name" : "Poltergeist"
+"role.poltergeist.blurb" : "ワタシハココニイルヨ"
+"role.poltergeist.short" : "P"
+
+# Document
+
+"role.poltergeist.doc" : "死体を引き寄せるように動かせます。"
+
+# Options
+
+"options.role.poltergeist.detail" : "Poltergeists can draw corpses close to them."
+"options.role.poltergeist.poltergeistCoolDown" : "Poltergeist Cooldown"
+
+# Game
+
+
+# UI
+
+"button.label.poltergeist" : "poltergeist"
+
+# Stats
+
+"stats.poltergeist.poltergeist" : "Num of Poltergeist"
+
+# Titles
+
+"achievement.poltergeist.common1.title" : "亡霊の気まぐれ"
+"achievement.poltergeist.common1.goal" : "死体を引き寄せる。"
+"achievement.poltergeist.common1.splitted.2" : "気まぐれ"

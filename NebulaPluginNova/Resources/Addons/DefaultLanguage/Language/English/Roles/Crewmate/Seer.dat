@@ -1,0 +1,41 @@
+# Assignable
+
+"role.seer.name" : "Seer"
+"role.seer.short" : "S"
+"role.seer.blurb" : "You Will See Players Die"
+
+# Document
+
+"role.seer.doc" : "A crewmate who knows when a player dies."
+
+# Options
+
+"options.role.seer.detail" : "Seer can see the ghosts to find out where victims died."
+"options.role.seer.ghostDuration" : "Ghost Duration"
+"options.role.seer.canSeeGhostsInShadow" : "Can See Ghosts In Shadow"
+"options.role.seer.canSeeGhostsInShadow.detail" : "When turned on, ghosts outside the field of view (shadowed areas) become visible."
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.seer.common1.title" : "Seer of the Ghost"
+"achievement.seer.common1.goal" : "Witness a ghost up close."
+"achievement.seer.common1.cond" : ""
+"achievement.seer.common1.splitted.2" : "Ghost"
+
+"achievement.seer.another1.title" : "Seer of the World"
+"achievement.seer.another1.goal" : "Become the first victim."
+"achievement.seer.another1.cond" : ""
+
+"achievement.seer.challenge2.title" : "Seer of the Truth"
+"achievement.seer.challenge2.goal" : "Vote for non-crewmate team in all votes."
+"achievement.seer.challenge2.cond" : "-Cannot clear if you skip voting or vote blank<br>-Number of votes: 3 or more"
+"achievement.seer.challenge2.splitted.1" : "of the "

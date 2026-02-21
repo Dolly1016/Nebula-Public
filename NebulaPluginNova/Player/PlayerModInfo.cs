@@ -204,7 +204,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     {
         get
         {
-            bool hasTasks = Role.TaskType != RoleTaskType.NoTask;
+            bool hasTasks = Role.HaveNormalTask;
             //実際は持っていなくとも、クルータスクを持っていると思しきプレイヤーの場合
             if (Role.TaskType == RoleTaskType.CrewmateTask) hasTasks = FeelLikeHaveCrewmateTasks;
             return hasTasks;
@@ -1410,7 +1410,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
     // Virial::ReportAPI
     void GamePlayer.ReportDeadBody(GamePlayer deadBody, bool canInvokeInSabo, bool consumeEmergencyButton) => MeetingHudExtension.ModCmdReportDeadBody(this, deadBody, MeetingHudExtension.ReportType.ReportDeadBody, canInvokeInSabo, consumeEmergencyButton);
-    void GamePlayer.RequestEmergencyMeeting(bool canInvokeInSabo, bool consumeEmergencyButton) => MeetingHudExtension.ModCmdReportDeadBody(this, null, MeetingHudExtension.ReportType.ReportDeadBody, canInvokeInSabo, consumeEmergencyButton);
+    void GamePlayer.RequestEmergencyMeeting(bool canInvokeInSabo, bool consumeEmergencyButton) => MeetingHudExtension.ModCmdReportDeadBody(this, null, MeetingHudExtension.ReportType.EmergencyMeeting, canInvokeInSabo, consumeEmergencyButton);
 
     // Virial::HoldingAPI
     GamePlayer? GamePlayer.HoldingPlayer => null;

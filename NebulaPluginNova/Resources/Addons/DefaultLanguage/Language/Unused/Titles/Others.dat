@@ -1,0 +1,130 @@
+"achievement.firstKill.title" : "ヴァニタスに描く生命"
+"achievement.firstKill.goal" : "通算で10回初手キルされる。"
+
+"achievement.firstKill2.title" : "霊界のウェルカマー"
+"achievement.firstKill2.goal" : "通算で50回初手キルされる。"
+"achievement.firstKill2.splitted.2" : "ウェルカマー"
+
+"achievement.firstKill3.title" : "見覚えのあるゲーム"
+"achievement.firstKill3.goal" : "通算で100回初手キルされる。"
+"achievement.firstKill3.flavor" : ""それっておまえのしわざなんだろ？" ―■■■"
+
+"achievement.death1.title" : "サスペンスのはじまり"
+"achievement.death1.goal" : "通算で50回死亡する。"
+
+"achievement.death2.title" : "骸の山"
+"achievement.death2.goal" : "通算で100回死亡する。"
+"achievement.death2.splitted.2" : "山"
+
+"achievement.death3.title" : "無間の業風"
+"achievement.death3.goal" : "通算で500回死亡する。"
+"achievement.death3.flavor" : ""―――""
+"achievement.death3.splitted.0" : "無間の"
+
+"achievement.challenge.impostor.title" : "糜爛"
+"achievement.challenge.impostor.goal" : "仲間が全員生存している状態で自身のキルによって<br>インポスターとして勝利する。"
+"achievement.challenge.impostor.cond" : "自身の手によって2人以上キルすること"
+
+"achievement.challenge.lastCrewmate.title" : "峻嶺"
+"achievement.challenge.lastCrewmate.goal" : "最後のクルーメイトとして生存したままクルーメイト勝利する。"
+"achievement.challenge.lastCrewmate.cond" : "マッドメイトはクルーメイト陣営にカウントしない"
+
+"achievement.challenge.death2.title" : "あの手この手"
+"achievement.challenge.death2.goal" : "4種類以上の死因でプレイヤーを死に追いやる。"
+"achievement.challenge.death2.cond" : "自身の死、及び自身が関与していない死を除く+自身の投票が与した追放を含む"
+
+"achievement.noCrewmate.title" : "タイムリミット"
+"achievement.noCrewmate.goal" : "クルーメイトが全員死亡した状態で、タスク勝利する。"
+"achievement.noCrewmate.cond" : "自身がクルーメイト陣営に属していること+マッドメイトはクルーメイト陣営にカウントしない"
+
+"achievement.challenge.crewmate.title" : "穏やかな航行"
+"achievement.challenge.crewmate.goal" : "誰も死んでいない状態でタスク勝利する。"
+
+"achievement.speedAttribute.title" : "良いのか悪いのか"
+"achievement.speedAttribute.goal" : "移動速度上昇と移動速度低下の効果を同時に受ける。"
+
+"achievement.threeRoles.title" : "三つ巴"
+"achievement.threeRoles.goal" : "インポスター陣営でラバーとサイドキックのモディファイアを付与される。"
+
+"achievement.doTaskEvenDead.title" : "死出の旅"
+"achievement.doTaskEvenDead.goal" : "死亡した状態で全てのタスクをこなす。"
+"achievement.doTaskEvenDead.cond" : "タスク総量: 8以上"
+
+"achievement.noMeeting.title" : "長夜の夢"
+"achievement.noMeeting.goal" : "会議を迎えることなく勝利する。"
+"achievement.noMeeting.flavor" : ""最悪の目覚めをあなたに""
+"achievement.noMeeting.splitted.2" : "夢"
+
+"achievement.extraVictim.title" : "その安堵も束の間"
+"achievement.extraVictim.goal" : "会議の追加追放で死亡する。"
+"achievement.extraVictim.splitted.0" : "その"
+
+"achievement.spectator.dead.title" : "デスカメラ"
+"achievement.spectator.dead.goal" : "観戦中のプレイヤーがキルされて死亡する。"
+
+"achievement.spectator.murderer.title" : "胸騒ぎのモメント"
+"achievement.spectator.murderer.goal" : "観戦中のプレイヤーが誰かをキルする。"
+
+"achievement.teleporter1.title" : "不思議な感覚"
+"achievement.teleporter1.goal" : "テレポーターを使用する。"
+"achievement.teleporter1.splitted.0" : "不思議な"
+
+"achievement.teleporter2.title" : "深秘"
+"achievement.teleporter2.goal" : "テレポーターを通算で50回使用する。"
+
+"achievement.movable.title" : "茈"
+"achievement.movable.goal" : "複数の移動制限によって全く移動できない状態に陥る。"
+
+"achievement.dragCorpse.title" : "終わりなき旅路"
+"achievement.dragCorpse.goal" : "通算で死体を100m引きずる。"
+"achievement.dragCorpse.flavor" : ""賑やかで楽しかった日々を思い返しながら。まだこの旅は続く。""
+
+"achievement.allWayKill.title" : "死のマエストロ"
+"achievement.allWayKill.goal" : "全ての死因でプレイヤーを死に追いやる。"
+
+"achievement.allWayDeath.title" : "奈落に吹く風"
+"achievement.allWayDeath.goal" : "全ての死因による死を経験する。"
+
+"achievement.perk.screen.title" : "ゲームチェンジャー"
+"achievement.perk.screen.goal" : "クルーメイト陣営で画面反転パークを獲得する。"
+"achievement.perk.screen.flavor" : ""大番狂わせを見せてやるぜ！""
+
+"achievement.perk.meteor.title" : "星墜アポカリプス"
+"achievement.perk.meteor.goal" : "パーク「死のメテオストーム」で3人以上をキルする。"
+
+"achievement.perk.blank.title" : "ただ訳もなく"
+"achievement.perk.blank.goal" : "パーク「空砲」あるいは「憤怒」を使って通算10回、偽りの痕跡を残す。"
+"achievement.perk.blank.splitted.0" : "ただ"
+
+"record.perk.manyPerks1.flipX" : "ようこそ鏡の世界へ"
+"record.perk.manyPerks1.flipY" : "下剋上の機"
+"record.perk.manyPerks1.flipXY" : "逆転劇"
+"record.perk.manyPerks1.invisible" : "並行宇宙の旅人"
+"record.perk.manyPerks1.meteor" : "死のメテオストーム"
+"record.perk.manyPerks1.rotation" : "昏迷"
+"record.perk.manyPerks1.blankShot" : "空砲"
+"record.perk.manyPerks1.fakeAxe" : "憤怒"
+
+"achievement.perk.manyPerks1.title" : "遊星よりのプラントX"
+"achievement.perk.manyPerks1.goal" : "通算で指定の全パークを使用する。"
+
+"achievement.costume.animals.title" : "もい！ふれあいランド"
+"achievement.costume.animals.goal" : "たくさんの動物たちといっしょにゲームをプレイする。"
+"achievement.costume.animals.cond" : "5匹以上の動物たちが集まること"
+"achievement.costume.animals.flavor" : ""のけものなんていない！"はずだったのに。"
+"achievement.costume.animals.splitted.0" : "もい！"
+
+"achievement.costume.music.title" : "ちぐはぐフィルハーモニー"
+"achievement.costume.music.goal" : "音楽隊を組んでゲームをプレイする。"
+"achievement.costume.music.cond" : "3人以上の演奏者と、1人の指揮者でプレイすること"
+
+"achievement.costume.party.title" : "ぱりないファンタスティカ"
+"achievement.costume.party.goal" : "パーティースタイルでばっちりキメる。"
+"achievement.costume.party.cond" : "パーティーは3人からっしょ+イケてるアイテムは目元につけてこ+ビビッドカラーで気分をアゲ+ダブりはノーカンでよろ"
+"achievement.costume.party.flavor" : ""心に翳りを秘めてこそ、その笑みは誰よりもかがやく。""
+
+"achievement.costume.partyCamo.title" : "キズナ☆ふぉーえば"
+"achievement.costume.partyCamo.goal" : "カモフラージュ終了の瞬間にアゲなメンバーで集まる。"
+"achievement.costume.partyCamo.cond" : "3人以上のパーティーメンバーで集まること"
+"achievement.costume.partyCamo.flavor" : ""どんなピンチでも乗り越えられるって、ウチはそー思った。" ―たぶん非ギャルの筆跡"
+"achievement.costume.partyCamo.splitted.1" : "☆"

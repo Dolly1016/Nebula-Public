@@ -1,0 +1,68 @@
+# Assignable
+
+"role.trilemma.name" : "Trilemma"
+"role.trilemma.generalBlurb" : "倶に天を戴かず"
+"role.trilemma.blurb" : "You're stuck in a trilemma."
+
+# Document
+
+"role.trilemma.doc" : "三すくみの関係です。他の二人が死亡しないと勝利できません。"
+"role.trilemma.winCond" : "%WIN%"
+"role.trilemma.winCond.block" : "生きて自身の勝利条件を満たしたうえで、ゲーム終了時に残りのトリレンマがどちらも死亡していること。<br>残りのどちらか一方でも生存している場合、勝利を失います。"
+"role.trilemma.winCond.additional" : "生きて自身の勝利条件を満たしたうえで、ゲーム終了時に残りのトリレンマがどちらも死亡していること。<br>残りのどちらか一方でも生存している場合、勝利を失います。"
+"role.trilemma.winCond.overwrite" : "生きて自身の勝利条件を満たしたうえで、ゲーム終了時に残りのトリレンマがどちらも死亡していると<br>勝利を乗っ取ります。残りのどちらか一方でも生存している場合、勝利を失います。"
+
+# Options
+
+"options.role.trilemma.detail" : "Trilemma cannot won unless the remaining two players die."
+"options.role.trilemma.numOfTrilemma" : "# Trilemmas"
+"options.role.trilemma.impostorAssignment" : "Impostor Assignment"
+"options.role.trilemma.neutralAssignment" : "Neutral Assignment"
+"options.role.trilemma.assignment.zero" : "Deny"
+"options.role.trilemma.assignment.maxOne" : "Max 1"
+"options.role.trilemma.assignment.one" : "Just 1"
+"options.role.trilemma.assignment.oneOrMore" : "1～"
+"options.role.trilemma.assignment.zeroOrMore" : "0～"
+"options.role.trilemma.winCondition" : "Win Condition"
+"options.role.trilemma.winCondition.detail" : "トリレンマの勝利(ブロック)条件を設定します。<br> -<b>ブロックのみ</b>: 死亡するか、他二人が生存していると勝利条件を失います。<br> -<b>追加勝利</b>: 他二人が死亡して自身が生存していれば追加勝利します。<br> -<b>乗っ取り勝利</b>: 他二人が死亡しかつ自身が生存しながら勝利すれば、勝利を乗っ取ります。"
+"options.role.trilemma.winCondition.block" : "Block"
+"options.role.trilemma.winCondition.additional" : "Extra Win"
+"options.role.trilemma.winCondition.overwrite" : "Overwrite"
+
+# Game
+
+"role.trilemma.taskText" : "[Trilemma Mission] Death of %PLAYERS%."
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.trilemma.common1.title" : "不倶戴天"
+"achievement.trilemma.common1.goal" : "トリレンマの最後の1人になる。"
+
+"achievement.trilemma.another1.title" : "フグ天 鯛天 百万点！"
+"achievement.trilemma.another1.goal" : "トリレンマの最初の脱落者になる。"
+"achievement.trilemma.another1.flavor" : ""さつまいもの方が好きかも。""
+
+"achievement.trilemma.common2.title" : "怨讐"
+"achievement.trilemma.common2.goal" : "トリレンマで脱落しながら勝利する。"
+"achievement.trilemma.common2.cond" : "トリレンマのほかのプレイヤーは敗北すること。"
+
+"achievement.trilemma.challenge.title" : "見てるか！？"
+"achievement.trilemma.challenge.goal" : "トリレンマの最後の1人になり、自身のキルでゲームを終了して勝利する。"
+"achievement.trilemma.challenge.flavor" : ""こいつをいたぶり続けよう！" ―静かの海にて"
+"achievement.trilemma.challenge.splitted.2" : "！？"
+
+# Team
+
+"end.trilemma" : "Trilemma Wins %EXTRA%"
+"end.extra.trilemma" : " <color=#FFFFFF>with</color> Trilemma"
+
+# Document
+
+"document.tip.winCond.trilemma.title" : "Overwrite Winning"
+"document.tip.winCond.trilemma" : "If two player in the trilemma die and then survive and meet the victory conditions,<br>it will overwrite the winning."

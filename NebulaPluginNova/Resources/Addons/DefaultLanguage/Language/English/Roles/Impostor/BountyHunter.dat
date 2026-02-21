@@ -1,0 +1,43 @@
+# Assignable
+
+"role.bountyHunter.name" : "Bounty Hunter"
+"role.bountyHunter.short" : "Bo"
+"role.bountyHunter.blurb" : "Get Rich Quick!"
+"role.bountyHunter.hint" : "Kill the bounty target"
+
+# Document
+
+"role.bountyHunter.doc" : "An impostor who can get a shorter kill cooldown by killing the <b>bounty target</b>.<br>The bounty target is selected from among survivors and updated every <var>%SEC%</var> seconds. <br>Additionally, the bounty target is updated immediately when killed.<br>Killing a player <b>other than</b> the bounty target lengthens the next kill cooldown."
+
+# Options
+
+"options.role.bountyHunter.detail" : "Bounty Hunter can gain a special Cooldown.<br>If they kill them but the bounty, they'll gain penalty Cooldown."
+"options.role.bountyHunter.bountyKillCoolDown" : "Bounty Kill Cooldown"
+"options.role.bountyHunter.othersKillCoolDown" : "Others Kill Cooldown"
+"options.role.bountyHunter.changeBountyInterval" : "Change Bounty Interval"
+"options.role.bountyHunter.showBountyArrow" : "Show Bounty Arrow"
+"options.role.bountyHunter.arrowUpdateInterval" : "Arrow Update Interval"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.bountyHunter.bountyKill" : "Num of Bounty Kill"
+"stats.bountyHunter.othersKill" : "Num of Non-bounty Kill"
+
+# Titles
+
+"achievement.bountyHunter.common1.title" : "Greedy Crime"
+"achievement.bountyHunter.common1.goal" : "Kill the bounty target."
+"achievement.bountyHunter.common1.splitted.0" : "Greedy "
+
+"achievement.bountyHunter.another1.title" : "Not Worth a Penny"
+"achievement.bountyHunter.another1.goal" : "Kill someone other than the bounty target."
+
+"achievement.bountyHunter.challenge.title" : "I Never Miss"
+"achievement.bountyHunter.challenge.goal" : "Get 3 kills within 30 seconds."
+"achievement.bountyHunter.challenge.splitted.2" : "Miss"

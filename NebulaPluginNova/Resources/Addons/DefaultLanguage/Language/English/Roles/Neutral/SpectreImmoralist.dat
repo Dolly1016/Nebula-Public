@@ -1,0 +1,60 @@
+# Assignable
+
+"role.spectreImmoralist.name" : "Immoralist"
+"role.spectreImmoralist.short" : "I"
+"role.spectreImmoralist.blurb" : "Outside of Reason"
+
+# Document
+
+"role.spectreImmoralist.doc" : "Spectre's ally. Can help Spectre by offering fries."
+"role.spectre.immoralist.winCond" : "The parent Spectre wins. (Die following the parent Spectre if they die.)"
+"role.spectre.immoralist.ability.title" : "Inherent Ability "Demon Worshiper""
+"role.spectre.immoralist.ability.main" : "Can use different abilities when alive and after death. Make good use of abilities for Spectre's victory."
+"role.spectre.immoralist.ability.alive" : "<title>Dedicate</title>While alive, can offer fries to empty plates.<br>Interact with an empty plate and wait for a while to make fries appear."
+"role.spectre.immoralist.ability.dead" : "<title>Disapper</title>After death, can take fries on plates away.<br>Be careful not to take too many fries, as the Spectre will easily get hungry."
+"role.spectre.immoralist.ability.suicide" : "<title>Suicide</title> he Immoralist can commit suicide at any time."
+
+# Options
+
+"options.role.spectreImmoralist.detail" : "Immoralist is a teammate of Spectre. <br>Immoralist can dedicate fries or disappear."
+"options.role.spectreImmoralist.respawnCooldown" : "Dedicate Cooldown"
+"options.role.spectreImmoralist.respawnDuration" : "Dedicate Duration"
+"options.role.spectreImmoralist.showDishesOnMap" : "Show Dishes On Map"
+"options.role.spectreImmoralist.canSuicide" : "Can Suicide"
+"options.role.spectreImmoralist.showKillFlash" : "Show Kill Flash"
+
+# Game
+
+
+# UI
+
+"button.label.immoralist.place" : "Dedicate"
+"button.label.immoralist.remove" : "Disappear"
+"button.label.immoralist.suicide" : "Suicide"
+
+# Stats
+
+"stats.spectreImmoralist.respawnFries" : "Num of Dedication"
+"stats.spectreImmoralist.removeFries" : "Num of Disappearance"
+"stats.spectreImmoralist.suicide" : "Num of Suicide"
+
+# Titles
+
+"achievement.spectreImmoralist.common1.title" : "Fox Ritual"
+"achievement.spectreImmoralist.common1.goal" : "Dedicate fries a total of 10 times."
+
+"achievement.spectreImmoralist.common2.title" : "Fox Possession"
+"achievement.spectreImmoralist.common2.goal" : "Take fries a total of 10 times away."
+
+"achievement.spectreImmoralist.common3.title" : "There, There"
+"achievement.spectreImmoralist.common3.goal" : "Dedicate fries right next to the Spectre."
+"achievement.spectreImmoralist.common3.flavor" : "※ It's out of faith. Not a feeding site."
+
+"achievement.spectreImmoralist.hard1.title" : "Purification Fire"
+"achievement.spectreImmoralist.hard1.goal" : "Change from Immoralist to another role,<br>and win with a victory other than Spectre victory after the Spectre dies."
+"achievement.spectreImmoralist.hard1.flavor" : "Forward is hell, backward is hell.<br>May there be hope beyond endless time."
+"achievement.spectreImmoralist.hard1.splitted.2" : "Fire"
+
+"achievement.spectreImmoralist.challenge.title" : "Fearless"
+"achievement.spectreImmoralist.challenge.goal" : "Immediately after being exiled or committing suicide,<br>seize a numerical victory and win with Spectre victory."
+"achievement.spectreImmoralist.challenge.flavor" : ""The shackles named life." —From a broken meeting minutes"

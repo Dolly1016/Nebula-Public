@@ -1,4 +1,5 @@
 ﻿using Nebula.Modules.GUIWidget;
+using Nebula.Roles.Assignment;
 using Nebula.Roles.Crewmate;
 using Nebula.Roles.Neutral;
 using Nebula.Scripts;
@@ -72,6 +73,7 @@ public class Roles
         public DefinedModifier? GetModifierById(int id) => Roles.GetModifier(id);
         public DefinedGhostRole? GetGhostRole(string internalName) => Roles.AllGhostRoles.FirstOrDefault(r => r.InternalName == internalName);
         public DefinedGhostRole? GetGhostRoleById(int id) => Roles.GetGhostRole(id);
+        public AssignmentSummary CalcAssignmentSummary(int? players = null) => AssignmentPreview.CalcSummary(players ?? (GamePlayer.AllPlayers.Any() ? GamePlayer.AllPlayers.Count() : PlayerControl.AllPlayerControls.Count));
     }
     static public Assignables API { get; } = new RolesAPI();
     static public IReadOnlyList<DefinedRole> AllRoles { get; private set; } = [];

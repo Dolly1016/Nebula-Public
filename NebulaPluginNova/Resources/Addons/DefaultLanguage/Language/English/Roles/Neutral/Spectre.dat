@@ -1,0 +1,96 @@
+# Assignable
+
+"role.spectre.name" : "Spectre"
+"role.spectre.short" : "S"
+"role.spectre.blurb" : "The Chaotic"
+
+# Document
+
+"role.spectre.doc" : "A neutral member who wins by surviving until the end while eating fries."
+"role.spectre.winCond" : "End the game with satiety kept above <var>%NUM%</var>. (Excluding end by sabotage.)"
+"role.spectre.ability.title" : "Inherent Ability "The Way of the Specter""
+"role.spectre.ability.main" : "Lurk without being noticed by other players and eat fries.<br>Make good use of the invisibility ability."
+"role.spectre.ability.fries" : "<title>Fries</title>Plates appear on the map. Interact with plates with fries to start a mini-game of eating fries.<br>You will starve to death if your satiety runs out.<br>To win, you need to maintain a certain level of satiety at the end of the game."
+"role.spectre.ability.vanish" : "<title>Vanish</title>Become invisible for a while. Activating invisibility consumes satiety.<br>Can only be activated if you can maintain satiety equivalent to 1 serving of fries even after consumption."
+
+# Options
+
+"options.role.spectre.detail" : "Spectre survives until the end and takes over the other victories. <br>However, if you don't eat fried food for a while, you will starve."
+"options.role.spectre.vanishCost" : "# Fries For Vanish"
+"options.role.spectre.vanishCooldown" : "Vanish Cooldown"
+"options.role.spectre.vanishDuration" : "Vanish Duration"
+"options.role.spectre.numOfDishes" : "# Of Dishes Spawning"
+"options.role.spectre.satiety" : "Satiety Duration Per Fries"
+"options.role.spectre.maxSatiety" : "Max Satiety"
+"options.role.spectre.initialSatiety" : "Initial Satiety"
+"options.role.spectre.requiredSatietyForWinning" : "Required Satiety For Winning"
+"options.role.spectre.friesReplenishmentCooldown" : "Fries Replenishment Cooldown"
+"options.role.spectre.showWhereKillersAre" : "Show Where Killers Are"
+"options.role.spectre.showDishesOnMap" : "Show Dishes On Map"
+"options.role.spectre.clairvoyance" : "Has Clairvoyance"
+"options.role.spectre.immoralistVariation" : "Immoralist Assignment"
+"options.role.spectre.immoralistVariation.none" : "None"
+"options.role.spectre.immoralistVariation.spectreFollower" : "S. Follower"
+"options.role.spectre.immoralistVariation.immoralist" : "Immoralist"
+"options.role.spectre.immoralistVariation.random" : "Random"
+"options.role.spectre.immoralistVariation.alternate" : "Alternate"
+"options.role.spectre.spectreFollowerChance" : "Spectre Follower Spawn Chance"
+"options.role.spectre.group.immoralist" : "Immoralist Settings"
+"options.role.spectre.group.dish" : "Dish Settings"
+"options.role.spectre.group.vanish" : "Vanish Ability Settings"
+
+# Game
+
+
+# UI
+
+"button.label.vanish" : "vanish"
+
+# Status
+
+"state.starved" : "Starved"
+
+# Stats
+
+"stats.spectre.vanish" : "Num of Vanish"
+"stats.spectre.eatFries" : "Num of Eaten Dishes"
+"role.spectre.gui.gauge" : "Dish Gauge"
+
+# Titles
+
+"achievement.spectre.common1.title" : "Glutton"
+"achievement.spectre.common1.goal" : "Eat fries a total of 20 times."
+
+"achievement.spectre.common2.title" : "Phantom Secret Art"
+"achievement.spectre.common2.goal" : "Turn invisible a total of 10 times."
+
+"achievement.spectre.another1.title" : "I Ate It"
+"achievement.spectre.another1.goal" : "Get exiled or suspected in the meeting immediately after eating fries for the first time."
+"achievement.spectre.another1.flavor" : ""Hang this panel and reflect on your actions!"<br>I'm not a pet, you know."
+"achievement.spectre.another1.splitted.0" : "I "
+
+"achievement.spectre.another2.title" : "I'm Hungry"
+"achievement.spectre.another2.goal" : "Starve to death."
+
+"achievement.spectre.costume1.title" : "True Form"
+"achievement.spectre.costume1.goal" : "Play as Spectre in the form of a Nine-Tailed Fox and win with Spectre victory."
+"achievement.spectre.costume1.flavor" : ""I won't run or hide." ―The great youkai spoke thus"
+"achievement.spectre.costume1.splitted.0" : "True "
+
+"achievement.spectre.common3.title" : "Taunt"
+"achievement.spectre.common3.goal" : "Take over a special condition victory with Spectre victory and win."
+
+"achievement.spectre.challenge.title" : "Summer Grass Burns Red"
+"achievement.spectre.challenge.goal" : "Win with Spectre victory while all Impostors are still alive."
+"achievement.spectre.challenge.cond" : "Impostors: 2 or more"
+"achievement.spectre.challenge.flavor" : ""A mountain of corpses with no place to step." ―From a traveler's notes"
+
+# Team
+
+"teams.spectre" : "Spectre"
+"end.spectre" : "Spectre Wins%EXTRA%"
+
+# Document
+
+"document.tip.winCond.spectre.title" : "Overwrite Winning"
+"document.tip.winCond.spectre" : "If Spectre is still alive, it will overwrite the winning."

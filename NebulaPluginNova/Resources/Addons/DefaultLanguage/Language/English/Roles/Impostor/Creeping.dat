@@ -1,0 +1,65 @@
+# Assignable
+
+"role.creeping.name" : "Creeping"
+"role.creeping.short" : "Cr"
+"role.creeping.blurb" : "It's Too Late Now"
+"role.creeping.hint" : "Kill with delayed poison"
+
+# Document
+
+"role.creeping.doc" : "Can perform <b>delayed kills</b> by applying slow-acting poison to players.<br>Use it properly alongside normal kills to maneuver skillfully."
+"role.creeping.ability.title" : "Inherent Ability "The Creeping End""
+"role.creeping.ability.main" : "Poison to players. Players hit with poison will die if they do not depoison within the specified time."
+"role.creeping.ability.poison" : "<title>Poison</title>Poison to a player.<br>A <b>blink</b> occurs at this time.<br>The poison cooldown is <var>kill cooldown %POISON%</var> (<var>%SEC%</var> seconds)."
+"role.creeping.ability.sec.longer" : "Longer"
+"role.creeping.ability.sec.shorter" : "Shorter"
+"role.creeping.ability.sec.just" : "The same as"
+"role.creeping.ability.depoison" : "<title>First Aid Kit</title>Players hit with poison can <b>depoison</b> using a first aid kit.<br>Only 1 first aid kit appears on the map."
+"role.creeping.tips" : "・Poison corrodes players even during emergency meetings. If the poison takes effect, the player dies even during the meeting.<br>・First aid kit spawn locations<br> -Skeld: Medbay<br> -MIRA HQ: Launch Pad or Storage Back<br> -Polus: Lab Back or Oxygen Room (Back of the cylinder room)<br> -Airship: Main Hall (Bed in the upper left) or Electrical Room Lower Left<br> -Fungle: Splash Zone Room or Lab Lower Left"
+
+# Options
+
+"options.role.creeping.detail" : "Creeping uses a slow-acting poison that will kill them if they do not cure<br>themselves of the poison within a certain time frame."
+"options.role.creeping.depoisonDuration" : "Depoison Duration"
+"options.role.creeping.poisonDelay" : "Posion Kill Delay"
+"options.role.creeping.poisonCooldown" : "Poison Cooldown"
+
+# Game
+
+"role.creeping.minigame.depoison" : "Depoison"
+
+# UI
+
+"button.label.poison" : "poison"
+
+# Game Statictics
+
+"statistics.events.poisoned" : "Poisoned"
+
+# Status
+
+"state.poisoned" : "Poisoned"
+
+# Stats
+
+"stats.creeping.poison" : "Num of Poison"
+"stats.creeping.depoison" : "Num of Depoison"
+
+# Titles
+
+"achievement.creeping.common1.title" : "Poisoned"
+"achievement.creeping.common1.goal" : "Get 1 delayed kill with poison."
+
+"achievement.creeping.common2.title" : "Sudden Change"
+"achievement.creeping.common2.goal" : "Kill players consecutively within 2 seconds."
+
+"achievement.creeping.another1.title" : "Futile Struggle"
+"achievement.creeping.another1.goal" : "Die from poison during an emergency meeting."
+
+"achievement.creeping.common3.title" : "Last Words Are"
+"achievement.creeping.common3.goal" : "The game ends during the emergency meeting and you win."
+"achievement.creeping.common3.cond" : "You must be alive"
+"achievement.creeping.common3.flavor" : ""I wanted to live." —An unsigned memoir"
+
+"achievement.creeping.challenge.title" : "Poisoned Spaceship"
+"achievement.creeping.challenge.goal" : "Poison while being affected by poison yourself, or get a kill with poison while being affected by poison,<br>and become the sole survivor to win."

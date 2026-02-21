@@ -1,0 +1,44 @@
+# Assignable
+
+"role.evilTrapper.name" : "Evil Trapper"
+"role.evilTrapper.short" : "Tp"
+"role.evilTrapper.blurb" : "Entrap and Kill Crewmates"
+"role.evilTrapper.hint" : "Master the use of traps!"
+
+# Document
+
+"role.evilTrapper.doc" : "An impostor who places traps that can be used in various ways, such as interfering with enemies and killing.<br>Traps become active after a meeting is held."
+"role.evilTrapper.ability.title" : "Inherent Ability "Trap""
+"role.evilTrapper.ability.main" : "The Evil Trapper can place 3 types of traps."
+"role.evilTrapper.ability.killTrap" : "<title>Kill Trap</title>An invisible trap. Kills players (excluding allies) who step on it.<br>Only activates while the Evil Trapper's kill cooldown is active.<br>%SE%"
+"role.evilTrapper.ability.killTrap.se" : "A unique placement sound is played when setting a kill trap."
+"role.evilTrapper.ability.killTrapBroken" : "<title>Broken Kill Trap</title>Kill traps activate only once.<br>Traps that kill players break and become visible to all players."
+"role.evilTrapper.tips" : "・Switch the type of trap to place with the %KEY% key.<br>・Placing a trap takes %SEC% seconds, and you will be stunned in place during placement."
+
+# Options
+
+"options.role.evilTrapper.detail" : "Evil Trapper sets traps with various effects.<br>Killing by trap shares its kill Cooldown too."
+"options.role.evilTrapper.killTrapSoundDistance" : "Kill Trap Sound Distance"
+"options.role.evilTrapper.costOfKillTrap" : "Cost Of Kill Trap"
+"options.role.evilTrapper.killTrapSize" : "Kill Trap Size"
+
+# Game
+
+
+# UI
+
+
+# Game Statictics
+
+"statistics.events.trap" : "Entrap"
+
+# Stats
+
+
+# Titles
+
+"achievement.evilTrapper.common1.title" : "Disturbance"
+"achievement.evilTrapper.common1.goal" : "Place a deceleration trap."
+
+"achievement.evilTrapper.challenge.title" : "Planned Crime"
+"achievement.evilTrapper.challenge.goal" : "Get 2 or more trap kills and survive until the end to win."

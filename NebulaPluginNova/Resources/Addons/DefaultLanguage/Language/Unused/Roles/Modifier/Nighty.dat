@@ -1,0 +1,39 @@
+# Assignable
+
+"role.nighty.name" : "Nighty"
+"role.nighty.generalBlurb" : "おねんねしてな！"
+
+# Document
+
+"role.nighty.doc" : "プレイヤーの視界を奪う<b>おやすみボム</b>を設置できます。"
+"role.nighty.ability.title" : "固有能力 "おやすみボム""
+"role.nighty.ability.main" : "おやすみボムを踏んだプレイヤーはしばらくの間、視界が極端に制限されます。<br>自身や仲間のインポスターはおやすみボムを<b>踏みません</b>。"
+"role.nighty.ability.place" : "<title>設置</title>その場におやすみボムを設置します。<br>おやすみボムは全インポスターが視認できます。"
+
+# Options
+
+"options.role.nighty.detail" : "Nighty can place bombs that narrow the player's field of vision."
+"options.role.nighty.placeCooldown" : "Bomb Place Cooldown"
+"options.role.nighty.mineDuration" : "Bomb Duration"
+"options.role.nighty.mineSize" : "Bomb Size"
+"options.role.nighty.blindDuration" : "Blind Effect Duration"
+
+# Game
+
+"gameAction.nighty.place" : "おやすみボム設置"
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.nighty.common1.title" : "おねんねしてな！"
+"achievement.nighty.common1.goal" : "通算で3回、プレイヤーをおやすみボムに掛ける。"
+"achievement.nighty.common1.splitted.0" : "おねんね"
+
+"achievement.nighty.challenge.title" : "千一夜のおやすみを"
+"achievement.nighty.challenge.goal" : "自身が仕掛けたおやすみボムが8回以上発動し、8種類以上の死因でプレイヤーが死亡し、<br>味方が全員生存したままインポスター勝利する。"
+"achievement.nighty.challenge.cond" : "インポスター: 2人以上"

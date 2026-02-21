@@ -1,0 +1,76 @@
+# Assignable
+
+"role.madmate.name" : "Madmate"
+"role.madmate.short" : "Ma"
+"role.madmate.prefix" : "Mad"
+"role.madmate.blurb" : "Assist Impostors"
+
+# Document
+
+"role.madmate.doc" : "インポスターに与する狂人です。"
+"role.madmate.winCond" : "インポスターが勝利すると勝利します。"
+"role.madmate.ability.title" : "固有能力 "狂死""
+"role.madmate.ability.main" : ""
+"role.madmate.ability.suicide" : "<title>自殺</title>任意のタイミングで自殺できます。"
+"role.madmate.tips" : ""
+
+# Options
+
+"options.role.madmate.detail" : "Madmate is on the side of imposters.<br>Obstruct crewmates to help imposters win."
+"options.role.madmate.canIdentifyImpostors" : "Can Identify Impostors"
+"options.role.madmate.canIdentifyImpostors.detail" : "タスクをこなすことで発見できるインポスターの最大人数を設定します。"
+"options.role.madmate.requiredTasksForIdentifying0" : "# Tasks To Identify (1st)"
+"options.role.madmate.requiredTasksForIdentifying1" : "# Tasks To Identify (2nd)"
+"options.role.madmate.requiredTasksForIdentifying2" : "# Tasks To Identify (3rd)"
+"options.role.madmate.group.embroil" : "Embroil Settings"
+"options.role.madmate.group.identification" : "Identification Settings"
+"options.role.madmate.embroilPlayersOnExile" : "Embroil Players On Exile"
+"options.role.madmate.embroilPlayersOnExile.detail" : "追放時に他の生存者を一人巻き込めます。<br>巻き込み対象は非インポスターに限られます。"
+"options.role.madmate.limitEmbroiledPlayersToVoters" : "Limit Embroiled Players To Voters"
+"options.role.madmate.limitEmbroiledPlayersToVoters.detail" : "オンに設定することで、巻き込み対象を<br>自身に票を投じた非インポスターに限定できます。"
+"options.role.madmate.embroilDelay" : "Embroil Delay"
+"options.role.madmate.embroilDelay.detail" : "追放時の生存者の巻き込みを遅延させます。<br>マッドメイトの追放後、指定した数の会議を跨いでから巻き込みます。<br><br>0に設定すると追放と同時に巻き込みます。"
+"options.role.madmate.canSuicide" : "Can Suicide"
+"options.role.madmate.suicideCooldown" : "Suicide Cooldown"
+"options.role.madmate.canFixLight" : "Can Fix Light"
+"options.role.madmate.canFixComms" : "Can Fix Comms"
+"options.role.madmate.hasImpostorVision" : "Has Impostor Vision"
+"options.role.madmate.canUseVents" : "Can Use Vents"
+"options.role.madmate.canMoveInVents" : "Can Move In Vents"
+"options.role.madmate.maddenRole" : "Maddened Role"
+
+# Game
+
+
+# UI
+
+"button.label.madmate.suicide" : "Suicide"
+
+# Stats
+
+"stats.madmate.foundImpostors" : "Num of Impostors Found"
+"stats.madmate.embroil" : "Num of Embroil"
+
+# Titles
+
+"achievement.madmate.common1.title" : "身代わり"
+"achievement.madmate.common1.goal" : "インポスターが生存しているときに会議で追放される。"
+
+"achievement.madmate.another1.title" : "戦略的な死、あるいは"
+"achievement.madmate.another1.goal" : "インポスターにキルされて死亡する。"
+
+"achievement.madmate.common2.title" : "紅の祈誓"
+"achievement.madmate.common2.goal" : "タスクをこなしてインポスターを発見する。"
+"achievement.madmate.common2.splitted.0" : "紅の"
+
+"achievement.madmate.another2.title" : "それでも私は信じている"
+"achievement.madmate.another2.goal" : "タスクをこなして発見したインポスターにキルされる。"
+"achievement.madmate.another2.splitted.0" : "それでも"
+
+"achievement.madmate.another3.title" : "事故はおこるさ"
+"achievement.madmate.another3.goal" : "タスクをこなして1人以上のインポスターを発見したうえで、<br>未発見のインポスターにキルされる。"
+
+"achievement.madmate.challenge.title" : "狂いに満ちた結末"
+"achievement.madmate.challenge.goal" : "インポスターが全員生存している状態でインポスター勝利する。"
+"achievement.madmate.challenge.splitted.0" : "狂いに満ちた"
+"achievement.madmate.challenge.splitted.2" : "結末"

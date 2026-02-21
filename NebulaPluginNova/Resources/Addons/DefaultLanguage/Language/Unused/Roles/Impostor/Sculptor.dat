@@ -1,0 +1,56 @@
+# Assignable
+
+"role.sculptor.name" : "Sculptor"
+"role.sculptor.short" : "Sc"
+"role.sculptor.blurb" : "Chaos Creation"
+
+# Document
+
+"role.sculptor.doc" : "歩く偶像を召喚できるインポスターです。"
+"role.sculptor.ability.title" : "固有能力 "ケイオスクリーチャー""
+"role.sculptor.ability.main" : ""
+"role.sculptor.ability.sample" : "<title>採取</title>偶像に適用できる見た目を採取します。"
+"role.sculptor.ability.map" : "<title>ミニマップ</title>偶像を召喚させるためのマップを開きます。<br>マップ上で偶像の目的地と見た目を選ぶとその場に偶像が出現し、歩き出します。"
+"role.sculptor.tips" : "・偶像がキルされるとその場で消え、実際には誰も死亡しません。"
+
+# Options
+
+"options.role.sculptor.detail" : "Sculptor will spawn idols of players that walk around the map.<br>Crewmates will not know if they are the real deal when they pass by!"
+"options.role.sculptor.sampleCoolDown" : "Sample Cooldown"
+"options.role.sculptor.createCoolDown" : "Create Cooldown"
+"options.role.sculptor.maxSamples" : "Max Samples"
+"options.role.sculptor.stayDurationAfterMoving" : "Stay Duration After Moving"
+"options.role.sculptor.detectionRadius" : "Player Detection Radius"
+
+# Game
+
+"gameAction.sculptor.summon" : "偶像召喚"
+
+# UI
+
+"button.label.sculptor.command" : "command"
+
+# Stats
+
+"stats.sculptor.sample" : "Num of Samples"
+"stats.sculptor.create" : "Num of Creation"
+"ui.action.sculptor.sample" : "Get sample of the player."
+"ui.action.sculptor.create" : "Specify the destination of the idol and<br>generate the idol."
+
+# Titles
+
+"achievement.sculptor.common1.title" : "無駄、ムダぁ！"
+"achievement.sculptor.common1.goal" : "仲間以外のプレイヤーが偶像にキルを試みる。"
+
+"achievement.sculptor.common2.title" : "イドラ・デウス"
+"achievement.sculptor.common2.goal" : "通算で20体の偶像を生成する。"
+
+"achievement.sculptor.common3.title" : "傀儡の惑星"
+"achievement.sculptor.common3.goal" : "出現している偶像の数が生存者数を上回る。"
+"achievement.sculptor.common3.splitted.2" : "惑星"
+
+"achievement.sculptor.challenge.title" : "罪の憑坐"
+"achievement.sculptor.challenge.goal" : "生成した偶像のサンプルプレイヤーが生成直後の会議で追放される。"
+"achievement.sculptor.challenge.cond" : "自分自身、および仲間を除く"
+"achievement.sculptor.challenge.splitted.0" : "罪の"
+"achievement.sculptor.challenge.splitted.2" : "憑坐"

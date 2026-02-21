@@ -1,0 +1,27 @@
+# Assignable
+
+"role.evilGuesser.name" : "Evil Guesser"
+"role.evilGuesser.short" : "G"
+"role.evilGuesser.blurb" : "Guess and Shoot"
+"role.evilGuesser.hint" : "Guess abilities"
+
+# Document
+
+"role.evilGuesser.doc" : "An impostor who can kill players by guessing their abilities during meetings.<br>If you guess incorrectly, you will die instead."
+"role.evilGuesser.tips" : "・If there are multiple abilities that can be used during a meeting, right-click the ability icon to switch between abilities."
+
+# Options
+
+"options.role.evilGuesser.detail" : "Guesser can shoot players in the meeting by guessing the role.<br>If the guess is wrong, guesser dies instead."
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+
+# Titles
+

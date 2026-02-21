@@ -156,8 +156,8 @@ internal class Oracle : DefinedSingleAbilityRoleTemplate<Oracle.Ability>, Define
     static private readonly FloatConfiguration OracleDurationOption = NebulaAPI.Configurations.Configuration("options.role.oracle.oracleDuration", (float[])[0f,0.5f,1f,1.5f,2f,2.5f,3f,3.5f,4f,5f,6f,7f,8f,9f,10f], 2f, FloatConfigurationDecorator.Second);
     static private readonly IntegerConfiguration MaxOracleOption = NebulaAPI.Configurations.Configuration("options.role.oracle.maxOracle", (0, 10, 1), 5, null, num => num == 0 ? Language.Translate("options.noLimit") : num.ToString());
     static private readonly IntegerConfiguration NumOfCandidatesOption = NebulaAPI.Configurations.Configuration("options.role.oracle.numOfCandidates", (1, 6), 6);
-    static internal readonly BoolConfiguration DieOnDividingOpportunistOption = NebulaAPI.Configurations.Configuration("options.role.oracle.dieOnDividingOpportunist", true);
-    static internal readonly BoolConfiguration DieOnDividingOracleOption = NebulaAPI.Configurations.Configuration("options.role.oracle.dieOnDividingOracle", true);
+    static internal readonly BoolConfiguration DieOnDividingOpportunistOption = NebulaAPI.Configurations.Configuration("options.role.oracle.dieOnDiviningOpportunist", true);
+    static internal readonly BoolConfiguration DieOnDividingOracleOption = NebulaAPI.Configurations.Configuration("options.role.oracle.dieOnDiviningOracle", true);
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0), arguments.Get(1, -1), arguments.Skip(2).ToArray());
     AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.CanLoadToMadmate;

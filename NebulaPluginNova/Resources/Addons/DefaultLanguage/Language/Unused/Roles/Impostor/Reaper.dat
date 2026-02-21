@@ -1,0 +1,39 @@
+# Assignable
+
+"role.reaper.name" : "Reaper"
+"role.reaper.short" : "Re"
+"role.reaper.blurb" : "Kill and Deceive the Crewmates"
+
+# Document
+
+"role.reaper.doc" : "死体を運べるインポスターです。<var>%VENT%</var>"
+"role.reaper.doc.vent" : "すべてのベントが繋がっていて、死体を掴んだまま大移動できます。"
+"role.reaper.doc.vent.cannotEnter" : "また、すべてのベントが繋がっています。"
+"role.reaper.ability.title" : "固有能力 "死神がやってくる""
+"role.reaper.ability.main" : "そう、前触れなく、あなたのすぐ後ろに。"
+"role.reaper.ability.drag" : "<title>掴む/離す</title>死体を掴んで運べます。"
+"role.reaper.ability.drag.cannotEnter" : "<title>掴む/離す</title>死体を掴んで運べます。<br><var>死体を掴んでいる間はベントを使用できません。</var>"
+
+# Options
+
+"options.role.reaper.detail" : "Reaper can drag dead bodies."
+"options.role.reaper.useVentWhileHoldingDeadbody" : "Use Vent While Holding Deadbody"
+"options.role.reaper.connectAllVents" : "Connect All Vents"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.reaper.ventWithDeadBody" : "Num of Using Vents With Corpses"
+
+# Titles
+
+"achievement.reaper.common1.title" : "船中引き回し"
+"achievement.reaper.common1.goal" : "死体を掴み、ベントに入る。"
+
+"achievement.reaper.challenge.title" : "死神隠し"
+"achievement.reaper.challenge.goal" : "5人の死体を通報されないまま闇に葬る。"

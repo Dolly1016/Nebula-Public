@@ -1,0 +1,31 @@
+# Assignable
+
+"role.poltergeist.name" : "Poltergeist"
+"role.poltergeist.blurb" : "I Am Here"
+"role.poltergeist.short" : "P"
+
+# Document
+
+"role.poltergeist.doc" : "Can move corpses as if attracting them."
+
+# Options
+
+"options.role.poltergeist.detail" : "Poltergeists can draw corpses close to them."
+"options.role.poltergeist.poltergeistCoolDown" : "Poltergeist Cooldown"
+
+# Game
+
+
+# UI
+
+"button.label.poltergeist" : "poltergeist"
+
+# Stats
+
+"stats.poltergeist.poltergeist" : "Num of Poltergeist"
+
+# Titles
+
+"achievement.poltergeist.common1.title" : "Ghost's Caprice"
+"achievement.poltergeist.common1.goal" : "Draw a corpse close."
+"achievement.poltergeist.common1.splitted.2" : "Caprice"

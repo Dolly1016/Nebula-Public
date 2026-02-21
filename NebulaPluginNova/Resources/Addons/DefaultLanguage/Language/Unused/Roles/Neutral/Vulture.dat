@@ -1,0 +1,53 @@
+# Assignable
+
+"role.vulture.name" : "Vulture"
+"role.vulture.short" : "V"
+"role.vulture.blurb" : "Eat Corpses to Win"
+
+# Document
+
+"role.vulture.doc" : "死体を捕食する第三陣営です。"
+"role.vulture.winCond" : "死体を<var>%NUM%</var>体捕食する。"
+"role.vulture.ability.title" : "固有能力 "屍の捕食者""
+"role.vulture.ability.main" : ""
+"role.vulture.ability.eat" : "<title>捕食</title>死体を食べます。"
+
+# Options
+
+"options.role.vulture.detail" : "Vulture eats dead bodies to win.<br>Crewmates must report before the corpse is eaten."
+"options.role.vulture.eatCoolDown" : "Eat Cooldown"
+"options.role.vulture.numOfTheEatenToWin" : "# the Eaten to Win"
+
+# Game
+
+"gameAction.vulture.eat" : "死体捕食"
+
+# UI
+
+"button.label.eat" : "eat"
+
+# Game Statictics
+
+"statistics.events.eat" : "Eat"
+
+# Stats
+
+"stats.vulture.eaten" : "Num of Eaten Corpses"
+
+# Titles
+
+"achievement.vulture.common1.title" : "捕食者"
+"achievement.vulture.common1.goal" : "死体を1つ捕食する。"
+
+"achievement.vulture.challenge.title" : "不自然な平穏"
+"achievement.vulture.challenge.goal" : "死体がレポートされること無く勝利する。"
+
+# Team
+
+"teams.vulture" : "Vulture"
+"end.vulture" : "Vulture Wins%EXTRA%"
+
+# Document
+
+"document.tip.winCond.vulture.title" : "Special Trigger"
+"document.tip.winCond.vulture" : "The vulture wins when vulture captures the specified number of corpses."

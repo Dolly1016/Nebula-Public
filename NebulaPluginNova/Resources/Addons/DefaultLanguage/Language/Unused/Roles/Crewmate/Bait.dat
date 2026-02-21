@@ -1,0 +1,47 @@
+# Assignable
+
+"role.bait.name" : "Bait"
+"role.bait.short" : "B"
+"role.bait.blurb" : "Bait Your Enemies"
+
+# Document
+
+"role.bait.doc" : "キルされると、キラーに自身の死体を通報させるクルーメイトです。"
+
+# Options
+
+"options.role.bait.detail" : "Your murderer reports your body immediately."
+"options.role.bait.showKillFlash" : "Show Kill Flash"
+"options.role.bait.showKillFlash.detail" : "オンに設定すると、キラーがベイトをキルしたとき、キラーの画面で水色のフラッシュが光ります。"
+"options.role.bait.reportDelay" : "Report Delay"
+"options.role.bait.reportDelay.detail" : "通報までに遅延を設けると、キルとレポートの時間差によるベイトレポートの判断が難しくなります。<br>シアやサイキック、ドクターがいるゲームで特に有効です。"
+"options.role.bait.reportDelayDispersion" : "Report Delay Dispersion"
+"options.role.bait.reportDelayDispersion.detail" : "通報までの遅延にばらつきを設けると、キルとレポートの時間差によるベイトレポートの判断がより難しくなります。"
+"options.role.bait.canSeeVentFlash" : "Can See Vent Flash"
+"options.role.bait.canSeeVentFlash.detail" : "誰かがベントを使用するとベイト目線でフラッシュが光ります。"
+
+# Game
+
+# UI
+
+# Game Statictics
+
+"statistics.events.baitReport" : "Bait Report"
+
+# Stats
+
+"stats.bait.bait" : "Num of Bait Report as Bait"
+"stats.bait.killer" : "Num of Bait Report as Killer"
+
+# Titles
+
+"achievement.bait.common1.title" : "計画通り"
+"achievement.bait.common1.goal" : "ベイトレポートを発動させる。"
+
+"achievement.bait.another1.title" : "策士策に溺れる"
+"achievement.bait.another1.goal" : "追放され、死亡する。"
+"achievement.bait.another1.splitted.1" : "策に"
+
+"achievement.bait.challenge.title" : "命懸けの計略"
+"achievement.bait.challenge.goal" : "自身をベイトレポートしたプレイヤーが会議で追放される。"
+"achievement.bait.challenge.splitted.0" : "命懸けの"

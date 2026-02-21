@@ -1,0 +1,67 @@
+# Assignable
+
+"role.cannon.name" : "Cannon"
+"role.cannon.short" : "C"
+"role.cannon.blurb" : "Blow It Away!"
+"role.cannon.hint" : "プレイヤーをぶっ飛ばそう！"
+
+# Document
+
+"role.cannon.doc" : "周囲のプレイヤーをぶっ飛ばす<b>空気砲</b>をもつインポスターです。"
+"role.cannon.ability.title" : "固有能力 "空気砲""
+"role.cannon.ability.main" : "着弾点をマークし、専用のミニマップから空気砲を要請します。"
+"role.cannon.ability.mark" : "<title>マーク</title>その場に空気砲を撃ちこむ着弾点をマークします。<br>マークは他プレイヤーから視認されません。"
+"role.cannon.ability.cannon" : "<title>空気砲</title>専用のマップを開き、着弾点を指定して空気砲を撃ちます。"
+
+# Options
+
+"options.role.cannon.detail" : "Canon's air cannon blows away surrounding players."
+"options.role.cannon.markCooldown" : "Mark Cooldown"
+"options.role.cannon.numOfMarks" : "# Marks Can Be Placed At The Same Time"
+"options.role.cannon.cannonCooldown" : "Cannon Cooldown"
+"options.role.cannon.cannonPower" : "Cannon Power"
+"options.role.cannon.cannonPower.detail" : "この値を大きくすると、空気砲がプレイヤーを吹き飛ばす威力が強まります。"
+"options.role.cannon.cannonPowerAttenuation" : "Cannon Power Attenuation"
+"options.role.cannon.cannonPowerAttenuation.detail" : "この値を大きくすると、空気砲の着弾点から離れたプレイヤーを<br>吹き飛ばしづらくなります。"
+"options.role.cannon.canBlowPlayerUsingConsole" : "Can Blow Player Using Console"
+
+# Game
+
+"gameAction.cannon.placement" : "マーク設置"
+
+# UI
+
+"button.label.mark" : "mark"
+"button.label.cannon" : "cannon"
+"ui.action.cannon.mark" : "Mark where the air cannon will fire."
+"ui.action.cannon.cannon" : "Open the special map to fire the air cannon."
+
+# Stats
+
+"stats.cannon.fire" : "Num of Cannon Firing"
+"stats.cannon.players" : "Num of the Blown by Cannon"
+
+# Titles
+
+"achievement.cannon.common3.title" : "ぶっとべ！"
+"achievement.cannon.common3.goal" : "空気砲を撃つ。"
+
+"achievement.cannon.common1.title" : "上からくるぞ！"
+"achievement.cannon.common1.goal" : "飛ばされた先で出会ったプレイヤーを即座にキルする。"
+"achievement.cannon.common1.cond" : "カノン自身が吹っ飛ぶこと+着地からキルまでを3秒以内にこなすこと"
+"achievement.cannon.common1.splitted.0" : "上から"
+
+"achievement.cannon.common2.title" : "散ッ！"
+"achievement.cannon.common2.goal" : "インポスターもろとも吹っ飛ばす。"
+"achievement.cannon.common2.cond" : "5人以上吹っ飛ばすこと+自身除くインポスターを1人以上吹っ飛ばすこと"
+
+"achievement.cannon.another1.title" : "だいだらぼっち警報"
+"achievement.cannon.another1.goal" : "誰も吹っ飛ばない空気砲を撃つ。"
+"achievement.cannon.another1.splitted.1" : "ぼっち"
+
+"achievement.cannon.another2.title" : "出直してきます"
+"achievement.cannon.another2.goal" : "タスクを中断させられたうえで、10m以上吹っ飛ばされる。"
+
+"achievement.cannon.challenge.title" : "崩潰を告ぐ号砲"
+"achievement.cannon.challenge.goal" : "吹っ飛ばされたプレイヤー全員が、そのターン中に別々の死因で死亡する。"
+"achievement.cannon.challenge.cond" : "3人以上吹っ飛ばすこと+直後の会議による追放・追加追放までが対象"

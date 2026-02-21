@@ -1,0 +1,35 @@
+# Header
+
+"options.task" : "Task Options"
+"options.task.detail" : "About crewmate tasks"
+
+# Groups
+
+"options.task.group.wiring" : "Wiring Task Settings"
+"options.task.group.noGuide" : "No Guide Task Settings"
+
+# Options
+
+"options.map.randomizedWiring" : "Randomized Wiring"
+"options.map.stepsOfWiringGame" : "Steps Of Wiring Game"
+"options.task.fakeScan" : "Fake Scan"
+"options.task.fakeScan.detail" : "タスクを持たないプレイヤーもスキャン台の上に移動できるようになります。"
+
+"options.task.noGuide.wiring" : "Fix Wiring Task"
+"options.task.noGuide.wiring.detail" : "オンにすると配線タスクの派生先(=2箇所目以降)の<br>場所が分からなくなります。"
+"options.task.noGuide.upload" : "Upload Data Task"
+"options.task.noGuide.upload.detail" : "オンにするとダウンロードタスク(=1箇所目)の<br>場所が分からなくなります。"
+"options.task.noGuide.divertPower" : "Divert Power Task"
+"options.task.noGuide.divertPower.detail" : "オンにすると配電先のタスクの<br>場所が分からなくなります。"
+"options.task.noGuide.garbage" : "Empty Garbage Task"
+"options.task.noGuide.garbage.detail" : "オンにするとゴミの回収タスク(=1箇所目)の<br>場所が分からなくなります。"
+"options.task.noGuide.sortRecords" : "Sort Records Task"
+"options.task.noGuide.sortRecords.detail" : "オンにすると資料の収納先が分からなくなります。"
+"options.task.noGuide.marshmallow" : "Roast Marshmallow Task"
+"options.task.noGuide.marshmallow.detail" : "オンにすると棒を集めるタスクの<br>場所が分からなくなります。"
+"options.task.noGuide.helpCritter" : "Help Critter Task"
+"options.task.noGuide.helpCritter.detail" : "オンにすると卵を回収するタスクの<br>場所が分からなくなります。"
+"options.task.noGuide.replaceParts" : "Replace Parts Task"
+"options.task.noGuide.replaceParts.detail" : "オンにするとパーツを回収するタスクの<br>場所が分からなくなります。"
+"options.task.noGuide.collectSamples" : "Collect Samples Task"
+"options.task.noGuide.collectSamples.detail" : "オンにするとサンプルを回収するタスクの<br>場所が分からなくなります。"

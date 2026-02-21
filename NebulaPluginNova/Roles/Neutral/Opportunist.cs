@@ -35,6 +35,8 @@ internal class Opportunist : DefinedRoleTemplate, HasCitation, DefinedRole
     static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.NeutralVentConfiguration("role.opportunist.vent", true);
 
     static public Opportunist MyRole = new Opportunist();
+
+    static private GameStatsEntry StatsTask = NebulaAPI.CreateStatsEntry("stats.opportunist.task", GameStatsCategory.Roles, MyRole);
     static public RoleFallback GenerateFallback(int numOfTasks) => new(MyRole, [numOfTasks]);
     public record OpportunistFallbackOption(GroupConfiguration Group, BoolConfiguration Switch, IntegerConfiguration Tasks);
     static public OpportunistFallbackOption FallbackConfiguration(Virial.Color? color, string? translationKey, string optionsPrefix, bool defaultSwitch = false, int defaultTasks = 2, int minTasks = 0, int maxTasks = 8)
@@ -101,6 +103,7 @@ internal class Opportunist : DefinedRoleTemplate, HasCitation, DefinedRole
                     task.IsActive = true;
                     if (task.IsCompleted)
                     {
+                        StatsTask.Progress();
                         HudManager.Instance.ShowTaskComplete();
                         MyPlayer.Tasks.Custom(myTasks.Count(t => t.IsCompleted), NumOfTasks, false);
                     }
@@ -125,6 +128,18 @@ internal class Opportunist : DefinedRoleTemplate, HasCitation, DefinedRole
                 ev.ExtraWinMask.Add(NebulaGameEnd.ExtraOpportunistWin);
                 ev.IsExtraWin = true;
             }
+        }
+
+        [Local]
+        void OnGameEnd(GameEndEvent ev)
+        {
+            if (MyPlayer.IsAlive && ev.EndState.Winners.Test(MyPlayer)) {
+                if (ev.EndState.ExtraWins.Test(NebulaGameEnd.ExtraOpportunistWin)) new StaticAchievementToken("opportunist.common1");
+                if (GamePlayer.AllPlayers.All(p => ev.EndState.Winners.Test(p) || p.AmOwner)) new StaticAchievementToken("opportunist.common2");
+                if (GamePlayer.AllPlayers.Any(p => p.IsAlive && !ev.EndState.Winners.Test(p))) new StaticAchievementToken("opportunist.challenge");
+            }
+            if (MyPlayer.IsAlive && !ev.EndState.Winners.Test(MyPlayer)) new StaticAchievementToken("opportunist.another1");
+            if (MyPlayer.IsDead && (MyPlayer.DeathTime ?? 0f) + 2f > NebulaGameManager.Instance?.CurrentTime) new StaticAchievementToken("opportunist.another2");
         }
 
     }

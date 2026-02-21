@@ -1,0 +1,46 @@
+# Common Role Options
+
+"options.common.group.task" : "Task Settings"
+"options.common.task" : "Task"
+"options.common.task.none" : "Off"
+"options.common.task.simple" : "On"
+"options.common.task.advanced" : "Advanced"
+"options.common.task.force" : "Task Settings"
+"options.common.task.force.simple" : "Simple"
+"options.common.task.force.advanced" : "Advanced"
+"options.common.task.num" : "# Tasks"
+"options.common.task.numShort" : "# Short Tasks"
+"options.common.task.numLong" : "# Long Tasks"
+"options.common.task.numCommon" : "# Common Tasks"
+
+# Role Filter
+
+"roleFilter.none" : "None"
+"roleFilter.separator" : ", "
+"roleFilter.categorySeparator" : "; "
+"roleFilter.exceptPattern.all" : "All roles except %ROLES%"
+"roleFilter.exceptPattern.crewmate" : "Crewmates except %ROLES%"
+"roleFilter.exceptPattern.impostor" : "Impostors except %ROLES%"
+"roleFilter.exceptPattern.neutral" : "Neutral except %ROLES%"
+"roleFilter.allPattern.all" : "All"
+"roleFilter.allPattern.crewmate" : "All Crewmates"
+"roleFilter.allPattern.impostor" : "All Impostors"
+"roleFilter.allPattern.neutral" : "All Neutral"
+"roleFilter.shortcut.all" : "All"
+"roleFilter.shortcut.allImpostor" : "Impostor"
+"roleFilter.shortcut.allNeutral" : "Neutral"
+"roleFilter.shortcut.allCrewmate" : "Crewmates"
+"roleFilter.preview.excludes" : "Excepting %ROLES%"
+"roleFilter.preview.etc" : "%ROLES% etc."
+"roleFilter.showOnlySpawnable" : "Show only spawnable roles"
+
+"options.role.modifierFilter" : "Modifiers Filter"
+"options.role.ghostRoleFilter" : "Ghost Filter"
+
+# Tag
+
+"configuration.tag.chaotic" : "This role is recommended for games<br>that use many roles."
+"configuration.tag.beginner" : "This role is recommended for beginners too."
+"configuration.tag.funny" : "This role has unique abilities."
+"configuration.tag.difficult" : "This role requires difficult operations."
+"configuration.tag.superNewRoles" : "This is a role in SNR collab."

@@ -1,0 +1,33 @@
+# Assignable
+
+"role.ember.name" : "Ember"
+"role.ember.short" : "E"
+"role.ember.blurb" : "The Demise"
+
+# Document
+
+"role.ember.doc" : "アヴェンジャーとの対決に敗北し、ダムドの呪詛によって燃え尽きた残骸。<br>ここに希望はない。"
+
+# Options
+
+"options.role.ember.detail" : "Ember was defeated in a decisive battle with the Avengers<br>and burned by the curse of the Damned."
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.ember.another1.title" : "有為転変"
+"achievement.ember.another1.goal" : "アヴェンジャーとの対決に敗れ、<br>自身のダムドの呪詛によって死亡して敗北する。"
+"achievement.ember.another1.flavor" : ""―それが君の選択だ。""
+
+"achievement.ember.another2.title" : "海は凪ぐ"
+"achievement.ember.another2.goal" : "アヴェンジャーとの対決に敗れ、<br>自身のダムドの呪詛によって死亡したうえで勝利する。"
+"achievement.ember.another2.flavor" : ""どんな嵐であろうとも、きっと大丈夫。""
+"achievement.ember.another2.splitted.0" : "海は"

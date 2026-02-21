@@ -321,8 +321,7 @@ public class DevStudio : MonoBehaviour
         //Contents of add-on
         (string translationKey,Func<DevAddon,(IMetaWidgetOld widget, Action? postAction, Func<bool>? confirm)>)[] edtiors = {
             ("devStudio.ui.addon.cosmetics",ShowCosmeticsScreen),
-            ("devStudio.ui.addon.document",ShowDocumentScreen),
-            ("devStudio.ui.addon.language",ShowLanguageScreen)
+            ("devStudio.ui.addon.document",ShowDocumentScreen)
         };
 
         widget.Append(new MetaWidgetOld.VerticalMargin(0.21f));
@@ -340,111 +339,6 @@ public class DevStudio : MonoBehaviour
         );
     }
 
-    //Languages
-    private (IMetaWidgetOld widget, Action? postAction, Func<bool>? confirm) ShowLanguageScreen(DevAddon addon)
-    {
-        Directory.CreateDirectory(addon.FolderPath + Path.DirectorySeparatorChar + "Language");
-
-        List<GUIWidget> widgets = new();
-        widgets.Add(GUI.Instance.LocalizedText(Virial.Media.GUIAlignment.Left, GUI.Instance.GetAttribute(AttributeAsset.OblongHeader), "devStudio.ui.addon.document"));
-        widgets.Add(GUI.Instance.Margin(new(null, 0.2f)));
-
-        void OpenDetailWindow(uint languageId)
-        {
-            string lName = Language.GetLanguage(languageId);
-            string fPath = "Language"+ Path.DirectorySeparatorChar + lName + ".dat";
-            bool exists = addon.ExistsFile(fPath);
-
-            var window = MetaScreen.GenerateWindow(new(2.2f, 2.4f), transform, Vector3.zero, true, true);
-
-            var holder = GUI.API.VerticalHolder(Virial.Media.GUIAlignment.Center,
-                GUI.Instance.RawText(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.CenteredBold), Language.GetLanguageShownString(languageId)),
-                GUI.API.VerticalMargin(0.22f),
-                exists ?
-                GUI.API.LocalizedButton(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.StandardMediumMasked), "devStudio.ui.language.editFile", _ => {
-                    System.Diagnostics.ProcessStartInfo processStartInfo = new();
-                    processStartInfo.FileName = addon.FolderPath + Path.DirectorySeparatorChar + fPath;
-                    processStartInfo.CreateNoWindow = true;
-                    processStartInfo.UseShellExecute = true;
-                    System.Diagnostics.Process.Start(processStartInfo);
-                    window.CloseScreen();
-                    ReopenScreen(true);
-                }) : 
-                GUI.API.LocalizedButton(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.StandardMediumMasked), "devStudio.ui.language.newFile", _ => {
-                    if(NebulaPlugin.GuardVanillaLangData)
-                        addon.WriteFile(fPath, "");
-                    else
-                        addon.WriteFile(fPath, new StreamReader(Language.OpenDefaultLangStream()!).ReadToEnd());
-                    window.CloseScreen();
-                    ReopenScreen(true);
-
-                    MetaUI.ShowConfirmDialog(transform, GUI.API.LocalizedTextComponent("devStudio.ui.language.newFile.confirm"));
-                }),
-                (!exists || NebulaPlugin.GuardVanillaLangData) ? null : GUI.API.LocalizedButton(Virial.Media.GUIAlignment.Center, GUI.Instance.GetAttribute(AttributeAsset.StandardMediumMasked), "devStudio.ui.language.addMissing", _ => {
-                    int num = 0;
-                    string newText = "";
-                    var myLang = new Language();
-                    myLang.Deserialize((addon as IResourceAllocator).GetResource(Virial.Compat.IReadOnlyArray<string>.Empty(), fPath)?.AsStream());
-                    using var defaultStream = Language.OpenDefaultLangStream();
-                    HashSet<string> keys = new(myLang.translationMap.Keys);
-                    Language.Deserialize(defaultStream, (key, text) => {
-                        if (myLang.TryGetText(key, out var myText))
-                            newText += "\"" + key + "\" : \"" + myText + "\"\n";
-                        else
-                        {
-                            newText += "\"" + key + "\" : \"" + text + "\" @Added\n";
-                            num++;
-                        }
-
-                        var detail = Language.FindFromDefault(key + ".detail");
-                        if(detail == null && myLang.TryGetText(key + ".detail", out var myDetailText)) newText += "\"" + key + ".detail\" : \"" + myDetailText + "\"\n";
-
-                        keys.Remove(key);
-                        keys.Remove(key + ".detail");
-                    }, comment => newText += comment + "\n");
-
-
-                    if (keys.Count > 0)
-                    {
-                        newText += "\n# Others\n\n";
-                        foreach (var key in keys) newText += "\"" + key + "\" : \"" + myLang.translationMap[key] + "\"\n";
-                    }
-
-                    addon.WriteFile(fPath, newText);
-
-                    window.CloseScreen();
-                    ReopenScreen(true);
-                    
-                    MetaUI.ShowConfirmDialog(transform, GUI.Instance.RawTextComponent(Language.Translate("devStudio.ui.language.addMissing.confirm").Replace("%NUM%",num.ToString())));
-                }),
-                !exists ? null : GUI.Instance.Button(Virial.Media.GUIAlignment.Center, GUI.Instance.GetAttribute(AttributeAsset.StandardMediumMasked), GUI.API.TextComponent(Virial.Color.Red, "devStudio.ui.language.delete"), _ => {
-                    addon.DeleteFile(fPath);
-                    window.CloseScreen();
-                    ReopenScreen(true);
-
-                    MetaUI.ShowConfirmDialog(transform, GUI.API.LocalizedTextComponent("devStudio.ui.language.delete.confirm"));
-                }, color : Virial.Color.Red)
-            );
-
-            window.SetWidget(holder, new Vector2(0.5f,1f), out _);
-
-        }
-        
-        GUIWidget[] scroller = new GUIWidget[]{ 
-            GUI.Instance.Margin(new(2.5f,null)),
-            GUI.Instance.ScrollView(Virial.Media.GUIAlignment.Center, new Virial.Compat.Size(4.2f, 4.2f), "devStudioLang", GUI.Instance.VerticalHolder(Virial.Media.GUIAlignment.Center, Language.AllLanguageId().Select(l =>
-            {
-                string lName = Language.GetLanguage(l);
-                bool exists = addon.ExistsFile("Language/" + lName + ".dat");
-
-                return GUI.API.RawButton(Virial.Media.GUIAlignment.Center, GUI.Instance.GetAttribute(AttributeParams.StandardBoldNonFlexible),
-                    Language.GetLanguageShownString(l), _ => OpenDetailWindow(l), color: (exists ? Virial.Color.White : new(0.5f, 0.5f, 0.5f, 1f)));
-            })), out var artifact) };
-
-        widgets.Add(GUI.Instance.HorizontalHolder(Virial.Media.GUIAlignment.Left, scroller));
-
-        return (new WrappedWidget(GUI.Instance.VerticalHolder(Virial.Media.GUIAlignment.Center, widgets)), null, null);
-    }
 
     //Document
     static SerializableDocument? migrated = null;
