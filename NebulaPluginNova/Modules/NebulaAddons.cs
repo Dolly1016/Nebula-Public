@@ -76,6 +76,34 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
         return null;
     }
 
+    static private int ComputeAddonHash(Stream zipStream)
+    {
+        using var archive = new ZipArchive(zipStream, ZipArchiveMode.Read);
+
+        var validEntries = archive.Entries
+        .Where(entry => !entry.FullName.StartsWith("Language/", StringComparison.OrdinalIgnoreCase))
+        .OrderBy(entry => entry.FullName, StringComparer.Ordinal)
+        .ToList();
+
+        using var md5 = MD5.Create();
+        using var combinedStream = new MemoryStream();
+
+        foreach (var entry in validEntries)
+        {
+           byte[] nameBytes = Encoding.UTF8.GetBytes(entry.FullName);
+           combinedStream.Write(BitConverter.GetBytes(nameBytes.Length), 0, 4);
+           combinedStream.Write(nameBytes, 0, nameBytes.Length);
+
+           using var entryStream = entry.Open();
+           entryStream.CopyTo(combinedStream);
+        }
+
+           combinedStream.Position = 0;
+           byte[] hashBytes = md5.ComputeHash(combinedStream);
+           string hashString = BitConverter.ToString(hashBytes);
+           return hashString.ComputeConstantHash();
+    }
+
     static private string AddonsDirectoryPath => PathHelpers.GameRootPath + Path.DirectorySeparatorChar + "Addons";
     static private IEnumerable<string> ExternalAddons()
     {
@@ -128,7 +156,7 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
                 int hash;
                 using (var file = File.Open(path, FileMode.Open))
                 {
-                    hash = System.BitConverter.ToString(md5.ComputeHash(file)).ComputeConstantHash();
+                    hash = ComputeAddonHash(file);
                 }
 
                 //メタ情報を付加
@@ -239,7 +267,8 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
 
                 var marketplaceMeta = zip.GetEntry(".marketplace");
                 if (marketplaceMeta == null)
-                    addon.HandshakeHash = addon.HandshakeHash = System.BitConverter.ToString(md5.ComputeHash(File.OpenRead(file))).ComputeConstantHash();
+                    using var fileStream = File.OpenRead(file);
+                    addon.HandshakeHash = ComputeAddonHash(fileStream);
                 else
                 {
                     using var mmStream = marketplaceMeta.Open();
