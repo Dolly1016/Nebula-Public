@@ -176,7 +176,7 @@ public interface ModAbilityButton : ILifespan, IHudContent
 
     ModAbilityButton SetAsMouseClickButton();
 
-    ModAbilityButton ShowUsesIcon(int variation, string text);
+    ModAbilityButton ShowUsesIcon(string text);
     ModAbilityButton UpdateUsesIcon(string text);
     ModAbilityButton HideUsesIcon();
     ModAbilityButton Break();
