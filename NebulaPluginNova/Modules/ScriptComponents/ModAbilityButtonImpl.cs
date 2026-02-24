@@ -396,9 +396,9 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
         return this;
     }
 
-    internal ModAbilityButtonImpl SetColorLabel(UnityEngine.Color color)
+    internal ModAbilityButtonImpl SetColorLabel(Virial.Color color)
     {
-        if (VanillaButton != null) VanillaButton.buttonLabelText.SetOutlineColor(color);
+        if (VanillaButton != null) VanillaButton.buttonLabelText.SetOutlineColor(color.ToUnityColor());
         return this;
     }
 
