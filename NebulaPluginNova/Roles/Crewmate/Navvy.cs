@@ -102,7 +102,7 @@ internal class Navvy : DefinedSingleAbilityRoleTemplate<Navvy.Ability>, DefinedR
                     });
                     if (min < 1f) currentTargetDoor = nearbyDoor;
                 };
-                sealButton.ShowUsesIcon(3, leftTapes.ToString());
+                sealButton.ShowUsesIcon(leftTapes.ToString(), MyRole.RoleColor);
                 sealButton.OnClick = (button) =>
                 {
                     SpriteRenderer sealRenderer = null!;
