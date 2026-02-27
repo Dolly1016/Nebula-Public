@@ -119,7 +119,7 @@ public class Agent : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                     };
                 }
 
-                this.BindGameObject(HudManager.Instance.ImpostorVentButton.ShowUsesIcon(3, out UsesText).gameObject);
+                this.BindGameObject(HudManager.Instance.ImpostorVentButton.ShowUsesIcon(out UsesText, MyRole.RoleColor).gameObject);
                 UsesText.text = leftVent.ToString();
             }
         }
