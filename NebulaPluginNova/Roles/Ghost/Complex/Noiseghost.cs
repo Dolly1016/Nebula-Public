@@ -42,7 +42,7 @@ public class Noiseghost : DefinedGhostRoleTemplate, DefinedGhostRole
                 var noiseButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, NoiseCooldownOption,
                     "noise", buttonSprite, null, _ => left > 0, true);
                 
-                noiseButton.ShowUsesIcon(3, left.ToString());
+                noiseButton.ShowUsesIcon(left.ToString(), MyRole.RoleColor);
                 noiseButton.OnClick = (button) =>
                 {
                     new StaticAchievementToken("noiseghost.common1");
