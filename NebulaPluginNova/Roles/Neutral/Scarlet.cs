@@ -171,13 +171,12 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                 flirtButton.SetSprite(flirtButtonSprite.GetSprite());
                 flirtButton.Availability = (button) => playerTracker.CurrentTarget != null && MyPlayer.CanMove;
                 flirtButton.Visibility = (button) => !MyPlayer.IsDead && LeftFlirts > 0;
-                var flirtIcon = flirtButton.ShowUsesIcon(4);
-                flirtIcon.text = LeftFlirts.ToString();
+                flirtButton.ShowUsesIcon(LeftFlirts.ToString(), MyRole.RoleColor);
                 flirtButton.OnClick = (button) =>
                 {
                     playerTracker.CurrentTarget?.RealPlayer.AddModifier(ScarletLover.MyRole, [FlirtatiousId, 0]);
                     LeftFlirts--;
-                    flirtIcon.text = LeftFlirts.ToString();
+                    flirtButton.UpdateUsesIcon(LeftFlirts.ToString());
                     flirtButton.StartCoolDown();
                     favoriteButton.StartCoolDown();
                     StatsKept.Progress();
@@ -192,13 +191,12 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                 favoriteButton.SetSprite(favoriteButtonSprite.GetSprite());
                 favoriteButton.Availability = (button) => playerTracker.CurrentTarget != null && MyPlayer.CanMove;
                 favoriteButton.Visibility = (button) => !MyPlayer.IsDead && LeftFavorite > 0;
-                var favoriteIcon = favoriteButton.ShowUsesIcon(4);
-                favoriteIcon.text = LeftFavorite.ToString();
+                favoriteIcon.ShowUsesIcon(LeftFavorite.ToString(), MyRole.RoleColor);
                 favoriteButton.OnClick = (button) =>
                 {
                     playerTracker.CurrentTarget?.RealPlayer.AddModifier(ScarletLover.MyRole, [FlirtatiousId, 1]);
                     LeftFavorite--;
-                    favoriteIcon.text = LeftFavorite.ToString();
+                    favoriteIcon.UpdateUsesIcon(LeftFavorite.ToString());
                     flirtButton.StartCoolDown();
                     favoriteButton.StartCoolDown();
 
