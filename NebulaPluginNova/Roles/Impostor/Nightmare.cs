@@ -152,7 +152,7 @@ internal class Nightmare : DefinedSingleAbilityRoleTemplate<Nightmare.Ability>, 
                 var placeButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, "nightmare.place",
                     placeCooldownOption, "place", placeButtonSprite, visibility: _ => disposableNightSeedOption || placed.Count < numOfNightSeedOption)
                     .SetAsUsurpableButton(this);
-                if (!disposableNightSeedOption) placeButton.ShowUsesIcon(0, numOfNightSeedOption.GetValue().ToString());
+                if (!disposableNightSeedOption) placeButton.ShowUsesIcon(numOfNightSeedOption.GetValue().ToString(), MyRole.RoleColor);
                 placeButton.OnClick = (button) => {
                     NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, GameActionTypes.NightmarePlacementAction);
                     placed.Add(new NightmareSeedInfo(MyPlayer.Position + new Virial.Compat.Vector2(0f, -0.1f)));
