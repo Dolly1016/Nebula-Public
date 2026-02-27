@@ -46,7 +46,7 @@ public class Lumine : DefinedGhostRoleTemplate, DefinedGhostRole
 
                     isUsed = true;
                 };
-                lumineButton.ShowUsesIcon(3, "1");
+                lumineButton.ShowUsesIcon("1", MyRole.RoleColor);
             }
         }
     }
