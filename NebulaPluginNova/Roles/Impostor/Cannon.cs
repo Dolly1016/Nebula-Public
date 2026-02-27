@@ -123,7 +123,7 @@ public class Cannon : DefinedSingleAbilityRoleTemplate<Cannon.Ability>, DefinedR
                     if (mapLayer) mapLayer.AddMark(mark!, () => Marks.Remove(mark!));
                     markButton.StartCoolDown();
                 };
-                markButton.ShowUsesIcon(0, " ");
+                markButton.ShowUsesIcon(" ", MyRole.RoleColor);
                 markButton.SetAsUsurpableButton(this);
                 GameOperatorManager.Instance?.Subscribe<GameUpdateEvent>(_ => markButton.UpdateUsesIcon((NumOfMarksOption - Marks.Count).ToString()), markButton);
 
