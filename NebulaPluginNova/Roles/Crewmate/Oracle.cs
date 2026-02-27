@@ -235,7 +235,7 @@ internal class Oracle : DefinedSingleAbilityRoleTemplate<Oracle.Ability>, Define
                 var oracleButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
                     OracleCooldownOption, "oracle", buttonImage, 
                     _ => playerTracker.CurrentTarget != null, _ => this.leftUses > 0);
-                if(this.leftUses < 20) oracleButton.ShowUsesIcon(3, this.leftUses.ToString());
+                if(this.leftUses < 20) oracleButton.ShowUsesIcon(this.leftUses.ToString(), MyRole.RoleColor);
                 
 
                 bool PredicateRole()
