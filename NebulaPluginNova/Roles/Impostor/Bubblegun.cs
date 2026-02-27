@@ -240,7 +240,7 @@ public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, De
 
                 equipButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.FixedAbility, "bubblegun.equip",
                     BubbleCoolDownOption.GetCooldown(MyPlayer.TeamKillCooldown), "equip", buttonSprite,
-                    null, _ => LeftUses > 0).ShowUsesIcon(0, LeftUses.ToString()).SetAsUsurpableButton(this);
+                    null, _ => LeftUses > 0).ShowUsesIcon(LeftUses.ToString(), MyRole.RoleColor).SetAsUsurpableButton(this);
                 equipButton.OnClick = (button) => {
                     button.SetLabel(MyGun == null ? "unequip" : "equip");
                     RpcEquip.Invoke((MyPlayer.PlayerId, MyGun == null));
