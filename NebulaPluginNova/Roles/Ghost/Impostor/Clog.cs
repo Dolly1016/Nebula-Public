@@ -75,7 +75,7 @@ public class Clog : DefinedGhostRoleTemplate, DefinedGhostRole
                     left--;
                     if(left > 0) ghostButton.UpdateUsesIcon(left.ToString());
                 };
-                ghostButton.ShowUsesIcon(0, left.ToString());
+                ghostButton.ShowUsesIcon(left.ToString(), MyRole.RoleColor);
             }
         }
     }
