@@ -248,7 +248,7 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignable
                     if (LeftKillingToCreateSidekick > 0)
                     {
                         lockSprite = sidekickButton.AddLockedOverlay();
-                        sidekickButton.ShowUsesIcon(3, LeftKillingToCreateSidekick.ToString());
+                        sidekickButton.ShowUsesIcon(LeftKillingToCreateSidekick.ToString(), MyRole.RoleColor);
                     }
                 }
 
@@ -290,7 +290,7 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignable
                         }
                         else if (LeftKillingToCreateSidekick > 0)
                         {
-                            sidekickButton?.ShowUsesIcon(3, LeftKillingToCreateSidekick.ToString());
+                            sidekickButton?.ShowUsesIcon(LeftKillingToCreateSidekick.ToString(), MyRole.RoleColor);
                         }
                     }
                 }, this);
