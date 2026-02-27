@@ -353,7 +353,7 @@ public class Disturber : DefinedSingleAbilityRoleTemplate<Disturber.Ability>, De
 
                 var placeButton = NebulaAPI.Modules.AbilityButton(this, alwaysShow: true)
                     .BindKey(Virial.Compat.VirtualKeyInput.Ability, "disturber.place")
-                    .SetImage(placeButtonSprite).ShowUsesIcon(0, "").SetLabel("place").SetAsUsurpableButton(this);
+                    .SetImage(placeButtonSprite).ShowUsesIcon("", MyRole.RoleColor).SetLabel("place").SetAsUsurpableButton(this);
                 placeButton.Availability = (button) => mapLayer && mapLayer.Positions.Count >= 2;
                 placeButton.Visibility = (button) => !MyPlayer.IsDead && AmongUsUtil.MapIsOpen && mapLayer && mapLayer.gameObject.active;
                 placeButton.OnClick = button => PlacePoles();
