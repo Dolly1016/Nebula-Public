@@ -1280,7 +1280,7 @@ public class Whammy : DefinedSingleAbilityRoleTemplate<Whammy.Ability>, DefinedR
                     0f, PlaceDurationOption, "balloon", buttonSprite,
                     _ => consoleTracker.CurrentTarget != null && this.leftBalloons > 0
                     ).SetAsUsurpableButton(this);
-                balloonButton.ShowUsesIcon(0, this.leftBalloons.ToString());
+                balloonButton.ShowUsesIcon(this.leftBalloons.ToString(), MyRole.RoleColor);
                 balloonButton.OnUpdate = _ => balloonButton.UpdateUsesIcon(this.leftBalloons.ToString());
                 Console? selectedConsole = null;
                 balloonButton.OnEffectStart = (button) => {
