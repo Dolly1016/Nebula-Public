@@ -89,8 +89,7 @@ public class Sheriff : DefinedSingleAbilityRoleTemplate<Sheriff.Ability>, HasCit
                 var killTracker = ObjectTrackers.ForPlayerlike(this, null, MyPlayer, ObjectTrackers.PlayerlikeKillablePredicate(MyPlayer), null, CanKillHidingPlayerOption);
                 killButton = new ModAbilityButtonImpl(isArrangedAsKillButton: MyPlayer.IsCrewmate).KeyBind(MyPlayer.IsCrewmate ? Virial.Compat.VirtualKeyInput.Kill : Virial.Compat.VirtualKeyInput.Ability).Register(this);
 
-                var leftText = killButton.ShowUsesIcon(3);
-                leftText.text = leftShots.ToString();
+                killButton.ShowUsesIcon(leftShots.ToString(), MyRole.RoleColor);
 
                 killButton.SetSprite(buttonSprite.GetSprite());
 
@@ -143,7 +142,7 @@ public class Sheriff : DefinedSingleAbilityRoleTemplate<Sheriff.Ability>, HasCit
                     }
                     button.StartCoolDown();
 
-                    leftText.text = (--leftShots).ToString();
+                    button.UpdateUsesIcon(leftShots.ToString());
                 };
                 killButton.CoolDownTimer = NebulaAPI.Modules.Timer(this, KillCoolDownOption.GetCooldown(MyPlayer.TeamKillCooldown)).SetAsKillCoolTimer();
                 killButton.CoolDownTimer.Start();
