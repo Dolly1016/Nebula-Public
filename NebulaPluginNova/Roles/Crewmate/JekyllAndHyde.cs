@@ -105,7 +105,7 @@ internal class JekyllAndHyde : DefinedRoleTemplate, DefinedRole, IAssignableDocu
                         button.StartCoolDown();
                     }, _ => !AmJekyll, _ => LeftKill > 0, _ => !AmJekyll
                     );
-                killButton.ShowUsesIcon(0, LeftKill.ToString());
+                killButton.ShowUsesIcon(LeftKill.ToString(), Nebula.Roles.Impostor.Impostor.MyRole.RoleColor);
                 NebulaAPI.CurrentGame?.KillButtonLikeHandler.Register(killButton.GetKillButtonLike());
 
                 var medicineButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
