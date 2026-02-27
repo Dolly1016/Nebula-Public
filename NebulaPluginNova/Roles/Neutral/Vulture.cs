@@ -83,7 +83,7 @@ public class Vulture : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignabl
                 var eatButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
                     EatCoolDownOption.Cooldown, "eat", buttonSprite,
                     _ => eatTracker.CurrentTarget != null);
-                eatButton.ShowUsesIcon(2, leftEaten.ToString());
+                eatButton.ShowUsesIcon(leftEaten.ToString(), MyRole.RoleColor);
                 eatButton.OnClick = (button) => {
                     NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, GameActionTypes.EatCorpseAction);
 
