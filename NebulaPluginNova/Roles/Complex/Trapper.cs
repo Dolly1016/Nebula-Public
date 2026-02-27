@@ -31,8 +31,8 @@ file static class TrapperSystem
             Trapper.PlaceCoolDownOption, Trapper.PlaceDurationOption, "place", buttonSprites[buttonVariation[0].id]!, 
             _ => leftCost >= buttonVariation[buttonIndex].cost, _ => leftCost > 0).SetAsUsurpableButton(myRole);
         placeButton.BindSubKey(Virial.Compat.VirtualKeyInput.AidAction, "trapper.switch", true);
-        int iconVariation = isEvil ? 0 : 3;
-        placeButton.ShowUsesIcon(iconVariation, leftCost.ToString());
+        Virial.Color color = isEvil ? Nebula.Roles.Complex.Trapper.MyEvilRole.RoleColor : Nebula.Roles.Complex.Trapper.MyNiceRole.RoleColor;
+        placeButton.ShowUsesIcon(leftCost.ToString(), color);
         placeButton.OnEffectStart = (button) =>
         {
             float duration = Trapper.PlaceDurationOption;
