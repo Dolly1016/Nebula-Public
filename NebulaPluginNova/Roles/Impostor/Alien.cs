@@ -88,7 +88,7 @@ public class Alien : DefinedSingleAbilityRoleTemplate<Alien.Ability>, HasCitatio
                     var invalidateButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.SecondaryAbility,
                         InvalidateCoolDownOption, "invalidate", invalidateButtonSprite,
                         _ => invalidateTracker.CurrentTarget != null, _ => LeftInvalidation > 0);
-                    invalidateButton.ShowUsesIcon(0, LeftInvalidation.ToString());
+                    invalidateButton.ShowUsesIcon(LeftInvalidation.ToString(), MyRole.RoleColor);
                     invalidateButton.OnClick = (button) =>
                     {
                         PlayerModInfo.RpcAttrModulator.Invoke((invalidateTracker.CurrentTarget!.RealPlayer.PlayerId, new AttributeModulator(PlayerAttributes.Isolation, 100000f, true, 0, canBeAware: invalidateTracker.CurrentTarget!.RealPlayer.IsImpostor), true));
