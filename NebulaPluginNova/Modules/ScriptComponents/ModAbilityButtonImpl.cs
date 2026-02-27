@@ -20,7 +20,7 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
     internal static Image VanillaKillImage => vanillaKillImage;
     public class AbilityButtonStructure
     {
-        public bool isLeftSide = false;
+        public bool isLeftSide = false; 
         public bool showAlways = false;
         public bool arrangedAsKillButton = false;
         public int priority = 0;
@@ -46,10 +46,10 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
             , () => new AbilityButtonStructure(), val =>
             {
                 var button = new ModAbilityButtonImpl(val.isLeftSide, val.arrangedAsKillButton, val.priority, val.showAlways);
-                if (val.onClick != null) button.OnClick = b => NebulaManager.Instance.StartCoroutine(val.onClick!.CoExecute([]).CoWait().HighSpeedEnumerator().WrapToIl2Cpp());
-                if (val.onSubClick != null) button.OnSubAction = b => NebulaManager.Instance.StartCoroutine(val.onSubClick!.CoExecute([]).CoWait().HighSpeedEnumerator().WrapToIl2Cpp());
+                if(val.onClick != null) button.OnClick = b => NebulaManager.Instance.StartCoroutine(val.onClick!.CoExecute([]).CoWait().HighSpeedEnumerator().WrapToIl2Cpp());
+                if(val.onSubClick != null) button.OnSubAction = b => NebulaManager.Instance.StartCoroutine(val.onSubClick!.CoExecute([]).CoWait().HighSpeedEnumerator().WrapToIl2Cpp());
                 button.SetRawLabel(val.label?.GetString() ?? "button");
-                if (val.image != null) button.SetSprite(val.image.GetSprite());
+                if(val.image != null)button.SetSprite(val.image.GetSprite());
                 return button;
             }));
     }
@@ -80,7 +80,7 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
     public bool IsBroken { get; set; } = false;
     public IUsurpableAbility? RelatedAbility { get; set; } = null;
     private HudContent gridContent;
-    public ModAbilityButtonImpl(bool isLeftSideButton = false, bool isArrangedAsKillButton = false, int priority = 0, bool alwaysShow = false)
+    public ModAbilityButtonImpl(bool isLeftSideButton = false, bool isArrangedAsKillButton = false,int priority = 0, bool alwaysShow = false)
     {
         VanillaButton = UnityEngine.Object.Instantiate(HudManager.Instance.KillButton, HudManager.Instance.KillButton.transform.parent);
         VanillaButton.gameObject.ForEachChild((Il2CppSystem.Action<GameObject>)((c) => { if (c.name.Equals("HotKeyGuide")) GameObject.Destroy(c); }));
@@ -119,7 +119,7 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
             brokenAlternative.sprite = VanillaButton.graphic.sprite;
             brokenAlternative.material = NebulaAsset.BrokenShaderMat;
             brokenAlternative.gameObject.SetActive(false);
-            NebulaAsset.PlaySE(NebulaAudioClip.ButtonBreaking, pitch: System.Random.Shared.NextSingle() * 0.2f + 0.7f, volume: 1f);
+            NebulaAsset.PlaySE(NebulaAudioClip.ButtonBreaking,pitch: System.Random.Shared.NextSingle() * 0.2f + 0.7f,volume: 1f);
         }
     }
     void IGameOperator.OnReleased()
@@ -149,7 +149,7 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
 
     public Func<ModAbilityButtonImpl, bool>? PlayFlashWhile { get; set; } = null;
     private float playFlashTimer = 0f;
-
+    
     private IEnumerator CoFlash()
     {
         var renderer = UnityHelper.CreateObject<SpriteRenderer>("Flash", VanillaButton.transform, new(0f, 0f, -1f));
@@ -182,7 +182,7 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
             if (PlayFlashWhile?.Invoke(this) ?? false)
             {
                 playFlashTimer -= Time.deltaTime;
-                if (playFlashTimer < 0f)
+                if(playFlashTimer < 0f)
                 {
                     playFlashTimer = 0.9f;
                     PlayFlashOnce();
@@ -206,10 +206,9 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
             //表示・非表示切替
             bool isVisible = IsVisible;
             VanillaButton.gameObject.SetActive(isVisible);
-            if (isVisible)
-            {
+            if (isVisible) {
                 if (IsBroken) TryGenerateBrokenAlternative();
-                if (brokenAlternative) brokenAlternative!.gameObject.SetActive(IsBroken);
+                if(brokenAlternative) brokenAlternative!.gameObject.SetActive(IsBroken);
                 VanillaButton.graphic.enabled = !IsBroken;
             }
 
@@ -224,13 +223,13 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
 
 
         }
-        catch (Exception exception)
+        catch(Exception exception)
         {
             NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Error, null, "[At " + VanillaButton.buttonLabelText.text + "] " + exception.ToString());
         }
     }
 
-    void OnHudActiveChange(Nebula.Patches.HudActivePatch.HudActiveChangeEvent ev) => UpdateVisibility();
+    void OnHudActiveChange(Patches.HudActivePatch.HudActiveChangeEvent ev) => UpdateVisibility();
 
     void OnHudUpdate(GameHudUpdateEvent ev)
     {
@@ -292,14 +291,12 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
 
     public bool UseCoolDownSupport { get; set; } = true;
 
-    void OnGameReenabled(TaskPhaseRestartEvent ev)
-    {
+    void OnGameReenabled(TaskPhaseRestartEvent ev) {
         if (UseCoolDownSupport) StartCoolDown();
         OnStartTaskPhase?.Invoke(this);
     }
 
-    public void OnGameStart(GameStartEvent ev)
-    {
+    public void OnGameStart(GameStartEvent ev) {
         if (UseCoolDownSupport && CoolDownTimer != null && CoolDownTimer is TimerImpl timer)
         {
             if (GeneralConfigurations.UseShortenCooldownAtGameStartOption)
@@ -319,7 +316,7 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
         if (IsBroken) return this;
 
         //簒奪が判明したらボタンを壊して、なにも起こさない
-        if (RelatedAbility?.IsUsurped ?? false)
+        if(RelatedAbility?.IsUsurped ?? false)
         {
             IsBroken = true;
             OnBroken?.Invoke(this);
@@ -366,7 +363,7 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
     }
 
     public ModAbilityButtonImpl SetLabel(string translationKey) => SetRawLabel(Language.Translate("button.label." + translationKey));
-
+    
     public ModAbilityButtonImpl SetRawLabel(string rawText)
     {
         VanillaButton.buttonLabelText.text = rawText;
@@ -398,7 +395,12 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
 
     internal ModAbilityButtonImpl SetColorLabel(Virial.Color color)
     {
-        if (VanillaButton != null) VanillaButton.buttonLabelText.SetOutlineColor(color.ToUnityColor());
+        if (VanillaButton != null)
+        {
+            Material? material = RoleManager.Instance.GetRole(RoleTypes.Shapeshifter).Ability.FontMaterial;
+            VanillaButton.buttonLabelText.SetSharedMaterial(material);
+            VanillaButton.buttonLabelText.SetOutlineColor(color);
+        }
         return this;
     }
 
@@ -458,7 +460,7 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
     public ModAbilityButtonImpl SubKeyBind(Virial.Compat.VirtualKeyInput keyCode, string? action = null, bool isCriticalSubAction = false)
     {
         var input = NebulaInput.GetInput(keyCode);
-        if (!input.IsEmpty) SubKeyBind(input, action, isCriticalSubAction);
+        if(!input.IsEmpty) SubKeyBind(input, action, isCriticalSubAction);
         return this;
     }
     public ModAbilityButtonImpl SubKeyBind(VirtualInput keyCode, string? action = null, bool isCriticalSubAction = false)
@@ -489,7 +491,7 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
     private bool canUseByMouseClick = false;
     public ModAbilityButtonImpl SetCanUseByMouseClick(bool onlyLook = false, ButtonEffect.ActionIconType iconType = ButtonEffect.ActionIconType.ClickAction, string? action = "mouseClick", bool atBottom = true)
     {
-        if (!onlyLook) canUseByMouseClick = true;
+        if(!onlyLook)canUseByMouseClick = true;
 
         if (!AmongUsUtil.UsingMouseMovement)
         {
@@ -565,7 +567,7 @@ public static class ButtonEffect
                 rawKey = "/";
             else if (AllKeyInfo.TryGetValue(keyCode, out var val)) rawKey = val.TranslationKey;
             if (rawKey == null || rawKey.Length <= 1) return rawKey;
-            if (Language.TryTranslate("key." + rawKey.HeadLower(), out var translated)) return translated;
+            if(Language.TryTranslate("key." + rawKey.HeadLower(), out var translated)) return translated;
             return rawKey;
         }
 
@@ -639,7 +641,7 @@ public static class ButtonEffect
     static readonly Image mouseDisableActionSprite = SpriteLoader.FromResource("Nebula.Resources.MouseActionDisableIcon.png", 100f);
     static readonly Image infoSprite = SpriteLoader.FromResource("Nebula.Resources.ButtonInfoIcon.png", 100f);
     static public Image InfoImage => infoSprite;
-    static public GameObject? AddKeyGuide(GameObject button, KeyCode key, UnityEngine.Vector2 pos, bool removeExistingGuide, bool isAidAction = false, string? action = null, int backVariation = 0)
+    static public GameObject? AddKeyGuide(GameObject button, KeyCode key, UnityEngine.Vector2 pos,bool removeExistingGuide, bool isAidAction = false, string? action = null, int backVariation = 0)
     {
 #if PC
         if(removeExistingGuide)button.gameObject.ForEachChild((Il2CppSystem.Action<GameObject>)(obj => { if (obj.name == "HotKeyGuide") GameObject.Destroy(obj); }));
@@ -678,7 +680,7 @@ public static class ButtonEffect
     static public GameObject? SetKeyGuideForVanillaButton(GameObject button, KeyCode key, bool removeExistingGuide = true, string? action = null, int backVariation = 0)
     {
         var obj = AddKeyGuide(button, key, new(0.48f, 0.48f), removeExistingGuide, action: action, backVariation: backVariation);
-        if (obj != null) obj.transform.localScale = new(1f / 0.7f, 1f / 0.7f, 1f);
+        if(obj != null) obj.transform.localScale = new(1f / 0.7f, 1f / 0.7f, 1f);
         return obj;
     }
 
@@ -707,7 +709,7 @@ public static class ButtonEffect
         collider.radius = 0.125f;
         button.OnMouseOver.AddListener(() => {
             string str = keyCode != KeyCode.None ? Language.Translate(isAidAction ? "ui.button.aidAction" : "ui.button.mainAction") + " : " + ButtonEffect.KeyCodeInfo.GetKeyDisplayName(keyCode) : "";
-            if (action != null)
+            if(action != null)
             {
                 if (str.Length > 0) str += "<br>";
                 str += "<line-indent=0.8em>" + Language.Translate("ui.action." + action!);
@@ -717,7 +719,7 @@ public static class ButtonEffect
         button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
     }
 
-    static public GameObject? SetMouseActionIcon(GameObject button, bool show, ActionIconType actionType = ActionIconType.ClickAction, string? action = "mouseClick", bool atBottom = true)
+    static public GameObject? SetMouseActionIcon(GameObject button,bool show, ActionIconType actionType = ActionIconType.ClickAction, string? action = "mouseClick", bool atBottom = true)
     {
 #if PC
         if (!show)
