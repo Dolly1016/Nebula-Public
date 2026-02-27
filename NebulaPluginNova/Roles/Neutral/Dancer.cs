@@ -240,7 +240,7 @@ public class Dancer : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             }
             else
             {
-                danceButton.ShowUsesIcon(0, canKillLeft.ToString());
+                danceButton.ShowUsesIcon(canKillLeft.ToString(), MyRole.RoleColor);
                 danceButton.SetImage(buttonKillSprite);    
             }
         }
