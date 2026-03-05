@@ -6,15 +6,15 @@
 
 # Document
 
-"role.jester.doc" : "A neutral member who wins by being lynched."
+"role.jester.doc" : "A neutral who wins by being lynched."
 "role.jetster.winCond" : "Be exiled in a meeting."
-"role.jester.ability.title" : "Inherent Ability "Clown's Mischief""
+"role.jester.ability.title" : "Inherent Ability [Clown's Mischief]"
 "role.jester.ability.main" : ""
 "role.jester.ability.drag" : "<title>Grag/Release</title> Can carry corpses."
 
 # Options
 
-"options.role.jester.detail" : "Jester schemes to be exiled to win.<br>Crewmates must not vote for the Jester!"
+"options.role.jester.detail" : "The Jester schemes to be exiled to win.<br>Crewmates must not vote for the Jester!"
 "options.role.jester.canDragDeadBody" : "Can Drag Dead Body"
 "options.role.jester.canFixComms" : "Can Fix Comms"
 "options.role.jester.canFixLight" : "Can Fix Light"

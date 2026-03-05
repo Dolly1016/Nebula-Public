@@ -7,7 +7,7 @@
 # Document
 
 "role.illusioner.doc" : "An impostor who can transform and morph other players' appearances."
-"role.illusioner.ability.title" : "Inherent Ability "Illusion of Confusion""
+"role.illusioner.ability.title" : "Inherent Ability [Illusion of Confusion]"
 "role.illusioner.ability.main" : "Possesses both the transformation ability of Morphing and the repainting ability of Painter."
 "role.illusioner.ability.sample" : "<title>Sample</title>Sample the <var>%LOOK%</var> appearance of the player.<br>The sampled appearance can be used for <b>Transformation</b> and <b>Paint</b>.<br><var>%SAMPLE%</var>"
 "role.illusioner.ability.morph" : "<title>Morph</title>morph into the sampled appearance.<br>The effect ends or activates the ability again while the ability is active returns you to your original appearance."
@@ -21,7 +21,7 @@
 
 # Options
 
-"options.role.illusioner.detail" : "Illusioner combines the abilities of Painter and Morphing."
+"options.role.illusioner.detail" : "The Illusioner combines the abilities of the Painter and the Morphing."
 "options.role.illusioner.sampleCoolDown" : "Sample Cooldown"
 "options.role.illusioner.morphCoolDown" : "Morph Cooldown"
 "options.role.illusioner.morphDuration" : "Morph Duration"
@@ -49,8 +49,8 @@
 # Titles
 
 "achievement.illusioner.common1.title" : "Higher Compatibility"
-"achievement.illusioner.common1.goal" : "Use both the Paint ability and Transformation ability at least once each."
+"achievement.illusioner.common1.goal" : "Use both the Paint ability and Morph ability at least once each."
 
 "achievement.illusioner.challenge.title" : "Unsubstantiated Slander"
-"achievement.illusioner.challenge.goal" : "Exile 1 or more sample source players of either Paint or Transformation in a meeting,<br>and kill 1 or more with your own hands."
+"achievement.illusioner.challenge.goal" : "Exile 1 or more sample source players of either Paint or Morph in a meeting,<br>and kill 1 or more with your own hands."
 "achievement.illusioner.challenge.splitted.0" : "Unsubstantiated"

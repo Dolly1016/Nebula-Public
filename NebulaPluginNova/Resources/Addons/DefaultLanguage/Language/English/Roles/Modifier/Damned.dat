@@ -11,7 +11,7 @@
 
 # Options
 
-"options.role.damned.detail" : "Damned is unconscious modifier.<br>The curse of Damned prevents one kill and has a dynamic effect for game."
+"options.role.damned.detail" : "The Damned is unconscious modifier.<br>The curse of the Damned prevents one kill and has a dynamic effect for game."
 
 # Game
 
@@ -45,13 +45,13 @@
 # Titles
 
 "achievement.damned.common1.title" : "Spreading Evil"
-"achievement.damned.common1.goal" : "Change from the crewmate team to the Impostor faction by curse."
+"achievement.damned.common1.goal" : "Change from the crewmate team to the Impostor team by curse."
 
 "achievement.damned.common2.title" : "Cursed One"
 "achievement.damned.common2.goal" : "Change into a Damned with Impostor role by curse."
 
 "achievement.damned.common3.title" : "Red Reversal"
-"achievement.damned.common3.goal" : "Change from the neutral to the Impostor faction by curse."
+"achievement.damned.common3.goal" : "Change from the neutral to the Impostor team by curse."
 "achievement.damned.common3.flavor" : ""Do not be mistaken. Even if their roles changes, they remain your enemy." ―From a broken meeting minutes"
 
 "achievement.damned.another1.title" : "Price of Betrayal"
@@ -63,7 +63,7 @@
 "achievement.damned.challenge.splitted.2" : "Curse"
 
 "achievement.combination.2.damned.avenger.hard.title" : "Curtain Call for the Tragedy"
-"achievement.combination.2.damned.avenger.hard.goal" : "Kill the cursed revenge target, inherit their role, and win.<br><br><size=75%><color=#aaaaaa>If the revenge target was Damned, the curse transforms.<br>Damned dies, and the role-changing curse is activated on the Avenger.</color></size>"
+"achievement.combination.2.damned.avenger.hard.goal" : "Kill the cursed revenge target, inherit their role, and win.<br><br><size=75%><color=#aaaaaa>If the revenge target was the Damned, the curse transforms.<br>The Damned dies, and the role-changing curse is activated on the Avenger.</color></size>"
 "achievement.combination.2.damned.avenger.hard.cond" : "The original lover must be defeated"
 "achievement.combination.2.damned.avenger.hard.flavor" : ""Shall we continue the game?"<br>He didn't know the face peeking through the defiant smile."
 "achievement.combination.2.damned.avenger.hard.splitted.2" : "Curtain Call"

@@ -1,0 +1,35 @@
+# Assignable
+
+"role.noisemaker.name" : "大嗓门"
+"role.noisemaker.short" : "嗓"
+"role.noisemaker.blurb" : "杀人啦"
+
+# Document
+
+"role.noisemaker.doc" : "大嗓门死亡时，会在死亡地点发出警报并有箭头提示。"
+
+# Options
+
+"options.role.noisemaker.detail" : "大嗓门被击杀会发出警报声"
+"options.role.noisemaker.noiseDuration" : "警报声持续时间"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.noisemaker.common1.title" : "神经过敏"
+"achievement.noisemaker.common1.goal" : "死亡后触发技能。"
+"achievement.noisemaker.common1.flavor" : "“在死亡之后的警示他人”—《飞船安全法则》节选"
+
+"achievement.noisemaker.challenge.title" : "苦肉计"
+"achievement.noisemaker.challenge.goal" : "被击杀后，击杀者在会议中被驱逐。"
+"achievement.noisemaker.challenge.splitted.0" : "好孩子的"
+"achievement.noisemaker.challenge.splitted.1" : "必杀"
+"achievement.noisemaker.challenge.splitted.2" : "苦肉计"

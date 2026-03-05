@@ -8,7 +8,7 @@
 # Document
 
 "role.amalgam.doc" : "An impostor who can use the abilities of amalgamate roles simultaneously."
-"role.amalgam.ability.title" : "Inherent Ability "Unknown Viscous Substance""
+"role.amalgam.ability.title" : "Inherent Ability [Unknown Viscous Substance]"
 "role.amalgam.ability.main" : "%ABILITY%"
 "role.amalgam.ability.main.selection" : "<var>Can amalgamate role abilities.</var>"
 "role.amalgam.ability.main.random" : "<var>The abilities of several roles are combined.</var><br>You can easily check the combined roles by opening the "My Role" tab on the help screen."
@@ -17,9 +17,11 @@
 
 # Options
 
-"options.role.amalgam.detail" : "Amalgam can combine the abilities of various roles."
+"options.role.amalgam.detail" : "The Amalgam can combine the abilities of various roles."
 "options.role.amalgam.maxRoles" : "# of Roles Can Load"
 "options.role.amalgam.randomAssignment" : "Random Assignment"
+"options.role.amalgam.numOfRandomAssignment" : "# of Roles Loaded Randomly"
+"options.role.amalgam.numOfRandomAssignment.all" : "All"
 "options.role.amalgam.abilityFilter" : "Ability Role Filter"
 "options.role.amalgam.canBeGuessedAsLoadedRoles" : "Can Be Guessed As Loaded Roles"
 

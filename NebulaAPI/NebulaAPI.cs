@@ -51,6 +51,7 @@ internal interface INebula
     Media.Translator Language { get; }
     Utilities.IHasher Hasher { get; }
     Assignable.Assignables Assignables { get; }
+    Logging.Logging Logging { get; }
 
     //GameStatsAPI
     GameStatsEntry CreateStatsEntry(string id, GameStatsCategory category, DefinedAssignable? assignable, TextComponent? displayTitle, int innerPriority = 0);
@@ -115,6 +116,10 @@ public static class NebulaAPI
     /// </summary>
     static public Assignable.Assignables Assignables => instance.Assignables;
 
+    /// <summary>
+    /// ログツールを提供するモジュールです。
+    /// </summary>
+    static public Logging.Logging Logging => instance.Logging;
 
     /// <summary>
     /// 現在のゲームを取得します。

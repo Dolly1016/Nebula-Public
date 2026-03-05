@@ -1,0 +1,44 @@
+# Assignable
+
+"role.evilTrapper.name" : "邪恶的陷阱师"
+"role.evilTrapper.short" : "邪陷"
+"role.evilTrapper.blurb" : "你的陷阱是害人的！"
+"role.evilTrapper.hint" : "使用陷阱制造混乱！"
+
+# Document
+
+"role.evilTrapper.doc" : "邪恶的陷阱师可以在地图中放置辅助、干扰和信息型陷阱。"
+"role.evilTrapper.ability.title" : "固有能力【陷阱】"
+"role.evilTrapper.ability.main" : "可以放置3种陷阱。<br>放置好的陷阱需要等一轮会议才能激活生效。"
+"role.evilTrapper.ability.killTrap" : "<title>杀人陷阱</title>其他玩家不可见。其他玩家（除同阵营）踩到后，会击杀该玩家。<br>仅在击杀冷却结束的情况下才会触发。<br>%SE%"
+"role.evilTrapper.ability.killTrap.se" : "放置杀人陷阱时会有独特的音效提示。"
+"role.evilTrapper.ability.killTrapBroken" : "<title>损坏的杀人陷阱</title>当杀人陷阱触发后，会损坏。<br>损坏的杀人陷阱所有人都可见。"
+"role.evilTrapper.tips" : "・可以通过%KEY%键切换要放置的陷阱。<br>・放置陷阱需要%SEC%秒，期间不能移动。"
+
+# Options
+
+"options.role.evilTrapper.detail" : "陷阱师可以在地图上放置不同效果的陷阱。<br>如果陷阱杀死一名玩家，击杀冷却也会重置。"
+"options.role.evilTrapper.killTrapSoundDistance" : "安装杀人陷阱时声音距离"
+"options.role.evilTrapper.costOfKillTrap" : "杀人陷阱放置成本"
+"options.role.evilTrapper.killTrapSize" : "杀人陷阱大小"
+
+# Game
+
+
+# UI
+
+
+# Game Statictics
+
+"statistics.events.trap" : "落陷"
+
+# Stats
+
+
+# Titles
+
+"achievement.evilTrapper.common1.title" : "你超速了"
+"achievement.evilTrapper.common1.goal" : "放置一个减速陷阱。"
+
+"achievement.evilTrapper.challenge.title" : "精致的陷阱"
+"achievement.evilTrapper.challenge.goal" : "使用杀戮陷阱杀死两名玩家，并活到胜利。"

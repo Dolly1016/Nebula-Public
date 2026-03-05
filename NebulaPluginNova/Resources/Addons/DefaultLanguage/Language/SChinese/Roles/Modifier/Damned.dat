@@ -1,0 +1,69 @@
+# Assignable
+
+"role.damned.name" : "受诅咒者"
+"role.damnedImpostor.name" : "受诅咒者"
+"role.damned.short" : "受"
+"role.damnedImpostor.short" : "受"
+"role.damned.prefix" : "受诅咒者"
+"role.damned.generalBlurb" : "身负诅咒的人"
+
+# Document
+
+"role.damned.doc" : "受诅咒者不会察觉自己是受诅咒者。<br>仅能防止第一次攻击，并向施加诅咒。"
+
+# Options
+
+"options.role.damned.detail" : "受诅咒者受到第一次伤害是无效的。<br>根据设置不同，效果也不同。"
+"options.role.damned.takeOverRoleOfKiller" : "成为凶手职业"
+"options.role.damned.damnedMurderMyKiller" : "反杀凶手"
+"options.role.damned.killDelay" : "延迟凶手死亡"
+"options.role.damned.damnedAction" : "诅咒逻辑"
+"options.role.damned.damnedAction.impostor" : "晋级为伪装者"
+"options.role.damned.damnedAction.madmate" : "晋级为叛徒"
+"options.role.damned.damnedAction.takeOver" : "成为凶手职业"
+"options.role.damned.canBecomeAwareOfDamned" : "可觉醒认知职业"
+"options.role.damned.taskProgressRequiredForSelfAdmission" : "觉醒所需完成任务进度"
+"options.role.damned.group.task" : "自我认知设定"
+
+# Game
+
+
+# UI
+
+
+# Game Statictics
+
+"statistics.events.curse" : "诅咒"
+
+# Status
+
+"state.cursed" : "诅咒"
+
+# Stats
+
+
+# Titles
+
+"achievement.damned.common1.title" : "邪恶者"
+"achievement.damned.common1.goal" : "因为诅咒导致从船员阵营变成伪装者阵营。"
+
+"achievement.damned.common2.title" : "诅咒者"
+"achievement.damned.common2.goal" : "因为诅咒变成职业为受诅咒者的伪装者。"
+
+"achievement.damned.common3.title" : "贪婪者"
+"achievement.damned.common3.goal" : "因为诅咒导致从独立阵营变为伪装者阵营。"
+"achievement.damned.common3.flavor" : "“对不起，我认为他是对的！”—来自会议记录。"
+
+"achievement.damned.another1.title" : "背叛者的代价"
+"achievement.damned.another1.goal" : "从伪装者阵营变成非伪装者阵营，之后被驱逐、赌杀、击杀任意一种死亡方法。"
+
+"achievement.damned.challenge.title" : "善良者"
+"achievement.damned.challenge.goal" : "因为诅咒从伪装者阵营变成船员阵营然后船员胜利。"
+"achievement.damned.challenge.flavor" : "“我想当个好人！”—来自手上沾满血液的伪装者。"
+"achievement.damned.challenge.splitted.2" : "诅咒"
+
+"achievement.combination.2.damned.avenger.hard.title" : "悲惨的谢幕"
+"achievement.combination.2.damned.avenger.hard.goal" : "复仇者击杀拥有受诅咒者的凶手，并获得其职业胜利。<br><br><size=75%><color=#aaaaaa>如果凶手是受诅咒者，诅咒将发生变化。<br>受诅咒者将死亡，复仇者将代替目标原职业。</color></size>"
+"achievement.combination.2.damned.avenger.hard.cond" : "提示：原恋人的另一方不会胜利。"
+"achievement.combination.2.damned.avenger.hard.flavor" : "“这个是一个悲惨的故事，但也充满戏剧性。”—一位幕后的演员。"
+"achievement.combination.2.damned.avenger.hard.splitted.2" : "谢幕"

@@ -1,0 +1,47 @@
+# Assignable
+
+"role.tyrant.name" : "暴君"
+"role.tyrant.short" : "暴"
+"role.tyrant.blurb" : "不折不扣的暴徒"
+
+# Document
+
+"role.tyrant.doc" : "暴君需要击杀指定数量的玩家才能获胜。"
+
+# Options
+
+"options.role.tyrant.detail" : "暴君需要完成指定的击杀数获胜。<br>在暴君完成前放逐他以阻止。"
+"options.role.tyrant.killCooldown" : "击杀冷却时间"
+"options.role.tyrant.numOfKillingToWin" : "胜利所需击杀数"
+"options.role.tyrant.useImpostorAbility" : "拥有伪装者能力"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.tyrant.kill" : "击杀次数"
+
+# Titles
+
+"achievement.tyrant.common1.title" : "暴君"
+"achievement.tyrant.common1.goal" : "累计击杀6次"
+
+"achievement.tyrant.another1.title" : "遥不可及的距离"
+"achievement.tyrant.another1.goal" : "在距离胜利仅差一名玩家时死亡。"
+
+"achievement.tyrant.challenge.title" : "极乐焦土"
+"achievement.tyrant.challenge.goal" : "在3个阵营都存活的情况下获胜。"
+
+# Team
+
+"teams.tyrant" : "暴君"
+"end.tyrant" : "暴君%EXTRA%胜利"
+
+# Document
+
+"document.tip.winCond.tyrant.title" : "击杀胜利"
+"document.tip.winCond.tyrant" : "击杀%NUM%名玩家获胜。<br>该阵营不会计入需要被歼灭的杀手阵营。"

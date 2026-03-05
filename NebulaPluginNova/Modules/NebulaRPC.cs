@@ -2,6 +2,7 @@
 using Il2CppInterop.Generator.Extensions;
 using Il2CppSystem.Reflection.Internal;
 using InnerNet;
+using Nebula.Modules.Logging;
 using Nebula.Scripts;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -171,8 +172,8 @@ public class RemoteProcessBase
         Hash = name.ComputeConstantHash();
         Name = name;
 
-        if (AllNebulaProcess.ContainsKey(Hash)) NebulaPlugin.Log.Print(NebulaLog.LogLevel.FatalError, NebulaLog.LogCategory.System, name + " is duplicated. (" + Hash + ")");
-        else NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, NebulaLog.LogCategory.System, name + " is registered. (" + Hash + ")");
+        if (AllNebulaProcess.ContainsKey(Hash)) NebulaLogger.Instance.Error(name + " is duplicated. (" + Hash + ")");
+        else NebulaLogger.Instance.Message(name + " is registered. (" + Hash + ")");
 
         AllNebulaProcess[Hash] = this;
         ShouldBeReliable = shouldBeReliable;
@@ -385,6 +386,8 @@ public abstract class RemoteProcessArgumentBase
         new RemoteProcessArgument<DefinedRole>((writer, role) => writer.Write(role?.Id ?? -1), reader => Roles.Roles.GetRole(reader.ReadInt32())!);
         new RemoteProcessArgument<DefinedGhostRole>((writer, role) => writer.Write(role?.Id ?? -1), reader => Roles.Roles.GetGhostRole(reader.ReadInt32())!);
         new RemoteProcessArgument<DefinedModifier>((writer, role) => writer.Write(role?.Id ?? -1), reader => Roles.Roles.GetModifier(reader.ReadInt32())!);
+
+        new RemoteProcessArgument<PlayerControl>((writer, player) => writer.Write(player?.PlayerId ?? byte.MaxValue), reader => Helpers.GetPlayer(reader.ReadByte())!);
     }
 }
 public class RemoteProcessArgument<T> : RemoteProcessArgumentBase
@@ -599,7 +602,7 @@ public class CombinedRemoteProcess : RemoteProcessBase
                 }
                 else
                 {
-                    NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, "RPC NotFound ID Error. id: " + id + " ,index: " + i + " ,length: " + num);
+                    NebulaLogger.Instance.Error("RPC NotFound ID Error. id: " + id + " ,index: " + i + " ,length: " + num);
                     throw new Exception("Combined RPC Error");
                 }
             }
@@ -760,9 +763,9 @@ public static class RoleRPC
     static private int RegisterAction<Ability>(string id, Action<Ability, int, bool> action, Predicate<Ability>? predicate) where Ability : IPlayerAbility
     {
         var hash = id.ComputeConstantHash();
-        if (actions.ContainsKey(hash)) NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, "Duplicated role argument sync message: " + id + " (Hash: " + hash +")");
+        if (actions.ContainsKey(hash)) NebulaLogger.Instance.Error("Duplicated role argument sync message: " + id + " (Hash: " + hash +")");
         actions[hash] = (num, player, calledByMe) => ActionInternal<Ability>(player, num, action, predicate, calledByMe);
-        NebulaPlugin.Log.Print("Registered role argument sync message: " + id + " (Hash: " + hash + ")");
+        NebulaLogger.Instance.Message("Registered role argument sync message: " + id + " (Hash: " + hash + ")");
         return hash;
     }
 
@@ -774,7 +777,7 @@ public static class RoleRPC
         }
         else
         {
-            NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, "Unknown role argument sync message: " + message.id);
+            NebulaLogger.Instance.Error("Unknown role argument sync message: " + message.id);
         }
     });
 
@@ -947,7 +950,7 @@ class NebulaRPCInGameHandlerPatch
         }
         else
         {
-            NebulaPlugin.Log.Print("RPC NotFound Error. id: " + id);
+            NebulaLogger.Instance.Error("RPC NotFound Error. id: " + id);
             throw new Exception("RPC Error Occurred. (Not found: " + id + ")");
         }
     }

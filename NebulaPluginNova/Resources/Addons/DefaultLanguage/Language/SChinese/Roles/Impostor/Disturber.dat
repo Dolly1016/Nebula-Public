@@ -1,0 +1,54 @@
+# Assignable
+
+"role.disturber.name" : "干扰者"
+"role.disturber.short" : "干"
+"role.disturber.blurb" : "此路不通"
+"role.disturber.hint" : "使用电障干扰其他玩家行动"
+
+# Document
+
+"role.disturber.doc" : "干扰者可以使用电障来干扰其他玩家行动。"
+"role.disturber.ability.title" : "固有能力【电磁屏障】"
+"role.disturber.ability.main" : "使用专属的地图来放置电桩，并在电桩之间生成屏障。"
+"role.disturber.ability.place" : "<title>放置</title>打开地图，放置电桩。可以同时按放<var>%POLES%</var>个电桩。<br>决定好一连串的布局后，点击右下角的按钮或关闭地图来放置电桩。<br>左键点击地图中的线路可以摧毁并回收电桩。"
+"role.disturber.ability.disturb" : "<title>干扰</title>激活后，两个杆子之间会形成障碍，阻止移动。"
+
+# Options
+
+"options.role.disturber.detail" : "干扰者可以放置杆子，杆子与杆子之间会形成一个电磁屏障。<br>它会阻止玩家移动。"
+"options.role.disturber.placeCoolDown" : "放置冷却时间"
+"options.role.disturber.disturbCoolDown" : "干扰冷却时间"
+"options.role.disturber.disturbDuration" : "干扰持续时间"
+"options.role.disturber.maxNumOfPoles" : "杆子数量"
+"options.role.disturber.maxDistanceBetweenPoles" : "杆子最大间距"
+
+# Game
+
+# UI
+
+"button.label.place" : "放置"
+"role.disturber.ui.removePoles" : "<b>左键点击</b>：摧毁杆子"
+"button.label.destroy" : "摧毁"
+"button.label.disturb" : "干扰"
+"ui.action.disturber.place" : "放置干扰杆。<br>它们的距离不能太远。"
+"ui.action.disturber.disturb" : "使用技能后杆子之间会出现一个电磁屏障。<br>技能效果结束后，最先放置的杆子会断掉"
+
+# Stats
+
+"stats.disturber.pole" : "杆子放置次数"
+"stats.disturber.disturb" : "干扰使用次数"
+
+# Titles
+
+"achievement.disturber.common1.title" : "禁止通行"
+"achievement.disturber.common1.goal" : "使用干扰技能。"
+
+"achievement.disturber.common2.title" : "封锁区域"
+"achievement.disturber.common2.goal" : "连接6根杆子并使用干扰技能。"
+"achievement.disturber.common2.splitted.0" : "封锁的"
+
+"achievement.disturber.challenge.title" : "苦闷如怒涛"
+"achievement.disturber.challenge.goal" : "通过干扰杆导致电力或通讯破坏超过40秒未被修复<br>导致期间3人死亡。"
+"achievement.disturber.challenge.cond" : "提示：跨会议重置时间。"
+"achievement.disturber.challenge.flavor" : "“漫长且煎熬……”"
+"achievement.disturber.challenge.splitted.1" : "怒涛的"

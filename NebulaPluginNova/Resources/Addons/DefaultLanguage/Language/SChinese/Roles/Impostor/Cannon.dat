@@ -1,0 +1,67 @@
+# Assignable
+
+"role.cannon.name" : "空气炮手"
+"role.cannon.short" : "空"
+"role.cannon.blurb" : "空气动力学"
+"role.cannon.hint" : "将其他玩家轰飞！"
+
+# Document
+
+"role.cannon.doc" : "空气炮手可以使用<b>空气炮</b>轰飞附近的玩家。"
+"role.cannon.ability.title" : "固有能力【空气炮】"
+"role.cannon.ability.main" : "标记轰击点，通过专属的地图发射空气炮。"
+"role.cannon.ability.mark" : "<title>标记</title>在你当前的位置上绘制一个标记点。<br>其他人看不到你的标记点。"
+"role.cannon.ability.cannon" : "<title>空气炮</title>打开特殊地图，向标记点位置发射空气炮。"
+
+# Options
+
+"options.role.cannon.detail" : "使用空气炮把附近的玩家击飞"
+"options.role.cannon.markCooldown" : "标记冷却时间"
+"options.role.cannon.numOfMarks" : "可同时放置标记数量"
+"options.role.cannon.cannonCooldown" : "空气炮冷却时间"
+"options.role.cannon.cannonPower" : "空气炮威力"
+"options.role.cannon.cannonPower.detail" : "该值越大，空气炮吹飞玩家的威力越强。"
+"options.role.cannon.cannonPowerAttenuation" : "空气炮威力衰减"
+"options.role.cannon.cannonPowerAttenuation.detail" : "该值越大，离空气炮落点越远的玩家更不容易被吹飞。"
+"options.role.cannon.canBlowPlayerUsingConsole" : "可以吹飞做任务中玩家"
+
+# Game
+
+"gameAction.cannon.placement" : "放置标记"
+
+# UI
+
+"button.label.mark" : "标记"
+"button.label.cannon" : "空气炮"
+"ui.action.cannon.mark" : "标记空气炮位置。"
+"ui.action.cannon.cannon" : "打开特殊地图，启动空气炮。"
+
+# Stats
+
+"stats.cannon.fire" : "空气炮使用次数"
+"stats.cannon.players" : "击飞玩家数量"
+
+# Titles
+
+"achievement.cannon.common3.title" : "让你飞起来！"
+"achievement.cannon.common3.goal" : "发射空气炮。"
+
+"achievement.cannon.common1.title" : "注意头顶！"
+"achievement.cannon.common1.goal" : "在吹飞之后落地并击杀一名玩家。"
+"achievement.cannon.common1.cond" : "提示：落地后在3秒内成功击杀一名玩家。"
+"achievement.cannon.common1.splitted.0" : "头顶"
+
+"achievement.cannon.common2.title" : "散射！"
+"achievement.cannon.common2.goal" : "用空气炮吹飞其他玩家。"
+"achievement.cannon.common2.cond" : "提示：吹飞5人和除自己以外的1名以上的伪装者。"
+
+"achievement.cannon.another1.title" : "哑炮"
+"achievement.cannon.another1.goal" : "没有人被空气炮吹飞。"
+"achievement.cannon.another1.splitted.1" : "孤独"
+
+"achievement.cannon.another2.title" : "上天去吧！"
+"achievement.cannon.another2.goal" : "在船员做任务的过程中将其吹飞10米以上的距离。"
+
+"achievement.cannon.challenge.title" : "飞行事故"
+"achievement.cannon.challenge.goal" : "所有在本回合内吹飞的玩家由不同原因在此回合死亡。"
+"achievement.cannon.challenge.cond" : "提示：至少击飞3个人，会议驱逐、连带也计入。"

@@ -1,0 +1,63 @@
+# Assignable
+
+"role.evilTracker.name" : "邪恶的追踪者"
+"role.evilTracker.short" : "邪追"
+"role.evilTracker.blurb" : "你无处可逃"
+
+# Document
+
+"role.evilTracker.doc" : "邪恶的追踪者可以追踪其他玩家位置或任务进度。"
+"role.evilTracker.ability.title" : "固有能力【追踪】"
+"role.evilTracker.ability.main" : ""
+"role.evilTracker.ability.track.cannotChange" : "<title>追踪</title>追踪指定目标。"
+"role.evilTracker.ability.track.canChange" : "<title>追踪</title>追踪指定目标。<var>可以重新选择追踪目标。</var>"
+"role.evilTracker.ability.arrow.withImpostor" : "<title>箭头</title>指向目标的白色箭头<var>和指向伪装者的红色箭头。</var><br>箭头每隔<var>%ARROWSEC%</var>秒更新一次。"
+"role.evilTracker.ability.arrow.onlyTarget" : "<title>箭头</title>指向目标的白色箭头。<br>箭头每隔<var>%ARROWSEC%</var>秒更新一次。"
+"role.evilTracker.ability.track.minimap" : "<title>小地图</title>被追踪的玩家位置会在<var>小地图</var>上显示。"
+"role.evilTracker.ability.task" : "<title>任务追踪</title><var>在会议中可以查看目标的任务进度。</var>"
+"role.evilTracker.ability.meeting.changeOnly" : "<var>可以在会议中更改追踪目标。</var>"
+"role.evilTracker.ability.meeting.targetOnly" : "<var>可以在会议中查看追踪目标的任务进度。</var>"
+"role.evilTracker.ability.meeting.checkChange" : "<var>可以在会议中更改追踪目标。<br>此外还可以看到追踪目标的任务进度。</var>"
+"role.evilTracker.ability.meeting.checkOnly" : "<var>可以在会议中查看一名玩家的任务进度。</var>"
+
+# Options
+
+"options.role.evilTracker.detail" : "邪恶的追踪者可以追踪其他玩家并获得其位置。<br>同时可以查看任务进度。"
+"options.role.evilTracker.showKillFlash" : "显示击杀闪光"
+"options.role.evilTracker.trackCoolDown" : "追踪冷却时间"
+"options.role.evilTracker.taskTracking" : "任务追踪"
+"options.role.evilTracker.taskTracking.off" : "关"
+"options.role.evilTracker.taskTracking.onlyTarget" : "仅追踪目标"
+"options.role.evilTracker.taskTracking.on" : "开"
+"options.role.evilTracker.updateArrowInterval" : "箭头更新间隔"
+"options.role.evilTracker.canChangeTarget" : "行动期间可以更改目标"
+"options.role.evilTracker.canChangeTargetOnMeeting" : "会议期间可以更改目标"
+"options.role.evilTracker.trackImpostors" : "追踪伪装者玩家"
+"options.role.evilTracker.showTrackingTargetOnMap" : "在地图上显示目标"
+"options.role.evilTracker.canCheckTrackingTasksInTaskPhase" : "显示任务具体位置"
+"options.role.evilTracker.showWhereTrackingIs" : "追踪对象位置以房间名表示"
+"options.role.evilTracker.group.playerTracking" : "位置追踪设定"
+"options.role.evilTracker.group.taskTracking" : "任务追踪设定"
+
+# Game
+
+
+# UI
+
+"button.label.track" : "追踪"
+
+# Stats
+
+
+# Titles
+
+"achievement.evilTracker.common1.title" : "监视者"
+"achievement.evilTracker.common1.goal" : "监测一次玩家的任务情况。"
+
+"achievement.evilTracker.another1.title" : "了无音信"
+"achievement.evilTracker.another1.goal" : "在存活时追踪的玩家死亡。"
+"achievement.evilTracker.another1.flavor" : "“对追踪系统有疑问，请联系我们的工程师！”—来自追踪终端的客服。"
+
+"achievement.evilTracker.challenge.title" : "跟踪狂"
+"achievement.evilTracker.challenge.goal" : "追踪剩余3个以下任务数的玩家，并在其做任务期间杀掉他。"
+"achievement.evilTracker.challenge.splitted.0" : "跟踪"

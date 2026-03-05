@@ -7,7 +7,7 @@
 # Document
 
 "role.painter.doc" : "An impostor who can paint other players' appearances."
-"role.painter.ability.title" : "Inherent Ability "Malicious Body Paint""
+"role.painter.ability.title" : "Inherent Ability [Malicious Body Paint]"
 "role.painter.ability.main" : ""
 "role.painter.ability.sample" : "<title>Sample</title>Sample the current appearance of the player.<br><var>%SAMPLE%</var>"
 "role.painter.ability.paint" : "<title>Paint</title>Paint the sampled appearance on a player.%PAINT%"
@@ -18,7 +18,7 @@
 
 # Options
 
-"options.role.painter.detail" : "Painter samples the appearance of the player<br>and paints the form onto players."
+"options.role.painter.detail" : "The Painter samples the appearance of the player<br>and paints the form onto players."
 "options.role.painter.sampleCoolDown" : "Sample Cooldown"
 "options.role.painter.paintCoolDown" : "Paint Cooldown"
 "options.role.painter.loseSampleOnMeeting" : "Lose Sample On Meeting"
@@ -34,7 +34,6 @@
 # Stats
 
 "stats.painter.sample" : "Num of Taking Samples"
-"stats.painter.morph" : "Number of Transformations"
 "stats.painter.paint" : "Num of Painting"
 
 # Titles

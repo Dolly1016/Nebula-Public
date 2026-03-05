@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using UnityEngine.Networking;
 
@@ -10,6 +11,8 @@ namespace Nebula.Utilities;
 
 internal class NebulaWebRequest
 {
+    public static string NebulaAPI { get; } = "https://www.nebula-on-the-ship.com:22020/";
+    public static string GetNoSAPI(string api) => NebulaAPI + api;
     public static IEnumerator CoGet(string url, bool noCache, Action<string> onSuccess, Action? onFailed = null, Action<UnityWebRequest>? modifier = null)
     {
         var request = UnityWebRequest.Get(url);
@@ -21,7 +24,7 @@ internal class NebulaWebRequest
 
         if (request.result != UnityWebRequest.Result.Success)
         {
-            LogUtils.WriteToConsole("Failed: " + request.result.ToString());
+            LogUtils.WriteToConsole($"Failed (URL: {url}): {request.result.ToString()}");
             onFailed?.Invoke();
             request.Dispose();
             yield break;
@@ -42,6 +45,7 @@ internal class NebulaWebRequest
 
         if (request.result != UnityWebRequest.Result.Success)
         {
+            LogUtils.WriteToConsole($"Failed (URL: {url}): {request.result.ToString()}");
             onFailed?.Invoke();
             request.Dispose();
             yield break;
@@ -71,6 +75,7 @@ internal class NebulaWebRequest
 
         if (request.result != UnityWebRequest.Result.Success)
         {
+            LogUtils.WriteToConsole($"Failed (URL: {url}): {request.result.ToString()}");
             onFailed?.Invoke();
             request.Dispose();
             yield break;
@@ -95,6 +100,7 @@ internal class NebulaWebRequest
 
         if (request.result != UnityWebRequest.Result.Success)
         {
+            LogUtils.WriteToConsole($"Failed (URL: {url}): {request.result.ToString()}");
             onFailed?.Invoke();
             request.Dispose();
             yield break;
@@ -102,5 +108,15 @@ internal class NebulaWebRequest
 
         onSuccess(request.downloadHandler.text);
         request.Dispose();
+    }
+
+    public static IEnumerator CoPost<TRequest, TResponse>(string url, TRequest request, Action<TResponse> onSuccess, Action? onFailed = null, Action<UnityWebRequest>? modifier = null) where TRequest : class where TResponse : class
+    {
+        string json = JsonSerializer.Serialize(request);
+        yield return NebulaWebRequest.CoPost(url, json, true, result =>
+        {
+            var deserialized = JsonSerializer.Deserialize<TResponse>(result);
+            if (deserialized != null) onSuccess.Invoke(deserialized);
+        }, onFailed, modifier);
     }
 }

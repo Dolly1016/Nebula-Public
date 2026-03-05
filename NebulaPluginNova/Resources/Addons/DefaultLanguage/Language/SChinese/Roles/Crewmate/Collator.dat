@@ -1,0 +1,88 @@
+# Assignable
+
+"role.collator.name" : "基因学家"
+"role.collator.short" : "基"
+"role.collator.blurb" : "这就是基因的魅力"
+
+# Document
+
+"role.collator.doc" : "基因学家可以通过采集其他玩家的样本从而获取他们之间的阵营是否匹配。"
+"role.collator.ability.title" : "固有能力【基因检测】"
+"role.collator.ability.main" : "可以从玩家中采集样本并在会议期间进行测试比较。<br>检测结果有两个类型：<b><color=#33FF33>匹配</color></b>和<b><color=#FF3333>不匹配</color></b>。<br>如果两个玩家是<b>同阵营</b>那么就显示为<b><color=#33FF33>相同</color></b>。<br>%SELECTIVE%"
+"role.collator.ability.nonSelective" : "如果你在任务阶段收集了两个样本，<br>那么将在<var>会议期间</var>的屏幕顶部显示结果。"
+"role.collator.ability.selective" : "如果你在任务阶段收集了两个以上的样本，<br>那么将在<var>会议期间</var>选择其中两个进行比较并在屏幕顶部显示结果。"
+"role.collator.ability.sample" : "<title>采集</title>从其他玩家中收集样品。<br>最多使用<var>%NUM%</var>个试管。"
+"role.collator.ability.meeting" : "<title>对照</title>在会议期间，玩家图标上会显示一个按钮，选择其中两个玩家进行比较。"
+"role.collator.tips" : "・这个职业与<color=#ff7f00>超</color><color=#ff0000>新</color><color=#00ff00>职业</color>进行联动（原职业：臨床検査技師）。"
+
+# Options
+
+"options.role.collator.detail" : "基因学家可以收集其他玩家的样本进行比较。"
+"options.role.collator.sampleCoolDown" : "取样冷却时间"
+"options.role.collator.selectiveCollating" : "允许在会议中采集样本"
+"options.role.collator.selectiveCollating.detail" : "开启后，你可以从采集的多个样本中自由选择一组进行比对。"
+"options.role.collator.maxTrials" : "最多采集次数"
+"options.role.collator.maxTrialsPerMeeting" : "每次会议最大采集次数"
+"options.role.collator.numOfTubes" : "试管数量"
+"options.role.collator.carringOverSamples" : "未使用的样本可下次会议中继续使用"
+"options.role.collator.canTakeDuplicateSample" : "可重复取样"
+"options.role.collator.canTakeDuplicateSample.detail" : "启用后，你可以重复采样同一个玩家获取样本。" 
+"options.role.collator.strictClassificationForNeutralRoles" : "第三方阵营严格分类"
+"options.role.collator.strictClassificationForNeutralRoles.detail" : "开启后，会根据真实阵营区分第三方阵营<br>如果关闭，第三方阵营无论什么情况都始终匹配。"
+"options.role.collator.madmateIsClassifiedAs" : "叛徒阵营归类"
+"options.role.collator.madmateIsClassifiedAs.detail" : "配置叛徒归属与哪一个阵营。"
+"options.role.collator.madmateIsClassifiedAs.impostor" : "伪装者阵营"
+"options.role.collator.madmateIsClassifiedAs.crewmate" : "船员阵营"
+
+# Game
+
+"role.collator.ui.title" : "样本对照"
+"role.collator.ui.target" : "目标"
+"role.collator.ui.result" : "结果"
+"role.collator.ui.matched" : "匹配"
+"role.collator.ui.unmatched" : "不匹配"
+"role.collator.gui.results" : "对照结果"
+"role.collator.gui.results.zero" : "无"
+
+# UI
+
+"button.label.collatorSample" : "采集"
+
+# Stats
+
+"stats.collator.collating" : "样本对照次数"
+"stats.collator.matched" : "样本匹配次数"
+"stats.collator.unmatched" : "样本不匹配次数"
+
+# Titles
+
+"achievement.collator.common3.title" : "有趣的记录"
+"achievement.collator.common3.goal" : "核对的结果确认不一致。"
+"achievement.collator.common3.flavor" : "“我们现在已经确定要个非船员溜进来了”—研究者的报告单"
+"achievement.collator.common3.splitted.0" : "有趣的"
+
+"achievement.collator.common1.title" : "实验狂魔"
+"achievement.collator.common1.goal" : "一次游戏取得五次以上样本。"
+"achievement.collator.common1.flavor" : "“你不能一直抽下去！” —研究者的提醒。"
+"achievement.collator.common1.splitted.2" : "日和"
+
+"achievement.collator.common2.title" : "癫狂的研究者"
+"achievement.collator.common2.goal" : "总计取得20次样品。"
+"achievement.collator.common2.flavor" : "“我觉得你不是一个船员！” —报告单上的潦草字迹。"
+"achievement.collator.common2.splitted.0" : "癫狂的"
+
+"achievement.collator.common4.title" : "含剧毒物质"
+"achievement.collator.common4.goal" : "比较两名伪装者的样本。"
+"achievement.collator.common4.flavor" : "“这……不对……快跑！” —用血写在地板上的字"
+"achievement.collator.common4.splitted.2" : "废弃物"
+
+"achievement.collator.another1.title" : "疯狂科学家"
+"achievement.collator.another1.goal" : "取样死亡玩家的样本。"
+"achievement.collator.another1.cond" : "提示：采集后5秒内被采样玩家死亡"
+"achievement.collator.another1.flavor" : "逆风者只为拯救世界却拯救不了自己。"
+"achievement.collator.another1.splitted.2" : "探求心"
+
+"achievement.collator.challenge.title" : "超级科学家"
+"achievement.collator.challenge.goal" : "全部伪装者都被采集后驱逐他们并胜利。"
+"achievement.collator.challenge.flavor" : "“世界终于恢复正轨了！”—一段话从实验室中传出。"
+"achievement.collator.challenge.splitted.1" : "科学"

@@ -1,0 +1,92 @@
+# Assignable
+
+"role.opportunist.name" : "投机者"
+"role.opportunist.short" : "投"
+"role.opportunist.blurb" : "苟且偷生"
+
+# Document
+
+"role.opportunist.doc" : "投机者需要活到最后并与胜利者共享胜利。"
+
+# Options
+
+"options.role.opportunist.detail" : "投机者完成自己的特殊任务并且活到最后可以和其他玩家一同胜利。"
+"options.role.opportunist.numOfTasks" : "任务数量"
+"options.role.opportunist.numOfTasks.detail" : "投机者将会分配在<b>指定地点</b>进行<b>停留</b>一段时间的任务。"
+"options.role.opportunist.stayingDuration" : "停留在任务点所需时间"
+"options.role.opportunist.canFixComms" : "可以修复通讯破坏"
+"options.role.opportunist.canFixLight" : "可以修复电力破坏"
+
+# Game
+
+"role.opportunist.task.veiled" : "完成前面的任务后解锁"
+"role.opportunist.task" : "停留在%LOC%附近"
+"role.opportunist.task.room" : "停留在房间内"
+"role.opportunist.task.loc.skeld.cafeteria.window" : "窗户"
+"role.opportunist.task.loc.skeld.storage.trash" : "垃圾排放口"
+"role.opportunist.task.loc.skeld.electrical.electrical" : "配电箱后面"
+"role.opportunist.task.loc.skeld.lowerEngine.lowerEngine" : "加油口"
+"role.opportunist.task.loc.skeld.reactor.upper" : "上方"
+"role.opportunist.task.loc.skeld.medbay.scan" : "扫描仪"
+"role.opportunist.task.loc.mira.balcony.antenna" : "天线"
+"role.opportunist.task.loc.mira.cafeteria.vendingMachine" : "自动售货机"
+"role.opportunist.task.loc.polus.security.camera" : "监控终端"
+"role.opportunist.task.loc.polus.comms.table" : "桌子"
+"role.opportunist.task.loc.polus.lab.hole" : "坑"
+"role.opportunist.task.loc.polus.lab.toilet" : "厕所"
+"role.opportunist.task.loc.polus.admin.bookshelf" : "书架"
+"role.opportunist.task.loc.polus.lifesupport.bottle" : "装罐"
+"role.opportunist.task.loc.polus.outside.ejection" : "温度显示器"
+"role.opportunist.task.loc.polus.outside.comms" : "通讯室左侧雪人"
+"role.opportunist.task.loc.airship.meetingRoom.meetingRoom" : "会议室深处"
+"role.opportunist.task.loc.airship.mainHall.cleaning" : "清洁工具室"
+"role.opportunist.task.loc.airship.mainHall.treasureBox" : "宝箱"
+"role.opportunist.task.loc.airship.mainHall.darkRoom" : "暗室"
+"role.opportunist.task.loc.airship.lounge.toilet" : "厕所"
+"role.opportunist.task.loc.airship.cargoBay.safe" : "保险箱"
+"role.opportunist.task.loc.airship.medical.vitals" : "生命监测装置"
+"role.opportunist.task.loc.airship.security.outside" : "外部瞭望台"
+"role.opportunist.task.loc.airship.viewingDeck.outside" : "外部瞭望台"
+"role.opportunist.task.loc.fungle.highlands.bigGem" : "宝石"
+"role.opportunist.task.loc.fungle.highlands.landing" : "中间平台"
+"role.opportunist.task.loc.fungle.jungle.monitoring" : "监测点"
+"options.role.opportunist.group.fallback" : "备用选项设定"
+"options.role.opportunist.fallback" : "备用选项"
+"options.role.opportunist.fallback.tasks" : "停留任务数量"
+
+# UI
+
+
+# Stats
+
+"stats.opportunist.task" : "完成任务数量"
+
+# Titles
+
+"achievement.opportunist.common1.title" : "高风险高收入"
+"achievement.opportunist.common1.goal" : "以投机者的身份跟随其他阵营胜利。"
+
+"achievement.opportunist.another1.title" : "给你机会也不中用"
+"achievement.opportunist.another1.goal" : "存活到最后但没有胜利。"
+
+"achievement.opportunist.another2.title" : "最后一刻"
+"achievement.opportunist.another2.goal" : "死亡后立即胜利。"
+"achievement.opportunist.another2.splitted.0" : "最后"
+
+"achievement.opportunist.common3.title" : "观光客"
+"achievement.opportunist.common3.goal" : "完成10个任务。"
+"achievement.opportunist.common3.splitted.2" : "观光客"
+
+"achievement.opportunist.common2.title" : "纯路人"
+"achievement.opportunist.common2.goal" : "存活到最后并独自获胜。"
+"achievement.opportunist.common2.flavor" : "“不知道啊，我只是纯路人”"
+"achievement.opportunist.common2.splitted.0" : "路人"
+
+"achievement.opportunist.challenge.title" : "随风而去"
+"achievement.opportunist.challenge.goal" : "在至少有一名幸存者会失败的情况下跟随获胜。"
+"achievement.opportunist.challenge.cond" : "提示：不含船员获胜。"
+
+# Team
+
+"teams.opportunist" : "投机者"
+"end.extra.opportunist" : "<color=#FFFFFF>+</color>投机者"

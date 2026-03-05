@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using Nebula.Modules.Logging;
+using System.Net;
 using System.Reflection;
 
 namespace Nebula.Modules;
@@ -105,7 +106,7 @@ public class ModUpdater
                 fileStream.Flush();
             }catch(Exception ex)
             {
-                NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, ex.GetType().Name + ex.Message + ex.StackTrace);
+                NebulaLogger.Instance.Error(ex.GetType().Name + ex.Message + ex.StackTrace);
             }
         }
 
@@ -140,7 +141,7 @@ public class ModUpdater
 
             var tags = JsonStructure.Deserialize<List<ReleaseContent>>(json);
             if (tags != null) foreach (var tag in tags) if (tag.tag_name != null) releases.Add(new(tag.tag_name, tag.body?.Replace("\\n", "\n").Replace("\\r", "")));
-            NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, releases.Count.ToString() + " releases have got from GitHub.");
+            NebulaLogger.Instance.Message(releases.Count.ToString() + " releases have got from GitHub.");
 
             if (releases.Count == lastReleases) MaybeNoMorePages = true;
 

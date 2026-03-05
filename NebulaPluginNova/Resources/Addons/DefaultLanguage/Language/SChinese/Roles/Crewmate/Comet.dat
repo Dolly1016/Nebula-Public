@@ -1,0 +1,56 @@
+# Assignable
+
+"role.comet.name" : "彗星之子"
+"role.comet.short" : "彗"
+"role.comet.blurb" : "一飞冲天"
+
+# Document
+
+"role.comet.doc" : "彗星之子可以进行冲刺，冲刺后会提升移动速度，并获得隐身效果。"
+"role.comet.ability.title" : "固有能力【彗星血脉】"
+"role.comet.ability.main" : ""
+"role.comet.ability.blaze" : "<title>冲刺</title>提升移动速度并获得隐身。<br>技能期间不会成为其他玩家的交互对象。"
+"role.comet.tips" : "・不受配电破坏影响。"
+
+# Options
+
+"options.role.comet.detail" : "彗星之子拥有隐身和极快的速度。<br>合理运用可以悄无声息的发现击杀现场。"
+"options.role.comet.blazeCoolDown" : "技能冷却时间"
+"options.role.comet.blazeSpeed" : "技能期间加速倍率"
+"options.role.comet.blazeDuration" : "技能持续时间"
+"options.role.comet.blazeVisionRate" : "技能期间视野倍率"
+"options.role.comet.blazeScreenRate" : "技能期间屏幕缩小倍率"
+
+# Game
+
+# UI
+
+"button.label.blaze" : "冲刺"
+
+# Stats
+
+"stats.comet.blazing" : "使用冲刺次数"
+
+# Titles
+
+"achievement.comet.common1.title" : "船上的彗星"
+"achievement.comet.common1.goal" : "使用自己的技能。"
+"achievement.comet.common1.cond" : "提示：仅在Skeld与Airship地图上获得。"
+"achievement.comet.common1.splitted.0" : "船上的"
+
+"achievement.comet.common2.title" : "地上的彗星"
+"achievement.comet.common2.goal" : "使用自己的技能。"
+"achievement.comet.common2.cond" : "提示：仅在MIRA HQ、Polus与Fungle地图上获得。"
+"achievement.comet.common2.splitted.0" : "地上的"
+
+"achievement.comet.common3.title" : "光速彗星"
+"achievement.comet.common3.goal" : "使用技能移动45米以上。"
+"achievement.comet.common3.cond" : "提示：技能持续时间：15秒以下+速度倍率：2.5倍以下"
+"achievement.comet.common3.flavor" : "“请不要超速。” —来自会议的警告"
+
+"achievement.comet.common4.title" : "换挡起飞！"
+"achievement.comet.common4.goal" : "使用加速陷阱并配合“敏捷”特技下的加速效果。"
+
+"achievement.comet.challenge.title" : "不可见的目击者"
+"achievement.comet.challenge.goal" : "在技能期间看到凶案。"
+"achievement.comet.challenge.splitted.0" : "不可见的"

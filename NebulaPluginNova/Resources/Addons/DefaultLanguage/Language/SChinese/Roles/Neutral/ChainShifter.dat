@@ -1,0 +1,45 @@
+# Assignable
+
+"role.chainShifter.name" : "交换师"
+"role.chainShifter.short" : "交"
+"role.chainShifter.blurb" : "我们来交换身份吧"
+
+# Document
+
+"role.chainShifter.doc" : "交换师是无法胜利的，赶紧与其他玩家换掉。"
+
+# Options
+
+"options.role.chainShifter.detail" : "交换师是无法胜利的，赶紧与其他玩家换掉。"
+"options.role.chainShifter.shiftCoolDown" : "交换冷却时间"
+"options.role.chainShifter.canCallEmergencyMeeting" : "可以召开紧急会议"
+
+# Game
+
+
+# UI
+
+"button.label.shift" : "交换"
+
+# Stats
+
+"stats.chainShifter.shift" : "交换职业次数"
+
+# Titles
+
+"achievement.chainShifter.common1.title" : "倒反天罡"
+"achievement.chainShifter.common1.goal" : "杀死交换师"
+"achievement.chainShifter.common1.flavor" : "亲手解决总比留着世上好。"
+
+"achievement.chainShifter.another1.title" : "天道好轮回，苍天饶过谁"
+"achievement.chainShifter.another1.goal" : "成为交换师并且失败"
+"achievement.chainShifter.another1.flavor" : "本来就不配胜利。"
+
+"achievement.chainShifter.challenge.title" : "成功人士——搅屎棍"
+"achievement.chainShifter.challenge.goal" : "更换其他玩家的职业后游戏结束并胜利"
+"achievement.chainShifter.challenge.flavor" : "再洗一次牌吧！"
+"achievement.chainShifter.challenge.splitted.2" : "搅屎棍"
+
+# Team
+
+"teams.chainShifter" : "交换师"

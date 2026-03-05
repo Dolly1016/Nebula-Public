@@ -1,0 +1,56 @@
+# Assignable
+
+"role.illusioner.name" : "模仿大师"
+"role.illusioner.short" : "模"
+"role.illusioner.blurb" : "不要相信你的眼睛"
+
+# Document
+
+"role.illusioner.doc" : "模仿大师可以化形或更改其他玩家的外貌。"
+"role.illusioner.ability.title" : "固有能力【模仿】"
+"role.illusioner.ability.main" : "模仿大师同时拥有画皮师与化形者的能力。"
+"role.illusioner.ability.sample" : "<title>取样</title>取样目标玩家的<var>%LOOK%</var>外观。取样后的外观可以用来<b>化形</b>和<b>绘制</b>。<br><var>%SAMPLE%</var>"
+"role.illusioner.ability.morph" : "<title>化形</title>化形成为当前取样的玩家外观。<br>效果时间结束或手动触发此能力可以恢复原样。"
+"role.illusioner.ability.paint" : "<title>绘制</title>将取样的外观绘制给目标玩家。外观会<var>%PAINT%</var>修改。"
+"role.illusioner.ability.look.original" : "原本"
+"role.illusioner.ability.look.current" : "当前"
+"role.illusioner.ability.sample.loseSample" : "取样的外观会在会议结束后丢弃。"
+"role.illusioner.ability.sample.keepSample" : "取样的外观可以一直保留。"
+"role.illusioner.ability.paint.afterMeeting" : "在会议结束后"
+"role.illusioner.ability.paint.immediate" : "立即"
+
+# Options
+
+"options.role.illusioner.detail" : "模仿大师同时拥有画皮师与化形者的能力"
+"options.role.illusioner.sampleCoolDown" : "取样冷却时间"
+"options.role.illusioner.morphCoolDown" : "化形冷却时间"
+"options.role.illusioner.morphDuration" : "化形持续时间"
+"options.role.illusioner.paintCoolDown" : "改变外观冷却时间"
+"options.role.illusioner.loseSampleOnMeeting" : "会议结束后需要重新取样"
+"options.role.illusioner.transformAfterMeeting" : "会议结束后生效"
+"options.role.illusioner.sampleOriginalLook" : "采集原本外观"
+
+# Game
+
+
+# UI
+
+"ui.action.illusioner.sample" : "获取样品"
+"ui.action.illusioner.paint" : "将别人的外貌改变成样品的形象"
+"ui.action.illusioner.morph" : "将自己的外貌改变成样品的形象"
+"ui.action.illusioner.switch" : "切换按键模式<br>在绘画技能与化形技能之间切换"
+
+# Stats
+
+"stats.illusioner.sample" : "取样使用次数"
+"stats.illusioner.morph" : "化形使用次数"
+"stats.illusioner.paint" : "改变外形使用次数"
+
+# Titles
+
+"achievement.illusioner.common1.title" : "互换人生"
+"achievement.illusioner.common1.goal" : "化形和改变样貌技能各使用一次。"
+
+"achievement.illusioner.challenge.title" : "无人知晓的真相"
+"achievement.illusioner.challenge.goal" : "在会议中驱逐一名你化形的玩家或者你改变样貌的玩家。<br>一人以上。"
+"achievement.illusioner.challenge.splitted.0" : "无人知晓的"

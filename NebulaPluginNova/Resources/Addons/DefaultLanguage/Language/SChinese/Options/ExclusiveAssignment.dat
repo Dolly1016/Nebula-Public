@@ -1,0 +1,20 @@
+# Header
+
+"options.exclusiveAssignment" : "排斥分配设置"
+"options.exclusiveAssignment.detail" : "配置后对应组内的职业只会出现其中之一。"
+
+# Groups
+
+# Options
+
+"options.exclusiveAssignment.category.0" : "类别1"
+"options.exclusiveAssignment.category.1" : "类别2"
+"options.exclusiveAssignment.category.2" : "类别3"
+"options.exclusiveAssignment.category.3" : "类别4"
+"options.exclusiveAssignment.category.4" : "类别5"
+"options.exclusiveAssignment.category.5" : "类别6"
+"options.exclusiveAssignment.category.6" : "类别7"
+"options.exclusiveAssignment.category.7" : "类别8"
+"options.exclusiveAssignment.category.8" : "类别9"
+"options.exclusiveAssignment.category.9" : "类别10"
+"options.exclusiveAssignment.edit" : "编辑"

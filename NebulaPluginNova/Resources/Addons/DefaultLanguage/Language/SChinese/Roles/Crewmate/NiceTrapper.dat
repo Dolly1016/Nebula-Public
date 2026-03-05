@@ -1,0 +1,40 @@
+# Assignable
+
+"role.niceTrapper.name" : "正义的陷阱师"
+"role.niceTrapper.short" : "正陷"
+"role.niceTrapper.blurb" : "安放陷阱并找出伪装者"
+"role.niceTrapper.hint" : "请多多善用陷阱！"
+
+# Document
+
+"role.niceTrapper.doc" : "正义的陷阱师可以在地图中放置辅助、干扰和信息型陷阱。"
+"role.niceTrapper.ability.title" : "固有能力【陷阱】"
+"role.niceTrapper.ability.main" : "可以放置3种陷阱。<br>放置好的陷阱需要等一轮会议才能激活生效。"
+"role.niceTrapper.ability.commTrap" : "<title>信号陷阱</title>其他玩家不可见。其他玩家踩到后，正义的陷阱师会收到箭头提示。"
+"role.niceTrapper.tips" : "・可以通过%KEY%键切换要放置的陷阱。<br>・放置陷阱需要%SEC%秒，期间不能移动。"
+
+# Options
+
+"options.role.niceTrapper.detail" : "陷阱师可以在地图上放置不同效果的陷阱。"
+"options.role.niceTrapper.costOfCommTrap" : "信号陷阱放置成本"
+"options.role.niceTrapper.commTrapSize" : "信号陷阱大小"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.niceTrapper.common1.title" : "仁慈者"
+"achievement.niceTrapper.common1.goal" : "放置一个加速陷阱。"
+
+"achievement.niceTrapper.challenge.title" : "名侦探"
+"achievement.niceTrapper.challenge.goal" : "通过信号陷阱获得8个人的动向。"
+"achievement.niceTrapper.challenge.cond" : "提示：每次会议结束，都会重置人数"
+"achievement.niceTrapper.challenge.flavor" : "“你们都很可疑！”—来自会议记录。"
+"achievement.niceTrapper.challenge.splitted.2" : "名侦探"

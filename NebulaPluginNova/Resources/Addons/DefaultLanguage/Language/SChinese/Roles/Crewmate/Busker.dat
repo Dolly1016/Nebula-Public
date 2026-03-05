@@ -1,0 +1,57 @@
+# Assignable
+
+"role.busker.name" : "灵化使"
+"role.busker.short" : "灵"
+"role.busker.blurb" : "秘法・灵魂出窍之术"
+
+# Document
+
+"role.busker.doc" : "灵化使可以通过<b>假死</b>变成鬼魂来进行移动。"
+"role.busker.ability.title" : "固有能力【阴阳行者】"
+"role.busker.ability.main" : "可以假死，然后像鬼魂一样在地图移动并且可以随时复活。<br>如果长时间不复活或者技能期间进入会议阶段，就会真死。"
+"role.busker.ability.pseudocide" : "<title>假死</title>使用后变成一个鬼魂。"
+"role.busker.ability.revive" : "<title>复活</title>你可以随时在地图上有效的点位复活。<br>一定要注意技能持续时间，否则就会真死。"
+
+# Options
+
+"options.role.busker.detail" : "灵化使可以通过假死变成灵魂悄无声息地观察其他人的行踪。<br>注意，如果不及时复活会真死哦。"
+"options.role.busker.pseudocideCoolDown" : "假死冷却时间"
+"options.role.busker.pseudocideDuration" : "假死持续时间"
+"options.role.busker.hidePseudocideFromVitals" : "在生命监测装置中隐藏假死状态"
+"options.role.busker.hidePseudocideFromVitals.detail" : "开启后，在假死期间，生命监测装置显示灵化使为存活状态。"
+
+# Game
+
+"gameAction.busker.revive" : "复活"
+
+# UI
+
+"button.label.pseudocide" : "假死"
+
+# Game Statictics
+
+"statistics.events.accident" : "复活失败"
+
+# Status
+
+"state.pseudocide" : "假死"
+
+# Stats
+
+"stats.busker.pseudocide" : "使用假死次数"
+"stats.busker.missed" : "复活失败次数"
+
+# Titles
+
+"achievement.busker.common1.title" : "才艺时间"
+"achievement.busker.common1.goal" : "假死然后复活。"
+"achievement.busker.common1.splitted.1" : "・"
+
+"achievement.busker.another1.title" : "玩过头了"
+"achievement.busker.another1.goal" : "假死后复活失败。"
+"achievement.busker.another1.splitted.0" : "危机的"
+
+"achievement.busker.challenge.title" : "医学奇迹"
+"achievement.busker.challenge.goal" : "假死并且复活后在两秒内发起报告。"
+"achievement.busker.challenge.cond" : "提示：报告自身尸体跟使用紧急按钮不算"
+"achievement.busker.challenge.flavor" : "“只有刺激才能保证心脏的跳动。”—没有署名的回忆录"

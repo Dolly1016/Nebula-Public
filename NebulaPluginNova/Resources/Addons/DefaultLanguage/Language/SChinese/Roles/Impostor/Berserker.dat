@@ -1,0 +1,68 @@
+# Assignable
+
+"role.berserker.name" : "易怒者"
+"role.berserker.short" : "怒"
+"role.berserker.blurb" : "你已经惹怒我了！"
+"role.berserker.hint" : "暴怒后击杀冷却和移动速度变快！"
+
+# Document
+
+"role.berserker.doc" : "易怒者是一个短期杀戮型伪装者，技能期间击杀冷却和移动速度变快。"
+"role.berserker.ability.title" : "固有能力【暴怒】"
+"role.berserker.ability.main" : "变成特殊形态，进入暴怒模式。<br>在暴怒期间，击杀冷却时间缩短，移动速度提高。<br>在暴怒状态下击杀一定次数的玩家后会进入忘我状态，无法识别他人身份。"
+"role.berserker.ability.berserk" : "<title>暴怒</title>进入暴怒状态会改变形态。<br>此时<var>%SE%</var>的玩家会听到咆哮声。"
+"role.berserker.ability.berserk.se.short" : "短距离内"
+"role.berserker.ability.berserk.se.middle" : "附近"
+"role.berserker.ability.berserk.se.long" : "大范围内"
+"role.berserker.ability.calmDown" : "<title>镇定</title><var>按下按钮或技能结束后会恢复原状，期间无法行动。</var>"
+"role.berserker.tips" : "・进入会议或死亡时，会解除暴怒状态。"
+
+# Options
+
+"options.role.berserker.detail" : "易怒者是一个很简单很直白的伪装者。<br>进入暴怒状态后，攻击冷却和移动速度会更快，但所有人都会知晓你的身份。"
+"options.role.berserker.killCooldown" : "暴怒状态下击杀冷却时间"
+"options.role.berserker.accelRate" : "暴怒状态下移动速度倍率"
+"options.role.berserker.canCalmDown" : "可以进入冷静状态"
+"options.role.berserker.canCalmDown.detail" : "开启后，暴怒状态可以通过时间耗尽或按钮结束状态。"
+"options.role.berserker.berserkCooldown" : "暴怒冷却时间"
+"options.role.berserker.maxBerserkDuration" : "暴怒最大持续时间"
+"options.role.berserker.killingForTrance" : "进入忘我状态所需击杀数"
+"options.role.berserker.killingForTrance.detail" : "在暴怒状态下不断击杀会逐渐迷失自我。<br>当进入忘我状态后，无法区分其他人，甚至可以击杀队友。"
+"options.role.berserker.bersekSEStrength" : "暴怒音效范围"
+
+# Game
+
+"gameAction.berserker.berserk" : "暴怒"
+
+# UI
+
+"button.label.berserk" : "暴怒"
+"button.label.calmDown" : "镇定"
+
+# Stats
+
+"stats.berserker.berserk" : "暴怒使用次数"
+
+# Titles
+
+"achievement.berserker.common1.title" : "红温"
+"achievement.berserker.common1.goal" : "使用一次暴怒能力。"
+
+"achievement.berserker.common2.title" : "无尽的红温怒气"
+"achievement.berserker.common2.goal" : "累计使用10次以上个暴怒。"
+"achievement.berserker.common2.splitted.0" : "怒气"
+
+"achievement.berserker.common3.title" : "过度劳累之后…"
+"achievement.berserker.common3.goal" : "击杀一名玩家后使用镇静能力。"
+
+"achievement.berserker.another1.title" : "临死前的怒火"
+"achievement.berserker.another1.goal" : "使用暴怒能力后在会议期间被驱逐或赌杀。"
+
+"achievement.berserker.another2.title" : "嗜血野兽"
+"achievement.berserker.another2.goal" : "在忘我状态下击杀一名伪装者。"
+"achievement.berserker.another2.splitted.1" : "嗜血"
+
+"achievement.berserker.common4.title" : "怒火未消"
+"achievement.berserker.common4.goal" : "在暴怒状态下击杀玩家并活到会议结束"
+"achievement.berserker.challenge.title" : "无人可挡"
+"achievement.berserker.challenge.goal" : "使用暴怒能力后，在20秒内击杀3名玩家并存活到最后胜利。"

@@ -1,0 +1,75 @@
+# Assignable
+
+"role.sniper.name" : "狙击手"
+"role.sniper.short" : "狙"
+"role.sniper.blurb" : "一枪制敌♪"
+
+# Document
+
+"role.sniper.doc" : "狙击手无法正常击杀，但可以使用狙击枪远程击杀其他玩家。"
+"role.sniper.ability.title" : "固有能力【狙击枪】"
+"role.sniper.ability.main" : "狙击无法正常攻击，但可以使用狙击枪射击。<br>通过狙击枪还能穿墙击杀玩家。"
+"role.sniper.ability.equip" : "<title>掏出/藏匿</title>掏出或藏匿狙击枪。<br>掏出后，其他玩家可以看到的狙击枪。"
+"role.sniper.ability.kill" : "<title>狙击</title>当狙击枪被掏出且冷却结束，狙击按钮会亮起。狙击方向为鼠标朝向。<br>使用快捷键或鼠标左键触发。"
+"role.sniper.tips" : "・・玩家的碰撞箱位于最中心的位置。<br>・当枪声响起时，<var>%SOUND%</var>米以内的玩家都会有通知。<var>%AIMASSIST%</var>"
+"role.sniper.tips.aimAssist" : "<br>・掏出狙击枪<b>%DELAY%</b>秒后会出现<b>辅助瞄准线</b>。<br>  沿着辅助瞄准线开枪更容易杀死敌人。"
+
+# Options
+
+"options.role.sniper.detail" : "狙击手可以远距离狙杀其他玩家，墙壁不能阻挡狙击手的狙杀。<br>狙击手的狙杀有最大有效射程，并会在狙击手所在地点周围用狙击图标向其他玩家示意。"
+"options.role.sniper.snipeCoolDown" : "狙击冷却时间"
+"options.role.sniper.shotSize" : "子弹大小"
+"options.role.sniper.shotEffectiveRange" : "狙击枪有效射程"
+"options.role.sniper.shotNoticeRange" : "枪声可听范围"
+"options.role.sniper.shotNoticeRange.detail" : "配置后，范围内的玩家可以听到狙击手开枪的声音以及位置。"
+"options.role.sniper.storeRifleOnFire" : "射击后继续持枪"
+"options.role.sniper.storeRifleOnUsingUtility" : "进行交互时自动收枪"
+"options.role.sniper.storeRifleOnUsingUtility.detail" : "开启后，在进行交互时，自动收起步枪。"
+"options.role.sniper.canSeeRifleInShadow" : "可以在阴影中看到狙击枪"
+"options.role.sniper.canKillHidingPlayer" : "可以击杀通风口内玩家"
+"options.role.sniper.aimAssist" : "瞄准辅助线"
+"options.role.sniper.aimAssist.detail" : "开启后，可以获得指向玩家的辅助线（这个辅助线可能会影响平衡）。"
+"options.role.sniper.delayInAimAssistActivation" : "辅助瞄准激活时间"
+"options.role.sniper.canKillImpostor" : "可以击杀伪装者"
+
+# Game
+
+"role.sniper.shotRange" : "狙击手：<color=white>狙击枪有效射程</color>"
+"role.sniper.soundRange" : "狙击手：<color=white>枪声可听范围</color>"
+"role.sniper.shotSize" : "狙击手：<color=white>子弹判定范围</color>"
+"gameAction.sniper.equip" : "掏出狙击枪"
+
+# UI
+
+"button.label.equip" : "掏出"
+"button.label.unequip" : "隐匿"
+"button.label.snipe" : "狙击"
+"ui.action.sniper.equip" : "掏出或藏匿狙击枪。"
+"ui.action.sniper.kill" : "使用狙击枪射击。"
+
+# Status
+
+"state.sniped" : "中弹"
+
+# Stats
+
+"stats.sniper.misshot" : "开枪打空次数"
+"stats.sniper.shot" : "开枪狙杀次数"
+
+# Titles
+
+"achievement.sniper.common1.title" : "精准打击"
+"achievement.sniper.common1.goal" : "狙杀一名玩家"
+
+"achievement.sniper.another1.title" : "惊枪之鸟"
+"achievement.sniper.another1.goal" : "使用狙击枪之后在会议中被赌杀或被驱逐"
+
+"achievement.sniper.common2.title" : "弹无虚发"
+"achievement.sniper.common2.goal" : "狙杀一名飞在天上的玩家"
+"achievement.sniper.common2.cond" : "提示：需要借助气动者的能力。"
+"achievement.sniper.common2.splitted.0" : "弹无虚发"
+
+"achievement.sniper.challenge.title" : "百步穿杨"
+"achievement.sniper.challenge.goal" : "狙杀两名20米以外的玩家。"
+"achievement.sniper.challenge.cond" : "提示：有效射程在20x以上"
+"achievement.sniper.challenge.splitted.2" : "百步穿杨"

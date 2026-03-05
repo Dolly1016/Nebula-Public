@@ -1,0 +1,58 @@
+# Assignable
+
+"role.effacer.name" : "擦除者"
+"role.effacer.short" : "擦"
+"role.effacer.blurb" : "擦除你的痕迹"
+"role.effacer.hint" : "让队友隐身，配合出完美击杀。"
+
+# Document
+
+"role.effacer.doc" : "擦除者可以让其他玩家<b>隐身</b>。<br>其他人看不到被隐身的玩家，但被隐身的玩家注意不到自己隐身了。<br>但是伪装者仍然可以看到其隐身了并且意识到他已经隐身了。"
+"role.effacer.ability.title" : "固有能力【隐身】"
+"role.effacer.ability.main" : ""
+"role.effacer.ability.efface" : "<title>擦除</title>使目标隐身。"
+"role.effacer.tips" : "・这个职业与<color=#ff7f00>超</color><color=#ff0000>新</color><color=#00ff00>职业</color>进行联动（原职业：ジャマー）。"
+
+# Options
+
+"options.role.effacer.detail" : "擦除者可以让其他玩家隐身。"
+"options.role.effacer.effaceCoolDown" : "擦除冷却时间"
+"options.role.effacer.effaceDuration" : "擦除持续时间"
+
+# Game
+
+
+# UI
+
+"button.label.efface" : "擦除"
+
+# Stats
+
+"stats.effacer.efface" : "擦除玩家次数"
+
+# Titles
+
+"achievement.effacer.common1.title" : "橡皮擦"
+"achievement.effacer.common1.goal" : "让玩家隐身。"
+"achievement.effacer.common1.flavor" : "“你从哪里来的？”—来自会议记录。"
+"achievement.effacer.common1.splitted.0" : "擦除"
+
+"achievement.effacer.common2.title" : "隐形刺客"
+"achievement.effacer.common2.goal" : "让伪装者队友隐身。"
+"achievement.effacer.common2.flavor" : "“我正在做任务，突然看到一把斧子飘在空中！”—来自报告者的自述。"
+"achievement.effacer.common2.splitted.0" : "隐形"
+
+"achievement.effacer.common3.title" : "无处躲藏"
+"achievement.effacer.common3.goal" : "击杀被队友擦除隐身的玩家。"
+"achievement.effacer.common3.flavor" : "“请解释一下怎么突然出现一个尸体？”—来自观看监控的船员的问题。"
+
+"achievement.effacer.common4.title" : "最佳配合"
+"achievement.effacer.common4.goal" : "让被隐身的队友击杀其他带刀职业。"
+"achievement.effacer.common4.flavor" : "“你以为你很强？”—来自尸体上的血字。"
+
+"achievement.effacer.challenge.title" : "无人区"
+"achievement.effacer.challenge.goal" : "除自身以外的伪装者全部存活。"
+"achievement.effacer.challenge.cond" : "提示：至少所有人都被隐身过。"
+"achievement.effacer.challenge.flavor" : "“怎么只有我一个人，其他人呢？”—来自飞艇管理者的疑惑。"
+"achievement.effacer.challenge.splitted.0" : "无人"
+"achievement.effacer.challenge.splitted.2" : "区域"

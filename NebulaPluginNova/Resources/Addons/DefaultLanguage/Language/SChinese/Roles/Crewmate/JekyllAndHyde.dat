@@ -1,0 +1,66 @@
+# Assignable
+
+"role.jekyllAndHyde.name.jekyll" : "杰基尔"
+"role.jekyllAndHyde.name.hyde" : "海德"
+"role.jekyllAndHyde.name.combination" : "%J% & %H%"
+"role.hydeImpostor.name" : "海德"
+"role.hydeImpostor.short" : "海"
+"role.jekyllAndHyde.blurb" : "我就是“我”！"
+
+# Document
+
+"role.jekyllAndHyde.doc" : "杰基尔与海德本质上是同一个。<br>杰基尔属于船员阵营，海德属于伪装者阵营。"
+"role.jekyllAndHyde.winCond" : "杰基尔：完成任务与船员一起胜利。<br>海德：与伪装者一起获胜。"
+"role.jekyllAndHyde.ability.title" : "固有能力【多重人格】"
+"role.jekyllAndHyde.ability.main" : "每次会议结束，就会切换一次人格。<br>杰基尔是船员阵营的，海德是伪装者阵营的。<br>海德可以击杀其他玩家，但是有击杀次数限制。<br>如果你击杀了一名伪装者玩家，你就彻底成为一名伪装者，不会在改变人格。"
+"role.jekyllAndHyde.ability.drug" : "<title>人格分离药</title>杰基尔可以通过完成任务获得<b>人格分离药</b>。<br>使用后立刻变成海德人格。"
+"role.jekyllAndHyde.tips" : "・人格会在被放逐的同时切换，如果导致游戏结束，胜负会根据切换的人格判定。<br>・初始人格是随机的。<br>・死亡后不会切换人格。"
+
+# Options
+
+"options.role.jekyllAndHyde.detail" : "杰基尔是船员阵营，但他的第二人格是海德。<br>海德状态下属于伪装者阵营的。"
+"options.role.jekyllAndHyde.numOfKill" : "海德击杀次数"
+"options.role.jekyllAndHyde.killCooldown" : "海德击杀冷却时间"
+"options.role.jekyllAndHyde.hasImpostorVision" : "海德拥有伪装者视野"
+"options.role.jekyllAndHyde.canUseVents" : "海德可以进入通风口"
+"options.role.jekyllAndHyde.canMoveInVents" : "海德可以使用通风口"
+
+# Game
+
+"role.jekyllAndHyde.short.jekyll" : "杰"
+"role.jekyllAndHyde.short.hyde" : "海"
+"role.jekyllAndHyde.short.combination" : "%J%%H%"
+"role.jekyllAndHyde.changedToText" : "%R%人格占据了这身体。"
+
+# UI
+
+"button.label.medicine" : "人格分离药"
+
+# Stats
+
+"stats.jekyllAndHyde.medicine" : "人格分离药使用次数"
+
+# Titles
+
+"achievement.jekyllAndHyde.common1.title" : "美妙时光"
+"achievement.jekyllAndHyde.common1.goal" : "喝下药物主动成为海德。"
+"achievement.jekyllAndHyde.common1.flavor" : "【或许没有邪恶一说，毕竟我永远是“我”！】"
+"achievement.jekyllAndHyde.common1.splitted.2" : "时光"
+
+"achievement.jekyllAndHyde.another1.title" : "我心如火"
+"achievement.jekyllAndHyde.another1.goal" : "通过海德人格死亡并输掉游戏。"
+"achievement.jekyllAndHyde.another1.flavor" : "【这是我最后一次登上这舞台！】"
+
+"achievement.jekyllAndHyde.common2.title" : "自我主宰"
+"achievement.jekyllAndHyde.common2.goal" : "通过海德人格击杀伪装者。"
+"achievement.jekyllAndHyde.common2.flavor" : "【让我破除这迷雾！】"
+
+"achievement.jekyllAndHyde.common3.title" : "黑幕"
+"achievement.jekyllAndHyde.common3.goal" : "通过海德人格击杀船员。"
+"achievement.jekyllAndHyde.common3.flavor" : "【世界只是一个巨大的幕布，“我”只是在表演“我”的人生。】"
+
+"achievement.jekyllAndHyde.challenge.title" : "人性"
+"achievement.jekyllAndHyde.challenge.goal" : "通过海德人格击杀其他玩家并通过船员阵营获胜而获胜。"
+"achievement.jekyllAndHyde.challenge.cond" : "提示：击杀船员玩家"
+"achievement.jekyllAndHyde.challenge.flavor" : "“即便如此，也要活下去” ——亨利・杰基尔？"
+"achievement.jekyllAndHyde.challenge.splitted.2" : "人性"

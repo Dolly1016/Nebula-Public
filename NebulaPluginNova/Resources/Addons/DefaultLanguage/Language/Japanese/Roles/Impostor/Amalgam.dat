@@ -20,6 +20,8 @@
 "options.role.amalgam.detail" : "アマルガムはさまざまな役職の能力を融合できます。"
 "options.role.amalgam.maxRoles" : "役職の最大融合回数"
 "options.role.amalgam.randomAssignment" : "ランダム融合"
+"options.role.amalgam.numOfRandomAssignment" : "役職のランダム融合回数"
+"options.role.amalgam.numOfRandomAssignment.all" : "全て"
 "options.role.amalgam.abilityFilter" : "役職フィルタ"
 "options.role.amalgam.canBeGuessedAsLoadedRoles" : "融合した役職で推察可能"
 

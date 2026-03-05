@@ -11,7 +11,7 @@
 
 # Options
 
-"options.role.niceGuesser.detail" : "Guesser can shoot players in the meeting by guessing the role.<br>If the guess is wrong, guesser dies instead."
+"options.role.niceGuesser.detail" : "The Nice Guesser can shoot players in the meeting by guessing the role.<br>If the guess is wrong, guesser dies instead."
 
 # Game
 

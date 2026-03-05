@@ -1,0 +1,57 @@
+# Assignable
+
+"role.lover.name" : "恋人"
+"role.lover.blurb" : "你和<color=#fc04bdff>%NAME%</color>坠入爱河了"
+"role.lover.generalBlurb" : "与你的爱人活到最后"
+
+# Document
+
+"role.lover.doc" : "恋人两人一组。%SUICIDE%"
+"role.lover.doc.standard" : "当有一方死亡时，另一方会殉情。"
+"role.lover.doc.avenger" : "当有一方死亡时，另一方会成为%AVENGER%来报仇。<br>如果有一方是因为被放逐而死亡或没有复仇对象，另一方会直接殉情。"
+"role.lover.winCond" : "当存活玩家只有3个或3个以下，且你与你的爱人存活。%EXTRA%"
+"role.lover.winCond.additional" : "<br><var>或者你的爱人获胜并且还存活，你也可以共享胜利</var>。"
+
+# Options
+
+"options.role.lover.detail" : "恋人两人一组。如果一方死亡，另一个也会死亡。"
+"options.role.lover.numOfPairs" : "可出现对数"
+"options.role.lover.chanceOfAssigningImpostors" : "一方为伪装者恋人的概率"
+"options.role.lover.allowExtraWin" : "允许跟随胜利" 
+"options.role.lover.allowExtraWin.detail" : "开启后，如果另一半获胜，你也会跟随获胜。"
+"options.role.lover.allowExtraWinViaCrewmateWin" : "跟随船员阵营获胜"
+"options.role.lover.blockRoleWin" : "禁止职业阵营胜利"
+"options.role.lover.blockRoleWin.detail" : "开启后，将无法通过自身胜利条件获胜。<br><br>・关闭：无论如何都可以通过自身胜利条件获胜。<br>・开启：无法通过恋人以外的胜利条件获胜。"
+"options.role.lover.avengerMode" : "复仇者模式"
+
+# Game
+
+# UI
+
+# Stats
+
+# Titles
+
+"achievement.lover.common1.title" : "那时也曾盲目过"
+"achievement.lover.common1.goal" : "达成恋人胜利。"
+"achievement.lover.common1.splitted.0" : "那时"
+
+"achievement.lover.another1.title" : "只求同死"
+"achievement.lover.another1.goal" : "爱人被杀死后连带死亡。"
+"achievement.lover.another1.splitted.1" : "有时"
+
+"achievement.lover.challenge.title" : "我们才是真爱"
+"achievement.lover.challenge.goal" : "两个伪装者存活，且自己非伪装者阵营的情况下，取代伪装者阵营胜利"
+"achievement.lover.challenge.splitted.2" : "恋"
+# Team
+
+"end.lover" : "恋人%EXTRA%胜利"
+"end.extra.lover" : "<color=#FFFFFF>+</color>恋人"
+
+# Document
+
+"document.tip.winCond.teams.lover" : "恋人"
+"document.tip.winCond.lovers.normal.title" : "独立胜利"
+"document.tip.winCond.lovers.normal" : "当存活数为3时，且双方都存活，那么将单独胜利。"
+"document.tip.winCond.lovers.extra.title" : "跟随胜利"
+"document.tip.winCond.lovers.extra" : "如果一方达到胜利条件且存活，则跟随胜利。"

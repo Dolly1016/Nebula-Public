@@ -1,0 +1,54 @@
+# Assignable
+
+"role.sidekick.name" : "跟班"
+"role.sidekick.short" : "跟"
+"role.sidekick.blurb" : "协助豺狼歼灭其他玩家"
+"role.sidekick.generalBlurb" : "协助豺狼歼灭其他玩家"
+
+# Document
+
+"role.sidekick.doc" : "跟班需要协助豺狼歼灭其他玩家。"
+
+# Options
+
+"options.role.sidekick.detail" : "跟班需要协助豺狼歼灭其他玩家。"
+"options.role.sidekick.canKill" : "可以击杀"
+"options.role.sidekick.killCoolDown" : "击杀冷却时间"
+"options.role.sidekick.isModifier" : "保留原有职业"
+"options.role.sidekick.canCreateSidekickChainly" : "跟班晋升为豺狼后可招募新的跟班"
+"options.role.sidekick.inheritanceRule" : "继承规则"
+"options.role.sidekick.inheritanceRule.inherit" : "晋级"
+"options.role.sidekick.inheritanceRule.suicide" : "自杀"
+"options.role.sidekick.inheritanceRule.none" : "无"
+"options.role.sidekick.assignedSidekick" : "游戏开始时分配"
+"options.role.sidekick.canSuicide" : "可以自杀"
+"options.role.sidekick.suicideCooldown" : "自杀冷却时间"
+"options.role.sidekick.canFixLight" : "可以修复电力破坏"
+"options.role.sidekick.canFixComms" : "可以修复通讯破坏"
+"options.role.sidekick.hasImpostorVision" : "拥有伪装者视野"
+"options.role.sidekick.canUseVents" : "可以使用通风口"
+"options.role.sidekick.canMoveInVents" : "可以在通风口中移动"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.sidekick.common1.title" : "升官"
+"achievement.sidekick.common1.goal" : "跟班晋级成为豺狼"
+"achievement.sidekick.common1.splitted.2" : "朋友"
+
+"achievement.sidekick.common2.title" : "传宗接代"
+"achievement.sidekick.common2.goal" : "跟班晋级后再去招募一个跟班"
+"achievement.sidekick.common2.splitted.0" : "友情的"
+
+"achievement.sidekick.challenge.title" : "无法摆脱的杀戮"
+"achievement.sidekick.challenge.goal" : "从伪装者阵营中进入到豺狼阵营中并取得胜利"
+"achievement.sidekick.challenge.cond" : "晋级也可以获得"
+"achievement.sidekick.challenge.splitted.0" : "无法摆脱的"

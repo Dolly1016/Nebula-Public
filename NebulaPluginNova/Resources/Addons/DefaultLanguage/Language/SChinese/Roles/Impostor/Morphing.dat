@@ -1,0 +1,54 @@
+# Assignable
+
+"role.morphing.name" : "化形者"
+"role.morphing.short" : "化"
+"role.morphing.blurb" : "装作别人的样子"
+
+# Document
+
+"role.morphing.doc" : "化形者可以变成被取样玩家的样子。"
+"role.morphing.ability.title" : "固有能力【化形】"
+"role.morphing.ability.main" : ""
+"role.morphing.ability.sample" : "<title>取样</title>收集附近玩家的外貌。<var>%SAMPLE%</var>"
+"role.morphing.ability.morph" : "<title>化形</title>化形成为当前取样的玩家外观。<br>效果时间结束或手动触发此能力可以恢复原样。"
+"role.morphing.ability.sample.loseSample" : "取样的外观会在会议结束后丢弃。"
+"role.morphing.ability.sample.keepSample" : "取样的外观可以一直保留。"
+
+# Options
+
+"options.role.morphing.detail" : "化形者需要先暗中给玩家取样，然后化形来击杀他人。"
+"options.role.morphing.sampleCoolDown" : "取样冷却时间"
+"options.role.morphing.morphCoolDown" : "化形冷却时间"
+"options.role.morphing.morphDuration" : "化形持续时间"
+"options.role.morphing.loseSampleOnMeeting" : "会议结束后需要重新取样"
+
+# Game
+
+
+# UI
+
+"button.label.morph" : "化形"
+"button.label.sample" : "取样"
+
+# Stats
+
+"stats.morphing.sample" : "取样使用次数"
+"stats.morphing.morph" : "化形使用次数"
+
+# Titles
+
+"achievement.morphing.common1.title" : "猜猜我是谁"
+"achievement.morphing.common1.goal" : "取样然后化形。"
+"achievement.morphing.common1.cond" : "提示：模仿大师也可以获取该成就！"
+"achievement.morphing.common1.splitted.0" : "猜猜"
+
+"achievement.morphing.another1.title" : "人皮面具"
+"achievement.morphing.another1.goal" : "杀死你取样的玩家"
+
+"achievement.morphing.another2.title" : "是镜子吗"
+"achievement.morphing.another2.goal" : "在你取样的玩家面前化形（需要离的很近）"
+"achievement.morphing.another2.flavor" : "“什么情况？”—来着一个监控管理者的自述。"
+
+"achievement.morphing.challenge.title" : "冤案制造者"
+"achievement.morphing.challenge.goal" : "幻形状态下杀死一名玩家，并在会议期间驱逐被化形的玩家"
+"achievement.morphing.challenge.splitted.0" : "冤屈的"

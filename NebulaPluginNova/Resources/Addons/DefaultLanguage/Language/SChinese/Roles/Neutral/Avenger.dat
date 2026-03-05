@@ -1,0 +1,64 @@
+# Assignable
+
+"role.avenger.name" : "复仇者"
+"role.avenger.short" : "复"
+"role.avenger.blurb" : "定让你血债血还"
+
+# Document
+
+"role.avenger.doc" : "复仇者只有在恋人有一方被杀时才会出现。"
+"role.avenger.winCond" : "击杀目标并活到最后。"
+
+# Options
+
+"options.role.avenger.detail" : "复仇者只有在恋人有一方被杀时才会出现。<br>完成复仇。"
+"options.role.avenger.killCoolDown" : "击杀冷却时间"
+"options.role.avenger.canKnowExistanceOfAvenger" : "可以知晓复仇者的存在"
+"options.role.avenger.canKnowExistanceOfAvenger.off" : "关"
+"options.role.avenger.canKnowExistanceOfAvenger.onlyTarget" : "仅复仇目标"
+"options.role.avenger.canKnowExistanceOfAvenger.on" : "开"
+"options.role.avenger.targetCanKnowAvenger" : "复仇目标知晓复仇者位置"
+"options.role.avenger.showAvengerFlashForTarget" : "闪光告知目标触发复仇者事件"
+"options.role.avenger.notificationForAvengerInterval" : "复仇目标位置通知间隔"
+"options.role.avenger.notificationForTargetInterval" : "复仇者位置通知间隔"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.avenger.killTarget" : "击杀复仇对象次数"
+"stats.avenger.failed" : "被复仇对象击杀次数"
+"stats.avenger.defend" : "击杀复仇者数量"
+"role.avenger.hudText" : "为你的爱人复仇！！！"
+
+# Titles
+
+"achievement.avenger.common1.title" : "报仇"
+"achievement.avenger.common1.goal" : "击杀复仇对象。"
+
+"achievement.avenger.common2.title" : "恋人杀手"
+"achievement.avenger.common2.goal" : "成为复仇对象后反杀复仇者。"
+"achievement.avenger.common2.flavor" : "菜就多练！"
+
+"achievement.avenger.another1.title" : "完不成的誓言"
+"achievement.avenger.another1.goal" : "复仇对象因非复仇者击杀方式死亡。"
+
+"achievement.avenger.another2.title" : "为爱而死"
+"achievement.avenger.another2.goal" : "击杀复仇对象后死亡。"
+"achievement.avenger.another2.splitted.2" : "死亡"
+
+"achievement.avenger.challenge.title" : "角斗士"
+"achievement.avenger.challenge.goal" : "在对手和自己都成为复仇者的基础上获胜。。"
+
+# Team
+
+"end.avenger" : "复仇者%EXTRA%胜利"
+
+# Document
+
+"document.tip.winCond.avenger.title" : "窃取胜利"
+"document.tip.winCond.avenger" : "击杀复仇对象后并活到最后，当游戏结束时，会覆盖并窃取胜利。"

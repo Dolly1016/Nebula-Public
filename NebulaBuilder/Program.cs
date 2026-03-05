@@ -1,6 +1,7 @@
 ﻿using Nebula;
 using Octokit;
 using System.Diagnostics;
+using System.IO.Compression;
 
 Console.WriteLine(GetDisplayVersion() + " ("+ GetTagVersion() +")");
 
@@ -10,6 +11,8 @@ var githubClient = new GitHubClient(new ProductHeaderValue("lr")) { Credentials 
 
 bool exit = false;
 string? githubReleaseUrl = null;
+
+EnzipAsset(Environment.GetEnvironmentVariable("AmongUsRelease") + "\\Nebula_Steam");
 
 AllProcess.Add(Process.Start(GenerateShortcut("AmongUsMod") + "\\Among Us.exe"));
 
@@ -66,8 +69,10 @@ while (!exit)
                     Console.WriteLine("dllファイルをアップロードしています...");
                     UploadAsset(release, "Nebula.dll", File.OpenRead(path + "\\Nebula.dll"));
                     Console.WriteLine("Steam版 zipファイルをアップロードしています...");
+                    EnzipAsset(path + "\\Nebula_Steam");
                     UploadAsset(release, "Nebula_Steam.zip", File.OpenRead(path + "\\Nebula_Steam.zip"));
                     Console.WriteLine("Epic版 zipファイルをアップロードしています...");
+                    EnzipAsset(path + "\\Nebula_Epic");
                     UploadAsset(release, "Nebula_Epic.zip", File.OpenRead(path + "\\Nebula_Epic.zip"));
                     Console.WriteLine("公開が完了しました。");
                 }
@@ -235,6 +240,17 @@ Release? CreateRelease(string description)
     var task = githubClient.Repository.Release.Create("Dolly1016", "Nebula", new(GetTagVersion()) { Name = GetDisplayVersion(), Body = description, Draft = false });
     task.Wait();
     return task.Result;
+}
+
+void EnzipAsset(string directoryPath)
+{
+    string zipPath = directoryPath + ".zip";
+
+    if (File.Exists(zipPath)) File.Delete(zipPath);
+    while (File.Exists(zipPath)) Thread.Sleep(500);
+
+    ZipFile.CreateFromDirectory(directoryPath, zipPath);
+    return;
 }
 
 void UploadAsset(Release release, string fileName, Stream rawData)

@@ -1,6 +1,6 @@
 # Options
 
-"options.role.guesser.detail" : "Guesser can shoot players in the meeting by guessing the role.<br>If the guess is wrong, guesser dies instead."
+"options.role.guesser.detail" : "The Guesser can shoot players in the meeting by guessing the role.<br>If the guess is wrong, guesser dies instead."
 "options.role.guesser.numOfGuess" : "# Guessing"
 "options.role.guesser.numOfGuessPerMeeting" : "# Guess Per Meeting"
 "options.role.guesser.canCallEmergencyMeeting" : "Can Call Emergency Meeting"

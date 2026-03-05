@@ -8,7 +8,7 @@
 # Document
 
 "role.alien.doc" : "An impostor who skillfully manipulates the information of admin and vitals to confuse crewmates."
-"role.alien.ability.title" : "Inherent Ability "Space Invaders""
+"role.alien.ability.title" : "Inherent Ability [Space Invaders]"
 "role.alien.ability.main" : "Interfere with crewmates using strange alien technology."
 "role.alien.ability.emi" : "<title>E.M.I.</title>Temporarily stop updating information on admin and vitals."
 "role.alien.ability.invalidate" : "<title>Invalidate</title>Erase nearby players from admin and vitals."
@@ -16,7 +16,7 @@
 
 # Options
 
-"options.role.alien.detail" : "Alien manipulates the information of admin and vitals,<br>causing confusion."
+"options.role.alien.detail" : "The Alien manipulates the information of admin and vitals,<br>causing confusion."
 "options.role.alien.emiCoolDown" : "E.M.I. Cooldown"
 "options.role.alien.emiDuration" : "E.M.I. Duration"
 "options.role.alien.invalidateCoolDown" : "Invalidate Cooldown"
@@ -46,7 +46,7 @@
 
 "achievement.alien.common3.title" : "Good Neighbor"
 "achievement.alien.common3.goal" : "Conceal an impostor's kill with E.M.I."
-"achievement.alien.common3.flavor" : ""Phew, that was a relief. If I had been seen, it would have been over." ——Another killer"
+"achievement.alien.common3.flavor" : ""Phew, that was a relief. If I had been seen, it would have been over." —Another killer"
 "achievement.alien.common3.splitted.0" : "Good "
 "achievement.alien.common3.splitted.2" : "Neighbor"
 

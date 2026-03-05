@@ -7,7 +7,7 @@
 # Document
 
 "role.sheriff.doc" : "A crewmate who can kill non-crew members."
-"role.sheriff.ability.title" : "Inherent Ability "Execution of Justice""
+"role.sheriff.ability.title" : "Inherent Ability [Execution of Justice]"
 "role.sheriff.ability.main" : ""
 "role.sheriff.ability.kill" : "<title>Kill</title>Attempt to kill. If the target is a crewmate, you <b>misfire</b> and die yourself.<br>%VENT%"
 "role.sheriff.ability.kill.vent" : "<var>Can also kill players in vents.</var>"
@@ -15,7 +15,7 @@
 
 # Options
 
-"options.role.sheriff.detail" : "Sheriff can kill other members.<br>Attempting to kill a Crewmate will die instead."
+"options.role.sheriff.detail" : "The Sheriff can kill other players.<br>Attempting to kill a crewmate will die instead."
 "options.role.sheriff.canKillMadmate" : "Can Kill Madmate"
 "options.role.sheriff.canKillLovers" : "Can Kill Lovers"
 "options.role.sheriff.killCoolDown" : "Kill Cooldown"

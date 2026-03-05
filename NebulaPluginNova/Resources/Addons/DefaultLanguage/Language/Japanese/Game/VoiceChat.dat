@@ -21,3 +21,5 @@
 "voiceChat.settings.device.default" : "既定"
 "voiceChat.settings.server" : "接続先VCサーバー"
 "voiceChat.settings.server.apply" : "適用"
+"voiceChat.settings.micTest" : "マイクテスト"
+"voiceChat.settings.micTest.end" : "マイクテスト終了"

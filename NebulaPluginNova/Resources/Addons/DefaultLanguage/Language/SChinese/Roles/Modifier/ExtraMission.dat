@@ -1,0 +1,46 @@
+# Assignable
+
+"role.extraMission.name" : "额外任务"
+"role.extraMission.generalBlurb" : "铲除眼中钉！"
+
+# Document
+
+"role.extraMission.doc" : "额外任务需要让任务目标死亡。<br>如果目标没有死亡将不能胜利。"
+
+# Options
+
+"options.role.extraMission.detail" : "额外任务需要让任务目标死亡。<br>如果目标没有死亡将不能胜利。"
+
+# Game
+
+"role.extraMission.taskText" : "【额外任务】想办法让%PLAYER%死亡。"
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.extraMission.common1.title" : "任务完成"
+"achievement.extraMission.common1.goal" : "额外任务目标死亡。"
+
+"achievement.extraMission.another1.title" : "万物相等"
+"achievement.extraMission.another1.goal" : "自身死亡后任务目标死亡。"
+
+"achievement.extraMission.common2.title" : "大难不死"
+"achievement.extraMission.common2.goal" : "成为额外任务的目标并生存到最后。"
+
+"achievement.extraMission.common3.title" : "意料之外的背叛"
+"achievement.extraMission.common3.goal" : "把票投给额外任务目标并驱逐。"
+"achievement.extraMission.common3.cond" : "提示：自己和目标是相同阵营（叛徒除外）"
+"achievement.extraMission.common3.splitted.0" : "意料之外的"
+
+"achievement.extraMission.another2.title" : "沉默者"
+"achievement.extraMission.another2.goal" : "任务的目标没有死亡，游戏失败。"
+"achievement.extraMission.another2.flavor" : "也许任务过于艰难。"
+
+"achievement.extraMission.challenge.title" : "过多疑虑"
+"achievement.extraMission.challenge.goal" : "额外任务目标死亡，且自身为他人额外任务的情况下活到最后并获胜。"
+"achievement.extraMission.challenge.splitted.0" : "过多的"

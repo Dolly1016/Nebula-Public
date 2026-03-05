@@ -1,0 +1,73 @@
+# Assignable
+
+"role.whammy.name" : "气球商"
+"role.whammy.short" : "气"
+"role.whammy.blurb" : "轻飘飘~"
+
+# Document
+
+"role.whammy.doc" : "气球商可以在所有任务点放置<b>气球</b>。"
+"role.whammy.ability.title" : "固有能力【气球减负】"
+"role.whammy.ability.main" : "在任务点放置气球，接触该任务点的玩家会获得一个气球。<br>拥有气球的玩家如果在一段时间内没有打破就会死亡。"
+"role.whammy.ability.place" : "<title>放置</title>在任务点上放置气球。<var>%SOUND%</var><br>接触此任务点的玩家会获得气球。"
+"role.whammy.ability.place.sound" : "放置气球的过程中，周围可以听到。"
+"role.whammy.ability.minigame" : "<title>弹弓</title>可以使用地图中的弹弓来打破气球。<br>最多尝试<var>%MINIGAME%</var>次就可以打破气球。"
+"role.whammy.tips" : "・气球会随风飘动，尝试去有风的地点看看如何？"
+
+# Options
+
+"options.role.whammy.detail" : "气球商可以在任务点放置气球陷阱。<br>被气球陷阱困住的人需要抓紧时间把气球打破。"
+"options.role.whammy.balloonsInStarting" : "初始气球数量"
+"options.role.whammy.balloonsInStarting.detail" : "游戏开始时会获得一些气球。<br>放置气球陷阱需要消耗一些气球。"
+"options.role.whammy.balloonsByKilling" : "击杀后获得气球数量"
+"options.role.whammy.balloonsByKilling.detail" : "每次击杀都会获得指定的气球数。"
+"options.role.whammy.balloonsTimeLimit" : "气球持续时间"
+"options.role.whammy.balloonsTimeLimit.detail" : "设置从触发到被绞死前的倒计时。"
+"options.role.whammy.numOfMaxMinigameConsoles" : "弹弓数量"
+"options.role.whammy.numOfMaxMinigameConsoles.detail" : "设置地图中出现弹弓装置的数量。"
+"options.role.whammy.numOfMaxMinigameToBreakBalloon" : "打破气球保底弹弓次数"
+"options.role.whammy.numOfMaxMinigameToBreakBalloon.detail" : "设置打破气球需要完成弹弓装置小游戏的数量。"
+"options.role.whammy.playSeOnPlacingBalloon" : "放置气球音效"
+"options.role.whammy.seStrength" : "放置气球音效听取范围"
+"options.role.whammy.placeDuration" : "放置气球所需时间"
+"options.role.whammy.additionalKillCooldownByPlacement" : "放置气球后追加击杀冷却秒数"
+"options.role.whammy.stoneAssignment" : "每个弹弓石子分配数量"
+"options.role.whammy.group.place" : "放置气球设定"
+"options.role.whammy.group.gaining" : "获取气球设定"
+"options.role.whammy.group.balloon" : "解除气球设定"
+
+# Game
+
+"gameAction.whammy.placement" : "放置气球"
+
+# UI
+
+"button.label.balloon" : "放置"
+
+# Status
+
+"state.balloon" : "绞死"
+
+# Stats
+
+"stats.whammy.balloon" : "放置气球次数"
+"roles.whammy.taskText" : "戳破气球（%TIME%秒）"
+
+# Titles
+
+"achievement.whammy.common1.title" : "逃逸的氧气"
+"achievement.whammy.common1.goal" : "通过气球陷阱勒死一名玩家。"
+
+"achievement.whammy.common2.title" : "消失的氧气"
+"achievement.whammy.common2.goal" : "累计通过气球陷阱勒死10名玩家。"
+"achievement.whammy.common2.splitted.0" : "消失的"
+"achievement.whammy.common2.splitted.1" : "氧气"
+
+"achievement.whammy.another1.title" : "Clown"
+"achievement.whammy.another1.goal" : "没有击杀一名玩家，在按放气球陷阱后被驱逐或杀死。"
+"achievement.whammy.another1.splitted.2" : "安心"
+
+"achievement.whammy.challenge.title" : "窒息感"
+"achievement.whammy.challenge.goal" : "让船员因为气球导致任务进度缓慢。"
+"achievement.whammy.challenge.cond" : "提示：同时存在3名玩家身上捆绑着气球。"
+"achievement.whammy.challenge.splitted.1" : "窒息感"

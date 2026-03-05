@@ -8,7 +8,7 @@
 # Document
 
 "role.berserker.doc" : "A short-term decisive battle-type impostor who goes berserk and gets lots of kills at once."
-"role.berserker.ability.title" : "Inherent Ability "Roar of Selflessness""
+"role.berserker.ability.title" : "Inherent Ability [Roar of Selflessness]"
 "role.berserker.ability.main" : "Reveal the impostor's true nature, transform, and <b>go berserk</b>. During berserk, the kill cooldown is shortened and movement speed increases.<br>However, accumulating kills in berserk mode gradually makes you lose yourself.<br>If you get <var>%KILL%</var> kills in one berserk mode, you enter <b>trance</b> mode and can no longer distinguish players by appearance.<br>In trance mode, you can kill players regardless of ally or enemy."
 "role.berserker.ability.berserk" : "<title>Berserk</title>Transform and power up.<br>At this time, a roar is heard by players within <var>%SE%</var>."
 "role.berserker.ability.berserk.se.short" : "very close"
@@ -19,7 +19,7 @@
 
 # Options
 
-"options.role.berserker.detail" : "Berserk and get lots of kills!<br>Berserker is an imposter who reveals its true identity and powers up."
+"options.role.berserker.detail" : "Berserk and get lots of kills!<br>The Berserker is an imposter who reveals its true identity and powers up."
 "options.role.berserker.killCooldown" : "Kill Cooldown"
 "options.role.berserker.accelRate" : "Accel Rate"
 "options.role.berserker.canCalmDown" : "Can Calm Down"

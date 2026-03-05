@@ -8,7 +8,7 @@
 # Document
 
 "role.hadar.doc" : "An impostor who can move by diving underground."
-"role.hadar.ability.title" : "Inherent Ability "Chitei no Henkosei""
+"role.hadar.ability.title" : "Inherent Ability [The Gophers Are Here!]"
 "role.hadar.ability.main" : "Dive underground and move freely. While underground, your field of view is very narrow and faint.<br>While moving underground, the location of nearby players is notified periodically."
 "role.hadar.ability.dive" : "<title>Dive</title>Dive underground."
 "role.hadar.ability.gush" : "<title>Gush</title>Escape to the ground."
@@ -18,11 +18,11 @@
 
 # Options
 
-"options.role.hadar.detail" : "Hadar can move freely underground.<br>Underground Hadar is invisible to other players."
+"options.role.hadar.detail" : "The Hadar can move freely underground.<br>When the Hadar is underground, it is invisible to other players."
 "options.role.hadar.diveCooldown" : "Dive Cooldown"
 "options.role.hadar.accelRateUnderground" : "Accel Rate Underground"
 "options.role.hadar.gushFromVents" : "Gush From Vents"
-"options.role.hadar.gushFromVents.detail" : "When turned on, Hadar can only emerge from nearby vents.<br>When turned off, Hadar can emerge anywhere on the map."
+"options.role.hadar.gushFromVents.detail" : "When turned on, the Hadar can only emerge from nearby vents.<br>When turned off, Hadar can emerge anywhere on the map."
 "options.role.hadar.ventDetectionRange" : "Vent Detection Range"
 "options.role.hadar.leftDivingEvidence" : "Left Diving Evidence"
 "options.role.hadar.leftDivingEvidence.detail" : "When turned on, a hole is left on the ground when diving underground.<br>The hole becomes smaller each time a meeting is held and eventually disappears."

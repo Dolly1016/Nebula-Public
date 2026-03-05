@@ -1,0 +1,64 @@
+# Assignable
+
+"role.bubblegun.name" : "泡泡枪手"
+"role.bubblegun.short" : "泡"
+"role.bubblegun.blurb" : "和我一起欣赏泡泡秀吧！"
+"role.bubblegun.hint" : "用泡泡捕捉其他玩家。"
+
+# Document
+
+"role.bubblegun.doc" : "泡泡枪手可以使用泡泡枪发射泡泡来困住其他玩家。<br>被泡泡困住的玩家会死亡，尸体也无法被报告。"
+"role.bubblegun.ability.title" : "固有能力【泡泡枪】"
+"role.bubblegun.ability.main" : "可以使用泡泡捕捉并击杀其他玩家。<br>泡泡枪的冷却时间<var>%BUBBLE%</var>（<var>%SEC%</var>秒）。"
+"role.bubblegun.ability.sec.longer" : "比击杀冷却时间更长"
+"role.bubblegun.ability.sec.shorter" : "比击杀冷却时间更短"
+"role.bubblegun.ability.sec.just" : "和击杀冷却时间相同"
+"role.bubblegun.ability.equip" : "<title>掏出/藏匿</title>掏出或藏匿泡泡枪。<br>掏出后，其他玩家可以看到的泡泡枪。"
+"role.bubblegun.ability.kill" : "<title>发射泡泡</title>发射泡泡。<br>发射方向可以通过鼠标光标来调整。"
+
+# Options
+
+"options.role.bubblegun.detail" : "泡泡枪手可以发射一束泡泡。<br>碰到泡泡的玩家会死亡，同时泡泡中的尸体无法报告。"
+"options.role.bubblegun.bubbleCooldown" : "发射泡泡冷却时间"
+"options.role.bubblegun.bubbleSize" : "泡泡大小"
+"options.role.bubblegun.bubbleSpeed" : "泡泡飞行速度"
+"options.role.bubblegun.bubbleDuration" : "泡泡持续时间"
+"options.role.bubblegun.maxBubbles" : "泡泡可发射次数"
+"options.role.bubblegun.eraseBubblesOnMeeting" : "会议后清除泡泡"
+"options.role.bubblegun.canKillImpostor" : "可以击杀队友"
+"options.role.bubblegun.bubblePopWhenHitWall" : "泡泡碰到墙壁后破裂"
+
+# Game
+
+
+# UI
+
+"button.label.bubble" : "发射泡泡"
+"ui.action.bubblegun.equip" : "掏出或藏匿泡泡枪。<br>掏出泡泡枪期间，击杀按钮会变成泡泡枪发射按钮。"
+"ui.action.bubblegun.kill" : "发射泡泡。<br>发射后会自动藏匿。"
+
+# Game Statictics
+
+"statistics.events.bubbled" : "泡中窒息"
+
+# Status
+
+"state.bubbled" : "泡中窒息"
+
+# Stats
+
+"stats.bubblegun.bubble" : "泡泡枪使用次数"
+
+# Titles
+
+"achievement.bubblegun.common1.title" : "抓到了！"
+"achievement.bubblegun.common1.goal" : "用泡泡捕捉一个玩家。"
+
+"achievement.bubblegun.another1.title" : "破碎的泡泡"
+"achievement.bubblegun.another1.goal" : "使用泡泡枪后，在下轮会议中被赌杀或者驱逐。"
+"achievement.bubblegun.another1.flavor" : "“终有消散时。”"
+
+"achievement.bubblegun.challenge.title" : "泡泡龙"
+"achievement.bubblegun.challenge.goal" : "向右上方发生一个泡泡，并在破裂前使3名以上玩家困住。"
+"achievement.bubblegun.challenge.flavor" : "“这是什么东西那么漂亮？”—来自好奇者。"
+"achievement.bubblegun.challenge.splitted.0" : "80年代的"

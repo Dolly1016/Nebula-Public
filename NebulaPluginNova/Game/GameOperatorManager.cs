@@ -1,4 +1,5 @@
 ﻿using Hazel;
+using Nebula.Modules.Logging;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -171,7 +172,7 @@ public class GameOperatorManager
                     o.action.Invoke(e);
                 }catch (Exception ex)
                 {
-                    NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Error, null, ex.ToString());
+                    NebulaLogger.Instance.Error(ex.ToString());
                 }
                 return false;
             });

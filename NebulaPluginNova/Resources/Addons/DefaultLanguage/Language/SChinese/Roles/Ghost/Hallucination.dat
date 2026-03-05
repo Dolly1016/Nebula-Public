@@ -1,0 +1,41 @@
+# Assignable
+
+"role.hallucination.name" : "幻形"
+"role.hallucination.blurb" : "让我再活一次"
+"role.hallucination.short" : "幻"
+
+# Document
+
+"role.hallucination.doc" : "幻形可以幻化出一个幸存者假人并操控。"
+
+# Options
+
+"options.role.hallucination.detail" : "幻形可以幻化出一个玩家假人并操控。"
+"options.role.hallucination.hallucinationCooldown" : "幻形冷却时间"
+"options.role.hallucination.hallucinationDuration" : "幻形持续时间"
+
+# Game
+
+"gameAction.hallucination.hallucination" : "召唤"幻形
+
+# UI
+
+"button.label.hallucination" : "幻形"
+
+# Stats
+
+"stats.hallucination.hallucinations" : "幻形召唤次数"
+
+# Titles
+
+"achievement.hallucination.common2.title" : "鬼打墙"
+"achievement.hallucination.common2.goal" : "在存活的玩家面前召唤幻形"
+"achievement.hallucination.common2.splitted.0" : "幻影"
+
+"achievement.hallucination.common3.title" : "如同镜子"
+"achievement.hallucination.common3.goal" : "与被操作的幻形相同样貌的玩家相遇"
+"achievement.hallucination.common3.splitted.2" : "？"
+
+"achievement.hallucination.another1.title" : "伪造在场"
+"achievement.hallucination.another1.goal" : "幻形一名玩家后，被幻形的玩家遭到驱逐。"
+"achievement.hallucination.another1.splitted.1" : "伪造"

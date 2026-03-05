@@ -1,0 +1,108 @@
+# Assignable
+
+"role.dancer.name" : "舞蹈家"
+"role.dancer.short" : "舞"
+"role.dancer.blurb" : "让我们一起共舞吧"
+
+# Document
+
+"role.dancer.doc" : "舞蹈家可以向其他玩家跳舞并设下<b>死亡预言</b>。"
+"role.dancer.winCond" : "存活的同时，让<var>%NUM%</var>个人协助你完成<b>死亡预言</b>。%ADD%"
+"role.dancer.winCond.main.lastDance" : "<br>另外，在完成以上条件后向幸存者展示<var>最后一舞</var>才能获胜。"
+"role.dancer.ability.title" : "固有能力【死亡之舞】"
+"role.dancer.ability.main" : "可以通过快速左右抖动身体进行跳舞。<br>目睹舞蹈的玩家会收到<b>死亡预言</b>。<br>目睹的玩家在死亡预言有效时间内死亡算作完成一次<b>死亡预言</b>。<br>目睹死亡预言的玩家可以通过与舞蹈家一样方式的操作进行传递死亡预言。<br><br>目睹舞蹈的玩家有三个选择：协助舞蹈家完成死亡预言、传染给其他玩家和等待死亡预言效果结束。"
+"role.dancer.ability.dance" : "<title>跳舞</title>快速左右抖动身体进行跳舞。点击按钮或使用快捷键都<b>无法发动</b>。<br>需要一直跳到按钮计时器结束才能向附近的玩家设下<b>死亡预言</b>。"
+"role.dancer.ability.danceKill" : "<title>死亡之舞</title>在尸体附近跳舞后，技能会变成<b>死亡之舞</b>。再次舞蹈可以直接击杀其他玩家。<br><b>死亡之舞</b>造成的击杀会直接算作完成一次<b>死亡预言</b>"
+"role.dancer.tips" : "・处于<b>死亡预言</b>期间，玩家不能获胜。<br>・如果<b>死亡预言</b>传给舞蹈家本人则直接消失。<br>・跳舞的人并不一定代表该玩家是舞蹈家。<br>・当舞蹈家获胜时，协助舞蹈家完成死亡预言的玩家也可以跟随<b>获胜</b>。"
+
+# Options
+
+"options.role.dancer.detail" : "舞蹈家可以通过跳舞对玩家设下死亡预言。<br>被设下死亡预言的玩家需要在会议中考虑死亡预言的影响。"
+"options.role.dancer.numOfSuccessfulForecastToWin" : "胜利所需完成死亡预言数量"
+"options.role.dancer.danceCoolDown" : "跳舞冷却时间"
+"options.role.dancer.danceDuration" : "跳舞持续时间"
+"options.role.dancer.danceRange" : "跳舞影响范围"
+"options.role.dancer.forecastDuration" : "死亡之舞持续时间"
+"options.role.dancer.finalDance" : "最后一舞模式"
+"options.role.dancer.deathNotification" : "出现尸体时有声音通知"
+"options.role.dancer.forecastedFollowingSuicide" : "舞蹈家死亡后追随者自杀"
+
+# Game
+
+"role.dancer.taskDanceText" : "完成死亡之舞"
+"role.dancer.taskFinalText" : "向所有活着的玩家展示最后一支舞蹈后获胜"
+
+# UI
+
+"button.label.dance" : "跳舞"
+"ui.action.danceAction" : "可以通过快速左右移动触发效果。"
+
+# Game Statictics
+
+"statistics.events.dance" : "死亡之舞"
+
+# Status
+
+"state.frenzied" : "疯癫"
+
+# Stats
+
+"stats.dancer.dance" : "跳舞次数"
+
+# Titles
+
+"achievement.dancer.common1.title" : "优美舞步"
+"achievement.dancer.common1.goal" : "在存活的玩家旁边跳舞。"
+"achievement.dancer.common1.splitted.0" : "舞步"
+
+"achievement.dancer.another2.title" : "大舞台"
+"achievement.dancer.another2.goal" : "在2名以上存活玩家附近使用技能。"
+"achievement.dancer.another2.splitted.1" : "舞台"
+
+"achievement.dancer.common8.title" : "舞动才是真谛"
+"achievement.dancer.common8.goal" : "总计20次成功预言玩家死亡。"
+"achievement.dancer.common8.splitted.2" : "真谛"
+
+"achievement.dancer.common2.title" : "狂热舞步"
+"achievement.dancer.common2.goal" : "在尸体附近使用技能。"
+"achievement.dancer.common2.flavor" : "为死者给予尊重。"
+
+"achievement.dancer.common3.title" : "终末之舞"
+"achievement.dancer.common3.goal" : "看到舞蹈家跳舞。"
+"achievement.dancer.common3.splitted.0" : "“它”"
+
+"achievement.dancer.common4.title" : "漏网之鱼"
+"achievement.dancer.common4.goal" : "目击舞蹈家的舞蹈后存活并胜利。"
+
+"achievement.dancer.common5.title" : "黄粱一梦"
+"achievement.dancer.common5.goal" : "被舞蹈家预言死亡后跟随其胜利。"
+"achievement.dancer.common5.flavor" : "跟随舞蹈家的舞步！"
+"achievement.dancer.common5.splitted.0" : "周末的"
+"achievement.dancer.common5.splitted.1" : "午后的"
+
+"achievement.dancer.common6.title" : "片尾曲"
+"achievement.dancer.common6.goal" : "成为最后一舞的目击者。"
+
+"achievement.dancer.common7.title" : "斗舞"
+"achievement.dancer.common7.goal" : "和舞蹈家一起跳舞。"
+"achievement.dancer.common7.splitted.1" : "斗舞"
+
+"achievement.dancer.another1.title" : "不被欣赏的舞蹈"
+"achievement.dancer.another1.goal" : "跳舞后，在会议中被赌杀或驱逐。"
+"achievement.dancer.another1.splitted.2" : "余舞"
+
+"achievement.dancer.challenge.title" : "被诅咒的舞女"
+"achievement.dancer.challenge.goal" : "在豺狼或者伪装者面前跳舞，并胜利。"
+"achievement.dancer.challenge.flavor" : "美丽的怪物。"
+"achievement.dancer.challenge.splitted.1" : "不祥的"
+"achievement.dancer.challenge.splitted.2" : "舞女"
+
+# Team
+
+"teams.dancer" : "舞蹈家"
+"end.dancer" : "舞蹈家<color=#FFFFFF>+鬼魂</color>%EXTRA%胜利"
+
+# Document
+
+"document.tip.winCond.dancer.title" : "特殊胜利"
+"document.tip.winCond.dancer" : "完成指定次数的死亡预言便会携带因死亡预言而死的人获胜。"

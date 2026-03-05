@@ -1,0 +1,19 @@
+# Categories
+
+"role.category.crewmate" : "船员职业"
+"role.category.impostor" : "伪装者职业"
+"role.category.neutral" : "第三方职业"
+"role.category.ghost" : "鬼魂职业"
+"role.category.modifier" : "附加能力"
+
+# Document
+
+"document.canAssignTo" : "可分配" 
+"document.caption.configuration" : "*部分<var>浅蓝色</var>内容为设置不同选项效果的描述，部分<client>绿色</client>内容为客户端不同修改效果的描述。"
+"document.configurations.title" : "局内设置" 
+"document.configurations.none" : "无" 
+"document.configurations.empty" : "无" 
+"document.tips.title" : "提示"
+"document.winCond.title" : "胜利条件"
+"document.titles.title" : "成就"
+"document.titles.none" : "无" 

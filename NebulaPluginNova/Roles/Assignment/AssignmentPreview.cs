@@ -445,7 +445,7 @@ internal class AssignmentPreview
         {
             if (!type.IsActive) continue;
 
-            roles.AddRange(CheckRoles(Roles.AllRoles, allFlag.HasFlag(AssignmentFlag.ModImpostor100), allFlag.HasFlag(AssignmentFlag.ModImpostorPrb), type));
+            roles.AddRange(CheckRoles(Roles.AllRoles, true, true, type));
         }
 
         foreach (var modifier in Roles.AllAllocatableModifiers()) specials.AddRange(modifier.SpecialAssignment);

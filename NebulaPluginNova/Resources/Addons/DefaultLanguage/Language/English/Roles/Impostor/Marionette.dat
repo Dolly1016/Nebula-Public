@@ -7,7 +7,7 @@
 # Document
 
 "role.marionette.doc" : "An impostor who controls a doll that can swap positions with themselves."
-"role.marionette.ability.title" : "Inherent Ability "Louis' Doll""
+"role.marionette.ability.title" : "Inherent Ability [A Puppetry Begins]"
 "role.marionette.ability.main" : "%DOC%"
 "role.marionette.ability.main.player" : "Can place a doll with <var>the same appearance as the Marionette themselves</var>."
 "role.marionette.ability.main.player.keep" : "Can place a doll with <var>the same appearance as the Marionette themselves</var>.<br><var>Even if your own appearance changes after placing the doll, the doll's appearance does not change.</var>"
@@ -21,7 +21,7 @@
 
 # Options
 
-"options.role.marionette.detail" : "Marionette can place the decoy.<br>they and the decoy swap position each other."
+"options.role.marionette.detail" : "The Marionette can place the decoy.<br>they and the decoy swap position each other."
 "options.role.marionette.mannequinMode" : "Decoy Appearance"
 "options.role.marionette.mannequinMode.mannequin" : "Mannequin"
 "options.role.marionette.mannequinMode.player" : "Player"

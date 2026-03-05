@@ -3,6 +3,7 @@ using Il2CppInterop.Runtime.Injection;
 using Il2CppSystem.Text.RegularExpressions;
 using Innersloth.Assets;
 using Nebula.Behavior;
+using Nebula.Modules.Logging;
 using Nebula.Utilities;
 using PowerTools;
 using Rewired.UI.ControlMapper;
@@ -18,10 +19,7 @@ using TMPro;
 using Unity.Profiling.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
-using UnityEngine.Networking;
-using UnityEngine.Profiling;
 using UnityEngine.Rendering;
-using UnityEngine.UIElements;
 using Virial;
 using Virial.Events.Player;
 using Virial.Game;
@@ -937,7 +935,7 @@ public class CustomItemBundle : CostumePermissionHolder
         IsActive = true;
         if (addToMoreCosmic) AllBundles[BundleName!] = this;
 
-        NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, NebulaLog.LogCategory.MoreCosmic, $"Start to load costume bundle. (Bundle: {BundleName}, Contents: {Hats.Count + Visors.Count + Nameplates.Count})");
+        MoreCosmic.Log.Message($"Start to load costume bundle. (Bundle: {BundleName}, Contents: {Hats.Count + Visors.Count + Nameplates.Count})");
 
         foreach (var item in AllCosmicItem())
         {
@@ -946,7 +944,7 @@ public class CustomItemBundle : CostumePermissionHolder
             yield return item.Activate(addToMoreCosmic);
         }
 
-        NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, NebulaLog.LogCategory.MoreCosmic, $"Finish to load costume bundle! (Bundle: {BundleName})");
+        MoreCosmic.Log.Message($"Finish to load costume bundle! (Bundle: {BundleName})");
 
         if (addToMoreCosmic)
         {
@@ -965,7 +963,7 @@ public class CustomItemBundle : CostumePermissionHolder
             HatManager.Instance.allNamePlates = nameplateList.ToArray();
         }
 
-        NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, NebulaLog.LogCategory.MoreCosmic, $"Finish to flush costume bundle! (Bundle: {BundleName})");
+        MoreCosmic.Log.Message($"Finish to flush costume bundle! (Bundle: {BundleName})");
     }
 
     public Stream? OpenStream(string path)
@@ -1009,7 +1007,7 @@ public class CustomItemBundle : CostumePermissionHolder
         {
             string hash = BitConverter.ToString(MD5.ComputeHash(rawData)).Replace("-", "").ToLowerInvariant();
 
-            NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, NebulaLog.LogCategory.MoreCosmic, $"Hash: {hash} ({category}/{address})");
+            MoreCosmic.Log.Message($"Hash: {hash} ({category}/{address})");
         }
 
     }
@@ -1042,7 +1040,7 @@ public class CustomItemBundle : CostumePermissionHolder
             }
             catch (Exception ex)
             {
-                NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, NebulaLog.LogCategory.MoreCosmic, $"Error occurred in costume deserialize (URL: {url})\n" + ex.ToString());
+                MoreCosmic.Log.Error($"Error occurred in costume deserialize (URL: {url})\n" + ex.ToString());
             }
         });
 
@@ -1084,6 +1082,7 @@ public class CustomItemBundle : CostumePermissionHolder
 [NebulaRPCHolder]
 public static class MoreCosmic
 {
+    internal static Virial.Logging.ILogger Log;
     public static readonly Dictionary<string, CosmicHat> AllHats = [];
     public static readonly Dictionary<string, CosmicVisor> AllVisors = [];
     public static readonly Dictionary<string, CosmicNameplate> AllNameplates = [];
@@ -1152,7 +1151,7 @@ public static class MoreCosmic
                 num++;
             }
 
-            NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, NebulaLog.LogCategory.MoreCosmic, num + "Localization entries have been registered! (Language: " + entry.Language + ")");
+            Log.Message(num + "Localization entries have been registered! (Language: " + entry.Language + ")");
         }
     }
     public static MultiImage? TryGetLocalizedImage(string hash, float pixelsPerUnit, int x, int y)
@@ -1214,7 +1213,7 @@ public static class MoreCosmic
         }
         catch (Exception e)
         {
-            NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.MoreCosmic, "Error is occurred while loading costumes.\n" + e.ToString());
+            MoreCosmic.Log.Error("Error is occurred while loading costumes.\n" + e.ToString());
         }
     }
 
@@ -1266,6 +1265,8 @@ public static class MoreCosmic
 
     static void Preprocess(NebulaPreprocessor preprocessor)
     {
+        Log = NebulaAPI.Logging.NebulaLogger("MoreCosmic");
+
         if (isLoaded) return;
 
         CoLoadAll().StartOnProcess();

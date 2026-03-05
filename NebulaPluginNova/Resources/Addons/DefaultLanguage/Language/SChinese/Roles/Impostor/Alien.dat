@@ -1,0 +1,62 @@
+# Assignable
+
+"role.alien.name" : "外星人"
+"role.alien.short" : "外"
+"role.alien.blurb" : "超越智慧的存在"
+"role.alien.hint" : "可以隐藏一些信息。"
+
+# Document
+
+"role.alien.doc" : "外星人可以隐藏一些终端的信息，制造信息差。"
+"role.alien.ability.title" : "固有能力【电磁干扰】"
+"role.alien.ability.main" : "外星技术会影响些终端设备。"
+"role.alien.ability.emi" : "<title>E.M.I.</title>在一段时间内使所有玩家在管理控制台和生命监测装置上的信息延迟更新。"
+"role.alien.ability.invalidate" : "<title>无效终端</title>使指定玩家在管理控制台和生命监测装置上的信息消失。"
+"role.alien.tips" : "・这个职业与<color=#ff7f00>超</color><color=#ff0000>新</color><color=#00ff00>职业</color>进行联动（原职业：コウモリ、クラッカー）。"
+
+# Options
+
+"options.role.alien.detail" : "外星人可以通过操作管理控制台和生命监测装置造成混乱。"
+"options.role.alien.emiCoolDown" : "E.M.I.冷却时间"
+"options.role.alien.emiDuration" : "E.M.I.持续时间"
+"options.role.alien.invalidateCoolDown" : "无效终端冷却时间"
+"options.role.alien.numOfInvalidations" : "无效终端次数"
+
+# Game
+
+
+# UI
+
+"button.label.emi" : "E.M.I."
+"button.label.invalidate" : "无效终端"
+
+# Stats
+
+
+# Titles
+
+"achievement.alien.common1.title" : "外星礼品"
+"achievement.alien.common1.goal" : "E.M.I.技能期间击杀一人。"
+"achievement.alien.common1.flavor" : "“@#@$$#&&?”—来自一个外星人的询问。"
+"achievement.alien.common1.splitted.0" : "外星的"
+
+"achievement.alien.common2.title" : "记忆混乱"
+"achievement.alien.common2.goal" : "总计10次将玩家从管理室地图上抹去。"
+"achievement.alien.common2.flavor" : "“我真的在那里！”—来自会议记录。"
+
+"achievement.alien.common3.title" : "好邻居"
+"achievement.alien.common3.goal" : "通过E.M.I.技能以掩盖队友的击杀。"
+"achievement.alien.common3.flavor" : "“那里怎么会有尸体？”—来自会议记录。"
+"achievement.alien.common3.splitted.0" : "善心"
+"achievement.alien.common3.splitted.2" : "邻居"
+
+"achievement.alien.common4.title" : "抹去你一切痕迹"
+"achievement.alien.common4.goal" : "杀死一名在管理面板被抹去的玩家。"
+"achievement.alien.common4.flavor" : "到底去哪里了？"
+"achievement.alien.common4.splitted.2" : "痕迹"
+
+"achievement.alien.challenge.title" : "异星的侵略者"
+"achievement.alien.challenge.goal" : "通过E.M.I.技能隐藏5次击杀。"
+"achievement.alien.challenge.cond" : "提示：自身击杀3名玩家以上"
+"achievement.alien.challenge.flavor" : "“所以他们都已经死了吗？”—来自被追入绝境的船员。"
+"achievement.alien.challenge.splitted.0" : "异星的"

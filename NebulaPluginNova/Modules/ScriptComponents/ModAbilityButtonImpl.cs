@@ -1,6 +1,7 @@
 ﻿using AmongUs.Data;
 using AmongUs.GameOptions;
 using Nebula.Commands.Variations;
+using Nebula.Modules.Logging;
 using Virial;
 using Virial.Command;
 using Virial.Compat;
@@ -220,12 +221,12 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
                 VanillaButton.SetDisabled();
                 if (IsBroken) VanillaButton.buttonLabelText.color = Palette.EnabledColor;
             }
-
+            
 
         }
         catch(Exception exception)
         {
-            NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Error, null, "[At " + VanillaButton.buttonLabelText.text + "] " + exception.ToString());
+            NebulaLogger.Instance.Error("[At " + VanillaButton.buttonLabelText.text + "] " + exception.ToString());
         }
     }
 
@@ -395,6 +396,7 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
 
     internal ModAbilityButtonImpl SetColorLabel(UnityEngine.Color color)
     {
+        SetLabelType(ModAbilityButton.LabelType.Impostor);
         if (VanillaButton != null) VanillaButton.buttonLabelText.SetOutlineColor(color);
         return this;
     }
@@ -518,6 +520,7 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
     ModAbilityButton ModAbilityButton.ToggleEffect() => ToggleEffect();
     ModAbilityButton ModAbilityButton.SetLabelType(ModAbilityButton.LabelType type) => SetLabelType(type);
     ModAbilityButton ModAbilityButton.SetColorLabel(UnityEngine.Color color) => SetColorLabel(color);
+    ModAbilityButton ModAbilityButton.SetColorLabel(Virial.Color color) => SetColorLabel(color.ToUnityColor());
 
     Predicate<ModAbilityButton> ModAbilityButton.Availability { set => Availability = value; }
     Predicate<ModAbilityButton> ModAbilityButton.Visibility { set => Visibility = value; }

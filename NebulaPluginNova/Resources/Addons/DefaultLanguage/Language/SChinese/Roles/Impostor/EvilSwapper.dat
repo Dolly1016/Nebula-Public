@@ -1,0 +1,28 @@
+# Assignable
+
+"role.evilSwapper.name" : "邪恶的换票师"
+"role.evilSwapper.short" : "邪换"
+"role.evilSwapper.blurb" : "逆转结局"
+"role.evilSwapper.hint" : "在会议中交换其他玩家的得票"
+
+# Document
+
+"role.evilSwapper.doc" : "邪恶的换票师可以在会议中交换其他玩家的得票。"
+"role.evilSwapper.ability.title" : "固有能力【换票】"
+"role.evilSwapper.ability.main" : "在会议中选择两名玩家并在会议结算阶段交换两人的票数。"
+
+# Options
+
+"options.role.evilSwapper.detail" : "邪恶的换票师可以在会议中交换其他玩家的得票。"
+"options.role.evilSwapper.numOfSwap" : "最大换票次数"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+
+# Titles

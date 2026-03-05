@@ -10,17 +10,17 @@
 
 # Options
 
-"options.role.mayor.detail" : "Mayor can save vote on meetings.<br>Saved votes are used other meetings all at once."
+"options.role.mayor.detail" : "The Mayor can save vote on meetings.<br>Saved votes are used other meetings all at once."
 "options.role.mayor.fixedVotes" : "Fixed Votes"
-"options.role.mayor.fixedVotes.detail" : "Optimize the options so you can make the mayor use a fixed number of votes per meeting."
+"options.role.mayor.fixedVotes.detail" : "Through the options, so you can make the mayor use a fixed number of votes per meeting."
 "options.role.mayor.minVote" : "# Min Vote"
-"options.role.mayor.minVote.detail" : "The minimum number of votes use per meeting."
+"options.role.mayor.minVote.detail" : "The min number of votes use per meeting."
 "options.role.mayor.maxVote" : "# Max Vote"
-"options.role.mayor.maxVote.detail" : "The maximum number of votes use per meeting."
+"options.role.mayor.maxVote.detail" : "The max number of votes use per meeting."
 "options.role.mayor.maxVotesStock" : "# Max Votes Stock"
-"options.role.mayor.maxVotesStock.detail" : "The mayor votes by consuming stocked votes.<br>Any unused votes from the allocated votes are stocked for the next meeting."
+"options.role.mayor.maxVotesStock.detail" : "The Mayor votes by consuming stocked votes.<br>Any unused votes from the allocated votes are stocked for the next meeting."
 "options.role.mayor.voteAssignment" : "# Vote Assignment On Meeting"
-"options.role.mayor.voteAssignment.detail" : "The mayor gains stock of votes at the start of each meeting.<br>This setting allows you to change the number of votes the mayor receives per meeting."
+"options.role.mayor.voteAssignment.detail" : "The Mayor gains stock of votes at the start of each meeting.<br>This setting allows you to change the number of votes the mayor receives per meeting."
 "options.role.mayor.voteAssignmentOnReporting" : "# Vote Assignment On Reporting"
 "options.role.mayor.voteAssignmentPerTasks" : "# Vote Assignment Per Tasks"
 
@@ -48,7 +48,7 @@
 "achievement.mayor.another1.cond" : "Have participated in 3 or more meetings"
 
 "achievement.mayor.common2.title" : "Less is More"
-"achievement.mayor.common2.goal" : "Conceal the mayor's existence by voting only once consecutively for 3 or more meetings at first.<br>After concealment, exile someone by using multiple votes at least once."
+"achievement.mayor.common2.goal" : "Conceal the Mayor's existence by voting only once consecutively for 3 or more meetings at first.<br>After concealment, exile someone by using multiple votes at least once."
 "achievement.mayor.common2.cond" : "After being concealed, use multiple votes more than once to exile someone"
 "achievement.mayor.common2.splitted.2" : "Beauty"
 

@@ -11,7 +11,7 @@
 
 # Options
 
-"options.role.sidekick.detail" : "Sidekick assists Jackal.<br>Sidekick is promoted to Jackal upon Jackal's death."
+"options.role.sidekick.detail" : "The Sidekick assists Jackal.<br>The Sidekick is promoted to Jackal upon Jackal's death."
 "options.role.sidekick.canKill" : "Has Kill Ability"
 "options.role.sidekick.killCoolDown" : "Kill Cooldown"
 "options.role.sidekick.isModifier" : "Is Modifier"
@@ -41,14 +41,14 @@
 # Titles
 
 "achievement.sidekick.common1.title" : "Forever Friends"
-"achievement.sidekick.common1.goal" : "Promote from Sidekick to Jackal."
+"achievement.sidekick.common1.goal" : "Promote from the Sidekick to the Jackal."
 "achievement.sidekick.common1.splitted.2" : "Friends"
 
 "achievement.sidekick.common2.title" : "Chain Of Friendship"
-"achievement.sidekick.common2.goal" : "After being promoted from Sidekick to Jackal,<br>grant Sidekick to someone else."
+"achievement.sidekick.common2.goal" : "After being promoted from the Sidekick to the Jackal,<br>grant the Sidekick to someone else."
 "achievement.sidekick.common2.splitted.0" : "Chain Of "
 
 "achievement.sidekick.challenge.title" : "Underworld Survival Skills"
-"achievement.sidekick.challenge.goal" : "Change from Impostor to Sidekick and win as Jackal."
+"achievement.sidekick.challenge.goal" : "Change from Impostor to the Sidekick and win as the Jackal."
 "achievement.sidekick.challenge.cond" : "Achievable even if promoted to Jackal during the game"
 "achievement.sidekick.challenge.splitted.0" : "Underworld "

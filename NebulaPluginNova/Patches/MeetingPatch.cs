@@ -185,7 +185,7 @@ public static class MeetingModRpc
         GameOperatorManager.Instance?.Run(new PlayerVoteDisclosedLocalEvent(GamePlayer.LocalPlayer, votedLocal, votedLocalOriginal, exiledAll.Contains(votedLocal?.PlayerId ?? byte.MaxValue)));
         GamePlayer[] votedBy = finalStates.Where(s => s.VotedForId == PlayerControl.LocalPlayer.PlayerId).Select(s => s.VoterId).Distinct().Select(id => NebulaGameManager.Instance.GetPlayer(id)).Where(p => p != null).ToArray()!;
         GameOperatorManager.Instance?.Run(new PlayerVotedLocalEvent(GamePlayer.LocalPlayer, votedBy!));
-        GameOperatorManager.Instance?.Run(new MeetingVoteDisclosedEvent(readonlyStates));
+        GameOperatorManager.Instance?.Run(new MeetingVoteDisclosedEvent(firstStates.ToArray(), readonlyStates));
 
         meetingHud.exiledPlayer = Helpers.GetPlayer(exiled)?.Data;
         meetingHud.wasTie = tie;
@@ -195,6 +195,7 @@ public static class MeetingModRpc
 
         foreach(var pva in meetingHud.playerStates)
         {
+            if (finalStates.All(state => state.VotedForId != pva.TargetPlayerId)) continue;
             var textTransform = pva.transform.FindChild("NameText");
             if(textTransform != null && textTransform)
             {

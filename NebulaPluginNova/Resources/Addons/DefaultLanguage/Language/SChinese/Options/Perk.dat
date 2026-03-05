@@ -1,0 +1,24 @@
+# Header
+
+"options.perk" : "特技选项"
+"options.perk.detail" : "地图中会出现神秘的花<br>开放的花可以让玩家获得特技。"
+
+# Groups
+
+# Options
+
+"options.perk.numOfPlants" : "花最大出现数量"
+"options.perk.numOfPlants.detail" : "花会在会议结束后长大。<br>存活玩家可以在开放的花中获得特技。"
+"options.perk.numOfWarpedPlants" : "怪异花最大出现数量"
+"options.perk.numOfWarpedPlants.detail" : "怪异花仅对非船员阵营玩家有用。<br>获取这些花的特技，可以在对局中进行捣乱。"
+"options.perk.maxBloomsPerPlant" : "最大成熟次数"
+"options.perk.growSpeed" : "花成长速度"
+"options.perk.growSpeed.detail" : "可以调整花的成长速度。<br>数值越大，生长速度越快。"
+"options.perk.shortcut.standard" : "通用特技快捷设定"
+"options.perk.shortcut.standard.0" : "出现概率为0%"
+"options.perk.shortcut.standard.100" : "出现概率为100%"
+"options.perk.shortcut.warped" : "非船员用特技快捷设定"
+"options.perk.shortcut.warped.0" : "出现概率为0%"
+"options.perk.shortcut.warped.100" : "出现概率为100%"
+"options.perk.movementRestrictionPerksAlsoAffectCasters" : "对特技持有者的移动限制也有效果"
+"options.perk.movementRotationPerksAlsoAffectCasters" : "对特技持有者的移动颠倒也有效果"

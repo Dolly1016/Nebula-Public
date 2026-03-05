@@ -8,7 +8,7 @@
 # Document
 
 "role.bubblegun.doc" : "Can trap players with a <b>bubble gun</b> that shoots huge bubbles.<br>Players trapped in bubbles die. Corpses trapped in bubbles cannot be reported."
-"role.bubblegun.ability.title" : "Inherent Ability "Uchinuke! Bubble Gun""
+"role.bubblegun.ability.title" : "Inherent Ability [Bang! Bubble Gun]"
 "role.bubblegun.ability.main" : "Can trap and kill players with bubbles.<br>The cooldown of the bubble gun is <var>kill cooldown %BUBBLE%</var> (<var>%SEC%</var> seconds)."
 "role.bubblegun.ability.sec.longer" : "Longer"
 "role.bubblegun.ability.sec.shorter" : "Shorter"
@@ -18,7 +18,7 @@
 
 # Options
 
-"options.role.bubblegun.detail" : "Bubblegun has a gun that shoots bubbles that trap and kill players."
+"options.role.bubblegun.detail" : "The Bubblegun has a gun that shoots bubbles that trap and kill players."
 "options.role.bubblegun.bubbleCooldown" : "Bubble Cooldown"
 "options.role.bubblegun.bubbleSize" : "Bubble Size"
 "options.role.bubblegun.bubbleSpeed" : "Bubble Speed"

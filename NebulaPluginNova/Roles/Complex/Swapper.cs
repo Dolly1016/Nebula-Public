@@ -73,7 +73,7 @@ public class Swapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
     public bool IsEvil => Category == RoleCategory.ImpostorRole;
     AbilityAssignmentStatus DefinedRole.AssignmentStatus => IsEvil ? AbilityAssignmentStatus.KillersSide : AbilityAssignmentStatus.CanLoadToMadmate;
     MultipleAssignmentType DefinedRole.MultipleAssignment => IsEvil ? MultipleAssignmentType.Allowed : MultipleAssignmentType.NotAllowed;
-    public override IUsurpableAbility CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0), arguments.Get(1, IsEvil ? NumOfSwapEvilOption : NumOfSwapNiceOption));
+    public override IUsurpableAbility CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0), IsEvil, arguments.Get(1, IsEvil ? NumOfSwapEvilOption : NumOfSwapNiceOption));
 
     static internal readonly IntegerConfiguration NumOfSwapNiceOption = NebulaAPI.Configurations.Configuration("options.role.niceSwapper.numOfSwap", (1, 15), 3);
     static internal readonly IntegerConfiguration NumOfSwapEvilOption = NebulaAPI.Configurations.Configuration("options.role.evilSwapper.numOfSwap", (1, 15), 1);
@@ -97,12 +97,16 @@ public class Swapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
     }
 
     static private Image MeetingIcon => MeetingPlayerButtonManager.Icons.AsLoader(8);
+
+    [NebulaRPCHolder]
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility, IGameOperator
     {
         int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
         int leftSwap;
-        public Ability(GamePlayer player, bool isUsurped, int leftSwap) : base(player, isUsurped)
+        internal bool AmEvil { private set; get; }
+        public Ability(GamePlayer player, bool isUsurped, bool amEvil, int leftSwap) : base(player, isUsurped)
         {
+            this.AmEvil = amEvil;
             this.leftSwap = leftSwap;
             this.awareOfUsurpation = isUsurped;
 
@@ -113,10 +117,13 @@ public class Swapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
             }
         }
 
+        bool swapEnsured = false;
         bool awareOfUsurpation = false;
         [Local]
         private void OnMeeting(MeetingStartEvent ev)
         {
+            swapEnsured = false;
+
             bool awareOfUsurpation = false;
             bool selected = false;
             if (this.leftSwap <= 0) return;
@@ -138,15 +145,67 @@ public class Swapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
                     {
                         RpcSwap.Invoke((MyPlayer, lastSelected.MyPlayer, state.MyPlayer, leftSwap));
                         selected = true;
+
+                        var player1 = lastSelected.MyPlayer;
+                        var player2 = state.MyPlayer;
+                        GameOperatorManager.Instance?.SubscribeSingleListener<ExileSceneStartEvent>(ev => {
+                            bool player1IsExiled = ev.Exiled.Contains(player1);
+                            bool player2IsExiled = ev.Exiled.Contains(player2);
+                            bool oneIsExiled = player1IsExiled || player2IsExiled;
+
+                            if (!AmEvil)
+                            {
+                                if (oneIsExiled && ((!player1IsExiled && player1.IsTrueCrewmate) || (!player2IsExiled && player2.IsTrueCrewmate))) new StaticAchievementToken("niceSwapper.common1");
+                                if((player1IsExiled ^ player2IsExiled) && (player1.IsTrueCrewmate ^ player2.IsTrueCrewmate) && (player1.IsTrueCrewmate == player1IsExiled)) new StaticAchievementToken("niceSwapper.another1");
+                            }
+
+                            //player1 != player2を前提とする
+                            if (player1.AmOwner || player2.AmOwner)
+                            {
+                                //自分自身をスワップ対象に選択している
+                                
+                                if (oneIsExiled && player1IsExiled != player2IsExiled && player1.AmOwner != player1IsExiled)
+                                {
+                                    //相手を追放
+                                    new StaticAchievementToken(AmEvil ? "evilSwapper.common1" : "niceSwapper.common2");
+                                }
+                            }
+
+                            if (AmEvil)
+                            {
+                                if (!swapEnsured) new StaticAchievementToken("evilSwapper.secret1");
+                                else
+                                {
+                                    GameOperatorManager.Instance?.Subscribe<GameEndEvent>(ev => {
+                                        var roles = GamePlayer.AllPlayers.Aggregate<GamePlayer, (bool justice, bool madmate, bool mayor)>((false, false, false), (val, p) => {
+                                            val.mayor |= p.Role == Crewmate.Mayor.MyRole;
+                                            val.justice |= p.Role == Crewmate.Justice.MyRole;
+                                            val.madmate |= p.Role == Crewmate.Madmate.MyRole;
+                                            return val;
+                                        });
+                                        if (!(roles.madmate && roles.mayor && roles.justice)) return;
+                                        if (ev.EndState.EndReason != GameEndReason.Situation) return;
+                                        if (!ev.EndState.Winners.Test(MyPlayer)) return;
+                                        new StaticAchievementToken("evilSwapper.challenge");
+                                    }, this);
+                                }
+                            }
+                            
+                        }, this);
                     }
                 }
             },
             p => (!selected || p.IsSelected) && !awareOfUsurpation && leftSwap > 0 && !p.MyPlayer.IsDead && (CanSelectSwapperOption || !p.MyPlayer.AmOwner) && MyPlayer.IsAlive
             ));
         }
+        
 
         internal void EnsureSwap(int nextLeftSwap) => RpcEnsureSwap.RpcSync(MyPlayer, nextLeftSwap);
-        static private readonly RoleRPC.Definition RpcEnsureSwap = RoleRPC.Get<Ability>("swapper.ensureSwap", (ability, num, calledByMe) => ability.leftSwap = num);
+        static private readonly RoleRPC.Definition RpcEnsureSwap = RoleRPC.Get<Ability>("swapper.ensureSwap", (ability, num, calledByMe) =>
+        {
+            ability.leftSwap = num;
+            if (ability.AmOwner) ability.swapEnsured = true;
+        });
         static private readonly RemoteProcess<(GamePlayer swapper, GamePlayer swap1, GamePlayer swap2, int currentLeftSwap)> RpcSwap = new("VoteSwap", (message, _) => {
             ModSingleton<SwapperSystem>.Instance.ReceiveSwapRequest(message.swapper, message.swap1, message.swap2, message.currentLeftSwap);
         });

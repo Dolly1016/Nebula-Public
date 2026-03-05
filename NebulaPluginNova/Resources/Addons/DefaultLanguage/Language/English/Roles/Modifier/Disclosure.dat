@@ -9,7 +9,7 @@
 
 # Options
 
-"options.role.disclosure.detail" : "Disclosure makes their cursor visible to everyone during an emergency meeting."
+"options.role.disclosure.detail" : "The Disclosure makes their cursor visible to everyone during an emergency meeting."
 "options.role.disclosure.anonymousCursor" : "Anonymous Cursor"
 "options.role.disclosure.showCursorAtLateVoting" : "Show Cursor At Late Voting"
 

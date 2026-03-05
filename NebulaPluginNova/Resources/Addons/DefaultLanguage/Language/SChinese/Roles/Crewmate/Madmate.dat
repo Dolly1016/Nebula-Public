@@ -1,0 +1,76 @@
+# Assignable
+
+"role.madmate.name" : "叛徒"
+"role.madmate.short" : "叛"
+"role.madmate.prefix" : "背叛的"
+"role.madmate.blurb" : "帮助伪装者获得胜利"
+
+# Document
+
+"role.madmate.doc" : "叛徒和伪装者一起胜利，<b>注意别暴露自己</b>。"
+"role.madmate.winCond" : "与伪装者一起获胜。"
+"role.madmate.ability.title" : "固有能力【狂信徒】"
+"role.madmate.ability.main" : ""
+"role.madmate.ability.suicide" : "<title>自尽</title>可以随时随地自尽。"
+"role.madmate.tips" : ""
+
+# Options
+
+"options.role.madmate.detail" : "叛徒属于伪装者阵营。<br>去背刺船员帮助伪装者！"
+"options.role.madmate.canIdentifyImpostors" : "可知晓伪装者阵营玩家数量"
+"options.role.madmate.canIdentifyImpostors.detail" : "配置后可以通过完成指定任务知晓一定量的伪装者玩家。"
+"options.role.madmate.requiredTasksForIdentifying0" : "知晓1个伪装者所需任务数"
+"options.role.madmate.requiredTasksForIdentifying1" : "知晓2个伪装者所需任务数"
+"options.role.madmate.requiredTasksForIdentifying2" : "知晓3个伪装者所需任务数"
+"options.role.madmate.group.embroil" : "连带设定"
+"options.role.madmate.group.identification" : "狂信徒设定"
+"options.role.madmate.embroilPlayersOnExile" : "被放逐时连带非伪装者阵营玩家"
+"options.role.madmate.embroilPlayersOnExile.detail" : "被驱逐时连带其他幸存玩家。<br>目标为非伪装者。"
+"options.role.madmate.limitEmbroiledPlayersToVoters" : "被连带玩家为投票者"
+"options.role.madmate.limitEmbroiledPlayersToVoters.detail" : "如果开启这个选项被连带的玩家只会从投票的玩家中选择。"
+"options.role.madmate.embroilDelay" : "连带延迟轮数"
+"options.role.madmate.embroilDelay.detail" : "叛徒被放逐时延迟连带幸存玩家。<br>当叛徒被放逐，会在指定会议次数后才会触发连带。<br><br>为0时，会在当前会议连带一个幸存玩家。"
+"options.role.madmate.canSuicide" : "可以自尽"
+"options.role.madmate.suicideCooldown" : "自杀冷却时间"
+"options.role.madmate.canFixLight" : "可以修复电力破坏"
+"options.role.madmate.canFixComms" : "可以修复通讯破坏"
+"options.role.madmate.hasImpostorVision" : "拥有伪装者视野"
+"options.role.madmate.canUseVents" : "可以使用通风口"
+"options.role.madmate.canMoveInVents" : "可以在通风口中移动"
+"options.role.madmate.maddenRole" : "职业叛徒化"
+
+# Game
+
+
+# UI
+
+"button.label.madmate.suicide" : "自尽"
+
+# Stats
+
+"stats.madmate.foundImpostors" : "知晓伪装者数量"
+"stats.madmate.embroil" : "连带幸存玩家数量"
+
+# Titles
+
+"achievement.madmate.common1.title" : "牺牲也许是最好的"
+"achievement.madmate.common1.goal" : "在会议中，其他伪装者还活着的时候被放逐。"
+
+"achievement.madmate.another1.title" : "追随也许需要奉献"
+"achievement.madmate.another1.goal" : "被伪装者杀死。"
+
+"achievement.madmate.common2.title" : "狂信徒"
+"achievement.madmate.common2.goal" : "完成任务并得知伪装者。"
+"achievement.madmate.common2.splitted.0" : "疯狂的"
+
+"achievement.madmate.another2.title" : "太过招摇"
+"achievement.madmate.another2.goal" : "完成任务得知伪装者后被击杀。"
+"achievement.madmate.another2.splitted.0" : "太过"
+
+"achievement.madmate.another3.title" : "在劫难逃"
+"achievement.madmate.another3.goal" : "完成部分任务并发现部分伪装者<br>但被未知晓的伪装者击杀。"
+
+"achievement.madmate.challenge.title" : "充满狂妄的终局"
+"achievement.madmate.challenge.goal" : "所有伪装者都存活，并且获胜。"
+"achievement.madmate.challenge.splitted.0" : "充满狂妄的"
+"achievement.madmate.challenge.splitted.2" : "终局"

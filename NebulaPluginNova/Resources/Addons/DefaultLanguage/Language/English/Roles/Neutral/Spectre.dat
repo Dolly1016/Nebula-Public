@@ -6,16 +6,16 @@
 
 # Document
 
-"role.spectre.doc" : "A neutral member who wins by surviving until the end while eating fries."
+"role.spectre.doc" : "A neutral who wins by surviving until the end while eating fries."
 "role.spectre.winCond" : "End the game with satiety kept above <var>%NUM%</var>. (Excluding end by sabotage.)"
-"role.spectre.ability.title" : "Inherent Ability "The Way of the Specter""
+"role.spectre.ability.title" : "Inherent Ability [The Way of the Specter]"
 "role.spectre.ability.main" : "Lurk without being noticed by other players and eat fries.<br>Make good use of the invisibility ability."
 "role.spectre.ability.fries" : "<title>Fries</title>Plates appear on the map. Interact with plates with fries to start a mini-game of eating fries.<br>You will starve to death if your satiety runs out.<br>To win, you need to maintain a certain level of satiety at the end of the game."
 "role.spectre.ability.vanish" : "<title>Vanish</title>Become invisible for a while. Activating invisibility consumes satiety.<br>Can only be activated if you can maintain satiety equivalent to 1 serving of fries even after consumption."
 
 # Options
 
-"options.role.spectre.detail" : "Spectre survives until the end and takes over the other victories. <br>However, if you don't eat fried food for a while, you will starve."
+"options.role.spectre.detail" : "The Spectre survives until the end and takes over the other victories. <br>However, if you don't eat fried food for a while, you will starve."
 "options.role.spectre.vanishCost" : "# Fries For Vanish"
 "options.role.spectre.vanishCooldown" : "Vanish Cooldown"
 "options.role.spectre.vanishDuration" : "Vanish Duration"
@@ -73,15 +73,15 @@
 "achievement.spectre.another2.goal" : "Starve to death."
 
 "achievement.spectre.costume1.title" : "True Form"
-"achievement.spectre.costume1.goal" : "Play as Spectre in the form of a Nine-Tailed Fox and win with Spectre victory."
-"achievement.spectre.costume1.flavor" : ""I won't run or hide." ―The great youkai spoke thus"
+"achievement.spectre.costume1.goal" : "Play as the Spectre in the form of a Nine-Tailed Fox and win with Spectre victory."
+"achievement.spectre.costume1.flavor" : ""I won't run or hide." —The great youkai spoke thus"
 "achievement.spectre.costume1.splitted.0" : "True "
 
 "achievement.spectre.common3.title" : "Taunt"
-"achievement.spectre.common3.goal" : "Take over a special condition victory with Spectre victory and win."
+"achievement.spectre.common3.goal" : "Take over a special condition victory with the Spectre victory and win."
 
 "achievement.spectre.challenge.title" : "Summer Grass Burns Red"
-"achievement.spectre.challenge.goal" : "Win with Spectre victory while all Impostors are still alive."
+"achievement.spectre.challenge.goal" : "Win with the Spectre victory while all Impostors are still alive."
 "achievement.spectre.challenge.cond" : "Impostors: 2 or more"
 "achievement.spectre.challenge.flavor" : ""A mountain of corpses with no place to step." ―From a traveler's notes"
 
@@ -93,4 +93,4 @@
 # Document
 
 "document.tip.winCond.spectre.title" : "Overwrite Winning"
-"document.tip.winCond.spectre" : "If Spectre is still alive, it will overwrite the winning."
+"document.tip.winCond.spectre" : "If the Spectre is still alive, it will overwrite the winning."

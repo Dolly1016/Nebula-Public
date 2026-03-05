@@ -6,11 +6,11 @@
 
 # Document
 
-"role.jackal.doc" : "A neutral member who wins by annihilating enemies."
+"role.jackal.doc" : "A neutral who wins by annihilating enemies."
 
 # Options
 
-"options.role.jackal.detail" : "Jackal annihilates players to win.<br>Exile of the Jackal is a common goal for Impostors and Crewmates."
+"options.role.jackal.detail" : "The Jackal annihilates players to win.<br>Exile of the Jackal is a common goal for Impostors and Crewmates."
 "options.role.jackal.killCoolDown" : "Kill Cooldown"
 "options.role.jackal.canCreateSidekick" : "Can Create Sidekick"
 "options.role.jackal.numOfKillingToCreateSidekick" : "# Killing to Create Sidekick"
@@ -31,7 +31,7 @@
 # Titles
 
 "achievement.jackal.common1.title" : "Friendship"
-"achievement.jackal.common1.goal" : "Create someone into the Sidekick role."
+"achievement.jackal.common1.goal" : "Create someone into the Sidekick."
 
 "achievement.jackal.challenge.title" : "Bloody Fierce Final Showdown"
 "achievement.jackal.challenge.goal" : "Win from a state where only you and the Impostor remain."

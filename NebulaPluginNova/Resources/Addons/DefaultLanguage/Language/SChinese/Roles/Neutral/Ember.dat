@@ -1,0 +1,33 @@
+# Assignable
+
+"role.ember.name" : "余烬"
+"role.ember.short" : "余"
+"role.ember.blurb" : "万念俱灰"
+
+# Document
+
+"role.ember.doc" : "余烬是复仇者击杀受诅咒者后被反噬的产物。<br>已经没有任何希望了。"
+
+# Options
+
+"options.role.ember.detail" : "余烬是复仇者击杀受诅咒者后被反噬的产物。<br>已经没有任何希望了。"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.ember.another1.title" : "来自诅咒的反噬"
+"achievement.ember.another1.goal" : "被复仇者击杀，但因为自己是受诅咒者化为余烬而输掉游戏。"
+"achievement.ember.another1.flavor" : "“——那是你应有的代价！”"
+
+"achievement.ember.another2.title" : "风平浪静"
+"achievement.ember.another2.goal" : "被复仇者击杀，但因为自己是受诅咒者导致死亡但仍然获胜。"
+"achievement.ember.another2.flavor" : "“人生嘛，大风大浪的很正常。”"
+"achievement.ember.another2.splitted.0" : "风平浪静"

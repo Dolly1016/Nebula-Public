@@ -271,7 +271,8 @@ public class DataSaver
 
     public static bool ExistData(string filename) => FileIO.Exists(ToDataSaverPath(filename));
 
-    public static string ToDataSaverPath(string filename) => FileIO.GetDataPathTo(new string[] { "NebulaOnTheShip" + Path.DirectorySeparatorChar + filename + ".dat" });
+    public static string ToDataSaverPath(string filename) => DataSaverFolderPath + Path.DirectorySeparatorChar + filename + ".dat";
+    public static string DataSaverFolderPath { get; private set; } = FileIO.GetDataPathTo(["NebulaOnTheShip"]);
 
     public void Load()
     {

@@ -1,22 +1,23 @@
-﻿using Il2CppInterop.Runtime.InteropTypes.Arrays;
+﻿using BepInEx.Unity.IL2CPP.Utils;
+using Hazel.Crypto;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using Il2CppSystem.Collections;
 using InnerNet;
 using Nebula.Behavior;
-using UnityEngine;
-using Virial.Game;
-using Il2CppSystem.Collections;
-using UnityEngine.SceneManagement;
-using Virial.Assignable;
-using Nebula.Roles;
-using Virial.Events.Game;
-using TMPro;
-using Nebula.Modules.GUIWidget;
-using UnityEngine.Rendering;
-using Sentry.Internal.Extensions;
-using Virial;
-using BepInEx.Unity.IL2CPP.Utils;
-using Hazel.Crypto;
-using Rewired.UI.ControlMapper;
 using Nebula.Modules.Cosmetics;
+using Nebula.Modules.GUIWidget;
+using Nebula.Modules.Logging;
+using Nebula.Roles;
+using Rewired.UI.ControlMapper;
+using Sentry.Internal.Extensions;
+using TMPro;
+using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.SceneManagement;
+using Virial;
+using Virial.Assignable;
+using Virial.Events.Game;
+using Virial.Game;
 using static Il2CppSystem.Net.Http.Headers.Parser;
 
 namespace Nebula.Patches;
@@ -422,7 +423,7 @@ public class MarketplaceConsolePatch
         }
         else
         {
-            NebulaPlugin.Log.Print("Wardrobe console was not found ");
+            NebulaLogger.Instance.Message("Wardrobe console was not found ");
         }
 
         ClientOption.ChangeAmbientVolumeIfNecessary(false, true);

@@ -1,0 +1,28 @@
+# Header
+
+"options.aeroGuesser" : "猜图模式设置"
+"options.aeroGuesser.detail" : "猜图模式相关设置。"
+
+# Groups
+
+"options.aeroGuesser.group.hurryTimer" : "缩短时间设定"
+"options.aeroGuesser.group.filter.difficulty" : "题目难度倍率设定"
+"options.aeroGuesser.group.filter.map" : "地图题目倍率设定"
+
+# Options
+
+"options.aeroGuesser.guessTime" : "猜测时间"
+"options.aeroGuesser.numOfQuiz" : "题目数量"
+"options.aeroGuesser.monochromeMode" : "黑白模式"
+"options.aeroGuesser.monochromeMode.detail" : "开启后，题目图片将显示为黑白色。"
+"options.aeroGuesser.hurryTimer" : "缩短时间"
+"options.aeroGuesser.hurryTimer.detail" : "开启后，每当有人提交答案就会缩短答题时间。"
+"options.aeroGuesser.hurryTimerDuration" : "缩短最大时间"
+"options.aeroGuesser.hurryTimerDuration.detail" : "这是设定每次缩短的秒数。<br>当设定时间大于当前时间，将不会缩短。"
+"options.aeroGuesser.skeld" : "Skeld"
+"options.aeroGuesser.mira" : "MIRA HQ"
+"options.aeroGuesser.polus" : "Polus"
+"options.aeroGuesser.airship" : "Airship"
+"options.aeroGuesser.fungle" : "Fungle"
+"options.aeroGuesser.normal" : "普通"
+"options.aeroGuesser.hard" : "困难"

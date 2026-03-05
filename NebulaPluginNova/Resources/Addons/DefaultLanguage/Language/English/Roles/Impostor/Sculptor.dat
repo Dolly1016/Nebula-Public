@@ -7,7 +7,7 @@
 # Document
 
 "role.sculptor.doc" : "An impostor who can summon walking idols."
-"role.sculptor.ability.title" : "Inherent Ability "Chaos Creature""
+"role.sculptor.ability.title" : "Inherent Ability [Chaos Creature]"
 "role.sculptor.ability.main" : ""
 "role.sculptor.ability.sample" : "<title>Sample</title>Sample an appearance applicable to the idol."
 "role.sculptor.ability.map" : "<title>Mini Map</title>Open a map to summon the idol.<br>Select the idol's destination and appearance on the map, and the idol will appear there and start walking."
@@ -15,7 +15,7 @@
 
 # Options
 
-"options.role.sculptor.detail" : "Sculptor will spawn idols of players that walk around the map.<br>Crewmates will not know if they are the real deal when they pass by!"
+"options.role.sculptor.detail" : "The Sculptor will spawn idols of players that walk around the map.<br>Crewmates will not know if they are the real deal when they pass by!"
 "options.role.sculptor.sampleCoolDown" : "Sample Cooldown"
 "options.role.sculptor.createCoolDown" : "Create Cooldown"
 "options.role.sculptor.maxSamples" : "Max Samples"

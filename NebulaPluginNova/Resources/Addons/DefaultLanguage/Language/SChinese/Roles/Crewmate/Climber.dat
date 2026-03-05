@@ -1,0 +1,65 @@
+# Assignable
+
+"role.climber.name" : "钩索师"
+"role.climber.short" : "钩"
+"role.climber.blurb" : "登上胜利的顶端！"
+
+# Document
+
+"role.climber.doc" : "钩索师可以使用钩索进行长距离移动。"
+"role.climber.ability.title" : "固有能力【攀岩高手】"
+"role.climber.ability.main" : "可以向一个方向发射钩索，当碰到墙壁后会向该方向快速移动。"
+"role.climber.ability.hookshot" : "<title>钩索枪</title>使用后向鼠标方向发射钩索。<br>如果成功碰到墙壁，将会把钩索师拉向够挂点。"
+"role.climber.tips" : "在Airship的移动平台或外部和Fungle的悬崖等开阔地带，可以将钩爪发射得更远。"
+
+# Options
+
+"options.role.climber.detail" : "钩索师可以发射钩索进行长距离移动。"
+"options.role.climber.gustCooldown" : "钩索冷却时间"
+"options.role.climber.canSeeInShadow" : "可以在阴影中看到钩索"
+
+# Game
+
+"gameAction.climber.hookshot" : "发射钩索"
+
+# UI
+
+"button.label.gust" : "钩索枪"
+
+# Stats
+
+"stats.climber.gust" : "钩索使用次数"
+"stats.climber.distance" : "钩索移动距离"
+
+# Titles
+
+"achievement.climber.common1.title" : "攀登"
+"achievement.climber.common1.goal" : "使用钩索移动5米。"
+"achievement.climber.common1.flavor" : "攀上最高峰的一小步。"
+"achievement.climber.common1.splitted.2" : "冒险家"
+
+"achievement.climber.common2.title" : "踏上最高峰"
+"achievement.climber.common2.goal" : "累计使用钩索移动1千米以上。"
+"achievement.climber.common2.flavor" : "“一步一步攀上世界之巅！”<br>“那么现在开始吧！”"
+"achievement.climber.common2.splitted.0" : "人类未踏的"
+
+"achievement.climber.common3.title" : "富士山上"
+"achievement.climber.common3.goal" : "累计使用钩索移动3776米以上。"
+"achievement.climber.common3.flavor" : "注：已经有人达成了。"
+"achievement.climber.common3.splitted.0" : "不死的"
+
+"achievement.climber.common4.title" : "世界之巅"
+"achievement.climber.common4.goal" : "累计使用钩索移动8848米以上。"
+"achievement.climber.common4.flavor" : "注：已经有人达成了。"
+
+"achievement.climber.common5.title" : "宇宙之巅"
+"achievement.climber.common5.goal" : "累计使用钩索移动21230米以上。"
+"achievement.climber.common5.flavor" : "奥林帕斯山，火星上的最高峰。<br>仰望星空吧。"
+
+"achievement.climber.another1.title" : "飞蛾扑火"
+"achievement.climber.another1.goal" : "使用钩索移动过程中或结束时被击杀。"
+
+"achievement.climber.challenge.title" : "绝望中仍有一线生机"
+"achievement.climber.challenge.goal" : "在伪装者、豺狼附近使用钩索移动。<br>周围存在2人以上，且结束后没有死亡。"
+"achievement.climber.challenge.splitted.0" : "神圣的"
+"achievement.climber.challenge.splitted.2" : "秘峰"

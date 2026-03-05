@@ -7,13 +7,13 @@
 # Document
 
 "role.psychic.doc" : "A crewmate who can search for corpses."
-"role.psychic.ability.title" : "Inherent Ability "Whispers of the Dead""
+"role.psychic.ability.title" : "Inherent Ability [Whispers of the Dead]"
 "role.psychic.ability.main" : "When reporting a corpse, get additional information."
 "role.psychic.ability.search" : "<title>Corpse Search</title>For a while, an arrow indicating the location of the corpse appears."
 
 # Options
 
-"options.role.psychic.detail" : "Psychics can obtain more information about reported bodies."
+"options.role.psychic.detail" : "The Psychic can obtain more information about reported bodies."
 "options.role.psychic.searchCooldown" : "Search Cooldown"
 "options.role.psychic.searchDuration" : "Search Duration"
 "options.role.psychic.message.elapsedTime" : "I died about %SEC%s ago..."

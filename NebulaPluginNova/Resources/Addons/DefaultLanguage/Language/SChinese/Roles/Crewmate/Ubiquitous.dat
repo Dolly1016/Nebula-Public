@@ -1,0 +1,57 @@
+# Assignable
+
+"role.ubiquitous.name" : "飞手"
+"role.ubiquitous.short" : "飞"
+"role.ubiquitous.blurb" : "通讯兵出身"
+
+# Language
+
+"role.ubiquitous.doc" : "飞手可以操控<b>无人机</b>来查看周围情况。"
+"role.ubiquitous.ability.title" : "固有能力【无处不在】"
+"role.ubiquitous.ability.main" : "每个任务阶段你都可以召唤一个<b>额外</b>无人机。<br>会议结束后，这些无人机将不能被<b>控制</b>并对其他玩家可见。<br>不能控制的无人机会上传附近玩家并在地图中显示。"
+"role.ubiquitous.ability.drone" : "<title>无人机</title>切换到无人机视角并操纵它。<br>如果无人机不存在，就会召唤一个新的。"
+"role.ubiquitous.ability.callBack" : "<title>收回</title>召回额外的无人机。"
+"role.ubiquitous.ability.doorHack" : "<title>黑入门禁</title>无人机可以破解附近的门。"
+"role.ubiquitous.tips" : "・即使你没有链接无人机也可以在左下角的小窗口查看无人机周围情况。"
+
+# Options
+
+"options.role.ubiquitous.detail" : "飞手可以随时随地使用无人机，<br>并在会议结束后在地图中获取无人机附近的玩家位置。"
+"options.role.ubiquitous.microphoneRadious" : "无人机麦克风范围"
+"options.role.ubiquitous.droneCoolDown" : "无人机冷却时间"
+"options.role.ubiquitous.droneDuration" : "无人机持续时间"
+"options.role.ubiquitous.detectionRadious" : "无人机检测范围"
+"options.role.ubiquitous.doorHackCoolDown" : "黑入门禁冷却时间"
+"options.role.ubiquitous.doorHackRadious" : "黑入门禁影响范围"
+
+# Game
+
+"role.ubiquitous.droneRange" : "飞手<color=white>：无人机检测范围</color>"
+"gameAction.ubiquitous.invoke" : "召唤无人机"
+
+# UI
+
+"button.label.drone" : "无人机"
+"button.label.doorHack" : "黑入门禁"
+"button.label.callBack" : "收回"
+"ui.action.ubiquitous.drone" : "召唤并操控无人机。<br>或切换到无人机视角"
+"ui.action.ubiquitous.doorHack" : "黑入附近的门。"
+
+# Stats
+
+"stats.ubiquitous.drones" : "无人机召唤次数"
+
+# Titles
+
+"achievement.ubiquitous.common1.title" : "拆锁匠"
+"achievement.ubiquitous.common1.goal" : "在一局游戏中打开5次门。"
+"achievement.ubiquitous.common1.splitted.2" : "拆锁匠"
+
+"achievement.ubiquitous.common2.title" : "拆锁专家"
+"achievement.ubiquitous.common2.goal" : "总计打开20次门。"
+"achievement.ubiquitous.common2.flavor" : "“你是怎么做到的？”<br>—“用一点点黑客的能力。”"
+
+"achievement.ubiquitous.challenge.title" : "超级监控网络"
+"achievement.ubiquitous.challenge.goal" : "在地图上确认所有存活玩家的位置。"
+"achievement.ubiquitous.challenge.cond" : "提示：除自身以外10人以上+检测范围3米以内"
+"achievement.ubiquitous.challenge.splitted.2" : "网络"

@@ -7,7 +7,7 @@
 # Document
 
 "role.whammy.doc" : "An impostor who disrupts game progress by placing <b>balloons</b> on tasks and emergency tasks."
-"role.whammy.ability.title" : "Inherent Ability "If you get hit with that, it's over?""
+"role.whammy.ability.title" : "Inherent Ability [Hanging Balloons]"
 "role.whammy.ability.main" : "Place balloons on tasks etc. to make players who touch the task pick up the balloon.<br>Players who pick up the balloon will die if they do not pop it within the time limit."
 "role.whammy.ability.place" : "<title>Place</title>Place balloons on tasks and emergency tasks.<var>%SOUND%</var><br>When a player (including yourself) touches the task, they will pick up the balloon."
 "role.whammy.ability.place.sound" : "Placing a balloon produces a sound that can be heard around."
@@ -16,7 +16,7 @@
 
 # Options
 
-"options.role.whammy.detail" : "Whammy places balloons in the task,<br>which will cause the player to float away if the balloons are not popped."
+"options.role.whammy.detail" : "The Whammy places balloons in the task,<br>which will cause the player to float away if the balloons are not popped."
 "options.role.whammy.balloonsInStarting" : "# Balloons In Starting"
 "options.role.whammy.balloonsInStarting.detail" : "The number of balloons you have at the start of the game.<br>Consume the balloons you have to place them on tasks."
 "options.role.whammy.balloonsByKilling" : "# Balloons By Killing"
@@ -24,9 +24,9 @@
 "options.role.whammy.balloonsTimeLimit" : "Time Limit Of Balloon Sabo."
 "options.role.whammy.balloonsTimeLimit.detail" : "Set the grace period for canceling the balloon<br>after picking up a placed balloon."
 "options.role.whammy.numOfMaxMinigameConsoles" : "Max Slingshot Consoles"
-"options.role.whammy.numOfMaxMinigameConsoles.detail" : "Set the maximum number of pachinko machines<br>that appear on the map."
+"options.role.whammy.numOfMaxMinigameConsoles.detail" : "Set the max number of slingshots<br>that appear on the map."
 "options.role.whammy.numOfMaxMinigameToBreakBalloon" : "Max Minigame To Break Balloon"
-"options.role.whammy.numOfMaxMinigameToBreakBalloon.detail" : "Set the upper limit of pachinko machines<br>that need to be visited to cancel the balloon."
+"options.role.whammy.numOfMaxMinigameToBreakBalloon.detail" : "Set the upper limit of slingshots<br>that need to be visited to cancel the balloon."
 "options.role.whammy.playSeOnPlacingBalloon" : "Play SE On Placing Balloon"
 "options.role.whammy.seStrength" : "SE Strength"
 "options.role.whammy.placeDuration" : "Place Duration"
@@ -58,9 +58,9 @@
 "achievement.whammy.common1.title" : "Pitch Shift"
 "achievement.whammy.common1.goal" : "Lift up with a balloon and kill."
 
-"achievement.whammy.common2.title" : "Attack on the Killer Crown"
+"achievement.whammy.common2.title" : "Attack of the Killer Crown"
 "achievement.whammy.common2.goal" : "Lift up with a balloon and get a total of 10 kills."
-"achievement.whammy.common2.splitted.0" : "Advancing"
+"achievement.whammy.common2.splitted.0" : "Attack"
 "achievement.whammy.common2.splitted.1" : "Killer "
 
 "achievement.whammy.another1.title" : "Safe Clown Uncle"
@@ -70,4 +70,4 @@
 "achievement.whammy.challenge.title" : "Dawn Has Not Come Yet"
 "achievement.whammy.challenge.goal" : "Spend a turn where survivors are chased by balloon canceling and no tasks progress at all."
 "achievement.whammy.challenge.cond" : "3 survivors must be chased by balloon canceling at the same time during the task phase"
-"achievement.whammy.challenge.splitted.1" : "Not "
+"achievement.whammy.challenge.splitted.1" : "Has Not "

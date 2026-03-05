@@ -1,4 +1,5 @@
-﻿using Virial;
+﻿using Nebula.Modules.Logging;
+using Virial;
 using Virial.Game;
 
 namespace Nebula.Modules.ScriptComponents;
@@ -27,10 +28,10 @@ public abstract class NebulaSyncObject : FlexibleLifespan, IGameOperator
     static protected void RegisterInstantiater(string tag, Func<float[], NebulaSyncObject> instantiater)
     {
         int hash = tag.ComputeConstantHash();
-        if (instantiaters.ContainsKey(hash)) NebulaPlugin.Log.Print(NebulaLog.LogLevel.FatalError, $"Duplicated Instantiater Error ({tag})");
+        if (instantiaters.ContainsKey(hash)) NebulaLogger.Instance.Error($"Duplicated Instantiater Error ({tag})");
         instantiaters[hash] = instantiater;
 
-        NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, $"Sync Object \"{tag}\" has been registered. ({hash})");
+        NebulaLogger.Instance.Message($"Sync Object \"{tag}\" has been registered. ({hash})");
     }
 
     public int ObjectId { get; private set; }
@@ -91,7 +92,7 @@ public abstract class NebulaSyncObject : FlexibleLifespan, IGameOperator
     {
         int id = AvailableId(PlayerControl.LocalPlayer.PlayerId);
         int hash = tag.ComputeConstantHash();
-        NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, $"Try Instantiate Sync GLOBAL Object (tag: {tag}, hash: {hash})");
+        NebulaLogger.Instance.Message($"Try Instantiate Sync GLOBAL Object (tag: {tag}, hash: {hash})");
         
         RpcInstantiateDef.Invoke(new(id, hash, arguments ?? Array.Empty<float>(), false));
         return new(id);
@@ -101,7 +102,7 @@ public abstract class NebulaSyncObject : FlexibleLifespan, IGameOperator
     {
         int id = AvailableId(PlayerControl.LocalPlayer.PlayerId);
         int hash = tag.ComputeConstantHash();
-        NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, $"Try Instantiate Sync LOCAL Object (tag: {tag}, hash: {hash})");
+        NebulaLogger.Instance.Message($"Try Instantiate Sync LOCAL Object (tag: {tag}, hash: {hash})");
         RpcInstantiateDef.LocalInvoke(new(id, hash, arguments ?? Array.Empty<float>(), false));
         return new(id);
     }

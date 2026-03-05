@@ -1,0 +1,39 @@
+# Assignable
+
+"role.seer.name" : "先知"
+"role.seer.short" : "先"
+"role.seer.blurb" : "观测死亡的瞬间"
+
+# Document
+
+"role.seer.doc" : "先知可以知晓是否有人死亡，当有人死亡时，会得到一个闪光提示。<br>死亡地点会留下鬼魂。"
+
+# Options
+
+"options.role.seer.detail" : "先知会看到一个白色死亡提示。<br>死亡地点会出现死者的鬼魂"
+"options.role.seer.ghostDuration" : "鬼魂显示持续时间"
+"options.role.seer.canSeeGhostsInShadow" : "可以在阴影中看到鬼魂"
+"options.role.seer.canSeeGhostsInShadow.detail" : "开启后你可以看到视野外（阴影区域）的鬼魂。"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.seer.common1.title" : "无法逃逸的灵魂"
+"achievement.seer.common1.goal" : "靠近亡者的灵魂。"
+"achievement.seer.common1.splitted.2" : "灵魂"
+
+"achievement.seer.another1.title" : "观察者"
+"achievement.seer.another1.goal" : "第一个被击杀。"
+
+"achievement.seer.challenge2.title" : "唯一的真理"
+"achievement.seer.challenge2.goal" : "在所有人都投票的情况下，只有自己投给非船员阵营。"
+"achievement.seer.challenge2.cond" : "提示：弃票、不投票都不算，必须要连续三回合以上。"
+"achievement.seer.challenge2.splitted.1" : "目击者"

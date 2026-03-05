@@ -1,0 +1,22 @@
+# Options
+
+"options.role.guesser.detail" : "赌怪可以猜测其他玩家的身份。<br>如果你的猜测正确，被猜测的玩家死亡。"
+"options.role.guesser.numOfGuess" : "猜测次数"
+"options.role.guesser.numOfGuessPerMeeting" : "每回合猜测次数"
+"options.role.guesser.canCallEmergencyMeeting" : "可以召开紧急会议"
+"options.role.guesser.leftGuess" : "剩余次数"
+"role.guesser.guessableFilter" : "可猜测职业过滤"
+
+# Game
+
+"role.guesser.leftGuess" : "剩余次数"
+
+# Game Statictics
+
+"statistics.events.guess" : "赌杀"
+"statistics.events.missed" : "误赌"
+
+# Status
+
+"state.guessed" : "赌杀"
+"state.misguessed" : "误赌"

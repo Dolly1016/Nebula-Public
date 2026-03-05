@@ -1,0 +1,29 @@
+"achievement.aeroGuesser.oneGame.title" : "猜猜这是哪"
+"achievement.aeroGuesser.oneGame.goal" : "游玩一次猜图模式。"
+
+"achievement.aeroGuesser.mapMismatch.title" : "陌生区域"
+"achievement.aeroGuesser.mapMismatch.goal" : "在猜图模式中，猜测位置与目标位置不在同一张地图中。"
+"achievement.aeroGuesser.mapMismatch.splitted.0" : "陌生的"
+
+"achievement.aeroGuesser.doubleScore2.title" : "只有我知道"
+"achievement.aeroGuesser.doubleScore2.goal" : "超出第二名两倍的分数，且总分在800分以上。"
+"achievement.aeroGuesser.doubleScore2.cond" : "提示：要求参与者大于5人。"
+"achievement.aeroGuesser.doubleScore2.splitted.2" : "知道"
+
+"achievement.aeroGuesser.total0.title" : "太空旅行"
+"achievement.aeroGuesser.total0.goal" : "在猜图模式中累计获得1万分。"
+
+"achievement.aeroGuesser.total1.title" : "地图勘探员"
+"achievement.aeroGuesser.total1.goal" : "在猜图模式中累计获得5万分。"
+
+"achievement.aeroGuesser.total2.title" : "星际导游"
+"achievement.aeroGuesser.total2.goal" : "在猜图模式中累计获得10万分。"
+
+"achievement.aeroGuesser.perfectScore.title" : "专业猜图师"
+"achievement.aeroGuesser.perfectScore.goal" : "累计达成10次完美竞猜。"
+"achievement.aeroGuesser.perfectScore.splitted.0" : "专业"
+
+"achievement.aeroGuesser.allMore900.title" : "无所不知"
+"achievement.aeroGuesser.allMore900.goal" : "所有题目都获得900分以上。"
+"achievement.aeroGuesser.allMore900.cond" : "提示：仅困难难度+题目数量：10题+地图类型：至少2种。"
+"achievement.aeroGuesser.allMore900.splitted.0" : "无所"

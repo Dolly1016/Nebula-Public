@@ -1,0 +1,31 @@
+# Assignable
+
+"role.poltergeist.name" : "捣蛋鬼"
+"role.poltergeist.blurb" : "尸体会在哪里呢"
+"role.poltergeist.short" : "捣"
+
+# Document
+
+"role.poltergeist.doc" : "捣蛋鬼可以将附近的尸体吸引到当前位置。"
+
+# Options
+
+"options.role.poltergeist.detail" : "捣蛋鬼可以吸引尸体。"
+"options.role.poltergeist.poltergeistCoolDown" : "吸引尸体冷却时间"
+
+# Game
+
+
+# UI
+
+"button.label.poltergeist" : "吸引"
+
+# Stats
+
+"stats.poltergeist.poltergeist" : "吸引尸体次数"
+
+# Titles
+
+"achievement.poltergeist.common1.title" : "诈尸"
+"achievement.poltergeist.common1.goal" : "移动一次尸体。"
+"achievement.poltergeist.common1.splitted.2" : "诈尸"

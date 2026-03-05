@@ -1,0 +1,39 @@
+# Assignable
+
+"role.crewmate.name" : "船员"
+"role.crewmate.short" : "船"
+"role.crewmate.blurb" : "完成你的任务并找出伪装者"
+
+# Document
+
+"role.crewmate.doc" : "只是一个无名小卒，没任何能力。<br><b>也许可以成为这里的传奇</b>"
+
+# Options
+
+"options.role.crewmate.detail" : "船员没有任何能力。<br>当没有其他职业可以分配时，也会出现。"
+
+# Game
+
+# UI
+
+# Status
+
+"state.alive" : "存活"
+"state.dead" : "死亡"
+"state.disconnected" : "掉线"
+"state.exiled" : "放逐"
+"state.suicide" : "自尽"
+
+# Stats
+
+# Titles
+
+# Team
+
+"teams.crewmate" : "船员"
+"end.crewmate" : "船员%EXTRA%胜利"
+
+"document.tip.winCond.crewmate.task.title" : "任务胜利"
+"document.tip.winCond.crewmate.task" : "船员阵营通过完成所有任务获胜。"
+"document.tip.winCond.crewmate.exile.title" : "放逐胜利"
+"document.tip.winCond.crewmate.exile" : "所有独立阵营都被放逐。"

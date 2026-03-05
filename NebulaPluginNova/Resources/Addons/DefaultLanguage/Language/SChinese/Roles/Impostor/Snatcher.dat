@@ -1,0 +1,62 @@
+# Assignable
+
+"role.snatcher.name" : "盗技者"
+"role.snatcher.short" : "盗"
+"role.snatcher.blurb" : "一切，尽归吾有"
+"role.snatcher.prefix" : "盗取"
+
+# Document
+
+"role.snatcher.doc" : "盗技者可以盗取其他玩家的能力为自己所用。"
+"role.snatcher.ability.title" : "固有能力【能力掠夺】"
+"role.snatcher.ability.main" : "可以从其他玩家身上盗取能力。被盗取的玩家不会立即意识到自己的能力被盗取。<br>被盗取能力的玩家尝试使用自身能力时，技能图标会损坏。"
+"role.snatcher.ability.snatch.taskPhase" : "<title>盗取</title>盗取其他玩家的能力。如果目标没有能力让你盗取，则获得<b>变速</b>能力。"
+"role.snatcher.ability.snatch.meeting" : "<title>盗取</title>在会议中推测其他玩家的能力。<br>推测成功即可盗取能力，反之技能损坏。"
+"role.snatcher.ability.clock.taskPhase" : "<title>变速</title>使用后让自身冷却恢复的更快。"
+"role.snatcher.ability.clock.meeting" : "如果推测失败，则获得<b>变速</b>能力。"
+
+# Options
+
+"options.role.snatcher.detail" : "盗技者可以夺取其他玩家的职业能力。"
+"options.role.snatcher.snatchMethod" : "盗取方式"
+"options.role.snatcher.snatchMethod.guess" : "会议推测"
+"options.role.snatcher.snatchMethod.interaction" : "主动交互"
+"options.role.snatcher.snatchCoolDown" : "盗取冷却时间"
+"options.role.snatcher.obviousGuessFailure" : "推测失败提示"
+"options.role.snatcher.clockCoolDown" : "变速冷却时间"
+"options.role.snatcher.clockDuration" : "变速持续时间"
+"options.role.snatcher.clockRatio" : "冷却变速倍率"
+"options.role.snatcher.killCooldownRewindAfterUsurp" : "盗取后重置击杀冷却"
+"options.role.snatcher.killCooldownRewindAfterUsurp.detail" : "当盗取拥有特殊击杀能力的职业时，目标将解锁普通击杀能力。"
+"options.role.snatcher.group.snatch" : "盗取能力设定"
+"options.role.snatcher.group.clock" : "冷却变速设定"
+
+# Game
+
+
+# UI
+
+"button.label.snatch" : "盗取"
+"button.label.clock" : "变速"
+"ui.action.snatcher.snatch" : "夺取别人能力。"
+"ui.action.snatcher.clock" : "短时间内加快冷却时间。"
+
+# Stats
+
+"stats.snatcher.snatch" : "盗取职业次数"
+
+# Titles
+
+"achievement.snatcher.common1.title" : "拿来吧你！"
+"achievement.snatcher.common1.goal" : "盗取其他人职业。"
+
+"achievement.snatcher.another1.title" : "流口水"
+"achievement.snatcher.another1.goal" : "被盗技者盗走能力。"
+
+"achievement.snatcher.common2.title" : "横行霸道"
+"achievement.snatcher.common2.goal" : "盗取能力后，目标输掉游戏并存活到最后胜利。"
+
+"achievement.snatcher.challenge.title" : "生生不息"
+"achievement.snatcher.challenge.goal" : "继承死去队友的能力并存活胜利。"
+"achievement.snatcher.challenge.flavor" : "“我将代替你的意志活下去！”"
+"achievement.snatcher.challenge.splitted.2" : "生生不息"

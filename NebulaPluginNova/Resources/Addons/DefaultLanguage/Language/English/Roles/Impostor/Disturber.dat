@@ -8,14 +8,14 @@
 # Document
 
 "role.disturber.doc" : "An impostor who can block players' movement with electric barriers."
-"role.disturber.ability.title" : "Inherent Ability "Electric Barrier""
+"role.disturber.ability.title" : "Inherent Ability [Electric Barrier]"
 "role.disturber.ability.main" : "Place poles from the dedicated mini map and generate barriers between the poles."
 "role.disturber.ability.place" : "<title>Place</title>Open the mini map and place poles.<br>The max number of poles that can be placed at the same time is <var>%POLES%</var>.<br>Once a continuous pole arrangement is determined,<br>press the place button in the lower right to place the poles."
 "role.disturber.ability.disturb" : "<title>Disturb</title>Temporarily generate barriers between the poles."
 
 # Options
 
-"options.role.disturber.detail" : "Disturber can place a pole to create barriers between poles.<br>The barriers prevent players movement."
+"options.role.disturber.detail" : "The Disturber can place a pole to create barriers between poles.<br>The barriers prevent players movement."
 "options.role.disturber.placeCoolDown" : "Place Cooldown"
 "options.role.disturber.disturbCoolDown" : "Disturb Cooldown"
 "options.role.disturber.disturbDuration" : "Disturb Duration"
@@ -32,6 +32,7 @@
 "button.label.disturb" : "disturb"
 "ui.action.disturber.place" : "Place poles.<br>The poles should be placed close together."
 "ui.action.disturber.disturb" : "Put up a barrier between the poles.<br>After the disturbance ends, the oldest pole will be broken."
+"role.disturber.ui.removePoles" : "Remove Poles"
 
 # Stats
 
@@ -51,4 +52,4 @@
 "achievement.disturber.challenge.goal" : "Use the disturbance ability to prolong a blackout or comms sabotaged for 40 seconds or more<br>and get 3 kills."
 "achievement.disturber.challenge.cond" : "Sabotage across meetings is invalid"
 "achievement.disturber.challenge.flavor" : ""That" comes at the worst timing."
-"achievement.disturber.challenge.splitted.1" : "Tempest "
+"achievement.disturber.challenge.splitted.1" : "Like a "

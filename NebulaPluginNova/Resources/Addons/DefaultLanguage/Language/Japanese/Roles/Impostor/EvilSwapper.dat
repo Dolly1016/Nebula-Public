@@ -26,3 +26,17 @@
 
 
 # Titles
+
+"achievement.evilSwapper.common1.title" : "闇の勢力"
+"achievement.evilSwapper.common1.goal" : "自身に投じられた最多票を入れ替えて、他人を追放する。"
+"achievement.evilSwapper.common1.flavor" : ""ディープ・ステートは本当なんだ！" ―レトリックじゃないよ、ハッキングだよ。"
+"achievement.evilSwapper.common1.splitted.0" : "闇の"
+
+"achievement.evilSwapper.another1.title" : "これは陰謀"
+"achievement.evilSwapper.another1.goal" : "フィクサーによって票の入れ替えが阻止される。"
+"achievement.evilSwapper.another1.flavor" : ""これは思考をだだ洩れにする洗脳電波よ。"<br>"...君が分かりやすすぎるだけかも。""
+
+"achievement.evilSwapper.challenge.title" : "トンデモ手数勝負"
+"achievement.evilSwapper.challenge.goal" : "マッドメイトとジャスティス、メイヤーがいるゲームで、<br>票の入れ替えをしたうえで勝利する。"
+"achievement.evilSwapper.challenge.cond" : "クルーメイト勝利以外かつ人数都合で勝利すること"
+"achievement.evilSwapper.challenge.splitted.0" : "トンデモ"

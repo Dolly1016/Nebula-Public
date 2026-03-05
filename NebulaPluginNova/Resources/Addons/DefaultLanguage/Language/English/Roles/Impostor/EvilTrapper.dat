@@ -8,7 +8,7 @@
 # Document
 
 "role.evilTrapper.doc" : "An impostor who places traps that can be used in various ways, such as interfering with enemies and killing.<br>Traps become active after a meeting is held."
-"role.evilTrapper.ability.title" : "Inherent Ability "Trap""
+"role.evilTrapper.ability.title" : "Inherent Ability [Trap]"
 "role.evilTrapper.ability.main" : "The Evil Trapper can place 3 types of traps."
 "role.evilTrapper.ability.killTrap" : "<title>Kill Trap</title>An invisible trap. Kills players (excluding allies) who step on it.<br>Only activates while the Evil Trapper's kill cooldown is active.<br>%SE%"
 "role.evilTrapper.ability.killTrap.se" : "A unique placement sound is played when setting a kill trap."
@@ -17,7 +17,7 @@
 
 # Options
 
-"options.role.evilTrapper.detail" : "Evil Trapper sets traps with various effects.<br>Killing by trap shares its kill Cooldown too."
+"options.role.evilTrapper.detail" : "The Evil Trapper sets traps with various effects.<br>Killing by trap shares its kill Cooldown too."
 "options.role.evilTrapper.killTrapSoundDistance" : "Kill Trap Sound Distance"
 "options.role.evilTrapper.costOfKillTrap" : "Cost Of Kill Trap"
 "options.role.evilTrapper.killTrapSize" : "Kill Trap Size"

@@ -1,0 +1,54 @@
+# Assignable
+
+"role.navvy.name" : "保安"
+"role.navvy.short" : "保"
+"role.navvy.blurb" : "保障船员安全"
+# Document
+
+"role.navvy.doc" : "保安可以封锁通风口和门。"
+"role.navvy.ability.title" : "固有能力【安保管理】"
+"role.navvy.ability.main" : ""
+"role.navvy.ability.seal" : "<title>封锁</title>使用胶带将通风口和门封锁上。"
+
+# Options
+
+"options.role.navvy.detail" : "保安可以封锁通风口。<br>可以使用通风口的玩家可以去除通风口上的胶带。"
+"options.role.navvy.sealCooldown" : "封锁冷却时间"
+"options.role.navvy.maxCost" : "初始胶带数量"
+"options.role.navvy.costForVentSealing" : "通风口封锁所需胶带数"
+"options.role.navvy.costForDoorSealing" : "门封锁所需胶带数"
+"options.role.navvy.removeDuration" : "移除胶带所需时间"
+"options.role.navvy.numOfVentRemovalSteps" : "通风口彻底去除胶带所需次数"
+"options.role.navvy.numOfDoorRemovalSteps" : "门彻底去除胶带所需次数"
+"options.role.navvy.redundantSealing" : "可以重新封锁"
+
+# Game
+
+
+# UI
+
+"button.label.seal" : "封锁"
+"button.label.vent.seal.remove" : "去除"
+
+# Stats
+
+"stats.navvy.sealVent" : "通风口封锁次数"
+"stats.navvy.sealDoor" : "门封锁次数"
+"stats.navvy.removeVent" : "通风口去除胶带次数"
+"stats.navvy.removeDoor" : "门去除胶带次数"
+
+# Titles
+
+"achievement.navvy.common1.title" : "强力贴"
+"achievement.navvy.common1.goal" : "使用10次封锁。"
+"achievement.navvy.common1.flavor" : "“这玩意真能贴住吗？”"
+"achievement.navvy.common1.splitted.1" : "强力"
+
+"achievement.navvy.common2.title" : "黏黏的令人厌烦"
+"achievement.navvy.common2.goal" : "去除5次胶带。"
+
+"achievement.navvy.challenge.title" : "保持通畅"
+"achievement.navvy.challenge.goal" : "封锁房间所有的门。"
+"achievement.navvy.challenge.cond" : "提示：这个房间必须拥有2个以上的门。"
+"achievement.navvy.challenge.flavor" : "“我不是关门了吗？？？”—一位愤怒的伪装者"
+"achievement.navvy.challenge.splitted.0" : "通畅"

@@ -8,7 +8,7 @@
 # Document
 
 "role.niceSwapper.doc" : "A crewmate who can swap cast votes during emergency meetings."
-"role.niceSwapper.ability.title" : "Inherent Ability "Voting Swap""
+"role.niceSwapper.ability.title" : "Inherent Ability [Voting Swap]"
 "role.niceSwapper.ability.main" : "The Nice Swapper can swap the votes of 2 selected players during emergency meetings."
 
 # Options
@@ -27,5 +27,16 @@
 
 # Titles
 
-"achievement.niceSwapper.another1.title" : "Collapse of Realism"
-"achievement.niceSwapper.another1.goal" : "Swap votes between a non-crewmate with the most votes and a crewmate,<br>and exile the crewmate."
+"achievement.niceSwapper.common1.title" : "秘蔵っ子"
+"achievement.niceSwapper.common1.goal" : "他人が獲得した最多票を入れ替えて、味方の追放を阻止する。"
+"achievement.niceSwapper.common1.splitted.1" : "っ"
+
+"achievement.niceSwapper.common2.title" : "我欲のトリアージ"
+"achievement.niceSwapper.common2.goal" : "自身が獲得した最多票を入れ替えて、他人を追放する。"
+"achievement.niceSwapper.common2.flavor" : ""僕、可愛いんです。""
+
+"achievement.niceSwapper.another1.title" : "独善"
+"achievement.niceSwapper.another1.goal" : "非クルーメイトが獲得した最多票を入れ替えて、クルーメイトを追放する。"
+
+"achievement.niceSwapper.challenge.title" : "アンリアルマジョリティ"
+"achievement.niceSwapper.challenge.goal" : "票を入れ替えて最後のインポスターを追放し、勝利する。"

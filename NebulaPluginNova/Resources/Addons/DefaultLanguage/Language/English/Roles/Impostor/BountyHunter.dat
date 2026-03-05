@@ -11,7 +11,7 @@
 
 # Options
 
-"options.role.bountyHunter.detail" : "Bounty Hunter can gain a special Cooldown.<br>If they kill them but the bounty, they'll gain penalty Cooldown."
+"options.role.bountyHunter.detail" : "The Bounty Hunter can gain a special Cooldown.<br>If they kill them but the bounty, they'll gain penalty Cooldown."
 "options.role.bountyHunter.bountyKillCoolDown" : "Bounty Kill Cooldown"
 "options.role.bountyHunter.othersKillCoolDown" : "Others Kill Cooldown"
 "options.role.bountyHunter.changeBountyInterval" : "Change Bounty Interval"

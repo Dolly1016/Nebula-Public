@@ -1,6 +1,7 @@
 ﻿using Il2CppInterop.Runtime.Injection;
 using Il2CppSystem.Text;
 using Nebula.Commands.Tokens;
+using Nebula.Modules.Logging;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using TMPro;
@@ -174,7 +175,7 @@ public class CommandManager
                     var varAllocator = (allocator as IVariableResourceAllocator);
 
                     if (varAllocator == null) {
-                        NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, null, "Invalid namespace was specified. (command: " + splittedPath[^1] + ")" );
+                        NebulaLogger.Instance.Error("Invalid namespace was specified. (command: " + splittedPath[^1] + ")" );
                         continue;
                     }
 
@@ -213,7 +214,7 @@ public class CommandManager
                     }
 
                     varAllocator.Register(splittedPath[^1], new AddonCommand(arguments, commands.ToArray()));
-                    NebulaPlugin.Log.Print("Registered Command: " + splittedPath[^1] + " at " + namespacePath);
+                    NebulaLogger.Instance.Message("Registered Command: " + splittedPath[^1] + " at " + namespacePath);
 
                 }
             }

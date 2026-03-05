@@ -1,5 +1,6 @@
 ﻿
 using Nebula.Modules.GUIWidget;
+using Nebula.Modules.Logging;
 using Nebula.Roles;
 using Nebula.Scripts;
 using System.Reflection;
@@ -28,7 +29,7 @@ public class NebulaImpl : INebula
     {
         Instance = this;
 
-        allModules.AddRange([Nebula.Modules.Language.API, GUI.API, ConfigurationsAPI.API, NebulaHasher.API, Roles.Roles.API]);
+        allModules.AddRange([Nebula.Modules.Language.API, GUI.API, ConfigurationsAPI.API, NebulaHasher.API, Roles.Roles.API, LoggingImpl.API]);
     }
 
     public Version APIVersion => typeof(NebulaAPI).Assembly.GetName().Version!;
@@ -75,6 +76,7 @@ public class NebulaImpl : INebula
     Virial.Media.Translator INebula.Language => Nebula.Modules.Language.API;
     Virial.Utilities.IHasher INebula.Hasher => NebulaHasher.API;
     Virial.Assignable.Assignables INebula.Assignables => Nebula.Roles.Roles.API;
+    Virial.Logging.Logging INebula.Logging => LoggingImpl.API;
 
     IModuleFactory INebula.Modules => factory;
 

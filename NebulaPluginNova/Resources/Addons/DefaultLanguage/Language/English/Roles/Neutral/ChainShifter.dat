@@ -6,11 +6,11 @@
 
 # Document
 
-"role.chainShifter.doc" : "A neutral member with no victory condition. Swap roles with someone."
+"role.chainShifter.doc" : "A neutral with no victory condition. Swap roles with someone."
 
 # Options
 
-"options.role.chainShifter.detail" : "Chain Shifter has no way to win."
+"options.role.chainShifter.detail" : "The Chain Shifter has no way to win."
 "options.role.chainShifter.shiftCoolDown" : "Shift Cooldown"
 "options.role.chainShifter.canCallEmergencyMeeting" : "Can Call Emergency Meeting"
 

@@ -1,0 +1,61 @@
+# Assignable
+
+"role.agent.name" : "代理人"
+"role.agent.short" : "代"
+"role.agent.blurb" : "你的心中只有任务"
+
+# Document
+
+"role.agent.doc" : "代理人可以帮助其他磨磨唧唧的船员完成任务。"
+"role.agent.ability.title" : "固有能力【专业代理】"
+"role.agent.ability.main" : "完成更多的任务，带领船员获胜。"
+"role.agent.ability.agent" : "<title>代理</title>只能在当前自身任务全部完成时才能使用。<br>使用后即可获得<b>替代</b>其他玩家任务额度的<b>额外任务</b>。"
+
+# Options
+
+"options.role.agent.detail" : "代理人可以替磨磨唧唧的船员完成任务"
+"options.role.agent.numOfExemptedTasks" : "可减少的任务数"
+"options.role.agent.numOfExemptedTasks.detail" : "指定代理人的任务总数将减少的数量。<br>总任务越少，获取额外任务的速度更快。"
+"options.role.agent.numOfExtraTasks" : "额外可接取任务数"
+"options.role.agent.numOfExtraTasks.detail" : "设置每次完成任务后可以额外获取的任务数量。<br>死亡后你将无法<b>获取</b>新的任务。"
+"options.role.agent.suicideIfSomeoneElseCompletesTasksBeforeAgent" : "若其他船员玩家先完成任务将自杀"
+"options.role.agent.suicideIfSomeoneElseCompletesTasksBeforeAgent.detail" : "开启后，如果有其他船员在代理人完成任务前完成任务，代理人会当场死亡。<br>如果特工已经完成了自带的任务，并且已经接取了额外任务时，不会死亡。"
+
+# Game
+
+# UI
+
+"button.label.agent" : "代理"
+
+# Game Statictics
+
+"statistics.events.layoff" : "解雇"
+
+# Status
+
+"state.layoff" : "解雇"
+
+# Stats
+
+"stats.agent.agent" : "代理任务次数"
+
+# Titles
+
+"achievement.agent.common1.title" : "最强社畜"
+"achievement.agent.common1.goal" : "一局完成8个以上的任务，并任务胜利。。"
+"achievement.agent.common1.cond" : "提示：免除自身3以下的任务+任务总量"
+"achievement.agent.common1.splitted.0" : "默默无闻的"
+
+"achievement.agent.another1.title" : "废物"
+"achievement.agent.another1.goal" : "其他船员先比代理人完成任务"
+"achievement.agent.another1.flavor" : "“你总是拖拖拉拉的。” —摘自一篇匿名文章。"
+
+"achievement.agent.common2.title" : "卷王"
+"achievement.agent.common2.goal" : "15秒内完成两个任务。"
+"achievement.agent.common2.splitted.0" : "行家的"
+
+"achievement.agent.challenge.title" : "社畜"
+"achievement.agent.challenge.goal" : "完成5个以上的代理任务，并任务胜利。"
+"achievement.agent.challenge.cond" : "提示：免除自身3以下的任务"
+"achievement.agent.challenge.splitted.0" : "完美"
+"achievement.agent.challenge.splitted.2" : "船员"

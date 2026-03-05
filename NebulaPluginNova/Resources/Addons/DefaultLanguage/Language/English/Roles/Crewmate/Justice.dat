@@ -6,16 +6,16 @@
 
 # Document
 
-"role.justice.doc" : "A crewmate who can put 2 players on <b>trial meeting</b>."
-"role.justice.ability.title" : "Inherent Ability "Trial Meeting""
-"role.justice.ability.main" : "During the meeting, select <var>%NUM%</var> players to start the <b>trial meeting</b> with %PICKME%.<br>In the trial meeting, you can only vote for one of the 2 selected by Justice.<br>If there is a tie in votes, <b>both players are exiled</b>."
-"role.justice.ability.pickJustice" : " <var>along with yourself</var>"
-"role.justice.ability.meeting" : "<title>Select</title>Choose the targets to put on trial during the meeting."
+"role.justice.doc" : "A crewmate who can put 2 players on the <b>balance</b>."
+"role.justice.ability.title" : "Inherent Ability [Justice Meeting]"
+"role.justice.ability.main" : "During the meeting, select <var>%NUM%</var> players to start the <b>justice meeting</b>%PICKME%.<br>In the special meeting, everyone can only vote for one of 2 selected players.<br>If there is a tie in votes, <b>both players are exiled</b>."
+"role.justice.ability.pickJustice" : " and <var>one of them is the Justice</var>."
+"role.justice.ability.meeting" : "<title>Select</title>Choose the targets to put on the balance during the meeting."
 "role.justice.tips" : "・This role is a <color=#ff7f00>Super</color><color=#ff0000>New</color><color=#00ff00>Roles</color> collaboration role (original role: 天秤)."
 
 # Options
 
-"options.role.justice.detail" : "Justice can put two players on the balance<br>and begin a special meeting."
+"options.role.justice.detail" : "The Justice can put two players on the balance<br>and begin a special meeting."
 "options.role.justice.putJusticeOnTheBalance" : "Put Justice On The Balance"
 "options.role.justice.justiceMeetingTime" : "Justice Meeting Time"
 
@@ -34,16 +34,16 @@
 # Titles
 
 "achievement.justice.common1.title" : "Trial Time"
-"achievement.justice.common1.goal" : "Start a trial meeting."
+"achievement.justice.common1.goal" : "Start a justice meeting."
 "achievement.justice.common1.flavor" : ""Suddenly, only the two of them were put on the balance!" —A witness's testimony"
 "achievement.justice.common1.splitted.0" : "Trial's "
 
 "achievement.justice.common2.title" : "Righteousness"
-"achievement.justice.common2.goal" : "Put an impostor on trial."
+"achievement.justice.common2.goal" : "Put an impostor on balance."
 "achievement.justice.common2.flavor" : ""I thought it was suspicious." —From the Broken Minutes"
 
 "achievement.justice.another1.title" : "Deepening Suspicion"
-"achievement.justice.another1.goal" : "Be exiled yourself in the trial meeting."
+"achievement.justice.another1.goal" : "Be exiled yourself in the justice meeting."
 "achievement.justice.another1.flavor" : ""Could it be that he was actually innocent?" —A Grimy Minutes of the Meeting"
 "achievement.justice.another1.splitted.0" : "Deepening "
 
@@ -52,6 +52,6 @@
 "achievement.justice.common3.flavor" : ""After the vote, both are culprits. Let the execution begin!" —A black-and-white bear said with a loud laugh"
 
 "achievement.justice.challenge.title" : "Balance of Evil"
-"achievement.justice.challenge.goal" : "Put two impostors on trial and exile both of them at the same time."
+"achievement.justice.challenge.goal" : "Put two impostors on the balance and exile both of them at the same time."
 "achievement.justice.challenge.flavor" : ""This balance showed equilibrium. That is to say......""
 "achievement.justice.challenge.splitted.0" : "Evil's "

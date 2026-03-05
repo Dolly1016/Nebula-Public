@@ -7,7 +7,7 @@
 # Document
 
 "role.evilTracker.doc" : "An impostor who can track players' positions and tasks."
-"role.evilTracker.ability.title" : "Inherent Ability "Evil Tracking""
+"role.evilTracker.ability.title" : "Inherent Ability [Evil Tracking]"
 "role.evilTracker.ability.main" : ""
 "role.evilTracker.ability.track.cannotChange" : "<title>Select</title>Choose the player to track positions."
 "role.evilTracker.ability.track.canChange" : "<title>Select</title>Choose the player to track positions.<var>Re-select to change the tracking target.</var>"
@@ -22,7 +22,7 @@
 
 # Options
 
-"options.role.evilTracker.detail" : "Evil Tracker can track the player and see where they are.<br>They can also check the progress of tasks on the meeting."
+"options.role.evilTracker.detail" : "The Evil Tracker can track the player and see where they are.<br>They can also check the progress of tasks on the meeting."
 "options.role.evilTracker.showKillFlash" : "Show Kill Flash"
 "options.role.evilTracker.trackCoolDown" : "Track Cooldown"
 "options.role.evilTracker.taskTracking" : "Task Tracking"

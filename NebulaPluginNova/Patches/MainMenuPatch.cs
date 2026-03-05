@@ -1,5 +1,6 @@
 ﻿using Nebula.Behavior;
 using Nebula.Modules.GUIWidget;
+using Nebula.UI.MainMenu;
 using UnityEngine.Playables;
 using UnityEngine.UI;
 using Virial.Media;
@@ -207,6 +208,11 @@ public static class MainMenuSetUpPatch
             {
                 DevTeamContact.OpenContactWindow(null);
             });
+
+            SetUpButton("title.buttons.migration", () =>
+            {
+                MigrationUI.OpenMigrationWindow();
+            });
         }
 #endif
 
@@ -363,7 +369,7 @@ public static class MainMenuSetUpPatch
                 if ((category ?? ModUpdater.ReleasedInfo.ReleaseCategory.Major) == ModUpdater.ReleasedInfo.ReleaseCategory.Major)
                     AutoUpdateContent("version.fetching.autoUpdate.major", () =>
                         (NebulaPlugin.GetLoaderConfig<bool>(nameof(NebulaLoader.NebulaLoader.AutoUpdate))?.Value ?? false) &&
-                        (NebulaPlugin.GetLoaderConfig<bool>(nameof(NebulaLoader.NebulaLoader.UseSnapshot))?.Value ?? false), () =>
+                        !(NebulaPlugin.GetLoaderConfig<bool>(nameof(NebulaLoader.NebulaLoader.UseSnapshot))?.Value ?? false), () =>
                         {
                             NebulaPlugin.GetLoaderConfig<bool>(nameof(NebulaLoader.NebulaLoader.AutoUpdate))?.Value = true;
                             NebulaPlugin.GetLoaderConfig<bool>(nameof(NebulaLoader.NebulaLoader.UseSnapshot))?.Value = false;
@@ -478,6 +484,7 @@ public static class MainMenuSetUpPatch
                 }).WrapToIl2Cpp());
             }
         }
+
 #endif
 
         foreach (var obj in GameObject.FindObjectsOfType<GameObject>(true))

@@ -24,7 +24,7 @@ namespace Nebula.Roles.Impostor;
 
 internal class Amalgam : DefinedRoleTemplate, DefinedRole, DefinedSingleAbilityRole<Amalgam.Ability>, ICustomAssignableStatus, IAssignableDocument
 {
-    private Amalgam() : base("amalgam", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [MaxRolesOption, RandomAssignmentOption, CanBeGuessedAsLoadedRolesOption, RoleFilterOption])
+    private Amalgam() : base("amalgam", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [MaxRolesOption, RandomAssignmentOption, NumOfRandomAssignmentOption, CanBeGuessedAsLoadedRolesOption, RoleFilterOption])
     {
         ICustomAssignableStatus.Register(this);
     }
@@ -45,6 +45,7 @@ internal class Amalgam : DefinedRoleTemplate, DefinedRole, DefinedSingleAbilityR
     static private readonly IntegerConfiguration MaxRolesOption = NebulaAPI.Configurations.Configuration("options.role.amalgam.maxRoles", (1, 16), 3);
     static private readonly BoolConfiguration CanBeGuessedAsLoadedRolesOption = NebulaAPI.Configurations.Configuration("options.role.amalgam.canBeGuessedAsLoadedRoles", true);
     static private readonly BoolConfiguration RandomAssignmentOption = NebulaAPI.Configurations.Configuration("options.role.amalgam.randomAssignment", false);
+    static private readonly IntegerConfiguration NumOfRandomAssignmentOption = NebulaAPI.Configurations.Configuration("options.role.amalgam.numOfRandomAssignment", (0, 16), 2, () => RandomAssignmentOption, decorator: num => num == 0 ? Language.Translate("options.role.amalgam.numOfRandomAssignment.all") : num.ToString());
     static private readonly SimpleRoleFilterConfiguration RoleFilterOption = new("options.role.amalgam.abilityFilter") { RolePredicate = r => r.MultipleAssignment != MultipleAssignmentType.NotAllowed, ScrollerTag = "amalgamFilter", InvertOption = true, PreviewOnlySpawnableRoles = false };
     static public readonly Amalgam MyRole = new();
 
@@ -66,6 +67,8 @@ internal class Amalgam : DefinedRoleTemplate, DefinedRole, DefinedSingleAbilityR
     static int[] GetRandomAssignment()
     {
         int leftNum = MaxRolesOption.GetValue();
+        int randomNum = NumOfRandomAssignmentOption.GetValue();
+        if (randomNum > 0 && leftNum > randomNum) leftNum = randomNum;
         if (leftNum > 0)
         {
             var cand = Roles.AllRoles.Where(CheckAssignable).ToList();
@@ -233,7 +236,7 @@ internal class Amalgam : DefinedRoleTemplate, DefinedRole, DefinedSingleAbilityR
         {
             if (subAbilities != null) ParseAndLoadSubAbilityArguments(subAbilities);
 
-            if (AmOwner && !RandomAssignmentOption)
+            if (AmOwner /*&& !RandomAssignmentOption*/)
             {
                 var selectButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.None,
                         0f, "select", buttonSprite, null, _ => GetLeftNum() > 0);
@@ -276,7 +279,7 @@ internal class Amalgam : DefinedRoleTemplate, DefinedRole, DefinedSingleAbilityR
                 ability.ability.ProgressWidget?.Move(new(0.14f, 0f))
                 )));
         
-        RemoteProcess<(GamePlayer amalgam, DefinedRole role)> RpcAddRole = new("AddRoleAmalgam", (message, _) =>
+        static RemoteProcess<(GamePlayer amalgam, DefinedRole role)> RpcAddRole = new("AddRoleAmalgam", (message, _) =>
         {
             if(message.amalgam.TryGetAbility<Ability>(out var ability))
             {

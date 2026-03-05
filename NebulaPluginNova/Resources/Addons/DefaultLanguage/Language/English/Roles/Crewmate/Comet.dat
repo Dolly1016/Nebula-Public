@@ -7,10 +7,10 @@
 # Document
 
 "role.comet.doc" : "A crewmate who can move at high speed while becoming invisible."
-"role.comet.ability.title" : "Inherent Ability "Comet on the Ship""
+"role.comet.ability.title" : "Inherent Ability [Comet on the Ship]"
 "role.comet.ability.main" : ""
 "role.comet.ability.blaze" : "<title>Blaze</title>Become invisible and increase movement speed.<br>You will not receive interactions from other players while invisible."
-"role.comet.tips" : "・Comet is not affected by blackouts."
+"role.comet.tips" : "・The Comet is not affected by power outage."
 
 # Options
 
@@ -46,7 +46,7 @@
 "achievement.comet.common3.title" : "Speedster"
 "achievement.comet.common3.goal" : "Move 45m or more in a straight line using the invisibility ability."
 "achievement.comet.common3.cond" : "Acceleration time: 15 seconds or less+Acceleration multiplier: 2.5x or less"
-"achievement.comet.common3.flavor" : ""You bear all the suspicions." —From the Broken Minutes"
+"achievement.comet.common3.flavor" : ""You bear all the suspicions." —From the Broken Minutes."
 
 "achievement.comet.common4.title" : "Top Gear"
 "achievement.comet.common4.goal" : "Accelerates while being affected by the effects of the Speed Trap and Park "Agile"."

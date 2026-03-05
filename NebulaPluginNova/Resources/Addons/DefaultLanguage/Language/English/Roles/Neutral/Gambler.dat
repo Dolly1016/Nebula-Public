@@ -6,15 +6,15 @@
 
 # Document
 
-"role.gambler.doc" : "A neutral member who bets chips and engages in gambling."
+"role.gambler.doc" : "A neutral who bets chips and engages in gambling."
 "role.gambler.winCond" : "Win bets while alive and obtain <var>%NUM%</var> chips."
-"role.gambler.ability.title" : "Inherent Ability "A Deliberate Gambler""
+"role.gambler.ability.title" : "Inherent Ability [A Deliberate Gambler]"
 "role.gambler.ability.main" : "Instead of voting in emergency meetings, the Gambler <b>predicts the voting result</b> and <b>bets chips</b>.<br>If you run out of all chips, you die.<br>To gain an advantage, engage in <b>cheating</b> during the task phase.<br><br>In emergency meetings, you can make two types of bets. If your prediction is correct, you get twice the number of chips you bet.<br>・<b>Zero Vote Bet</b>: Choose 3 players who will receive no votes at all to bet. Your prediction is correct only if all 3 receive no votes.<br>・<b>Most Votes Bet</b>: Choose 1 player who will receive the most votes to bet. Your prediction is correct if the chosen player receives the most votes.<br>"
 "role.gambler.ability.deceive" : "<title>Deceive</title>Deceive a player.<br>Immediately know the player's voting target in the next meeting."
 
 # Options
 
-"options.role.gambler.detail" : "Bet on the results of votes in the meeting to get chips. <br>Deceive to understand your opponent's movements and get an advantage."
+"options.role.gambler.detail" : "Bet on the results of votes in the meeting to get chips.<br>Deceive to understand your opponent's movements and get an advantage."
 "options.role.gambler.deceiveCooldown" : "Deceive Cooldown"
 "options.role.gambler.deceiveDuration" : "Deceive Duration"
 "options.role.gambler.initialChips" : "# Initial Chips"

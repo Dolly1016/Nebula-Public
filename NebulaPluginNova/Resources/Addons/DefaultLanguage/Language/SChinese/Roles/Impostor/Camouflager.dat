@@ -1,0 +1,43 @@
+# Assignable
+
+"role.camouflager.name" : "隐蔽者"
+"role.camouflager.short" : "隐"
+"role.camouflager.blurb" : "给他们上个迷彩涂装"
+"role.camouflager.hint" : "让所有玩家变的一模一样！"
+
+# Document
+
+"role.camouflager.doc" : "隐蔽者可以干扰玩家的视觉，使所有玩家<b>一模一样</b>。"
+"role.camouflager.ability.main" : ""
+"role.camouflager.ability.title" : "固有能力【隐蔽】"
+"role.camouflager.ability.camo" : "激活<b>隐蔽</b>。"
+
+# Options
+
+"options.role.camouflager.detail" : "隐蔽者可以让所有人变成一模一样的。<br>躲在人群里面趁机出手。"
+"options.role.camouflager.camoCoolDown" : "隐蔽冷却时间"
+"options.role.camouflager.camoDuration" : "隐蔽持续时间"
+"options.role.camouflager.canInvokeCamoAfterDeath" : "死亡后也可以使用隐蔽技能"
+"options.role.camouflager.canInvokeCamoAfterDeath.detail" : "开启后，即使死亡也能使用隐蔽技能。"
+
+# Game
+
+
+# UI
+
+"button.label.camo" : "隐蔽"
+
+# Stats
+
+"stats.camouflager.camo" : "隐蔽使用次数"
+
+# Titles
+
+"achievement.camouflager.common1.title" : "谁在那？"
+"achievement.camouflager.common1.goal" : "使用一次技能。"
+"achievement.camouflager.common1.splitted.0" : "你是"
+
+"achievement.camouflager.challenge.title" : "恐惧就在你们身边"
+"achievement.camouflager.challenge.goal" : "在技能期间，出现4次以上的凶案。"
+"achievement.camouflager.challenge.flavor" : "“人群也充满危险！”—没有署名的纸条。"
+"achievement.camouflager.challenge.splitted.0" : "恐惧的"

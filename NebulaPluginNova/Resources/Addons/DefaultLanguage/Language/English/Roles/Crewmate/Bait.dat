@@ -14,7 +14,7 @@
 "options.role.bait.showKillFlash" : "Show Kill Flash"
 "options.role.bait.showKillFlash.detail" : "When turned on, a light blue flash lights up on the killer's screen when they kill the bait."
 "options.role.bait.reportDelay" : "Report Delay"
-"options.role.bait.reportDelay.detail" : "Adding a delay before reporting makes it difficult to judge the bait report based on the time difference between the kill and the report.<br>Especially effective in games with Seer, Psychic, or Doctor."
+"options.role.bait.reportDelay.detail" : "Adding a delay before reporting makes it difficult to judge the bait report based on the time difference between the kill and the report.<br>Especially effective in games with the Seer, the Psychic, or the Doctor."
 "options.role.bait.reportDelayDispersion" : "Report Delay Dispersion"
 "options.role.bait.reportDelayDispersion.detail" : "Adding variation to the delay before reporting makes it even more difficult to judge the bait report based on the time difference between the kill and the report."
 "options.role.bait.canSeeVentFlash" : "Can See Vent Flash"

@@ -1,0 +1,65 @@
+# Assignable
+
+"role.cupid.name" : "月老"
+"role.cupid.short" : "月"
+"role.cupid.blurb" : "团圆月下，相思树底"
+"role.cupid.hint" : "制造恋人并用红线击杀其他玩家"
+
+# Document
+
+"role.cupid.doc" : "月老可以制造恋人。此外，还能在恋人之间牵起<b>红线</b>，来造成大量击杀。"
+"role.cupid.ability.title" : "固有能力【命运红线】"
+"role.cupid.ability.main" : "可以指定一对恋人，并在这对恋人之间创建<b>红线</b>。<br>触碰红线的玩家会立即死亡。"
+"role.cupid.ability.lover" : "<title>指定</title>指定一对恋人玩家。<br>选择两个人后，再次使用就会创建<b>红线</b>。"
+"role.cupid.ability.laser" : "<title>红线</title>在恋人之间显现红线。当按下时不会在第一时间出现红线，需要等待<var>%CUPID_DELAY%</var>秒后出现。<br>红线每个恋人各使用1次，月老可以使用2次，共计4次。"
+"role.cupid.tips" : "・恋人和月老并非<b>队友</b>。请在游戏结束前想办法处理掉。<br>・月老无法击杀自己指定的恋人。<br>・在指定第二名玩家或使用红线之前，如果有一名被指定的玩家死亡，可以重新选择其他玩家。"
+
+# Options
+
+"options.role.cupid.detail" : "月老是一个可以通过牵线玩家创建恋人的伪装者。<br>被月老用红线牵线的恋人玩家可以通过红线击杀其他玩家。"
+"options.role.cupid.selectCooldown" : "指定恋人冷却时间"
+"options.role.cupid.laserDelayByCupid" : "月老发动红线创建延迟"
+"options.role.cupid.laserDelayByLover" : "恋人发动红线创建延迟"
+"options.role.cupid.laserCooldown" : "红线冷却时间"
+"options.role.cupid.laserDuration" : "红线持续时间"
+"options.role.cupid.laserRadius" : "红线判定范围"
+"options.role.cupid.laserSeStrength" : "红线音效传播范围"
+
+# Game
+
+
+# UI
+
+"button.label.cupid.lover" : "指定"
+"button.label.cupid.string" : "红线"
+"ui.action.cupid.lover" : "选择作为恋人的玩家。"
+"ui.action.cupid.string" : "在恋人玩家之间会出现一条红色的激光。<br>首次发动会让恋人成立，之后可以重复发动。"
+"ui.action.cupid.lover.string" : "触发姻缘红线。<br>一局只能使用一次。"
+
+# Status
+
+"state.laser" : "情殇"
+
+# Stats
+
+"stats.cupid.lovers" : "牵线成功次数"
+"stats.cupid.laserCupid" : "月老创建红线次数"
+"stats.cupid.laserLover" : "恋人创建红线次数"
+
+# Titles
+
+"achievement.cupid.common1.title" : "异地恋"
+"achievement.cupid.common1.goal" : "让相差30米的恋人显现红线。"
+
+"achievement.combination.2.cupid.lover.common1.title" : "血红色的羁绊"
+"achievement.combination.2.cupid.lover.common1.goal" : "作为月老撮合一对恋人，然后通过红线击杀2人以上并以恋人阵营胜利。"
+"achievement.combination.2.cupid.lover.common1.splitted.1" : "红色的"
+
+"achievement.cupid.another1.title" : "这不对吧"
+"achievement.cupid.another1.goal" : "触碰到自己撮合的恋人产生的红线导致死亡。"
+"achievement.cupid.another1.splitted.0" : "说的"
+
+"achievement.cupid.challenge.title" : "至痴情者"
+"achievement.cupid.challenge.goal" : "作为月老撮合一对恋人，然后通过红线击杀5人以上，<br>之后通过某些手段除掉恋人并以伪装者阵营胜利。"
+"achievement.cupid.challenge.flavor" : "“痴情的恋人啊，在等来世吧！”"
+"achievement.cupid.challenge.splitted.0" : "痴情"

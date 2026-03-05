@@ -1,0 +1,64 @@
+# Assignable
+
+"role.destroyer.name" : "毁灭者"
+"role.destroyer.short" : "毁"
+"role.destroyer.blurb" : "碾压一切！"
+"role.destroyer.hint" : "将其他玩家压扁！"
+
+# Document
+
+"role.destroyer.doc" : "毁灭者可以将其他玩家压扁。"
+"role.destroyer.ability.title" : "固有能力【碾压】"
+"role.destroyer.ability.main" : "可以执行<b>碾压</b>来代替普通的击杀。<br>被碾压的玩家不会留下尸体但击杀时间需要很久。"
+"role.destroyer.ability.leftEvidence" : "<title>血迹</title>击杀现场会留下<b>血迹</b>，颜色与玩家颜色相同。<br>血迹无法被报告。"
+"role.destroyer.tips" : "・如果目标左右都没有足够的空间，那么将无法执行击杀。需要注意狭窄场所。<br>・在执行碾压的过程中，附近的玩家会听到击杀音效。<var>%REPORT%</var>"
+"role.destroyer.tips.report" : "<br>・可以报告正在碾压的现场，但无法阻止被碾压玩家的死亡。"
+
+# Options
+
+"options.role.destroyer.detail" : "毁灭者击杀玩家后不会产生尸体。<br>但是他的击杀所需时间会更长。"
+"options.role.destroyer.destroyCoolDown" : "碾压冷却时间"
+"options.role.destroyer.phasesOfDestroying" : "碾压所需时间"
+"options.role.destroyer.phasesOfDestroying.detail" : "设置毁灭者击杀所需时间。<br>实际击杀所需时间为括号内的秒数。"
+"options.role.destroyer.killSEStrength" : "碾压音效范围"
+"options.role.destroyer.leaveKillEvidence" : "成功碾压留下血迹"
+"options.role.destroyer.leaveKillEvidence.detail" : "开启后，受害者对应的颜色会留着击杀现场。<br>该痕迹在会议结束后仍然不会消失。"
+"options.role.destroyer.canReportKillScene" : "可以报告碾压现场"
+"options.role.destroyer.canReportKillScene.detail" : "开启后，在击杀现场附近报告键会亮起。<br>当毁灭者成功击杀后，将不能报告。"
+
+# Game
+
+
+# UI
+
+"button.label.destroyerKill" : "碾压"
+"ui.action.destroyer.kill" : "站在其他玩家旁边，使用后碾压他。"
+
+# Game Statictics
+
+"statistics.events.destroy" : "压死"
+
+# Status
+
+"state.crushed" : "压死"
+
+# Stats
+
+"stats.destroyer.reported" : "碾压期间被报告次数"
+
+# Titles
+
+"achievement.destroyer.common1.title" : "禁忌之力"
+"achievement.destroyer.common1.goal" : "使用一次特殊击杀。"
+"achievement.destroyer.common1.splitted.2" : "力"
+
+"achievement.destroyer.common2.title" : "碾压一切！"
+"achievement.destroyer.common2.goal" : "使用10次特殊击杀"
+
+"achievement.destroyer.another1.title" : "趁虚而入"
+"achievement.destroyer.another1.goal" : "在进行击杀的过程中被报告。"
+
+"achievement.destroyer.challenge.title" : "法外狂徒"
+"achievement.destroyer.challenge.goal" : "在同一场游戏中杀死3个玩家并胜利。"
+"achievement.destroyer.challenge.flavor" : "“这似乎是一个处刑场。” —来自探险者的阐述。"
+"achievement.destroyer.challenge.splitted.2" : "狂徒"

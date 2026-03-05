@@ -7,7 +7,7 @@
 "role.lover.doc" : "A modifier for pairs of 2. %SUICIDE%"
 "role.lover.doc.standard" : "If your partner dies, you die following them."
 "role.lover.doc.avenger" : "If your partner is killed, you become %AVENGER% and start a revenge drama.<br>If there is no revenge target due to exile etc., you die following them directly."
-"role.lover.winCond" : "Survive with your partner when the total number of survivors is 3 or less. %EXTRA%"
+"role.lover.winCond" : "Survive with your partner when the total number of survivors is 3 or less.%EXTRA%"
 "role.lover.winCond.additional" : "<br>Alternatively, if your partner wins and survives, you also get an <var>extra win</var>."
 
 # Options

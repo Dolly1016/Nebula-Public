@@ -1,0 +1,35 @@
+# Header
+
+"options.task" : "任务设置"
+"options.task.detail" : "这是关于任务的设置"
+
+# Groups
+
+"options.task.group.wiring" : "配线任务设定"
+"options.task.group.noGuide" : "无指引任务设定"
+
+# Options
+
+"options.map.randomizedWiring" : "随机配线任务点位"
+"options.map.stepsOfWiringGame" : "完成任务所需配线次数"
+"options.task.fakeScan" : "伪装扫描送出结果任务"
+"options.task.fakeScan.detail" : "让没有送出扫描结果任务的玩家也可以移动到扫描仪上伪装自己。"
+
+"options.task.noGuide.wiring" : "无指引修复配线任务"
+"options.task.noGuide.wiring.detail" : "开启后，将无法得知后续配线任务位置（第二处及之后）。"
+"options.task.noGuide.upload" : "无指引上传数据任务"
+"options.task.noGuide.upload.detail" : "开启后，将无法得知上传任务位置。"
+"options.task.noGuide.divertPower" : "无指引转移电路任务"
+"options.task.noGuide.divertPower.detail" : "开启后，将无法得知后续转移电路任务位置。"
+"options.task.noGuide.garbage" : "无指引清理垃圾任务"
+"options.task.noGuide.garbage.detail" : "开启后，将无法得知（第一处）清理垃圾任务位置。"
+"options.task.noGuide.sortRecords" : "无指引整理档案任务"
+"options.task.noGuide.sortRecords.detail" : "开启后，将无法得知整理档案任务任务位置。"
+"options.task.noGuide.marshmallow" : "无指引收集贝壳任务"
+"options.task.noGuide.marshmallow.detail" : "开启后，将无法得知收集贝壳任务位置。"
+"options.task.noGuide.helpCritter" : "无指引帮助生物任务"
+"options.task.noGuide.helpCritter.detail" : "开启后，将无法得知帮助生物任务位置。"
+"options.task.noGuide.replaceParts" : "无指引更换零件任务"
+"options.task.noGuide.replaceParts.detail" : "开启后，将无法得知更换零件任务位置。"
+"options.task.noGuide.collectSamples" : "无指引收集样本任务"
+"options.task.noGuide.collectSamples.detail" : "开启后，将无法得知收集样本任务位置。"

@@ -1,0 +1,55 @@
+# Assignable
+
+"role.arsonist.name" : "纵火犯"
+"role.arsonist.short" : "纵"
+"role.arsonist.blurb" : "艺术就是燃烧"
+
+# Document
+
+"role.arsonist.doc" : "纵火犯需要给所有存活玩家涂油来获得胜利。"
+"role.arsonist.winCond" : "给所有幸存者涂上油并点火。"
+"role.arsonist.ability.title" : "固有能力【纵火】"
+"role.arsonist.ability.main" : ""
+"role.arsonist.ability.douse" : "<title>涂油</title>需要紧紧贴着其他玩家继续涂油，当所有人都被涂上油，涂油技能就会变成<b>点火</b>。"
+"role.arsonist.ability.ignite" : "<title>点火</title>只有全部存活玩家都被涂油才能获得此技能。使用后，纵火犯直接胜利。"
+
+# Options
+
+"options.role.arsonist.detail" : "纵火犯需要给所有存活玩家涂油来获得胜利。"
+"options.role.arsonist.douseCoolDown" : "涂油冷却时间"
+"options.role.arsonist.douseDuration" : "涂油所需时间"
+
+# Game
+
+
+# UI
+
+"button.label.douse" : "涂油"
+"button.label.ignite" : "点火"
+
+# Stats
+
+"stats.arsonist.doused" : "被涂油玩家数量"
+"role.arsonist.gui.left" : "剩余玩家"
+"role.arsonist.gui.left.dead" : "死亡"
+
+# Titles
+
+"achievement.arsonist.common1.title" : "充满汽油味"
+"achievement.arsonist.common1.goal" : "3个以上被涂油的玩家活着参加会议"
+"achievement.arsonist.common1.splitted.0" : "汽油味"
+
+"achievement.arsonist.challenge.title" : "不配接受火焰的洗礼"
+"achievement.arsonist.challenge.goal" : "在会议中将唯一一个没被涂油的玩家驱逐并胜利。"
+"achievement.arsonist.challenge.flavor" : "“你太干净了！”—来自纵火者的独白。"
+"achievement.arsonist.challenge.splitted.2" : "会议"
+
+# Team
+
+"teams.arsonist" : "纵火犯"
+"end.arsonist" : "纵火犯%EXTRA%胜利"
+
+# Document
+
+"document.tip.winCond.arsonist.title" : "特殊胜利"
+"document.tip.winCond.arsonist" : "所有幸存的玩家被涂上油并点燃获胜。"

@@ -1,0 +1,33 @@
+# Assignable
+
+"role.guesser.name" : "赌怪"
+"role.guesser.generalBlurb" : "让我猜猜看"
+"role.guesser.blurb" : "你可以赌杀任何人。"
+
+# Document
+
+"role.guesser.doc" : "赌怪可以在会议中推理、猜测任何其他玩家的身份并杀死他们。<br>如果猜测正确，被猜测的玩家死亡，反之自己死亡。"
+
+# Options
+
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.guesser.allGuess" : "赌杀次数"
+"stats.guesser.misguessed" : "误赌次数"
+
+# Titles
+
+"achievement.guesser.common1.title" : "你漏出马脚了"
+"achievement.guesser.common1.goal" : "赌杀一名玩家。"
+"achievement.guesser.common1.flavor" : "生命就是一场豪赌"
+
+"achievement.guesser.challenge.title" : "朋友，这是一场豪赌"
+"achievement.guesser.challenge.goal" : "赌杀3名及以上的玩家"
+"achievement.guesser.challenge.flavor" : "“兄弟，我没开，真的……”—来自天才少年的自述。"

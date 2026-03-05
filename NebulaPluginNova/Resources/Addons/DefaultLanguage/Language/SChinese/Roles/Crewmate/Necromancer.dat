@@ -1,0 +1,66 @@
+# Assignable
+
+"role.necromancer.name" : "死灵法师"
+"role.necromancer.short" : "死"
+"role.necromancer.blurb" : "召回灵魂"
+
+# Document
+
+"role.necromancer.doc" : "死灵法师可以将尸体复活。"
+"role.necromancer.ability.title" : "固有能力【禁忌・通灵术】"
+"role.necromancer.ability.main" : "将尸体抬到指定房间<b>复活</b>。<br>当附近<var>%DISTANCE%</var>内有尸体时，屏幕会有紫色光提示。"
+"role.necromancer.ability.drag" : "<title>拖拽/松开</title>可以拖拽尸体并携带移动，或松开尸体。拖拽尸体时会有箭头提示<b>复活</b>该玩家的房间。<br>复活房间因第一次出现尸体位置而变。"
+"role.necromancer.ability.drag.near" : "非常近"
+"role.necromancer.ability.drag.far" : "附近"
+"role.necromancer.ability.revive" : "<title>复活</title>到达指定房间后，且处于拖拽状态即可复活该玩家。<br>复活等待时间结束后，该玩家会在当前位置复活。"
+
+# Options
+
+"options.role.necromancer.detail" : "死灵法师可以提供尸体复活玩家！<br>把尸体带到指定位置并复活。"
+"options.role.necromancer.reviveCoolDown" : "复活冷却时间"
+"options.role.necromancer.reviveDuration" : "复活所需时间"
+"options.role.necromancer.reviveDuration.detail" : "这是设置按下复活键复活尸体所需的等待时间。"
+"options.role.necromancer.detectedRange" : "最大通知距离"
+"options.role.necromancer.detectedRange.detail" : "当死灵法师与尸体足够进时，屏幕会变的有点紫。<br>这可以让其感知到尸体的存在。"
+"options.role.necromancer.reviveMinRange" : "到复活室的最小距离"
+"options.role.necromancer.reviveMinRange.detail" : "复活尸体的房间是根据尸体的位置来确定的。<br>此设置是指定复活房间与尸体之间的最小距离。"
+"options.role.necromancer.reviveMaxRange" : "到复活室的最大距离"
+"options.role.necromancer.reviveMaxRange.detail" : "复活尸体的房间是根据尸体的位置来确定的。<br>此设置是指定复活房间与尸体之间的最大距离。"
+
+# Game
+
+"role.necromancer.phantomMessage" : "把我带到%ROOM%那里……"
+"role.necromancer.reviveRange" : "死灵法师<color=white>：尸体通知范围</color>"
+"gameAction.necromancer.revive" : "复活"
+
+# UI
+
+"button.label.revive" : "复活"
+
+# Status
+
+"state.revived" : "复活"
+
+# Stats
+
+"stats.necromancer.revive" : "复活成功数量"
+
+# Titles
+
+"achievement.necromancer.common1.title" : "秽土转生"
+"achievement.necromancer.common1.goal" : "复活一名玩家。"
+"achievement.necromancer.common1.flavor" : "“还没到你退场的时候。”—来自一位神秘的法师。"
+
+"achievement.necromancer.another2.title" : "没有奇迹"
+"achievement.necromancer.another2.goal" : "在拖动尸体的过程中被击杀。"
+"achievement.necromancer.another2.flavor" : "“人固有一死，或重于泰山，或轻于鸿毛”—汉・司马迁"
+
+"achievement.necromancer.another.title" : "通灵事故"
+"achievement.necromancer.another.goal" : "复活一个非船员阵营玩家。"
+"achievement.necromancer.another.splitted.0" : "噩梦的"
+
+"achievement.necromancer.challenge.title" : "轮回"
+"achievement.necromancer.challenge.goal" : "在一局游戏中让同一名玩家复活两次。"
+"achievement.necromancer.challenge.flavor" : "“无法结束的噩梦。” —来自重生者。"
+"achievement.necromancer.challenge.splitted.1" : "死灵"
+"achievement.necromancer.challenge.splitted.2" : "兵团"

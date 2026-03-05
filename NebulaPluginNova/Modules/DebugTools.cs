@@ -1,4 +1,5 @@
 ﻿using AmongUs.Data.Player;
+using Nebula.Modules.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -67,16 +68,16 @@ public static class DebugTools
 
                 if (str.Length == 0)
                 {
-                    NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Log, NebulaLog.LogCategory.System, $"Canceled changing debug variable. (Name: {v.Name}, Current: {old})");
+                    NebulaLogger.Instance.Message($"Canceled changing debug variable. (Name: {v.Name}, Current: {old})");
                     return true;
                 }
 
                 if (old != str)
                 {
                     if (!v.Deserialize(str))
-                        NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.System, $"Failed to deserialize. (Name: {v.Name}, Input: {str})");
+                        NebulaLogger.Instance.Error($"Failed to deserialize. (Name: {v.Name}, Input: {str})");
                     else
-                        NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Log, NebulaLog.LogCategory.System, $"Changed debug variable. (Name: {v.Name}, Old: {old}, Current: {v.ToString()})");
+                        NebulaLogger.Instance.Message($"Changed debug variable. (Name: {v.Name}, Old: {old}, Current: {v.ToString()})");
                 }
                 return true;
             }, MaxLines = 1 }

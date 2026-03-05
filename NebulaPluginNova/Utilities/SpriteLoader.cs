@@ -5,6 +5,7 @@ using Cpp2IL.Core.Extensions;
 using Virial.Utilities;
 using Virial.Media;
 using UnityEngine;
+using Nebula.Modules.Logging;
 
 namespace Nebula.Utilities;
 
@@ -279,7 +280,7 @@ public class ZipTextureLoader : ITextureLoader
         {
             texture = GraphicsHelper.LoadTextureFromZip(archive, address);
             if(texture!=null && IsUnloadAsset) texture.hideFlags |= HideFlags.DontUnloadUnusedAsset | HideFlags.HideAndDontSave;
-            if (texture == null) NebulaPlugin.Log.Print(NebulaLog.LogCategory.Scripting, $"Image is not found. (path:{address})");
+            if (texture == null) NebulaLogger.Instance.Error($"Image is not found. (path:{address})");
         }
         return texture!;
     }

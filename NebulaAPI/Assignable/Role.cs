@@ -660,13 +660,11 @@ public interface RuntimeAssignable : ILifespan, IBindPlayer, IGameOperator, IRel
     /// <summary>
     /// 通信障害を修理できる場合trueを返します。
     /// </summary>
-    [Obsolete(AttributeConstants.ObsoleteText)]
     bool CanFixComm => true;
 
     /// <summary>
     /// 通信障害を修理できる場合trueを返します。
     /// </summary>
-    [Obsolete(AttributeConstants.ObsoleteText)]
     bool CanFixLight => true;
 
     /// <summary>

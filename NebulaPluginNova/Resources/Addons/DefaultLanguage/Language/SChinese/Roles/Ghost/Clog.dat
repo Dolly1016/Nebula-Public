@@ -1,0 +1,41 @@
+# Assignable
+
+"role.clog.name" : "阻碍者"
+"role.clog.blurb" : "前方不通请换道"
+"role.clog.short" : "阻"
+
+# Document
+
+"role.clog.doc" : "阻碍者可以召唤妨碍幸存者移动的鬼魂。"
+
+# Options
+
+"options.role.clog.detail" : "阻碍者可以生成一个有实体的灵魂，它可以阻挡一切。"
+"options.role.clog.ghostDuration" : "灵魂持续时间"
+"options.role.clog.numOfGhost" : "灵魂可生成数"
+"options.role.clog.ghostSize" : "灵魂判定大小"
+
+# Game
+
+"role.clog.ghostSize" : "阻碍者：<color=white>灵魂判定大小</color>"
+"gameAction.clog.ghost" : "召唤鬼魂"
+
+# UI
+
+"button.label.ghost" : "鬼魂"
+
+# Stats
+
+"stats.clog.ghosts" : "灵魂召唤次数"
+
+# Titles
+
+"achievement.clog.common1.title" : "怨气化形"
+"achievement.clog.common1.goal" : "召唤拥有实体的灵魂。"
+
+"achievement.clog.another1.title" : "来自队友的呼唤"
+"achievement.clog.another1.goal" : "任一伪装者队友接近放置的灵魂。"
+"achievement.clog.another1.splitted.0" : "来自"
+
+"achievement.clog.common2.title" : "绝望的结局"
+"achievement.clog.common2.goal" : "利用能力破坏获胜。"

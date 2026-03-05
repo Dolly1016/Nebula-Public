@@ -1,4 +1,5 @@
 ﻿using Nebula.Behavior;
+using Nebula.Modules.Logging;
 using System.IO.Compression;
 using System.Net;
 using System.Reflection;
@@ -140,7 +141,7 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
             }
             catch (Exception ex)
             {
-                NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, ex.GetType().Name + ex.Message + ex.StackTrace);
+                NebulaLogger.Instance.Error(ex.GetType().Name + ex.Message + ex.StackTrace);
             }
         }
     }
@@ -250,7 +251,7 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
             catch
             {
                 zip.Dispose();
-                NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.Addon, "Failed to load addon \"" + Path.GetFileName(file) + "\".");
+                NebulaLogger.Instance.Error("Failed to load addon \"" + Path.GetFileName(file) + "\".");
             }
         }
 
@@ -279,7 +280,7 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
         //未解決のアドオン
         foreach(var l in leftAddons)
         {
-            NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, "Could not resolve dependencies. Excluded addon: \"" + l.AddonName + " (" + l.Id + ")\"");
+            NebulaLogger.Instance.Error("Could not resolve dependencies. Excluded addon: \"" + l.AddonName + " (" + l.Id + ")\"");
         }
 
         AllAddons.Do(a => a.Dependency = a.IdDependencyCache.Select(id => GetAddon(id)).ToArray()!);

@@ -3,7 +3,9 @@ using AmongUs.HTTP;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Innersloth.IO;
 using Nebula.Behavior;
+using Nebula.Modules.Online;
 using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 using UnityEngine.Events;
 using UnityEngine.Networking;
 using UnityEngine.ResourceManagement;
@@ -12,151 +14,10 @@ using static HttpMatchmakerManager;
 
 namespace Nebula.Patches;
 
-[NebulaPreprocess(PreprocessPhase.PostLoadAddons)]
-[HarmonyPatch(typeof(RegionMenu), nameof(RegionMenu.Open))]
-public static class RegionMenuOpenPatch
+internal static class IRegionInfoExtentions
 {
-    private static StringDataEntry SaveIp = null!;
-    private static IntegerDataEntry SavePort = null!;
-
-    private static TextField? ipField = null;
-    private static TextField? portField = null;
-
-    public static IRegionInfo[] defaultRegions = null!;
-
-    private static readonly DataSaver customServerData = new("CustomServer");
-    private static StaticHttpRegionInfo /*CustomRegion = null!,*/ NoSServerRegion = null!;
-    private const string NoSIP = "https://www.nebula-on-the-ship.com";
-    private const ushort NoSPort = 443;
-
-    public static readonly List<IRegionInfo> AddonRegions = [];
-    public static IRegionInfo GenerateRegion(string name, string ip, ushort port) => new StaticHttpRegionInfo(name, StringNames.NoTranslation, ip,
-            new ServerInfo[] { new ServerInfo("Http-1", ip, port, false) }).Cast<IRegionInfo>();
-
-    private class CustomServerData
-    {
-        [JsonSerializableField]
-        public string DisplayName = null!;
-        [JsonSerializableField]
-        public string Ip = null!;
-        [JsonSerializableField]
-        public ushort Port = 443;
-
-        public bool IsValid => DisplayName != null && Ip != null;
-    }
-    public static void LoadAddonRegion()
-    {
-        foreach(var addon in NebulaAddon.AllAddons)
-        {
-            using var stream = addon.OpenRead("CustomServer.json");
-            if (stream == null) continue;
-            var servers = JsonStructure.Deserialize<List<CustomServerData>>(stream);
-
-            foreach(var server in servers ?? [])
-            {
-                if (server.IsValid)
-                {
-                    AddonRegions.Add(GenerateRegion(server.DisplayName, server.Ip, server.Port));
-                }
-            }
-        }
-    }
-    public static void UpdateRegions()
-    {
-        ServerManager serverManager = DestroyableSingleton<ServerManager>.Instance;
-        IRegionInfo[] regions = defaultRegions;
-
-        //var CustomRegion = new DnsRegionInfo(SaveIp.Value, "Custom", StringNames.NoTranslation, SaveIp.Value, (ushort)SavePort.Value, false);
-        
-        /*
-        CustomRegion = new StaticHttpRegionInfo("Custom", StringNames.NoTranslation, SaveIp.Value,
-            new ServerInfo[] { new ServerInfo("Custom", SaveIp.Value, (ushort)SavePort.Value, false) });
-        */
-
-        NoSServerRegion = new StaticHttpRegionInfo("Nebula on the Ship JP", StringNames.NoTranslation, NoSIP,
-            (ServerInfo[])[new("Http-1", NoSIP, NoSPort, false)]);
-
-        var ModNARegion = new StaticHttpRegionInfo("Modded NA (MNA)", StringNames.NoTranslation, "www.aumods.us",
-            (ServerInfo[])[new("Http-1", "https://www.aumods.us", 443, false)]);
-        var ModEURegion = new StaticHttpRegionInfo("Modded EU (MEU)", StringNames.NoTranslation, "au-eu.duikbo.at",
-            (ServerInfo[])[new("Http-1", "https://au-eu.duikbo.at", 443, false)]);
-        var ModASRegion = new StaticHttpRegionInfo("Modded Asia (MAS)", StringNames.NoTranslation, "au-as.duikbo.at",
-            (ServerInfo[])[new("Http-1", "https://au-as.duikbo.at", 443, false)]);
-
-        regions = regions.Concat(AddonRegions).Concat([ModNARegion.Cast<IRegionInfo>(), ModEURegion.Cast<IRegionInfo>(), ModASRegion.Cast<IRegionInfo>(), NoSServerRegion.Cast<IRegionInfo>()]).ToArray();
-        //マージ時、DefaultRegionsに含まれている要素のほうが優先される(重複時に生き残る方)
-        ServerManager.DefaultRegions = regions;
-        serverManager.LoadServers();
-        if(serverManager.CurrentRegion.TranslateName != StringNames.NoTranslation)
-        {
-            serverManager.StartCoroutine(ManagedEffects.Sequence(ManagedEffects.Wait(3f), ManagedEffects.Action(()=> serverManager.SetRegion(ModASRegion.CastFast<IRegionInfo>()))).WrapToIl2Cpp());
-        }
-    }
-
-    static RegionMenuOpenPatch()
-    {
-        LoadAddonRegion();
-        defaultRegions = ServerManager.DefaultRegions;
-        UpdateRegions();
-    }
-
-    private static void ChooseOption(RegionMenu __instance, IRegionInfo region)
-    {
-
-        DestroyableSingleton<ServerManager>.Instance.SetRegion(region);
-        __instance.RegionText.text = DestroyableSingleton<TranslationController>.Instance.GetStringWithDefault(region.TranslateName, region.Name, new Il2CppReferenceArray<Il2CppSystem.Object>([]));
-    }
-
-    /*
-    public static void Postfix(RegionMenu __instance)
-    {
-        if (!__instance.TryCast<RegionMenu>()) return;
-
-        if (!ipField)
-        {
-            Reference<TextField> ipRef = new();
-            var widget = new MetaWidgetOld.TextInput(1, 2f, new(2.8f, 0.3f))
-            {
-                TextFieldRef = ipRef,
-                TextPredicate = (c) => ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || ('0' <= c && c <= '9') || c is '?' or '!' or ',' or '.' or '/' or ':',
-                Hint = "Server IP".Color(Color.gray),
-                DefaultText = SaveIp.Value
-            };
-            widget.Generate(__instance.gameObject, new Vector3(0f, -1.2f, -100f),out _);
-
-            ipField = ipRef.Value!;
-            ipField.LostFocusAction = (text) =>
-            {
-                while (text.EndsWith('/')) text = text.Substring(0, text.Length - 1);
-                ipField.SetText(text);
-                SaveIp.Value = text;
-                UpdateRegions();
-                ChooseOption(__instance, CustomRegion.Cast<IRegionInfo>());
-            };
-        }
-
-        if (!portField)
-        {
-            Reference<TextField> portRef = new();
-            var widget = new MetaWidgetOld.TextInput(1, 2f, new(2.8f, 0.3f))
-            {
-                TextFieldRef = portRef,
-                TextPredicate = (c) => '0' <= c && c <= '9',
-                Hint = "Server Port".Color(Color.gray),
-                DefaultText = SavePort.Value.ToString()
-            };
-            widget.Generate(__instance.gameObject, new Vector3(0f, -1.8f, -100f), out _);
-
-            portField = portRef.Value!;
-            portField.LostFocusAction = (text) =>
-            {
-                SavePort.Value = ushort.TryParse(text, out var port) ? port : (ushort)22023;
-                UpdateRegions();
-                ChooseOption(__instance, CustomRegion.Cast<IRegionInfo>());
-            };
-        }
-    }
-    */
+    static public string ModTranslatedName(this IRegionInfo region) => TranslateText(region.Name);
+    static public string TranslateText(string text) => Language.TryTranslate("regions." + text, out var translated) ? translated : text;
 }
 
 [HarmonyPatch(typeof(CreateGameOptions), nameof(CreateGameOptions.UpdateServerText))]
@@ -164,7 +25,7 @@ public static class UpdateGameOptionRegionTextPatch
 {
     static void Prefix(CreateGameOptions __instance, [HarmonyArgument(0)] ref string text)
     {
-        text = ServerDropdownPatch.TranslateText(text);
+        text = IRegionInfoExtentions.TranslateText(text);
     }
 }
 
@@ -177,9 +38,7 @@ public static class ServerDropdownPatch
     const int RegionsPerColumn = 5;
     public static bool Prefix(ServerDropdown __instance)
     {
-        var regions = DestroyableSingleton<ServerManager>.Instance.AvailableRegions.Where(r => r.TranslateName == StringNames.NoTranslation).ToArray();
-        var defaultRegions = ServerManager.DefaultRegions.ToArray();
-        regions = regions.OrderBy(r => defaultRegions.FindIndex(d => d.Name == r.Name)).ToArray();
+        var regions = CustomServerLoader.CurrentAvailableRegions().ToArray();
         int num = 0;
 
         List<ServerListButton> buttons = [];
@@ -189,7 +48,7 @@ public static class ServerDropdownPatch
             if (DestroyableSingleton<ServerManager>.Instance.CurrentRegion.Name == regionInfo.Name)
             {
                 __instance.defaultButtonSelected = __instance.firstOption;
-                __instance.firstOption.ChangeButtonText(TranslateText(regionInfo.Name));
+                __instance.firstOption.ChangeButtonText(regionInfo.ModTranslatedName());
             }
             else
             {
@@ -197,7 +56,7 @@ public static class ServerDropdownPatch
                 ServerListButton serverListButton = __instance.ButtonPool.Get<ServerListButton>();
                 serverListButton.transform.localPosition = new Vector3(BaseX * (float)(num / RegionsPerColumn), __instance.y_posButton + -0.55f * (float)(num % RegionsPerColumn), -1f);
                 serverListButton.transform.localScale = Vector3.one;
-                serverListButton.Text.text = TranslateText(regionInfo.Name);
+                serverListButton.Text.text = regionInfo.ModTranslatedName();
                 serverListButton.Text.ForceMeshUpdate(false, false);
                 serverListButton.Button.OnClick.RemoveAllListeners();
                 serverListButton.Button.OnClick.AddListener(() => __instance.ChooseOption(region));
@@ -241,7 +100,7 @@ file static class ModServerSearcher
         yield return DestroyableSingleton<EOSManager>.Instance.WaitForLoginFlow();
 
         IRegionInfo initialRegion = DestroyableSingleton<ServerManager>.Instance.CurrentRegion;
-        List<IRegionInfo> regions = DestroyableSingleton<ServerManager>.Instance.AvailableRegions.ToList();
+        List<IRegionInfo> regions = CustomServerLoader.CurrentAvailableRegions().ToList();
         regions.RemoveAll(r => r.Name == initialRegion.Name);
         List<string> errorRegions = [];
 
@@ -264,7 +123,7 @@ file static class ModServerSearcher
         {
             if (failure.Reason == DisconnectReasons.Custom)
             {
-                errorRegions.Add(region.TranslateName == StringNames.NoTranslation ? region.Name.Replace("<br>", "") : DestroyableSingleton<TranslationController>.Instance.GetString(region.TranslateName));
+                errorRegions.Add(region.TranslateName == StringNames.NoTranslation ? region.ModTranslatedName() : DestroyableSingleton<TranslationController>.Instance.GetString(region.TranslateName));
             }
         }).WrapToIl2Cpp()).ToArray());
 
@@ -346,7 +205,7 @@ file static class ModServerSearcher
             {
                 FindGameByCodeResponse findGameByCodeResponse = JsonConvert.DeserializeObject<FindGameByCodeResponse>(response, matchmaker.jsonSettings);
                 findGameByCodeResponse.Region = region.TranslateName;
-                findGameByCodeResponse.UntranslatedRegion = region.Name;
+                findGameByCodeResponse.UntranslatedRegion = region.ModTranslatedName();
                 onFound.Invoke(findGameByCodeResponse, matchmakerToken);
             }
             catch

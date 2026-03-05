@@ -32,6 +32,7 @@
 "button.label.disturb" : "障壁"
 "ui.action.disturber.place" : "ポールを設置します。<br>2本目以降のポールは円で示された範囲内に設置する必要があります。"
 "ui.action.disturber.disturb" : "ポール間に障壁を張ります。<br>妨害効果の終了時に、一番古いポールは壊れて消滅します。"
+"role.disturber.ui.removePoles" : "ポール撤去"
 
 # Stats
 

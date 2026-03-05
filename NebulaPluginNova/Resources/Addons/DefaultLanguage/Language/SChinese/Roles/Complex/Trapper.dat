@@ -1,0 +1,28 @@
+# Document
+
+"role.trapper.ability.accelTrap" : "<title>加速陷阱</title>踩到他的玩家会在一段时间内获得加速效果。"
+"role.trapper.ability.decelTrap" : "<title>减速陷阱</title>踩到他的玩家会在一段时间内获得减速效果。"
+
+# Options
+
+"options.role.trapper.placeCoolDown" : "放置冷却时间"
+"options.role.trapper.placeDuration" : "放置所需时间"
+"options.role.trapper.numOfCharges" : "陷阱零件数"
+"options.role.trapper.speedTrapSize" : "加速陷阱判定范围"
+"options.role.trapper.accelRate" : "加速倍率"
+"options.role.trapper.decelRate" : "减速倍率"
+"options.role.trapper.speedDuration" : "效果持续时间"
+
+# Game
+
+"gameAction.trapper.placement.evil" : "陷阱放置"
+"gameAction.trapper.placement.nice" : "陷阱放置"
+
+# UI
+
+"ui.action.trapper.place" : "放置陷阱。"
+"ui.action.trapper.switch" : "切换要放置的陷阱类型。"
+
+# Status
+
+"state.trapped" : "落陷"

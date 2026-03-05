@@ -9,7 +9,7 @@
 "role.clog.doc" : "Can summon ghosts that interfere with survivors' movement."
 # Options
 
-"options.role.clog.detail" : "Clog can invoke the ghost with collider."
+"options.role.clog.detail" : "The Clog can invoke the ghost with collider."
 "options.role.clog.ghostDuration" : "Ghost Duration"
 "options.role.clog.numOfGhost" : "# Of Ghost"
 "options.role.clog.ghostSize" : "Ghost Size"

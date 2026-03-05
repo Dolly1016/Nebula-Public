@@ -1,0 +1,49 @@
+# Assignable
+
+"role.painter.name" : "画皮师"
+"role.painter.short" : "画"
+"role.painter.blurb" : "多么美妙的皮囊"
+
+# Document
+
+"role.painter.doc" : "画皮师可以改变其他玩家的外观，被改变的玩家自己不清楚。"
+"role.painter.ability.title" : "固有能力【改变外观】"
+"role.painter.ability.main" : ""
+"role.painter.ability.sample" : "<title>取样</title>收集附近玩家的外貌。<var>%SAMPLE%</var>"
+"role.painter.ability.paint" : "<title>绘制</title>将取样的外观绘制给目标玩家。外观会<var>%PAINT%</var>修改。"
+"role.painter.ability.sample.loseSample" : "取样的外观会在会议结束后丢弃。"
+"role.painter.ability.sample.keepSample" : "取样的外观可以一直保留。"
+"role.painter.ability.paint.afterMeeting" : "在会议结束后"
+"role.painter.ability.paint.immediate" : "立即"
+
+# Options
+
+"options.role.painter.detail" : "画皮师可以改变其他玩家的外观"
+"options.role.painter.sampleCoolDown" : "取样冷却时间"
+"options.role.painter.paintCoolDown" : "改变外观冷却时间"
+"options.role.painter.loseSampleOnMeeting" : "会议结束后需要重新取样"
+"options.role.painter.transformAfterMeeting" : "会议结束后生效"
+
+# Game
+
+
+# UI
+
+"button.label.paint" : "绘制"
+
+# Stats
+
+"stats.painter.sample" : "取样使用次数"
+"stats.painter.paint" : "改变外形使用次数"
+
+# Titles
+
+"achievement.painter.common1.title" : "多漂亮的妆容"
+"achievement.painter.common1.goal" : "取样并修改其他玩家的外观"
+"achievement.painter.common1.cond" : "提示：模仿大师也可以获取该成就！"
+
+"achievement.painter.challenge.title" : "消失的证人"
+"achievement.painter.challenge.goal" : "将3个及以上的玩家修改两次及以上的外观"
+"achievement.painter.challenge.cond" : "提示：相同的样本给两个及以上的玩家不会记次数"
+"achievement.painter.challenge.splitted.0" : "消失的"
+"achievement.painter.challenge.splitted.2" : "证人"

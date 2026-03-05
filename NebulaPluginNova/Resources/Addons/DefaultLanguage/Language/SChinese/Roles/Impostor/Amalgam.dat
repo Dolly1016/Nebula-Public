@@ -1,0 +1,49 @@
+# Assignable
+
+"role.amalgam.name" : "融合体"
+"role.amalgam.short" : "融"
+"role.amalgam.blurb" : "不明状体"
+"role.amalgam.hint" : "融合其他职业能力，组合出最强职业！"
+
+# Document
+
+"role.amalgam.doc" : "融合体可以融合其他职业的能力。"
+"role.amalgam.ability.title" : "固有能力【融合】"
+"role.amalgam.ability.main" : "%ABILITY%"
+"role.amalgam.ability.main.selection" : "<var>可以融合多个职业能力。</var>"
+"role.amalgam.ability.main.random" : "<var>融合了多个职业能力。</var><br>在当前界面中，会显示当前融合职业能力的介绍选项卡，点击即可展开。"
+"role.amalgam.ability.amalgam" : "<title>融合</title>融合能力。<br>融合后将无法修改。"
+"role.amalgam.tips" : "・<b>特殊行动型</b>和<b>地图控制型</b>分别只能融合一个职业能力。<br>・除击杀按钮和瞄准类能力以外没有快捷键，需要手动点击。"
+
+# Options
+
+"options.role.amalgam.detail" : "融合体可以融合其他职业的能力。"
+"options.role.amalgam.maxRoles" : "最大职业能力融合数"
+"options.role.amalgam.randomAssignment" : "随机融合能力"
+"options.role.amalgam.numOfRandomAssignment" : "初始获得融合数"
+"options.role.amalgam.numOfRandomAssignment.all" : "全部"
+"options.role.amalgam.abilityFilter" : "职业能力过滤"
+"options.role.amalgam.canBeGuessedAsLoadedRoles" : "可以猜测融合职业进行赌杀"
+
+# Game
+
+"role.amalgam.tabs.kill" : "特殊行动型"
+"role.amalgam.tabs.map" : "地图控制型"
+"role.amalgam.tabs.others" : "其他扩展型"
+
+# UI
+
+"button.label.select" : "融合"
+
+# Stats
+
+
+# Titles
+
+"achievement.amalgam.common1.title" : "新生"
+"achievement.amalgam.common1.goal" : "获得第二个能力。"
+
+"achievement.amalgam.challenge.title" : "究极融合生命体"
+"achievement.amalgam.challenge.goal" : "同时获得两个以上融合职业中的挑战成就。"
+"achievement.amalgam.challenge.splitted.0" : "究极的"
+"achievement.amalgam.challenge.splitted.2" : "生命体"

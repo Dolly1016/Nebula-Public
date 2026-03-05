@@ -1,0 +1,25 @@
+# Header
+
+"options.assignment" : "分配设置"
+"options.assignment.detail" : "关于职业分配数量相关的选项"
+
+# Groups
+
+"options.assignment.group.assignment" : "职业分配设定"
+
+# Options
+
+"options.assignment.crewmate" : "船员职业"
+"options.assignment.impostor" : "伪装者职业"
+"options.assignment.neutral" : "第三方职业"
+"options.assignment.unlimited" : "无限制"
+"options.assignment.assignOpToHost" : "主持人是管理员"
+"options.assignment.assignOpToHost.detail" : "开启后，主持人可以在游戏中使用指令。<br>一般情况开启没有任何意义。"
+"options.assignment.ghostAssignmentMethod" : "鬼魂分配方法"
+"options.assignment.ghostAssignmentMethod.detail" : "你可以更改鬼魂职业的分配方式。<br> ・<b>标准</b>：死亡的玩家始终可以分配到可用职业之一。<br> ・<b>刺激</b>：分配概率会影响你能否获得鬼魂职业。"
+"options.assignment.ghostAssignmentMethod.normal" : "标准"
+"options.assignment.ghostAssignmentMethod.thrilling" : "随机"
+"options.assignment.preview" : "职业分配预览"
+"options.assignment.preview.withoutCrewmate" : "伪装者 x%IMP% （至少有%RIMP%个属于mod职业），第三方 x%NEU%，船员均属于mod职业。"
+"options.assignment.preview.withCrewmate" : "伪装者 x%IMP% （至少有%RIMP%个属于mod职业），第三方 x%NEU%，至少有%CREW%个船员属于mod职业。"
+"options.assignment.preview.hint" : "・ 有黄色高亮的将会分配模组职业。<br>・ 伪装者总数需要在Among Us基础设置中配置。"

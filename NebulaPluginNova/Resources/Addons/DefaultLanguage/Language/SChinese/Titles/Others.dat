@@ -1,0 +1,130 @@
+"achievement.firstKill.title" : "生与死的观察"
+"achievement.firstKill.goal" : "看到10次死亡"
+
+"achievement.firstKill2.title" : "真是令人愉快的游戏"
+"achievement.firstKill2.goal" : "累计被首杀50次。"
+"achievement.firstKill2.splitted.2" : "游戏"
+
+"achievement.firstKill3.title" : "进房笑嘻嘻，首刀玩手机"
+"achievement.firstKill3.goal" : "累计被首杀100次。"
+"achievement.firstKill3.flavor" : "“高血压，已经卸载！”—■■■"
+
+"achievement.death1.title" : "越战越勇"
+"achievement.death1.goal" : "累计死亡50次。"
+
+"achievement.death2.title" : "尸骸成山"
+"achievement.death2.goal" : "累计死亡100次。"
+"achievement.death2.splitted.2" : "山"
+
+"achievement.death3.title" : "死亡如风"
+"achievement.death3.goal" : "累计死亡500次。"
+"achievement.death3.flavor" : "“已经不痛不痒了……”"
+"achievement.death3.splitted.0" : "瞬间的"
+
+"achievement.challenge.impostor.title" : "完美的入侵"
+"achievement.challenge.impostor.goal" : "所有伪装者都存活，并且获胜。"
+"achievement.challenge.impostor.cond" : "提示：自己要杀死2个以上的玩家"
+
+"achievement.challenge.lastCrewmate.title" : "极限生存"
+"achievement.challenge.lastCrewmate.goal" : "作为最后的船员存活并胜利。"
+"achievement.challenge.lastCrewmate.cond" : "提示：叛徒不计入船员阵营。"
+
+"achievement.challenge.death2.title" : "千方百计"
+"achievement.challenge.death2.goal" : "见证4种死亡原因。"
+"achievement.challenge.death2.cond" : "提示：包含自杀、他人的死亡以及投票驱逐间接害死。"
+
+"achievement.noCrewmate.title" : "胜利倒计时"
+"achievement.noCrewmate.goal" : "在全体船员死亡的状态下任务胜利。"
+"achievement.noCrewmate.cond" : "提示：自己属于船员阵营且不是叛徒（叛徒不计入船员阵营）。"
+
+"achievement.challenge.crewmate.title" : "寂静的世界"
+"achievement.challenge.crewmate.goal" : "所有人都存活，然后任务获胜。"
+
+"achievement.speedAttribute.title" : "是好是坏"
+"achievement.speedAttribute.goal" : "同时受到加速和减速的效果。"
+
+"achievement.threeRoles.title" : "各怀鬼胎"
+"achievement.threeRoles.goal" : "在伪装者阵营中，存在一个拥有恋人附加和一个有跟班附加"
+
+"achievement.doTaskEvenDead.title" : "打工魂"
+"achievement.doTaskEvenDead.goal" : "死亡状态下完成所有任务。"
+"achievement.doTaskEvenDead.cond" : "提示：8个以上的任务"
+
+"achievement.noMeeting.title" : "夜长梦多"
+"achievement.noMeeting.goal" : "没有发起一次会议并胜利。"
+"achievement.noMeeting.flavor" : "最糟糕的游戏"
+"achievement.noMeeting.splitted.2" : "梦"
+
+"achievement.extraVictim.title" : "死亡回响"
+"achievement.extraVictim.goal" : "被连带驱逐。"
+"achievement.extraVictim.splitted.0" : "死亡的"
+
+"achievement.spectator.dead.title" : "战地实记"
+"achievement.spectator.dead.goal" : "观战视角中玩家被击杀。"
+
+"achievement.spectator.murderer.title" : "忐忑不安"
+"achievement.spectator.murderer.goal" : "观战视角中玩家进行击杀。"
+
+"achievement.teleporter1.title" : "奇妙的感觉"
+"achievement.teleporter1.goal" : "使用一次传送器"
+"achievement.teleporter1.splitted.0" : "奇妙的"
+
+"achievement.teleporter2.title" : "虫洞研究家"
+"achievement.teleporter2.goal" : "累计使用50次传送器"
+
+"achievement.movable.title" : "太多规矩"
+"achievement.movable.goal" : "因为多种限制导致无法移动。"
+
+"achievement.dragCorpse.title" : "落叶归根"
+"achievement.dragCorpse.goal" : "累计拖拽尸体达到100米。"
+"achievement.dragCorpse.flavor" : "“人死了，要回家；人活着，就得往前走。”—《落叶归根》"
+
+"achievement.allWayKill.title" : "受难日"
+"achievement.allWayKill.goal" : "集齐全部击杀式死亡原因。"
+
+"achievement.allWayDeath.title" : "死亡研究家"
+"achievement.allWayDeath.goal" : "集齐全部死亡原因。"
+
+"achievement.perk.screen.title" : "游戏重塑者"
+"achievement.perk.screen.goal" : "伪装者获得翻转屏幕的特技。"
+"achievement.perk.screen.flavor" : "“疯狂大翻转！”"
+
+"achievement.perk.meteor.title" : "陨石末日"
+"achievement.perk.meteor.goal" : "使用特技“天动万象”击杀3名以上的玩家。"
+
+"achievement.perk.blank.title" : "怪我咯"
+"achievement.perk.blank.goal" : "使用特技“空弹”或“愤怒”累计10次以上。"
+"achievement.perk.blank.splitted.0" : "奇怪的"
+
+"record.perk.manyPerks1.flipX" : "镜像"
+"record.perk.manyPerks1.flipY" : "颠倒"
+"record.perk.manyPerks1.flipXY" : "逆转"
+"record.perk.manyPerks1.invisible" : "融入"
+"record.perk.manyPerks1.meteor" : "天动万象"
+"record.perk.manyPerks1.rotation" : "晕厥"
+"record.perk.manyPerks1.blankShot" : "空弹"
+"record.perk.manyPerks1.fakeAxe" : "愤怒"
+
+"achievement.perk.manyPerks1.title" : "特技大师"
+"achievement.perk.manyPerks1.goal" : "累计使用指定的特技"
+
+"achievement.costume.animals.title" : "动物世界"
+"achievement.costume.animals.goal" : "和动物服装的玩家一起游玩。"
+"achievement.costume.animals.cond" : "提示：至少存在5个动物服装。"
+"achievement.costume.animals.flavor" : "好多动物哇！"
+"achievement.costume.animals.splitted.0" : "动物！"
+
+"achievement.costume.music.title" : "音乐队"
+"achievement.costume.music.goal" : "组成完整的音乐队。"
+"achievement.costume.music.cond" : "提示：至少存在3名演奏者和一个指挥员"
+
+"achievement.costume.party.title" : "派对客"
+"achievement.costume.party.goal" : "一场有趣的派对。"
+"achievement.costume.party.cond" : "提示：至少3个人佩戴“炫目迷醉”系列，每个人不相同。"
+"achievement.costume.party.flavor" : "现在是派对时间！"
+
+"achievement.costume.partyCamo.title" : "劫后余生"
+"achievement.costume.partyCamo.goal" : "隐蔽技能结束后，都聚集在一起。"
+"achievement.costume.partyCamo.cond" : "提示：至少3个人以上在一起。"
+"achievement.costume.partyCamo.flavor" : "无论如何，至少在这轮活下来了。"
+"achievement.costume.partyCamo.splitted.1" : "☆"

@@ -6,11 +6,11 @@
 
 # Document
 
-"role.poltergeist.doc" : "Can move corpses as if attracting them."
+"role.poltergeist.doc" : "Can drag corpses as if attracting them."
 
 # Options
 
-"options.role.poltergeist.detail" : "Poltergeists can draw corpses close to them."
+"options.role.poltergeist.detail" : "The Poltergeist can drag corpses close to them."
 "options.role.poltergeist.poltergeistCoolDown" : "Poltergeist Cooldown"
 
 # Game
@@ -27,5 +27,5 @@
 # Titles
 
 "achievement.poltergeist.common1.title" : "Ghost's Caprice"
-"achievement.poltergeist.common1.goal" : "Draw a corpse close."
+"achievement.poltergeist.common1.goal" : "Drag a corpse close."
 "achievement.poltergeist.common1.splitted.2" : "Caprice"

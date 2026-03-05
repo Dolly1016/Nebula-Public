@@ -1,0 +1,56 @@
+# Assignable
+
+"role.sculptor.name" : "机械师"
+"role.sculptor.short" : "机"
+"role.sculptor.blurb" : "混乱的制造者"
+
+# Document
+
+"role.sculptor.doc" : "机械师可以召唤可以走动的机械人。"
+"role.sculptor.ability.title" : "固有能力【机械专家】"
+"role.sculptor.ability.main" : ""
+"role.sculptor.ability.sample" : "<title>取样</title>采集其他玩家的外观样本并用于制作机械人。"
+"role.sculptor.ability.map" : "<title>制作</title>打开用于制作机械人的地图界面。<br>在地图上选择好机械人的目的地与外观后，会在原地创建一个机械人，机械人会自动走到目的地。"
+"role.sculptor.tips" : "・机器人死亡会直接消失，不会产生其他效果。"
+
+# Options
+
+"options.role.sculptor.detail" : "机械师可以为其他玩家制作等身机械人。<br>机械人形象与对应的玩家外貌相同，很难分辨。"
+"options.role.sculptor.sampleCoolDown" : "取样冷却时间"
+"options.role.sculptor.createCoolDown" : "制作冷却时间"
+"options.role.sculptor.maxSamples" : "最大保存样本数量"
+"options.role.sculptor.stayDurationAfterMoving" : "机械人移动后停留时间"
+"options.role.sculptor.detectionRadius" : "机械人探知范围"
+
+# Game
+
+"gameAction.sculptor.summon" : "制作机械人"
+
+# UI
+
+"button.label.sculptor.command" : "制作"
+
+# Stats
+
+"stats.sculptor.sample" : "取样使用次数"
+"stats.sculptor.create" : "制作机械人次数"
+"ui.action.sculptor.sample" : "采集玩家样本。"
+"ui.action.sculptor.create" : "打开地图选择机械人移动目标位置。<br>选择目标位置和外貌后，机械人将会出现并主动移动到目标地点。"
+
+# Titles
+
+"achievement.sculptor.common1.title" : "人如机"
+"achievement.sculptor.common1.goal" : "除队友以外的玩家击杀一个机械人。"
+
+"achievement.sculptor.common2.title" : "机械时代"
+"achievement.sculptor.common2.goal" : "累计制作20个机械人。"
+
+"achievement.sculptor.common3.title" : "末日机"
+"achievement.sculptor.common3.goal" : "机械人的数量大于幸存玩家数。"
+"achievement.sculptor.common3.splitted.2" : "末日"
+
+"achievement.sculptor.challenge.title" : "替罪机械"
+"achievement.sculptor.challenge.goal" : "制作一个其他玩家外貌的机械人后，该玩家被驱逐。"
+"achievement.sculptor.challenge.cond" : "提示：除自身与队友以外。"
+"achievement.sculptor.challenge.splitted.0" : "替罪的"
+"achievement.sculptor.challenge.splitted.2" : "机械"

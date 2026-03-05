@@ -1,13 +1,14 @@
 ﻿using Nebula.Behavior;
-using Virial.Game;
-using Nebula.Roles.Modifier;
-using Virial;
-using Virial.Events.Game;
-using Virial.Runtime;
 using Nebula.Game.Statistics;
-using Virial.Text;
-using Virial.Assignable;
+using Nebula.Modules.Logging;
+using Nebula.Roles.Modifier;
 using UnityEngine.Rendering;
+using Virial;
+using Virial.Assignable;
+using Virial.Events.Game;
+using Virial.Game;
+using Virial.Runtime;
+using Virial.Text;
 
 namespace Nebula.Game;
 
@@ -211,7 +212,7 @@ public class EndGameManagerSetUpPatch
             return true;
         }catch(Exception e)
         {
-            NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Error, null, "Failed to send webhook. \n" + e.ToString());
+            NebulaLogger.Instance.Error("Failed to send webhook. \n" + e.ToString());
             return false;
         }
     }

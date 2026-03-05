@@ -1,0 +1,15 @@
+# Tutorial
+
+"tutorial.guide.canClose" : "点击此处关闭教程。"
+"tutorial.guide.cannotClose" : "当鼠标悬停时，教程将会继续进行。"
+"tutorial.variations.subAction" : "有些技能需要通过键盘触发对应的<b>子行为</b>。<br>鼠标悬停此处可以查看该行为的详细信息。"
+"tutorial.variations.helpInGame.title" : "游戏内帮助"
+"tutorial.variations.helpInGame.caption" : "按下%KEY%键时可以打开帮助页面。<br>在帮助页面可以查看自身的职业的能力、胜利条件以及称号"
+"tutorial.variations.meetingTool.title" : "地图标记辅助"
+"tutorial.variations.meetingTool.caption" : "玩家可以在会议中的小地图进行标记绘制。<br>合理运用帮助你快速理清游戏情况！"
+"tutorial.variations.stamp.title" : "表情包"
+"tutorial.variations.stamp.caption" : "%KEY%呼出表情栏！（行动期间不可用）<br>在帮助界面可以配置表情包。"
+"tutorial.variations.ambienceOnMeeting.title" : "关闭会议环境音效"
+"tutorial.variations.ambienceOnMeeting.caption" : "若你想在会议中关闭一些环境音效，可以开启【关闭会议环境音效】功能。<br>该选项可以通过设置Nos选项卡中开启。"
+"tutorial.variations.meetingTool.line.title" : "快速创建玩家图标"
+"tutorial.variations.meetingTool.line.caption" : "在地图中绘制一条线，<br>并在松开鼠标的一瞬间<b>右键点击</b>。"

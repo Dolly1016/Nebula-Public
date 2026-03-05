@@ -68,6 +68,15 @@ public interface NebulaPreprocessor
     ExtraWin CreateExtraWin(string immutableId, TextComponent displayText, Color color);
 
     DIManager DIManager { get; }
+    /// <summary>
+    /// RPCで取り扱える型を追加します。
+    /// </summary>
+    /// <typeparam name="T">新たに取り扱う型</typeparam>
+    /// <typeparam name="V">RPCで取り扱えるデータ型、あるいはそのタプル型</typeparam>
+    /// <param name="serializer"></param>
+    /// <param name="deserializer"></param>
+    /// <returns></returns>
+    bool RegisterRpcType<T, V>(Func<T?, V> serializer, Func<V, T?> deserializer) where T : class where V : notnull;
 
     void SchedulePreprocess(PreprocessPhase phase, Action process);
     void SchedulePreprocess(PreprocessPhase phase, IEnumerator process);

@@ -1,0 +1,58 @@
+# Assignable
+
+"role.jester.name" : "小丑"
+"role.jester.short" : "丑"
+"role.jester.blurb" : "想办法让自己被投出去"
+
+# Document
+
+"role.jester.doc" : "小丑需要想办法让自己被放逐。"
+"role.jetster.winCond" : "在会议中被放逐。"
+"role.jester.ability.title" : "固有能力【恶作剧】"
+"role.jester.ability.main" : ""
+"role.jester.ability.drag" : "<title>拖拽/松开</title>可以拖拽尸体并携带移动，或松开尸体。"
+
+# Options
+
+"options.role.jester.detail" : "小丑被放逐则小丑获得胜利。"
+"options.role.jester.canDragDeadBody" : "可以拖曳尸体"
+"options.role.jester.canFixComms" : "可以修复通讯破坏"
+"options.role.jester.canFixLight" : "可以修复电力破坏"
+"options.role.jester.task" : "胜利需要完成任务"
+
+# Game
+
+"game.meeting.roleJesterText" : "虽然我是<color=#FD54A7>Jester</color>，但你们是真正的<color=#009900>Clown</color>！"
+
+# UI
+
+"button.label.drag" : "拖曳"
+"button.label.release" : "松开"
+
+# Stats
+
+
+# Titles
+
+"achievement.jester.common1.title" : "娱者"
+"achievement.jester.common1.goal" : "在会议阶段获得1以上的票数"
+"achievement.jester.common1.cond" : "自身投票不算"
+
+"achievement.jester.common2.title" : "新玩具！"
+"achievement.jester.common2.goal" : "使用“空弹”或“愤怒”营造出假信息后被驱逐并获胜。"
+"achievement.jester.common2.splitted.0" : "玩具"
+
+"achievement.jester.challenge.title" : "充满欢愉的会议"
+"achievement.jester.challenge.goal" : "在会议阶段被驱逐"
+"achievement.jester.challenge.flavor" : "加入欢愉吧！"
+"achievement.jester.challenge.splitted.2" : "欢愉"
+
+# Team
+
+"teams.jester" : "小丑"
+"end.jester" : "小丑%EXTRA%胜利"
+
+# Document
+
+"document.tip.winCond.jester.title" : "特殊胜利"
+"document.tip.winCond.jester" : "在会议中被放逐时获胜。"

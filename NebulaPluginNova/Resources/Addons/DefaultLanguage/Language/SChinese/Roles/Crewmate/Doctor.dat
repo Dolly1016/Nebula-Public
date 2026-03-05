@@ -1,0 +1,40 @@
+# Assignable
+
+"role.doctor.name" : "医学家"
+"role.doctor.short" : "医"
+"role.doctor.blurb" : "从死人身上获取信息"
+
+# Document
+
+"role.doctor.doc" : "医学家可以在生命监测装置中看到玩家的死因。"
+"role.doctor.ability.title" : "固有能力【医疗护理】"
+"role.doctor.ability.main" : "随时携带者可充电的生命监测装置。<br>通过完成任务可以为生命监测装置充电。"
+"role.doctor.ability.vital" : "<title>生命监测装置</title>打开生命监测装置。<br>也可以查看尸体的死因。"
+
+# Options
+
+"options.role.doctor.detail" : "医学家自带一个生命监测装置"
+"options.role.doctor.portableVitalsCharge" : "初始使用秒数"
+"options.role.doctor.maxPortableVitalsCharge" : "便携装置最大充能数"
+"options.role.doctor.chargesPerTasks" : "每完成一个任务追加充能数" 
+
+# Game
+
+"role.doctor.gadgetLeft" : "%SECOND%秒"
+
+# UI
+
+"button.label.vital" : "生命监测装置"
+
+# Stats
+
+# Titles
+
+"achievement.doctor.common1.title" : "合格的医护人员"
+"achievement.doctor.common1.goal" : "打开一次自身携带的生命监测装置。"
+
+"achievement.doctor.challenge.title" : "无奈的医护人员"
+"achievement.doctor.challenge.goal" : "在使用便携式生命监测装置时看到死亡的瞬间。"
+"achievement.doctor.challenge.cond" : "提示：初始时间在10秒以下+任务充能2秒以下"
+"achievement.doctor.challenge.flavor" : "“又多了一个。”—来自白衣者无奈独白"
+"achievement.doctor.challenge.splitted.1" : "这样"

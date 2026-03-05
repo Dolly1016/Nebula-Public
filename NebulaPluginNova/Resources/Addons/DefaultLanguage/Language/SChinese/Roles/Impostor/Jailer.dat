@@ -1,0 +1,57 @@
+# Assignable
+
+"role.jailer.name" : "狱卒"
+"role.jailer.short" : "狱"
+"role.jailer.blurb" : "一切都在掌握之中"
+
+# Document
+
+"role.jailer.doc" : "狱卒可以远程查看管理地图。"
+"role.jailer.ability.title" : "固有能力【管理地图】" 
+"role.jailer.ability.main" : "%DOC%"
+"role.jailer.ability.main.canWalk" : "狱卒可以随时随地<var>边走边看</var>管理地图。%INHERIT%"
+"role.jailer.ability.main.cannotWalk" : "狱卒可以随时随地观看管理地图。<br>观看期间不能<var>行走</var>。%INHERIT%"
+"role.jailer.ability.iconColor.both" : "<title>管理地图</title>尸体显示为<var>灰色</var>，伪装者显示为<var>红色</var>。"
+"role.jailer.ability.iconColor.deadBodyOnly" : "<title>管理地图</title>尸体显示为<var>灰色</var>。"
+"role.jailer.ability.iconColor.impostorOnly" : "<title>管理地图</title>伪装者显示为<var>红色</var>。"
+"role.jailer.ability.main.inherit" : "<br>此外，死亡时，此能力会<var>继承</var>给幸存的伪装者。"
+"role.jailer.tips" : "・无论游戏设置如何，狱卒都能记录尸体。"
+
+"role.jailerModifier.doc" : "狱卒可以远程查看管理地图。"
+"role.jailerModifier.ability.title" : "固有能力【管理地图】"
+"role.jailerModifier.ability.main" : "%DOC%"
+"role.jailerModifier.tips" : "・无论游戏设置如何，狱卒都能记录尸体。"
+
+# Options
+
+"options.role.jailer.detail" : "狱卒可以远程查看主控台"
+"options.role.jailer.canMoveWithMapWatching" : "可以在移动中查看主控台"
+"options.role.jailer.canUseAdminOnMeeting" : "可以在会议期间使用管理控制台"
+"options.role.jailer.canIdentifyDeadBodies" : "能在主控台中识别尸体"
+"options.role.jailer.canIdentifyImpostors" : "能在主控台中识别伪装者"
+"options.role.jailer.inheritAbilityOnDying" : "死亡后能力可以继承给队友"
+"options.role.jailer.inheritAbilityOnDying.detail" : "开启后，你死亡时可以让另一个队友继承你的能力。"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.jailer.common1.title" : "了如指掌"
+"achievement.jailer.common1.goal" : "打开一次主控台。"
+"achievement.jailer.common1.splitted.2" : "了如指掌"
+
+"achievement.jailer.common2.title" : "监守者"
+"achievement.jailer.common2.goal" : "在尸体旁边停留10秒以上。"
+"achievement.jailer.common2.splitted.2" : "监守者"
+
+"achievement.jailer.challenge.title" : "绝对隐蔽"
+"achievement.jailer.challenge.goal" : "至少有两人与尸体在一个房间内。"
+"achievement.jailer.challenge.flavor" : "“你说你们没有看到尸体？”—来自会议记录。"
+"achievement.jailer.challenge.splitted.0" : "绝对"

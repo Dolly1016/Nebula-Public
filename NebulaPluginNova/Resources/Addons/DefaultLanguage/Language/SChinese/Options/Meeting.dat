@@ -1,0 +1,32 @@
+# Header
+
+"options.meeting" : "紧急会议设置"
+"options.meeting.detail" : "一些跟紧急会议相关的内容"
+
+# Groups
+
+"options.meeting.group.gameStart" : "缩短冷却时间设定"
+"options.meeting.group.earlySettings" : "游戏前期紧急会议设定"
+"options.meeting.group.nonCrewmateInformation" : "非船员可见信息设定"
+
+# Options
+
+"options.meeting.noticeExtraVictims" : "显示被放逐玩家通知"
+"options.meeting.noticeExtraVictims.detail" : "开启后，每当会议结束有额外信息时，会进行额外通知。"
+"options.meeting.deathPenalty" : "死亡减少紧急会议冷却时间"
+"options.meeting.deathPenalty.detail" : "配置后，会议时间将减少设定值乘以死亡人数秒数。"
+"options.meeting.numOfMeeting" : "紧急会议次数"
+"options.meeting.emergencyCooldownAtGameStart" : "游戏开始时的紧急冷却时间"
+"options.meeting.showRoleOfExiled" : "放逐显示职业"
+"options.meeting.extraEmergencyCooldownInTheEarly" : "前期紧急会议额外冷却时间"
+"options.meeting.extraEmergencyCooldownInTheEarly.detail" : "配置后，当场上未死一定数量时，紧急会议的冷却会格外的长。"
+"options.meeting.earlyDiscussionReduction" : "游戏前期讨论时间缩短"
+"options.meeting.extraEmergencyCooldownInTheEarlyCondition" : "结束前期所需死亡数"
+"options.meeting.extraEmergencyCooldownInTheEarlyCondition.detail" : "配置后，当场上死于该数量的值后，紧急会议冷却时间会恢复为正常值。"
+"options.meeting.waitingForHost" : "统计中"
+"options.meeting.showVoteState" : "显示投票状态"
+"options.meeting.prohibitMeetingTool" : "禁用地图标记辅助"
+"options.meeting.shortenCooldownAtGameStart" : "游戏初始阶段冷却时间缩短"
+"options.meeting.shortenCooldown" : "缩短冷却时间"
+"options.meeting.nonCrewCanSeeTaskTracker" : "紧急会议中可以查看任务进度"
+"options.meeting.nonCrewCanSeeSabotageStatus" : "紧急会议中可以查看破坏状态"

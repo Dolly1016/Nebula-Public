@@ -1,0 +1,60 @@
+# Assignable
+
+"role.psychic.name" : "灵媒"
+"role.psychic.short" : "灵"
+"role.psychic.blurb" : "只有尸体才会说实话"
+
+# Document
+
+"role.psychic.doc" : "灵媒可以搜索尸体位置。"
+"role.psychic.ability.title" : "固有能力【亡魂媒介】"
+"role.psychic.ability.main" : "报告尸体时会有额外信息。"
+"role.psychic.ability.search" : "<title>搜索</title>使用后在一段时间内获取尸体位置。"
+
+# Options
+
+"options.role.psychic.detail" : "灵媒报告尸体可以获得更多信息。"
+"options.role.psychic.searchCooldown" : "搜索冷却时间"
+"options.role.psychic.searchDuration" : "搜索持续时间"
+"options.role.psychic.message.elapsedTime" : "我大概在%SEC%秒前去世了……"
+"options.role.psychic.message.killersColor" : "凶手的颜色是%COLOR%"
+"options.role.psychic.message.killersRole" : "凶手的职业是%ROLE%"
+"options.role.psychic.message.killerIsDead" : "凶手已经死了"
+"options.role.psychic.message.myRole" : "我的职业是%ROLE%"
+"options.role.psychic.message.myState" : "我的死因是%STATE%……"
+"options.role.psychic.message.inner.darkColor" : "深色"
+"options.role.psychic.message.inner.lightColor" : "浅色"
+"options.role.psychic.message.header" : "冥界通讯"
+
+# Game
+
+
+# UI
+
+"button.label.search" : "搜索"
+
+# Stats
+
+"stats.psychic.searching" : "使用搜索尸体次数"
+"stats.psychic.messages" : "获得冥界通讯信息次数"
+
+# Titles
+
+"achievement.psychic.common1.title" : "来自死者的声音"
+"achievement.psychic.common1.goal" : "进行一次通灵。"
+
+"record.psychic.common2.elapsedTime" : "死亡经过时间"
+"record.psychic.common2.killersColor" : "击杀者颜色深浅"
+"record.psychic.common2.killersRole" : "击杀者职业"
+"record.psychic.common2.killerIsDead" : "击杀者已经死亡"
+"record.psychic.common2.myRole" : "被杀者职业"
+"record.psychic.common2.myState" : "死因"
+
+"achievement.psychic.common2.title" : "资深灵媒"
+"achievement.psychic.common2.goal" : "获取所有的通灵信息。"
+"achievement.psychic.common2.splitted.2" : "资深"
+
+"achievement.psychic.challenge.title" : "献予亡魂的箴言"
+"achievement.psychic.challenge.goal" : "对已经死亡20秒以上的尸体进行通灵，并准确驱逐或赌杀。"
+"achievement.psychic.challenge.flavor" : "虽然无力回天，但仍为你伸张正义。"
+"achievement.psychic.challenge.splitted.1" : "亡魂的"

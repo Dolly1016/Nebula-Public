@@ -1,0 +1,35 @@
+# Assignable
+
+"role.noiseghost.name" : "吵闹鬼"
+"role.noiseghost.blurb" : "尸体之声"
+"role.noiseghost.short" : "吵"
+
+# Document
+
+"role.noiseghost.doc" : "吵闹鬼可以在当前位置发出警报声。"
+
+# Options
+
+"options.role.noiseghost.detail" : "吵闹鬼可以随时随地发出警报声"
+"options.role.noiseghost.noiseDuration" : "警报声持续时间"
+"options.role.noiseghost.numOfNoise" : "警报声使用次数"
+"options.role.noiseghost.noiseCooldown" : "警报声冷却时间"
+
+# Game
+
+
+# UI
+
+"button.label.noise" : "警报"
+
+# Stats
+
+"stats.noiseghost.alert" : "警报使用次数"
+
+# Titles
+
+"achievement.noiseghost.common1.title" : "死者的哀嚎"
+"achievement.noiseghost.common1.goal" : "使用一次技能。"
+
+"achievement.noiseghost.common2.title" : "全面警戒"
+"achievement.noiseghost.common2.goal" : "使用20次以上技能。"

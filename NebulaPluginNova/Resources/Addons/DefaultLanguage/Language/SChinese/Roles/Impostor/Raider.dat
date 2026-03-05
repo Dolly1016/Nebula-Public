@@ -1,0 +1,57 @@
+# Assignable
+
+"role.raider.name" : "强盗"
+"role.raider.short" : "强"
+"role.raider.blurb" : "一斧制敌♪"
+
+# Document
+
+"role.raider.doc" : "强盗无法正常击杀，但可以掷出一把可以穿透人体的斧头击杀他人。"
+"role.raider.ability.title" : "固有能力【掷斧】"
+"role.raider.ability.main" : "斧头在投掷后，会平行飞行，直到撞到墙壁，期间碰到的玩家会死亡。"
+"role.raider.ability.equip" : "<title>掏出/藏匿</title>掏出或藏匿斧子。<br>掏出后，其他玩家可以看到的斧头。"
+"role.raider.ability.kill" : "<title>投掷</title>当斧子被掏出且冷却结束，投掷按钮会亮起。斧头会从鼠标光标的方向投掷出去。<br>建议使用快捷键或鼠标左击斧头进行投掷。"
+"role.raider.tips" : "・玩家的碰撞箱位于最中心的位置，请瞄准腹部投掷。"
+
+# Options
+
+"options.role.raider.detail" : "强盗无法正常击杀，但可以掷出一把可以穿透人体的斧头击杀他人。"
+"options.role.raider.throwCoolDown" : "投掷斧头冷却时间"
+"options.role.raider.axeSize" : "斧头大小"
+"options.role.raider.axeSpeed" : "斧头飞行速度"
+"options.role.raider.canKillImpostor" : "可以击杀伪装者"
+
+# Game
+
+"role.raider.axeSize" : "强盗<color=white>： 斧头判定范围</color>"
+"gameAction.raider.equip" : "掏出/藏匿斧头"
+"gameAction.raider.throw" : "投掷斧头"
+
+# UI
+
+"button.label.throw" : "投掷"
+"ui.action.raider.equip" : "掏出或藏匿斧子。"
+"ui.action.raider.kill" : "投掷掏出的斧子。"
+
+# Status
+
+"state.beaten" : "中斧"
+
+# Stats
+
+"stats.raider.thrown" : "斧子投掷次数"
+
+# Titles
+
+"achievement.raider.common1.title" : "斧头帮"
+"achievement.raider.common1.goal" : "用斧子成功击杀一名玩家。"
+
+"achievement.raider.another1.title" : "太过放肆"
+"achievement.raider.another1.goal" : "使用斧子之后在会议中被赌杀或被驱逐"
+"achievement.raider.another1.flavor" : "“尽管被发现，但那个家伙脸上还是浮现了诡异笑容”—来自见证者的自述。"
+
+"achievement.raider.challenge.title" : "飞天神斧"
+"achievement.raider.challenge.goal" : "一次斧子杀死3个及以上的玩家"
+"achievement.raider.challenge.flavor" : "左手拿酒，右手持斧，跳着小舞。"
+"achievement.raider.challenge.splitted.0" : "飞天的"
+"achievement.raider.challenge.splitted.2" : "神斧"

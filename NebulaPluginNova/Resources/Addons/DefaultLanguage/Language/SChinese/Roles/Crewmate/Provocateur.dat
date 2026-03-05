@@ -1,0 +1,55 @@
+# Assignable
+
+"role.provocateur.name" : "挑衅者"
+"role.provocateur.short" : "挑"
+"role.provocateur.blurb" : "我死了，你也别想活着！"
+
+# Document
+
+"role.provocateur.doc" : "挑衅者死亡后会连带凶手一起死亡。"
+"role.provocateur.ability.title" : "固有能力【以暴制暴】"
+"role.provocateur.ability.main" : "被击杀时，则会连带凶手一起死亡。<br>如果是被投票放逐出去的，则也会带走其中一个把<b>票</b>投给你的人。"
+"role.provocateur.ability.embroil" : "<title>挑衅</title>技能期间，被击杀时会连带凶手死亡。"
+
+# Options
+
+"options.role.provocateur.detail" : "挑衅者可以通过挑衅技能反杀攻击者。<br>合理运用技能，以备不时之需。"
+"options.role.provocateur.embroilCoolDown" : "挑衅冷却时间"
+"options.role.provocateur.embroilAdditionalCoolDown" : "挑衅冷却时间追加"
+"options.role.provocateur.embroilAdditionalCoolDown.detail" : "在技能期间内可以连带凶手。<br>如果没有触发技能，就会增加额外的冷却时间。<br>此设置可以增加额外冷却的加值。"
+"options.role.provocateur.embroilDuration" : "挑衅持续时间"
+
+# Game
+
+
+# UI
+
+"button.label.embroil" : "挑衅"
+
+# Game Statictics
+
+"statistics.events.embroil" : "挑衅"
+
+# Status
+
+"state.embroiled" : "挑衅"
+
+# Stats
+
+"stats.provocateur.taskPhase" : "行动期间连带次数"
+"stats.provocateur.exile" : "会议期间连带次数"
+
+# Titles
+
+"achievement.provocateur.common1.title" : "临终的挣扎"
+"achievement.provocateur.common1.goal" : "被放逐时，随机带走一名玩家。"
+"achievement.provocateur.common1.splitted.2" : "挣扎"
+
+"achievement.provocateur.common2.title" : "罪孽的报偿"
+"achievement.provocateur.common2.goal" : "使用挑衅成功带走一名敌人。"
+
+"achievement.provocateur.challenge.title" : "这就是第六感"
+"achievement.provocateur.challenge.goal" : "技能期间将10米以外的强盗或者狙击手连带死亡。"
+"achievement.provocateur.challenge.flavor" : "“感受空气细微的流动，在某时刻释放它！”"
+"achievement.provocateur.challenge.splitted.0" : "第六感的"
+"achievement.provocateur.challenge.splitted.2" : "解放"

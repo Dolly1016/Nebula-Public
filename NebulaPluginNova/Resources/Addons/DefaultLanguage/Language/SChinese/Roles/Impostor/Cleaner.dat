@@ -1,0 +1,51 @@
+# Assignable
+
+"role.cleaner.name" : "清理者"
+"role.cleaner.short" : "清"
+"role.cleaner.blurb" : "杀人不留痕迹"
+"role.cleaner.hint" : "清理尸体，消除罪证"
+
+# Document
+
+"role.cleaner.doc" : "清理者可以让场上的尸体消失。<var>%COOLDOWN%</var>"
+"role.cleaner.doc.cooldown" : "<br>击杀与清理共享一个冷却时间，使用一个另一个也会重置。"
+"role.cleaner.doc.notSyncCooldown" : "<br>击杀一名玩家后，仅使清理能力增加5秒冷却。"
+"role.cleaner.ability.title" : "固有能力【毁尸灭迹】"
+"role.cleaner.ability.main" : ""
+"role.cleaner.ability.clean" : "<title>清理</title>清理尸体。"
+
+# Options
+
+"options.role.cleaner.detail" : "清理者可以让场上的尸体消失。"
+"options.role.cleaner.cleanCoolDown" : "清理尸体冷却时间"
+"options.role.cleaner.syncKillAndCleanCoolDown" : "清理与击杀共用冷却时间"
+"options.role.cleaner.syncKillAndCleanCoolDown.detail" : "开启后，使用击杀或技能时，都会重置另一个的冷却。"
+
+# Game
+
+"gameAction.cleaner.clean" : "清理尸体"
+
+# UI
+
+"button.label.clean" : "清理"
+"ui.action.cleaner.clean" : "清理尸体。<br>使用击杀后会和技能一并进行冷却时间。"
+
+# Game Statictics
+
+"statistics.events.clean" : "清理尸体"
+
+# Stats
+
+"stats.cleaner.clean" : "清理尸体次数"
+
+# Titles
+
+"achievement.cleaner.common1.title" : "干干净净"
+"achievement.cleaner.common1.goal" : "清理一次尸体。"
+
+"achievement.cleaner.common2.title" : "自我清理"
+"achievement.cleaner.common2.goal" : "清理自己击杀产生的尸体。"
+"achievement.cleaner.common2.splitted.0" : "自我清理"
+
+"achievement.cleaner.challenge.title" : "捉摸不透的会议"
+"achievement.cleaner.challenge.goal" : "在发动会议之前清理两个以上的尸体。"

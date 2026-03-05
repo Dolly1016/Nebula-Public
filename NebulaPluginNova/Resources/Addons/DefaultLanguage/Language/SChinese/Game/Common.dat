@@ -1,0 +1,76 @@
+# No Team
+
+"end.gameEnd" : "游戏结束"
+"end.nogame" : "无效游戏"
+
+"end.status.noWinners" : "无人胜利" 
+
+# No Team Statictics
+
+"statistics.events.startGame" : "游戏开始"
+"statistics.events.endGame" : "游戏结束"
+"statistics.events.kill" : "击杀"
+"statistics.events.exiled" : "放逐"
+"statistics.events.report" : "报告"
+"statistics.events.emergency" : "紧急会议"
+"statistics.events.endMeeting" : "结束会议"
+"statistics.events.disconnect" : "断线"
+"statistics.events.revive" : "复活"
+
+# Console
+
+"console.notAvailable" : "不可用"
+
+# Tasks
+
+"task.unknownPlace" : "？？？"
+"task.divertPower" : "转移电路"
+
+# Meta Information
+
+"metaInfo.meeting.sabotage" : "当前破坏状态"
+"metaInfo.meeting.sabotage.electrical" : "电力"
+"metaInfo.meeting.sabotage.communications" : "通讯"
+"metaInfo.meeting.task" : "平均完成任务数："
+
+# Meta Command
+
+"help.tabs.myInfo" : "我的信息"
+"help.tabs.roles" : "职业"
+"help.tabs.modifiers" : "附加能力"
+"help.tabs.overview" : "分配详情"
+"help.tabs.options" : "设置"
+"help.tabs.slides" : "幻灯片"
+"help.tabs.achievements" : "成就"
+"help.tabs.stamps" : "表情包"
+"help.slides.share" : "公开"
+"help.overview.pattern.realCount" : "实际人数"
+"help.overview.pattern.custom" : "%NUM% 人"
+"help.overview.simulate" : "请设置模拟玩家数量。"
+"help.command" : "指令"
+"help.command.nogame" : "无效游戏"
+"help.command.quickStart" : "快速开始"
+"help.command.cancelStarting" : "取消开始"
+"help.command.console" : "指令终端"
+"help.command.saveResult" : "保存结果图像"
+"help.command.toggleSocial" : "游戏内显示特写"
+"help.command.hideHud" : "切换HUD显示效果"
+"help.command.vcState" : "切换VC显示状态信息"
+
+# Button
+
+"button.label.rejoin" : "重载语音"
+"button.label.show" : "判定检测"
+"button.label.spectator" : "旁观"
+"button.label.spectatorChange" : "切换"
+"button.label.spectatorExit" : "退出"
+"button.label.task" : "任务"
+"button.label.marketplace" : "创意工坊"
+"button.label.costume" : "装饰品"
+"button.label.appeal" : "特写"
+"button.label.playAchievement" : "高亮成就"
+"button.label.suicide" : "自尽"
+"button.label.fixPos" : "脱离卡点"
+"button.label.mobile.switch" : "切换"
+"button.label.afk" : "挂机"
+"button.label.scan" : "扫描"

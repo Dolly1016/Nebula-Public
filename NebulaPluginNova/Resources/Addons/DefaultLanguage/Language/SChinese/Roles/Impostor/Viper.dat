@@ -1,0 +1,47 @@
+# Assignable
+
+"role.viper.name" : "毒蛇"
+"role.viper.short" : "蛇"
+"role.viper.blurb" : "使用酸液缓慢溶解受害者"
+
+# Document
+
+"role.viper.doc" : "毒蛇造成击杀时，会缓慢溶解尸体。"
+
+# Options
+
+"options.role.viper.detail" : "毒蛇造成击杀后，尸体会被缓慢溶解。<br>被彻底溶解的尸体无法报告。"
+"options.role.viper.acidCooldown" : "酸液冷却时间"
+"options.role.viper.dissolveDuration" : "完全溶解尸体所需时间"
+"options.role.viper.acidLeavesBone" : "留下遗骸"
+"options.role.viper.canReportBone" : "可以报告遗骸"
+
+# Game
+
+
+# UI
+
+"button.label.acid" : "酸液"
+
+# Status
+
+"state.dissolved" : "溶解"
+
+# Stats
+
+
+# Titles
+
+"achievement.viper.common1.title" : "为时已晚"
+"achievement.viper.common1.goal" : "一名玩家从完全溶解的尸体经过。"
+"achievement.viper.common1.splitted.0" : "为时"
+
+"achievement.viper.common2.title" : "飞天巨蟒"
+"achievement.viper.common2.goal" : "在使用酸液击杀玩家之前先使用其他击杀方式。"
+"achievement.viper.common2.splitted.0" : "飞天"
+
+"achievement.combination.2.viper.sidekick.common3.title" : "催化剂"
+"achievement.combination.2.viper.sidekick.common3.goal" : "从毒蛇变成跟班。"
+
+"achievement.viper.challenge.title" : "蚀尽的鼓动"
+"achievement.viper.challenge.goal" : "在一整场游戏中，你击杀的玩家没有被报告，并获胜。"

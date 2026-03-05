@@ -152,7 +152,7 @@ internal class AchievementViewer : MonoBehaviour
         
         void AddCustomTitle()
         {
-            int gainedAchievements = NebulaAchievementManager.AllAchievements.Count(a => a.IsCleared);
+            int gainedAchievements = NebulaAchievementManager.AllAchievements.Count(a => a.IsCleared && !a.IsAddonTitle);
             inner.Add(new(GUIAlignment.Left, new NoSGUIText(GUIAlignment.Left, groupAttr, new TranslateTextComponent("achievement.group.custom")), 0.5f));
 
             void TryAddContent(NebulaAchievementManager.CustomAchievement a, int requiredAchievements, int minAchievements)

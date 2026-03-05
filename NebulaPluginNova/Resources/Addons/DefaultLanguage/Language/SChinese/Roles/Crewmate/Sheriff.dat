@@ -1,0 +1,74 @@
+# Assignable
+
+"role.sheriff.name" : "警长"
+"role.sheriff.short" : "警"
+"role.sheriff.blurb" : "击杀伪装者"
+
+# Document
+
+"role.sheriff.doc" : "警长可以对可疑的玩家进行执法击杀，执法有一定次数需要谨慎使用。"
+"role.sheriff.ability.title" : "固有能力【正义使者】"
+"role.sheriff.ability.main" : ""
+"role.sheriff.ability.kill" : "<title>执法</title>使用后尝试击杀目标。如果目标是船员阵营，就会因为<b>走火</b>而死。<br><var>%VENT%</var>"
+"role.sheriff.ability.kill.vent" : "可以击杀通风口中的玩家。"
+"role.sheriff.ability.seal" : "<title>能力封锁</title>在报告键亮起或报告尸体前，能力将会一直封印。"
+
+# Options
+
+"options.role.sheriff.detail" : "警长可以击杀其他玩家。<br>如果警长尝试击杀船员阵营的玩家，警长自己死亡。"
+"options.role.sheriff.canKillMadmate" : "可以击杀叛徒"
+"options.role.sheriff.canKillLovers" : "可以击杀恋人"
+"options.role.sheriff.killCoolDown" : "击杀冷却时间"
+"options.role.sheriff.numOfShots" : "击杀次数"
+"options.role.sheriff.canKillHidingPlayer" : "可以击杀通风口内玩家"
+"options.role.sheriff.canKillHidingPlayer.detail" : "开启后，可以击杀躲藏在通风口内的玩家。"
+"options.role.sheriff.sealAbilityUntilReportingDeadBodies" : "在没有发现尸体前不能使用技能"
+"options.role.sheriff.sealAbilityUntilReportingDeadBodies.detail" : "开启后，在出现玩家死亡的会议之前，击杀能力会被封印。"
+"options.role.sheriff.unsealOnReportButtonTurningOn" : "报告键亮起时解锁击杀能力"
+
+# Game
+
+
+# UI
+
+
+# Game Statictics
+
+"statistics.events.misfire" : "走火"
+
+# Status
+
+"state.misfired" : "走火"
+
+# Stats
+
+"stats.sheriff.shot" : "执法次数"
+"stats.sheriff.misshot" : "走火次数"
+
+# Titles
+
+"achievement.sheriff.common1.title" : "正直的警长"
+"achievement.sheriff.common1.goal" : "成功执法。"
+"achievement.sheriff.common1.splitted.2" : "使命"
+
+"achievement.sheriff.another1.title" : "美国警长"
+"achievement.sheriff.another1.goal" : "执法失败。"
+"achievement.sheriff.another1.splitted.0" : "清白的"
+
+"achievement.sheriff.another2.title" : "无能警官"
+"achievement.sheriff.another2.goal" : "不执法并活到最后胜利。"
+"achievement.sheriff.another2.splitted.0" : "无能的"
+
+"achievement.sheriff.another3.title" : "没有信誉"
+"achievement.sheriff.another3.goal" : "执法后报告并被指控驱逐"
+"achievement.sheriff.another3.flavor" : "“你已经没有任何信誉可言！”—来自船员们的唏嘘。"
+"achievement.sheriff.another3.splitted.2" : "信誉"
+
+"achievement.sheriff.common2.title" : "从不记仇"
+"achievement.sheriff.common2.goal" : "成功执法一名在会议中投给警长的玩家。"
+"achievement.sheriff.common2.splitted.2" : "英雄"
+
+"achievement.sheriff.challenge.title" : "完美的执法者"
+"achievement.sheriff.challenge.goal" : "用自己的能力淘汰敌人。"
+"achievement.sheriff.challenge.cond" : "提示：击杀2名以上的敌人。"
+"achievement.sheriff.challenge.splitted.0" : "完美的"

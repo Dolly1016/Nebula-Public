@@ -1,0 +1,49 @@
+# Assignable
+
+"role.fixer.name" : "控局者"
+"role.fixer.short" : "控"
+"role.fixer.blurb" : "幕后的操盘手"
+
+# Document
+
+"role.fixer.doc" : "控局者可以在会议中屏蔽其他玩家的通讯。"
+"role.fixer.ability.title" : "固有能力【辩证调停】"
+"role.fixer.ability.main" : "在会议中可以对一名玩家实施干扰，屏蔽其平板的通信。<br>请勿盲目屏蔽他人，利用它保护最重要的船员。"
+"role.fixer.ability.jamming" : "<title>屏蔽</title>屏蔽目标平板的通讯。<br>该能力有一定使用次数。"
+"role.fixer.ability.blocked" : "<title>无信号</title>通讯被屏蔽的玩家会有此标记。<br>被屏蔽的玩家无法投票，并且其会议能力也将失效。<br>其他玩家不能对被屏蔽玩家进行操作。"
+
+# Options
+
+"options.role.fixer.detail" : "控局者可以让指定玩家不能成为投票目标，同时限制其投票权利。"
+"options.role.fixer.numOfJamming" : "屏蔽使用次数"
+"options.role.fixer.canJamPlayerContinuously" : "可以连续屏蔽相同玩家"
+"options.role.fixer.jammingSealsVoteRight" : "屏蔽时限制投票权利"
+"options.role.fixer.maxLeftVotingTimeForJamming" : "可进行屏蔽最大会议剩余时间"
+
+# Game
+
+"roles.fixer.jamming" : "剩余屏蔽次数"
+
+# UI
+
+
+# Stats
+
+"stats.fixer.jamming" : "屏蔽使用次数"
+
+# Titles
+
+"achievement.fixer.common1.title" : "幕后操盘"
+"achievement.fixer.common1.goal" : "累计屏蔽5次平板通信。"
+
+"achievement.fixer.common2.title" : "绝地逆转"
+"achievement.fixer.common2.goal" : "屏蔽已经获得5票的船员，并驱逐真正的敌人。"
+
+"achievement.fixer.secret1.title" : "无信号区"
+"achievement.fixer.secret1.goal" : "被屏蔽一次。"
+"achievement.fixer.secret1.splitted.2" : "弱者"
+
+"achievement.fixer.challenge.title" : "游戏特性"
+"achievement.fixer.challenge.goal" : "在投票阶段屏蔽敌方玩家并驱逐队友。"
+"achievement.fixer.challenge.flavor" : "“你永远不知道你会在哪里摔跤。”"
+"achievement.fixer.challenge.splitted.0" : "特性"

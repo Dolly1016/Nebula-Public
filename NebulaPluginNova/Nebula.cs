@@ -53,14 +53,14 @@ public class NebulaPlugin
     public const string AmongUsVersion = "2023.7.12";
     public const string PluginGuid = "jp.dreamingpig.amongus.nebula";
     public const string PluginName = "NebulaOnTheShip";
-    public const string PluginVersion = "3.0.0.3";
+    public const string PluginVersion = "3.1.0.0";
 
-    //public const string VisualVersion = "v3.0.0.3";
-    public const string VisualVersion = "Snapshot 26.02.21a";
+    public const string VisualVersion = "v3.1";
+    //public const string VisualVersion = "Snapshot 26.03.04a";
     //public const string VisualVersion = "Costume Animation DEMO 2";
 
     public const string PluginEpochStr = "108";
-    public const string PluginBuildNumStr = "1552";
+    public const string PluginBuildNumStr = "1556";
     public static readonly int PluginEpoch = int.Parse(PluginEpochStr);
     public static readonly int PluginBuildNum = int.Parse(PluginBuildNumStr);
     public const bool GuardVanillaLangData = false;
@@ -100,8 +100,6 @@ public class NebulaPlugin
     internal static bool AllowHttpCommunication => true;
 #endif
 
-    public static NebulaLog Log { get; private set; }
-
 
     public static string GetNebulaVersionString()
     {
@@ -111,8 +109,7 @@ public class NebulaPlugin
     static public Harmony Harmony = new Harmony(PluginGuid);
 
 
-    public bool IsPreferential => Log.IsPreferential;
-    public static NebulaPlugin MyPlugin { get; private set; } = null!;
+    public static bool IsPreferential => NebulaLogFile.IsPreferential;
     public static BasePlugin LoaderPlugin = null!;
 
     static public void LoadForAndroid()
@@ -137,7 +134,7 @@ public class NebulaPlugin
     {
         IsAndroid = android;
         //if (!IsAndroid) System.Console.OutputEncoding = Encoding.UTF8;
-        Log = new(android);
+        NebulaLogFile.Initialize(android);
 
         void LoadLibrary(string path)
         {

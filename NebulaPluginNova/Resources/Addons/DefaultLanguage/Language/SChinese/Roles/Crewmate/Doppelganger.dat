@@ -1,0 +1,49 @@
+# Assignable
+
+"role.doppelganger.name" : "二重身"
+"role.doppelganger.short" : "二"
+"role.doppelganger.blurb" : "多重身份"
+
+# Document
+
+"role.doppelganger.doc" : "二重身可以召唤并自由操控分身。"
+"role.doppelganger.ability.title" : "固有能力【分离意识】"
+"role.doppelganger.ability.main" : "可以在地图中创建与自己外观相同的<b>分身</b>。"
+"role.doppelganger.ability.map" : "<title>操纵</title>打开用于召唤或控制分身的地图界面。使用常规地图也可以召唤。"
+"role.doppelganger.ability.swap" : "<title>交换</title>与分身交换位置。"
+"role.doppelganger.ability.despawn" : "<title>消除</title>使用分身消失。"
+"role.doppelganger.tips" : "・分身被击杀，本体也会一起<b>死亡</b>。<br>・可以通过地图观察靠近分身的玩家位置与深浅颜色。"
+
+# Options
+
+"options.role.doppelganger.detail" : "二重身可以创建一个分身，分身死亡本体也会死亡。<br>分身可以指定移动到目标区域迷惑其他玩家。"
+"options.role.doppelganger.swapCooldown" : "交换冷却时间" 
+"options.role.doppelganger.swapDuration" : "交换持续时间"
+"options.role.doppelganger.detectionRadius" : "分身探知范围"
+
+# Game
+
+"gameAction.doppelganger.summon" : "召唤分身"
+
+# UI
+
+"button.label.doppelganger.command" : "操纵"
+"button.label.despawn" : "消除"
+"ui.action.doppelganger.swap" : "与分身交换位置。"
+"ui.action.doppelganger.despawn" : "消除分身。"
+
+# Stats
+
+# Titles
+
+"achievement.doppelganger.common1.title" : "分身移行"
+"achievement.doppelganger.common1.goal" : "与分身交换位置并移动20米以上。"
+
+"achievement.doppelganger.another1.title" : "同生共死"
+"achievement.doppelganger.another1.goal" : "因为分身死亡导致本体死亡。"
+
+"achievement.doppelganger.challenge.title" : "最佳拍档"
+"achievement.doppelganger.challenge.goal" : "通过分身交换位置快速完成多个任务。"
+"achievement.doppelganger.challenge.cond" : "提示：完成任务时，所有船员剩余任务量超过4个。"
+"achievement.doppelganger.challenge.splitted.0" : "最佳的"
+"achievement.doppelganger.challenge.splitted.2" : "拍档"

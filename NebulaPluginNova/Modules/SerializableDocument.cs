@@ -1,6 +1,7 @@
 ﻿using Il2CppSystem.Xml.Schema;
 using Nebula.Behavior;
 using Nebula.Modules.GUIWidget;
+using Nebula.Modules.Logging;
 using Nebula.Scripts;
 using System.Reflection;
 using TMPro;
@@ -391,7 +392,7 @@ public class SerializableDocument : IDocument
                                 myScreen?.Do(screen => screen.SetWidget(DocumentManager.GetDocument(args[1])?.Build(myScreen) ?? null, out _));
                                 break;
                             default:
-                                NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.Document, $"Unknown link action \"{args[0]}\" is triggered.");
+                                NebulaLogger.Instance.Error($"Unknown link action \"{args[0]}\" is triggered.");
                                 break;
                         }
                     });

@@ -1,0 +1,59 @@
+# Assignable
+
+"role.oracle.name" : "占卜师"
+"role.oracle.short" : "占"
+"role.oracle.blurb" : "你可以查验对方的职业"
+
+# Document
+
+"role.oracle.doc" : "占卜师可以通过占卜获取其他玩家的职业。"
+"role.oracle.ability.title" : "固有能力【预知未来】"
+"role.oracle.ability.main" : "对一名玩家使用能力后，可以预言到该玩家的<var>%CAND%</var>。"
+"role.oracle.ability.main.one" : "当前职业"
+"role.oracle.ability.main.multiple" : "当前%NUM%种职业之一"
+"role.oracle.ability.oracle" : "<title>预言</title>预言目标玩家当前职业。<br><var>%DIE%</var>"
+"role.oracle.ability.oracle.die" : "但是，如果目标的职业是%ROLES%，那么就会<b>死亡</b>。"
+"role.oracle.ability.oracle.die.split" : "、"
+
+# Options
+
+"options.role.oracle.detail" : "占卜师可以通过占卜其他玩家的职业。"
+"options.role.oracle.maxOracle" : "最大占卜次数"
+"options.role.oracle.oracleCooldown" : "占卜冷却时间"
+"options.role.oracle.oracleAdditionalCooldown" : "占卜冷却时间追加"
+"options.role.oracle.oracleDuration" : "占卜所需时间"
+"options.role.oracle.numOfCandidates" : "占卜后得知职业数"
+"options.role.oracle.dieOnDiviningOpportunist" : "占卜到投机者时自杀"
+"options.role.oracle.dieOnDiviningOracle" : "占卜到占卜师时自杀"
+
+# Game
+
+"role.oracle.gui.results" : "占卜结果"
+"role.oracle.gui.results.zero" : "无"
+
+# UI
+
+"button.label.oracle" : "占卜"
+
+# Status
+
+"status.punished" : "天谴"
+
+# Stats
+
+"stats.oracle.oracle" : "使用占卜次数"
+
+# Titles
+
+"achievement.oracle.common1.title" : "神说"
+"achievement.oracle.common1.goal" : "使用10次占卜。"
+"achievement.oracle.common1.splitted.0" : "星星的"
+"achievement.oracle.common1.splitted.2" : "言辞"
+
+"achievement.oracle.another1.title" : "私心"
+"achievement.oracle.another1.goal" : "驱逐或误赌一名占卜过的船员。"
+"achievement.oracle.another1.splitted.0" : "私心"
+
+"achievement.oracle.challenge.title" : "我们的见解"
+"achievement.oracle.challenge.goal" : "占卜过的伪装者中至少有1名船员结果中有伪装者，<br>且不驱逐一个船员（不含叛徒）的情况下获胜。"
+"achievement.oracle.challenge.splitted.0" : "我们的"

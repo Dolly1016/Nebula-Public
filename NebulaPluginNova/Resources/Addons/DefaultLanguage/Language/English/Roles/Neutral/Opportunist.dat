@@ -6,11 +6,11 @@
 
 # Document
 
-"role.opportunist.doc" : "A neural member who wins by surviving until the end."
+"role.opportunist.doc" : "A neural who wins by surviving until the end."
 
 # Options
 
-"options.role.opportunist.detail" : "Opportunists can earn additional wins by completing tasks and surviving."
+"options.role.opportunist.detail" : "The Opportunist can earn additional wins by completing tasks and surviving."
 "options.role.opportunist.numOfTasks" : "# Staying Tasks"
 "options.role.opportunist.numOfTasks.detail" : "The Opportunist is assigned tasks to <b>stay</b> at a <b>designated location</b> for a while."
 "options.role.opportunist.stayingDuration" : "Staying Duration Per Tasks"
@@ -64,7 +64,7 @@
 # Titles
 
 "achievement.opportunist.common1.title" : "Afterward, Let It Be Wild"
-"achievement.opportunist.common1.goal" : "Win with Opportunist extra victory."
+"achievement.opportunist.common1.goal" : "Win with the Opportunist extra winning."
 
 "achievement.opportunist.another1.title" : "Sudden Development"
 "achievement.opportunist.another1.goal" : "Survive until the end but lose."
@@ -83,8 +83,8 @@
 "achievement.opportunist.common2.splitted.0" : "Out Of The Way "
 
 "achievement.opportunist.challenge.title" : "As The Wind Blows"
-"achievement.opportunist.challenge.goal" : "Defeat 1 or more survivors and get an extra victory."
-"achievement.opportunist.challenge.cond" : "Excluding Crewmate victory"
+"achievement.opportunist.challenge.goal" : "Defeat 1 or more survivors and get an extra winning."
+"achievement.opportunist.challenge.cond" : "Excluding Crewmates win"
 
 # Team
 

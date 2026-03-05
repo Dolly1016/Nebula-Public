@@ -1,0 +1,90 @@
+# Assignable
+
+"role.scarlet.name" : "魅魔"
+"role.scarlet.short" : "魅"
+"role.scarlet.blurb" : "让我控制你的心"
+
+# Document
+
+"role.scarlet.doc" : "魅魔可以和本命一起获胜。<br>当然，也要照顾好备胎的情绪。"
+"role.scarlet.winCond" : "本命存活并达到胜利条件后，会被魅魔接管。"
+"role.scarlet.ability.title" : "固有能力【魅力】"
+"role.scarlet.ability.main" : "巧妙利用备胎协助本命达到胜利条件。"
+"role.scarlet.ability.favorite" : "<title>本命</title>将该玩家指定为自己的本命。<br>如果魅魔与本命之间有一方死亡，另一方会殉情。"
+"role.scarlet.ability.flirt" : "<title>备胎</title>将该玩家指定为备胎，魅魔会知晓备胎的职业。<br>如果魅魔与备胎之间有一方死亡，另一方不会殉情。"
+"role.scarlet.ability.hourglass" : "<title>倒计时</title>如果长时间不指定本命，那么会因为寂寞导致死亡。<br>会议期间，倒计时不会读秒。"
+"role.scarlet.ability.meeting" : "<title>号召</title>只能在会议中使用。<br>让本命和备胎同时投票给魅魔投票的目标。"
+
+# Options
+
+"options.role.scarlet.detail" : "魅魔是一个第三方职业，可以选择一名玩家成为自己的本命并带其共享胜利。<br>其次可以魅惑一名玩家成为备胎来控制局势。"
+"options.role.scarlet.graceUntilDecidingFavorite" : "指定本命倒计时"
+"options.role.scarlet.graceUntilDecidingFavorite.detail" : "如果魅魔没有在配置的时间内确定本命，将会直接死亡。<br>会议期间（含会议结束的总结）内，计时器不会计数。<br>・ 如果这个时间太短，那么魅魔将很难生存。"
+"options.role.scarlet.numOfKept" : "备胎最大人数"
+"options.role.scarlet.numOfCommand" : "号召最大使用次数"
+"options.role.scarlet.numOfCommand.detail" : "魅魔可以在会议中发动<b>号召</b>来让本命和备胎的投票与自己的投票选择一致。"
+"options.role.scarlet.canOverrideTaskWin" : "可以窃取任务胜利"
+"options.role.scarlet.favoriteGauge" : "情感值"
+"options.role.scarlet.favoriteGauge.detail" : "开启后，魅魔必须使情感值达到一定值才能获胜。<br>情感值可以通过靠近本命时持续积累，相反会慢慢衰减。"
+"options.role.scarlet.requiredGaugeToWin" : "获胜所需情感值"
+"options.role.scarlet.requiredGaugeToWin.detail" : "魅魔窃取胜利前需要积攒最低值。"
+"options.role.scarlet.surplusGauge" : "情感值溢出上限"
+"options.role.scarlet.surplusGauge.detail" : "在原先获胜情感值上追加额外上限。<br>数值越高，魅魔独自行动的时间越长。"
+"options.role.scarlet.gaugeReductionRatio" : "情感值衰减速度"
+"options.role.scarlet.gaugeReductionRatio.detail" : "当魅魔远离本命时，情感值会以积累速度乘以该设定值进行衰减。<br>设置1倍时，衰减与积累速度相同，建议设置小于1倍。"
+"options.role.scarlet.canLocateLovers" : "显示真爱位置"
+"options.role.scarlet.group.gauge" : "情感值设定"
+
+# Game
+
+"role.scarlet.gui.gauge" : "情感度"
+"role.scarlet.gui.favorite" : "本命"
+
+# UI
+
+"button.label.scarlet.grance" : "倒计时"
+"button.label.favorite" : "本命"
+"button.label.seduce" : "备胎"
+"button.label.scarlet.command" : "号召"
+"ui.action.scarlet.suicide" : "如果长时间不指定本命将会死亡！<br>会议期间倒计时不会读秒。"
+
+# Stats
+
+"stats.scarlet.kept" : "指定备胎次数"
+
+# Titles
+
+"achievement.scarlet.common1.title" : "我可不渣"
+"achievement.scarlet.common1.goal" : "指定一名本命和一名以上的备胎。"
+"achievement.scarlet.common1.splitted.0" : "另一个"
+
+"achievement.scarlet.common2.title" : "臣服于我"
+"achievement.scarlet.common2.goal" : "通过号召累计放逐3名玩家。"
+"achievement.scarlet.common2.splitted.1" : "名义"
+
+"achievement.scarlet.another1.title" : "被魅惑的绅士"
+"achievement.scarlet.another1.goal" : "因为魅魔的死亡导致自己被连带。"
+"achievement.scarlet.another1.splitted.0" : "魅惑"
+
+"achievement.scarlet.another2.title" : "来自绿茶的警告"
+"achievement.scarlet.another2.goal" : "在会议中被号召的票驱逐。"
+"achievement.scarlet.another2.flavor" : "“好哥哥们，就是他欺负我！” —人群中的鬼魅之声。"
+
+"achievement.scarlet.love.title" : "自爱者"
+"achievement.scarlet.love.goal" : "在达到魅魔获胜条件时，只有本命胜利。"
+"achievement.scarlet.love.cond" : "提示：魅魔有额外胜利约束"
+"achievement.scarlet.love.flavor" : "“这是一个诅咒！”"
+
+"achievement.scarlet.challenge.title" : "女皇"
+"achievement.scarlet.challenge.goal" : "通过号召驱逐一名玩家，且至少有两名备胎死亡、两名存活，并与本命一起胜利。"
+"achievement.scarlet.challenge.splitted.2" : "女皇"
+
+# Team
+
+"teams.scarlet" : "魅魔"
+"end.scarlet" : "魅魔%EXTRA%胜利"
+
+# Document
+
+"document.tip.winCond.scarlet.title" : "窃取胜利"
+"document.tip.winCond.scarlet" : "当本命存活且其阵营获胜时，将窃取其阵营胜利并与本命一起获胜。<br>但对于复仇者获胜时，仅本命是复仇者的情况下才能窃取胜利。"

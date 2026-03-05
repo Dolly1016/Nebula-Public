@@ -7,14 +7,14 @@
 # Document
 
 "role.rokurokubi.doc" : "An impostor who can stretch their neck to kill players far away."
-"role.rokurokubi.ability.title" : "Inherent Ability "Yōkai Rokurokubi""
-"role.rokurokubi.ability.main" : "Stretch the neck loooong. The neck can stretch across walls."
+"role.rokurokubi.ability.title" : "Inherent Ability [Yōkai Rokurokubi]"
+"role.rokurokubi.ability.main" : "Stretch the neck loooong! The neck can stretch across walls."
 "role.rokurokubi.ability.rokurokubi" : "<title>Crane</title>Stretch the neck. Press and hold the %KEY% key to stop the neck extension."
 "role.rokurokubi.ability.reset" : "<title>Reset</title>Press the retset button or kill to return the neck to its original length."
 
 # Options
 
-"options.role.rokurokubi.detail" : "Rokurokubi can stretch its neck to straddle walls<br>and kill players above it."
+"options.role.rokurokubi.detail" : "The Rokurokubi can stretch its neck to straddle walls<br>and kill players above it."
 "options.role.rokurokubi.craneSpeed" : "Crane Speed"
 "options.role.rokurokubi.maxNeckLength" : "Max Neck Length"
 "options.role.rokurokubi.autoKillInCraning" : "Auto Kill"

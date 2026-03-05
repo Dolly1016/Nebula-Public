@@ -1,5 +1,6 @@
 ﻿using Il2CppSystem.Runtime.Serialization.Formatters.Binary;
 using Nebula.Modules.GUIWidget;
+using Nebula.Modules.Logging;
 using Nebula.Patches;
 using System.IO.Compression;
 using System.Text;
@@ -70,7 +71,7 @@ static internal class DevTeamContact
         }
         catch (Exception e)
         {
-            NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Error, null, "Failed to send webhook. \n" + e.ToString());
+            NebulaLogger.Instance.Error("Failed to send webhook. \n" + e.ToString());
             return false;
         }
     }

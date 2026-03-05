@@ -1,0 +1,98 @@
+"achievement.innersloth.wins_skeld.title" : "漂泊飞船"
+"achievement.innersloth.wins_skeld.goal" : "在The Skeld 获胜 3 次。"
+
+"achievement.innersloth.wins_mira.title" : "全面封锁"
+"achievement.innersloth.wins_mira.goal" : "在 MIRA 获胜 3 次。"
+
+"achievement.innersloth.wins_polus.title" : "证据确凿"
+"achievement.innersloth.wins_polus.goal" : "在Polus 获胜 3 次。"
+
+"achievement.innersloth.wins_airship.title" : "高帽船员帮"
+"achievement.innersloth.wins_airship.goal" : "在 Airship 获胜 3 次。"
+
+"achievement.innersloth.survive_crewmate.title" : "幸存者"
+"achievement.innersloth.survive_crewmate.goal" : "以船员的身份存活下来并取得胜利。"
+
+"achievement.innersloth.win_all_tasks.title" : "任务机器"
+"achievement.innersloth.win_all_tasks.goal" : "以船员身份完成所有任务来取得胜利。"
+
+"achievement.innersloth.win_always_correct_votes.title" : "神探福尔摩斯"
+"achievement.innersloth.win_always_correct_votes.goal" : "以船员身份在将每一票都投给伪装者的情况下取得胜利。"
+
+"achievement.innersloth.win_kills.title" : "开膛手"
+"achievement.innersloth.win_kills.goal" : "以伪装者身份杀死所有船员来取得胜利。"
+
+"achievement.innersloth.win_impostor_vote.title" : "能言善道"
+"achievement.innersloth.win_impostor_vote.goal" : "以伪装者身份通过投票来取得胜利。"
+
+"achievement.innersloth.win_sabotage.title" : "破坏王"
+"achievement.innersloth.win_sabotage.goal" : "以伪装者身份造成严重破坏来取得胜利。"
+
+"achievement.innersloth.no_vents_impostor_win.title" : "谋事在人"
+"achievement.innersloth.no_vents_impostor_win.goal" : "以伪装者身份在不使用通风口的情况下取得胜利。"
+
+"achievement.innersloth.survive_two_impostors.title" : "毫无破绽"
+"achievement.innersloth.survive_two_impostors.goal" : "在伪装者为 2 名的游戏中，于游戏结束时 2 名伪装者都存活的情况下取得胜利。"
+
+"achievement.innersloth.kill_while_shifted.title" : "不要相信任何人"
+"achievement.innersloth.kill_while_shifted.goal" : "杀死某人，然后伪装成他们。"
+
+"achievement.innersloth.block_kill_as_guardian.title" : "我可以成为你的“天士”"
+"achievement.innersloth.block_kill_as_guardian.goal" : "以守护天使的身份阻止杀人。"
+
+"achievement.innersloth.task_complete_easy.title" : "实习生"
+"achievement.innersloth.task_complete_easy.goal" : "总计完成 10 次任务。"
+
+"achievement.innersloth.task_complete_medium.title" : "经理"
+"achievement.innersloth.task_complete_medium.goal" : "总计完成 100 次任务。"
+
+"achievement.innersloth.task_complete_hard.title" : "任务专家"
+"achievement.innersloth.task_complete_hard.goal" : "总计完成 500 次任务。"
+
+"achievement.innersloth.card_first_try.title" : "不可能的任务"
+"achievement.innersloth.card_first_try.goal" : "于一场游戏中一次就通过刷卡任务。"
+
+"achievement.innersloth.die_during_medscan.title" : "待宰羔羊"
+"achievement.innersloth.die_during_medscan.goal" : "在医务室扫描过程中被杀。"
+
+"achievement.innersloth.kills_first.title" : "初露锋芒"
+"achievement.innersloth.kills_first.goal" : "完成首次击杀。"
+
+"achievement.innersloth.kills_easy.title" : "杀手"
+"achievement.innersloth.kills_easy.goal" : "总计杀死 5 个人。"
+
+"achievement.innersloth.kills_medium.title" : "刺客"
+"achievement.innersloth.kills_medium.goal" : "总计杀死 50 个人。"
+
+"achievement.innersloth.kills_hard.title" : "死神"
+"achievement.innersloth.kills_hard.goal" : "总计杀死 150 个人。"
+
+"achievement.innersloth.three_kills_before_meeting.title" : "饥饿难耐"
+"achievement.innersloth.three_kills_before_meeting.goal" : "在召开会议前杀死 3 个人。"
+
+"achievement.innersloth.fix_own_sabotage.title" : "伪装船员"
+"achievement.innersloth.fix_own_sabotage.goal" : "修复一次自己造成的破坏。"
+
+"achievement.innersloth.kill_during_lights.title" : "暗藏杀机"
+"achievement.innersloth.kill_during_lights.goal" : "在照明损坏期间杀死一个人。"
+
+"achievement.innersloth.hns_survive_crewmate.title" : "捉迷藏高手"
+"achievement.innersloth.hns_survive_crewmate.goal" : "在捉迷藏模式下，以船员身份在游戏中生存下去。"
+
+"achievement.innersloth.hns_impostor_kill_all.title" : "无处可逃"
+"achievement.innersloth.hns_impostor_kill_all.goal" : "在捉迷藏模式下，以伪装者身份杀死所有躲藏者。"
+
+"achievement.innersloth.hns_complete_all_tasks.title" : "飓风行动"
+"achievement.innersloth.hns_complete_all_tasks.goal" : "捉迷藏模式下，完成所有任务。"
+
+"achievement.innersloth.hns_crewmate_wins_easy.title" : "你逃不掉的"
+"achievement.innersloth.hns_crewmate_wins_easy.goal" : "捉迷藏模式下，以躲藏者身份获胜10局"
+
+"achievement.innersloth.hns_crewmate_wins_hard.title" : "但你可以躲起来"
+"achievement.innersloth.hns_crewmate_wins_hard.goal" : "捉迷藏模式下，以躲藏者身份获胜50局"
+
+"achievement.innersloth.hns_impostor_kills_easy.title" : "你可以逃命"
+"achievement.innersloth.hns_impostor_kills_easy.goal" : "捉迷藏模式下，以追杀者身份杀死100人。"
+
+"achievement.innersloth.hns_impostor_kills_hard.title" : "但你没地方躲"
+"achievement.innersloth.hns_impostor_kills_hard.goal" : "捉迷藏模式下，以追杀者身份杀死200人。"

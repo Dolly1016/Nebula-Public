@@ -1,0 +1,32 @@
+# Assignable
+
+"role.disclosure.name" : "显眼包"
+"role.disclosure.generalBlurb" : "嗨，看我看我！"
+
+# Document
+
+"role.disclosure.doc" : "显眼包在会议中会展示自己鼠标光标的位置。"
+
+# Options
+
+"options.role.disclosure.detail" : "拥有显眼包的玩家，在会议期间会公开自己鼠标光标的位置。"
+"options.role.disclosure.anonymousCursor" : "匿名鼠标光标"
+"options.role.disclosure.showCursorAtLateVoting" : "投票结算时显示鼠标光标"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.disclosure.common1.title" : "直播中"
+"achievement.disclosure.common1.goal" : "在鼠标光标被公开的情况下进行投票。"
+
+"achievement.disclosure.challenge.title" : "乱世舆论煽动者"
+"achievement.disclosure.challenge.goal" : "自身投票超过5秒，并且有3名以上的玩家选择被你投票的玩家。<br>同时3次以上让不同阵营的玩家被票出。"
+"achievement.disclosure.challenge.splitted.2" : "煽动者"

@@ -7,14 +7,14 @@
 # Document
 
 "role.phosphorus.doc" : "A crewmate who can place lanterns that brightly illuminate the surroundings."
-"role.phosphorus.ability.title" : "Inherent Ability "Lantern""
+"role.phosphorus.ability.title" : "Inherent Ability [Lantern]"
 "role.phosphorus.ability.main" : "The light of the lantern illuminates the surroundings through walls."
 "role.phosphorus.ability.place" : "<title>Place</title>Place a lantern. Once all lanterns are placed, this button disappears,<br>and the lantern button below becomes usable after a meeting is held."
 "role.phosphorus.ability.lantern" : "<title>Lantern</title>Turn on the lantern. The lantern turns off when the effect time ends."
 
 # Options
 
-"options.role.phosphorus.detail" : "Lamps that Phosphorus places give a better view of the surroundings.<br>Imposters will avoid kills around lamps. "
+"options.role.phosphorus.detail" : "Lamps that the Phosphorus places give a better view of the surroundings.<br>Imposters will avoid kills around lamps. "
 "options.role.phosphorus.numOfLamps" : "Num of Lamps"
 "options.role.phosphorus.placeCoolDown" : "Place Cooldown"
 "options.role.phosphorus.lampCoolDown" : "Lamp Cooldown"

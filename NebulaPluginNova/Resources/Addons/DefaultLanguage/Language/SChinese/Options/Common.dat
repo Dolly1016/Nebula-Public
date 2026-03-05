@@ -1,0 +1,60 @@
+"options.role.count" : "最大数量"
+"options.role.chance" : "生成概率"
+"options.role.secondaryChance" : "多次生成概率"
+"options.role.count.jackalized" : "豺狼化分配数量"
+"options.role.chance.jackalized" : "豺狼化分配概率"
+"options.role.count.madden" : "叛徒化分配数量"
+"options.role.chance.madden" : "叛徒化分配概率"
+"options.role.count.tyrant" : "暴君化分配数量"
+"options.role.chance.tyrant" : "暴君化分配概率"
+"options.role.count.short" : "分配数量"
+"options.modifier.chance" : "附加能力概率"
+"options.role.crewmateCount" : "船员最大分配数量"
+"options.role.impostorCount" : "伪装者最大分配数量"
+"options.role.neutralCount" : "第三方最大分配数量"
+"options.role.definiteCount" : "绝对分配数量"
+"options.role.randomCount" : "随机分配数量"
+"options.role.maxCount" : "最大分配数量"
+"options.role.maxCount.unlimited" : "无限制"
+
+"options.killCoolDown.type.immediate" : "固定值"
+"options.killCoolDown.type.relative" : "与基础值相差"
+"options.killCoolDown.type.ratio" : "与基础值相比"
+
+"options.commonSetting" : "常规设置"
+
+"role.general.canUseVent" : "可以使用通风口"
+"role.general.ventOption" : "通风口选项"
+"role.general.ventCoolDown" : "冷却时间"
+"role.general.ventCoolDown.short" : "冷却"
+"role.general.ventDuration" : "持续时间"
+"role.general.ventDuration.short" : "持续"
+"role.general.ventUses" : "最大使用次数"
+"role.general.ventUses.short" : "使用次数"
+
+# Tabs
+
+"options.tab.setting" : "游戏 [设置]"
+"options.tab.crewmate" : "[船员] 职业"
+"options.tab.impostor" : "[伪装者] 职业"
+"options.tab.neutral" : "[第三方] 职业"
+"options.tab.ghost" : "[鬼魂] 职业"
+"options.tab.modifier" : "[附加能力]"
+
+# Vanilla Options
+
+"options.vanilla.header" : "Among Us"
+"options.vanilla.header.impostor" : "伪装者选项"
+"options.vanilla.header.crewmate" : "船员选项"
+"options.vanilla.header.meeting" : "紧急会议选项"
+"options.vanilla.header.task" : "任务选项"
+
+# UI
+
+"ui.options.nav.1.left" : "打开选项"
+"ui.options.nav.1.middle" : "切换简略/详细显示"
+"ui.options.nav.1.right" : "复制职业名称与详细信息"
+"ui.options.nav.2.middle" : "返回选项列表"
+
+"ui.configuration.click" : "左键进行职业配置<br>右键复制职业介绍"
+"ui.configuration.copied" : "复制成功！"

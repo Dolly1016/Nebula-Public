@@ -12,7 +12,7 @@
 
 # Options
 
-"options.role.evilGuesser.detail" : "Guesser can shoot players in the meeting by guessing the role.<br>If the guess is wrong, guesser dies instead."
+"options.role.evilGuesser.detail" : "The Evil Guesser can shoot players in the meeting by guessing the role.<br>If the guess is wrong, guesser dies instead."
 
 # Game
 

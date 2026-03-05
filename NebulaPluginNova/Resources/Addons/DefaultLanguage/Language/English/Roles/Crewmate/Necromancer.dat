@@ -7,7 +7,7 @@
 # Document
 
 "role.necromancer.doc" : "A crewmate who can carry and revive corpses."
-"role.necromancer.ability.title" : "Inherent Ability "Forbidden Spirit Summoning Technique""
+"role.necromancer.ability.title" : "Inherent Ability [Forbidden Necromancy]"
 "role.necromancer.ability.main" : "Carry a corpse to a desired location to perform a <b>revival</b> ritual.<br>If there is a corpse within your <var>%DISTANCE%</var>, the screen will turn purple."
 "role.necromancer.ability.drag" : "<title>Grag/Release</title>Grag and carry a corpse. Bring the corpse to the revival room indicated by the arrow to <b>revive</b> it.<br>Each corpse has a different revival room."
 "role.necromancer.ability.drag.near" : "very close"
@@ -16,16 +16,16 @@
 
 # Options
 
-"options.role.necromancer.detail" : "Necromancer can raise dead bodies from the dead!<br>They drags a corpse for a resurrection ritual."
+"options.role.necromancer.detail" : "The Necromancer can raise dead bodies from the dead!<br>They drags a corpse for a resurrection ritual."
 "options.role.necromancer.reviveCoolDown" : "Revive Cooldown"
 "options.role.necromancer.reviveDuration" : "Revive Duration"
-"options.role.necromancer.reviveDuration.detail" : "The time it takes for the deceased to be revived<br>after pressing the revival button in the revival room."
+"options.role.necromancer.reviveDuration.detail" : "The time that the revival ritual needs after pressing the revival button in the revival room."
 "options.role.necromancer.detectedRange" : "Detected Range"
-"options.role.necromancer.detectedRange.detail" : "When the necromancer gets close enough to a corpse, the screen turns slightly purple.<br>This allows the necromancer to notice the presence of nearby corpses."
+"options.role.necromancer.detectedRange.detail" : "When the Necromancer gets close enough to a corpse, the screen turns slightly purple.<br>This allows the necromancer to notice the presence of nearby corpses."
 "options.role.necromancer.reviveMinRange" : "Revive Room Min Distance"
-"options.role.necromancer.reviveMinRange.detail" : "The revival room is determined based on the location where the corpse spawned.<br>This setting allows you to specify the minimum distance between the revival room and the corpse's spawn location."
+"options.role.necromancer.reviveMinRange.detail" : "The revival room is determined based on the location where the corpse spawned.<br>This option allows you to specify the mini distance between the revival room and the corpse's spawn location."
 "options.role.necromancer.reviveMaxRange" : "Revive Room Max Distance"
-"options.role.necromancer.reviveMaxRange.detail" : "The revival room is determined based on the location where the corpse spawned.<br>This setting allows you to specify the maximum distance between the revival room and the corpse's spawn location."
+"options.role.necromancer.reviveMaxRange.detail" : "The revival room is determined based on the location where the corpse spawned.<br>This option allows you to specify the max distance between the revival room and the corpse's spawn location."
 
 # Game
 
@@ -56,7 +56,7 @@
 "achievement.necromancer.another2.flavor" : ""Death comes equally to all and can never be escaped." —The Holy Scripture of Space Travel"
 
 "achievement.necromancer.another.title" : "Nightmare Revival"
-"achievement.necromancer.another.goal" : "Revive a player from the non-crewmate faction."
+"achievement.necromancer.another.goal" : "Revive a non-crewmate player."
 "achievement.necromancer.another.splitted.0" : "Nightmare's "
 
 "achievement.necromancer.challenge.title" : "Endless Ghost Army"

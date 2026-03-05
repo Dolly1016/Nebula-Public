@@ -8,7 +8,7 @@
 # Document
 
 "role.creeping.doc" : "Can perform <b>delayed kills</b> by applying slow-acting poison to players.<br>Use it properly alongside normal kills to maneuver skillfully."
-"role.creeping.ability.title" : "Inherent Ability "The Creeping End""
+"role.creeping.ability.title" : "Inherent Ability [The Creeping End]"
 "role.creeping.ability.main" : "Poison to players. Players hit with poison will die if they do not depoison within the specified time."
 "role.creeping.ability.poison" : "<title>Poison</title>Poison to a player.<br>A <b>blink</b> occurs at this time.<br>The poison cooldown is <var>kill cooldown %POISON%</var> (<var>%SEC%</var> seconds)."
 "role.creeping.ability.sec.longer" : "Longer"
@@ -19,7 +19,7 @@
 
 # Options
 
-"options.role.creeping.detail" : "Creeping uses a slow-acting poison that will kill them if they do not cure<br>themselves of the poison within a certain time frame."
+"options.role.creeping.detail" : "The Creeping uses a slow-acting poison that will kill them if they do not cure<br>themselves of the poison within a certain time frame."
 "options.role.creeping.depoisonDuration" : "Depoison Duration"
 "options.role.creeping.poisonDelay" : "Posion Kill Delay"
 "options.role.creeping.poisonCooldown" : "Poison Cooldown"

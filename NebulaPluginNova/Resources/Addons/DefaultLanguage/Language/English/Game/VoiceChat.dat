@@ -21,3 +21,5 @@
 "voiceChat.settings.device.default" : "Default"
 "voiceChat.settings.server" : "VC Server"
 "voiceChat.settings.server.apply" : "Apply"
+"voiceChat.settings.micTest" : "Mic. Test"
+"voiceChat.settings.micTest.end" : "Interrupt Mic. Test"

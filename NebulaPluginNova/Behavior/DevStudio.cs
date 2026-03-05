@@ -10,6 +10,7 @@ using Virial.Text;
 using Virial.Media;
 using UnityEngine;
 using Nebula.Modules.Cosmetics;
+using Nebula.Modules.Logging;
 
 namespace Nebula.Behavior;
 
@@ -935,7 +936,7 @@ public class DevStudio : MonoBehaviour
                     }
                     catch (Exception e)
                     {
-                        NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, e.ToString());
+                        NebulaLogger.Instance.Error(e.ToString());
                         MetaUI.ShowConfirmDialog(null, new TranslateTextComponent("devStudio.ui.cosmetics.failedToCopy"));
                     }
                 }

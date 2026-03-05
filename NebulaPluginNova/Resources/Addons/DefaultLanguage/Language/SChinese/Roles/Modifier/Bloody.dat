@@ -1,0 +1,34 @@
+# Assignable
+
+"role.bloody.name" : "血语者"
+"role.bloody.generalBlurb" : "杀了我，你会后悔的"
+
+# Document
+
+"role.bloody.doc" : "血语者被击杀后，凶手会留下鲜红的血迹。"
+
+# Options
+
+"options.role.bloody.detail" : "血语者被击杀后，凶手会留下鲜红的血迹。"
+"options.role.bloody.curseDuration" : "血迹持续时长"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.bloody.bloody" : "血语触发次数"
+"stats.bloody.killer" : "触发血语次数"
+
+# Titles
+
+"achievement.bloody.common1.title" : "复仇的欲望"
+"achievement.bloody.common1.goal" : "让凶手沾上你的血。"
+"achievement.bloody.common1.flavor" : "死了也要留下你的罪证！"
+
+"achievement.bloody.challenge.title" : "后悔吧！"
+"achievement.bloody.challenge.goal" : "凶手沾上你的血后，在会议中被驱逐。"
+"achievement.bloody.challenge.flavor" : "血债血还天经地义！"

@@ -1,0 +1,37 @@
+# Assignable
+
+"role.confused.name" : "幻视者"
+"role.confused.generalBlurb" : "你看不清他人的外貌"
+
+# Document
+
+"role.confused.doc" : "幻视者会在每次会议结束后重置其他玩家的外貌。"
+
+# Options
+
+"options.role.confused.detail" : "幻视者会在每次会议结束后重置其他玩家的外貌。"
+"options.role.confused.chanceOfShuffle" : "重置外貌次数"
+"options.role.confused.numOfMaxShuffledPairs" : "每次会议最大随机更改数量"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.confused.common1.title" : "该凭何信念而活"
+"achievement.confused.common1.goal" : "幻视者的能力生效。"
+"achievement.confused.common1.splitted.1" : "信念"
+
+"achievement.confused.another1.title" : "水面下无尽的深渊"
+"achievement.confused.another1.goal" : "在迷茫者的能力发动前死亡。"
+
+"achievement.confused.challenge.title" : "我的未来如何？"
+"achievement.confused.challenge.goal" : "活着，且只剩船员阵营的情况下获胜。"
+"achievement.confused.challenge.cond" : "提示：第三方阵营数量2+，伪装者阵营数量2+"
+"achievement.confused.challenge.splitted.1" : "如何"

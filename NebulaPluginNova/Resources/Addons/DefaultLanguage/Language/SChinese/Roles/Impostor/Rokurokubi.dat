@@ -1,0 +1,56 @@
+# Assignable
+
+"role.rokurokubi.name" : "辘轳首"
+"role.rokurokubi.short" : "辘"
+"role.rokurokubi.blurb" : "让我仔细看看"
+
+# Document
+
+"role.rokurokubi.doc" : "辘轳首可以伸长自己的脖子进行远程击杀。"
+"role.rokurokubi.ability.title" : "固有能力【妖怪・辘轳首】<pos=8.9em><voffset=0.94em><size=0.5em>lù  lu</size></voffset></pos>"
+"role.rokurokubi.ability.main" : "可以自由伸长脖子，同时脖子可以跨越墙壁。"
+"role.rokurokubi.ability.rokurokubi" : "<title>伸长</title>伸长脖子。按住%KEY%键可以暂停伸长。"
+"role.rokurokubi.ability.reset" : "<title>收缩</title>按下收缩按钮或完成一次击杀后，脖子恢复原状。"
+
+# Options
+
+"options.role.rokurokubi.detail" : "辘轳首可以伸长脖子，远距离击杀其他玩家。<br>脖子可以跨越墙壁延伸。"
+"options.role.rokurokubi.craneSpeed" : "脖颈伸长速度"
+"options.role.rokurokubi.maxNeckLength" : "脖颈最大长度"
+"options.role.rokurokubi.autoKillInCraning" : "长径状态下自动击杀"
+
+# Game
+
+
+# UI
+
+"button.label.rokuro" : "伸长"
+"button.label.rokuro.reset" : "收缩"
+"ui.action.rokurokubi.pause" : "按住时暂停脖颈伸长。"
+
+# Stats
+
+
+# Titles
+
+"achievement.rokurokubi.common1.title" : "颈间寒意"
+"achievement.rokurokubi.common1.goal" : "使用脖子杀死两个玩家。"
+"achievement.rokurokubi.common1.splitted.0" : "颈间"
+
+"achievement.rokurokubi.common2.title" : "恭候多时"
+"achievement.rokurokubi.common2.goal" : "暂停3秒以上后完成击杀。"
+"achievement.rokurokubi.common2.flavor" : "“你掉进陷阱啦！”"
+
+"achievement.rokurokubi.common3.title" : "灵异事件"
+"achievement.rokurokubi.common3.goal" : "在隐身情况下使用脖子完成击杀。"
+"achievement.rokurokubi.common3.cond" : "提示：需要击杀离本体10米以上的玩家。"
+
+"achievement.rokurokubi.another1.title" : "悬浮之首"
+"achievement.rokurokubi.another1.goal" : "伸长脖子过程中被击杀。"
+"achievement.rokurokubi.another1.flavor" : "“趁人之危啊！”"
+"achievement.rokurokubi.another1.splitted.0" : "悬浮"
+
+"achievement.rokurokubi.challenge.title" : "意外组合技"
+"achievement.rokurokubi.challenge.goal" : "队友击杀后，使用脖子将现场另一名玩家击杀，完成双杀。"
+"achievement.rokurokubi.challenge.cond" : "提示：目标不能是队友。"
+"achievement.rokurokubi.challenge.splitted.1" : "组合技"

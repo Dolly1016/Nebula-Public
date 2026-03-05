@@ -1,4 +1,5 @@
-﻿using Nebula.Patches;
+﻿using Nebula.Modules.Logging;
+using Nebula.Patches;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Virial.Compat;
@@ -228,7 +229,7 @@ public class Language
 
             if (strings.Length != 2)
             {
-                NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.Language, "Failed to read the line \"" + line + "\"");
+                NebulaLogger.Instance.Error("Failed to read the line \"" + line + "\"");
                 continue;
             }
 
@@ -243,7 +244,7 @@ public class Language
                 }
                 catch
                 {
-                    NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.Language, "Cannot read the line \"" + line + "\"");
+                    NebulaLogger.Instance.Error("Cannot read the line \"" + line + "\"");
                     continue;
                 }
             }

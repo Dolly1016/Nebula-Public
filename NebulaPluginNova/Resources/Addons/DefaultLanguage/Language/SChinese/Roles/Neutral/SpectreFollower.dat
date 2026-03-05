@@ -1,0 +1,43 @@
+# Assignable
+
+"role.spectreFollower.name" : "狐狸"
+"role.spectreFollower.short" : "狸"
+"role.spectreFollower.blurb" : "有理想的狐狸"
+
+# Document
+
+"role.spectreFollower.doc" : "狐狸是狐妖的分身跟班。<br>狐狸可以通过吃油豆腐为狐妖恢复饱食度。"
+"role.spectre.follower.winCond" : "随狐妖一起获胜。（狐妖死亡时，会跟随其死亡。）"
+"role.spectre.follower.ability.title" : "固有能力【贪吃】"
+"role.spectre.follower.ability.main" : "狐狸和狐妖共享一个饱食度。<br>偷吃油豆腐可以帮助狐妖保持满腹状态。"
+"role.spectre.follower.ability.fries" : "<title>油豆腐</title>油豆腐将会出现在地图上。<br>狐狸可以对装有油豆腐的盘子进行互动，互动时会进入一个吃油豆腐的小游戏。"
+
+# Options
+
+"options.role.spectreFollower.detail" : "狐狸是狐妖的分身跟班。<br>狐狸可以通过吃油豆腐为狐妖恢复饱食度。"
+"options.role.spectreFollower.satietyRate" : "油豆腐恢复饱食度数"
+"options.role.spectreFollower.showDishesOnMap" : "地图中显示油豆腐位置"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.spectreFollower.eatFries" : "食用油豆腐次数"
+
+# Titles
+
+"achievement.spectreFollower.common1.title" : "美妙的口感"
+"achievement.spectreFollower.common1.goal" : "吃10次油豆腐"
+
+"achievement.spectreFollower.hard1.title" : "狐视眈眈"
+"achievement.spectreFollower.hard1.goal" : "成为狐妖并胜利，且原来的狐妖必须失败。"
+
+"achievement.spectreFollower.challenge.title" : "大胃狐"
+"achievement.spectreFollower.challenge.goal" : "恢复的饱食度大于狐妖并获胜。"
+"achievement.spectreFollower.challenge.flavor" : "人生自古谁无死，吃饱喝足就满足。"
+"achievement.spectreFollower.challenge.splitted.0" : "大胃的"
+"achievement.spectreFollower.challenge.splitted.2" : "元气满满"

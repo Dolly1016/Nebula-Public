@@ -1,0 +1,66 @@
+# Assignable
+
+"role.marionette.name" : "木偶师"
+"role.marionette.short" : "偶"
+"role.marionette.blurb" : "利用木偶欺诈船员"
+
+# Document
+
+"role.marionette.doc" : "木偶师可以使用木偶进行长距离转移，但要注意隐蔽哦。"
+"role.marionette.ability.title" : "固有能力【木偶】"
+"role.marionette.ability.main" : "可以放置一个<var>%DOC%</var>"
+"role.marionette.ability.main.player" : "外观与木偶师相同的木偶。"
+"role.marionette.ability.main.player.keep" : "外观与木偶师相同的木偶。<br>放置后，当木偶师外貌发生变更时，木偶的外观仍然不变。</var>"
+"role.marionette.ability.main.mannequin" : "模特外观的木偶。"
+"role.marionette.ability.place" : "<title>放置</title>在原地放置一个木偶。"
+"role.marionette.ability.destroy" : "<title>摧毁</title>摧毁当前放置的木偶。"
+"role.marionette.ability.monitor" : "<title>查看</title>在木偶和本体之前切换视角。<br>当观察木偶时，玩家冻结在原地。"
+"role.marionette.ability.swap" : "<title>交换位置</title>与木偶交换位置。"
+"role.marionette.ability.arrow" : "<title>箭头</title>指向木偶位置的箭头。"
+"role.marionette.tips" : "・所有人都可以看到木偶。注意，别被发现。<br>・会议结束后，自动移除所有木偶。"
+
+# Options
+
+"options.role.marionette.detail" : "木偶师可以放置一个任何人都可见的木偶。<br>在木偶有效时间内，木偶师可以随时查看木偶的周围情况，并可以交换自己与木偶的位置。"
+"options.role.marionette.mannequinMode" : "木偶外观"
+"options.role.marionette.mannequinMode.mannequin" : "木偶模型"
+"options.role.marionette.mannequinMode.player" : "玩家本身"
+"options.role.marionette.fixDecoyAppearance" : "锁定模型状态"
+"options.role.marionette.placeCoolDown" : "放置冷却时间"
+"options.role.marionette.swapCoolDown" : "交换位置冷却时间"
+"options.role.marionette.decoyDuration" : "木偶存在时间"
+"options.role.marionette.canSeeDecoyInShadow" : "可以在阴影中看到木偶"
+
+# Game
+
+"gameAction.marionette.placement" : "放置木偶"
+
+# UI
+
+"button.label.swap" : "交换位置"
+"button.label.monitor" : "查看"
+"ui.action.marionette.place" : "放置木偶。"
+"ui.action.marionette.destroy" : "摧毁木偶。"
+"ui.action.marionette.monitor" : "切换到木偶的视角。"
+"ui.action.marionette.swap" : "与木偶交换位置。"
+"ui.action.marionette.switch" : "切换按键模式<br>在切换视角与切换位置技能之间切换"
+
+# Stats
+
+"stats.marionette.decoy" : "放置木偶次数"
+"stats.marionette.swap" : "与木偶交换次数"
+
+# Titles
+
+"achievement.marionette.common1.title" : "木偶戏"
+"achievement.marionette.common1.goal" : "放置一个木偶人。"
+
+"achievement.marionette.another1.title" : "人间喜剧"
+"achievement.marionette.another1.goal" : "与木偶交换位置时被发现并被驱逐。"
+
+"achievement.marionette.common2.title" : "你猜谁是真的我？"
+"achievement.marionette.common2.goal" : "10秒内交换两次位置。"
+
+"achievement.marionette.challenge.title" : "木偶术・血祭"
+"achievement.marionette.challenge.goal" : "击杀一名玩家后与木偶交换位置（木偶至少30米外）"
+"achievement.marionette.challenge.splitted.0" : "血色的"

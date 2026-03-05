@@ -3,6 +3,10 @@ using BepInEx.Unity.IL2CPP.Utils;
 using Il2CppInterop.Runtime.Injection;
 using Nebula.Behavior;
 using Nebula.Modules.GUIWidget;
+using Nebula.Modules.Logging;
+using Nebula.Roles.Complex;
+
+
 #if PC
 using Steamworks;
 #endif
@@ -22,6 +26,7 @@ using Virial.Runtime;
 using Virial.Text;
 using static Il2CppSystem.Linq.Expressions.Interpreter.CastInstruction.CastInstructionNoT;
 using static Nebula.Modules.AbstractAchievement;
+using static Nebula.Modules.CameraAttention;
 
 namespace Nebula.Modules;
 
@@ -44,7 +49,7 @@ public class StaticAchievementToken : AchievementTokenBase
 
     public StaticAchievementToken(string achievement)
         : base(NebulaAchievementManager.GetRecord(achievement, out var a) ? a : null!) {
-        if (Achievement == null) NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, "Not found such achievement: " + achievement);
+        if (Achievement == null) NebulaLogger.Instance.Error("Not found such achievement: " + achievement);
     }
 
 
@@ -184,13 +189,14 @@ public class ProgressRecord
         string? defaultSourceHashed = null;
         if (defaultSource != null) defaultSourceHashed = "a." + defaultSource.ComputeConstantHashAsStringLong();
 
+        var entryId = GroupId != null ? "a." + GroupId + "." + hashedKey : "a." + hashedKey;
         this.entry = new IntegerDataEntry("a." + hashedKey, NebulaAchievementManager.AchievementDataSaver, 0, defaultSourceHashed, DebugTools.WriteAllAchievementsData);
         this.goal = goal;
-        if (NebulaAchievementManager.AllRecords.Any(r => r.entry.Name == this.entry.Name)) NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, "Duplicate achievement hash: " + key);
+        if (NebulaAchievementManager.AllRecords.Any(r => r.entry.Name == this.entry.Name)) NebulaLogger.Instance.Error("Duplicate achievement hash: " + key);
         NebulaAchievementManager.RegisterRecord(this, key);
     }
 
-    public virtual string Id => key;
+    public virtual string Id => GroupId == null ? key : (GroupId + "." + key);
     public virtual string TranslationKey => "achievement." + key + ".title";
     public string GoalTranslationKey => "achievement." + key + ".goal";
     public string CondTranslationKey => "achievement." + key + ".cond";
@@ -220,7 +226,7 @@ public class ProgressRecord
 public class DisplayProgressRecord : ProgressRecord
 {
     string translationKey;
-    public DisplayProgressRecord(string key, int goal, string translationKey, string? defaultSource = null) : base(null, key, goal, true, defaultSource)
+    public DisplayProgressRecord(string? group, string key, int goal, string translationKey, string? defaultSource = null) : base(group, key, goal, true, defaultSource)
     {
         this.translationKey = translationKey;
     }
@@ -268,6 +274,7 @@ public interface INebulaAchievement
     internal bool HasPrefix { get; set; }
     internal bool HasInfix { get; set; }
     internal bool HasSuffix { get; set; }
+    internal bool IsAddonTitle { get; }
 
     IEnumerable<string> GetKeywords()
     {
@@ -490,6 +497,7 @@ public class AbstractAchievement : ProgressRecord, INebulaAchievement
     public bool HasSuffix { get; set; }
     public bool HasInfix { get; set; }
     public bool IsHidden { get => (isSecret || !(preAchievement?.Get()?.IsCleared ?? true)) && !IsCleared; }
+    public bool IsAddonTitle => GroupId != null;
 
     public AbstractAchievement(string? groupId, bool canClearOnce, bool isSecret, bool noHint, string key, int goal, IEnumerable<DefinedAssignable> role, IEnumerable<AchievementType> type, int trophy, int attention, Image? specifiedImage, string? preAchievement) : base(groupId, key, goal, canClearOnce) 
     {
@@ -541,6 +549,7 @@ public class InnerslothAchievement : INebulaAchievement
     public bool HasPrefix { get; set; }
     public bool HasSuffix { get; set; }
     public bool HasInfix { get; set; }
+    public bool IsAddonTitle => false;
 #if PC
     bool IsClearedSteam => SteamUserStats.GetAchievement(Id.Split('.', 2)[1], out var cleared) && cleared;
 #else
@@ -584,8 +593,9 @@ public class InnerslothAchievement : INebulaAchievement
 
 public class SumUpReferenceAchievement : INebulaAchievement
 {
-    public SumUpReferenceAchievement(bool isSecret, string key, string reference, int goal, IEnumerable<DefinedAssignable> role, IEnumerable<AchievementType> type, int trophy, int attention, Image? specifiedImage, string? preAchievement)
+    public SumUpReferenceAchievement(bool isAddonTitle, bool isSecret, string key, string reference, int goal, IEnumerable<DefinedAssignable> role, IEnumerable<AchievementType> type, int trophy, int attention, Image? specifiedImage, string? preAchievement)
     {
+        this.IsAddonTitle = isAddonTitle;
         this.Id = key;
         this.Trophy = trophy;
         this.IsSecret = isSecret;
@@ -616,6 +626,7 @@ public class SumUpReferenceAchievement : INebulaAchievement
     public bool HasPrefix { get; set; }
     public bool HasSuffix { get; set; }
     public bool HasInfix { get; set; }
+    public bool IsAddonTitle { get; private set; } = false;
     private ProgressRecord? referenceRecord = null;
     private readonly IEnumerable<AchievementType> achievementType =[];
     public Image? SpecifiedBackImage { get; set; }
@@ -678,8 +689,8 @@ public class SumUpReferenceAchievement : INebulaAchievement
 
 public class SumUpAchievement : AbstractAchievement, INebulaAchievement
 {
-    public SumUpAchievement(bool isSecret, bool noHint, string key, int goal, IEnumerable<DefinedAssignable> role, IEnumerable<AchievementType> type, int trophy, int attention, Image? specifiedImage, string? preAchievement)
-        : base(null, true, isSecret, noHint, key, goal, role, type, trophy, attention, specifiedImage, preAchievement)
+    public SumUpAchievement(string? group, bool isSecret, bool noHint, string key, int goal, IEnumerable<DefinedAssignable> role, IEnumerable<AchievementType> type, int trophy, int attention, Image? specifiedImage, string? preAchievement)
+        : base(group, true, isSecret, noHint, key, goal, role, type, trophy, attention, specifiedImage, preAchievement)
     {
     }
 
@@ -723,8 +734,8 @@ public class SumUpAchievement : AbstractAchievement, INebulaAchievement
 public class CompleteAchievement : SumUpAchievement, INebulaAchievement
 {
     ProgressRecord[] records;
-    public CompleteAchievement(ProgressRecord[] allRecords, bool isSecret, bool noHint, string key, IEnumerable<DefinedAssignable> role, IEnumerable<AchievementType> type, int trophy, int attention, Image? specifiedImage, string? preAchievement)
-        : base(isSecret, noHint, key, allRecords.Length, role,type, trophy, attention, specifiedImage, preAchievement) {
+    public CompleteAchievement(string? group, ProgressRecord[] allRecords, bool isSecret, bool noHint, string key, IEnumerable<DefinedAssignable> role, IEnumerable<AchievementType> type, int trophy, int attention, Image? specifiedImage, string? preAchievement)
+        : base(group, isSecret, noHint, key, allRecords.Length, role,type, trophy, attention, specifiedImage, preAchievement) {
         this.records = allRecords;
     }
 
@@ -754,18 +765,54 @@ public class CompleteAchievement : SumUpAchievement, INebulaAchievement
 
 public class TitleRegisterImpl : ITitlesRegister
 {
-    static public TitleRegisterImpl Instance { get {
+    static public TitleRegisterImpl Instance
+    {
+        get
+        {
             if (field == null) field = new();
             return field;
         }
     }
 
-    bool ITitlesRegister.Register(string group, string id, bool isSecret, DefinedAssignable? relatedRole)
+    private List<TitleBuilder> titleBuilders = [];
+    private List<RecordBuilder> recordBuilders = [];
+
+    void ITitlesRegister.Register(TitleBuilder builder) => titleBuilders.Add(builder);
+    void ITitlesRegister.Register(RecordBuilder builder) => recordBuilders.Add(builder);
+    public void BuildAll()
     {
-        if (group == null || group.Length <= 0) return false;
-        if (id == null || id.Length <= 0) return false;
-        NebulaAchievementManager.registeredAchievements.Add(new NebulaAchievementManager.AchievementRegister(group, id, isSecret, relatedRole));
-        return true;
+        //CompleteAchievement未実装
+
+        foreach (var builder in recordBuilders)
+        {
+            var id = builder.Id;
+            var group = builder.Group;
+            if (id == null || group == null) continue;
+            new DisplayProgressRecord(group, id,  builder.Goal, "record." + group + "." + id, builder.MigrationSource);
+        }
+        foreach (var builder in titleBuilders)
+        {
+            var id = builder.Id;
+            var group = builder.Group;
+            int trophy = Math.Clamp((int)builder.Rank, 0, 2);
+            int goal = Math.Max(builder.Goal ?? 1, 1);
+            if (id == null || group == null) continue;
+
+            DefinedAssignable[] relatedRoles = builder.RelatedRole != null ? [builder.RelatedRole] : [];
+
+            if (builder.RelatedRecord != null)
+            {
+                id = group + "." + id;
+                new SumUpReferenceAchievement(true, builder.IsSecret, id, builder.RelatedRecord, builder.Goal ?? 1, relatedRoles, [], trophy, 0, null, null);
+            }else if(goal > 1)
+            {
+                new SumUpAchievement(group, builder.IsSecret, false, id, goal, relatedRoles, [], trophy, 0, null, null);
+            }
+            else
+            {
+                new StandardAchievement(group, false, builder.IsSecret, false, id, 1, relatedRoles, [], trophy, 0, null, null);
+            }
+        }
     }
 }
 
@@ -782,23 +829,6 @@ static public class NebulaAchievementManager
     static private readonly CustomAchievement[] customAchievements = [new("custom.0"), new("custom.1"), new("custom.2")];
     static private readonly List<INebulaAchievement> allAchievements = [];
     static private readonly List<GameStatsEntry> allStats = [];
-
-    internal class AchievementRegister
-    {
-        public AchievementRegister(string group, string id, bool isSecret, DefinedAssignable? relatedRole)
-        {
-            Group = group;
-            Id = id;
-            IsSecret = isSecret;
-            DefinedAssignables = relatedRole != null ? [relatedRole] : [];
-        }
-
-        public string Group { get; }
-        public string Id { get; }
-        public bool IsSecret { get; }
-        public IEnumerable<DefinedAssignable> DefinedAssignables { get; }
-    }
-    static internal readonly List<AchievementRegister> registeredAchievements = [];
 
     static internal CustomAchievement GetCustomAchievement(int index) => customAchievements[index];
 
@@ -909,7 +939,7 @@ static public class NebulaAchievementManager
     {
         (int num, int max, int hidden)[] result = new (int num, int max, int hidden)[4];
         for (int i = 0; i < result.Length; i++) result[i] = (0, 0, 0);
-        return AllAchievements.Where(a => predicate?.Invoke(a) ?? true).Aggregate(result,
+        return AllAchievements.Where(a => !a.IsAddonTitle && (predicate?.Invoke(a) ?? true)).Aggregate(result,
             (ac,achievement) => {
                 if (!achievement.IsHidden)
                 {
@@ -969,8 +999,8 @@ static public class NebulaAchievementManager
         NebulaAchievementManager.SortStats();
 
         //組み込みレコード
-        ProgressRecord[] killRecord = PlayerState.AllKillStates.Select(tag => new DisplayProgressRecord("kill." + tag.TranslateKey, 1, tag.TranslateKey)).ToArray();
-        ProgressRecord[] deathRecord = PlayerState.AllDeadStates.Select(tag => new DisplayProgressRecord("death." + tag.TranslateKey, 1, tag.TranslateKey)).ToArray();
+        ProgressRecord[] killRecord = PlayerState.AllKillStates.Select(tag => new DisplayProgressRecord(null, "kill." + tag.TranslateKey, 1, tag.TranslateKey)).ToArray();
+        ProgressRecord[] deathRecord = PlayerState.AllDeadStates.Select(tag => new DisplayProgressRecord(null, "death." + tag.TranslateKey, 1, tag.TranslateKey)).ToArray();
 
 
         //読み込み
@@ -1071,7 +1101,7 @@ static public class NebulaAchievementManager
                         if (allRecords.TryGetValue(a.Substring(7), out var r))
                             recordsList.Add(r);
                         else
-                            NebulaPlugin.Log.Print(NebulaLog.LogLevel.FatalError, "The record \"" + a.Substring(7) + "\" was not found.");
+                            NebulaLogger.Instance.Error("The record \"" + a.Substring(7) + "\" was not found.");
                         break;
                     case string a when a.StartsWith("sync-"):
                         reference = a.Substring(5);
@@ -1135,13 +1165,13 @@ static public class NebulaAchievementManager
             if (innersloth)
                 new InnerslothAchievement(noHint, args[0], specifiedImage) { HasInfix = hasInfix, HasPrefix = hasPrefix, HasSuffix = hasPostfix };
             else if (isRecord)
-                new DisplayProgressRecord(args[0], goal, "record." + args[0], defaultSource);
+                new DisplayProgressRecord(null, args[0], goal, "record." + args[0], defaultSource);
             else if (!records.IsEmpty())
-                new CompleteAchievement(records.ToArray(), secret, noHint, args[0], relatedRoles, types.ToArray(), rarity, attention, specifiedImage, preAchievement) { HasInfix = hasInfix, HasPrefix = hasPrefix, HasSuffix = hasPostfix };
+                new CompleteAchievement(null, records.ToArray(), secret, noHint, args[0], relatedRoles, types.ToArray(), rarity, attention, specifiedImage, preAchievement) { HasInfix = hasInfix, HasPrefix = hasPrefix, HasSuffix = hasPostfix };
             else if (reference != null)
-                new SumUpReferenceAchievement(secret, args[0], reference, goal, relatedRoles, types.ToArray(), rarity, attention, specifiedImage, preAchievement) { HasInfix = hasInfix, HasPrefix = hasPrefix, HasSuffix = hasPostfix };
+                new SumUpReferenceAchievement(false, secret, args[0], reference, goal, relatedRoles, types.ToArray(), rarity, attention, specifiedImage, preAchievement) { HasInfix = hasInfix, HasPrefix = hasPrefix, HasSuffix = hasPostfix };
             else if (goal > 1)
-                new SumUpAchievement(secret, noHint, args[0], goal, relatedRoles, types.ToArray(), rarity, attention, specifiedImage, preAchievement) { HasInfix = hasInfix, HasPrefix = hasPrefix, HasSuffix = hasPostfix };
+                new SumUpAchievement(null, secret, noHint, args[0], goal, relatedRoles, types.ToArray(), rarity, attention, specifiedImage, preAchievement) { HasInfix = hasInfix, HasPrefix = hasPrefix, HasSuffix = hasPostfix };
             else
                 new StandardAchievement(clearOnce, secret, noHint, args[0], goal, relatedRoles, types.ToArray(), rarity, attention, specifiedImage, preAchievement) { HasInfix = hasInfix, HasPrefix = hasPrefix, HasSuffix = hasPostfix };
 
@@ -1155,10 +1185,7 @@ static public class NebulaAchievementManager
         SendOnlineProgress(true).StartOnProcess();
         GetOnlineGlobalProgress().StartOnProcess();
 
-        foreach (var entry in registeredAchievements)
-        {
-            new StandardAchievement(entry.Group, false, entry.IsSecret, false, entry.Id, 1, entry.DefinedAssignables, entry.IsSecret ? [AchievementType.Secret] : [], 0, 0, null, null);
-        }
+        TitleRegisterImpl.Instance.BuildAll();
     }
 
     static private void RegisterAchievement(INebulaAchievement ach)
@@ -1166,7 +1193,7 @@ static public class NebulaAchievementManager
         allAchievements.Add(ach);
 
         long hash = ach.Id.ComputeConstantLongHash();
-        if (!fastAchievements.TryAdd(hash, ach)) NebulaPlugin.Log.Print($"Duplicated Achievement! (Hash: {hash}, Achievement: {ach.Id} & {fastAchievements[hash].Id})");
+        if (!fastAchievements.TryAdd(hash, ach)) NebulaLogger.Instance.Warning($"Duplicated Achievement! (Hash: {hash}, Achievement: {ach.Id} & {fastAchievements[hash].Id})");
     }
     static internal GameStatsEntry RegisterStats(string id, GameStatsCategory category, DefinedAssignable? relatedAssignable, TextComponent? displayName = null, int innerPriority = 0)
     {
@@ -1446,14 +1473,14 @@ static public class NebulaAchievementManager
     {
         if (DebugTools.DebugMode) yield break;
 
-        while (!EOSManager.Instance || EOSManager.Instance.friendCode == null || EOSManager.Instance.friendCode.Length == 0) yield return null;
+        while (!EOSManager.InstanceExists || EOSManager.Instance.friendCode == null || EOSManager.Instance.friendCode.Length == 0) yield return null;
 
 
         var text = "[" + string.Join(",", NebulaAchievementManager.AllAchievements.Where(a => a.IsCleared).Select(a => "\"" + a.Id + "\"")) + "]";
         var currentHash = text.ComputeConstantLongHash();
         if (currentHash != onlineEntry.Value)
         {
-            yield return NebulaWebRequest.CoPost("https://www.nebula-on-the-ship.com:22020/titles/push/", "{" + $"\"titles\":{text},\"friendCode\":\"{EOSManager.Instance.FriendCode}\"" + "}", true, _ =>
+            yield return NebulaWebRequest.CoPost(NebulaWebRequest.GetNoSAPI("titles/push/"), "{" + $"\"titles\":{text},\"friendCode\":\"{EOSManager.Instance.FriendCode}\"" + "}", true, _ =>
             {
                 onlineEntry.Value = currentHash;
             });
@@ -1464,7 +1491,7 @@ static public class NebulaAchievementManager
     static private IEnumerator GetOnlineGlobalProgress()
     {
         Virial.Compat.Wrapping<Dictionary<string, float>> result = new(null);
-        yield return RestAPIHelpers.CoGetRequest("https://www.nebula-on-the-ship.com:22020/titles/get/", [], result);
+        yield return RestAPIHelpers.CoGetRequest(NebulaWebRequest.GetNoSAPI("titles/get/"), [], result);
 
         if ((result.Value?.Count ?? 0) > 0)
         {

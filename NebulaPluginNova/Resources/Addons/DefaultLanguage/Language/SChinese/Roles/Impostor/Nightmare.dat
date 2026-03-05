@@ -1,0 +1,63 @@
+# Assignable
+
+"role.nightmare.name" : "梦魇"
+"role.nightmare.short" : "梦"
+"role.nightmare.blurb" : "潜伏在梦中"
+
+# Document
+
+"role.nightmare.doc" : "梦魇可以制造一个<b>黑暗区域</b>。"
+"role.nightmare.ability.title" : "固有能力【恐惧之夜】"
+"role.nightmare.ability.main" : "可以通过使用<b>夜幕</b>能力让<b>恐惧之颅</b>附近制作阴影区域来干扰其他玩家的视野。"
+"role.nightmare.ability.place" : "<title>放置</title>在脚下放置<b>恐惧之颅</b>。<br>安放的<b>恐惧之颅</b>在没有使用<b>夜幕</b>能力前不可见。"
+"role.nightmare.ability.nightmare" : "<title>夜幕</title>让<b>恐惧之颅</b>制造阴影区域，区域内的玩家视野会大幅度受到限制。%DESTROY%"
+"role.nightmare.ability.nightmare.destroy" : "<br><var>使用后<b>恐惧之颅</b>消失。</var>"
+"role.nightmare.tips" : "・梦魇和同阵营的玩家均可看清黑暗区域内部的情况。"
+
+# Options
+
+"options.role.nightmare.detail" : "梦魇可以创造一个阴影区域。"
+"options.role.nightmare.placeCooldown" : "放置冷却时间"
+"options.role.nightmare.nightmareCooldown" : "夜幕冷却时间"
+"options.role.nightmare.nightmareDuration" : "夜幕持续时间"
+"options.role.nightmare.nightSize" : "夜幕区域范围"
+"options.role.nightmare.nightSize.detail" : "调整夜幕区域的范围大小"
+"options.role.nightmare.disposableNightSeed" : "一次性恐惧之颅"
+"options.role.nightmare.disposableNightSeed.detail" : "启用后，使用一次<b>夜幕</b>恐惧之颅就会消失。"
+"options.role.nightmare.numOfNightSeed" : "恐惧之颅数量"
+"options.role.nightmare.inShadowLightSize" : "夜幕区域内视野范围"
+"options.role.nightmare.inShadowLightSize.detail" : "设置夜幕区域内的视野范围。<br>设定值基于灯光破坏的效果范围。"
+
+# Game
+
+"gameAction.nightmare.nightSeed" : "放置恐惧之颅"
+
+# UI
+
+"button.label.nightmare" : "夜幕"
+"ui.action.nightmare.place" : "在脚下埋下恐惧之颅。<br>使用能力后激活它们。"
+"ui.action.nightmare.nightmare" : "在恐惧之颅附近产生特殊的阴影。"
+
+# Stats
+
+"stats.nightmare.place" : "放置恐惧之颅次数"
+"stats.nightmare.nightmare" : "夜幕发动次数"
+
+# Titles
+
+"achievement.nightmare.common1.title" : "梦境主宰"
+"achievement.nightmare.common1.goal" : "发动10次夜幕。"
+"achievement.nightmare.common1.splitted.2" : "主宰"
+
+"achievement.nightmare.common2.title" : "梦之猎手"
+"achievement.nightmare.common2.goal" : "在夜幕范围内杀死5名玩家。"
+
+"achievement.nightmare.another1.title" : "当心脚下"
+"achievement.nightmare.another1.goal" : "在夜幕范围内死亡。"
+
+"achievement.nightmare.another2.title" : "恶梦成真"
+"achievement.nightmare.another2.goal" : "本局首次使用夜幕后，被驱逐或赌杀。"
+
+"achievement.nightmare.challenge.title" : "后半夜"
+"achievement.nightmare.challenge.goal" : "单次夜幕发动后，使3名玩家在夜幕中死亡。"
+"achievement.nightmare.challenge.cond" : "提示：梦魇也要参与击杀。"

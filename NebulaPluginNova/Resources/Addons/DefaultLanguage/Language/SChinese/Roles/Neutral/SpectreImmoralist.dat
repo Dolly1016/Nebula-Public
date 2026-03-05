@@ -1,0 +1,60 @@
+# Assignable
+
+"role.spectreImmoralist.name" : "背德者"
+"role.spectreImmoralist.short" : "背"
+"role.spectreImmoralist.blurb" : "被蛊惑而走上不正之道"
+
+# Document
+
+"role.spectreImmoralist.doc" : "背德者是狐妖的信徒，可以为狐妖供奉油豆腐。"
+"role.spectre.immoralist.winCond" : "随狐妖一起获胜。（狐妖死亡时，会跟随其死亡。）"
+"role.spectre.immoralist.ability.title" : "固有能力【妖信徒】"
+"role.spectre.immoralist.ability.main" : "拥有两个不同的能力，分别在活着的时候和死着的时候。<br>利用这些能力帮助狐妖"
+"role.spectre.immoralist.ability.alive" : "<title>供奉</title>活时的能力，背德者可以供奉油豆腐。<br>靠近空盘子并使用该能力，使用后会重新出现一个油豆腐。"
+"role.spectre.immoralist.ability.dead" : "<title>取走</title>死时的能力，背德者可以取走油豆腐。<br>靠近盛放着油豆腐的盘子并使用该能力，使用后油豆腐就会消失变成空盘子。"
+"role.spectre.immoralist.ability.suicide" : "<title>自決</title>背德者拥有自己掌握死亡的能力。"
+
+# Options
+
+"options.role.spectreImmoralist.detail" : "背德者是被狐妖蛊惑的玩家。<br>背德者活着时可以供奉油豆腐，死亡时可以拿走油豆腐。"
+"options.role.spectreImmoralist.respawnCooldown" : "供奉冷却时间"
+"options.role.spectreImmoralist.respawnDuration" : "供奉所需时间"
+"options.role.spectreImmoralist.showDishesOnMap" : "地图中显示油豆腐位置"
+"options.role.spectreImmoralist.canSuicide" : "可以自杀"
+"options.role.spectreImmoralist.showKillFlash" : "显示击杀闪光"
+
+# Game
+
+
+# UI
+
+"button.label.immoralist.place" : "供奉"
+"button.label.immoralist.remove" : "取走"
+"button.label.immoralist.suicide" : "自尽"
+
+# Stats
+
+"stats.spectreImmoralist.respawnFries" : "供奉食物次数"
+"stats.spectreImmoralist.removeFries" : "拿走食物次数"
+"stats.spectreImmoralist.suicide" : "自尽次数"
+
+# Titles
+
+"achievement.spectreImmoralist.common1.title" : "信教者"
+"achievement.spectreImmoralist.common1.goal" : "累计供奉10个油豆腐"
+
+"achievement.spectreImmoralist.common2.title" : "新时代狐妖"
+"achievement.spectreImmoralist.common2.goal" : "累计取走10次油豆腐。"
+
+"achievement.spectreImmoralist.common3.title" : "乖啦乖啦~♪"
+"achievement.spectreImmoralist.common3.goal" : "在狐妖面前供奉油豆腐。"
+"achievement.spectreImmoralist.common3.flavor" : "※纯属信仰行为，绝非投喂现场。"
+
+"achievement.spectreImmoralist.hard1.title" : "不灭的意志"
+"achievement.spectreImmoralist.hard1.goal" : "从背德者变成了其他身份，并见证了狐妖死亡，然后通过非狐妖胜利的方式胜利。"
+"achievement.spectreImmoralist.hard1.flavor" : "从绝望中获得一线生机。"
+"achievement.spectreImmoralist.hard1.splitted.2" : "意志"
+
+"achievement.spectreImmoralist.challenge.title" : "不惜身命"
+"achievement.spectreImmoralist.challenge.goal" : "自杀或者被驱逐后，最终因为狐妖成功夺取胜利而胜利。"
+"achievement.spectreImmoralist.challenge.flavor" : "也许是命运，也许是自我的意志"

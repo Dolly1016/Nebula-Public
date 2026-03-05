@@ -1,0 +1,23 @@
+# Header
+
+"options.voiceChat" : "语音聊天设置"
+"options.voiceChat.detail" : "可以在游戏中与其他玩家继续语音聊天！"
+
+# Groups
+
+# Options
+
+"options.voiceChat.useVoiceChat" : "使用语音聊天"
+"options.voiceChat.canTalkInWanderingPhase" : "近距离语音"
+"options.voiceChat.wallsBlockAudio" : "隔墙阻隔聊天"
+"options.voiceChat.killersHearDead" : "接收鬼魂聊天语音"
+"options.voiceChat.killersHearDead.onlyMyKiller" : "仅凶手"
+"options.voiceChat.killersHearDead.onlyImpostors" : "仅伪装者阵营"
+"options.voiceChat.killersHearDead.allKillers" : "全部杀手"
+"options.voiceChat.affectedByCommsSab" : "处于通讯破坏期间不能语音"
+"options.voiceChat.isolateGhostsStrictly" : "鬼魂不能听到幸存者聊天"
+"options.voiceChat.radio" : "语音频道设定"
+"options.voiceChat.impostorsRadio" : "伪装者阵营语音频道"
+"options.voiceChat.jackalRadio" : "豺狼阵营语音频道"
+"options.voiceChat.loversRadio" : "恋人语音频道"
+"options.voiceChat.scarletRadio" : "魅魔语音频道"

@@ -1,0 +1,96 @@
+# Assignable
+
+"role.spectre.name" : "狐妖"
+"role.spectre.short" : "狐"
+"role.spectre.blurb" : "藏匿于混沌之间"
+
+# Document
+
+"role.spectre.doc" : "狐妖需要偷吃油豆腐并存活到最后。"
+"role.spectre.winCond" : "当饱食度达到<var>%NUM%</var>以上且游戏结束，即可窃取胜利者的胜利。（破坏胜利不算）"
+"role.spectre.ability.title" : "固有能力【妖生之道】"
+"role.spectre.ability.main" : "狐妖需要趁别人不注意时偷吃油豆腐。<br>合理使用隐身更快的获胜。"
+"role.spectre.ability.fries" : "<title>油豆腐</title>油豆腐将会出现在地图上。<br>狐妖可以对装有油豆腐的盘子进行互动，互动时会进入一个吃油豆腐的小游戏。<br>饱食度耗尽就会饿死，所以要多多注意。<br>要想获胜，你需要在游戏结束前保持一定程度的饱食度。"
+"role.spectre.ability.vanish" : "<title>隐身</title>使用后会消耗一定饱食度进入隐身状态。<br>饱食度不足一块油豆腐时无法激活。"
+
+# Options
+
+"options.role.spectre.detail" : "狐妖如果活到最后即可抢夺其他人胜利。<br>但是，如果在一段时间没有吃到油豆腐会饿死。"
+"options.role.spectre.vanishCost" : "隐身消耗饱食度量"
+"options.role.spectre.vanishCooldown" : "隐身冷却时间"
+"options.role.spectre.vanishDuration" : "隐身持续时间"
+"options.role.spectre.numOfDishes" : "地图中油豆腐最大出现数量"
+"options.role.spectre.satiety" : "一块油豆腐代表秒数"
+"options.role.spectre.maxSatiety" : "最大饱食度"
+"options.role.spectre.initialSatiety" : "初始饱食度"
+"options.role.spectre.requiredSatietyForWinning" : "胜利所需最少饱食度"
+"options.role.spectre.friesReplenishmentCooldown" : "地图中油豆腐自动恢复所需时间"
+"options.role.spectre.showWhereKillersAre" : "显示带刀玩家位置"
+"options.role.spectre.showDishesOnMap" : "地图中显示油豆腐位置"
+"options.role.spectre.clairvoyance" : "拥有透视能力"
+"options.role.spectre.immoralistVariation" : "追随者分配职业"
+"options.role.spectre.immoralistVariation.none" : "无"
+"options.role.spectre.immoralistVariation.spectreFollower" : "狐狸"
+"options.role.spectre.immoralistVariation.immoralist" : "背德者"
+"options.role.spectre.immoralistVariation.random" : "随机"
+"options.role.spectre.immoralistVariation.alternate" : "交替"
+"options.role.spectre.spectreFollowerChance" : "狐狸生成概率"
+"options.role.spectre.group.immoralist" : "追随者设定"
+"options.role.spectre.group.dish" : "油豆腐设定"
+"options.role.spectre.group.vanish" : "隐身能力设定"
+
+# Game
+
+
+# UI
+
+"button.label.vanish" : "隐身"
+
+# Status
+
+"state.starved" : "饿死"
+
+# Stats
+
+"stats.spectre.vanish" : "隐身使用次数"
+"stats.spectre.eatFries" : "食用油豆腐次数"
+"role.spectre.gui.gauge" : "饱食度"
+
+# Titles
+
+"achievement.spectre.common1.title" : "小馋嘴"
+"achievement.spectre.common1.goal" : "吃掉20份油豆腐"
+
+"achievement.spectre.common2.title" : "妖道・秘法术"
+"achievement.spectre.common2.goal" : "使用隐身20次。"
+
+"achievement.spectre.another1.title" : "油腻的语言"
+"achievement.spectre.another1.goal" : "仅吃一块油豆腐后在会议中驱逐。"
+"achievement.spectre.another1.flavor" : "“好油腻啊！所以不要在妖言惑众！！！”"
+"achievement.spectre.another1.splitted.0" : "油腻"
+
+"achievement.spectre.another2.title" : "饥寒交迫"
+"achievement.spectre.another2.goal" : "没有即使补充食物被饿死。"
+
+"achievement.spectre.costume1.title" : "真正的九尾狐"
+"achievement.spectre.costume1.goal" : "使用九尾狐装扮并通过狐妖职业获胜。"
+"achievement.spectre.costume1.flavor" : "“我将展示我的全部姿态！”"
+"achievement.spectre.costume1.splitted.0" : "真正的"
+
+"achievement.spectre.common3.title" : "戏弄"
+"achievement.spectre.common3.goal" : "狐妖窃取特殊胜利并获胜。"
+
+"achievement.spectre.challenge.title" : "染满血液的地板"
+"achievement.spectre.challenge.goal" : "在所有伪装者都存活的情况下，通过狐妖获得胜利。"
+"achievement.spectre.challenge.cond" : "提示：伪装者2人以上"
+"achievement.spectre.challenge.flavor" : "“无从下脚”"
+
+# Team
+
+"teams.spectre" : "狐妖"
+"end.spectre" : "狐妖%EXTRA%胜利"
+
+# Document
+
+"document.tip.winCond.spectre.title" : "窃取胜利"
+"document.tip.winCond.spectre" : "狐妖存活并且饱食度在大于指定饱食度将窃取其他阵营胜利。<br>但不能窃取破坏胜利。"

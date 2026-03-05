@@ -15,7 +15,7 @@
 
 # Options
 
-"options.role.obsessional.detail" : "Obsessional is obsessed by specific target.<br>Obsessional can only win when the target wins."
+"options.role.obsessional.detail" : "The Obsessional is obsessed by specific target.<br>They can only win when the target wins."
 "options.role.obsessional.canWinEvenIfObsessionalTargetDie" : "Can Win Even If Obsessional Target Dies"
 "options.role.obsessional.canWinEvenIfObsessionalDie" : "Can Win Even If Obsessional Dies"
 "options.role.obsessional.obsessionalSuicideWhenObsessionalTargetDie" : "Obsessional Suicides When Obsessional Target Dies"
@@ -45,7 +45,7 @@
 "achievement.obsessional.another1.flavor" : ""(Blood letters... No, maybe it's ketchup)" —next to the empty pizza box"
 
 "achievement.obsessional.another2.title" : "Unexpected Development"
-"achievement.obsessional.another2.goal" : "Become Obsessional as an Impostor and lose due to Impostor victory."
+"achievement.obsessional.another2.goal" : "Become the Obsessional as an Impostor and lose due to Impostor victory."
 "achievement.obsessional.another2.splitted.0" : "Unexpected "
 
 "achievement.obsessional.lover1.title" : "Infatuation Fantasy"

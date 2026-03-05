@@ -1466,6 +1466,7 @@ public class MetaScreen : MonoBehaviour, GUIScreen
 
 public static class MetaUI
 {
+    static public string ConfirmTranslationKey => "ui.dialog.ok";
     static public MetaScreen ShowConfirmDialog(Transform? transform, Virial.Text.TextComponent text)
     {
         MetaScreen screen = MetaScreen.GenerateWindow(new(3.5f, 1.35f), transform, Vector3.zero, true, true);
@@ -1473,9 +1474,41 @@ public static class MetaUI
         MetaWidgetOld widget = new();
 
         widget.Append(new MetaWidgetOld.Text(new(TextAttributeOld.ContentAttr) { Size = new(3.3f, 0.8f) }) { MyText = text, Alignment = AlignmentOption.Center });
-        widget.Append(new MetaWidgetOld.Button(screen.CloseScreen, TextAttributeOld.BoldAttr) { TranslationKey = "ui.dialog.ok", Alignment = AlignmentOption.Center });
+        widget.Append(new MetaWidgetOld.Button(screen.CloseScreen, TextAttributeOld.BoldAttr) { TranslationKey = ConfirmTranslationKey, Alignment = AlignmentOption.Center });
         screen.SetWidget(widget);
 
+        return screen;
+    }
+
+    static public MetaScreen ShowConfirmDialog(Transform? transform, Virial.Text.TextComponent text, Action onClose)
+    {
+        MetaScreen screen = MetaScreen.GenerateWindow(new(3.5f, 1.35f), transform, Vector3.zero, true, false);
+
+        MetaWidgetOld widget = new();
+
+        widget.Append(new MetaWidgetOld.Text(new(TextAttributeOld.ContentAttr) { Size = new(3.3f, 0.8f) }) { MyText = text, Alignment = AlignmentOption.Center });
+        widget.Append(new MetaWidgetOld.Button(()=>
+        {
+            screen.CloseScreen();
+            onClose.Invoke();
+        }, TextAttributeOld.BoldAttr) { TranslationKey = ConfirmTranslationKey, Alignment = AlignmentOption.Center });
+        screen.SetWidget(widget);
+
+        return screen;
+    }
+
+    static public MetaScreen ShowConfirmDialog(Transform? transform, Virial.Media.GUIWidget widget, Action onClose)
+    {
+        MetaScreen screen = MetaScreen.GenerateWindow(new(3.5f, 1.35f), transform, Vector3.zero, true, false);
+
+        screen.SetWidget(GUI.API.VerticalHolder(GUIAlignment.Center,
+            widget,
+            GUI.API.LocalizedButton(GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.CenteredBoldFixed), ConfirmTranslationKey, _ =>
+            {
+                screen.CloseScreen();
+                onClose.Invoke();
+            })
+            ), out _);
         return screen;
     }
 

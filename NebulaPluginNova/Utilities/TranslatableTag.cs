@@ -1,4 +1,5 @@
-﻿using Virial;
+﻿using Nebula.Modules.Logging;
+using Virial;
 using Virial.Runtime;
 using Virial.Text;
 
@@ -30,7 +31,7 @@ public class TranslatableTag : CommunicableTextTag
         TranslateKey = translateKey;
 
         if (NebulaAPI.Preprocessor?.FinishPreprocess ?? true)
-            NebulaPlugin.Log.Print(NebulaLog.LogLevel.FatalError, "Pre-loading has been finished. Translatable tag \"" + TranslateKey + "\" is invalid on current process.");
+            NebulaLogger.Instance.Error("Pre-loading has been finished. Translatable tag \"" + TranslateKey + "\" is invalid on current process.");
         else
             AllTag.Add(this);
         

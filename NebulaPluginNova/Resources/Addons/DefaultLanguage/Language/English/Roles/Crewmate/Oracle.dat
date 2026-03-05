@@ -7,17 +7,17 @@
 # Document
 
 "role.oracle.doc" : "A crewmate who can check other players' roles through divination."
-"role.oracle.ability.title" : "Inherent Ability "Prophecy of God""
-"role.oracle.ability.main" : "Divine a player's role and narrow down the player's role %CAND%."
-"role.oracle.ability.main.one" : "<var>divine</var> it"
-"role.oracle.ability.main.multiple" : "<var>narrow down to %NUM% candidates</var>"
+"role.oracle.ability.title" : "Inherent Ability [Prophecy of God]"
+"role.oracle.ability.main" : "Divine a player's role and %CAND%."
+"role.oracle.ability.main.one" : "get <var>one accurate role</var>"
+"role.oracle.ability.main.multiple" : "<var>narrow down to %NUM% roles</var>"
 "role.oracle.ability.oracle" : "<title>Oracle</title>Divine the player's current role.<br>%DIE%"
 "role.oracle.ability.oracle.die" : "However, if you divine %ROLES%, you will <var>die</var>."
 "role.oracle.ability.oracle.die.split" : ", "
 
 # Options
 
-"options.role.oracle.detail" : "Oracle can narrow down other player's roles to a few candidates."
+"options.role.oracle.detail" : "The Oracle can narrow down other player's roles to a few candidates."
 "options.role.oracle.maxOracle" : "Max # Oracle"
 "options.role.oracle.oracleCooldown" : "Oracle Cooldown"
 "options.role.oracle.oracleAdditionalCooldown" : "Oracle Additional Cooldown"

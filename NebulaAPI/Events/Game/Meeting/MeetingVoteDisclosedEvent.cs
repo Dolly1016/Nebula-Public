@@ -8,11 +8,15 @@ namespace Virial.Events.Game.Meeting;
 
 internal class MeetingVoteDisclosedEvent : Event
 {
-    public IEnumerable<MeetingHud.VoterState> VoteStates { get { foreach (var v in states) yield return v; } }
+    internal IEnumerable<MeetingHud.VoterState> VoteStates { get { foreach (var v in states) yield return v; } }
+    internal IEnumerable<MeetingHud.VoterState> PreMappedVoteStates { get { foreach (var v in preMapStates) yield return v; } }
+
+    private readonly MeetingHud.VoterState[] preMapStates;
     private MeetingHud.VoterState[] states;
 
-    internal MeetingVoteDisclosedEvent(MeetingHud.VoterState[] states)
+    internal MeetingVoteDisclosedEvent(MeetingHud.VoterState[] preMapStates, MeetingHud.VoterState[] states)
     {
+        this.preMapStates = preMapStates;
         this.states = states;
     }
 }

@@ -1,0 +1,30 @@
+# Meeting Tool
+
+"meeting.memo.page" : "页码："
+"meeting.memo.player.line" : "%PLAYER%的移动路线"
+"meeting.memo.player.type" : "选择图标"
+"meeting.memo.player.color" : "选择玩家"
+"meeting.memo.control.icon" : "鼠标左键：编辑<br>鼠标右键：删除图标"
+"meeting.memo.control.line" : "鼠标左键：更改颜色<br>鼠标右键：删除路线"
+
+# Prespawn Minigame
+
+"game.prespawn.countdown" : "剩余时间：%SECOND%"
+"game.prespawn.waiting" : "等待其他玩家……"
+"game.prespawn.spawnIn" : "你出生在"
+
+# Emergency Button
+
+"game.meeting.cannotUseEmergencyButton" : "紧急会议已锁定"
+
+# Exile Scene
+
+"game.meeting.someoneDisappeared" : "有玩家失踪了"
+"game.meeting.roleText" : "%PLAYER% 是 %ROLE%"
+"game.meeting.multiple" : "有两个人被放逐了"
+"game.meeting.obvious" : "没有其他选择"
+
+# UI
+
+"ui.meeting.leftClick" : "左键使用"
+"ui.meeting.rightClick" : "右键切换"

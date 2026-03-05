@@ -10,7 +10,7 @@
 
 # Options
 
-"options.role.ember.detail" : "Ember was defeated in a decisive battle with the Avengers<br>and burned by the curse of the Damned."
+"options.role.ember.detail" : "The Ember was defeated in a decisive battle with the Avenger<br>and burned by the curse of the Damned."
 
 # Game
 
@@ -24,7 +24,7 @@
 # Titles
 
 "achievement.ember.another1.title" : "Impermanence"
-"achievement.ember.another1.goal" : "Lose to the Avenger in a showdown,<br>die from your own Damned's curse and lose."
+"achievement.ember.another1.goal" : "Lose to the Avenger in a showdown,<br>die from your own the Damned's curse and lose."
 "achievement.ember.another1.flavor" : ""That's your choice.""
 
 "achievement.ember.another2.title" : "The Sea Calms"

@@ -12,11 +12,33 @@
 "title.buttons.marketplace" : "マーケットプレイス"
 "title.buttons.stats" : "統計"
 "title.buttons.form" : "バグ報告"
+"title.buttons.migration" : "データ引継"
 
 "ui.update.waitFinishing" : "バージョン変更中です"
 "ui.update.finishUpdate" : "処理が完了しました！<br>ゲームを再起動してください。"
 "ui.update.autoUpdate" : "自動更新が有効になりました。"
 "ui.version.copied" : "バージョンテキストをコピーしました。"
+"ui.migration.title" : "データ引継"
+"ui.migration.buttons.upload" : "引継登録"
+"ui.migration.buttons.upload.detail" : "現在のデータをオンラインで保存します。保存したデータは<br>引継先の端末で復元できます。データはサーバ上で<b>2週間</b>保存されます。"
+"ui.migration.buttons.restore" : "データ復元"
+"ui.migration.buttons.restore.detail" : "保存されたデータを復元します。<br>引継登録時に入手した<b>復元コード</b>が必要です。"
+"ui.migration.notLogIn" : "引継登録、データ復元にはログインが必要です。"
+"ui.migration.upload.title" : "引継登録"
+"ui.migration.upload.failed" : "引継登録に失敗しました。"
+"ui.migration.upload.success" : "引継登録が完了しました。<br>復元には、以下の復元コードが必要です。忘れずにお控えください！"
+"ui.migration.download.title" : "データ復元"
+"ui.migration.download.content" : "引継登録時に取得した復元コードを入力してください。"
+"ui.migration.download.password" : "復元コード"
+"ui.migration.download.proceed" : "復元"
+"ui.migration.download.confirm.title" : "データ復元の確認"
+"ui.migration.download.confirm.content" : "データが見つかりました。復元してもよろしいですか？<br>データを復元すると、この端末での現在の進捗は<b>消去</b>されます。"
+"ui.migration.download.confirm.date" : "%YEAR%年%MONTH%月%DAY%日 %HOUR%:%MINUTE%"
+"ui.migration.download.confirm.button.confirm" : "復元する"
+"ui.migration.download.confirm.button.cancel" : "やめる"
+"ui.migration.download.success" : "データを復元しました。<br>ゲームを終了します。再起動してください。"
+"ui.migration.download.failed" : "データを復元できませんでした。"
+"ui.migration.download.notFound" : "紐づけられたデータが見つかりませんでした。<br>復元コードが間違っているか、引継期限切れの可能性があります。"
 
 # AFK
 
@@ -121,9 +143,16 @@
 
 # Regions
 
+"regionsMenu.message" : "※全リージョンがサードパーティです。Innerslothとは関係ありません。"
 "regions.Modded NA (MNA)" : "北米 (Mod)"
 "regions.Modded EU (MEU)" : "欧州 (Mod)"
 "regions.Modded Asia (MAS)" : "アジア (Mod)"
+"regions.Niko233(NA)" : "北米 (Niko)"
+"regions.Niko233(EU)" : "欧州 (Niko)" 
+"regions.Niko233(AS)" : "アジア (Niko)"
+"regions.Modded Shanghai (MSH FK)" : "上海 (Mod)"
+"regions.Modded Beijing (MBJ MXYX)" : "北京 (Mod)"
+"regions.Modded HongKong (MHK HU)" : "香港 (Mod)"
 
 # Free Play
 

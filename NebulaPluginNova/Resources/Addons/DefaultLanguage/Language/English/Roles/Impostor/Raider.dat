@@ -7,7 +7,7 @@
 # Document
 
 "role.raider.doc" : "An impostor who cannot perform normal kills but can get mass kills by throwing an axe."
-"role.raider.ability.title" : "Inherent Ability "Riot Battle Axe""
+"role.raider.ability.title" : "Inherent Ability [Riot Battle Axe]"
 "role.raider.ability.main" : "The axe kills all players it touches before sticking into a wall."
 "role.raider.ability.equip" : "<title>Equip/Unequip</title> Ready or store the axe.<br>The readied axe is visible to others."
 "role.raider.ability.kill" : "<title>Throw</title> The throw button lights up only while the axe is readied. The axe flies in the direction of the mouse cursor.<br>It is recommended to throw using the keyboard shortcut for killing or LeftClick near the center of the screen."
@@ -15,7 +15,7 @@
 
 # Options
 
-"options.role.raider.detail" : "Raider throws axes to kill players.<br>Thrown axe remains and serves as evidence."
+"options.role.raider.detail" : "The Raider throws axes to kill players.<br>Thrown axe remains and serves as evidence."
 "options.role.raider.throwCoolDown" : "Throw Cooldown"
 "options.role.raider.axeSize" : "Axe Size"
 "options.role.raider.axeSpeed" : "Axe Speed"

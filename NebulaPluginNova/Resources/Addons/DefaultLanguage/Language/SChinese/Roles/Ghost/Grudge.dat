@@ -1,0 +1,41 @@
+# Assignable
+
+"role.grudge.name" : "怨灵"
+"role.grudge.blurb" : "我不甘心"
+"role.grudge.short" : "怨"
+
+# Document
+
+"role.grudge.doc" : "怨灵可以通过站在幸存者旁边获得额外的胜利。"
+
+# Options
+
+"options.role.grudge.detail" : "怨灵需要站在幸存者附近一段时间才能与最终的胜利者共享胜利。<br>如果你不想让怨灵胜利，那就远离他。"
+"options.role.grudge.totalStandingTimeToWin" : "获胜所需站立时间"
+
+# Game
+
+"role.grudge.taskText" : "站在幸存者旁边"
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.grudge.common1.title" : "怨灵不甘"
+"achievement.grudge.common1.goal" : "在存活者的身边实体化。"
+
+"achievement.grudge.common2.title" : "恭候光临"
+"achievement.grudge.common2.goal" : "在无人的地方实体化迎接存活的玩家。"
+"achievement.grudge.common2.cond" : "提示：在无人的地方保持实体化状态等待5秒以上"
+"achievement.grudge.common2.splitted.0" : "恭候"
+
+"achievement.grudge.common3.title" : "第二次机会"
+"achievement.grudge.common3.goal" : "通过特殊任务独立胜利。"
+
+# Team
+
+"end.extra.grudge" : "<color=#FFFFFF>+</color>怨灵"

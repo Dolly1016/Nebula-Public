@@ -8,14 +8,14 @@
 # Document
 
 "role.niceTrapper.doc" : "A crewmate who places traps that can be used in various ways, such as supporting allies, interfering with enemies, and gathering information."
-"role.niceTrapper.ability.title" : "Inherent Ability "Trap""
+"role.niceTrapper.ability.title" : "Inherent Ability [Trap]"
 "role.niceTrapper.ability.main" : "The Nice Trapper can place 3 types of traps.<br>Traps become active after a meeting is held."
 "role.niceTrapper.ability.commTrap" : "<title>Communication Trap</title>An invisible trap. When a player steps on it, the Nice Trapper receives a notification with an arrow."
 "role.niceTrapper.tips" : "・Switch the type of trap to place with the %KEY% key.<br>・Placing a trap takes %SEC% seconds, and you will be stunned in place during placement."
 
 # Options
 
-"options.role.niceTrapper.detail" : "Nice Trapper sets traps with various effects."
+"options.role.niceTrapper.detail" : "The Nice Trapper sets traps with various effects."
 "options.role.niceTrapper.costOfCommTrap" : "Cost Of Comm. Trap"
 "options.role.niceTrapper.commTrapSize" : "Comm. Trap Size"
 
@@ -31,7 +31,7 @@
 # Titles
 
 "achievement.niceTrapper.common1.title" : "Kindness"
-"achievement.niceTrapper.common1.goal" : "Place an speed trap."
+"achievement.niceTrapper.common1.goal" : "Place a speed trap."
 
 "achievement.niceTrapper.challenge.title" : "Armchair Detective"
 "achievement.niceTrapper.challenge.goal" : "Track the movements of 8 players with comm. traps."

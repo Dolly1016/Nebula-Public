@@ -7,13 +7,13 @@
 # Document
 
 "role.navvy.doc" : "A crewmate who can block vents and doors."
-"role.navvy.ability.title" : "Inherent Ability "Spaceship Plumber""
+"role.navvy.ability.title" : "Inherent Ability [Spaceship Plumber]"
 "role.navvy.ability.main" : ""
 "role.navvy.ability.seal" : "<title>Seal</title>Seal vents and doors with tape."
 
 # Options
 
-"options.role.navvy.detail" : "Navvy can cover the vents with tape. <br>Players who have access to vents can remove the tape from blocked vents."
+"options.role.navvy.detail" : "The Navvy can cover the vents with tape. <br>Players who have access to vents can remove the tape from blocked vents."
 "options.role.navvy.sealCooldown" : "Seal Cooldown"
 "options.role.navvy.maxCost" : "Initial Costs"
 "options.role.navvy.costForVentSealing" : "Costs For Vent Sealing"

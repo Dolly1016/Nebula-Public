@@ -10,7 +10,7 @@
 
 # Options
 
-"options.role.hallucination.detail" : "Hallucination invokes false-player and operates."
+"options.role.hallucination.detail" : "The Hallucination invokes false-player and operates."
 "options.role.hallucination.hallucinationCooldown" : "Hallucination Cooldown"
 "options.role.hallucination.hallucinationDuration" : "Hallucination Duration"
 

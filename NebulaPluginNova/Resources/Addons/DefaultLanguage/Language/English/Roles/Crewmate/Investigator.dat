@@ -6,14 +6,14 @@
 
 # Document
 
-"role.investigator.doc" : "A crewmate who obtains information by investigating footprints left at crime scenes."
-"role.investigator.ability.title" : "Inherent Ability "Seeker of Truth""
+"role.investigator.doc" : "A crewmate who gets information by investigating footprints left at crime scenes."
+"role.investigator.ability.title" : "Inherent Ability [Seeker of Truth]"
 "role.investigator.ability.main" : ""
 "role.investigator.ability.investigate" : "<title>Investigate</title>Start investigating on the spot. During investigation, your field of view changes, and footprints become visible.<br>Approaching a footprint starts the investigation of that footprint."
 
 # Options
 
-"options.role.investigator.detail" : "Investigators follow footprints<br>and look for information about the murder."
+"options.role.investigator.detail" : "The Investigator follows footprints<br>and look for information about the murder."
 "options.role.investigator.investigateCooldown" : "Investigate Cooldown"
 "options.role.investigator.investigateDuration" : "Investigate Duration"
 "options.role.investigator.investigateSpeed" : "Investigate Speed"

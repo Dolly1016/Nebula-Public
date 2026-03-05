@@ -14,7 +14,7 @@
 
 # Options
 
-"options.role.trilemma.detail" : "Trilemma cannot won unless the remaining two players die."
+"options.role.trilemma.detail" : "The Trilemma cannot won unless the remaining two players die."
 "options.role.trilemma.numOfTrilemma" : "# Trilemmas"
 "options.role.trilemma.impostorAssignment" : "Impostor Assignment"
 "options.role.trilemma.neutralAssignment" : "Neutral Assignment"

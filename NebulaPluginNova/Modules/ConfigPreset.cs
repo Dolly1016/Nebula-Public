@@ -1,4 +1,5 @@
 ﻿using Cpp2IL.Core.Extensions;
+using Nebula.Modules.Logging;
 using System.Text;
 using Virial.Runtime;
 
@@ -47,7 +48,7 @@ public class ScriptPreset : IConfigPreset{
             onLoad.Invoke();
         }catch(Exception ex)
         {
-            NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, ex.ToString());
+            NebulaLogger.Instance.Error(ex.ToString());
             return false;
         }
         return true;
@@ -88,7 +89,7 @@ public class ConfigPreset : IConfigPreset
         }
         catch
         {
-            NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, $"Preset \"{name}\" is invalid preset file.");
+            NebulaLogger.Instance.Error($"Preset \"{name}\" is invalid preset file.");
         }
     }
 
@@ -223,7 +224,7 @@ public class ConfigPreset : IConfigPreset
                         }
                         catch
                         {
-                            NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.Preset, "Load Failed: " + args[1]);
+                            NebulaLogger.Instance.Error("Load Failed: " + args[1]);
                         }
                         break;
                 }

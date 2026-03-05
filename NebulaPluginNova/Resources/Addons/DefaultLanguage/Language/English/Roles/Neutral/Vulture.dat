@@ -6,15 +6,15 @@
 
 # Document
 
-"role.vulture.doc" : "A Third faction member who eats corpses."
+"role.vulture.doc" : "A neutral who eats corpses."
 "role.vulture.winCond" : "Eat <var>%NUM%</var> corpses."
-"role.vulture.ability.title" : "Inherent Ability "Predator""
+"role.vulture.ability.title" : "Inherent Ability [Predator]"
 "role.vulture.ability.main" : ""
 "role.vulture.ability.eat" : "<title>Eat</title> Eat corpses."
 
 # Options
 
-"options.role.vulture.detail" : "Vulture eats dead bodies to win.<br>Crewmates must report before the corpse is eaten."
+"options.role.vulture.detail" : "The Vulture eats dead bodies to win.<br>Crewmates must report before the corpse is eaten."
 "options.role.vulture.eatCoolDown" : "Eat Cooldown"
 "options.role.vulture.numOfTheEatenToWin" : "# the Eaten to Win"
 

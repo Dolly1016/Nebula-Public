@@ -7,15 +7,15 @@
 # Document
 
 "role.echo.doc" : "A crewmate who can detect nearby players and sense actions."
-"role.echo.ability.title" : "Inherent Ability "The Yell In the Valley""
+"role.echo.ability.title" : "Inherent Ability [Yahoo in the Hollow]"
 "role.echo.ability.main" : ""
 "role.echo.ability.echo" : "<title>Echo</title>Detect nearby players. You can tell the direction of players detected nearby.<br>The farther the player is, the longer the time lag until detection."
-"role.echo.ability.action" : "<title>Action Detection</title> Can sense actions that occur on the ship."
-"role.echo.tips" : "・The actions that can be sensed are as follows.<br>%ACTIONS%"
+"role.echo.ability.action" : "<title>Action Echo</title>Can detect actions that occur on the ship."
+"role.echo.tips" : "・The actions that can be detected are as follows.<br>%ACTIONS%"
 
 # Options
 
-"options.role.echo.detail" : "Echo is a Crewmate who can detect players."
+"options.role.echo.detail" : "The Echo is a Crewmate who can detect players."
 "options.role.echo.echoCooldown" : "Echo Cooldown"
 "options.role.echo.echoRange" : "Echo Range"
 

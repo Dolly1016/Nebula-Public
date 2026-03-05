@@ -1,0 +1,62 @@
+"achievement.omikuji.title" : "多多益善"
+"achievement.omikuji.goal" : "在一局游戏中获得3个特技。"
+"achievement.omikuji.cond" : "提示：一月限定"
+"achievement.omikuji.splitted.1" : "多多益善"
+
+"achievement.setsubun.title" : "喜来福运"
+"achievement.setsubun.goal" : "完成所有任务并活到最后，同时驱逐所有伪装者获得胜利。"
+"achievement.setsubun.cond" : "提示：二月限定"
+
+"achievement.graduation2.title" : "离别的季节"
+"achievement.graduation2.goal" : "通过投票驱逐3名玩家。"
+"achievement.graduation2.cond" : "提示：三月限定"
+"achievement.graduation2.splitted.2" : "季节"
+
+"achievement.sakura.title" : "樱花盛开时"
+"achievement.sakura.goal" : "游戏中设置颜色从黄绿色变成樱花色。"
+"achievement.sakura.cond" : "提示：四月限定"
+
+"achievement.koinobori.title" : "自由的爱情"
+"achievement.koinobori.goal" : "恋人自由奔跑。"
+"achievement.koinobori.cond" : "提示：五月限定、恋人两人同时拥有<br>加速效果</br>并且<br>5秒内</br>两人一起移动，仅在MIRA HQ和Airship地图。"
+
+"achievement.rainyStep.title" : "雨中散步"
+"achievement.rainyStep.goal" : "在受到减速的情况下继续走动。"
+"achievement.rainyStep.cond" : "提示：六月限定、持续时间在6秒以上，仅在Polus和The Fungle地图"
+"achievement.rainyStep.flavor" : "美妙的雨季"
+"achievement.rainyStep.splitted.1" : "雨天的"
+
+"achievement.rainyStepAnother.title" : "追逐星落"
+"achievement.rainyStepAnother.goal" : "在受到加速速的情况下继续走动。"
+"achievement.rainyStepAnother.cond" : "提示：六月限定、持续时间在6秒以上，仅在The Skeld地图。"
+"achievement.rainyStepAnother.flavor" : "超越光速！"
+
+"achievement.tanabata.title" : "急而不得"
+"achievement.tanabata.goal" : "使用狙击枪、斧头击杀正在使用移动平台的玩家。"
+"achievement.tanabata.cond" : "提示：七月限定，仅在Airship地图。"
+
+"achievement.watermelon.title" : "大西瓜！"
+"achievement.watermelon.goal" : "在The Fungle的沙滩上杀死拥有<b>血语者</b>的绿色或黑色玩家。"
+"achievement.watermelon.cond" : "八月限定"
+"achievement.watermelon.flavor" : "爽口的“西瓜汁”！"
+
+"achievement.autumnSky.title" : "全职玩家"
+"achievement.autumnSky.goal" : "职业连续变化5次以上。"
+"achievement.autumnSky.cond" : "提示：9月限定"
+"achievement.autumnSky.splitted.1" : "全职"
+
+"achievement.halloween.title" : "捣蛋时间"
+"achievement.halloween.goal" : "把尸体搬到50米外。"
+"achievement.halloween.cond" : "提示：10月限定"
+"achievement.halloween.flavor" : "“死了就不能给你糖哦！”—一个真正的鬼这样说的。"
+"achievement.halloween.splitted.0" : "捣蛋"
+
+"achievement.freshWine.title" : "小丑的香槟"
+"achievement.freshWine.goal" : "吞噬或清理掉新鲜的尸体。"
+"achievement.freshWine.cond" : "提示：11月限定"
+"achievement.freshWine.flavor" : "“来自82年的佳酿！”"
+
+"achievement.christmas.title" : "结束之日"
+"achievement.christmas.goal" : "在会议中驱逐恋人"
+"achievement.christmas.cond" : "提示：十二月限定"
+"achievement.christmas.splitted.1" : "爆炸"

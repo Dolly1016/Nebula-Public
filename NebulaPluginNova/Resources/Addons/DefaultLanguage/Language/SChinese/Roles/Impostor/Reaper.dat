@@ -1,0 +1,37 @@
+# Assignable
+
+"role.reaper.name" : "送葬者"
+"role.reaper.short" : "送"
+"role.reaper.blurb" : "拖走尸体来欺骗船员"
+
+# Document
+
+"role.reaper.doc" : "送葬者可以拖拽尸体。<var>%VENT%</var>"
+"role.reaper.doc.vent" : "此外，所有通风口都是相通的，可以拖拽尸体进行大范围移动。"
+"role.reaper.doc.vent.cannotEnter" : "此外，所有通风口都是相通的。"
+"role.reaper.ability.title" : "固有能力【送葬】"
+"role.reaper.ability.main" : ""
+"role.reaper.ability.drag" : "<title>拖拽/松开</title>可以拖拽尸体并携带移动，或松开尸体。"
+"role.reaper.ability.drag.cannotEnter" : "<title>拖拽/松开</title>可以拖拽尸体并携带移动，或松开尸体。<br><var>拖拽尸体期间，不能使用通风口。</var>"
+
+# Options
+
+"options.role.reaper.detail" : "送葬者可以拖拽尸体。"
+"options.role.reaper.useVentWhileHoldingDeadbody" : "拖拽尸体时可以使用通风口"
+"options.role.reaper.connectAllVents" : "连接所有通风口"
+
+# Game
+
+# UI
+
+# Stats
+
+"stats.reaper.ventWithDeadBody" : "携带尸体时使用通风口次数"
+
+# Titles
+
+"achievement.reaper.common1.title" : "一条龙服务"
+"achievement.reaper.common1.goal" : "拖动尸体的同时并进入通风口内。"
+
+"achievement.reaper.challenge.title" : "无人通报"
+"achievement.reaper.challenge.goal" : "一回合内超过5具尸体且没有人报告"

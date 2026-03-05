@@ -1,0 +1,67 @@
+# Assignable
+
+"role.trilemma.name" : "三角仇"
+"role.trilemma.generalBlurb" : "不共戴天之仇！"
+"role.trilemma.blurb" : "你陷入了一场纷争！"
+
+# Document
+
+"role.trilemma.doc" : "三个相克的组合。在其他两人没有死亡之前，无法获胜。"
+"role.trilemma.winCond" : "%WIN%"
+"role.trilemma.winCond.block" : "在存活并满足自身胜利条件的基础上，游戏结束时除你以外的其他拥有三角仇的玩家都死亡。<br>如果其中有任何一人没有死亡，你失去胜利。"
+"role.trilemma.winCond.additional" : "在存活并满足自身胜利条件的基础上，游戏结束时除你以外的其他拥有三角仇的玩家都死亡，你获得额外胜利。<br>如果其中有任何一人没有死亡，你失去胜利。"
+"role.trilemma.winCond.overwrite" : "在存活并满足自身胜利条件的基础上，游戏结束时除你以外的其他拥有三角仇的玩家都死亡，你可以窃取胜利。<br>如果其中有任何一人没有死亡，你失去胜利。"
+
+# Options
+
+"options.role.trilemma.detail" : "三角仇由三名玩家组成。<br>拥有三角仇的玩家需要让其他两个人死亡才能获胜。"
+"options.role.trilemma.numOfTrilemma" : "最大组数"
+"options.role.trilemma.impostorAssignment" : "伪装者分配数量"
+"options.role.trilemma.neutralAssignment" : "第三方分配数量"
+"options.role.trilemma.assignment.zero" : "0人"
+"options.role.trilemma.assignment.maxOne" : "最大1人"
+"options.role.trilemma.assignment.one" : "1人"
+"options.role.trilemma.assignment.oneOrMore" : "1人以上"
+"options.role.trilemma.assignment.zeroOrMore" : "0人以上"
+"options.role.trilemma.winCondition" : "三角仇获胜方式"
+"options.role.trilemma.winCondition.detail" : "关于三角仇胜利方式设置。<br> ・<b>默认</b>：如果你死亡或者其他两人其一未死亡，则失去胜利条件。<br> ・<b>跟随</b>：如果其他两人死亡且你活到最后，则获得额外胜利。<br> ・<b>窃取</b>：如果其他两人死亡且你活到最后，则可以窃取胜利。"
+"options.role.trilemma.winCondition.block" : "默认"
+"options.role.trilemma.winCondition.additional" : "跟随"
+"options.role.trilemma.winCondition.overwrite" : "窃取"
+
+# Game
+
+"role.trilemma.taskText" : "【三角仇】%PLAYERS%"
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.trilemma.common1.title" : "不共戴天"
+"achievement.trilemma.common1.goal" : "拥有三角仇且是最后存活的玩家。"
+
+"achievement.trilemma.another1.title" : "剪刀石头布，可我是剪刀手"
+"achievement.trilemma.another1.goal" : "拥有三角仇且是第一个被淘汰的玩家。"
+"achievement.trilemma.another1.flavor" : "“我也不想出剪刀啊！”"
+
+"achievement.trilemma.common2.title" : "怨敌"
+"achievement.trilemma.common2.goal" : "拥有三角仇且被淘汰但仍然获胜。"
+"achievement.trilemma.common2.cond" : "其他拥有三角仇的玩家必须失败。"
+
+"achievement.trilemma.challenge.title" : "独孤求败"
+"achievement.trilemma.challenge.goal" : "拥有三角仇且是最后存活的玩家，并通过自己的击杀结束游戏并获胜。"
+"achievement.trilemma.challenge.flavor" : "“无敌是多么寂寞~”—《无敌的寂寞》"
+"achievement.trilemma.challenge.splitted.2" : "！？"
+# Team
+
+"end.trilemma" : "三角仇%EXTRA%胜利"
+"end.extra.trilemma" : "<color=#FFFFFF>+</color>三角仇"
+
+# Document
+
+"document.tip.winCond.trilemma.title" : "窃取胜利"
+"document.tip.winCond.trilemma" : "如果你处于三角仇中，当其他两个人死亡，你存活时并且满足胜利，将窃取胜利。<br>满足胜利条件同时成为三角仇最后一名存活的玩家获胜。"

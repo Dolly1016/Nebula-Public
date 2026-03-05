@@ -1,0 +1,83 @@
+# Assignable
+
+"role.paparazzo.name" : "摄影师"
+"role.paparazzo.short" : "摄"
+"role.paparazzo.blurb" : "来！茄子！"
+"role.paparazzo.taskText" : "来看看你们靓照<br>（%DETAIL%）"
+"role.paparazzo.taskTextSubject" : "拍摄玩家数：%CS%/%GS%"
+"role.paparazzo.taskTextDisclosed" : "会议展示玩家数：%CD%/%GD%"
+"role.paparazzo.taskTextPhoto" : "会议展示照片数：%CP%/%GP%"
+
+# Document
+
+"role.paparazzo.doc" : "摄影师可以在任务阶段拍摄照片并在会议中公开展示。"
+"role.paparazzo.winCond" : "存活期间拍摄<var>%SUBJECT%</var>名不同的玩家并在会议中展示<var>%DISCLOSED%</var>名不同的玩家和一定数量的照片。<br>拍摄玩家和公开展示玩家分开计算且不冲突。"
+"role.paparazzo.ability.title" : "固有能力【抓拍】"
+"role.paparazzo.ability.main" : "在任务阶段，屏幕会出现取景器协助拍摄。<br>拍摄的图片会储存在左下角，没有玩家的照片会被丢弃。<br><br>在会议中单击照片就会把照片公开出来。<br>当沙漏计时器结束后，你将无法公开照片。"
+"role.paparazzo.ability.camera" : "<title>拍摄</title>使用快捷键或鼠标左键进行拍摄照片。"
+"role.paparazzo.tips" : "・你可以更改取景方向。<br>・按住鼠标右键时，固定取景方向。"
+
+# Options
+
+"options.role.paparazzo.detail" : "摄影师可以偷拍。<br>在会议中把照片公开出来。"
+"options.role.paparazzo.shotCoolDown" : "拍摄冷却时间"
+"options.role.paparazzo.requiredSubjects" : "胜利所需拍不同玩家数量"
+"options.role.paparazzo.requiredSubjects.detail" : "配置后，必须拍摄指定的人数的照片才能胜利。<br>连续拍摄相同的玩家只有第一次会记录。"
+"options.role.paparazzo.requiredDisclosed" : "胜利所需会议展示玩家数量"
+"options.role.paparazzo.requiredDisclosed.detail" : "配置后，必须展示指定的人数的照片才能胜利。<br>连续展示相同的玩家只有第一次会记录。"
+"options.role.paparazzo.requiredPhotos" : "胜利所需会议展示照片数量"
+"options.role.paparazzo.telephotoFinderSize" : "进距离镜头大小"
+"options.role.paparazzo.wideAngleFinderSize" : "远距离镜头大小"
+
+# Game
+
+
+# UI
+
+"button.label.shot" : "拍摄"
+"ui.action.paparazzo.camera" : "拍摄照片。"
+"ui.action.paparazzo.toggle" : "将镜头旋转90度。"
+
+# Stats
+
+"stats.paparazzo.photo" : "拍摄使用次数"
+"stats.paparazzo.players" : "展示拍摄玩家数量"
+
+# Titles
+
+"achievement.paparazzo.common1.title" : "记录生活每一天"
+"achievement.paparazzo.common1.goal" : "拍三张有效的照片。"
+"achievement.paparazzo.common1.splitted.0" : "白天的"
+
+"achievement.paparazzo.common2.title" : "大合照"
+"achievement.paparazzo.common2.goal" : "展示一张照片出现4名以上的玩家"
+"achievement.paparazzo.common2.flavor" : "“这个照片充满着尔虞我诈。”—来自会议记录。"
+"achievement.paparazzo.common2.splitted.1" : "秘密的"
+
+"achievement.paparazzo.common3.title" : "狗仔队"
+"achievement.paparazzo.common3.goal" : "拍摄进出通风管道的瞬间。"
+"achievement.paparazzo.common3.flavor" : "“美好的事物就在身边”—来自摄影师的心得。"
+
+"achievement.paparazzo.common4.title" : "有罪证据！"
+"achievement.paparazzo.common4.goal" : "拍摄同时包含尸体和尸体击杀者的照片。"
+"achievement.paparazzo.common4.flavor" : "“第一线证据！” —来自摄影师的心得。"
+
+"achievement.paparazzo.another1.title" : "第一嫌疑人"
+"achievement.paparazzo.another1.goal" : "作为伪装者在被公开的照片上被展示。"
+"achievement.paparazzo.another1.splitted.1" : "第一"
+"achievement.paparazzo.another1.flavor" : "向三年前的自己问好！"
+
+"achievement.paparazzo.challenge.title" : "舆论制造者与键盘侠"
+"achievement.paparazzo.challenge.goal" : "在会议中公开一张照片，因某种原因使4名以上的玩家死亡。"
+"achievement.paparazzo.challenge.cond" : "提示：自身死亡不算。"
+"achievement.paparazzo.challenge.flavor" : "“这是一个被诅咒的照片！”—来自会议记录。"
+
+# Team
+
+"teams.paparazzo" : "摄影师"
+"end.paparazzo" : "摄影师%EXTRA%胜利"
+
+# Document
+
+"document.tip.winCond.paparazzo.title" : "特殊胜利"
+"document.tip.winCond.paparazzo" : "完成指定的拍摄次数、展示玩家数和会议展示照片数任务后胜利。"

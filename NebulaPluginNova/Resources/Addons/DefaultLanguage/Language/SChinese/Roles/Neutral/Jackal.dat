@@ -1,0 +1,54 @@
+# Assignable
+
+"role.jackal.name" : "豺狼"
+"role.jackal.short" : "豺"
+"role.jackal.blurb" : "歼灭其他玩家"
+
+# Document
+
+"role.jackal.doc" : "豺狼需要杀死其他所有玩家。"
+
+# Options
+
+"options.role.jackal.detail" : "豺狼需要杀死其他所有玩家。"
+"options.role.jackal.killCoolDown" : "击杀冷却时间"
+"options.role.jackal.canCreateSidekick" : "豺狼可招募跟班"
+"options.role.jackal.numOfKillingToCreateSidekick" : "豺狼可以招募跟班前需要击杀的人数"
+"options.role.jackal.numOfKillingToWin" : "胜利所需击杀数"
+"options.role.jackal.jacklizedImpostor" : "伪装者豺狼化"
+
+# Game
+
+
+# UI
+
+"button.label.sidekick" : "招募"
+
+# Stats
+
+"stats.jackal.sidekick" : "招募使用次数"
+
+# Titles
+
+"achievement.jackal.common1.title" : "收徒"
+"achievement.jackal.common1.goal" : "招募一个跟班。"
+
+"achievement.jackal.challenge.title" : "腥风血雨的战斗"
+"achievement.jackal.challenge.goal" : "只剩下豺狼与跟班并且获胜"
+"achievement.jackal.challenge.cond" : "提示：必须杀死最后一名玩家"
+"achievement.jackal.challenge.flavor" : "鲜血，杀戮，使我沸腾！"
+"achievement.jackal.challenge.splitted.0" : "腥风血雨"
+
+# Team
+
+"teams.jackal" : "豺狼"
+"end.jackal" : "豺狼%EXTRA%胜利"
+
+# Document
+
+"document.tip.winCond.teams.jackal" : "豺狼"
+
+"document.tip.winCond.jackal.kill.title" : "击杀胜利"
+"document.tip.winCond.jackal.kill" : "当豺狼阵营幸存玩家数占所有幸存玩家数一半时获胜。<br>需要其他独立阵营全部死亡，同时队友不属于%LOVER%阵营。"
+"document.tip.winCond.jackal.extinction.title" : "完全歼灭胜利"
+"document.tip.winCond.jackal.extinction" : "当所有幸存玩家都是相同阵营时，那么就获胜了。<br>需要队友中不存在%LOVER%阵营。"

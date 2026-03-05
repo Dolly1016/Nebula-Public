@@ -10,7 +10,7 @@
 
 # Options
 
-"options.role.viper.detail" : "Vipers are imposters who kill using poison that dissolves corpses."
+"options.role.viper.detail" : "The Viper is an imposter who kill using poison that dissolves corpses."
 "options.role.viper.acidCooldown" : "Kill Cooldown"
 "options.role.viper.dissolveDuration" : "Dissolve Duration"
 "options.role.viper.acidLeavesBone" : "Acid Leaves Bone"

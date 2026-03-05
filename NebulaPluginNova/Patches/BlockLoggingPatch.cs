@@ -119,4 +119,4 @@ public static class BlockAULoggerExceptionPatch
 
 
 [HarmonyPatch(typeof(AbstractUserSaveData), nameof(AbstractUserSaveData.HandleSave))]
-public static class BlockSaveUserDataPatch { public static bool Prefix() => NebulaPlugin.Log.IsPreferential; }
+public static class BlockSaveUserDataPatch { public static bool Prefix() => NebulaPlugin.IsPreferential; }

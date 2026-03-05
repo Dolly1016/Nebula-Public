@@ -1,14 +1,9 @@
-﻿using Discord;
-using Il2CppInterop.Runtime.Injection;
-using LibCpp2IL.Wasm;
+﻿using Il2CppInterop.Runtime.Injection;
 using Nebula.Modules.Cosmetics;
 using Nebula.Modules.GUIWidget;
 using Nebula.Modules.MetaWidget;
-using Nebula.Utilities;
-using Sentry.Unity.NativeUtils;
-using System.Text;
-using TMPro;
-using UnityEngine.Networking;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Virial.Media;
 using Virial.Runtime;
 using Virial.Text;
@@ -90,43 +85,6 @@ internal class MarketplaceData
     static public bool CheckOwning(int entryId)
     {
         return Data.OwningCostumes.Any(c => c.EntryId == entryId) || Data.OwningAddons.Any(c => c.EntryId == entryId);
-    }
-}
-
-[NebulaPreprocess(PreprocessPhase.BuildNoSModuleContainer)]
-public class MarketplaceCache
-{
-    static internal OnlineMarketplace.SearchContentResult[] AddonResult = [];
-    static internal OnlineMarketplace.SearchContentResult[] CosmeticsResult = [];
-    static private bool IsDone = false;
-    static private float BeginTime = 0f;
-    public static void Preprocess(NebulaPreprocessor preprocessor)
-    {
-        BeginTime = Time.time;
-        NebulaManager.Instance.StartCoroutine(ManagedEffects.Sequence(
-            OnlineMarketplace.CoGetRecommendedContents(true, 0, result => ManagedEffects.Action(() => AddonResult = result ?? [])),
-            OnlineMarketplace.CoGetRecommendedContents(false, 0, result => ManagedEffects.Action(() => CosmeticsResult = result ?? [])),
-            ManagedEffects.Action(() => IsDone = true)
-            ).WrapToIl2Cpp());
-    }
-
-    [NebulaPreprocess(PreprocessPhase.PostFixStructure)]
-    public class MarketplaceCacheWaiter
-    {
-        //マーケットプレイスとの通信終了を待つ
-        public static IEnumerator Preprocess(NebulaPreprocessor preprocessor)
-        {
-            if (IsDone) yield break;
-
-            yield return preprocessor.SetLoadingText("Gain Pick-Up Marketplace Items");
-
-            while (true)
-            {
-                //最大で10秒まつ
-                if (Time.time - 10f > BeginTime || IsDone) break;
-                yield return null;
-            }
-        }
     }
 }
 
@@ -216,7 +174,7 @@ public class Marketplace : MonoBehaviour
         var window = MetaScreen.GenerateWindow(new(7f, 3.6f), parent, Vector3.zero, true, true);
         window.SetWidget(new VerticalWidgetsHolder(GUIAlignment.Center, new GUILoadingIcon(GUIAlignment.Center) { Size = 0.3f }, new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OverlayTitle), new TranslateTextComponent("marketplace.ui.loading"))), new Vector2(0.5f,0.5f), out _);
 
-        void ShowDetail(OnlineMarketplace.GetContentResult? result)
+        void ShowDetail(OnlineMarketplace.ItemDetail? result)
         {
             if (result == null) return;
             if (!window) return;
@@ -227,8 +185,8 @@ public class Marketplace : MonoBehaviour
             Virial.Color color = owning ? Virial.Color.Red : new(1f,1f,0f);
 
             window.SetWidget(new GUIScrollView(GUIAlignment.Center, new(6.8f, 3.5f), new VerticalWidgetsHolder(GUIAlignment.Center,
-                new HorizontalWidgetsHolder(GUIAlignment.Left, GUI.API.RawText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.MarketplaceTitle), Uri.UnescapeDataString(result.title)), GUI.API.RawText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), Uri.UnescapeDataString(result.author))),
-                GUI.API.RawText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), Uri.UnescapeDataString(result.blurb)),
+                new HorizontalWidgetsHolder(GUIAlignment.Left, GUI.API.RawText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.MarketplaceTitle), Uri.UnescapeDataString(result.Title)), GUI.API.RawText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), Uri.UnescapeDataString(result.Author))),
+                GUI.API.RawText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), Uri.UnescapeDataString(result.Blurb)),
                 GUI.API.VerticalMargin(0.1f),
                 new HorizontalWidgetsHolder(GUIAlignment.Left,
                     GUI.API.LocalizedText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), "marketplace.ui.marketplace.state"),
@@ -244,7 +202,7 @@ public class Marketplace : MonoBehaviour
                         }
                         else
                         {
-                            LocalMarketplaceItem item = new (){ EntryId = entryId, Title = Uri.UnescapeDataString(result.title), Url = Uri.UnescapeDataString(result.url) };
+                            LocalMarketplaceItem item = new (){ EntryId = entryId, Title = Uri.UnescapeDataString(result.Title), Url = Uri.UnescapeDataString(result.Url) };
                             owningItems.Add(item);
                             if (!isAddon)
                             {
@@ -262,7 +220,7 @@ public class Marketplace : MonoBehaviour
                     new NoSGUIMargin(GUIAlignment.Center, new(0.25f,0f)),
                     (isAddon && owning) ? new HorizontalWidgetsHolder(GUIAlignment.Center, new NoSGUICheckbox(GUIAlignment.Left, localItem!.AutoUpdate) { OnValueChanged = val => { localItem.AutoUpdate = val; MarketplaceData.Save(); } }, GUI.API.HorizontalMargin(0.1f),  GUI.API.LocalizedText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.DocumentBold), "marketplace.ui.marketplace.autoUpdate")) : GUIEmptyWidget.Default
                 ),
-                GUI.API.RawText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), Uri.UnescapeDataString(result.detail).Replace("\r","<br>"))
+                GUI.API.RawText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), Uri.UnescapeDataString(result.Detail).Replace("\r","<br>"))
                 )), out _);
         }
 
@@ -288,18 +246,18 @@ public class Marketplace : MonoBehaviour
         var textField = new GUITextField(Virial.Media.GUIAlignment.Center, new(4.8f, 0.4f)) { IsSharpField = false, HintText = Language.Translate("marketplace.ui.hint").Color(Color.gray) };
         var viewer = new GUIScrollView(Virial.Media.GUIAlignment.Left, new(7f, 3.9f), null);
 
-        IEnumerator CoSetToViewer(OnlineMarketplace.SearchContentResult[]? result)
+        IEnumerator CoSetToViewer(OnlineMarketplace.SearchResult? result)
         {
-            if (result != null)
+            if (result?.Items != null)
             {
-                lastContents.AddRange(result.Select(r => new NoSGUIFramed(Virial.Media.GUIAlignment.Left, new VerticalWidgetsHolder(Virial.Media.GUIAlignment.Left,
-                    GUI.API.Text(GUIAlignment.Left, AttributeAsset.DocumentStandard, GUI.API.FunctionalTextComponent(() => int.TryParse(r.entryId, out var id) && MarketplaceData.CheckOwning(id) ? Language.Translate("marketplace.ui.marketplace.state.owning").Color(Color.green) : Language.Translate("marketplace.ui.marketplace.state.unowning").Color(Color.red))),
+                lastContents.AddRange(result.Items.Select(r => new NoSGUIFramed(Virial.Media.GUIAlignment.Left, new VerticalWidgetsHolder(Virial.Media.GUIAlignment.Left,
+                    GUI.API.Text(GUIAlignment.Left, AttributeAsset.DocumentStandard, GUI.API.FunctionalTextComponent(() => MarketplaceData.CheckOwning(r.Id) ? Language.Translate("marketplace.ui.marketplace.state.owning").Color(Color.green) : Language.Translate("marketplace.ui.marketplace.state.unowning").Color(Color.red))),
                     GUI.API.VerticalMargin(-0.05f),
                     new HorizontalWidgetsHolder(Virial.Media.GUIAlignment.Left,
-                        GUI.API.RawText(Virial.Media.GUIAlignment.Left, AttributeAsset.MarketplaceTitle, Uri.UnescapeDataString(r.title)),
-                        GUI.API.RawText(Virial.Media.GUIAlignment.Left, AttributeAsset.MarketplaceDeveloper, Uri.UnescapeDataString(r.author))
+                        GUI.API.RawText(Virial.Media.GUIAlignment.Left, AttributeAsset.MarketplaceTitle, Uri.UnescapeDataString(r.Title)),
+                        GUI.API.RawText(Virial.Media.GUIAlignment.Left, AttributeAsset.MarketplaceDeveloper, Uri.UnescapeDataString(r.Author))
                     ),
-                    GUI.API.RawText(Virial.Media.GUIAlignment.Left, AttributeAsset.MarketplaceBlurb, Uri.UnescapeDataString(r.blurb))
+                    GUI.API.RawText(Virial.Media.GUIAlignment.Left, AttributeAsset.MarketplaceBlurb, Uri.UnescapeDataString(r.Blurb))
                 ), new(0.1f, 0.1f), Color.clear)
                 { 
                     PostBuilder = renderer =>
@@ -312,11 +270,10 @@ public class Marketplace : MonoBehaviour
                         collider.isTrigger = true;
                         button.OnClick.AddListener(() =>
                         {
-                            if (int.TryParse(r.entryId, out var id))
-                                OpenDetailWindow(isAddon, id, transform, () => { 
-                                    if (MyItemsScreen.isActiveAndEnabled) UpdateItemsScreen();
-                                    if (MarketplaceScreen.isActiveAndEnabled) RefreshMarketplaceInnerScreen();
-                                });
+                            OpenDetailWindow(isAddon, r.Id, transform, () => { 
+                                if (MyItemsScreen.isActiveAndEnabled) UpdateItemsScreen();
+                                if (MarketplaceScreen.isActiveAndEnabled) RefreshMarketplaceInnerScreen();
+                            });
                         });
                     }
                 }));
@@ -331,14 +288,14 @@ public class Marketplace : MonoBehaviour
             if (isAddon != addon)
             {
                 isAddon = addon;
-                if (!searchedAlready) RefreshMarketplaceInnerScreen();
+                RefreshMarketplaceInnerScreen();
             }
         }
 
         void RefreshMarketplaceInnerScreen()
         {
             lastContents.Clear();
-            StartCoroutine(CoSetToViewer(isAddon ? MarketplaceCache.AddonResult : MarketplaceCache.CosmeticsResult).WrapToIl2Cpp());
+            StartCoroutine(OnlineMarketplace.CoGetLatestContents(isAddon, 0, CoSetToViewer).WrapToIl2Cpp());
         }
 
         Virial.Media.GUIWidget GenerateCategoryWidget(bool forAddon) => new GUIModernButton(Virial.Media.GUIAlignment.Center, Virial.Text.AttributeAsset.MarketplaceCategoryButton, forAddon ? TextAddons : TextCosmetics)
@@ -376,11 +333,11 @@ public class Marketplace : MonoBehaviour
                                 searchedAlready = true;
                                 if (text.Length == 0)
                                 {
-                                    StartCoroutine(OnlineMarketplace.CoGetRecommendedContents(isAddon, 0, result => CoSetToViewer(result)).WrapToIl2Cpp());
+                                    StartCoroutine(OnlineMarketplace.CoGetLatestContents(isAddon, 0, CoSetToViewer).WrapToIl2Cpp());
                                 }
                                 else
                                 {
-                                    StartCoroutine(OnlineMarketplace.CoSearchContents(isAddon, lastQuery, 0, result => CoSetToViewer(result)).WrapToIl2Cpp());
+                                    StartCoroutine(OnlineMarketplace.CoSearchContents(isAddon, lastQuery, 0, CoSetToViewer).WrapToIl2Cpp());
                                 }
 
                             }
@@ -392,7 +349,7 @@ public class Marketplace : MonoBehaviour
 
         MarketplaceScreen.SetBorder(new(9f, 5f));
         MarketplaceScreen.SetWidget(widget, new Vector2(0f, 1f), out _);
-        StartCoroutine(CoSetToViewer(isAddon ? MarketplaceCache.AddonResult : MarketplaceCache.CosmeticsResult).WrapToIl2Cpp());
+        StartCoroutine(OnlineMarketplace.CoGetLatestContents(isAddon, 0, CoSetToViewer).WrapToIl2Cpp());
     }
 
     (Func<bool, IEnumerable<LocalMarketplaceItem>> items, Action<LocalMarketplaceItem> action) currentItemsAction;
@@ -495,17 +452,17 @@ public class Marketplace : MonoBehaviour
                         var waitUpdateWindow = MetaScreen.GenerateWindow(new(3f, 1f), transform, Vector3.zero, true, true, withMask: true);
                         waitUpdateWindow.SetWidget(new VerticalWidgetsHolder(GUIAlignment.Center, new GUILoadingIcon(GUIAlignment.Center) { Size = 0.35f }, GUI.API.LocalizedText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), "marketplace.ui.edit.wait")), new Vector2(0.5f, 0.5f), out _);
 
-                        StartCoroutine(OnlineMarketplace.CoEditContent(edited.EntryId, edited.Key, edited.Title, edited.Blurb, edited.Detail, edited.Author, edited.Url, success => {
+                        StartCoroutine(OnlineMarketplace.CoEditContent(edited.EntryId, edited.Key, edited.Title, edited.Blurb, edited.Detail, edited.Author, edited.Url, result => {
                             waitUpdateWindow.CloseScreen();
-                            return ManagedEffects.Action(() => MetaUI.ShowConfirmDialog(transform, new TranslateTextComponent(success ? "marketplace.ui.edit.finish" : "marketplace.ui.edit.failed")));
+                            return ManagedEffects.Action(() => MetaUI.ShowConfirmDialog(transform, new TranslateTextComponent((result?.ResultId == 0) ? "marketplace.ui.edit.finish" : "marketplace.ui.edit.failed")));
                         }).WrapToIl2Cpp());
                     }, new()
                     {
-                        Title = Uri.UnescapeDataString(result.title),
-                        Author = Uri.UnescapeDataString(result.author),
-                        Blurb = Uri.UnescapeDataString(result.blurb),
-                        Detail = Uri.UnescapeDataString(result.detail),
-                        Url = Uri.UnescapeDataString(result.url),
+                        Title = Uri.UnescapeDataString(result.Title),
+                        Author = Uri.UnescapeDataString(result.Author),
+                        Blurb = Uri.UnescapeDataString(result.Blurb),
+                        Detail = Uri.UnescapeDataString(result.Detail),
+                        Url = Uri.UnescapeDataString(result.Url),
                         Key = item.Key,
                         EntryId = item.EntryId,
                         IsAddon = isAddon,
@@ -606,17 +563,18 @@ public class Marketplace : MonoBehaviour
                         MetaUI.ShowConfirmDialog(transform, new TranslateTextComponent(success ? "marketplace.ui.publish.finish" : "marketplace.ui.publish.failed"));
                         yield break;
                     }
-                    StartCoroutine(OnlineMarketplace.CoPushContent(item.IsAddon, item.Title, item.Blurb, item.Detail, item.Author, item.Url, item.Key, item.Discord, id =>
+                    StartCoroutine(OnlineMarketplace.CoPushContent(item.IsAddon, item.Title, item.Blurb, item.Detail, item.Author, item.Url, item.Key, item.Discord, result =>
                     {
-                        if (id.HasValue)
+                        bool succeed = result != null && result.ResultId == 0;
+                        if (succeed)
                         {
                             if (isAddon)
-                                MarketplaceData.Data.DevAddons.Add(new() { EntryId = id.Value, Title = item.Title, Key = item.Key, Url = item.Url });
+                                MarketplaceData.Data.DevAddons.Add(new() { EntryId = result!.ItemId, Title = item.Title, Key = item.Key, Url = item.Url });
                             else
-                                MarketplaceData.Data.DevCostumes.Add(new() { EntryId = id.Value, Title = item.Title, Key = item.Key, Url = item.Url });
+                                MarketplaceData.Data.DevCostumes.Add(new() { EntryId = result!.ItemId, Title = item.Title, Key = item.Key, Url = item.Url });
                             MarketplaceData.Save();
                         }
-                        return CoFinishPublish(id.HasValue);
+                        return CoFinishPublish(succeed);
                     }).WrapToIl2Cpp());
                 });
             });
@@ -628,117 +586,188 @@ public class Marketplace : MonoBehaviour
 
 internal static class OnlineMarketplace
 {
-    private const string APIURL = "https://script.google.com/macros/s/AKfycbxc8jEhQBH7L4UeJinWxAmh3ziUYbtWnUfNiYsFGu9tj5KQVTApY67ObNNLOTNtKstPag/exec";
-
-    private class OnlineResponse<T>
-    {
-        [JsonSerializableField]
-        public int statusCode;
-
-        [JsonSerializableField]
-        public T data;
-    }
-
-    static private IEnumerator CoGetResponse<T>(string method, Func<T, IEnumerator> callback, params (string label, string value)[] contents)
+    static private IEnumerator CoPostResponse<TRequest, TResponse>(string method, TRequest requestData, Func<TResponse, IEnumerator> callback) where TRequest : class where TResponse : class
     {
         if (NebulaPlugin.AllowHttpCommunication)
         {
             IEnumerator? callbackCoroutine = null;
-            var json = "{" + contents.Prepend(("request", method)).Select(tuple => (tuple.Item1, Uri.EscapeDataString(tuple.Item2))).Join(tuple => $"\"{tuple.Item1}\" : \"{tuple.Item2}\"", ",") + "}";
-            yield return NebulaWebRequest.CoPost(APIURL, json, true, result => {
-                callbackCoroutine = callback.Invoke(JsonStructure.Deserialize<OnlineResponse<T>>(result)!.data);
+            yield return NebulaWebRequest.CoPost<TRequest, TResponse>(NebulaWebRequest.GetNoSAPI($"marketplace/{method}/"), requestData, result => {
+                callbackCoroutine = callback.Invoke(result);
             });
             if (callbackCoroutine != null) yield return callbackCoroutine;
         }
         yield break;
     }
 
-    public class SearchContentResult
+    public class PublishRequest
     {
-        [JsonSerializableField]
-        public string entryId;
-
-        [JsonSerializableField]
-        public string title;
-
-        [JsonSerializableField]
-        public string blurb;
-
-        [JsonSerializableField]
-        public string author;
-    }
-    private class SearchResult
-    {
-        [JsonSerializableField]
-        public bool success;
-
-        [JsonSerializableField]
-        public List<SearchContentResult> result;
-
-    }
-    public class GetContentResult
-    {
-        [JsonSerializableField]
-        public bool isValid;
-
-        [JsonSerializableField]
-        public string title;
-
-        [JsonSerializableField]
-        public string blurb;
-
-        [JsonSerializableField]
-        public string detail;
-
-        [JsonSerializableField]
-        public string author;
-
-        [JsonSerializableField]
-        public string url;
-    }
-    private class GetResult
-    {
-        [JsonSerializableField]
-        public bool success;
-
-        [JsonSerializableField]
-        public GetContentResult result;
-
-    }
-    private class PublishResult
-    {
-        [JsonSerializableField]
-        public int id;
+        [JsonPropertyName("isAddon")]
+        public bool IsAddon { get; set; }
+        [JsonPropertyName("title")]
+        public string Title { get; set; }
+        [JsonPropertyName("blurb")]
+        public string Blurb { get; set; }
+        [JsonPropertyName("detail")]
+        public string Detail { get; set; }
+        [JsonPropertyName("author")]
+        public string Author { get; set; }
+        [JsonPropertyName("url")]
+        public string Url { get; set; }
+        [JsonPropertyName("key")]
+        public string Key { get; set; }
+        [JsonPropertyName("discordId")]
+        public string DiscordId { get; set; }
+        [JsonPropertyName("langs")]
+        public string[] Langs { get; set; }
+        [JsonPropertyName("icon")]
+        public string? Icon { get; set; } = null;
     }
 
-    private class EditResult
+    public class EditRequest
     {
-        [JsonSerializableField]
-        public bool success;
+        [JsonPropertyName("id")]
+        public int Id { get; set; }
+        [JsonPropertyName("key")]
+        public string Key { get; set; }
+        [JsonPropertyName("title")]
+        public string Title { get; set; }
+        [JsonPropertyName("blurb")]
+        public string Blurb { get; set; }
+        [JsonPropertyName("detail")]
+        public string Detail { get; set; }
+        [JsonPropertyName("author")]
+        public string Author { get; set; }
+        [JsonPropertyName("url")]
+        public string Url { get; set; }
+        [JsonPropertyName("langs")]
+        public string[] Langs { get; set; }
+        [JsonPropertyName("icon")]
+        public string? Icon { get; set; } = null;
     }
 
-    static public IEnumerator CoGetRecommendedContents(bool isAddon, int page, Func<SearchContentResult[]?, IEnumerator> callback)
+    public class VisibilityRequest
     {
-        yield return CoGetResponse<SearchResult>("recommended", s => callback.Invoke(s.success ? s.result.ToArray() : null), ("type", isAddon ? "addon" : "cosmetics"), ("page", page.ToString()));
+        [JsonPropertyName("id")]
+        public int Id { get; set; }
+        [JsonPropertyName("key")]
+        public string Key { get; set; }
+        [JsonPropertyName("isPublic")]
+        public bool IsPublic { get; set; }
     }
 
-    static public IEnumerator CoSearchContents(bool isAddon, string query, int page, Func<SearchContentResult[]?,IEnumerator> callback)
+    public class SearchRequest
     {
-        yield return CoGetResponse<SearchResult>("search", s => callback.Invoke(s.success ? s.result.ToArray() : null), ("type", isAddon ? "addon" : "cosmetics"), ("query", query), ("page", page.ToString()));
+        [JsonPropertyName("isAddon")]
+        public bool IsAddon { get; set; }
+        [JsonPropertyName("query")]
+        public string Query { get; set; }
+        [JsonPropertyName("page")]
+        public int Page { get; set; }
+        [JsonPropertyName("lang")]
+        public string Lang { get; set; }
+    }
+    public class LatestRequest
+    {
+        [JsonPropertyName("isAddon")]
+        public bool IsAddon { get; set; }
+        [JsonPropertyName("page")]
+        public int Page { get; set; }
+        [JsonPropertyName("lang")]
+        public string Lang { get; set; }
     }
 
-    static public IEnumerator CoPushContent(bool isAddon, string title, string blurb, string detail, string author, string url, string key, string discordId, Func<int?, IEnumerator> callback)
+    public class DetailRequest
     {
-        yield return CoGetResponse<PublishResult>("publish", r => callback.Invoke(r.id), ("type", isAddon ? "addon" : "cosmetics"), ("title", title), ("short", blurb), ("detail", detail), ("author", author), ("url", url), ("key", key), ("discordId", discordId));
+        [JsonPropertyName("id")]
+        public int Id { get; set; }
     }
 
-    static public IEnumerator CoGetContent(int id, Func<GetContentResult?, IEnumerator> callback)
+    public class PublishResult
     {
-        yield return CoGetResponse<GetResult>("get", r => callback.Invoke(r.success ? r.result : null), ("id", id.ToString()));
+        [JsonPropertyName("resultId")]
+        public int ResultId { get; set; }
+        [JsonPropertyName("itemId")]
+        public int ItemId { get; set; }
     }
 
-    static public IEnumerator CoEditContent(int entryId, string key, string title, string blurb, string detail, string author, string url, Func<bool, IEnumerator> callback)
+    public class EditResult
     {
-        yield return CoGetResponse<EditResult>("edit", r => callback.Invoke(r.success), ("entryId", entryId.ToString()), ("title", title), ("short", blurb), ("detail", detail), ("author", author), ("url", url), ("key", key));
+        [JsonPropertyName("resultId")]
+        public int ResultId { get; set; }
+    }
+
+    public class VisibilityResult
+    {
+        [JsonPropertyName("resultId")]
+        public int ResultId { get; set; }
+    }
+
+    public class ItemAbst
+    {
+        [JsonPropertyName("id")]
+        public int Id { get; set; }
+        [JsonPropertyName("title")]
+        public string Title { get; set; }
+        [JsonPropertyName("blurb")]
+        public string Blurb { get; set; }
+        [JsonPropertyName("author")]
+        public string Author { get; set; }
+        [JsonPropertyName("langSupport")]
+        public bool LangSupport { get; set; }
+        [JsonPropertyName("icon")]
+        public string Icon { get; set; }
+    }
+
+    public class SearchResult
+    {
+        [JsonPropertyName("resultId")]
+        public int ResultId { get; set; }
+        [JsonPropertyName("items")]
+        public ItemAbst[] Items { get; set; }
+    }
+
+    public class ItemDetail
+    {
+        [JsonPropertyName("id")]
+        public int Id { get; set; }
+        [JsonPropertyName("isAddon")]
+        public bool IsAddon { get; set; }
+        [JsonPropertyName("title")]
+        public string Title { get; set; }
+        [JsonPropertyName("blurb")]
+        public string Blurb { get; set; }
+        [JsonPropertyName("detail")]
+        public string Detail { get; set; }
+        [JsonPropertyName("author")]
+        public string Author { get; set; }
+        [JsonPropertyName("url")]
+        public string Url { get; set; }
+        [JsonPropertyName("langs")]
+        public string[] Langs { get; set; }
+    }
+
+    static public IEnumerator CoGetLatestContents(bool isAddon, int page, Func<SearchResult?, IEnumerator> callback)
+    {
+        yield return CoPostResponse<LatestRequest, SearchResult>("latest", new() { IsAddon = isAddon, Page = page, Lang = Language.GetCurrentLanguage() }, callback);
+    }
+
+    static public IEnumerator CoSearchContents(bool isAddon, string query, int page, Func<SearchResult?, IEnumerator> callback)
+    {
+        yield return CoPostResponse<SearchRequest, SearchResult>("search", new() { IsAddon = isAddon, Query = query, Page = page, Lang = Language.GetCurrentLanguage()}, callback);
+    }
+
+    static public IEnumerator CoPushContent(bool isAddon, string title, string blurb, string detail, string author, string url, string key, string discordId, Func<PublishResult?, IEnumerator> callback)
+    {
+        yield return CoPostResponse<PublishRequest, PublishResult>("publish", new() { IsAddon = isAddon, Title = title, Blurb = blurb, Detail = detail, Author = author, Url = url, Key = key, DiscordId = discordId, Icon = "", Langs = [] }, callback);
+    }
+
+    static public IEnumerator CoGetContent(int id, Func<ItemDetail?, IEnumerator> callback)
+    {
+        yield return CoPostResponse<DetailRequest, ItemDetail>("details", new() { Id = id }, callback);
+    }
+
+    static public IEnumerator CoEditContent(int entryId, string key, string title, string blurb, string detail, string author, string url, Func<EditResult?, IEnumerator> callback)
+    {
+        yield return CoPostResponse<EditRequest, EditResult>("edit", new() { Id = entryId, Key = key, Title = title, Blurb = blurb, Detail = detail, Author = author, Url = url, Icon = "", Langs = [] }, callback);
     }
 }

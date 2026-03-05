@@ -5,6 +5,7 @@ using Interstellar.VoiceChat;
 using Nebula.Behavior;
 using Nebula.Modules.Cosmetics;
 using Nebula.Modules.GUIWidget;
+using Nebula.Modules.Online;
 using Nebula.Patches;
 using System;
 using System.Collections.Generic;
@@ -644,7 +645,7 @@ internal class NoSVCRoom
         masterVolumeRouter.Connect(endpoint);
 
         string server = VCSettings.ServerAddress;
-        if (server.Length == 0) server = "ws://www.nebula-on-the-ship.com:22010";
+        if (server.Length == 0) server = CustomServerLoader.GetVCServer();
         interstellarRoom = new VCRoom(source, roomCode, region, server + "/vc",
             new VCRoomParameters()
             {

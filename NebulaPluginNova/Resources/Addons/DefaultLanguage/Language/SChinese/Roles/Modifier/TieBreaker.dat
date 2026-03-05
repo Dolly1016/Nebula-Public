@@ -1,0 +1,30 @@
+# Assignable
+
+"role.tieBreaker.name" : "破平者"
+"role.tieBreaker.generalBlurb" : "我将是破局之人"
+
+# Document
+
+"role.tieBreaker.doc" : "破平者在出现平票时，会为投票目标额外追加一票。"
+
+# Options
+
+"options.role.tieBreaker.detail" : "破平者在出现平票时，会为投票目标额外追加一票。"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.tieBreaker.tieBreaking" : "触发破平次数"
+
+# Titles
+
+"achievement.tieBreaker.common1.title" : "独裁者"
+"achievement.tieBreaker.common1.goal" : "出现平局而追加1票"
+
+"achievement.tieBreaker.challenge.title" : "一票之差"
+"achievement.tieBreaker.challenge.goal" : "通过追加的一票驱逐非同阵营的玩家。"

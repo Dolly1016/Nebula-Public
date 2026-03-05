@@ -1,0 +1,65 @@
+# Assignable
+
+"role.creeping.name" : "投毒者"
+"role.creeping.short" : "投"
+"role.creeping.blurb" : "你已病入膏肓！"
+"role.creeping.hint" : "合理使用投毒进行延迟击杀，制造混乱。"
+
+# Document
+
+"role.creeping.doc" : "投毒者可以对其他玩家投毒进行<b>延迟击杀</b>。<br>投毒仍然可以进行普通击杀，巧妙利用实现最大化收益。"
+"role.creeping.ability.title" : "固有能力【制毒大师】"
+"role.creeping.ability.main" : "可以对其他玩家投毒。中毒的玩家若没在规定时间内解毒，将会毒发身亡。"
+"role.creeping.ability.poison" : "<title>投毒</title>对目标投毒。<br>会有<b>闪烁</b>提示。<br>投毒的冷却时间<var>%POISON%</var>（<var>%SEC%</var>秒）。"
+"role.creeping.ability.sec.longer" : "比击杀冷却时间更长"
+"role.creeping.ability.sec.shorter" : "比击杀冷却时间更短"
+"role.creeping.ability.sec.just" : "和击杀冷却时间相同"
+"role.creeping.ability.depoison" : "<title>急救箱</title>中毒的玩家可以使用急救箱进行<b>解毒</b>。<br>急救箱在地图中只会存在一个。"
+"role.creeping.tips" : "・在紧急会议中，毒素仍然会侵蚀玩家，因此会在会议中死亡。<br>・中毒的玩家可以在地图中选择急救箱进行解毒。<br>・急救箱只会在地图中出现一个，根据不同的地图，位置会在一到两个固定点位。<br>  ・Skeld：医务室<br>  ・MIRA HQ：发射台或库房<br>  ・Polus：实验室或氧气室（装填罐子任务点后面）<br>  ・Airship：大厅（最左侧上方屋子中）或配电室左下角<br>  ・Fungle：水花区（屋子内部）或实验室左下角"
+
+# Options
+
+"options.role.creeping.detail" : "投毒者可以对其他玩家进行投毒。<br>被投毒的玩家在一段时间内没有找到解药会毒发身亡。"
+"options.role.creeping.depoisonDuration" : "解毒所需时间"
+"options.role.creeping.poisonDelay" : "毒发延迟时间"
+"options.role.creeping.poisonCooldown" : "投毒冷却时间"
+
+# Game
+
+"role.creeping.minigame.depoison" : "解毒"
+
+# UI
+
+"button.label.poison" : "投毒"
+
+# Game Statictics
+
+"statistics.events.poisoned" : "中毒"
+
+# Status
+
+"state.poisoned" : "中毒"
+
+# Stats
+
+"stats.creeping.depoison" : "使用急救箱次数"
+"stats.creeping.poison" : "使用投毒次数"
+
+# Titles
+
+"achievement.creeping.common1.title" : "毒发"
+"achievement.creeping.common1.goal" : "通过投毒击杀一名玩家。"
+
+"achievement.creeping.common2.title" : "迅速"
+"achievement.creeping.common2.goal" : "在2秒内连续击杀两名玩家。"
+
+"achievement.creeping.another1.title" : "徒劳的挣扎"
+"achievement.creeping.another1.goal" : "在紧急会议中因为中毒而死。"
+
+"achievement.creeping.common3.title" : "未说尽的遗言"
+"achievement.creeping.common3.goal" : "在紧急会议期间游戏结束并获胜。"
+"achievement.creeping.common3.cond" : "提示：自身存活。"
+"achievement.creeping.common3.flavor" : "“为什么……会……”—没有署名的遗言"
+
+"achievement.creeping.challenge.title" : "全员毒虫"
+"achievement.creeping.challenge.goal" : "在自身已中毒的状态下投毒，或在自身中毒期间通过投毒完成击杀，<br>并成为唯一幸存者获胜。"

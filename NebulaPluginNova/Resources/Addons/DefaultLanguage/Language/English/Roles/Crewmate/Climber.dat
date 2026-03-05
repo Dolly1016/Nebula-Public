@@ -7,14 +7,14 @@
 # Document
 
 "role.climber.doc" : "A crewmate who can move long distances using a hookshot."
-"role.climber.ability.title" : "Inherent Ability "Hookshot""
+"role.climber.ability.title" : "Inherent Ability [Hookshot]"
 "role.climber.ability.main" : "Hook the hookshot to a distant wall for a big move at once."
 "role.climber.ability.hookshot" : "<title>Hookshot</title>Fire the hookshot.<br>If it successfully hooks onto a wall, the climber is pulled to the hooked location."
 "role.climber.tips" : "The hookshot can be fired farther in open places such as the elevator and outside of Airship, and the cliffs of Fungle."
 
 # Options
 
-"options.role.climber.detail" : "Climber can travel long distances using their hookshots."
+"options.role.climber.detail" : "The Climber can travel long distances using their hookshots."
 "options.role.climber.gustCooldown" : "Hookshot Cooldown"
 "options.role.climber.canSeeInShadow" : "Can See Hookshot In Shadow"
 
@@ -60,6 +60,6 @@
 "achievement.climber.another1.goal" : "Die while moving with the hookshot or immediately after."
 
 "achievement.climber.challenge.title" : "Sacred Secret Peak"
-"achievement.climber.challenge.goal" : "Escape with the hookshot from a place<br>there are 2 or more impostors, madmates, or jackals nearby and survive."
+"achievement.climber.challenge.goal" : "Escape with the hookshot from a place.<br>There are 2 or more players are the impostor team, Madmates, or Jackal team nearby and survive."
 "achievement.climber.challenge.splitted.0" : "Sacred "
 "achievement.climber.challenge.splitted.2" : "Secret Peak"

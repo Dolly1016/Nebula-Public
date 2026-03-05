@@ -64,13 +64,14 @@
 
 "achievement.paparazzo.another1.title" : "インポスター・イン・ポスター"
 "achievement.paparazzo.another1.goal" : "インポスターがパパラッチに撮影され、会議で写真を開示される。"
-"achievement.paparazzo.another1.splitted.1" : "イン"
 "achievement.paparazzo.another1.flavor" : "Say Hello! 3年前のあなたへ"
+"achievement.paparazzo.another1.splitted.1" : "イン"
 
 "achievement.paparazzo.challenge.title" : "揺れる輿論"
 "achievement.paparazzo.challenge.goal" : "写真を公開した会議内で、何らかの理由で4人以上死亡する。"
 "achievement.paparazzo.challenge.cond" : "自身がその会議で死亡してしまった場合は無効"
 "achievement.paparazzo.challenge.flavor" : ""これは呪われた記事だ。すぐに処分せねばなるまい。" ―破られた議事録より"
+"achievement.paparazzo.challenge.splitted.0" : "揺れる"
 
 # Team
 

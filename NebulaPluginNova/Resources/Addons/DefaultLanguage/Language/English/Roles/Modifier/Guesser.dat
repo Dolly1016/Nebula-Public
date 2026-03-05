@@ -6,7 +6,7 @@
 
 # Document
 
-"role.guesser.doc" : "Guess other players' abilities to kill them.<br>If the guess fails, you die instead."
+"role.guesser.doc" : "The Guesser guesses other players' abilities to kill them.<br>If the guess fails, you die instead."
 
 # Options
 

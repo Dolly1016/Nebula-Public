@@ -6,10 +6,10 @@
 
 # Document
 
-"role.dancer.doc" : "A neutral member who confuses players by dancing."
+"role.dancer.doc" : "A neutral who confuses players by dancing."
 "role.dancer.winCond" : "Survive and fulfill the prophecy of death for <var>%NUM%</var> players. %ADD%"
 "role.dancer.winCond.main.lastDance" : "<br>Additionally, when the above condition is met, show the <var>Last Dance</var> to the survivors."
-"role.dancer.ability.title" : "Inherent Ability "Dance of Death""
+"role.dancer.ability.title" : "Inherent Ability [Dance of Death]"
 "role.dancer.ability.main" : "The Dancer can dance by moving their body slightly.<br>Survivors who witness the dance receive a <b>Prophecy of Death</b>.<br>The Prophecy of Death has an expiration time, and it is fulfilled when the target player dies within the expiration time.<br>If the expiration time passes, the Prophecy of Death is canceled.<br>If a player with a Prophecy of Death dances next to someone, they can <b>pass on</b> the Prophecy of Death to them.<br><br>Witnesses of the dance will choose their actions mainly from three options: -<br>share fate with the Dancer,<br>-pass on the prophecy to someone,<br>-endure until the prophecy expires."
 "role.dancer.ability.dance" : "<title>Dance</title>Continue moving slightly on the spot to dance. Cannot be <b>activated</b> by button click/key input.<br>If you dance until the button timer is full, you cast a <b>Prophecy of Death</b>."
 "role.dancer.ability.danceKill" : "<title>Death Dance</title>Dancing next to a corpse changes your next dance to a <b>Death Dance</b> that can kill players.<br>Kills by <b>Death Dance</b> are counted as fulfilled Prophecies of Death."
@@ -17,7 +17,7 @@
 
 # Options
 
-"options.role.dancer.detail" : "Dancer casts a curse on the player by dancing.<br>Players must consider the effects of the curse in their discussions."
+"options.role.dancer.detail" : "The Dancer casts a curse on the player by dancing.<br>Players must consider the effects of the curse in their discussions."
 "options.role.dancer.numOfSuccessfulForecastToWin" : "Num Of Successful Forecast To Win"
 "options.role.dancer.danceCoolDown" : "Dance Cooldown"
 "options.role.dancer.danceDuration" : "Dance Duration"

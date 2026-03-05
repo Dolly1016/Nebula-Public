@@ -1,0 +1,15 @@
+# Header
+
+"options.consoleRestriction" : "信息终端使用限制"
+"options.consoleRestriction.detail" : "对生命监测装置、管理控制台以及安保监控进行时间使用限制"
+
+# Groups
+
+# Options
+
+"options.consoleRestriction.unlimited" : "无限制"
+"options.consoleRestriction.adminRestriction" : "管理控制台"
+"options.consoleRestriction.vitalsRestriction" : "生命监测装置"
+"options.consoleRestriction.cameraRestriction" : "安保监控与门禁系统"
+"options.consoleRestriction.resetRestrictions" : "会议结束后重置使用限制"
+"options.consoleRestriction.showDeadBodiesOnAdmin" : "管理控制台中显示尸体"

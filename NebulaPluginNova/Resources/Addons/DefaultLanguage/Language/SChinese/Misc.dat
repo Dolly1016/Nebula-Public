@@ -1,0 +1,247 @@
+# Title
+
+"title.buttons.nebula" : "星云舰"
+"title.label.nebula" : "星云舰"
+
+"title.label.discord" : "点击加入Discord！"
+
+"title.buttons.update" : "历史版本"
+"title.buttons.achievements" : "成就"
+"title.buttons.addons" : "附加插件"
+"title.buttons.developersStudio" : "制作插件"
+"title.buttons.marketplace" : "创意工坊"
+"title.buttons.stats" : "统计"
+"title.buttons.form" : "Bug反馈"
+"title.buttons.migration" : "数据继承"
+
+"ui.update.waitFinishing" : "等待更新……"
+"ui.update.finishUpdate" : "更新完成！<br>请重启游戏！"
+"ui.update.autoUpdate" : "自动更新已启用"
+"ui.version.copied" : "已复制版本信息。"
+"ui.migration.title" : "数据继承"
+"ui.migration.buttons.upload" : "上传数据"
+"ui.migration.buttons.upload.detail" : "将当前您的游戏数据上传到我们的服务器中保存。<br>服务器会为您保留<b>2周</b>的时间，在此期间您可以在新的设备中使用恢复码下载您的游戏数据。"
+"ui.migration.buttons.restore" : "恢复数据"
+"ui.migration.buttons.restore.detail" : "恢复您在旧设备中上传的数据。<br>需要您提交在之前上传数据时获取的<b>恢复码</b>进行恢复操作。"
+"ui.migration.notLogIn" : "上传数据和恢复数据都需要您登录。"
+"ui.migration.upload.title" : "上传数据"
+"ui.migration.upload.failed" : "上传数据失败。"
+"ui.migration.upload.success" : "数据上传成功。<br>这是恢复数据所需要的恢复码，请务必保存！"
+"ui.migration.download.title" : "恢复数据"
+"ui.migration.download.content" : "请输入上传数据时获取的恢复码。"
+"ui.migration.download.password" : "恢复码"
+"ui.migration.download.proceed" : "恢复"
+"ui.migration.download.confirm.title" : "确认恢复"
+"ui.migration.download.confirm.content" : "已找到您上传的数据，确定要恢复吗？<br>恢复的数据将<b>永久</b>替换此设备的当前进度。"
+"ui.migration.download.confirm.date" : "%YEAR%年%MONTH%月%DAY%日 %HOUR%:%MINUTE%"
+"ui.migration.download.confirm.button.confirm" : "恢复"
+"ui.migration.download.confirm.button.cancel" : "取消"
+"ui.migration.download.success" : "数据已恢复。<br>游戏将关闭，请重启游戏。"
+"ui.migration.download.failed" : "无法恢复数据。"
+"ui.migration.download.notFound" : "找不到关联的数据。<br>请检查您的恢复码是否有误或者您的数据已过期。"
+
+# AFK
+
+"ui.afk.title" : "挂机中"
+"ui.afk.detail" : "按任意键解除挂机状态。"
+
+# Certification
+
+"certification.waiting" : "正在验证"
+"certification.waiting.detail" : "正在验证Among Us和NoS的版本"
+"certification.waiting.client" : "正在验证Among Us和NoS的版本"
+"certification.uncertified" : "未安装"
+"certification.uncertified.detail" : "该玩家未安装星云舰"
+"certification.uncertified.client" : "你已安装星云舰<br>请不要进入原版房间"
+"certification.unmatchedEpoch" : "不匹配版本"
+"certification.unmatchedEpoch.detail" : "该玩家安装的星云舰版本与你不同。<br>将你的版本复制给他们或者让他们去<b>GitHub</b>下载相同的版本。"
+"certification.unmatchedEpoch.client" : "主持人安装的星云舰版本与你不同。<br>试试询问主持人更换或者去<b>GitHub</b>下载相同的版本！"
+"certification.unmatchedBuild" : "不匹配快照版本"
+"certification.unmatchedBuild.detail" : "该玩家安装的星云舰版本与你不同，可能是其他分支。<br>将你的版本复制给他们或者让他们下载你当前<b>游戏程序标题</b>相同的版本。"
+"certification.unmatchedBuild.client" : "主持人安装的星云舰版本与你不同，可能是其他分支。<br>试试询问主持人更换或者去<b>游戏程序标题</b>下载相同的版本！"
+"certification.unmatchedAddon" : "不匹配插件"
+"certification.unmatchedAddon.detail" : "该玩家安装的附加插件与你不同或缺失<br>请让所有人使用相同的插件"
+"certification.unmatchedAddon.client" : "该插件与主持人不同或未安装<br>请让所有人使用相同的插件"
+"certification.unmatchedVanilla" : "不匹配Among Us版本"
+"certification.unmatchedVanilla.detail" : "该玩家的Among Us版本与主持人不同。<br>请确保相同的版本。"
+"certification.unmatchedVanilla.client" : "该Among Us版本与主持人不同。<br>请确保相同的版本。"
+
+# Versions
+
+"version.category.all" : "全部"
+"version.category.major" : "稳定版"
+"version.category.snapshot" : "快照版"
+"version.category.preRelease" : "预览版"
+"version.category.custom" : "自定义"
+"version.category.unknown" : "未知"
+"version.category.auto" : "自动更新"
+"version.fetching.autoUpdate.major" : "最新稳定版"
+"version.fetching.autoUpdate.snapshot" : "最新快照版"
+"version.fetching.gainPackage" : "获取"
+"version.fetching.setAutoUpdate" : "启用自动更新"
+"version.fetching.current" : "当前"
+"version.fetching.mismatched" : "不可更改"
+"version.fetching.applied" : "已应用"
+"version.fetching.mismatched.detail" : "由于NoS与Among Us版本不匹配，无法进行更改。<br>请使用对应的版本。"
+"version.fetching.loadMore" : "加载更多"
+
+# Game Mode
+
+"options.gamemode" : "游戏模式"
+
+"gamemode.standard" : "标准模式"
+"gamemode.freeplay" : "自由模式"
+"gamemode.aeroguesser" : "猜图模式"
+
+# Notification
+
+"notification.lobby.noTitleForFreeplay" : "自由游戏中无法获得成就。"
+"notification.lobby.noTitleForOP" : "在主持人拥有管理员权限的游戏中无法获得成就。"
+
+# Inventory
+
+"inventory.palette.catalogue" : "目录"
+"inventory.palette.colorCode" : "颜色代码"
+"inventory.palette.colorCode.mainColor" : "主体颜色"
+"inventory.palette.colorCode.shadowColor" : "阴影颜色"
+"inventory.palette.colorCode.visorColor" : "面罩颜色"
+"inventory.palette.colorCode.colorName" : "颜色名称"
+"inventory.palette.colorCode.copy" : "复制"
+"inventory.palette.colorCode.paste" : "粘贴"
+"inventory.palette.colorCode.copied" : "颜色代码已复制。"
+"inventory.palette.colorCode.pasted" : "颜色代码已粘贴。"
+"inventory.palette.colorCode.pasted.failed" : "格式错误！"
+"inventory.catalogue.innersloth" : "原版系列"
+"inventory.color.vanilla0" : "红色"
+"inventory.color.vanilla1" : "蓝色"
+"inventory.color.vanilla2" : "绿色"
+"inventory.color.vanilla3" : "粉红色"
+"inventory.color.vanilla4" : "橘色"
+"inventory.color.vanilla5" : "黄色"
+"inventory.color.vanilla6" : "黑色"
+"inventory.color.vanilla7" : "白色"
+"inventory.color.vanilla8" : "紫色"
+"inventory.color.vanilla9" : "棕色"
+"inventory.color.vanilla10" : "青色"
+"inventory.color.vanilla11" : "黄绿色"
+"inventory.color.vanilla12" : "红褐色"
+"inventory.color.vanilla13" : "玫红色"
+"inventory.color.vanilla14" : "蕉黄色"
+"inventory.color.vanilla15" : "灰色"
+"inventory.color.vanilla16" : "茶色"
+"inventory.color.vanilla17" : "珊瑚红"
+"inventory.color.visor" : "默认颜色"
+"inventory.costume.variants" : "变体"
+"inventory.costume.tag.0" : "此装扮有动画效果。"
+"inventory.costume.tag.1" : "此装扮可以变换形态。"
+"inventory.costume.tag.2" : "此装扮有其他变体。"
+
+# Logs
+
+"log.loadCostume" : "加载完成！"
+"log.awaiting" : "正在加载信息（标签：%TAG%）"
+
+# Regions
+
+"regions.Modded NA (MNA)" : "北美洲 （Mod）"
+"regions.Modded EU (MEU)" : "欧洲 （Mod）"
+"regions.Modded Asia (MAS)" : "亚洲 （Mod）"
+"regions.Niko233(NA)" : "北美洲（Niko）"
+"regions.Niko233(EU)" : "欧洲（Niko）" 
+"regions.Niko233(AS)" : "亚洲（Niko）"
+"regions.Modded Shanghai (MSH FK)" : "上海（Mod）"
+"regions.Modded Beijing (MBJ MXYX)" : "北京（Mod）"
+"regions.Modded HongKong (MHK HU)" : "香港特區（Mod）"
+
+# Free Play
+
+"role.metaRole.ui.roles" : "职业"
+"button.label.operate" : "修改"
+"game.metaAbility.tabs.roles" : "职业"
+"game.metaAbility.tabs.modifiers" : "附加属性"
+"game.metaAbility.tabs.ghostRoles" : "鬼魂职业"
+"game.metaAbility.tabs.perks" : "特技"
+"game.metaAbility.perks.standard" : "通用特技"
+"game.metaAbility.perks.noncrewmateOnly" : "非船员用特技"
+"game.metaAbility.equipped" : "分配中"
+"game.metaAbility.unequipped" : "未分配"
+
+# Social
+
+"social.appeal.detail" : "通过<b>特写</b>可以将其他玩家的注意力集中在自己身上。<br>尽情地展示自己的魅力。"
+"social.appeal.lobby" : "允许准备大厅使用<b>特写</b>"
+"social.appeal.lobby.detail" : "开启后，准备大厅会显示一个<b>特写</b>按钮。<br>使用后会把镜头聚焦在自己身上。"
+"social.appeal.game" : "允许游戏中使用<b>特写</b>"
+"social.appeal.game.detail" : "开启后，游戏中会显示一个<b>特写</b>按钮。<br>不推荐开启，如果启用请在游戏开始时进行自我介绍展示，不要在游戏进行中使用。"
+
+"achievement.social.firstClear" : "%PLAYER%首次获得"
+"achievement.social.clear" : "%PLAYER%获得"
+"achievement.social.clearMultiple" : "%PLAYER%和%OTHERS%玩家获得"
+"achievement.social.noAchievement" : "未高亮显示"
+
+# Stats
+
+"stats.ui.title" : "统计"
+"stats.ui.caption" : "*从 v2.13 （2024/12/25发布）的游戏数据进行统计。"
+"stats.group.kill" : "击杀数"
+"stats.group.death" : "死亡数"
+"stats.group.game" : "对局"
+"stats.group.roles" : "职业"
+"stats.group.perks" : "特技"
+"stats.group.aeroGuesser" : "猜图"
+"stats.role.common.assigned" : "%ROLE% 获得次数"
+"stats.role.common.won" : "通过 %ROLE% 获胜次数"
+"stats.modifier.common.assigned" : "%MODIFIER% 获得次数"
+"stats.modifier.common.won" : "通过 %MODIFIER% 获胜次数"
+"stats.ghostRole.common.assigned" : "%GHOSTROLE% 获得次数"
+"stats.ghostRole.common.won" : "通过 %GHOSTROLE% 获胜次数"
+"stats.common.kill" : "%STATE%"
+"stats.common.death" : "%STATE%"
+"stats.common.win" : "通过 %END% 获胜次数"
+"stats.common.defeat" : "通过 %END% 失败次数"
+"stats.gamePlay" : "总对局数"
+"stats.plants.gain.normal" : "从普通花获得特技次数"
+"stats.plants.gain.warped" : "从怪异花获得特技次数"
+"stats.perk.common.gain" : "%PERK% 获得次数"
+"stats.aeroGuesser.gamePlay" : "总对局数"
+"stats.aeroGuesser.totalScore" : "累计获得分数"
+"stats.aeroGuesser.perfectScore" : "获得满分次数"
+
+# Common UI
+
+"ui.dialog.yes" : "是"
+"ui.dialog.no" : "否"
+"ui.dialog.ok" : "确定"
+"ui.dialog.confirmation" : "确认"
+"ui.dialog.exit" : "退出"
+"ui.dialog.search" : "搜索"
+"ui.dialog.keyword" : "关键字"
+"ui.common.loading" : "正在加载……"
+
+# Button UI
+
+"ui.button.mainAction" : "主：行动"
+"ui.button.aidAction" : "副：行动"
+"ui.action.mouseClick" : "可以通过鼠标点击附近的玩家触发效果。"
+
+# Other UI
+
+"ui.citation.openUrl" : "点击打开连接"
+"ui.costume.missedCostume" : "想要显示其他玩家全球服装<br>必须下载对应装饰品资源<br><br>点击打开界面可以下载到全球服装"
+"ui.costume.unownedCostume" : "缺少的全球服装列表"
+"ui.error.stamp.notLoaded" : "正在加载表情包。<br>请稍候……"
+"ui.error.stamp.notAllowed" : "该房间禁用了表情包。"
+"ui.error.emote.notAllowed" : "该房间禁用了表情动作。"
+"ui.error.emote.cooldown" : "使用过急，稍等片刻。"
+"ui.stamp.onTable" : "已选表情"
+"ui.stamp.all" : "可用表情"
+"ui.stamp.full" : "表情栏已满。<br>请选择要替换的表情。"
+"ui.stamp.select" : "请选择要替换的表情。"
+"ui.stamp.click.top.1" : "鼠标左击要替换的表情，然后在下方选择你想换的表情。"
+"ui.stamp.click.top.2" : "鼠标左击以替换表情。"
+"ui.stamp.click.bottom.1" : "鼠标左击以添加表情。"
+"ui.stamp.click.bottom.2" : "鼠标左击以移除表情"
+"ui.stamp.loading" : " （加载中或未知表情）"
+"ui.warning.unrecommendedResolution" : "为了您的体验，请使用高宽比为16:9的图像分辨率。"
+"ui.error.failedToSearchRoom" : "以下区域未找到对应房间："
+"ui.error.quickStart.cannotStart" : "玩家数不足，无法开始！"

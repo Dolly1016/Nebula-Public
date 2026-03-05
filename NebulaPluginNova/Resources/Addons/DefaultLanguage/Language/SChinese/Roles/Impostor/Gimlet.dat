@@ -1,0 +1,73 @@
+# Assignable
+
+"role.gimlet.name" : "螺旋人"
+"role.gimlet.short" : "螺"
+"role.gimlet.blurb" : "贯穿一切"
+"role.gimlet.hint" : "用钻头冲撞进行击杀"
+
+# Document
+
+"role.gimlet.doc" : "螺旋人可以变身成钻头向前突进。触碰钻头的玩家会立即死亡。"
+"role.gimlet.ability.title" : "固有能力【无畏突进】"
+"role.gimlet.ability.main" : ""
+"role.gimlet.ability.drill" : "<title>钻头</title>变身成钻头，向鼠标光标方向突进。<br>撞到墙壁后结束冲刺并恢复原状。"
+"role.gimlet.tips" : "・较小的角度触碰墙壁时，会沿着墙壁继续突进并且出现摩擦声。"
+
+# Options
+
+"options.role.gimlet.detail" : "螺旋人可以通过变成钻头进行大规模杀伤的伪装者。"
+"options.role.gimlet.drillCooldown" : "钻头冷却时间"
+"options.role.gimlet.drillSize" : "钻头判定范围"
+"options.role.gimlet.drillSpeed" : "钻头移动速度"
+"options.role.gimlet.drillSpeed.detail" : "设置钻头状态下的移动速度。<br>默认为普通情况下的两倍。"
+"options.role.gimlet.canKillImpostor" : "可以击杀队友"
+"options.role.gimlet.drillSeStrength" : "钻头音效传播范围"
+"options.role.gimlet.frictionResistance" : "允许突进最大角度"
+"options.role.gimlet.frictionResistance.detail" : "调整钻头触碰墙壁继续突进的最大角度。<br>数值越大，即使以直角形式撞击墙壁，仍然保持突进状态。"
+
+# Game
+
+"gameAction.gimlet.drill" : "钻头冲撞"
+
+# UI
+
+"button.label.drill" : "钻头"
+
+# Status
+
+"state.drill" : "钻碎"
+
+# Stats
+
+"stats.gimlet.drill" : "钻头使用次数"
+"ui.action.gimlet.drill" : "变身成钻头进行冲撞攻击。"
+"role.gimlet.soundRange" : "螺旋人：<color=white>音效传播范围</color>"
+"role.gimlet.drillSize" : "螺旋人：<color=white>钻头碰撞体积</color>"
+
+# Titles
+
+"achievement.gimlet.common1.title" : "意外工伤"
+"achievement.gimlet.common1.goal" : "通过钻头击杀玩家。"
+"achievement.gimlet.common1.splitted.1" : "意外"
+
+"achievement.gimlet.common3.title" : "谨慎而行"
+"achievement.gimlet.common3.goal" : "贴着墙壁5秒以上并钻死2人以上。"
+
+"achievement.gimlet.another1.title" : "鲁莽冲撞"
+"achievement.gimlet.another1.goal" : "使用钻头后没有击杀任何人。"
+"achievement.gimlet.another1.splitted.0" : "鲁莽"
+
+"achievement.gimlet.another2.title" : "安全第一"
+"achievement.gimlet.another2.goal" : "首次变身成为钻头进入会议中被赌杀或驱逐。"
+"achievement.gimlet.another2.flavor" : "“你这什么工具？”"
+"achievement.gimlet.another2.splitted.0" : "安全第一的"
+
+"achievement.gimlet.common2.title" : "视野盲区"
+"achievement.gimlet.common2.goal" : "单次技能期间钻死4人以上。"
+"achievement.gimlet.common2.flavor" : "“我们都在努力的活着！”"
+"achievement.gimlet.common2.splitted.0" : "视野"
+
+"achievement.gimlet.challenge.title" : "无敌破坏王"
+"achievement.gimlet.challenge.goal" : "使用钻头钻死4人以上，并且最后钻死的是正在修复破坏的玩家，通过破坏获胜。"
+"achievement.gimlet.challenge.cond" : "提示：必须在玩家开始修复破坏的10秒后。"
+"achievement.gimlet.challenge.splitted.2" : "破坏王"

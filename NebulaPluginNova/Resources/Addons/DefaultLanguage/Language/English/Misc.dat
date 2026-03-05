@@ -121,9 +121,16 @@
 
 # Regions
 
+"regionsMenu.message" : "*All regions are third party and not affiliated with Innersloth."
 "regions.Modded NA (MNA)" : "North America (Mod)"
 "regions.Modded EU (MEU)" : "Europe (Mod)"
 "regions.Modded Asia (MAS)" : "Asia (Mod)"
+"regions.Niko233(NA)" : "North America (Niko)"
+"regions.Niko233(EU)" : "Europe (Niko)"
+"regions.Niko233(AS)" : "Asia (Niko)"
+"regions.Modded Shanghai (MSH FK)" : "Shanghai (Mod)"
+"regions.Modded Beijing (MBJ MXYX)" : "Beijing (Mod)"
+"regions.Modded HongKong (MHK HU)" : "HongKong (Mod)"
 
 # Free Play
 

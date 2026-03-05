@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TMPro;
+using UnityEngine.Rendering;
+using Virial.Text;
 using static HttpMatchmakerManager;
 using static Il2CppSystem.Globalization.CultureInfo;
 
@@ -27,6 +29,13 @@ public static class CreateGameOptionsPatch
         __instance.serverDropdown.transform.SetLocalY(-2.63f);
 
         __instance.capacityOption.ValidRange.max = AmongUsUtil.IsCustomServer() ? 24 : 15;
+
+        var attr = new TextAttribute(GUI.Instance.GetAttribute(AttributeParams.StandardBaredLeft)) { FontSize = new(1.2f, 0.9f, 1.2f), Size = new(5f, 1.2f), Style = Virial.Text.FontStyle.Bold, IsFlexible = false };
+        var textColor = new Virial.Color(255, 160, 160).ToUnityColor();
+        var textObj = GUI.API.RealtimeText(Virial.Media.GUIAlignment.Left, attr, () => Language.Translate("regionsMenu.message").Color(textColor).Bold(), 10).Instantiate(new(10f, 10f), out _);
+        textObj!.transform.SetParent(__instance.serverDropdown.transform.parent);
+        textObj.transform.localPosition = new(2.71f, -2.3f, 0f);
+        textObj.AddComponent<SortingGroup>();
     }
 }
 

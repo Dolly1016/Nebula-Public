@@ -1,0 +1,95 @@
+# Assignable
+
+"role.gambler.name" : "赌徒"
+"role.gambler.short" : "赌"
+"role.gambler.blurb" : "一无所有，或赢下所有！！！"
+
+# Document
+
+"role.gambler.doc" : "赌徒需要在会议中押注结果获得筹码并获胜。"
+"role.gambler.winCond" : "存活期间需要进行押注获得筹码，筹码达到<var>%NUM%</var>枚筹码才能获胜。"
+"role.gambler.ability.title" : "固有能力【命运赌者】"
+"role.gambler.ability.main" : "赌徒不能在会议中直接投票，而是通过<b>预测结果</b>并押注<b>筹码</b>进行投票操作。<br>当所有筹码全部输光就会死亡。<br>为了更好的获取有利信息，请在任务阶段积极地寻找其他幸存者向他们<b>套话</b>。<br><br>在会议中有两种押注方法，预测正确即可获得押注筹码的两倍。<br>・<b>无票押注</b>：选择三名几乎不会被投的玩家进行押注，若该三名玩家没有被投，则为预测正确。<br>・<b>多票押注</b>：选择一名玩家，若该玩家得票是全场最多即预测成功。<br>"
+"role.gambler.ability.deceive" : "<title>套话</title>对一名玩家使用套话<br>在接下来的会议中可以知晓其投票的玩家。"
+
+# Options
+
+"options.role.gambler.detail" : "赌徒可以通过押注会议结果获得筹码。<br>洞察局势赢下最后的胜利！"
+"options.role.gambler.deceiveCooldown" : "套话冷却时间"
+"options.role.gambler.deceiveDuration" : "套话所需时间"
+"options.role.gambler.initialChips" : "初始筹码数量"
+"options.role.gambler.goalChips" : "胜利所需筹码数量"
+"options.role.gambler.maxBettingPatterns" : "每轮会议可押注次数"
+"options.role.gambler.canVote" : "押注投票模式"
+"options.role.gambler.canVote.detail" : "开启后，赌徒将根据押注情况进行投票：<br>・<b>多票押注</b>：视为投票给多票押注的目标。<br>・<b>无票押注</b>：视为弃票。<br>・如果会议中可以多次押注，投票结果为最后一次押注情况。"
+"options.role.gambler.chipsLimitForNoVoteBetting" : "无票押注筹码数限制"
+"options.role.gambler.chipsLimitForNoVoteBetting.detail" : "设置无票押注允许押注的筹码数上限。"
+"options.role.gambler.noticeFirstSuccess" : "首次押注成功时播报信息"
+
+# Game
+
+"gambler.betting.control" : "鼠标左击：增加筹码<br>Shift+鼠标左击：减少筹码<br>鼠标右击：撤销押注"
+"gambler.ui.selectingHint" : "选择你要押注的目标然后点击+按钮。<br><b>无票押注</b>：选择%NV%名可能不会得票的玩家。<br><b>最多票押注</b>：选择%MV%可能会得最多票的玩家。"
+"gambler.ui.multiSelecting" : "押注对象不能重复"
+"gambler.ui.lackOfChips" :  "筹码不足"
+"gambler.ui.zeroBetting" : "无票押注"
+"gambler.ui.maxBetting" : "最多票押注"
+"gambler.currentChips" : "所持筹码："
+"gambler.ui.help.add" : "选择一名玩家后点击<b>添加筹码</b>。"
+"gambler.ui.help.check" : "<b>确定</b>当前指定押注筹码。<br>确定后其他人视角为<b>已投票</b>状态。"
+"gambler.ui.firstSuccess" : "已经赢下一小步……"
+
+# UI
+
+"button.label.deceive" : "套话"
+
+# Status
+
+"state.lost" : "破产"
+
+# Stats
+
+"stats.gambler.bet" : "押注次数"
+"stats.gambler.bet.success" : "赌赢次数"
+"stats.gambler.bet.failed" : "赌输次数"
+"stats.gambler.deceive" : "套话次数"
+
+# Titles
+
+"achievement.gambler.common1.title" : "稳健"
+"achievement.gambler.common1.goal" : "对3名以上的玩家使用了套话。"
+"achievement.gambler.common1.splitted.0" : "稳健"
+
+"achievement.gambler.common2.title" : "沉迷不悟"
+"achievement.gambler.common2.goal" : "累计下注20次。"
+"achievement.gambler.common2.flavor" : "“下一把肯定能赢。”—一位赌徒的碎碎念"
+
+"achievement.gambler.another1.title" : "一无所有"
+"achievement.gambler.another1.goal" : "全押后赌输导致破产死亡。"
+
+"achievement.gambler.common3.title" : "赢下所有！"
+"achievement.gambler.common3.goal" : "全押后赢得赌局。"
+
+"achievement.gambler.common4.title" : "火中取栗"
+"achievement.gambler.common4.goal" : "单次会议中进行3次以上下注且全部获胜。"
+"achievement.gambler.common4.splitted.0" : "火中取栗"
+
+"achievement.combination.2.gambler.lover.another.title" : "赌徒的一生"
+"achievement.combination.2.gambler.lover.another.goal" : "破产后连带恋人死亡。"
+"achievement.combination.2.gambler.lover.another.flavor" : "※拒绝黄赌毒，从你我做起。"
+
+"achievement.gambler.challenge.title" : "幸运之子"
+"achievement.gambler.challenge.goal" : "不使用套话赢得一局游戏。"
+"achievement.gambler.challenge.flavor" : "“靠运气？别逗了，哪有什么运气啊。”—赌场老板"
+"achievement.gambler.challenge.splitted.0" : "幸运的"
+"achievement.gambler.challenge.splitted.2" : "赌徒"
+
+# Team
+
+"teams.gambler" : "赌徒"
+"end.gambler" : "赌徒%EXTRA%胜利"
+
+# Document
+
+"document.tip.winCond.gambler.title" : "特殊胜利"
+"document.tip.winCond.gambler" : "存活期间需要进行押注获得筹码，达到%NUM%点筹码后即可胜利。"

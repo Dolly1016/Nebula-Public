@@ -1,0 +1,58 @@
+# Assignable
+
+"role.stirrer.name" : "幻术师"
+"role.stirrer.short" : "幻"
+"role.stirrer.blurb" : "死在我的幻术下吧"
+
+# Document
+
+"role.stirrer.doc" : "幻术师可以制造假破坏来迷惑其他玩家。"
+"role.stirrer.ability.title" : "固有能力【假破坏】"
+"role.stirrer.ability.main" : "向其他玩家致幻，并消耗致幻层数来赐予目标假破坏。"
+"role.stirrer.ability.stir" : "<title>施幻</title>向目标赐予施幻层数。"
+"role.stirrer.ability.fakeSabo" : "<title>制幻</title>消耗目标一个层数赐予假破坏。<br>假破坏的类型每个玩家都不一样。"
+"role.stirrer.tips" : "・假破坏可以通过正常修复破坏来解除。<br>・如果在规定时间内没有修复破坏，该玩家会承受对应的破坏效果。"
+
+# Options
+
+"options.role.stirrer.detail" : "幻术师可以对玩家施加幻术，让其以为有破坏。<br>如果该玩家没有修复紧急破坏，那么其就会因为破坏死去。"
+"options.role.stirrer.stirCoolDown" : "施幻冷却时间"
+"options.role.stirrer.sabotageCharge" : "每次施幻赐予层数"
+"options.role.stirrer.sabotageMaxCharge" : "施幻层数最大数量"
+"options.role.stirrer.sabotageCoolDown" : "制幻冷却时间"
+"options.role.stirrer.sabotageInterval" : "制幻额外时间"
+"options.role.stirrer.sabotageInterval.detail" : "配置后，造成假破坏后，根据该时间增加额外冷却。"
+
+# Game
+
+
+# UI
+
+"button.label.stir" : "施幻"
+"button.label.fakeSabotage" : "制幻"
+"ui.action.stirrer.stir" : "给予玩家一个标记。"
+"ui.action.stirrer.fakeSabo" : "给予被标记的玩家一个假破坏效果。"
+
+# Game Statictics
+
+"statistics.events.fakeSabotage" : "假破坏"
+
+# Status
+
+"state.deranged" : "错乱"
+
+# Stats
+
+"stats.stirrer.stir" : "施幻使用次数"
+"stats.stirrer.sabo" : "制幻使用次数"
+
+# Titles
+
+"achievement.stirrer.common1.title" : "是真是假"
+"achievement.stirrer.common1.goal" : "制造一场虚假的破坏"
+
+"achievement.stirrer.challenge.title" : "七星夺窍术"
+"achievement.stirrer.challenge.goal" : "同时对7名玩家造成假破坏效果"
+"achievement.stirrer.challenge.cond" : "提示：破坏任务3个以下且施幻冷却在10秒以上"
+"achievement.stirrer.challenge.splitted.0" : "虚伪的"
+"achievement.stirrer.challenge.splitted.2" : "北斗七星"

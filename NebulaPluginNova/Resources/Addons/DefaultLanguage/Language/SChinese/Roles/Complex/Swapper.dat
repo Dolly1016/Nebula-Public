@@ -1,0 +1,15 @@
+# Document
+
+"role.swapper.ability.swap" : "<title>换票</title>交换两名玩家的得票结果。<br>此能力在对局中只能使用<var>%NUM%</var>次。"
+
+# Options
+
+"options.role.swapper.canSelectSwapper" : "可以交换自己"
+
+# Game
+
+"roles.swapper.leftSwap" : "剩余换票次数"
+
+# UI
+
+# Status

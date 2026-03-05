@@ -7,7 +7,7 @@
 # Document
 
 "role.sniper.doc" : "An impostor who cannot perform normal kills but can get long-range kills with a sniper rifle."
-"role.sniper.ability.title" : "Inherent Ability "Sniper Rifle""
+"role.sniper.ability.title" : "Inherent Ability [Sniper Rifle]"
 "role.sniper.ability.main" : "Can snipe players far away with a sniper rifle.<br>Can also kill players across walls."
 "role.sniper.ability.equip" : "<title>Equip/Unequip</title>Ready or store the sniper rifle.<br>The readied sniper rifle is visible to others."
 "role.sniper.ability.kill" : "<title>Snipe</title>The sniper button lights up only while the sniper rifle is readied. Aim in the direction of the mouse cursor.<br>It is recommended to snipe using the keyboard shortcut for killing or LeftClick near the center of the screen."
@@ -16,7 +16,7 @@
 
 # Options
 
-"options.role.sniper.detail" : "Sniper has a rifle to snipe players.<br>When sniper shoots, players nearby they see a notification."
+"options.role.sniper.detail" : "The Sniper has a rifle to snipe players.<br>When sniper shoots, players nearby they see a notification."
 "options.role.sniper.snipeCoolDown" : "Snipe Cooldown"
 "options.role.sniper.shotSize" : "Shot Size"
 "options.role.sniper.shotEffectiveRange" : "Shot Effective Range"

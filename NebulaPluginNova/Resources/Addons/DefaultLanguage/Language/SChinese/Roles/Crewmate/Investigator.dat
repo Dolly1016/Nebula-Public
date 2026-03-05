@@ -1,0 +1,58 @@
+# Assignable
+
+"role.investigator.name" : "调查员"
+"role.investigator.short" : "查"
+"role.investigator.blurb" : "绝不放过任何线索"
+
+# Document
+
+"role.investigator.doc" : "调查员可以通过犯罪现场留下的脚印来获得信息。"
+"role.investigator.ability.title" : "固有能力【侦查之眼】"
+"role.investigator.ability.main" : "调查员拥有“调查”能力。<br>“调查”过程中可以识别行凶者的犯罪现场。<br>仔细调查足迹，可以知晓更多信息。"
+"role.investigator.ability.investigate" : "<title>調査</title>开始调查。<br>调查期间，视野会发生变化，可以看到足迹。"
+
+# Options
+
+"options.role.investigator.detail" : "调查员可以追踪其他玩家的足迹并收集信息。"
+"options.role.investigator.investigateCooldown" : "调查冷却时间"
+"options.role.investigator.investigateDuration" : "调查持续时间"
+"options.role.investigator.investigateSpeed" : "调查足迹所需时间"
+"options.role.investigator.investigateSpeed.detail" : "调查足迹信息需要一定时间。<br>数值越大，调查速度越快。"
+"options.role.investigator.investigateEyesight" : "调查技能期间视野范围"
+"options.role.investigator.investigateEyesight.detail" : "调查过程中如果视野变小，调查足迹将会变得很难。"
+"options.role.investigator.footprintDuration" : "凶手足迹留存时间"
+"options.role.investigator.footprintDuration.detail" : "设置凶手在多久前会显示足迹。"
+
+# Game
+
+"role.investigator.overlay.title.unchecked" : "没有调查到足迹"
+"role.investigator.overlay.title.checked" : "%ROOM%的足迹"
+"role.investigator.overlay.notFound" : "正在调查中……<br>发现犯罪现场的时间较短，可以更快地获取足迹。"
+"role.investigator.overlay.fastFind" : "从发现犯罪现场到使用调查能力期间没有发起紧急会议。"
+"role.investigator.overlay.reportedImmediately" : "犯罪现场似乎在发起紧急会议之前。"
+"role.investigator.overlay.elapsed" : "紧急会议似乎在出现犯罪现场%ELAPSED%秒前发起的。"
+"role.investigator.overlay.killer" : "另外，这似乎是%TEAM%的杰作。"
+
+# UI
+
+"button.label.investigate" : "调查"
+
+# Stats
+
+"stats.investigator.found" : "调查足迹次数"
+
+# Titles
+
+"achievement.investigator.common1.title" : "原来如此"
+"achievement.investigator.common1.goal" : "累计调查10次足迹。"
+"achievement.investigator.common1.flavor" : "“真相只有一个！”—《名侦探柯南》"
+
+"achievement.investigator.another1.title" : "知晓真相的后果"
+"achievement.investigator.another1.goal" : "调查过程中，在足迹附近死亡。"
+
+"achievement.investigator.another2.title" : "罪恶的帮凶"
+"achievement.investigator.another2.goal" : "在调查发现足迹后，结束后没有驱逐任何一个嫌疑人。"
+
+"achievement.investigator.challenge.title" : "真理的追求者"
+"achievement.investigator.challenge.goal" : "在调查发现足迹后并驱逐嫌疑人。"
+"achievement.investigator.challenge.splitted.0" : "真理的"

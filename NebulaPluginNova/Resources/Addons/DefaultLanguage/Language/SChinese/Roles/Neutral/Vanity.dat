@@ -1,0 +1,68 @@
+# Assignable
+
+"role.vanity.name" : "虚荣者"
+"role.vanity.short" : "荣"
+"role.vanity.blurb" : "愿成为真正的正义"
+
+# Document
+
+"role.vanity.doc" : "虚荣者自认为是警长。"
+"role.vanity.winCond" : "如果未击杀过船员，当船员获胜时，可以与船员一起胜利。<br>如果击杀过船员，<var>%WIN%</var>。"
+"role.vanity.winCond.independent" : "那么需要击杀所有人"
+"role.vanity.winCond.extra" : "当船员失败时可以跟随胜利者一起胜利</var>"
+"role.vanity.ability.title" : "固有能力【正义使者？】"
+"role.vanity.ability.main" : "虚荣者在开始时与警长相同，但不会因为走火而死。"
+"role.vanity.ability.kill" : "可以击杀所有人。"
+
+# Options
+
+"options.role.vanity.detail" : "虚荣者自认为是警长。<br>胜利条件根据击杀行为而改变。"
+"options.role.vanity.canExtraWinEvenIfVanityDied" : "死亡时也跟随胜利"
+"options.role.vanity.independentTeam" : "独立阵营模式"
+"options.role.vanity.becomeAwareOfVanityWhenKillCrewmate" : "击杀船员后觉醒认知职业"
+"options.role.vanity.canBecomeAwareOfVanity" : "完成任务后觉醒认知职业"
+"options.role.vanity.taskProgressRequiredForSelfAdmission" : "觉醒所需完成任务进度"
+"options.role.vanity.group.task" : "自我认知设定"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.vanity.kill" : "击杀次数"
+
+# Titles
+
+"achievement.vanity.common1.title" : "自我觉醒"
+"achievement.vanity.common1.goal" : "得知自己是虚荣者"
+
+"achievement.vanity.another1.title" : "骄兵必败"
+"achievement.vanity.another1.goal" : "击杀一名船员后，除被驱逐或赌杀以外的原因死亡。"
+
+"achievement.combination.2.sheriff.vanity.common2.title" : "若我坚定不移"
+"achievement.combination.2.sheriff.vanity.common2.goal" : "以警长的身份击杀非船员玩家，但最终驱逐了船员玩家而输掉游戏。"
+"achievement.combination.2.sheriff.vanity.common2.cond" : "提示：仅虚荣者存在的对局中解锁。"
+"achievement.combination.2.sheriff.vanity.common2.flavor" : "“只是太过不坚定了……”"
+
+"achievement.vanity.challenge.title" : "再见了我的朋友！"
+"achievement.vanity.challenge.goal" : "击杀最后一名船员后获胜。"
+"achievement.vanity.challenge.splitted.0" : "再见了"
+
+# Team
+
+"teams.vanity" : "虚荣者"
+"end.vanity" : "虚荣者%EXTRA%胜利"
+"end.extra.vanity" : "<color=#FFFFFF>+</color>虚荣者"
+
+# Document
+
+"document.tip.winCond.vanity.kill.title" : "击杀胜利"
+"document.tip.winCond.vanity.kill" : "若已击杀船员，需要完全歼灭其他阵营或自身阵营占据全体幸存玩家的一半以上。"
+"document.tip.winCond.vanity.extra.crewOnly.title" : "跟随船员胜利"
+"document.tip.winCond.vanity.extra.crewOnly" : "若未击杀船员，当船员阵营获得胜利时跟随船员胜利。"
+"document.tip.winCond.vanity.extra.title" : "跟随胜利"
+"document.tip.winCond.vanity.extra" : "若未击杀船员，当船员阵营获得胜利时跟随船员胜利。<br>若已击杀船员，当船员阵营失败时跟随胜利方胜利。"
+"document.tip.winCond.vanity.extra.surviveCond" : "跟随胜利需要保证虚荣者一直处于<b>存活</b>状态。"

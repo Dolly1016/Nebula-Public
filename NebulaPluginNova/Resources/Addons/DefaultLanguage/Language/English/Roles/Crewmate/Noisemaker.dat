@@ -10,7 +10,7 @@
 
 # Options
 
-"options.role.noisemaker.detail" : "Noisemaker send out an alert when killed."
+"options.role.noisemaker.detail" : "The Noisemaker send out an alert when killed."
 "options.role.noisemaker.noiseDuration" : "Noise Duration"
 
 # Game

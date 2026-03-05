@@ -8,14 +8,14 @@
 # Document
 
 "role.gimlet.doc" : "An impostor who transforms into a drill and rushes. Players touched by the drill die."
-"role.gimlet.ability.title" : "Inherent Ability "Drill Fierce Charge""
+"role.gimlet.ability.title" : "Inherent Ability [Drill Fierce Charge]"
 "role.gimlet.ability.main" : ""
 "role.gimlet.ability.drill" : "<title>Drill</title>Transform into a drill and rush. Rush in the direction of the mouse cursor.<br>Colliding with a wall ends the rush and returns you to your original form."
 "role.gimlet.tips" : "・Touching a wall at a shallow angle allows you to continue rushing while scraping against the wall."
 
 # Options
 
-"options.role.gimlet.detail" : "Gimlet is an imposter who can transform into a drill."
+"options.role.gimlet.detail" : "The Gimlet is an imposter who can transform into a drill."
 "options.role.gimlet.drillCooldown" : "Drill Cooldown"
 "options.role.gimlet.drillSize" : "Drill Size"
 "options.role.gimlet.drillSpeed" : "Drill Speed"

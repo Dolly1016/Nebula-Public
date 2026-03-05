@@ -1,5 +1,6 @@
 ﻿using Nebula.AeroGuesser;
 using Nebula.Behavior;
+using Nebula.Modules.Logging;
 using Nebula.Roles;
 using Nebula.Roles.Abilities;
 using Nebula.Roles.Crewmate;
@@ -44,14 +45,14 @@ internal class NebulaPreprocessorImpl : NebulaPreprocessor
             if (method == null)
             {
                 preprocessList[(int)attr.MyPhase].Add(() => ManagedEffects.Action(() => Helpers.RunStaticConstructor(t)));
-                NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, t.Name + " doesn't have preprocessor. its static constructor is called instead.");
+                NebulaLogger.Instance.Message(t.Name + " doesn't have preprocessor. its static constructor is called instead.");
             }
             else if(method.ReturnType == typeof(void))
                 preprocessList[(int)attr.MyPhase].Add(() => ManagedEffects.Action(()=> method.Invoke(null, [this])));
             else if (method.ReturnType == typeof(IEnumerator))
                 preprocessList[(int)attr.MyPhase].Add(() => (method.Invoke(null, [this]) as IEnumerator)!);
             else
-                NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, t.Name + " has invalid preprocess that returns unsupported type.");
+                NebulaLogger.Instance.Error(t.Name + " has invalid preprocess that returns unsupported type.");
         }
     }
 
@@ -64,7 +65,7 @@ internal class NebulaPreprocessorImpl : NebulaPreprocessor
         else if (assignable is DefinedGhostRole dgr)
             Roles.Roles.Register(dgr);
         else
-            NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, assignable.GetType().Name + " is unknown type.");
+            NebulaLogger.Instance.Error(assignable.GetType().Name + " is unknown type.");
     }
 
     AssignmentType NebulaPreprocessor.RegisterAssignmentType(Func<DefinedRole> relatedRole, Func<int[], DefinedRole, int[]> argumentEditor, string postfix, Virial.Color? color, Func<AbilityAssignmentStatus, DefinedRole, bool> predicate, Func<bool> isActive, bool canGuessAsAbility)
@@ -74,6 +75,17 @@ internal class NebulaPreprocessorImpl : NebulaPreprocessor
     }
 
     RoleTeam NebulaPreprocessor.CreateTeam(string translationKey, Virial.Color color, TeamRevealType revealType) => new Team(translationKey, color, revealType);
+
+    bool NebulaPreprocessor.RegisterRpcType<T, V>(Func<T?, V> serializer, Func<V, T?> deserializer) where T : class
+    {
+        var process = RemoteProcessAsset.GetProcess(typeof(V));
+        new RemoteProcessArgument<T>((writer, val) => {
+            process.Item1.Invoke(writer, serializer.Invoke(val));
+        }, (reader) => { 
+            return (T?)process.Item2.Invoke(reader)!;
+        });
+        return true;
+    }
 
     void NebulaPreprocessor.SchedulePreprocess(PreprocessPhase phase, Action process) => (this as NebulaPreprocessor).SchedulePreprocess(phase, process.ToCoroutine());
     
@@ -111,7 +123,7 @@ public static class ToolsInstaller
     static IEnumerator Preprocess(NebulaPreprocessor preprocessor)
     {
 #if PC
-        if (NebulaPlugin.Log.IsPreferential)
+        if (NebulaPlugin.IsPreferential)
         {
             Patches.LoadPatch.LoadingText = "Installing Tools";
             yield return null;

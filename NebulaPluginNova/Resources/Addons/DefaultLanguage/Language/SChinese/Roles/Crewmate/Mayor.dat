@@ -1,0 +1,57 @@
+# Assignable
+
+"role.mayor.name" : "市长"
+"role.mayor.short" : "市"
+"role.mayor.blurb" : "找出伪装者并将之放逐"
+
+# Document
+
+"role.mayor.doc" : "市长可以在会议上存票。<br>市长在投票阶段的任意时间都可以使用存下的投票。<br>将投票数设为0可以累积选票。<br>在投票界面中，将有两个按钮来调节市长在本次会议中的投票数。<br>市长若决定存票，市长需要将投票数调为0。"
+
+# Options
+
+"options.role.mayor.detail" : "市长可以在会议上存票。<br>市长可以在合适的时机存票或投票。"
+"options.role.mayor.fixedVotes" : "固定票数"
+"options.role.mayor.fixedVotes.detail" : "开启后只能投出固定票数。"
+"options.role.mayor.minVote" : "最小投票数"
+"options.role.mayor.minVote.detail" : "设置每次会议可以投出的最小票数。"
+"options.role.mayor.maxVote" : "最大投票数"
+"options.role.mayor.maxVote.detail" : "设置每次会议可以投出的最大票数。"
+"options.role.mayor.maxVotesStock" : "可存下最大票数"
+"options.role.mayor.maxVotesStock.detail" : "市长通过之前所存储的票来进行投票。<br>如果在投票的时候没有选择票数，则会存起来为下次会议中使用。"
+"options.role.mayor.voteAssignment" : "会议投票分配"
+"options.role.mayor.voteAssignment.detail" : "每次会议都会获得额外的票数。<br>此设置可以用来更快地存票。"
+"options.role.mayor.voteAssignmentOnReporting" : "自身报告尸体额外获得票数"
+"options.role.mayor.voteAssignmentPerTasks" : "每完成一个任务获得票数"
+
+# Game
+
+# UI
+
+
+# Stats
+
+"stats.mayor.votes" : "投出票数量"
+"role.mayor.hud.votes" : "所持票数"
+
+# Titles
+
+"achievement.mayor.common1.title" : "这就是独裁"
+"achievement.mayor.common1.goal" : "使用自己的能力将其他玩家票出。"
+"achievement.mayor.common1.cond" : "提示：必须是自己票的玩家"
+"achievement.mayor.common1.flavor" : "“我说的才算！”—来自独裁者的发言。"
+"achievement.mayor.common1.splitted.0" : "这就是"
+
+"achievement.mayor.another1.title" : "白忙活"
+"achievement.mayor.another1.goal" : "没有投出一票的情况下死亡。"
+"achievement.mayor.another1.cond" : "提示：3次会议以上"
+
+"achievement.mayor.common2.title" : "隐藏实力"
+"achievement.mayor.common2.goal" : "从开局第一次会议开始计算，连续3次会议只投1票。"
+"achievement.mayor.common2.cond" : "提示：隐藏能力后，用能力放逐一名玩家。"
+"achievement.mayor.common2.splitted.2" : "实力"
+
+"achievement.mayor.challenge.title" : "谨慎的市长"
+"achievement.mayor.challenge.goal" : "仅用自己的选票将一名非船员的玩家放逐。"
+"achievement.mayor.challenge.cond" : "提示：小丑不算"
+"achievement.mayor.challenge.flavor" : "谨慎才能干大事！"

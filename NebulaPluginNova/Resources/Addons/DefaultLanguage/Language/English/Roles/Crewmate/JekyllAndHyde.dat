@@ -10,10 +10,10 @@
 # Document
 
 "role.jekyllAndHyde.doc" : "Your personality switches every time an emergency meeting ends.<br>Jekyll is a member of the crewmates, and Hyde is a member of the impostors."
-"role.jekyllAndHyde.winCond" : "For Jekyll: Win by completing tasks to achieve crewmate victory.<br>For Hyde: Win by achieving impostor victory."
-"role.jekyllAndHyde.ability.title" : "Inherent Ability "Multiple Personalities""
-"role.jekyllAndHyde.ability.main" : "Two personalities switch with each other. Jekyll can obtain transformation potions, and Hyde has a limited-use kill button.<br>If Hyde kills an impostor, Hyde becomes a member of the impostors, and the personality is fixed as Hyde."
-"role.jekyllAndHyde.ability.drug" : "<title>Medicine</title>Jekyll obtains a <b>medicine</b> by completing tasks.<br>Drinking the medicine immediately transforms you into Hyde."
+"role.jekyllAndHyde.winCond" : "For Jekyll: Win by completing tasks as a crewmate.<br>For Hyde: Win as an impostor."
+"role.jekyllAndHyde.ability.title" : "Inherent Ability [Multiple Personalities]"
+"role.jekyllAndHyde.ability.main" : "Two personalities switch with each other. Jekyll can get medicines can switch the personality, and Hyde has a limited-use kill button.<br>If Hyde kills an impostor, Hyde becomes a member of the impostors, and the personality is fixed as Hyde."
+"role.jekyllAndHyde.ability.drug" : "<title>Medicine</title>Jekyll gets a <b>medicine</b> by completing tasks.<br>Taking the medicine immediately transforms you into Hyde."
 "role.jekyllAndHyde.tips" : "・Personality also switches upon exile. If the game ends due to exile,<br>the outcome is determined by the personality after the switch.<br>・The initial personality at the start of the game is randomly determined.<br>・Personality does not switch after death."
 
 # Options
@@ -43,7 +43,7 @@
 # Titles
 
 "achievement.jekyllAndHyde.common1.title" : "Sweet Moment"
-"achievement.jekyllAndHyde.common1.goal" : "Drink the medicine and transform into Hyde."
+"achievement.jekyllAndHyde.common1.goal" : "Take the medicine and transform into Hyde."
 "achievement.jekyllAndHyde.common1.flavor" : ""All of it was a new and sweet moment." —From the Doctor's Notes"
 "achievement.jekyllAndHyde.common1.splitted.2" : "Moment"
 
@@ -53,14 +53,14 @@
 
 "achievement.jekyllAndHyde.common2.title" : "Farewell"
 "achievement.jekyllAndHyde.common2.goal" : "Kill an impostor as Hyde."
-"achievement.jekyllAndHyde.common2.flavor" : ""This is the end." ―From the doctor's notes"
+"achievement.jekyllAndHyde.common2.flavor" : ""This is the end." —From the doctor's notes"
 
 "achievement.jekyllAndHyde.common3.title" : "Darkness"
 "achievement.jekyllAndHyde.common3.goal" : "Kill a crewmate as Jekyll."
 "achievement.jekyllAndHyde.common3.flavor" : ""It was a thought I couldn't help but fear." —From the Doctor's notes"
 
 "achievement.jekyllAndHyde.challenge.title" : "Human"
-"achievement.jekyllAndHyde.challenge.goal" : "Win as a crewmate by achieving crewmate victory as Jekyll while killing as Hyde."
-"achievement.jekyllAndHyde.challenge.cond" : "Kill a player from the crewmate team"
+"achievement.jekyllAndHyde.challenge.goal" : "Win with crewmates as Jekyll while killing as Hyde."
+"achievement.jekyllAndHyde.challenge.cond" : "Kill a crewmate team player"
 "achievement.jekyllAndHyde.challenge.flavor" : ""And yet, I will go on living" —Henry Jekyll?"
 "achievement.jekyllAndHyde.challenge.splitted.2" : "Human"

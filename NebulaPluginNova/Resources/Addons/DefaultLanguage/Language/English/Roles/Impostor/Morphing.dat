@@ -7,7 +7,7 @@
 # Document
 
 "role.morphing.doc" : "An impostor who can sample other players' appearances and morph into them."
-"role.morphing.ability.title" : "Inherent Ability "Morphing""
+"role.morphing.ability.title" : "Inherent Ability [Morphing]"
 "role.morphing.ability.main" : ""
 "role.morphing.ability.sample" : "<title>Sample</title>Sample the current appearance of the player.<br><var>%SAMPLE%</var>"
 "role.morphing.ability.morph" : "<title>Morph</title>Morph into the sampled appearance.<br>The effect ends or activates the ability again while the ability is active returns you to your original appearance."
@@ -16,7 +16,7 @@
 
 # Options
 
-"options.role.morphing.detail" : "Morphing samples the appearance of the player<br>and transforms into that form."
+"options.role.morphing.detail" : "The Morphing samples the appearance of the player<br>and transforms into that form."
 "options.role.morphing.sampleCoolDown" : "Sample Cooldown"
 "options.role.morphing.morphCoolDown" : "Morph Cooldown"
 "options.role.morphing.morphDuration" : "Morph Duration"
@@ -34,7 +34,6 @@
 
 "stats.morphing.sample" : "Num of Taking Samples"
 "stats.morphing.morph" : "Num of Morphing"
-"stats.morphing.paint" : "Number of Paints"
 
 # Titles
 

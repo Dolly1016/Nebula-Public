@@ -1,0 +1,56 @@
+# Assignable
+
+"role.justice.name" : "大神官"
+"role.justice.short" : "官"
+"role.justice.blurb" : "实行正义审判"
+
+# Document
+
+"role.justice.doc" : "大神官可以将两名玩家送上<b>审判</b>会议。"
+"role.justice.ability.title" : "固有能力【会议审判】"
+"role.justice.ability.main" : "在会议中选择<var>%NUM%</var>名玩家<var>%PICKME%</var>进行<b>会议审判</b>。<br>在这种特殊会议中，你只能投票给两名玩家其中之一。<br>如果两人平票，那么就全部<b>放逐</b>。"
+"role.justice.ability.pickJustice" : "和自己"
+"role.justice.ability.meeting" : "<title>选择</title>在会议期间选择审判的对象。"
+"role.justice.tips" : "・这个职业与<color=#ff7f00>超</color><color=#ff0000>新</color><color=#00ff00>职业</color>进行联动（原职业：天秤）。"
+
+# Options
+
+"options.role.justice.detail" : "大神官可以选择两名玩家置于“天平”上<br>并实行一场特殊的会议。"
+"options.role.justice.putJusticeOnTheBalance" : "对峙模式"
+"options.role.justice.justiceMeetingTime" : "法庭结束时间"
+
+# Game
+
+"game.meeting.justiceMeeting" : "请选择你心中的目标！"
+
+# UI
+
+# Stats
+
+"stats.justice.exiled" : "在天平上被放逐玩家数量"
+"stats.justice.nonCrewmates" : "在天平上被放逐非船员玩家数量"
+
+# Titles
+
+"achievement.justice.common1.title" : "审判时间"
+"achievement.justice.common1.goal" : "发起一次公平会议。"
+"achievement.justice.common1.flavor" : "“请说出你们的证词！”—来自法庭最高的声音。"
+"achievement.justice.common1.splitted.0" : "审判的"
+
+"achievement.justice.common2.title" : "裁定之刻"
+"achievement.justice.common2.goal" : "法庭中有一方是伪装者。"
+"achievement.justice.common2.flavor" : "“充满紧张的气氛。” —来自一个人的唏嘘。"
+
+"achievement.justice.another1.title" : "生性多疑"
+"achievement.justice.another1.goal" : "自己在法庭中被驱逐。"
+"achievement.justice.another1.flavor" : "“难道他是无辜的？” —来自疑惑的人。"
+"achievement.justice.another1.splitted.0" : "多疑的"
+
+"achievement.justice.common3.title" : "充满争议"
+"achievement.justice.common3.goal" : "两个玩家获得同样的票数。"
+"achievement.justice.common3.flavor" : "“都有充分的理由，真让人难办。”—来自会议记录。"
+
+"achievement.justice.challenge.title" : "原告？被告？"
+"achievement.justice.challenge.goal" : "将两名伪装者挂在法庭上，并同时驱逐。"
+"achievement.justice.challenge.flavor" : "“正义的天平始终平衡。”"
+"achievement.justice.challenge.splitted.0" : "邪恶的"

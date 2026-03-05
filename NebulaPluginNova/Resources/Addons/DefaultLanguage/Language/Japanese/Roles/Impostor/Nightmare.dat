@@ -54,10 +54,13 @@
 
 "achievement.nightmare.another1.title" : "夜道に気をつけて"
 "achievement.nightmare.another1.goal" : "夜の領域内で死亡する。"
+"achievement.nightmare.another1.splitted.0" : "夜道に"
 
 "achievement.nightmare.another2.title" : "夢オチ希望"
 "achievement.nightmare.another2.goal" : "はじめて闇夜を発動した直後の会議で追放あるいは推察される。"
+"achievement.nightmare.another2.splitted.0" : "夢オチ"
 
 "achievement.nightmare.challenge.title" : "ある一夜の凶変"
 "achievement.nightmare.challenge.goal" : "一度の闇夜で、夜の領域内で3人以上死亡する。"
 "achievement.nightmare.challenge.cond" : "ナイトメア自身も夜の領域内で1キル以上決めること"
+"achievement.nightmare.challenge.splitted.1" : "一夜の"

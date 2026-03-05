@@ -1,0 +1,22 @@
+# Header
+
+"options.exile" : "放逐设置"
+"options.exile.detail" : "放逐玩家相关设置。"
+
+# Groups
+
+# Options
+
+"options.exile.group.confirmEject" : "确认放逐数量信息设定"
+"options.exile.confirmEjectCondition" : "可知晓剩余总结信息对象"
+"options.exile.confirmEjectTarget" : "统计剩余人数对象"
+"options.exile.confirmEject.all" : "全部"
+"options.exile.confirmEject.impostors" : "伪装者"
+"options.exile.confirmEject.killers" : "带刀者"
+"options.exile.confirmEject.nonCrewmates" : "非船员"
+"exile.confirmEject.impostor.s" : "剩下%NUM%个伪装者。"
+"exile.confirmEject.impostor.p" : "剩下%NUM%个伪装者。"
+"exile.confirmEject.killer.s" : "剩下%NUM%个带刀者。"
+"exile.confirmEject.killer.p" : "剩下%NUM%个带刀者。"
+"exile.confirmEject.nonCrewmate.s" : "剩下%NUM%个非船员。"
+"exile.confirmEject.nonCrewmate.p" : "剩下%NUM%个非船员。"

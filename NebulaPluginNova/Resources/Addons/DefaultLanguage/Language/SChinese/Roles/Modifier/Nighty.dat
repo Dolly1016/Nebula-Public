@@ -1,0 +1,39 @@
+# Assignable
+
+"role.nighty.name" : "眠夜"
+"role.nighty.generalBlurb" : "乖乖睡觉去吧！"
+
+# Document
+
+"role.nighty.doc" : "眠夜可以放置<b>安眠地雷</b>让踩中的玩家视野受到限制。"
+"role.nighty.ability.title" : "固有能力【安眠地雷】"
+"role.nighty.ability.main" : "踩到地雷的玩家视野会在一段时间内受到限制。<br>自身和其他伪装者<b>不会</b>触发。"
+"role.nighty.ability.place" : "<title>放置</title>放置安眠地雷。<br>安眠地雷对所有伪装者可见。"
+
+# Options
+
+"options.role.nighty.detail" : "眠夜可以放置让玩家视野受限的陷阱。"
+"options.role.nighty.placeCooldown" : "安眠地雷放置冷却时间"
+"options.role.nighty.mineDuration" : "安眠地雷持续时间"
+"options.role.nighty.mineSize" : "安眠地雷判定范围"
+"options.role.nighty.blindDuration" : "视野缩小持续时间"
+
+# Game
+
+"gameAction.nighty.place" : "放置安眠地雷"
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.nighty.common1.title" : "晚安咯！"
+"achievement.nighty.common1.goal" : "使用安眠地雷累计触发3次。"
+"achievement.nighty.common1.splitted.0" : "晚安"
+
+"achievement.nighty.challenge.title" : "安眠之夜"
+"achievement.nighty.challenge.goal" : "使用安眠地雷累计触发8次，且有8名玩家以不同的死因死亡。<br>所有伪装者都存活，并且获胜。"
+"achievement.nighty.challenge.cond" : "条件：2个伪装者以上"

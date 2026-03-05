@@ -1,0 +1,70 @@
+# Assignable
+
+"role.hadar.name" : "矿工"
+"role.hadar.short" : "矿"
+"role.hadar.blurb" : "我最爱的金矿在哪里"
+"role.hadar.hint" : "潜入地底然后偷袭。"
+
+# Document
+
+"role.hadar.doc" : "矿工可以遁地，在地底自由行动。"
+"role.hadar.ability.title" : "固有能力【挖洞】"
+"role.hadar.ability.main" : "可以遁地，在地底自由行动。在地下时视野会变得非常狭窄昏暗，但可以感知到附近的玩家。"
+"role.hadar.ability.dive" : "<title>遁地</title>遁入地下。"
+"role.hadar.ability.gush" : "<title>跳出</title>跳出地面。"
+"role.hadar.ability.gush.vent" : "<title>跳出</title>从附近的通风口跳出地面。"
+"role.hadar.ability.evidence" : "<title>遁地痕迹</title>每次遁地时都会在原地留下一个坑。<br>穴は会議を跨ぐたびに小さくなります。"
+"role.hadar.tips" : "・在地下时，击杀冷却不会自然恢复。"
+
+# Options
+
+"options.role.hadar.detail" : "矿工可以在地下自由移动。<br>玩家看不到在地下的矿工。"
+"options.role.hadar.diveCooldown" : "遁地冷却时间"
+"options.role.hadar.accelRateUnderground" : "在地下移动速度倍率"
+"options.role.hadar.gushFromVents" : "显现时从最近通风口跳出"
+"options.role.hadar.gushFromVents.detail" : "开启后，矿工只能从最近的通风口中出现。<br>反之可以在任何有效区域出现。"
+"options.role.hadar.ventDetectionRange" : "通风口检测范围"
+"options.role.hadar.leftDivingEvidence" : "遁地时会留下证据"
+"options.role.hadar.leftDivingEvidence.detail" : "开启后，潜入地下时，地面会留下一个洞。<br>这个洞会随着会议的进行逐渐消失。"
+
+# Game
+
+"gameAction.hadar.disappear" : "矿工遁地"
+"gameAction.hadar.appear" : "矿工跳出"
+
+# UI
+
+"button.label.dive" : "遁地"
+"button.label.gush" : "跳出"
+
+# Stats
+
+"stats.hadar.dive" : "遁地使用次数"
+
+# Titles
+
+"achievement.hadar.common1.title" : "来自地底的杀意"
+"achievement.hadar.common1.goal" : "取消遁地后，在8秒内进行击杀。"
+"achievement.hadar.common1.splitted.2" : "杀意"
+
+"achievement.hadar.common2.title" : "超级矿工"
+"achievement.hadar.common2.goal" : "击杀后8秒内遁地。"
+
+"achievement.hadar.common3.title" : "勘探员"
+"achievement.hadar.common3.goal" : "累计10次遁地、跳出。"
+"achievement.hadar.common3.splitted.0" : "地底的"
+"achievement.hadar.common3.splitted.2" : "勘探员"
+
+"achievement.hadar.another1.title" : "愚人者"
+"achievement.hadar.another1.goal" : "遁地后的会议上被驱逐或被赌杀。"
+
+"achievement.hadar.common4.title" : "惊喜！"
+"achievement.hadar.common4.goal" : "在存活玩家附近取消潜伏。"
+"achievement.hadar.common4.splitted.1" : "……"
+
+"achievement.hadar.common5.title" : "黄金在哪里？"
+"achievement.hadar.common5.goal" : "遁地期间移动30米以上。"
+
+"achievement.hadar.challenge.title" : "黄金矿工"
+"achievement.hadar.challenge.goal" : "在一局游戏内遁地50秒且击杀3人以上并获胜。"
+"achievement.hadar.challenge.splitted.2" : "黄金矿工"

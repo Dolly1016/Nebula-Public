@@ -6,12 +6,12 @@
 
 # Document
 
-"role.avenger.doc" : "A neutral member burning with revenge after their lover's life is taken."
+"role.avenger.doc" : "A neutral burning with revenge after their lover's life is taken."
 "role.avenger.winCond" : "Kill the revenge target and survive until the end."
 
 # Options
 
-"options.role.avenger.detail" : "When a Lovers partner is killed, the remaining becomes Avenger.<br>Achieve your revenge and steal the victory."
+"options.role.avenger.detail" : "When a Lovers partner is killed, the remaining becomes the Avenger.<br>Achieve your revenge and steal the victory."
 "options.role.avenger.killCoolDown" : "Kill Cooldown"
 "options.role.avenger.canKnowExistanceOfAvenger" : "Can Know Existance Of Avenger"
 "options.role.avenger.canKnowExistanceOfAvenger.off" : "Off"
@@ -52,7 +52,7 @@
 "achievement.avenger.another2.splitted.2" : "Die"
 
 "achievement.avenger.challenge.title" : "Avengers"
-"achievement.avenger.challenge.goal" : "Both you and your partner become Avengers and win as Avengers."
+"achievement.avenger.challenge.goal" : "Both you and your partner become Avengers and win as the Avenger."
 
 # Team
 

@@ -27,7 +27,7 @@
 
 "achievement.challenge.lastCrewmate.title" : "Steep Peak"
 "achievement.challenge.lastCrewmate.goal" : "Survive as the last Crewmate and win with Crewmate victory."
-"achievement.challenge.lastCrewmate.cond" : "Madmate is not counted as part of the Crewmate faction"
+"achievement.challenge.lastCrewmate.cond" : "Madmate is not counted as part of the Crewmate team"
 
 "achievement.challenge.death2.title" : "All Kinds of Tricks"
 "achievement.challenge.death2.goal" : "Cause players to die from 4 or more types of causes of death."
@@ -35,7 +35,7 @@
 
 "achievement.noCrewmate.title" : "Time Limit"
 "achievement.noCrewmate.goal" : "Win with task victory while all Crewmates are dead."
-"achievement.noCrewmate.cond" : "You must belong to the Crewmate faction+Madmate is not counted as part of the Crewmate faction"
+"achievement.noCrewmate.cond" : "You must belong to the Crewmate team+Madmate is not counted as part of the Crewmate team"
 
 "achievement.challenge.crewmate.title" : "The Ordinary"
 "achievement.challenge.crewmate.goal" : "Win by tasks without anyone dying."
@@ -86,7 +86,7 @@
 "achievement.allWayDeath.goal" : "Experience death from all causes of death."
 
 "achievement.perk.screen.title" : "Game Changer"
-"achievement.perk.screen.goal" : "Acquire a screen flip perk as part of the Crewmate faction."
+"achievement.perk.screen.goal" : "Acquire a screen flip perk as part of the Crewmate team."
 "achievement.perk.screen.flavor" : ""I'll show you a big upset!""
 
 "achievement.perk.meteor.title" : "Starfall Apocalypse"

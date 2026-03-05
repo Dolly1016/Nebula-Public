@@ -1,0 +1,66 @@
+# Assignable
+
+"role.obsessional.name" : "暗恋者"
+"role.obsessional.blurb" : "我深深地暗恋这%NAME%"
+"role.obsessional.generalBlurb" : "只想安安静静地爱着你"
+
+# Document
+
+"role.obsessional.doc" : "暗恋者自身的胜利条件会变成暗恋对象的胜利条件。%SUICIDE%"
+"role.obsessional.doc.suicide" : "暗恋对象死亡时，暗恋者会<var>殉情</var>。"
+"role.obsessional.winCond" : "%WIN%"
+"role.obsessional.winCond.canWinEvenIfTargetDie" : "%SELF%暗恋对象胜利时，会跟随暗恋对象获胜。<br>自身职业的胜利条件<b><color=#ff0000ff>无效</color></b>。"
+"role.obsessional.winCond.cannotWinIfTargetDie" : "%SELF%暗恋对象<var>存活并</var>胜利时会跟随暗恋对象获胜。<br>自身职业的胜利条件<b><color=#ff0000ff>无效</color></b>。"
+"role.obsessional.winCond.cannotWinIfSelfDie" : "自身<var>存活</var>，并且"
+
+# Options
+
+"options.role.obsessional.detail" : "暗恋者开局会分配一个玩家作为暗恋目标。<br>只有暗恋对象胜利才能获得额外胜利。"
+"options.role.obsessional.canWinEvenIfObsessionalTargetDie" : "即使暗恋目标死亡也能胜利"
+"options.role.obsessional.canWinEvenIfObsessionalDie" : "即使自身死亡也能胜利"
+"options.role.obsessional.obsessionalSuicideWhenObsessionalTargetDie" : "暗恋目标死亡会殉情"
+"options.role.obsessional.impostorObsessionalObsessesOver" : "伪装者玩家暗恋目标可以是"
+"options.role.obsessional.impostorObsessionalObsessesOver.default" : "全部"
+"options.role.obsessional.impostorObsessionalObsessesOver.neutralOnly" : "仅第三方阵营"
+"options.role.obsessional.impostorObsessionalObsessesOver.nonCrewmate" : "除伪装者阵营"
+
+# Game
+
+"role.obsessional.taskText" : "【暗恋者】暗恋目标是%PLAYER%。"
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+"achievement.obsessional.common1.title" : "默默无闻的爱"
+"achievement.obsessional.common1.goal" : "与暗恋对象一起获得胜利。"
+"achievement.obsessional.common1.splitted.0" : "默默无闻"
+
+"achievement.obsessional.another1.title" : "执念到天涯海角"
+"achievement.obsessional.another1.goal" : "因暗恋对象的死亡而自杀。"
+"achievement.obsessional.another1.flavor" : "“我一直都默默地爱着你……”—来自一位自杀者。"
+
+"achievement.obsessional.another2.title" : "不被期待的爱情"
+"achievement.obsessional.another2.goal" : "自身为伪装者，但目标不为，导致伪装者胜利而失败。"
+"achievement.obsessional.another2.splitted.0" : "不被期待"
+
+"achievement.obsessional.lover1.title" : "三角恋"
+"achievement.obsessional.lover1.goal" : "暗恋对象以恋人胜利，自己也一起胜利。"
+"achievement.obsessional.lover1.flavor" : "奇妙的关系网。"
+"achievement.obsessional.lover1.splitted.2" : "幻想"
+
+"achievement.obsessional.lover2.title" : "错失所爱"
+"achievement.obsessional.lover2.goal" : "暗恋对象因为是恋人跟随对象导致自己失败。"
+
+"achievement.obsessional.challenge.title" : "全部属于你"
+"achievement.obsessional.challenge.goal" : "只与暗恋对象两人取胜。"
+"achievement.obsessional.challenge.splitted.0" : "全部"
+
+# Team
+
+"end.extra.obsessional" : "<color=#FFFFFF>+</color>暗恋者"
+

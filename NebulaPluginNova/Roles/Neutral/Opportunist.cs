@@ -76,7 +76,7 @@ internal class Opportunist : DefinedRoleTemplate, HasCitation, DefinedRole
         }
         bool RuntimeAssignable.CanFixComm => CanFixCommsOption;
         bool RuntimeAssignable.CanFixLight => CanFixLightOption;
-        RoleTaskType RuntimeRole.TaskType => RoleTaskType.RoleTask;
+        RoleTaskType RuntimeRole.TaskType => RoleTaskType.SpecialTask;
         private Arrow? myArrow;
 
         private TaskInfo[] myTasks = [];
@@ -86,6 +86,7 @@ internal class Opportunist : DefinedRoleTemplate, HasCitation, DefinedRole
             ev.ReplaceBody(string.Join("\n", myTasks.Select(task => task.GetTaskText())));
         }
 
+        [Local]
         void OnUpdate(GameHudUpdateEvent ev)
         {
             if (MyPlayer.IsDead) return;

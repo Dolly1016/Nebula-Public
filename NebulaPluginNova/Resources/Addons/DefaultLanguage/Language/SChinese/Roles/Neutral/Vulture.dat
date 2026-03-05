@@ -1,0 +1,53 @@
+# Assignable
+
+"role.vulture.name" : "秃鹫"
+"role.vulture.short" : "鹫"
+"role.vulture.blurb" : "真是美味啊"
+
+# Document
+
+"role.vulture.doc" : "秃鹫需要吃掉指定数量的尸体才能胜利。"
+"role.vulture.winCond" : "吞噬<var>%NUM%</var>个尸体。"
+"role.vulture.ability.title" : "固有能力【食腐】"
+"role.vulture.ability.main" : ""
+"role.vulture.ability.eat" : "<title>吞噬</title>吞噬尸体。"
+
+# Options
+
+"options.role.vulture.detail" : "秃鹫需要吃掉指定数量的尸体才能胜利。<br>秃鹫可以看到指向场上所有尸体的若干青色箭头。"
+"options.role.vulture.eatCoolDown" : "吞噬冷却时间"
+"options.role.vulture.numOfTheEatenToWin" : "获胜所需吞噬尸体数量"
+
+# Game
+
+"gameAction.vulture.eat" : "吞噬尸体"
+
+# UI
+
+"button.label.eat" : "吞噬"
+
+# Game Statictics
+
+"statistics.events.eat" : "吞噬"
+
+# Stats
+
+"stats.vulture.eaten" : "吞噬尸体数量"
+
+# Titles
+
+"achievement.vulture.common1.title" : "真是美味啊！"
+"achievement.vulture.common1.goal" : "吃掉一个尸体。"
+
+"achievement.vulture.challenge.title" : "自助餐"
+"achievement.vulture.challenge.goal" : "获胜并且没有人报告尸体。"
+
+# Team
+
+"teams.vulture" : "秃鹫"
+"end.vulture" : "秃鹫%EXTRA%胜利"
+
+# Document
+
+"document.tip.winCond.vulture.title" : "特殊胜利"
+"document.tip.winCond.vulture" : "在行动期间吞噬一定量的尸体后获胜。"

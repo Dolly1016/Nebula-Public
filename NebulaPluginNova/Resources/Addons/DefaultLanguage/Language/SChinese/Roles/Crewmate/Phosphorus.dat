@@ -1,0 +1,48 @@
+# Assignable
+
+"role.phosphorus.name" : "提灯人"
+"role.phosphorus.short" : "提"
+"role.phosphorus.blurb" : "用灯光带走黑暗"
+
+# Document
+
+"role.phosphorus.doc" : "提灯人可以在地图中放置照亮周围的提灯。"
+"role.phosphorus.ability.title" : "固有能力【提灯】"
+"role.phosphorus.ability.main" : "提灯的光芒可以跨越墙壁照亮四周。"
+"role.phosphorus.ability.place" : "<title>放置</title>放置提灯。当所有的提灯都被放置后，此按钮消失。<br>提灯放置后需要等一轮会议后才能生效。"
+"role.phosphorus.ability.lantern" : "<title>提灯</title>点亮提灯。效果时间结束后熄灭。"
+
+# Options
+
+"options.role.phosphorus.detail" : "提灯人可以放置提灯。<br>提灯发光时，该位置一直可视。 "
+"options.role.phosphorus.numOfLamps" : "提灯放置次数"
+"options.role.phosphorus.placeCoolDown" : "放置冷却时间"
+"options.role.phosphorus.lampCoolDown" : "发光冷却时间"
+"options.role.phosphorus.lampDuration" : "发光持续时间"
+"options.role.phosphorus.lampStrength" : "光照亮度范围"
+
+# Game
+
+"gameAction.phosphorus.placement" : "ランタン設置"
+
+# UI
+
+"button.label.lantern" : "提灯"
+
+# Stats
+
+"stats.phosphorus.lantern" : "安装提灯数量"
+"stats.phosphorus.lighting" : "开启提灯次数"
+
+# Titles
+
+"achievement.phosphorus.common1.title" : "夜空中最亮的星"
+"achievement.phosphorus.common1.goal" : "放置3个的提灯。"
+"achievement.phosphorus.common1.splitted.2" : "星"
+
+"achievement.phosphorus.common2.title" : "光芒万丈"
+"achievement.phosphorus.common2.goal" : "放置20个提灯。"
+
+"achievement.phosphorus.challenge.title" : "予逝者以微光救赎"
+"achievement.phosphorus.challenge.goal" : "用提灯照亮尸体。"
+"achievement.phosphorus.challenge.splitted.1" : "微弱的"

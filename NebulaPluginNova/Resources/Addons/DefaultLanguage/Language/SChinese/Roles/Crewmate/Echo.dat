@@ -1,0 +1,45 @@
+# Assignable
+
+"role.echo.name" : "感知者"
+"role.echo.short" : "感"
+"role.echo.blurb" : "生命的回响"
+
+# Document
+
+"role.echo.doc" : "感知者可以探测周围的玩家并感知一些特殊行动。"
+"role.echo.ability.title" : "固有能力【空谷传音】"
+"role.echo.ability.main" : ""
+"role.echo.ability.echo" : "<title>探测</title>探测周围的玩家。可以知晓被探测的玩家方向。<br>距离越远，延迟越高。"
+"role.echo.ability.action" : "<title>行动感知</title>当其他玩家进行一些特殊行动时，会获得提升和位置信息。"
+"role.echo.tips" : "・可以感知一下动作：<br>%ACTIONS%"
+
+# Options
+
+"options.role.echo.detail" : "感知者是一个船员职业，他可以获取附近玩家的位置<br>并且可以感知其他玩家的行为。"
+"options.role.echo.echoCooldown" : "感知冷却时间"
+"options.role.echo.echoRange" : "感知最大范围"
+
+# Game
+
+# UI
+
+"button.label.echo" : "探测"
+
+# Stats
+
+"stats.echo.players" : "感知到玩家数量"
+"stats.echo.actions" : "感知到行为数量"
+
+# Titles
+
+"achievement.echo.common1.title" : "物体在呼吸"
+"achievement.echo.common1.goal" : "使用一次感知并感知到其他玩家。"
+
+"achievement.echo.common2.title" : "流动的声音"
+"achievement.echo.common2.goal" : "累计感知50次玩家行动。"
+"achievement.echo.common2.splitted.0" : "流动的"
+
+"achievement.echo.challenge.title" : "视监一切"
+"achievement.echo.challenge.goal" : "通过感知2名以上玩家的异常行为并将异常行为的玩家投出去。"
+"achievement.echo.challenge.flavor" : "“请注意你们的行为！”—空气中流动的声音"
+"achievement.echo.challenge.splitted.2" : "视监"

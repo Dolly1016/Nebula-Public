@@ -1,0 +1,38 @@
+# Assignable
+
+"role.quack.name" : "鸭医"
+"role.quack.short" : "鸭"
+"role.quack.blurb" : "声誉叫的最响亮"
+
+# Document
+
+"role.quack.doc" : "鸭医可以随时随地报告尸体。"
+"role.quack.ability.title" : "固有能力【庸医】"
+"role.quack.ability.main" : "可以随时随地打开生命监测装置。<br>此外，可以在生命监测装置中直接报告尸体。"
+"role.quack.ability.vital" : "<title>生命监测装置</title>打开生命监测装置。"
+
+# Options
+
+"options.role.quack.detail" : "鸭医可以通过生命监测装置进行远程报告尸体。"
+
+# Game
+
+
+# UI
+
+# Stats
+
+"stats.quack.report" : "远程发起报告次数"
+
+# Titles
+
+"achievement.quack.common1.title" : "嘎嘎嘎♪"
+"achievement.quack.common1.goal" : "使用生命检测装置报告一次尸体。"
+
+"achievement.quack.another1.title" : "不要鸭！"
+"achievement.quack.another1.goal" : "自己发起的紧急会议被驱逐。"
+
+"achievement.quack.challenge.title" : "呀呀呀~"
+"achievement.quack.challenge.goal" : "自己发起紧急会议然后累计驱逐3名玩家并获胜。"
+"achievement.quack.challenge.flavor" : "“真不怪我鸭~”"
+"achievement.quack.challenge.splitted.0" : "卑劣的"

@@ -1,0 +1,47 @@
+# Assignable
+
+"role.bait.name" : "诱饵"
+"role.bait.short" : "诱"
+"role.bait.blurb" : "诱骗敌人"
+
+# Document
+
+"role.bait.doc" : "诱饵被杀死时，击杀诱饵的凶手就会立刻报告。"
+
+# Options
+
+"options.role.bait.detail" : "诱饵被杀后，凶手会立刻报告诱饵的尸体"
+"options.role.bait.showKillFlash" : "击杀诱饵的凶手有闪光提醒"
+"options.role.bait.showKillFlash.detail" : "开启后，杀死诱饵的凶手会有淡蓝色闪光提示。"
+"options.role.bait.reportDelay" : "报告延迟"
+"options.role.bait.reportDelay.detail" : "设置击杀延迟报告可以会更难判断是否击杀诱饵。"
+"options.role.bait.reportDelayDispersion" : "最大通知延迟"
+"options.role.bait.reportDelayDispersion.detail" : "通过击杀延迟报告设置的时间差让船员更难判断是否为诱饵事件。"
+"options.role.bait.canSeeVentFlash" : "可以看到通风口闪光"
+"options.role.bait.canSeeVentFlash.detail" : "开启后，如果有人使用通风口，诱饵会获得闪光提示。"
+
+# Game
+
+# UI
+
+# Game Statictics
+
+"statistics.events.baitReport" : "报告诱饵"
+
+# Stats
+
+"stats.bait.bait" : "诱饵触发报告次数"
+"stats.bait.killer" : "触发诱饵报告次数"
+
+# Titles
+
+"achievement.bait.common1.title" : "诱人中带一丝危险"
+"achievement.bait.common1.goal" : "被击杀然后强制让凶手报告。"
+
+"achievement.bait.another1.title" : "死于谋略"
+"achievement.bait.another1.goal" : "非正常击杀导致死亡（如放逐）"
+"achievement.bait.another1.splitted.1" : "计策"
+
+"achievement.bait.challenge.title" : "谋士当以身定局"
+"achievement.bait.challenge.goal" : "凶手在报告自己死亡的会议上被驱逐。"
+"achievement.bait.challenge.splitted.0" : "拼命的"

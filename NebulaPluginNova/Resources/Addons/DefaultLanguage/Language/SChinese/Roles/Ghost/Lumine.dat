@@ -1,0 +1,34 @@
+# Assignable
+
+"role.lumine.name" : "引路魂"
+"role.lumine.blurb" : "正义之光"
+"role.lumine.short" : "引"
+
+# Document
+
+"role.lumine.doc" : "引路魂可以在当前位置发出可以穿墙的光芒，每局只能使用一次。"
+
+# Options
+
+"options.role.lumine.detail" : "引路魂只能开一次灯。"
+"options.role.lumine.lightSize" : "光芒范围"
+"options.role.lumine.lightDuration" : "光芒持续时间"
+
+# Game
+
+
+# UI
+
+"button.label.lumine" : "发光"
+
+# Stats
+
+
+# Titles
+
+"achievement.lumine.common1.title" : "来自天堂的光"
+"achievement.lumine.common1.goal" : "发动技能，照亮尸体。"
+"achievement.lumine.common1.splitted.2" : "光"
+
+"achievement.lumine.another1.title" : "遗憾"
+"achievement.lumine.another1.goal" : "发动技能，照亮自己的尸体。"

@@ -1,0 +1,46 @@
+# Common Role Options
+
+"options.common.group.task" : "任务相关设定"
+"options.common.task" : "任务设定"
+"options.common.task.none" : "关闭"
+"options.common.task.simple" : "简易"
+"options.common.task.advanced" : "高级"
+"options.common.task.force" : "任务设定"
+"options.common.task.force.simple" : "简易"
+"options.common.task.force.advanced" : "高级"
+"options.common.task.num" : "任务数"
+"options.common.task.numShort" : "短任务数"
+"options.common.task.numLong" : "长任务数"
+"options.common.task.numCommon" : "普通任务数"
+
+# Role Filter
+
+"roleFilter.none" : "无"
+"roleFilter.separator" : "、"
+"roleFilter.categorySeparator" : "；"
+"roleFilter.exceptPattern.all" : "%ROLES%除外"
+"roleFilter.exceptPattern.crewmate" : "船员%ROLES%除外 "
+"roleFilter.exceptPattern.impostor" : "伪装者%ROLES%除外 "
+"roleFilter.exceptPattern.neutral" : "第三方%ROLES%除外 "
+"roleFilter.allPattern.all" : "所有"
+"roleFilter.allPattern.crewmate" : "所有船员"
+"roleFilter.allPattern.impostor" : "所有伪装者"
+"roleFilter.allPattern.neutral" : "所有第三方"
+"roleFilter.shortcut.all" : "所有"
+"roleFilter.shortcut.allImpostor" : "伪装者阵营"
+"roleFilter.shortcut.allNeutral" : "第三方阵营"
+"roleFilter.shortcut.allCrewmate" : "船员阵营"
+"roleFilter.preview.excludes" : "%ROLES%除外"
+"roleFilter.preview.etc" : "%ROLES%等"
+"roleFilter.showOnlySpawnable" : "只显示可生成职业"
+
+"options.role.modifierFilter" : "附加能力过滤"
+"options.role.ghostRoleFilter" : "鬼魂能力过滤"
+
+# Tag
+
+"configuration.tag.chaotic" : "这个职业适合在多职业的情况下开启。"
+"configuration.tag.beginner" : "这个职业适合新手。"
+"configuration.tag.funny" : "这个职业能力比较独特。"
+"configuration.tag.difficult" : "这个职业难度偏高适合高玩，建议仔细查看职业介绍。"
+"configuration.tag.superNewRoles" : "这是与SNR联动的职业。"

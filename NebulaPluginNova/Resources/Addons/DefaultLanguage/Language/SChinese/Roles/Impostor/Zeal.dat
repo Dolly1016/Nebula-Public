@@ -1,0 +1,48 @@
+# Assignable
+
+"role.zeal.name" : "狂欢者"
+"role.zeal.short" : "狂"
+"role.zeal.blurb" : "让我们热血澎湃！"
+
+# Document
+
+"role.zeal.doc" : "狂欢者可以吸取其他幸存者的热情力并转化成更多的击杀按钮。"
+"role.zeal.ability.title" : "固有能力【炽热杀意】"
+"role.zeal.ability.main" : "狂欢者可以通过靠近其他玩家吸取狂热获取更多击杀按钮。<br>每个击杀按钮都有独立的冷却时间，因此可以实现连续击杀。"
+"role.zeal.ability.absorb" : "<title>吸收</title>靠近目标，在目标身边持续一段时间即可获得击杀按钮。"
+"role.zeal.ability.kill" : "<title>击杀</title>击杀按钮为消耗品，可以获得多个按钮。<br>使用任意一个击杀按钮后，其他击杀按钮不会重置冷却。"
+
+# Options
+
+"options.role.zeal.detail" : "狂欢者可以吸取其他幸存者的热情力升华为杀意。<br>吸收的热情力将转化为击杀按钮，可以获得两个以上的击杀按钮。"
+"options.role.zeal.killCooldown" : "击杀冷却时间"
+"options.role.zeal.absorbCooldown" : "吸收冷却时间"
+"options.role.zeal.absorbDuration" : "吸收所需时间"
+"options.role.zeal.absorbAdditionalDuration" : "吸收冷却时间追加"
+"options.role.zeal.absorbAdditionalDuration.detail" : "吸收狂欢所需时间的计算公式：（吸收所需时间）＋（吸收冷却时间追加）×（击杀按钮数）<br>该选项数值越大，获取多个击杀按钮越难。"
+"options.role.zeal.enthusiasmCooldown" : "狂欢冷却时间"
+"options.role.zeal.enthusiasmCooldown.detail" : "这是从同一个玩家再次吸收狂欢所需的冷却时间。"
+
+# Game
+
+
+# UI
+
+"button.label.absorb" : "吸收"
+
+# Stats
+
+
+# Titles
+
+"achievement.zeal.common1.title" : "燥热气氛"
+"achievement.zeal.common1.goal" : "在一段时间内完成一次双杀。"
+
+"achievement.zeal.another1.title" : "瞬间冷却"
+"achievement.zeal.another1.goal" : "在持有2个以上击杀按钮的情况下死亡。"
+
+"achievement.zeal.common2.title" : "热血澎湃"
+"achievement.zeal.common2.goal" : "同时持有4个以上击杀按钮。"
+
+"achievement.zeal.challenge.title" : "终末狂欢"
+"achievement.zeal.challenge.goal" : "在一段时间内击杀3名以上的玩家结束游戏并获胜。"

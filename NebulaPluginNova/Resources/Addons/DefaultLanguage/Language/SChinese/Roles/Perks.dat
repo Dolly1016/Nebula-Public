@@ -1,0 +1,102 @@
+# Perks
+
+"perkui.message.noncrew" : "船员无法从怪异花获得特技"
+"perkui.message.noncrewWarning" : "**注意！这是非船员才能使用的特技！**"
+"perkui.message.swap" : "通过当前所持特技交换获得"
+"perkui.message.obtain" : "通过交互操作获得特技"
+
+"perk.common.maxSpawn" : "最大出现数量"
+"perk.common.maxSpawn.unlimited" : "无限制"
+
+"perk.empty.name" : "通用特技"
+"perk.empty.detail" : "可以从开放的<b>花</b>中获得特技。"
+
+"perk.empty.noncrewmate.name" : "非船员用特技"
+"perk.empty.noncrewmate.detail" : "可以从开放的<b>怪异花</b>中获得特技。"
+
+"perk.acceleration.name" : "敏捷"
+"perk.acceleration.detail" : "使用后持续%D%秒，移动速度提高%R%倍。 <br>此特技有%CD%秒冷却。"
+"perk.acceleration.cooldown" : "敏捷冷却时间"
+"perk.acceleration.duration" : "加速持续时间"
+"perk.acceleration.rate" : "加速倍率"
+
+"perk.flipX.name" : "镜像"
+"perk.flipX.detail" : "使所有玩家的画面左右翻转。"
+
+"perk.flipY.name" : "颠倒"
+"perk.flipY.detail" : "使所有玩家的画面上下翻转。"
+
+"perk.flipXY.name" : "逆转"
+"perk.flipXY.detail" : "使所有玩家的画面上下左右翻转。"
+
+"perk.sniperIcon.name" : "空弹"
+"perk.sniperIcon.detail" : "在原地开空枪。<br>此特技有%CD%秒冷却。"
+
+"perk.raiderEvidence.name" : "愤怒"
+"perk.raiderEvidence.detail" : "把斧子插入墙壁中。<br>此特技有%CD%秒冷却。<br>强盗不能使用该特技。"
+
+"perk.fakeBubble.name" : "泡泡"
+"perk.fakeBubble.detail" : "在原地发射一个没有击杀能力的泡泡。<br>此特技有%CD%秒冷却。"
+
+"perk.accelTrap.name" : "激进"
+"perk.accelTrap.detail" : "使用后在原地放置一个加速陷阱。<br>安放后，在会议结束时生效。"
+
+"perk.decelTrap.name" : "保守"
+"perk.decelTrap.detail" : "使用后在原地放置一个减速陷阱。<br>安放后，在会议结束时生效。"
+
+"perk.taskReduction.name" : "算计"
+"perk.taskReduction.detail" : "减少一个任务。<br>如果完成了所有任务，那么则无效。"
+
+"perk.ventRelocate.name" : "搬迁"
+"perk.ventRelocate.detail" : "可以移动一次通风口。<br>使用后抓住通风口并可以在%D%秒期间拖动通风口。<br>持续时间结束或再次使用，将释放通风口在当前位置。"
+"perk.ventRelocate.duration" : "拖动持续时间"
+
+"perk.emergencyButton.name" : "紧急会议"
+"perk.emergencyButton.detail" : "随时随地发起会议。<br>使用后仍然算作在总发起紧急会议数"
+
+"perk.teamLook.name" : "魔法水晶"
+"perk.teamLook.detail" : "在紧急会议中，你可以知晓一名存活玩家的阵营。"
+"perk.teamLook.ui.title" : "魔法水晶的结果"
+"perk.teamLook.ui.team" : "%TEAM%阵营"
+
+"perk.ghostLook.name" : "尸检"
+"perk.ghostLook.detail" : "在紧急会议中，可以选择一名玩家获得其死因。"
+"perk.ghostLook.ui.title" : "尸检报告详情"
+
+"perk.invisible.name" : "融入"
+"perk.invisible.detail" : "隐身%D%秒。<br>仅限1次。"
+
+"perk.hookshot.name" : "钩索枪"
+"perk.hookshot.detail" : "钩索枪只能使用一次。<br>发射钩索进行长距离移动。"
+
+"perk.doubleVote.name" : "独裁"
+"perk.doubleVote.detail" : "除跳过、不投票、投0票以外。<br>投票数翻一倍。"
+
+"perk.monowayX.name" : "风向标-赤"
+"perk.monowayX.detail" : "激活后，在%D%秒内只能上下移动。<br>该技能有%CD%秒冷却。<br>冷却时间仅在行动阶段进行，会议期间会停止计时。"
+
+"perk.monowayY.name" : "风向标-青"
+"perk.monowayY.detail" : "激活后，在%D%秒内只能左右移动。<br>该技能有%CD%秒冷却。<br>冷却时间仅在行动阶段进行，会议期间会停止计时。"
+
+"perk.monowayRotate.name" : "眩晕"
+"perk.monowayRotate.detail" : "激活后，在%D%秒内颠倒移动方向。<br>该技能有%CD%秒冷却。<br>冷却时间仅在行动阶段进行，会议期间会停止计时。"
+
+"perk.meteor.name" : "天动万象"
+"perk.meteor.detail" : "使用10秒后，会以使用地点为中心并在周围落下大量陨石。<br>此特技只能发动一次。<br>从使用开始到陨石坠落期间，紧急会议按钮将会封锁。<br>靠近陨石落点的玩家会收到红色闪光警告。<br>秃鹫无法使用该特技。"
+"perk.meteor.sabotageText" : "陨石坠落警报：尽快远离陨石坠落地点！"
+"perk.meteor.meetingButtonText" : "由于陨石坠落警报拉响<br>因此无法召开紧急会议"
+
+"perk.footprint.name" : "泥足"
+"perk.footprint.detail" : "会留下全员可见的足迹。"
+
+"perk.sacrifice.name" : "替身"
+"perk.sacrifice.detail" : "在原地召唤一个替身。<br>替身死亡，本体不会死亡。<br>替身会在%D%秒内消失。"
+"perk.sacrifice.duration" : "替身持续时间"
+
+# Game Statictics
+
+"statistics.events.meteor" : "陨石砸落"
+
+# Status
+
+"state.meteor" : "陨石砸落"

@@ -1,0 +1,26 @@
+# Assignable
+
+"role.niceGuesser.name" : "正义的赌怪"
+"role.niceGuesser.short" : "正赌"
+"role.niceGuesser.blurb" : "猜测并狙杀玩家"
+
+# Document
+
+"role.niceGuesser.doc" : "正义的赌怪可以在会议中推理、猜测任何其他玩家的身份并杀死他们。<br>如果猜测正确，被猜测的玩家死亡，反之自己死亡。"
+"role.niceGuesser.tips" : "・如果会议中可以使用多个能力，右键单击能力图标即可切换。"
+
+# Options
+
+"options.role.niceGuesser.detail" : "赌怪可以在会议中猜测其他玩家的能力。<br>如果赌怪猜测正确，目标玩家死亡，否则自己死亡。"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+
+# Titles
+

@@ -1,0 +1,43 @@
+# Assignable
+
+"role.bountyHunter.name" : "赏金猎人"
+"role.bountyHunter.short" : "赏"
+"role.bountyHunter.blurb" : "猎杀你的目标！"
+"role.bountyHunter.hint" : "尽可能的击杀赏金目标。"
+
+# Document
+
+"role.bountyHunter.doc" : "赏金猎人需要去主动击杀<b>赏金目标</b>以获得更快的击杀冷却速度。<br>赏金目标会从幸存者中随机选择一名玩家，当成功击杀目标或每<var>%SEC%</var>秒后，将更新一次目标。<br>若击杀除目标<b>以外</b>的玩家，则下次的击杀冷却时间会变长。"
+
+# Options
+
+"options.role.bountyHunter.detail" : "赏金猎人对自己的目标有特别的吸引力。<br>追上你的目标并击杀他，获得特别的奖励。"
+"options.role.bountyHunter.bountyKillCoolDown" : "击杀目标后冷却时间"
+"options.role.bountyHunter.othersKillCoolDown" : "击杀非目标后冷却时间"
+"options.role.bountyHunter.changeBountyInterval" : "改变追猎目标的时间间隔"
+"options.role.bountyHunter.showBountyArrow" : "对追猎目标用箭头标记"
+"options.role.bountyHunter.arrowUpdateInterval" : "追猎目标箭头更新间隔"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.bountyHunter.bountyKill" : "击杀赏金目标数量"
+"stats.bountyHunter.othersKill" : "击杀非赏金目标数量"
+
+# Titles
+
+"achievement.bountyHunter.common1.title" : "欲望杀手"
+"achievement.bountyHunter.common1.goal" : "成功击杀赏金目标。"
+"achievement.bountyHunter.common1.splitted.0" : "欲望的"
+
+"achievement.bountyHunter.another1.title" : "意料之外"
+"achievement.bountyHunter.another1.goal" : "击杀除赏金以外的目标。"
+
+"achievement.bountyHunter.challenge.title" : "专业赏金杀手"
+"achievement.bountyHunter.challenge.goal" : "30秒内杀死3个玩家。"
+"achievement.bountyHunter.challenge.splitted.2" : "杀手"

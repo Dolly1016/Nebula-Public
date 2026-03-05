@@ -1,0 +1,67 @@
+# Assignable
+
+"role.thurifer.name" : "调香师"
+"role.thurifer.short" : "香"
+"role.thurifer.blurb" : "迷人的香味让人沉沦"
+
+# Document
+
+"role.thurifer.doc" : "调香师击杀吸入大量烟气的玩家时，会延迟让目标死亡。"
+"role.thurifer.ability.title" : "固有能力【香熏】"
+"role.thurifer.ability.main" : "在地图上会出现香炉，香炉产生的烟气可以侵蚀其他玩家使其获得<b>香熏</b>效果。<br>调香师的击杀行为会根据<b>香熏</b>的进度进行延迟击杀。"
+"role.thurifer.ability.curse" : "<title>激活</title>激活香炉，使其产生烟气。<br>香炉会立即激活，因此其他玩家更容易发现调香师。<br>被激活的香炉会在燃烧一段时间后熄灭。"
+"role.thurifer.ability.impute" : "<title>转移</title>当自身<b>香熏</b>达到50%以上可以<b>转移</b>到另一个未激活的香炉上，使进度重置，此能力只能使用一次。<br>注意，若船员使用<b>转移</b>到一个未激活的香炉，那么这个香炉永远不会熄灭。<br>调香师不能<b>转移</b>自身进度。"
+
+# Options
+
+"options.role.thurifer.detail" : "调香师可以通过香炉飘出的烟气来缓慢击杀其他人。"
+"options.role.thurifer.inhalationSpeed" : "香熏效果增长速度"
+"options.role.thurifer.inhalationSpeed.detail" : "配置玩家吸入香气的速度。<br>数值越大，吸入速度越快。"
+"options.role.thurifer.curseDuration" : "被激活香炉持续时间"
+"options.role.thurifer.numOfThuribulums" : "香炉最多存在数"
+"options.role.thurifer.numOfThuribulums.detail" : "配置地图中香炉存在最大数量。<br>不同地图可能会影响出现数量，可能会低于设定值。"
+"options.role.thurifer.thuribulumRange" : "香炉影响范围"
+"options.role.thurifer.maxKillDelay" : "最大击杀延迟时间"
+"options.role.thurifer.maxKillDelay.detail" : "配置后，根据吸入的香气程度来控制最大击杀延迟。<br>击杀延迟会根据设置值和香气吸入程度而变化。"
+"options.role.thurifer.showBlink" : "击杀超过3秒时显示闪烁"
+"options.role.thurifer.showBlink.detail" : "开启后，击杀延迟时间超过3秒会进行闪烁提示。"
+"options.role.thurifer.activationDelay" : "香炉延迟激活时间"
+"options.role.thurifer.activationDelay.detail" : "配置后，激活香炉需要等配置的时间才会真正生效。<br>这个功能主要是为了迷糊其他玩家。"
+
+# Game
+
+"gameAction.thurifer.activate" : "激活香炉"
+"gameAction.thurifer.impute" : "转移香炉"
+
+# UI
+
+"button.label.thurifer.curse" : "激活"
+"button.label.thurifer.impute" : "转移"
+"ui.action.thurifer.curse" : "激活香炉。"
+
+# Game Statictics
+
+"statistics.events.gassed" : "烟气中毒"
+
+# Status
+
+"state.gassed" : "烟气中毒"
+
+# Stats
+
+"stats.thurifer.activate" : "香炉点燃次数"
+"stats.thurifer.impute" : "转移香薰次数"
+
+# Titles
+
+"achievement.thurifer.common1.title" : "禅境"
+"achievement.thurifer.common1.goal" : "累计激活10个香炉"
+"achievement.thurifer.common1.splitted.0" : "禅的"
+
+"achievement.thurifer.common2.title" : "害人害己"
+"achievement.thurifer.common2.goal" : "将身上的“香熏”转移到香炉中。"
+"achievement.thurifer.common2.flavor" : "“若心存恶意，则必自食恶果，因恶行终将报应。”—警示语"
+
+"achievement.thurifer.challenge.title" : "香熏的魅力"
+"achievement.thurifer.challenge.goal" : "有8人以上受到“香熏”效果，且都以达到50%，然后击杀4个人。<br>至少有一个人死于最大延迟击杀和一个人因延迟死亡死于会议期间。"
+"achievement.thurifer.challenge.splitted.2" : "魅力"
