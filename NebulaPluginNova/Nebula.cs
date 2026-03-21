@@ -55,12 +55,12 @@ public class NebulaPlugin
     public const string PluginName = "NebulaOnTheShip";
     public const string PluginVersion = "3.1.0.0";
 
-    public const string VisualVersion = "v3.1";
-    //public const string VisualVersion = "Snapshot 26.03.04a";
-    //public const string VisualVersion = "Costume Animation DEMO 2";
+    //public const string VisualVersion = "v3.1";
+    public const string VisualVersion = "Snapshot 26.03.21a";
+    //public const string VisualVersion = "Higher Refresh Rate DEMO";
 
     public const string PluginEpochStr = "108";
-    public const string PluginBuildNumStr = "1556";
+    public const string PluginBuildNumStr = "1558";
     public static readonly int PluginEpoch = int.Parse(PluginEpochStr);
     public static readonly int PluginBuildNum = int.Parse(PluginBuildNumStr);
     public const bool GuardVanillaLangData = false;

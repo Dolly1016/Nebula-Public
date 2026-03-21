@@ -172,7 +172,7 @@ public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, Defi
             if (AmongUsClient.Instance.AmHost)
             {
                 var spawner = NebulaAPI.CurrentGame?.GetModule<IMapObjectSpawner>();
-                spawner?.Spawn(NumOfThuribulumsOption, 7.5f, "thuribulum", Thuribulum.MyTag, MapObjectType.SmallInCorner);
+                spawner?.Spawn(NumOfThuribulumsOption, 7.5f, "thuribulum", Thuribulum.MyTag, MapObjectType.SmallInCorner | MapObjectType.SmallOpened);
             }
 
             //解除ボタン

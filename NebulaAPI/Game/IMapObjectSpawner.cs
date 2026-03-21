@@ -10,10 +10,27 @@ namespace Virial.Game;
 [Flags]
 public enum MapObjectType
 {
+    /// <summary>
+    /// 小物を置くのに適した、奥まった場所
+    /// </summary>
     SmallInCorner = 0x0001,
-    Reachable = 0x0002,
-    SmallOrTabletopOutOfSight = 0x0004,
-    DepoisonBox = 0x0008,
+    /// <summary>
+    /// 小物を置くのに適した、開けた場所
+    /// </summary>
+    SmallOpened = 0x0002,
+    /// <summary>
+    /// 容易に到達可能な地点
+    /// </summary>
+    Reachable = 0x0004,
+    /// <summary>
+    /// 視界に入りづらい机の上、あるいは小狭い場所
+    /// </summary>
+    SmallOrTabletopOutOfSight = 0x0008,
+    /// <summary>
+    /// 医療キット
+    /// </summary>
+    DepoisonBox = 0x0010,
+
 }
 
 public record MapObjectCondition(string Tag, float Distance);

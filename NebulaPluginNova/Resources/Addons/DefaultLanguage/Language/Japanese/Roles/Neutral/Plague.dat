@@ -1,0 +1,65 @@
+# Assignable
+
+"role.plague.name" : "プレイグ"
+"role.plague.short" : "プ"
+"role.plague.blurb" : "死に至る病"
+
+# Document
+
+"role.plague.doc" : "疾病の感染を広げる第三陣営です。"
+"role.plague.winCond" : "全生存者を疾病に感染させる。直接感染したプレイヤーとともに勝利します。"
+"role.plague.ability.title" : "固有能力 "精神を喰らう疾病""
+"role.plague.ability.main" : "毒を収集して、生存者に打ち込み、感染を広げます。<br>感染には、プレイグによる<b>直接感染</b>と感染者による<b>間接感染</b>の2種類があります。<br><br><b>直接感染</b>: プレイグに毒素の瓶を打ち込まれると感染する。<br><b>間接感染</b>: 感染者のそばに滞在すると感染が進行する。進行度が100%になると感染する。"
+"role.plague.ability.plant" : "<title>毒のウツボカズラ</title>マップ中に毒素を採取できるウツボカズラが最大<var>%PLANTS%</var>株出現します。<br>一度採取したウツボカズラは、緊急会議を挟むと再度採取できるようになる場合があります。"
+"role.plague.ability.use" : "<title>採取</title>毒のウツボカズラから毒素を採取します。<br>複数回採取すると瓶いっぱいに毒素がたまります。"
+"role.plague.ability.infect" : "<title>感染</title>満タンの毒素の瓶をプレイヤーに対して使用すると、プレイヤーを疾病に直接感染させます。<br>最大で%BOTTLES%人のプレイヤーを直接感染させられます。"
+"role.plague.tips" : "・緊急会議終了から10秒間は、感染の進行が停止します。<br>・毒のウツボカズラの状態は<var>%VISUAL%</var>。"
+"role.plague.tips.visual.visual" : "全プレイヤーが視認できます"
+"role.plague.tips.visual.indiv" : "プレイヤー間で互いに共有していません"
+
+# Options
+
+"options.role.plague.detail" : "プレイグは生存者に疾病を広げる第三陣営です。<br>全員が疾病に感染すると勝利します。"
+"options.role.plague.numOfBottles" : "毒素の瓶の所持本数"
+"options.role.plague.numOfPods" : "毒のウツボカズラの最大出現数"
+"options.role.plague.visualPods" : "毒のウツボカズラの状態視認"
+"options.role.plague.visualPods.detail" : "オンにすると全プレイヤー間で毒のウツボカズラの状態を視認できます。<br>毒のウツボカズラから毒を採取したプレイヤーがいたら、それはプレイグです！"
+"options.role.plague.infectDuration" : "間接感染に要する時間"
+"options.role.plague.infectDistance" : "間接感染の感染範囲"
+
+# Game
+
+# UI
+
+"button.label.plague.infect" : "感染"
+"role.plague.gui.progress" : "感染状況"
+"role.plague.gui.infected" : "感染済み"
+
+# Stats
+
+# Titles
+
+"achievement.plague.common1.title" : "絶望が訪れる"
+"achievement.plague.common1.goal" : "1回のゲームで毒素の瓶を2回使用する。"
+"achievement.plague.common1.flavor" : ""毒したまえ、君は後悔するだろう。毒さずにいたまえ、君は後悔するだろう。""
+
+"achievement.plague.common2.title" : "病の世界へようこそ"
+"achievement.plague.common2.goal" : "直接の感染者として他人を感染させる。"
+"achievement.plague.common2.flavor" : "書き残された文字の後ろに、ただ呆然と佇む私。"
+
+"achievement.plague.common3.title" : "スーパースプレッダー"
+"achievement.plague.common3.goal" : "直接の感染者として他人の感染を500%進行させる。"
+
+"achievement.plague.challenge.title" : "他ならぬ二人のフィロソフィ"
+"achievement.plague.challenge.goal" : "プレイグの勝利条件を満たしながら、プレイグ勝利以外で勝利する。"
+"achievement.plague.challenge.flavor" : ""かつて私は、その信念のために生きたのだ。" ―時を超えて、手記より"
+
+# Team
+
+"teams.plague" : "プレイグ"
+"end.plague" : "プレイグ%EXTRA%勝利"
+
+# Document
+
+"document.tip.winCond.plague.title" : "特殊勝利"
+"document.tip.winCond.plague" : "全生存者が疾病に感染すると勝利します。直接感染したプレイヤーもともに勝利します。"

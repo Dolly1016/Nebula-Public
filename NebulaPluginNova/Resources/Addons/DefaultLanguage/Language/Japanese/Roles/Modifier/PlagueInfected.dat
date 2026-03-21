@@ -1,0 +1,22 @@
+# Assignable
+
+"role.plagueInfected.name" : "疾病感染者"
+"role.plagueInfected.generalBlurb" : "身体は病の乗り物"
+
+# Document
+
+"role.plagueInfected.doc" : "プレイグの疾病に感染したプレイヤーです。"
+
+# Options
+
+"options.role.plagueInfected.detail" : "プレイグの疾病に感染したプレイヤーです。感染は緊急会議の開始時に発覚します。<br>プレイグに毒素の瓶を打ち込まれて<b>直接感染</b>していれば、プレイグ勝利でともに勝利できます。"
+
+# Game
+
+# UI
+
+# Stats
+
+
+# Titles
+

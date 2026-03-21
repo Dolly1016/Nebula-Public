@@ -50,36 +50,51 @@ public class MiraData : MapData
     static private MapObjectPoint[] mapObjectPoints = [
         new(-3.0f, 3.7f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //ドロップシップ右上
         new(-5.7f, -2.1f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //ドロップシップ下外
-        new(1.4f, -0.9f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //ドロップシップ下通路右方
+        new(1.4f, -0.9f, MapObjectType.SmallOpened | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //ドロップシップ下通路右方
         new(-2.8f, 0.3f, MapObjectType.DepoisonBox), //ドロップシップ右下端
-        new(8.5f, -1.9f,MapObjectType.SmallOrTabletopOutOfSight), //メッドベイ、O2復旧コンソール間
-        new(13.2f, -1.8f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //メッドベイ左外
+        new(8.5f, -1.9f,MapObjectType.SmallOpened), //メッドベイ、O2復旧コンソール間
+        new(13.2f, -1.8f, MapObjectType.SmallOpened | MapObjectType.Reachable), //メッドベイ左外
         new(16.7f, -1.4f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //メッドベイ右下
-        new(14.1f, 2.8f, MapObjectType.SmallInCorner | MapObjectType.Reachable| MapObjectType.SmallOrTabletopOutOfSight), //コミュ左下
-        new(16.3f, 2.8f, MapObjectType.SmallOrTabletopOutOfSight), //コミュ右下
-        new(10.8f, 5.0f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //ロッカー右上
+        new(14.0f, -1.4f, MapObjectType.SmallInCorner | MapObjectType.SmallOrTabletopOutOfSight), //メッドベイ左下
+        new(14.1f, 2.8f, MapObjectType.SmallInCorner | MapObjectType.SmallOrTabletopOutOfSight), //コミュ左下
+        new(16.3f, 2.8f, MapObjectType.SmallInCorner |MapObjectType.SmallOrTabletopOutOfSight), //コミュ右下
+        new(15.2f, 3.9f, MapObjectType.Reachable), //コミュ中央
+        new(10.8f, 5.0f, MapObjectType.SmallOpened | MapObjectType.Reachable), //ロッカー右上
         new(9.2f, 1.2f, MapObjectType.Reachable), //ロッカー中央
+        new(10.3f, 0.6f, MapObjectType.SmallInCorner), //ロッカー右下
         new(5.4f, 5.7f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //除染中央
-        new(4.5f, 12.1f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //リアクター右
-        new(11.0f, 12.4f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //ラボ右
-        new(11.8f, 10.0f, MapObjectType.SmallOrTabletopOutOfSight), //ラボ右下隅
-        new(16.0f, 10.9f, MapObjectType.SmallInCorner | MapObjectType.SmallOrTabletopOutOfSight), //三叉路中央左下
-        new(20.6f, 9.6f, MapObjectType.SmallInCorner | MapObjectType.SmallOrTabletopOutOfSight), //三叉路中央右下
-        new(18.5f, 13.7f, MapObjectType.SmallInCorner), //三叉路中央上
+        new(6.9f, 7.9f, MapObjectType.SmallInCorner | MapObjectType.SmallOrTabletopOutOfSight), //除染右上
+        new(5.3f, 13.4f, MapObjectType.Reachable | MapObjectType.SmallOpened), //ラボリアクター間
+        new(4.5f, 12.1f, MapObjectType.SmallInCorner | MapObjectType.SmallOrTabletopOutOfSight), //リアクター右
+        new(1.2f, 10.1f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //リアクター左下
+        new(11.0f, 12.4f, MapObjectType.SmallInCorner), //ラボ右
+        new(8.5f, 12.5f, MapObjectType.Reachable), //ラボ中央
+        new(11.8f, 10.0f, MapObjectType.SmallOrTabletopOutOfSight | MapObjectType.SmallInCorner), //ラボ右下隅
+        new(16.0f, 10.9f, MapObjectType.SmallOpened | MapObjectType.SmallOrTabletopOutOfSight), //三叉路中央左下
+        new(20.6f, 9.6f, MapObjectType.SmallOpened), //三叉路中央右下
+        new(18.55f, 13.7f, MapObjectType.SmallOpened), //三叉路中央上
         new(17.8f, 11.5f, MapObjectType.Reachable), //三叉路中央
+        new(11.5f, 6.5f, MapObjectType.SmallOpened | MapObjectType.Reachable), //三叉路左下
         new(14.1f, 20.9f, MapObjectType.SmallInCorner | MapObjectType.SmallOrTabletopOutOfSight), //オフィス配電盤そば
         new(13.4f, 17.2f, MapObjectType.SmallInCorner), //オフィス下
         new(17.1f, 18.6f, MapObjectType.Reachable), //オフィス前
         new(19.5f, 20.6f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //アドミン左上
+        new(19.4f, 17.8f, MapObjectType.SmallInCorner | MapObjectType.SmallOrTabletopOutOfSight), //アドミン左下
         new(22.4f, 19.7f, MapObjectType.SmallOrTabletopOutOfSight), //アドミン右上
         new(19.5f, 23.9f, MapObjectType.SmallInCorner), //グリーンハウス右上
+        new(15.7f, 24.6f, MapObjectType.SmallInCorner), //グリーンハウス左上
+        new(17.4f, 23.2f, MapObjectType.Reachable), //グリーンハウス中央
         new(22.1f, 23.2f, MapObjectType.SmallOrTabletopOutOfSight), //グリーンハウス右端
         new(13.7f, 24.0f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //グリーンハウス左
         new(19.0f, 25.3f, MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight),//グリーンハウス上ベント横
-        new(26.3f, 5.4f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //カフェ上
-        new(28.3f, -0.1f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //カフェ右下
+        new(26.3f, 5.4f, MapObjectType.SmallOpened | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //カフェ上
+        new(21.5f, 4.3f, MapObjectType.SmallInCorner | MapObjectType.SmallOrTabletopOutOfSight), //カフェ左上
+        new(28.3f, -0.1f, MapObjectType.SmallOpened | MapObjectType.Reachable), //カフェ右下
         new(23.7f, 0.0f, MapObjectType.Reachable), //カフェ下
-        new(21.6f, -2.3f, MapObjectType.SmallInCorner | MapObjectType.SmallOrTabletopOutOfSight), //カフェ下展望
+        new(21.6f, -2.3f, MapObjectType.SmallInCorner | MapObjectType.SmallOrTabletopOutOfSight), //カフェ下展望左
+        new(27.4f, -1.4f, MapObjectType.SmallOpened | MapObjectType.SmallOrTabletopOutOfSight), //カフェ下展望右
+        new(19.7f, -1.5f, MapObjectType.SmallInCorner | MapObjectType.SmallOrTabletopOutOfSight), //カフェ下展望アンテナそば
+        new(18.2f, 0.0f, MapObjectType.SmallOpened), //カフェストレージ左下
         new(20.2f, 2.0f, MapObjectType.SmallInCorner), //ストレージ下
         new(19.8f, 4.1f, MapObjectType.SmallOrTabletopOutOfSight), //ストレージ中
         new(18.6f, 5.65f, MapObjectType.DepoisonBox), //ストレージ最奥

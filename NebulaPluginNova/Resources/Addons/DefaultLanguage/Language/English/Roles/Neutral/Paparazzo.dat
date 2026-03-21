@@ -64,13 +64,14 @@
 
 "achievement.paparazzo.another1.title" : "Impostor IN POSTOR"
 "achievement.paparazzo.another1.goal" : "You are an imposter and a photo of yourself is revealed."
+"achievement.paparazzo.another1.flavor" : "Say...cheese!"
 "achievement.paparazzo.another1.splitted.1" : "In "
-# Key "achievement.paparazzo.another1.flavor" not found in source
 
 "achievement.paparazzo.challenge.title" : "Swaying Public Opinion"
 "achievement.paparazzo.challenge.goal" : "Have 4 or more players die for some reason during the meeting where the photo is revealed."
 "achievement.paparazzo.challenge.cond" : "Invalid if you die during that meeting"
 "achievement.paparazzo.challenge.flavor" : ""This is a cursed article. It must be disposed of immediately." —From a broken meeting minutes"
+"achievement.paparazzo.challenge.splitted.0" : "Sway "
 
 # Team
 

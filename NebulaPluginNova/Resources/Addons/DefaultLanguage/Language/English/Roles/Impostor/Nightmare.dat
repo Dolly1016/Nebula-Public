@@ -54,10 +54,13 @@
 
 "achievement.nightmare.another1.title" : "Be Careful in the Dark"
 "achievement.nightmare.another1.goal" : "Die within the night zone."
+achievement.nightmare.another1.splitted.0" : "On Night Road "
 
 "achievement.nightmare.another2.title" : "Someone Pinch Me"
 "achievement.nightmare.another2.goal" : "Be exiled or guessed in the meeting immediately after activating night for the first time."
+"achievement.nightmare.another2.splitted.0" : "Dream Shattered "
 
 "achievement.nightmare.challenge.title" : "Horror of a Certain Night"
 "achievement.nightmare.challenge.goal" : "3 or more deaths occur within the night zone with one night activation."
 "achievement.nightmare.challenge.cond" : "The Nightmare themselves must also get 1 or more kills within the night zone"
+"achievement.nightmare.challenge.splitted.1" : "Overnight "

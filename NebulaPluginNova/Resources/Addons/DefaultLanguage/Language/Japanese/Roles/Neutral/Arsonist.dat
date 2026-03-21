@@ -26,12 +26,12 @@
 
 "button.label.douse" : "塗る"
 "button.label.ignite" : "点火"
+"role.arsonist.gui.left" : "残りプレイヤー"
+"role.arsonist.gui.left.dead" : "死亡"
 
 # Stats
 
 "stats.arsonist.doused" : "油を塗った回数"
-"role.arsonist.gui.left" : "残りプレイヤー"
-"role.arsonist.gui.left.dead" : "死亡"
 
 # Titles
 

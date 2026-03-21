@@ -486,8 +486,9 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         var currentOutfit = CurrentOutfit;
         var text = onMeeting ? DefaultName : currentOutfit.Outfit.outfit.PlayerName;
 
-        AssignableAction(r => r.DecorateNameConstantly(ref text, NebulaGameManager.Instance?.CanSeeAllInfo ?? false, false));
-        var ev = GameOperatorManager.Instance?.Run(new PlayerDecorateNameEvent(this, text));
+        var canSeeAllInfo = NebulaGameManager.Instance?.CanSeeAllInfo ?? false;
+        AssignableAction(r => r.DecorateNameConstantly(ref text, canSeeAllInfo, false));
+        var ev = GameOperatorManager.Instance?.Run(new PlayerDecorateNameEvent(this, text, canSeeAllInfo));
         text = ev?.Name ?? text;
         var color = (ev?.Color.HasValue ?? false) ? ev.Color.Value.ToUnityColor() : Color.white;
 
@@ -914,7 +915,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     static private TimelimitedCache<bool> canSeeFootprint = new(() => GameOperatorManager.Instance!.Run(new UpdateFootprintVisibilityEvent(NebulaGameManager.Instance!)).Visible, 0.05f);
     public void OnSetAttribute(IPlayerAttribute attribute)
     {
-        IEnumerator CoFootprintUpdate(Func<Color> color, Func<bool>? predicate, float duration)
+        IEnumerator CoFootprintUpdate(Func<Color> color, Func<bool>? predicate, float duration, int type)
         {
             bool isLeft = false;
 
@@ -925,20 +926,21 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
                 if (predicate?.Invoke() ?? true)
                 {
-                    var pos = FootprintHelpers.GetFootprintPosition(MyControl, isLeft);
+                    var pos = FootprintHelpers.GetFootprintPosition(MyControl, isLeft, out var angle);
+                    if (angle.HasValue) angle = angle.Value + (isLeft ? 9f : -9f);
                     isLeft = !isLeft;
-                    if (pos.HasValue) AmongUsUtil.GenerateFootprint(pos.Value, color.Invoke(), duration, () => canSeeFootprint.Value);
+                    if (pos.HasValue) AmongUsUtil.GenerateFootprint(pos.Value, color.Invoke(), angle, duration, type, () => canSeeFootprint.Value);
                 }
             }
         }
 
         if (attribute == PlayerAttributes.CurseOfBloody)
         {
-            NebulaManager.Instance.StartCoroutine(CoFootprintUpdate(() => Roles.Modifier.Bloody.MyRole.UnityColor, null, 5f).WrapToIl2Cpp());
+            NebulaManager.Instance.StartCoroutine(CoFootprintUpdate(() => Roles.Modifier.Bloody.MyRole.UnityColor, null, 5f, 0).WrapToIl2Cpp());
         }
         if (attribute == PlayerAttributes.Footprint)
         {
-            NebulaManager.Instance.StartCoroutine(CoFootprintUpdate(() => DynamicPalette.PlayerColors[CurrentOutfit.Outfit.outfit.ColorId], ()=>!HasAttribute(PlayerAttributes.CurseOfBloody), 3f).WrapToIl2Cpp());
+            NebulaManager.Instance.StartCoroutine(CoFootprintUpdate(() => DynamicPalette.PlayerColors[CurrentOutfit.Outfit.outfit.ColorId], ()=>!HasAttribute(PlayerAttributes.CurseOfBloody), 3f, 1).WrapToIl2Cpp());
         }
     }
 

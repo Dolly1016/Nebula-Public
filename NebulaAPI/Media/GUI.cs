@@ -90,6 +90,12 @@ public abstract class GUIWidget
     internal abstract GameObject? Instantiate(Anchor anchor, Size size, out Size actualSize);
 
     /// <summary>
+    /// 大きさの考慮を先送りにさせるウィジェットで使用します。
+    /// 同じ位置に複数のウィジェットを配置できます。
+    /// </summary>
+    public bool PostponesConsideringSize { get; set; } = false;
+
+    /// <summary>
     /// GUIWidgetをSupplierの形式に変換します。
     /// </summary>
     /// <param name="widget"></param>

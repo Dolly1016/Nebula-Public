@@ -678,6 +678,27 @@ public interface Player : ICommandExecutor, IArchivedPlayer, IPlayerlike
         return result;
     }
 
+    /// <summary>
+    /// 役職を取得します。
+    /// </summary>
+    /// <typeparam name="Role"></typeparam>
+    /// <param name="role"></param>
+    /// <returns></returns>
+    bool TryGetRole<Role>([MaybeNullWhen(false)] out Role role) where Role : class, RuntimeRole
+    {
+        if (this.Role is Role r)
+        {
+            role = r;
+            return true;
+        }
+        else
+        {
+            role = null;
+            return false;
+        }
+    }
+    
+
 
     /// <summary>
     /// インポスター陣営の場合、trueを返します。

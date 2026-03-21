@@ -78,7 +78,7 @@ public class StandardRoleAllocator : IRoleAllocator
         public int count = (param ?? role.AllocationParameters)?.RoleCountSum ?? 0; 
         public int left = (param ?? role.AllocationParameters)?.RoleCountSum ?? 0; 
         public int cost = (param ?? role.AllocationParameters)?.TeamCost ?? 1;
-        public int otherCost = (param ?? role.AllocationParameters)?.OtherCost ?? 1;
+        public int otherCost = (param ?? role.AllocationParameters)?.OtherCost ?? 0;
         public AllocationParameters? Param => param ?? role.AllocationParameters;
     }
 

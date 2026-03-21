@@ -52,8 +52,8 @@ internal class ItemSupplierManager : AbstractModule<Virial.Game.Game>, IGameOper
         //ホストがサプライヤを生成する
         var spawner = NebulaAPI.CurrentGame?.GetModule<IMapObjectSpawner>();
 
-        if(PlantsAreSpawnable) spawner?.Spawn(GeneralConfigurations.NumOfPlantsOption, 8f, "itemSupplier", ItemSupplier.MyAllplayersTag, MapObjectType.Reachable, [MapObjectCondition]);
-        if(WarpedPlantsAreSpawnable) spawner?.Spawn(GeneralConfigurations.NumOfWarpedPlantsOption, 8f, "itemSupplier", ItemSupplier.MyNoncrewmateTag, MapObjectType.Reachable, [MapObjectCondition]);
+        if(PlantsAreSpawnable) spawner?.Spawn(GeneralConfigurations.NumOfPlantsOption, 8f, "itemSupplier", ItemSupplier.MyAllplayersTag, MapObjectType.Reachable | MapObjectType.SmallOpened, [MapObjectCondition]);
+        if(WarpedPlantsAreSpawnable) spawner?.Spawn(GeneralConfigurations.NumOfWarpedPlantsOption, 8f, "itemSupplier", ItemSupplier.MyNoncrewmateTag, MapObjectType.SmallOpened | MapObjectType.SmallInCorner, [MapObjectCondition]);
 
         if (Helpers.CurrentMonth == 1) achTokenOmikuji = new("omikuji", 0, (val, _) => val >= 5);
     }

@@ -1,4 +1,6 @@
 ﻿using Il2CppInterop.Runtime.Injection;
+using Nebula.Behavior;
+using Virial;
 
 namespace Nebula.Modules;
 
@@ -269,5 +271,26 @@ public class HudContent : MonoBehaviour
         obj.UpdateSubPriority();
 
         return obj;
+    }
+
+    static public Transform InstantiateStretchContent(ILifespan lifespan, string name, bool isLeftSide, bool occupiesLine)
+    {
+        var holder = InstantiateContent(name, isLeftSide, occupiesLine, false, true);
+        lifespan.BindGameObject(holder.gameObject);
+        var adjust = UnityHelper.CreateObject<ScriptBehaviour>("Adjust", holder.transform, Vector3.zero);
+        adjust.UpdateHandler += () =>
+        {
+            if (MeetingHud.Instance)
+            {
+                adjust.transform.localScale = new(0.65f, 0.65f, 1f);
+                adjust.transform.localPosition = new(-0.45f, -0.37f, 0f);
+            }
+            else
+            {
+                adjust.transform.localScale = Vector3.one;
+                adjust.transform.localPosition = Vector3.zero;
+            }
+        };
+        return adjust.transform;
     }
 }

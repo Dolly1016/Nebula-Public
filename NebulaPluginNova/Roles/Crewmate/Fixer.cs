@@ -68,6 +68,13 @@ internal class Fixer : DefinedSingleAbilityRoleTemplate<Fixer.Ability>, DefinedR
             buttonManager?.RegisterMeetingAction(new(MeetingIcon,
                p =>
                {
+                   if (IsUsurped)
+                   {
+                       NebulaAsset.PlaySE(NebulaAudioClip.ButtonBreaking, volume: 1f);
+                       leftJamming = 0;
+                       return;
+                   }
+
                    if (MyPlayer.IsSameSideOf(p.MyPlayer))
                    {
                        if (MeetingHud.Instance.playerStates.Count(pva => pva.VotedFor == p.MyPlayer.PlayerId) >= 5)

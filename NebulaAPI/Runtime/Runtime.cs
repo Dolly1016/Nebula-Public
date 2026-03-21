@@ -4,6 +4,7 @@ using Virial.Assignable;
 using Virial.Attributes;
 using Virial.DI;
 using Virial.Game;
+using Virial.Game.Console;
 using Virial.Text;
 
 namespace Virial.Runtime;
@@ -92,6 +93,12 @@ public interface NebulaPreprocessor
     internal void PickUpPreprocess(System.Reflection.Assembly assembly);
     AssignmentType RegisterAssignmentType(Func<DefinedRole> relatedRole, Func<int[], DefinedRole, int[]> argumentEditor, string postfix, Color? color, Func<AbilityAssignmentStatus, DefinedRole, bool> predicate, Func<bool> isActive, bool canGuessAsAbility = true);
     void RegisterExclusiveAssignmentRule(IExclusiveAssignmentRule rule) => IExclusiveAssignmentRule.RegisterRule(rule);
+
+    /// <summary>
+    /// 使用ボタンの代替画像を登録します。
+    /// </summary>
+    /// <returns></returns>
+    UseButtonAlternative RegisterUseButtonAlternative(Virial.Media.Image buttonImage, Action onUsed);
 
     public bool FinishPreprocess { get; }
 }

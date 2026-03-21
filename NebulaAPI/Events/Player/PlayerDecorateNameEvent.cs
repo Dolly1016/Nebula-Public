@@ -10,9 +10,11 @@ public class PlayerDecorateNameEvent : AbstractPlayerEvent
 {
     public string Name { get; set; }
     public Virial.Color? Color { get; set; } = null;
+    public bool CanSeeAllInfo { get; }
 
-    internal PlayerDecorateNameEvent(Virial.Game.Player player, string name) : base(player)
+    internal PlayerDecorateNameEvent(Virial.Game.Player player, string name, bool canSeeAllInfo) : base(player)
     {
         Name = name;
+        CanSeeAllInfo = canSeeAllInfo;
     }
 }

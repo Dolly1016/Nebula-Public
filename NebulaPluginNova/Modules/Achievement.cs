@@ -193,14 +193,14 @@ public class ProgressRecord
         this.entry = new IntegerDataEntry("a." + hashedKey, NebulaAchievementManager.AchievementDataSaver, 0, defaultSourceHashed, DebugTools.WriteAllAchievementsData);
         this.goal = goal;
         if (NebulaAchievementManager.AllRecords.Any(r => r.entry.Name == this.entry.Name)) NebulaLogger.Instance.Error("Duplicate achievement hash: " + key);
-        NebulaAchievementManager.RegisterRecord(this, key);
+        NebulaAchievementManager.RegisterRecord(this, Id);
     }
 
     public virtual string Id => GroupId == null ? key : (GroupId + "." + key);
-    public virtual string TranslationKey => "achievement." + key + ".title";
-    public string GoalTranslationKey => "achievement." + key + ".goal";
-    public string CondTranslationKey => "achievement." + key + ".cond";
-    public string FlavorTranslationKey => "achievement." + key + ".flavor";
+    public virtual string TranslationKey => "achievement." + Id + ".title";
+    public string GoalTranslationKey => "achievement." + Id + ".goal";
+    public string CondTranslationKey => "achievement." + Id + ".cond";
+    public string FlavorTranslationKey => "achievement." + Id + ".flavor";
 
     protected void UpdateProgress(int newProgress) => entry.Value = newProgress;
 
@@ -253,6 +253,7 @@ public interface INebulaAchievement
     static private readonly TextAttribute DetailContentAttribute = GUI.API.GetAttribute(AttributeAsset.OverlayContent);
     static private readonly Virial.Color GlobalProgressColor = new(180,180,180);
     string Id { get; }
+    string? Group { get; }
     string TranslationKey => "achievement." + Id + ".title";
     string GoalTranslationKey => "achievement." + Id + ".goal";
     string CondTranslationKey => "achievement." + Id + ".cond";
@@ -274,7 +275,7 @@ public interface INebulaAchievement
     internal bool HasPrefix { get; set; }
     internal bool HasInfix { get; set; }
     internal bool HasSuffix { get; set; }
-    internal bool IsAddonTitle { get; }
+    internal bool IsAddonTitle => Group != null;
 
     IEnumerable<string> GetKeywords()
     {
@@ -497,7 +498,7 @@ public class AbstractAchievement : ProgressRecord, INebulaAchievement
     public bool HasSuffix { get; set; }
     public bool HasInfix { get; set; }
     public bool IsHidden { get => (isSecret || !(preAchievement?.Get()?.IsCleared ?? true)) && !IsCleared; }
-    public bool IsAddonTitle => GroupId != null;
+    string? INebulaAchievement.Group => GroupId;
 
     public AbstractAchievement(string? groupId, bool canClearOnce, bool isSecret, bool noHint, string key, int goal, IEnumerable<DefinedAssignable> role, IEnumerable<AchievementType> type, int trophy, int attention, Image? specifiedImage, string? preAchievement) : base(groupId, key, goal, canClearOnce) 
     {
@@ -550,6 +551,7 @@ public class InnerslothAchievement : INebulaAchievement
     public bool HasSuffix { get; set; }
     public bool HasInfix { get; set; }
     public bool IsAddonTitle => false;
+    string? INebulaAchievement.Group => null;
 #if PC
     bool IsClearedSteam => SteamUserStats.GetAchievement(Id.Split('.', 2)[1], out var cleared) && cleared;
 #else
@@ -593,10 +595,10 @@ public class InnerslothAchievement : INebulaAchievement
 
 public class SumUpReferenceAchievement : INebulaAchievement
 {
-    public SumUpReferenceAchievement(bool isAddonTitle, bool isSecret, string key, string reference, int goal, IEnumerable<DefinedAssignable> role, IEnumerable<AchievementType> type, int trophy, int attention, Image? specifiedImage, string? preAchievement)
+    public SumUpReferenceAchievement(string? groupId, bool isSecret, string key, string reference, int goal, IEnumerable<DefinedAssignable> role, IEnumerable<AchievementType> type, int trophy, int attention, Image? specifiedImage, string? preAchievement)
     {
-        this.IsAddonTitle = isAddonTitle;
-        this.Id = key;
+        this.Group = groupId;
+        this.key = key;
         this.Trophy = trophy;
         this.IsSecret = isSecret;
         this.goal = goal;
@@ -606,7 +608,7 @@ public class SumUpReferenceAchievement : INebulaAchievement
         this.Attention = attention;
         this.SpecifiedBackImage = specifiedImage;
         this.preAchievement = preAchievement == null ? null : new(() => NebulaAchievementManager.GetAchievement(preAchievement, out var ach) ? ach : null!);
-        NebulaAchievementManager.RegisterNonrecord(this, key);
+        NebulaAchievementManager.RegisterNonrecord(this, Id);
     }
 
     private readonly Cache<INebulaAchievement>? preAchievement;
@@ -614,7 +616,8 @@ public class SumUpReferenceAchievement : INebulaAchievement
 
     static private TextAttribute OblongAttribute = new(GUI.Instance.GetAttribute(AttributeParams.Oblong)) { FontSize = new(1.6f), Size = new(0.6f, 0.2f), Color = new(163, 204, 220) };
 
-    public string Id { get; private init; }
+    private string key { get; init; }
+    public string Id => Group != null ? (Group + "." + key) : key;
     public int Attention { get; private init; }
 
     public int Trophy { get; private init; }
@@ -626,7 +629,7 @@ public class SumUpReferenceAchievement : INebulaAchievement
     public bool HasPrefix { get; set; }
     public bool HasSuffix { get; set; }
     public bool HasInfix { get; set; }
-    public bool IsAddonTitle { get; private set; } = false;
+    public string? Group { get; private set; }
     private ProgressRecord? referenceRecord = null;
     private readonly IEnumerable<AchievementType> achievementType =[];
     public Image? SpecifiedBackImage { get; set; }
@@ -802,8 +805,7 @@ public class TitleRegisterImpl : ITitlesRegister
 
             if (builder.RelatedRecord != null)
             {
-                id = group + "." + id;
-                new SumUpReferenceAchievement(true, builder.IsSecret, id, builder.RelatedRecord, builder.Goal ?? 1, relatedRoles, [], trophy, 0, null, null);
+                new SumUpReferenceAchievement(group, builder.IsSecret, id, builder.RelatedRecord, builder.Goal ?? 1, relatedRoles, [], trophy, 0, null, null);
             }else if(goal > 1)
             {
                 new SumUpAchievement(group, builder.IsSecret, false, id, goal, relatedRoles, [], trophy, 0, null, null);
@@ -1169,7 +1171,7 @@ static public class NebulaAchievementManager
             else if (!records.IsEmpty())
                 new CompleteAchievement(null, records.ToArray(), secret, noHint, args[0], relatedRoles, types.ToArray(), rarity, attention, specifiedImage, preAchievement) { HasInfix = hasInfix, HasPrefix = hasPrefix, HasSuffix = hasPostfix };
             else if (reference != null)
-                new SumUpReferenceAchievement(false, secret, args[0], reference, goal, relatedRoles, types.ToArray(), rarity, attention, specifiedImage, preAchievement) { HasInfix = hasInfix, HasPrefix = hasPrefix, HasSuffix = hasPostfix };
+                new SumUpReferenceAchievement(null, secret, args[0], reference, goal, relatedRoles, types.ToArray(), rarity, attention, specifiedImage, preAchievement) { HasInfix = hasInfix, HasPrefix = hasPrefix, HasSuffix = hasPostfix };
             else if (goal > 1)
                 new SumUpAchievement(null, secret, noHint, args[0], goal, relatedRoles, types.ToArray(), rarity, attention, specifiedImage, preAchievement) { HasInfix = hasInfix, HasPrefix = hasPrefix, HasSuffix = hasPostfix };
             else

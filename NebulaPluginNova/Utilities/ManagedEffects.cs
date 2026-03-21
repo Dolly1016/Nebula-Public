@@ -245,6 +245,20 @@ public static class ManagedEffects
         GameObject.Destroy(obj);
     }
 
+    static public IEnumerator CoShakeTubelike(Transform transform, float currentScale, float goalScale)
+    {
+        float p = 0f;
+        while (p < 1f)
+        {
+            p += Time.deltaTime / 1.15f;
+            transform.localEulerAngles = new(0f, 0f, 24f * Mathn.Sin(p * 29.2f) * (1f - p));
+            transform.localScale = Vector3.one * (1f + (1f - (p * p)) * 0.4f) * Mathn.Lerp(currentScale, goalScale, p);
+            yield return null;
+        }
+        transform.localEulerAngles = new(0f, 0f, 0f);
+        transform.localScale = Vector3.one * goalScale;
+    
+    }
     static public void StartOnScene(this IEnumerator coroutine) => NebulaManager.Instance.StartCoroutine(coroutine.WrapToIl2Cpp());
     static public void StartOnProcess(this IEnumerator coroutine) => ModSingleton<ResidentBehaviour>.Instance.StartCoroutine(coroutine.WrapToIl2Cpp());
     static public void StartOn(this IEnumerator coroutine, MonoBehaviour behaviour) => behaviour.StartCoroutine(coroutine.WrapToIl2Cpp());

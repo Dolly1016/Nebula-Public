@@ -545,6 +545,13 @@ public class NebulaManager : MonoBehaviour
                 }
             }
 
+            /*
+            if (Input.GetKeyDown(KeyCode.Tab))
+            {
+                NebulaAPI.Logging.InGameLogger(3f).Message("Update FPS Rate: " + AmongUsUtil.FastRate + "\n" + (AmongUsUtil.IsInFastUpdate ? "高FPS対策が<b>有効</b>です。" : "高FPS対策は<b>無効</b>です。"));
+            }
+            */
+
             if (AmongUsClient.Instance && AmongUsClient.Instance.GameState != InnerNet.InnerNetClient.GameStates.NotJoined)
             {
                 var stampInput = NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Stamp);

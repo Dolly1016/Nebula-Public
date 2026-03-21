@@ -33,6 +33,7 @@ public class NebulaGameEnd
     static public readonly GameEnd GamblerWin = new(35, "gambler", Roles.Neutral.Gambler.MyRole.UnityColor, 29);
     static public readonly GameEnd TyrantWin = new(36, "tyrant", Roles.Neutral.Tyrant.MyRole.UnityColor, 32);
     static public readonly GameEnd VanityWin = new(37, "vanity", Roles.Neutral.Vanity.MyRole.UnityColor, 18);
+    static public readonly GameEnd PlagueWin = new(38, "plague", Roles.Neutral.Plague.MyRole.UnityColor, 32);
     static public readonly GameEnd GameEnd = new(62, "gameEnd", Palette.CrewmateBlue, 128) { AlternativeClip = () => NebulaAsset.GetAudioClip(NebulaAudioClip.AeroGuesserGameEnd)};
     static public readonly GameEnd NoGame = new(63, "nogame", InvalidColor, 128) { AllowWin = false };
 
@@ -72,6 +73,7 @@ public class NebulaGameEnd
         RegisterWinCondTip(VanityWin, () => (Roles.Neutral.Vanity.MyRole as ISpawnable).IsSpawnable && Roles.Neutral.Vanity.IndependentTeamOption, "vanity.kill");
         RegisterWinCondTip(VanityWin, () => (Roles.Neutral.Vanity.MyRole as ISpawnable).IsSpawnable && Roles.Neutral.Vanity.IndependentTeamOption, "vanity.extra.crewOnly", text => { if (!Roles.Neutral.Vanity.CanExtraWinEvenIfVanityDied) text += "<br>" + Language.Translate("document.tip.winCond.vanity.extra.surviveCond"); return text; });
         RegisterWinCondTip(VanityWin, () => (Roles.Neutral.Vanity.MyRole as ISpawnable).IsSpawnable && !Roles.Neutral.Vanity.IndependentTeamOption, "vanity.extra", text => { if (!Roles.Neutral.Vanity.CanExtraWinEvenIfVanityDied) text += "<br>" + Language.Translate("document.tip.winCond.vanity.extra.surviveCond"); return text; });
+        RegisterWinCondTip(PlagueWin, () => (Roles.Neutral.Plague.MyRole as ISpawnable).IsSpawnable, "plague");
     }
 
     private static void RegisterWinCondTip(GameEnd gameEnd, Func<bool> predicate, string name, Func<string,string>? decorator = null)

@@ -36,25 +36,7 @@ public interface IRoleAllocator
 /// </summary>
 public interface IRoleDraftAllocator
 {
-    /// <summary>
-    /// 指定のプレイヤーのために役職をいくつか抽選します。
-    /// 十分な抽選ができないと判断した場合、nullが返ります。
-    /// リストが返された場合、このあとPopAsを呼び出して割り当てられる役職を確定する必要があります。
-    /// </summary>
-    /// <param name="playerId"></param>
-    /// <returns></returns>
-    List<AssignmentCandidate>? Peek(byte playerId, int candidateNum);
 
-    /// <summary>
-    /// 割り当てる役職を確定します。
-    /// </summary>
-    /// <param name="candidate"></param>
-    void PopAs(AssignmentCandidate candidate);
-    /// <summary>
-    /// 指定されたプレイヤーをランダム割り当てのプレイヤーとして設定します。
-    /// </summary>
-    /// <param name="playerId"></param>
-    void SetRandom(byte playerId);
 }
 
 /// <summary>

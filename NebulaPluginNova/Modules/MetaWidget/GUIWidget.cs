@@ -76,13 +76,29 @@ public class VerticalWidgetsHolder : WidgetsHolder {
     internal override GameObject? Instantiate(Size size, out Size actualSize)
     {
         var results = widgets.Select(c => (c.Instantiate(size, out var acSize), acSize, c)).ToArray();
-        (float maxWidth, float sumHeight) = results.Aggregate((0f, 0f), (r, current) => (Math.Max(r.Item1, current.acSize.Width), r.Item2 + current.acSize.Height));
+        (float maxWidth, float sumHeight, float? temp) = results.Aggregate((0f, 0f, (float?)null), (r, current) =>
+        {
+            float maxWidth = Math.Max(r.Item1, current.acSize.Width);
+            float height = r.Item2;
+            float? tempHeight = r.Item3;
+            if (current.c.PostponesConsideringSize)
+            {
+                tempHeight = Mathn.Max(tempHeight ?? current.acSize.Height, current.acSize.Height);
+            }
+            else
+            {
+                tempHeight = 0f;
+                height += Mathn.Max(current.acSize.Height, tempHeight ?? current.acSize.Height);
+            }
+            return (maxWidth, height, tempHeight);
+        });
         if (FixedWidth != null) maxWidth = FixedWidth.Value;
 
         GameObject myObj = UnityHelper.CreateObject("WidgetsHolder", null, UnityEngine.Vector3.zero);
 
 
         float height = sumHeight * 0.5f;
+        float? maxHeight = null;
         foreach (var r in results)
         {
             if (r.Item1 != null)
@@ -90,7 +106,16 @@ public class VerticalWidgetsHolder : WidgetsHolder {
                 r.Item1.transform.SetParent(myObj.transform);
                 r.Item1.transform.localPosition = new UnityEngine.Vector3(CalcWidth(r.c.Alignment, r.acSize.Width, maxWidth), height - r.acSize.Height * 0.5f, 0f);
             }
-            height -= r.acSize.Height;
+
+            if (r.c.PostponesConsideringSize)
+            {
+                maxHeight = Mathn.Max(maxHeight ?? r.acSize.Height, r.acSize.Height);
+            }
+            else
+            {
+                height -= Mathn.Max(maxHeight ?? r.acSize.Height, r.acSize.Height);
+                maxHeight = null;
+            }
         }
 
         actualSize = new(maxWidth, sumHeight);
@@ -108,13 +133,28 @@ public class HorizontalWidgetsHolder : WidgetsHolder
     internal override GameObject? Instantiate(Size size, out Size actualSize)
     {
         var results = widgets.Select(c => (c.Instantiate(size, out var acSize), acSize, c)).ToArray();
-        (float sumWidth, float maxHeight) = results.Aggregate((0f, 0f), (r, current) => (r.Item1 + current.acSize.Width, Math.Max(r.Item2, current.acSize.Height)));
+        (float sumWidth, float maxHeight, float? temp) = results.Aggregate((0f, 0f, (float?)null), (r, current) => {
+            var maxHeight = Math.Max(r.Item2, current.acSize.Height);
+            var width = r.Item1;
+            var tempWidth = r.Item3;
+            if(current.c.PostponesConsideringSize)
+            {
+                tempWidth = Mathn.Max(tempWidth ?? current.acSize.Width, current.acSize.Width);
+            }
+            else
+            {
+                tempWidth = 0f;
+                width += Mathn.Max(current.acSize.Width, tempWidth ?? current.acSize.Width);
+            }
+            return (width, maxHeight, tempWidth);
+        });
         if (FixedHeight != null) maxHeight = FixedHeight.Value;
 
         GameObject myObj = UnityHelper.CreateObject("WidgetsHolder", null, UnityEngine.Vector3.zero);
 
 
         float width = -sumWidth * 0.5f;
+        float? maxWidth = null;
         foreach (var r in results)
         {
             if (r.Item1 != null)
@@ -122,7 +162,16 @@ public class HorizontalWidgetsHolder : WidgetsHolder
                 r.Item1.transform.SetParent(myObj.transform);
                 r.Item1.transform.localPosition = new UnityEngine.Vector3(width + r.acSize.Width * 0.5f, CalcHeight(r.c.Alignment, r.acSize.Height, maxHeight), 0f);
             }
-            width += r.acSize.Width;
+
+            if (r.c.PostponesConsideringSize)
+            {
+                maxWidth = Mathn.Max(maxWidth ?? r.acSize.Width, r.acSize.Width);
+            }
+            else
+            {
+                width += Mathn.Max(maxWidth ?? r.acSize.Width, r.acSize.Width);
+                maxWidth = null;
+            }
         }
 
         actualSize = new(sumWidth, maxHeight);

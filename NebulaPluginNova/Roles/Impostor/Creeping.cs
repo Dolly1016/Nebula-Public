@@ -127,7 +127,7 @@ internal class Creeping : DefinedSingleAbilityRoleTemplate<Creeping.Ability>, Ha
         {
             ModSingleton<DepoisonBoxManager>.Instance.RegisterBox(this);
             MyRenderer.material = VanillaAsset.GetHighlightMaterial();
-            UnityHelper.CreateObject<SpriteRenderer>("ConsoleBack", MyRenderer.transform, new(0f, 0f, 0.0001f)).sprite = sprites.GetSprite(1);
+            SetBackRenderer(sprites.GetSprite(1));
 
             MyConsole = MyRenderer.gameObject.AddComponent<CustomConsole>();
             MyConsole.Renderer = MyRenderer;

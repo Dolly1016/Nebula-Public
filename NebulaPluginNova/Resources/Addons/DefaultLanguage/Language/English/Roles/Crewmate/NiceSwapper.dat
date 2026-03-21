@@ -27,16 +27,16 @@
 
 # Titles
 
-"achievement.niceSwapper.common1.title" : "秘蔵っ子"
-"achievement.niceSwapper.common1.goal" : "他人が獲得した最多票を入れ替えて、味方の追放を阻止する。"
-"achievement.niceSwapper.common1.splitted.1" : "っ"
+"achievement.niceSwapper.common1.title" : "Hidden Treasure Children"
+"achievement.niceSwapper.common1.goal" : "Swap the max votes of the player to the other player who is enemy."
+"achievement.niceSwapper.common1.splitted.1" : "the "
 
-"achievement.niceSwapper.common2.title" : "我欲のトリアージ"
-"achievement.niceSwapper.common2.goal" : "自身が獲得した最多票を入れ替えて、他人を追放する。"
-"achievement.niceSwapper.common2.flavor" : ""僕、可愛いんです。""
+"achievement.niceSwapper.common2.title" : "My Desire Triage"
+"achievement.niceSwapper.common2.goal" : "Swap votes of oneself to the other player and exile the player."
+"achievement.niceSwapper.common2.flavor" : ""I am the most useful!""
 
-"achievement.niceSwapper.another1.title" : "独善"
-"achievement.niceSwapper.another1.goal" : "非クルーメイトが獲得した最多票を入れ替えて、クルーメイトを追放する。"
+"achievement.niceSwapper.another1.title" : "Mind One's Own Business"
+"achievement.niceSwapper.another1.goal" : "Swap the max votes of the non-crewmate to a crewmate and exile the crewmate."
 
-"achievement.niceSwapper.challenge.title" : "アンリアルマジョリティ"
-"achievement.niceSwapper.challenge.goal" : "票を入れ替えて最後のインポスターを追放し、勝利する。"
+"achievement.niceSwapper.challenge.title" : "Unreal Majority"
+"achievement.niceSwapper.challenge.goal" : "Swap votes, exile the last impostor, and win."

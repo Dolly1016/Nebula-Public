@@ -212,16 +212,7 @@ public class Collator : DefinedSingleAbilityRoleTemplate<Collator.Ability>, HasC
         private IEnumerator CoShakeTube(int index)
         {
             var tube = allSamples[index].tube;
-            var transform = tube.transform;
-            float p = 0f;
-            while (p < 1f) {
-                p += Time.deltaTime * 1.15f;
-                transform.localEulerAngles = new(0f, 0f, 24f * Mathn.Sin(p * 29.2f) * (1f - p));
-                transform.localScale = Vector3.one * (1f + (1f - (p * p)) * 0.4f);
-                yield return null;
-            }
-            transform.localEulerAngles = new(0f, 0f, 0f);
-            transform.localScale = Vector3.one;
+            return ManagedEffects.CoShakeTubelike(tube.transform, 1f, 1f);
         }
 
         AchievementToken<EditableBitMask<GamePlayer>>? acTokenChallenge = null;
@@ -236,28 +227,13 @@ public class Collator : DefinedSingleAbilityRoleTemplate<Collator.Ability>, HasC
                 acTokenAnother1 = new("collator.another1", (null, 0f, false), (value, _) => value.clear);
 
                 //サンプル一覧の表示
-                var IconsHolder = HudContent.InstantiateContent("CollatorIcons", true, true, false, true);
-                this.BindGameObject(IconsHolder.gameObject);
-                var ajust = UnityHelper.CreateObject<ScriptBehaviour>("Ajust", IconsHolder.transform, Vector3.zero);
-                ajust.UpdateHandler += () =>
-                {
-                    if (MeetingHud.Instance)
-                    {
-                        ajust.transform.localScale = new(0.65f, 0.65f, 1f);
-                        ajust.transform.localPosition = new(-0.45f, -0.37f, 0f);
-                    }
-                    else
-                    {
-                        ajust.transform.localScale = Vector3.one;
-                        ajust.transform.localPosition = Vector3.zero;
-                    }
-                };
+                var holder = HudContent.InstantiateStretchContent(this, "CollatorIcons", true, true);
 
                 allSamples = new (SpriteRenderer tube, SpriteRenderer sample)[SelectiveCollatingOption ? NumOfTubesOption : 2];
-                IconsHolder.SetPriority(allSamples.Length > 3 ? 1 : -1);
+
                 for (int i = 0;i<allSamples.Length;i++)
                 {
-                    var tube = UnityHelper.CreateObject<SpriteRenderer>("SampleTube", ajust.transform, Vector3.zero, LayerExpansion.GetUILayer());
+                    var tube = UnityHelper.CreateObject<SpriteRenderer>("SampleTube", holder, Vector3.zero, LayerExpansion.GetUILayer());
                     tube.sprite = tubeSprite.GetSprite(0);
 
                     var sample = UnityHelper.CreateObject<SpriteRenderer>("SampleColored", tube.transform, new(0, 0, 0.1f));

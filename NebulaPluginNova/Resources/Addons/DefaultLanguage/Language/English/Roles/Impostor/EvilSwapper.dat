@@ -26,3 +26,17 @@
 
 
 # Titles
+
+"achievement.evilSwapper.common1.title" : "Dark Forces"
+"achievement.evilSwapper.common1.goal" : "Swap the most votes of oneself and exile others."
+"achievement.evilSwapper.common1.flavor" : ""The deep state is real!" —It's not rhetoric, it's hacking."
+"achievement.evilSwapper.common1.splitted.0" : "Dark "
+ 
+"achievement.evilSwapper.another1.title" : "It's A Conspiracy"
+"achievement.evilSwapper.another1.goal" : "The Fixer prevents the vote swap."
+"achievement.evilSwapper.another1.flavor" : ""This is a brainwashing radio wave that lets your thoughts spill out."<br>"...Maybe it's just that you're too easy to understand.""
+ 
+"achievement.evilSwapper.challenge.title" : "Absurd Contest"
+"achievement.evilSwapper.challenge.goal" : "There is the Madmate, Justice, and Mayor in the game.<br>Then get the victory after swapping votes."
+"achievement.evilSwapper.challenge.cond" : "Wining in a situation except the crewmate victory and due to the number of players"
+"achievement.evilSwapper.challenge.splitted.0" : "Nonsense "

@@ -115,29 +115,12 @@ public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignab
 
             if (AmOwner)
             {
-                var IconsHolder = HudContent.InstantiateContent("ArsonistIcons", true, true, false, true);
-                this.BindGameObject(IconsHolder.gameObject);
-                
-
-                var ajust = UnityHelper.CreateObject<ScriptBehaviour>("Ajust", IconsHolder.transform, Vector3.zero);
-                ajust.UpdateHandler += () =>
-                {
-                    if (MeetingHud.Instance)
-                    {
-                        ajust.transform.localScale = new(0.65f, 0.65f, 1f);
-                        ajust.transform.localPosition = new(-0.45f, -0.37f, 0f);
-                    }
-                    else
-                    {
-                        ajust.transform.localScale = Vector3.one;
-                        ajust.transform.localPosition = Vector3.zero;
-                    }
-                };
+                var holder = HudContent.InstantiateStretchContent(this, "ArsonistIcons", true, true);
                 foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
                 {
                     if (p.AmOwner) continue;
 
-                    var icon = AmongUsUtil.GetPlayerIcon(p.Unbox().DefaultOutfit, ajust.transform, Vector3.zero, Vector3.one * 0.31f);
+                    var icon = AmongUsUtil.GetPlayerIcon(p.Unbox().DefaultOutfit, holder, Vector3.zero, Vector3.one * 0.31f);
                     icon.ToggleName(false);
                     icon.SetAlpha(0.35f);
                     playerIcons.Add((p.PlayerId,icon));

@@ -129,7 +129,7 @@ public abstract class NebulaSyncObject : FlexibleLifespan, IGameOperator
         return default(T);
     }
 
-    static public IEnumerator<T> GetObjects<T>(string tag) where T : NebulaSyncObject
+    static public IEnumerable<T> GetObjects<T>(string tag) where T : NebulaSyncObject
     {
         int hash = tag.ComputeConstantHash();
         foreach(var obj in allObjects.Values)
@@ -219,6 +219,11 @@ public class NebulaSyncStandardObject : NebulaSyncObject
     {
         base.OnReleased();
         if(MyRenderer) GameObject.Destroy(MyRenderer.gameObject);
+    }
+
+    public void SetBackRenderer(Sprite sprite)
+    {
+        UnityHelper.CreateObject<SpriteRenderer>("back", MyRenderer.transform, new(0f, 0f, 0.0001f)).sprite = sprite;
     }
 
     protected static SystemConsole SystemConsolize(GameObject obj, SpriteRenderer? renderer, ImageNames image, Minigame minigamePrefab, float usableDistance = 1f)

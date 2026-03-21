@@ -57,6 +57,13 @@ public interface IModuleFactory
     ModAbilityButton InteractButton<P>(ILifespan lifespan, Player player, ObjectTracker<P> tracker, VirtualKeyInput input, string? inputHelp, float cooldown, string label, Image? image, Action<P, ModAbilityButton> onClick, Func<ModAbilityButton, bool>? availability = null, Func<ModAbilityButton, bool>? visibility = null, bool asGhostButton = false) where P : IPlayerlike
         => InteractButton(lifespan, player, tracker, new Events.Player.PlayerInteractParameter(), input, inputHelp, cooldown, label, image, onClick, availability, visibility, asGhostButton);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    ModAbilityButton ObjectInteractButton<T>(ILifespan lifespan, Player player, ObjectTracker<T> tracker, VirtualKeyInput input, string? inputHelp, float cooldown, string label, Image? image, Action<T, ModAbilityButton> onClick, Func<ModAbilityButton, bool>? availability = null, Func<ModAbilityButton, bool>? visibility = null, bool asGhostButton = false) where T : class {
+        var button = AbilityButton(lifespan, player, input, inputHelp, cooldown, label, image, b => tracker.CurrentTarget != null && (availability?.Invoke(b) ?? true), visibility, asGhostButton);
+        button.OnClick = b => onClick.Invoke(tracker.CurrentTarget!, b);
+        return button;
+    }
+
     ModAbilityButton EffectButton(ILifespan lifespan, Player player, VirtualKeyInput input, string? inputHelp, float cooldown, float duration, string label, Image? image, Func<ModAbilityButton, bool>? availability = null, Func<ModAbilityButton, bool>? visibility = null, bool asGhostButton = false, bool isToggleEffect = false)
     {
         var button = AbilityButton(lifespan, player, input, inputHelp, cooldown, label, image, availability, visibility, asGhostButton);
@@ -157,6 +164,7 @@ public interface IModuleFactory
     ObjectTracker<IPlayerlike> PlayerlikeKillTracker(ILifespan lifespan, Player player, Func<IPlayerlike, bool>? filter = null, Func<IPlayerlike, bool>? filterHeavier = null, bool canTrackInVentPlayer = false);
 
     ObjectTracker<IPlayerlike> PlayerlikeTracker(ILifespan lifespan, Player player, Func<IPlayerlike, bool>? filter = null, Func<IPlayerlike, bool>? filterHeavier = null, bool canTrackInVentPlayer = false);
+
 
     /// <summary>
     /// タイマーを生成します。

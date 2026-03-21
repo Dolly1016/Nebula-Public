@@ -8,27 +8,22 @@ using Virial.Events.Game;
 using Virial.Game;
 using BepInEx.Unity.IL2CPP.Utils;
 using Nebula.Map;
+using Virial.Runtime;
+using Virial.Game.Console;
 
 namespace Nebula.Modules;
 
-[HarmonyPatch(typeof(UseButton), nameof(UseButton.Awake))]
-public static class UseButtonSettingsPatch
+[NebulaPreprocess(PreprocessPhase.BuildNoSModule)]
+public static class TeleporterUseButtons
 {
-    private static IDividedSpriteLoader useButtonIcon = DividedSpriteLoader.FromResource("Nebula.Resources.TeleporterButton.png", 100f, 4, 1);
-    static void Postfix(UseButton __instance)
+    static internal UseButtonAlternative[] Alternatives = [];
+    private const int Variations = 4;
+    static void Preprocess(NebulaPreprocessor preprocessor)
     {
-        var useSetting = __instance.fastUseSettings[ImageNames.UseButton];
-        UseButtonSettings GenerateSettings(Sprite sprite) => new()
-        {
-            FontMaterial = useSetting.FontMaterial,
-            ButtonType = ImageNames.UseButton,
-            Image = sprite,
-            Text = useSetting.Text
-        };
-
-        for (int i = 0; i < 4; i++) __instance.fastUseSettings[(ImageNames)(128 + i)] = GenerateSettings(useButtonIcon.GetSprite(i));
-
-        //__instance.fastUseSettings[ImageNames.UseButton] = GenerateSettings(useButtonIcon.GetSprite(0));
+        
+        IDividedSpriteLoader useButtonIcon = DividedSpriteLoader.FromResource("Nebula.Resources.TeleporterButton.png", 100f, Variations, 1);
+        Alternatives = new UseButtonAlternative[Variations];
+        for (int i = 0; i < Variations; i++) Alternatives[i] = new UseButtonAlternative(useButtonIcon.AsLoader(i), () => true, PolishTeleportStoneStartPatch.OnPostUseConsole, true);
     }
 }
 
@@ -51,12 +46,11 @@ public static class PolishTeleportStonePatch
     }
 }
 
-[HarmonyPatch(typeof(SystemConsole), nameof(SystemConsole.Use))]
 public static class PolishTeleportStoneStartPatch
 {
     static private SpriteLoader stoneSprite = SpriteLoader.FromResource("Nebula.Resources.TeleporterTask.png", 100f);
 
-    static void Postfix(SystemConsole __instance)
+    internal static void OnPostUseConsole(SystemConsole __instance)
     {
         if (!Minigame.Instance) return;
         var rubyGame = Minigame.Instance.TryCast<PolishRubyGame>();
@@ -232,7 +226,7 @@ public class Teleporter : NebulaSyncStandardObject
         ShadowRenderer = UnityHelper.CreateObject<SpriteRenderer>("Console", MyRenderer.transform, new Vector3(0f, -0.2f, 0.001f));
         ShadowRenderer.sprite = shadowSprite.GetSprite(kind);
 
-        SystemConsolize(MyRenderer.gameObject, ConsoleRenderer, (ImageNames)(128 + kind), PolishRubyPrefab);
+        SystemConsolize(MyRenderer.gameObject, ConsoleRenderer, TeleporterUseButtons.Alternatives[kind].ImageNames, PolishRubyPrefab);
     }
 
     static Teleporter() => NebulaSyncObject.RegisterInstantiater(MyTag, (args) => new Teleporter(new(args[0], args[1]), (int)args[2]));

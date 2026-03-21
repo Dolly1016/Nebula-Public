@@ -13,17 +13,24 @@ namespace Nebula.Roles.Crewmate;
 
 public static class FootprintHelpers
 {
-    static public Vector2? GetFootprintPosition(PlayerControl player, bool isLeft)
+    static public Vector2? GetFootprintPosition(PlayerControl player, bool isLeft, out float? angle)
     {
-        if (player.inVent || player.Data.IsDead) return null;
+        if (player.inVent || player.Data.IsDead)
+        {
+            angle = null;
+            return null;
+        }
 
         if (player.MyPhysics.Velocity.magnitude > 0)
         {
-            var vec = player.MyPhysics.Velocity.normalized * 0.08f * (isLeft ? 1f : -1f);
+            var vel = player.MyPhysics.Velocity.normalized;
+            var vec = vel * 0.08f * (isLeft ? 1f : -1f);
+            angle = Mathn.Atan2(vel.y, vel.x).RadToDeg();
             return player.transform.position + new Vector3(-vec.y, vec.x - 0.22f);
         }
         else
         {
+            angle = null;
             return player.transform.position + new Vector3(0f, -0.22f);
         }
     }
@@ -84,7 +91,7 @@ internal class Investigator : DefinedRoleTemplate, HasCitation, DefinedRole, IAs
             if (spawned) return;
             if (Mathn.Abs(cameraPos.x - Position.x) > 10f || Mathn.Abs(cameraPos.y - Position.y) > 10f) return;
 
-            Renderer = AmongUsUtil.GenerateFootprint(Position, Color.black.AlphaMultiplied(Mathn.Pow(Magnitude, 0.5f)), null);
+            Renderer = AmongUsUtil.GenerateFootprint(Position, Color.black.AlphaMultiplied(Mathn.Pow(Magnitude, 0.5f)), null, null, 0);
             spawned = true;
         }
 
@@ -249,7 +256,7 @@ internal class Investigator : DefinedRoleTemplate, HasCitation, DefinedRole, IAs
                     
                     if (time > footprintDuration || MeetingHud.Instance) break;
 
-                    var pos = FootprintHelpers.GetFootprintPosition(ev.Murderer.VanillaPlayer, isLeft);
+                    var pos = FootprintHelpers.GetFootprintPosition(ev.Murderer.VanillaPlayer, isLeft, out var angle);
                     isLeft = !isLeft;
 
                     if (pos.HasValue) allFootprints.Add(new(pos.Value, (footprintDuration - time) / footprintDuration, killData));

@@ -10,6 +10,7 @@ using Virial;
 using Virial.Assignable;
 using Virial.DI;
 using Virial.Game;
+using Virial.Game.Console;
 using Virial.Runtime;
 using Virial.Text;
 using Virial.Utilities;
@@ -112,6 +113,7 @@ internal class NebulaPreprocessorImpl : NebulaPreprocessor
     GameEnd NebulaPreprocessor.CreateEnd(string immutableId, TextComponent displayText, Virial.Color color, int priority, bool specifyNobodyWins) => new(immutableId, displayText, color, priority, specifyNobodyWins);
     ExtraWin NebulaPreprocessor.CreateExtraWin(string localizedName, Virial.Color color) => new(localizedName, color);
     ExtraWin NebulaPreprocessor.CreateExtraWin(string immutableId, TextComponent displayText, Virial.Color color) => new(immutableId, displayText, color);
+    UseButtonAlternative NebulaPreprocessor.RegisterUseButtonAlternative(Virial.Media.Image buttonImage, Action onUsed) => new(buttonImage, () => true, _ => onUsed.Invoke(), false);
 
     private List<Func<IEnumerator>>[] preprocessList;
 }

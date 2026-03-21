@@ -1,5 +1,7 @@
 ﻿using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using Virial;
 using Virial.Events.Game.Meeting;
+using xCloud;
 
 namespace Nebula.Patches;
 

@@ -2,6 +2,7 @@
 
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Game.Console;
 
 namespace Nebula.Patches;
 
@@ -315,8 +316,15 @@ public static class SystemConsoleCanUsePatch
             couldUse = false;
         }
 
+        if(GamePlayer.LocalPlayer != null && !UseButtonAlternative.CheckCanUse(__instance))
+        {
+            canUse = false;
+            couldUse = false;
+            return;
+        }
+
         //緊急会議コンソールの使用をブロック
-        if (__instance.MinigamePrefab.TryCast<EmergencyMinigame>() && (info.AllAssigned().Any(a => !a.CanCallEmergencyMeeting) || info.AllAbilities.Any(a => a.BlockCallingEmergencyMeeting)))
+        if (__instance.MinigamePrefab != null && __instance.MinigamePrefab.TryCast<EmergencyMinigame>() && (info.AllAssigned().Any(a => !a.CanCallEmergencyMeeting) || info.AllAbilities.Any(a => a.BlockCallingEmergencyMeeting)))
         {
             canUse = false;
             couldUse = false;

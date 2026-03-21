@@ -88,17 +88,18 @@ public class FungleData : MapData
 
     static private readonly MapObjectPoint[] mapObjectPoints = [
         new(-11.2f, 12.4f, MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //ドロップシップ上端左
-        new(-9.6f, 13.6f, MapObjectType.SmallOrTabletopOutOfSight), //ドロップシップ上端
+        new(-9.6f, 13.6f, MapObjectType.SmallOrTabletopOutOfSight | MapObjectType.SmallInCorner), //ドロップシップ上端
         new(-6.9f, 12.8f, MapObjectType.SmallInCorner), //ドロップシップ上方
-        new(-9.2f, 7.0f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //ドロップシップ左下
-        new(-13.6f, 4.8f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //カフェテリア右下
+        new(-9.2f, 7.0f, MapObjectType.SmallOpened | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //ドロップシップ左下
+        new(-8.2f, 8.3f, MapObjectType.SmallOpened | MapObjectType.Reachable), //ドロップシップ下方
+        new(-13.6f, 4.8f, MapObjectType.SmallOpened | MapObjectType.Reachable), //カフェテリア右下
         new(-17.9f, 7.5f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //カフェテリア左上
         new(-16.4f, 6.2f, MapObjectType.SmallOrTabletopOutOfSight), //カフェテリア卓上
         new(-20.5f, 6.5f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //カフェテリア左外
         new(-21.5f, 2.0f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //レク左上外
         new(-15.7f, 2.2f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //レクカフェ間
         new(-18.1f, 2.4f, MapObjectType.SmallOrTabletopOutOfSight), //レクカフェ間左寄り
-        new(-16.2f, 0.9f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //レクシャワー
+        new(-16.2f, 0.9f, MapObjectType.SmallOpened | MapObjectType.Reachable), //レクシャワー
         new(-18.5f, -2.3f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //レク左下
         new(-23.0f, -1.5f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //レク左外
         new(-14.6f, -2.4f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //レク右下
@@ -106,59 +107,80 @@ public class FungleData : MapData
         new(-14.3f, 0.6f, MapObjectType.DepoisonBox),//レク上卓上
         new(-17.3f, -0.1f, MapObjectType.Reachable), //レク中央
         new(-19.3f, -4.6f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //レクキッチン間
+        new(-16.3f, -4.0f, MapObjectType.SmallOpened | MapObjectType.Reachable), //レク下外側
         new(-13.9f, -7.6f, MapObjectType.Reachable), //キッチン中央
         new(-17.2f, -9.6f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //キッチン下
-        new(-21.5f, -6.7f, MapObjectType.SmallInCorner | MapObjectType.SmallOrTabletopOutOfSight), //桟橋
+        new(-18.15f, -6.7f, MapObjectType.SmallOpened | MapObjectType.SmallOrTabletopOutOfSight), //キッチン左上
+        new(-21.9f, -6.9f, MapObjectType.SmallInCorner | MapObjectType.SmallOrTabletopOutOfSight), //桟橋
         new(-20.9f, -7.2f, MapObjectType.Reachable), //桟橋(中央寄り)
-        new(-9.7f, -9.6f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //キッチン右ジャングル通路入り口
-        new(-7.7f, -15.3f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //ジャングル左下端
-        new(-2.3f, -12.8f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //ラボ下
+        new(-9.7f, -9.6f, MapObjectType.SmallOpened | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //キッチン右ジャングル通路入り口下
+        new(-8.5f, -13.45f, MapObjectType.SmallOpened | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //キッチン右ジャングル通路入り口上
+        new(-7.7f, -15.3f, MapObjectType.SmallOpened | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //ジャングル左下端
+        new(-2.3f, -12.8f, MapObjectType.SmallOpened | MapObjectType.Reachable), //ラボ下
         new(-7.6f, -7.5f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //ラボ左
-        new(-4.6f, -10.9f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //ラボ中
-        new(-1.6f, -6.8f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //ラボ右上
+        new(-7.02f, -10.9f, MapObjectType.SmallInCorner | MapObjectType.SmallOrTabletopOutOfSight), //ラボ左下寄り
+        new(-4.6f, -10.9f, MapObjectType.SmallOpened | MapObjectType.Reachable), //ラボ中
+        new(-1.6f, -6.8f, MapObjectType.SmallOpened | MapObjectType.Reachable), //ラボ右上
         new(-5.4f, -10.2f, MapObjectType.DepoisonBox), //ラボ左下の床
-        new(1.8f, -5.2f, MapObjectType.SmallInCorner), //会議室右下外
+        new(-0.3f, -9.4f, MapObjectType.SmallOpened), //ラボ右の通路
+        new(1.8f, -5.2f, MapObjectType.SmallOpened), //会議室右下外
         new(0.2f, -6.8f, MapObjectType.SmallOrTabletopOutOfSight), //会議室右下外下寄り
         new(-1.1f, -0.4f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //会議室
-        new(-7.3f, 4.0f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //キャンプファイア右上
+        new(-7.3f, 4.0f, MapObjectType.SmallOpened | MapObjectType.Reachable), //キャンプファイア右上
+        new(-11.2f, -3.6f, MapObjectType.SmallOpened), //キャンプファイア下の壁
         new(1.6f, -2.4f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //宿舎
         new(1.2f, -0.7f, MapObjectType.SmallOrTabletopOutOfSight), //宿舎上寄り
+        new(-6.8f, -1.2f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //会議室外左
         new(1.2f, 1.9f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //会議室ストレージ間
-        new(0.0f, 4.1f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //ストレージ
+        new(1.16f, 0.82f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //会議室ストレージ間壁下
+        new(-2.1f, 2.3f, MapObjectType.SmallOpened | MapObjectType.Reachable), //ストレージ前
+        new(0.0f, 4.1f, MapObjectType.SmallOpened | MapObjectType.Reachable), //ストレージ
+        new(1.5f, 3.9f, MapObjectType.SmallInCorner), //ストレージ奥
         new(-2.2f, 7.1f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //ドロップシップストレージ間
         new(17.8f, 11.4f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //コミュ左下
         new(24.8f, 14.6f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //コミュ右上
         new(22.7f, 13.2f, MapObjectType.Reachable), //コミュ中央
-        new(18.2f, 7.2f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //コミュ高台中間
-        new(21.8f, 1.7f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //エンジン下
-        new(17.4f, 3.1f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //巨大宝石右
-        new(13.5f, 2.8f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //巨大宝石左
+        new(22.3f, 11.5f, MapObjectType.SmallOpened), //コミュ下
+        new(18.2f, 7.2f, MapObjectType.SmallInCorner | MapObjectType.SmallOpened | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //コミュ高台中間左
+        new(22.4f, 8.14f, MapObjectType.SmallInCorner | MapObjectType.SmallOpened | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //コミュ高台中間右
+        new(21.8f, 1.7f, MapObjectType.SmallOpened | MapObjectType.Reachable), //エンジン下
+        new(17.4f, 3.1f, MapObjectType.SmallOpened | MapObjectType.Reachable), //巨大宝石右
+        new(13.5f, 2.8f, MapObjectType.SmallOpened | MapObjectType.Reachable), //巨大宝石左
         new(13.7f, 9.3f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //採掘場
         new(11.2f, 8.2f, MapObjectType.SmallOrTabletopOutOfSight), //採掘場左寄り
-        new(10.1f, 4.5f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //展望右
+        new(10.1f, 4.5f, MapObjectType.SmallOpened | MapObjectType.Reachable), //展望右
         new(7.2f, 2.4f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //展望中
         new(10.0f, 1.2f, MapObjectType.SmallOrTabletopOutOfSight),//展望奥
         new(15.0f, -0.6f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //巨大宝石下方
+        new(15.5f, 1.12f, MapObjectType.SmallOpened), //巨大宝石下そば
         new(19.9f, 0.7f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //エンジン外左下
         new(21.8f, 1.7f, MapObjectType.SmallOrTabletopOutOfSight), //エンジン下
-        new(20.5f, -8.5f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //リアクター下
+        new(20.5f, -8.5f, MapObjectType.SmallOpened | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //リアクター下
         new(21.9f, -5.9f, MapObjectType.SmallInCorner), //リアクター上
         new(14.6f, -6.0f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //リアクター外左側上
-        new(16.8f, -9.6f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //リアクター外左側下
+        new(16.8f, -9.6f, MapObjectType.SmallOpened | MapObjectType.Reachable), //リアクター外左側下
         new(18.9f, -12.6f, MapObjectType.SmallOrTabletopOutOfSight), //リアクター外左側下隅
         new(17.6f, -13.2f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //リアクター温室中間
         new(14.7f, -17.0f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //ジャングル下方
+        new(18.8f, -8.6f, MapObjectType.SmallOpened), //リアクター前
+        new(6.9f, -6.2f, MapObjectType.SmallOpened), //ジャングル上方
         new(10.6f, -8.5f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //温室上
-        new(13.4f, -12.6f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //温室右
-        new(5.8f, -7.4f, MapObjectType.Reachable), //温室左上
+        new(7.9f, -7.7f, MapObjectType.Reachable), //温室上の通路中央
+        new(13.4f, -12.6f, MapObjectType.SmallOpened | MapObjectType.Reachable), //温室右
+        new(5.8f, -7.4f, MapObjectType.SmallInCorner), //温室左上
         ];
     static private readonly MapObjectPoint[] nonClassicObjectPoints = [
         new(7.7f, -14.7f, MapObjectType.SmallInCorner | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //温室下
         new(3.7f, -13.1f, MapObjectType.Reachable), //温室左下
-        new(2.3f, -11.4f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //ラボ温室間
+        new(2.3f, -11.4f, MapObjectType.SmallOpened | MapObjectType.Reachable), //ラボ温室間
+        ];
+    static private readonly MapObjectPoint[] classicObjectPoints = [
+        new(0.59f, -11.9f, MapObjectType.SmallOpened | MapObjectType.Reachable | MapObjectType.SmallOrTabletopOutOfSight), //ラボ外右下
+        new(10.0f, -16.0f, MapObjectType.SmallInCorner | MapObjectType.SmallOrTabletopOutOfSight), //O2下
+        new(9.5f, -13.8f, MapObjectType.SmallInCorner | MapObjectType.SmallOrTabletopOutOfSight), //O2下、上寄り
         ];
 
-    public override MapObjectPoint[] MapObjectPoints => GeneralConfigurations.FungleForClassicGameOption.Value ? mapObjectPoints : [..mapObjectPoints, ..nonClassicObjectPoints];
+    public override MapObjectPoint[] MapObjectPoints => GeneralConfigurations.FungleForClassicGameOption.Value ? [..mapObjectPoints, ..classicObjectPoints] : [..mapObjectPoints, ..nonClassicObjectPoints];
     public override IReadOnlyList<Vector2> MapArea => GeneralConfigurations.FungleForClassicGameOption.Value ? combinedClassicMapPos : combinedNonClassicMapPos;
     public override IReadOnlyList<Vector2> NonMapArea => [];
     protected override (AdditionalRoomArea area, string key, bool detailRoom)[] AdditionalRooms => additionalRooms;

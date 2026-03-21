@@ -64,6 +64,7 @@ public static class GameStartClientPatch
 [HarmonyPatch(typeof(RoleManager), nameof(RoleManager.SelectRoles))]
 public static class InitializeRolePatch
 {
+    //AlternativeRoutineを使用しない場合ここに到達する。
     static bool Prefix(RoleManager __instance)
     {
         //ロール割り当て

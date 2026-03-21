@@ -22,10 +22,6 @@ public class NebulaLoader : BasePlugin
 {
     static public NebulaLoader MyPlugin = null!;
 
-    public static AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
-    public static AndroidJavaObject currentActivity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
-    public static AndroidJavaObject vibrator = currentActivity.Call<AndroidJavaObject>("getSystemService", "vibrator");
-
     public override void Load()
     {
         MyPlugin = this;

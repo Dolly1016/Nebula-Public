@@ -5,6 +5,7 @@ using Nebula.Behavior;
 using Nebula.Game.Statistics;
 using Nebula.Map;
 using Nebula.Modules.Cosmetics;
+using Nebula.Patches;
 using Virial;
 using Virial.Game;
 using Virial.Text;
@@ -365,13 +366,20 @@ public static class AmongUsUtil
         return assist;
     }
 
-    private static SpriteLoader footprintSprite = SpriteLoader.FromResource("Nebula.Resources.Footprint.png", 100f);
-    public static SpriteRenderer GenerateFootprint(Vector2 pos,Color color, float? duration, Func<bool>? canSeeIn = null)
+    private static DividedSpriteLoader footprintSprite = DividedSpriteLoader.FromResource("Nebula.Resources.Footprint.png", 100f, 2, 1);
+    public static SpriteRenderer GenerateFootprint(Vector2 pos,Color color, float? angle, float? duration, int type, Func<bool>? canSeeIn = null)
     {
+        if (type == 1 && !angle.HasValue) return null!;//Type1の足跡は歩いているときだけ発生
+
         var renderer = UnityHelper.CreateObject<SpriteRenderer>("Footprint", null, new Vector3(pos.x, pos.y, pos.y / 1000f + 0.001f), LayerExpansion.GetPlayersLayer());
-        renderer.sprite = footprintSprite.GetSprite();
+        renderer.sprite = footprintSprite.GetSprite(type);
         renderer.color = color;
-        renderer.transform.eulerAngles = new Vector3(0f, 0f, (float)System.Random.Shared.NextDouble() * 360f);
+        float footAngle = type switch
+        {
+            1 => angle!.Value + (System.Random.Shared.NextSingle() - 0.5f) * 4f,
+            _ => (float)System.Random.Shared.NextDouble() * 360f
+        };
+        renderer.transform.eulerAngles = new Vector3(0f, 0f, footAngle);
         
         IEnumerator CoDisappearFootprint()
         {
@@ -534,6 +542,7 @@ public static class AmongUsUtil
         return "Invalid";
     }
 
+    static public int AdjustedImpostors(int players) => GameOptionsManager.Instance.CurrentGameOptions.GetAdjustedNumImpostorsModded(players);
     static public int NumOfImpostors => GameOptionsManager.Instance.CurrentGameOptions.GetInt(Int32OptionNames.NumImpostors);
     static public int NumOfShortTasks => GameOptionsManager.Instance.CurrentGameOptions.GetInt(Int32OptionNames.NumShortTasks);
     static public int NumOfCommonTasks => GameOptionsManager.Instance.CurrentGameOptions.GetInt(Int32OptionNames.NumCommonTasks);
@@ -783,4 +792,16 @@ public static class AmongUsUtil
     }
 
     public static HideAndSeekManager HnSPrefab => GameManagerCreator.Instance.HideAndSeekManagerPrefab;
+
+    public const float DeltaTime60 = 1f / 60f;
+    public const float DeltaTime70 = 1f / 70f;
+    public static bool IsInFastUpdate => Time.deltaTime < DeltaTime70;
+    public static float FastRate
+    {
+        get
+        {
+            var deltaTime = Time.deltaTime;
+            return deltaTime > 0f ? 1f / deltaTime / 60f : 1f;
+        }
+    }
 }

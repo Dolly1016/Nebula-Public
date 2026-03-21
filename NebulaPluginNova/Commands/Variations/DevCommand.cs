@@ -69,7 +69,7 @@ internal class DevCommand : ICommand
             case "objects":
             case "objectpos":
             case "mapobjectpoints":
-                points = MapData.GetCurrentMapData().MapObjectPoints.Select(p => (p.Point.ToUnityVector(), "", UnityEngine.Vector2.zero));
+                points = MapData.GetCurrentMapData().MapObjectPoints.Select(p => (p.Point.ToUnityVector(), string.Join('\n', Enum.GetValues<Virial.Game.MapObjectType>().Where(type => ((int)p.Type & (int)type) != 0).Select(type => type.ToString())), UnityEngine.Vector2.zero));
                 break;
             case "aeroguessereasy":
             case "aeroeasy":

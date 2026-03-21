@@ -15,10 +15,12 @@
 "achievement.sakura.title" : "Advance! Cherry Blossom Front"
 "achievement.sakura.goal" : "Change from yellow-green to cherry blossom pink and bloom during the game."
 "achievement.sakura.cond" : "April title"
+"achievement.sakura.splitted.0" : "Advance! "
 
 "achievement.koinobori.title" : "Love Streamers Swimming in the Sky"
 "achievement.koinobori.goal" : "Run side by side leisurely as two lovers in the sky."
 "achievement.koinobori.cond" : "May title+Both Lovers must have the <b>acceleration effect</b>+Must stay close while moving for <b>5 seconds</b>+MIRA HQ, Airship only"
+"achievement.koinobori.splitted.1" : "Swim "
 
 "achievement.rainyStep.title" : "Footsteps on a Rainy Day"
 "achievement.rainyStep.goal" : "Keep walking while under the effect of reduced speed."
@@ -55,6 +57,7 @@
 "achievement.freshWine.goal" : "Prey on or erase a fresh corpse that has just died."
 "achievement.freshWine.cond" : "November title"
 "achievement.freshWine.flavor" : ""A once-in-a-century event in 2XXX, surpassing the best events of this century, the best in space.""
+"achievement.freshWine.splitted.1" : "Premium "
 
 "achievement.christmas.title" : "How to Spend the Holidays"
 "achievement.christmas.goal" : "Exiled as lovers"

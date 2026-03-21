@@ -172,7 +172,7 @@ internal class AssignmentPreview
         AssignmentFlag[] result = new AssignmentFlag[players];
         for (int i = 0; i < players; i++) result[i] = 0;
 
-        int impostors = GameOptionsManager.Instance.CurrentGameOptions.GetAdjustedNumImpostorsModded(players);
+        int impostors = AmongUsUtil.AdjustedImpostors(players);
         int modImpostors = GeneralConfigurations.AssignmentImpostorOption;
         if (modImpostors < 0) modImpostors = 99;
         int modNeutral = GeneralConfigurations.AssignmentNeutralOption;
