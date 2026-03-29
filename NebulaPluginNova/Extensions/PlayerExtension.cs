@@ -4,6 +4,7 @@ using Epic.OnlineServices.Mods;
 using Hazel;
 using Nebula.Behavior;
 using Nebula.Game.Statistics;
+using Nebula.Modules.Cosmetics;
 using Nebula.Player;
 using TMPro;
 using UnityEngine.Rendering;
@@ -197,7 +198,7 @@ public static class PlayerExtension
     {
         //Scalerにまとめる
         var scaler = UnityHelper.CreateObject("Scaler", playerControlObject.transform, playerControlObject.GetComponent<Collider2D>().offset).transform;
-        scaler.gameObject.AddComponent<SortingGroup>();
+        var group = scaler.gameObject.AddComponent<SortingGroup>();
         var cosmetics = playerControlObject.GetComponentInChildren<CosmeticsLayer>();
         cosmetics.transform.SetParent(scaler, true);
         playerControlObject.transform.FindChild("BodyForms").SetParent(scaler, true);

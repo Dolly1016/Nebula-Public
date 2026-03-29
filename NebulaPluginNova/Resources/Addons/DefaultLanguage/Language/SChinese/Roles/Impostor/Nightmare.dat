@@ -54,10 +54,13 @@
 
 "achievement.nightmare.another1.title" : "当心脚下"
 "achievement.nightmare.another1.goal" : "在夜幕范围内死亡。"
+"achievement.nightmare.another1.splitted.0" : "夜路上"
 
 "achievement.nightmare.another2.title" : "恶梦成真"
 "achievement.nightmare.another2.goal" : "本局首次使用夜幕后，被驱逐或赌杀。"
+"achievement.nightmare.another2.splitted.0" : "恶梦"
 
 "achievement.nightmare.challenge.title" : "后半夜"
 "achievement.nightmare.challenge.goal" : "单次夜幕发动后，使3名玩家在夜幕中死亡。"
 "achievement.nightmare.challenge.cond" : "提示：梦魇也要参与击杀。"
+"achievement.nightmare.challenge.splitted.1" : "夜间的"

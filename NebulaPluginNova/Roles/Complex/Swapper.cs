@@ -137,7 +137,7 @@ public class Swapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
                 state.SetSelect(true);
                 if (lastSelected != null)
                 { 
-                    if(!MeetingHudExtension.CanVoteFor(lastSelected.MyPlayer))
+                    if(!MeetingHudExtension.CanVoteFor(lastSelected.MyPlayer) || lastSelected.MyPlayer == state.MyPlayer)
                     {
                         lastSelected.SetSelect(false);
                     }

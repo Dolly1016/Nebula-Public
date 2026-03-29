@@ -4,7 +4,7 @@ using Nebula.Map;
 using Nebula.Modules.CustomMap;
 using Virial.Game;
 
-namespace Nebula.Patches;
+namespace Nebula.Patches.Old;
 
 [HarmonyPatch(typeof(ShipStatus),nameof(ShipStatus.Awake))]
 public class ShipStatusPatch

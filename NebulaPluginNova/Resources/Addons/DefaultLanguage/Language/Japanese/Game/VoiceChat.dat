@@ -23,3 +23,4 @@
 "voiceChat.settings.server.apply" : "適用"
 "voiceChat.settings.micTest" : "マイクテスト"
 "voiceChat.settings.micTest.end" : "マイクテスト終了"
+"voiceChat.settings.player.reset" : "右クリックで音声リセット"

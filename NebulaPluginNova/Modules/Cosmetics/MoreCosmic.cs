@@ -290,6 +290,9 @@ public class CosmicImage
     [JsonSerializableField(true)]
     public List<float>? FPSCurve = null;
 
+    [JsonSerializableField(true)]
+    public float AnimSync = 0f;
+
     public void MarkAsUnloadAsset()
     {
         spriteLoader?.MarkAsUnloadAsset();
@@ -297,7 +300,15 @@ public class CosmicImage
         maskSpriteLoader?.MarkAsUnloadAsset();
     }
 
-    public int GetLength() => X.HasValue && Y.HasValue ? Length.HasValue ? Math.Min(Length.Value, X.Value * Y.Value) : X.Value * Y.Value : Length ?? 1;
+    public int GetLength()
+    {
+        if (X.HasValue && Y.HasValue) {
+            if(Length.HasValue)
+                return Math.Min(Length.Value, X.Value * Y.Value);
+            return X.Value * Y.Value;
+        }
+        return X ?? Y ?? Length ?? 1;
+    }
 
     public float PixelsPerUnit = 100f;
     public Vector2 Pivot = new Vector2(0.5f, 0.5f);
@@ -1579,15 +1590,147 @@ public class SetVisorPatch
     }
 }
 
+file class UIMaterial
+{
+    static public Material GetMaterial() => new Material(NebulaAsset.TransColorGameShader);
+    public const MaskType SpecialMaskType = (MaskType)7;
+    public static bool ShouldUseUIMaterial(MaskType maskType) => maskType == SpecialMaskType;
+}
+
+static public class MaskTypeExtensions
+{
+       public static void SetAsUIElement(this CosmeticsLayer layer) => layer.SetMaskType(UIMaterial.SpecialMaskType);
+}
+
 [HarmonyPatch(typeof(VisorLayer), nameof(VisorLayer.UpdateMaterial))]
 public class SetVisorMaterialPatch
 {
+    static bool Prefix(VisorLayer __instance)
+    {
+        LogUtils.WriteToConsole("VisorLayer.UpdateMaterial");
+        if (UIMaterial.ShouldUseUIMaterial(__instance.matProperties.MaskType))
+        {
+            __instance.Image.sharedMaterial = UIMaterial.GetMaterial();
+            __instance.Image.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+            if (__instance.visorData != null && __instance.IsLoaded && __instance.viewAsset.GetAsset().MatchPlayerColor)
+            {
+                PlayerMaterial.SetColors(__instance.matProperties.ColorId, __instance.Image);
+            }
+
+            return false;
+        }
+        return true;
+    }
     public static void Postfix(VisorLayer __instance)
     {
         if (__instance.transform.parent.TryGetComponent<NebulaCosmeticsLayer>(out var layer))
         {
             layer.RequireUpdateMaterial();
         }
+    }
+}
+
+[HarmonyPatch(typeof(SkinLayer), nameof(SkinLayer.UpdateMaterial))]
+public class SkinLayerUpdateMaterialPatch
+{
+    static bool Prefix(SkinLayer __instance)
+    {
+        LogUtils.WriteToConsole("SkinLayer.UpdateMaterial");
+        if (UIMaterial.ShouldUseUIMaterial(__instance.matProperties.MaskType))
+        {
+            __instance.layer.sharedMaterial = UIMaterial.GetMaterial();
+            __instance.layer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+            if (__instance.skin && __instance.skin.MatchPlayerColor)
+            {
+                PlayerMaterial.SetColors(__instance.matProperties.ColorId, __instance.layer);
+            }
+
+            return false;
+        }
+        return true;
+    }
+}
+
+[HarmonyPatch(typeof(HatParent), nameof(HatParent.UpdateMaterial))]
+public class HatParentUpdateMaterialPatch
+{
+    static bool Prefix(HatParent __instance)
+    {
+        LogUtils.WriteToConsole("HatParent.UpdateMaterial");
+        if (UIMaterial.ShouldUseUIMaterial(__instance.matProperties.MaskType))
+        {
+            var front = __instance.FrontLayer;
+            var back = __instance.BackLayer;
+            front.sharedMaterial = UIMaterial.GetMaterial();
+            back.sharedMaterial = UIMaterial.GetMaterial();
+            front.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+            back.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+            if (__instance.IsLoaded && __instance.viewAsset.GetAsset().MatchPlayerColor)
+            {
+                PlayerMaterial.SetColors(__instance.matProperties.ColorId, front);
+                PlayerMaterial.SetColors(__instance.matProperties.ColorId, back);
+            }
+
+            return false;
+        }
+        return true;
+    }
+}
+
+[HarmonyPatch(typeof(CosmeticsLayer), nameof(CosmeticsLayer.GetBodyMaterial))]
+public class CosmeticsLayerGetBodyMaterialPatch
+{
+    static bool Prefix(CosmeticsLayer __instance, ref Material __result, [HarmonyArgument(0)] MaskType type)
+    {
+        LogUtils.WriteToConsole("GetBodyMaterial");
+        if (UIMaterial.ShouldUseUIMaterial(type))
+        {
+            __result = UIMaterial.GetMaterial();
+            return false;
+        }
+        return true;
+    }
+}
+
+[HarmonyPatch(typeof(CosmeticsLayer), nameof(CosmeticsLayer.UpdateBodyMaterial))]
+public class CosmeticsLayerGetBodySpriteMaskInteractionPatch
+{
+    static bool Prefix(CosmeticsLayer __instance)
+    {
+        LogUtils.WriteToConsole("UpdateBodyMaterial");
+        if (UIMaterial.ShouldUseUIMaterial(__instance.bodyMatProperties.MaskType))
+        {
+            Material bodyMaterial = UIMaterial.GetMaterial();
+            SpriteMaskInteraction bodySpriteMaskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+            foreach (PlayerBodySprite playerBodySprite in __instance.bodySprites)
+            {
+                playerBodySprite.BodySprite.sharedMaterial = bodyMaterial;
+                playerBodySprite.BodySprite.maskInteraction = bodySpriteMaskInteraction;
+                foreach (SpriteRenderer spriteRenderer in playerBodySprite.LongModeParts)
+                {
+                    spriteRenderer.sharedMaterial = bodyMaterial;
+                    spriteRenderer.maskInteraction = bodySpriteMaskInteraction;
+                }
+            }
+            if (__instance.currentBodySprite != null)
+            {
+                PlayerMaterial.SetColors(__instance.bodyMatProperties.ColorId, __instance.currentBodySprite.BodySprite);
+                foreach (SpriteRenderer spriteRenderer2 in __instance.currentBodySprite.LongModeParts)
+                {
+                    PlayerMaterial.SetColors(__instance.bodyMatProperties.ColorId, spriteRenderer2);
+                }
+                if (__instance.currentBodySprite != null && __instance.currentBodySprite.PettingHand != null)
+                {
+                    PlayerMaterial.SetColors(__instance.bodyMatProperties.ColorId, __instance.currentBodySprite.PettingHand.HandSprite);
+                }
+                if (__instance.currentBodySprite != null && __instance.currentBodySprite.HandHat != null)
+                {
+                    PlayerMaterial.SetColors(__instance.bodyMatProperties.ColorId, __instance.currentBodySprite.HandHat);
+                }
+            }
+            return false;
+        }
+        return true;
     }
 }
 
@@ -2142,11 +2285,12 @@ public class NebulaCosmeticsLayer : MonoBehaviour
 
         void SetMaterial(Material material, Properties properties, params SpriteRenderer[] renderers)
         {
+            if (UIMaterial.ShouldUseUIMaterial(properties.MaskType)) material = UIMaterial.GetMaterial();
             renderers.Do(r =>
             {
                 r.material = material;
                 r.material.SetInt(MaskLayer, properties.MaskLayer);
-                r.maskInteraction = properties.MaskType switch { MaskType.SimpleUI => SpriteMaskInteraction.VisibleInsideMask, MaskType.Exile => SpriteMaskInteraction.VisibleOutsideMask, _ => SpriteMaskInteraction.None };
+                r.maskInteraction = properties.MaskType switch { UIMaterial.SpecialMaskType => SpriteMaskInteraction.VisibleInsideMask, MaskType.SimpleUI => SpriteMaskInteraction.VisibleInsideMask, MaskType.Exile => SpriteMaskInteraction.VisibleOutsideMask, _ => SpriteMaskInteraction.None };
             });
             if (properties.MaskLayer <= 0) renderers.Do(r => SetMaskLayerBasedOnLocalPlayer(r, properties.IsLocalPlayer));
         }
@@ -2161,6 +2305,9 @@ public class NebulaCosmeticsLayer : MonoBehaviour
             }
             return orig;
         }
+
+        float normalizedAnimTime = 0;
+        if(MyAnimations != null) normalizedAnimTime = MyAnimations.Animator.NormalizedTime;
 
         //Modハット
         if (CurrentModHat != null)
@@ -2246,9 +2393,30 @@ public class NebulaCosmeticsLayer : MonoBehaviour
                 HatFrontIndex++;
             }
 
+
             //インデックスの調整
-            HatFrontIndex %= frontImage?.GetLength() ?? 1;
-            HatBackIndex %= backImage?.GetLength() ?? 1;
+            if ((frontImage?.AnimSync ?? 0) > 0 && MyAnimations != null)
+            {
+                LogUtils.WriteToConsole("NormalizedTime: " + normalizedAnimTime);
+                
+                var length = frontImage!.GetLength();
+                var animSync = frontImage.AnimSync;
+
+                LogUtils.WriteToConsole("Length: " + length);
+                HatFrontIndex = (int)((normalizedAnimTime % animSync) / animSync * (float)length) % length;
+            }
+            else
+                HatFrontIndex %= frontImage?.GetLength() ?? 1;
+
+            if ((backImage?.AnimSync ?? 0) > 0 && MyAnimations != null)
+            {
+                var length = backImage!.GetLength();
+                var animSync = backImage.AnimSync;
+                HatBackIndex = (int)((normalizedAnimTime % animSync) / animSync * (float)length) % length;
+            }
+            else
+                HatBackIndex %= backImage?.GetLength() ?? 1;
+            
             if (lastHatFrontImage != frontImage && (frontImage?.RequirePlayFirstState ?? true)) HatFrontIndex = 0;
             if (lastHatBackImage != backImage && (backImage?.RequirePlayFirstState ?? true)) HatBackIndex = 0;
             if (isDead && !(visualHat?.DoAnimationIfDead ?? true)) HatFrontIndex = HatBackIndex = 0;
@@ -2371,8 +2539,24 @@ public class NebulaCosmeticsLayer : MonoBehaviour
             }
 
             //インデックスの調整
-            VisorIndex %= image?.GetLength() ?? 1;
-            VisorBackIndex %= backImage?.GetLength() ?? 1;
+            if ((image?.AnimSync ?? 0) > 0 && MyAnimations != null)
+            {
+                var length = image!.GetLength();
+                var animSync = image.AnimSync;
+                VisorIndex = (int)((normalizedAnimTime % animSync) / animSync * (float)length) % length;
+            }
+            else
+                VisorIndex %= image?.GetLength() ?? 1;
+
+            if ((backImage?.AnimSync ?? 0) > 0 && MyAnimations != null)
+            {
+                var length = backImage!.GetLength();
+                var animSync = backImage.AnimSync;
+                VisorBackIndex = (int)((normalizedAnimTime % animSync) / animSync * (float)length) % length;
+            }
+            else
+                VisorBackIndex %= backImage?.GetLength() ?? 1;
+
             if (lastVisorImage != image && (image?.RequirePlayFirstState ?? true)) VisorIndex = 0;
             if (lastVisorBackImage != backImage && (backImage?.RequirePlayFirstState ?? true)) VisorBackIndex = 0;
             if (isDead && !(visualVisor?.DoAnimationIfDead ?? true)) VisorIndex = VisorBackIndex = 0;
@@ -2475,28 +2659,31 @@ public class NebulaCosmeticsLayer : MonoBehaviour
         UpdateZ();
     }
 
+    public int? GroupOrderDiff = null;
     void UpdateZ()
     {
         try
         {
+            bool useDiff = GroupOrderDiff.HasValue;
+
             if(MyLayer != null)
             {
-                if (MyLayer.currentBodySprite != null && MyLayer.currentBodySprite.BodySprite) MyLayer.currentBodySprite.BodySprite.SetBothOrder(Order.Body);
-                MyLayer.skin.layer.SetBothOrder(Order.Skin);
-                MyLayer.hat.FrontLayer.SetBothOrder(Order.HatFront);
-                MyLayer.hat.BackLayer.SetBothOrder(Order.HatBack);
-                MyLayer.visor.Image.SetBothOrder(Order.VisorFront);
+                if (MyLayer.currentBodySprite != null && MyLayer.currentBodySprite.BodySprite) MyLayer.currentBodySprite.BodySprite.SetBothOrder(Order.Body, GroupOrderDiff, useDiff);
+                MyLayer.skin.layer.SetBothOrder(Order.Skin, GroupOrderDiff, useDiff);
+                MyLayer.hat.FrontLayer.SetBothOrder(Order.HatFront, GroupOrderDiff, useDiff);
+                MyLayer.hat.BackLayer.SetBothOrder(Order.HatBack, GroupOrderDiff, useDiff);
+                MyLayer.visor.Image.SetBothOrder(Order.VisorFront, GroupOrderDiff, useDiff);
             }
-            hatFrontExRenderer?.SetBothOrder(Order.HatFrontEx);
-            hatBackExRenderer?.SetBothOrder(Order.HatBackEx);
-            visorFrontExRenderer?.SetBothOrder(Order.VisorFrontEx);
-            visorBackRenderer?.SetBothOrder(Order.VisorBack);
-            visorBackExRenderer?.SetBothOrder(Order.VisorBackEx);
+            hatFrontExRenderer?.SetBothOrder(Order.HatFrontEx, GroupOrderDiff, useDiff);
+            hatBackExRenderer?.SetBothOrder(Order.HatBackEx, GroupOrderDiff, useDiff);
+            visorFrontExRenderer?.SetBothOrder(Order.VisorFrontEx, GroupOrderDiff, useDiff);
+            visorBackRenderer?.SetBothOrder(Order.VisorBack, GroupOrderDiff, useDiff);
+            visorBackExRenderer?.SetBothOrder(Order.VisorBackEx, GroupOrderDiff, useDiff);
 
-            BodyHatPreMask?.SetBothOrder(Order.BodyPreMask);
-            BodyHatPostMask?.SetBothOrder(Order.BodyPostMask);
-            BodyVisorPreMask?.SetBothOrder(Order.BodyPreMask);
-            BodyVisorPostMask?.SetBothOrder(Order.BodyPostMask);
+            BodyHatPreMask?.SetBothOrder(Order.BodyPreMask, GroupOrderDiff, useDiff);
+            BodyHatPostMask?.SetBothOrder(Order.BodyPostMask, GroupOrderDiff, useDiff);
+            BodyVisorPreMask?.SetBothOrder(Order.BodyPreMask, GroupOrderDiff, useDiff);
+            BodyVisorPostMask?.SetBothOrder(Order.BodyPostMask, GroupOrderDiff, useDiff);
         }
         catch { }
         /*
@@ -3106,5 +3293,14 @@ public static class TabEnablePatch
 
             return false;
         }
+    }
+}
+
+public static class MoreCosmicExtensions
+{
+    public static void SetAsGUIComponent(this PoolablePlayer player, bool inMask = true)
+    {
+        player.cosmetics.GetComponent<NebulaCosmeticsLayer>().GroupOrderDiff = -950;
+        player.cosmetics.SetMaskType(inMask ? MaskType.SimpleUI : MaskType.None);
     }
 }

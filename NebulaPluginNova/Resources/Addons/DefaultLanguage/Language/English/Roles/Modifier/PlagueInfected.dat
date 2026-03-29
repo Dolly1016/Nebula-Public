@@ -1,0 +1,22 @@
+# Assignable
+
+"role.plagueInfected.name" : "Plague Infected"
+"role.plagueInfected.generalBlurb" : "The Body Is Vehicles For Disease"
+
+# Document
+
+"role.plagueInfected.doc" : "The player is infected with a disease. The infection was discovered at the start of the emergency meeting.<br>If you are directly infected by the Plague after being injected with a vial of venom, you both win if the Plague wins."
+
+# Options
+
+"options.role.plagueInfected.detail" : "The player is infected with a disease."
+
+# Game
+
+# UI
+
+# Stats
+
+
+# Titles
+

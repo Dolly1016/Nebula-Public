@@ -190,6 +190,8 @@ public class Dancer : DefinedRoleTemplate, DefinedRole, IAssignableDocument
         {
         }
 
+        int[] RuntimeAssignable.RoleArguments => [(int)BitMasks.AsPlayer().AddAll(completedDanceLooked).AsRawPattern];
+
         GameTimer? danceCoolDownTimer = null;
 
         //ファイナルダンスモードで次のダンスがファイナルダンスになりうるとき、true

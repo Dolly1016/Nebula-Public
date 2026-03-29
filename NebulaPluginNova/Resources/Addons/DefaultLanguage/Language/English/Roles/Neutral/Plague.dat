@@ -1,0 +1,66 @@
+# Assignable
+
+"role.plague.name" : "Plague"
+"role.plague.short" : "P"
+"role.plague.blurb" : "The Sickness Unto Death"
+
+# Document
+
+"role.plague.doc" : "A neutral who spreads the disease."
+"role.plague.winCond" : "Infect all survivors with the disease. Win together with the players you directly infected."
+"role.plague.ability.title" : "Inherent Ability [Disease Devours the Mind]"
+"role.plague.ability.main" : "Collect venom, inject it into survivors, and spread the infection.<br>There are two types of infection: direct infection by the plague and indirect infection by an infected person.<br><br><b>Direct Infection</b>: It occurs when a plague injects with a vial of venom.<br><b>Indirect Infection</b>: Staying near an infected person will cause the infection to progress. Infection occurs when the infection progresses to 100%."
+"role.plague.ability.plant" : "<title>Venom Pitcher</title>Up to <var>%PLANTS%</var> pitcher plants, from which the plague can collect venom, will appear on the map.<br>Pitcher plants from which venom has been collected may become available for further collection<br>after an emergency meeting is held."
+"role.plague.ability.use" : "<title>Collect</title>The Plague can extract venom from the venom pitcher.<br>After collecting it three times, the vial will be full of venom."
+"role.plague.ability.infect" : "<title>Infect</title>Using a full vial of venom on a player will directly infect them with the disease.<br>Plague can directly infect up to <var>%BOTTLES%</var> players."
+"role.plague.tips" : "・For 10 seconds after the emergency meeting ends, the progression of the infection will stop. <br>・The state of the venom pitcher <var>%VISUAL%</var>."
+"role.plague.tips.visual.visual" : "can be seen by all players"
+"role.plague.tips.visual.indiv" : "is not shared between players"
+
+# Options
+
+"options.role.plague.detail" : "The Plague spreads disease to the survivors. <br>It wins when all survivers becomes infected with the disease."
+"options.role.plague.numOfBottles" : "# Vials of Venom"
+"options.role.plague.bottleCapacity" : "Bottle Capacity"
+"options.role.plague.numOfPods" : "# Venom Pitchers"
+"options.role.plague.visualPods" : "Visual Venom Pitchers"
+"options.role.plague.visualPods.detail" : "When enabled, all players can see the status of venom pitcher."
+"options.role.plague.infectDuration" : "Indirect Infection Duration"
+"options.role.plague.infectDistance" : "Indirect Infection Distance"
+
+# Game
+
+# UI
+
+"button.label.plague.infect" : "infect"
+"role.plague.gui.progress" : "Infection Status"
+"role.plague.gui.infected" : "Infected"
+
+# Stats
+
+# Titles
+
+"achievement.plague.common1.title" : "Despair Comes"
+"achievement.plague.common1.goal" : "Use the vial of venom twice in one game."
+"achievement.plague.common1.flavor" : ""Poison, and you will regret it; do not poison, and you will also regret it.""
+
+"achievement.plague.common2.title" : "Welcome to the World of Disease"
+"achievement.plague.common2.goal" : "Infect others as a direct infected player."
+"achievement.plague.common2.flavor" : "I see my reflection in the mirror."
+
+"achievement.plague.common3.title" : "Super Spreader"
+"achievement.plague.common3.goal" : "As a direct indected player, increase the infection rate of others by 500%."
+
+"achievement.plague.challenge.title" : "The philosophies of These Two"
+"achievement.plague.challenge.goal" : "Achieve a win through means other than a Plague win,<br>while fulfilling Plague's win conditions."
+"achievement.plague.challenge.flavor" : ""I once lived for that belief." ―From a Memoir, Across Time"
+
+# Team
+
+"teams.plague" : "Plague"
+"end.plague" : "Plague Wins%EXTRA%"
+
+# Document
+
+"document.tip.winCond.plague.title" : "Special Trigger"
+"document.tip.winCond.plague" : "The Plague wins when all survivors become infected with the disease.<br>Players who are directly infected also win."

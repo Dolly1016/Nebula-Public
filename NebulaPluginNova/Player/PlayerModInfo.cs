@@ -1079,7 +1079,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     private int visibilityCache = 0; //穏やかに変わる可視性のキャッシュ
     private int immediateVisibilityCache = 0; //即座に変わる可視性のキャッシュ
     public bool IsInvisible => VisibilityLevel == 2;
-    public int VisibilityLevel => Math.Max(immediateVisibilityCache, visibilityCache);
+    private int VisibilityLevel => Math.Max(immediateVisibilityCache, visibilityCache);
     private float VisibilityAlpha = 1f;
     private bool IsInShadowCache = false;
     private void UpdateVisibilityAlpha(int invisibleLevel)
@@ -1101,9 +1101,9 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         else
         {
             if (VisibilityAlpha > goal)
-                VisibilityAlpha -= 0.85f * Time.deltaTime;
+                VisibilityAlpha -= 1.05f * Time.deltaTime;
             else
-                VisibilityAlpha += 0.85f * Time.deltaTime;
+                VisibilityAlpha += 1.05f * Time.deltaTime;
 
             VisibilityAlpha = Mathn.Clamp(VisibilityAlpha, min, max);
         }
@@ -1164,8 +1164,11 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
                     }
                 }
 
+                //その他、イベントによる変更
+                var finalVisibility = (int?)GameOperatorManager.Instance?.Run<PlayerUpdateVisibilityEvent>(new(this, (PlayerUpdateVisibilityEvent.VisibilityLevel)invisibleLevel, (PlayerUpdateVisibilityEvent.VisibilityLevel)visibilityCache)).Visibility ?? invisibleLevel;
+
                 //属性による可視性の情報を控えておく
-                visibilityCache = invisibleLevel;
+                visibilityCache = finalVisibility;
                 immediateVisibilityCache = immediateInvisibleLevel;
             }
 

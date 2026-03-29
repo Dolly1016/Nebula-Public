@@ -10,7 +10,7 @@ namespace Virial.Game;
 public interface GameMap : ILifespan
 {
     /// <summary>
-    /// 与えられた点のもっともらしい部屋名を返します。
+    /// 与えられた点のもっともらしい翻訳済みの部屋名を返します。
     /// </summary>
     /// <param name="position">部屋名を調べる地点</param>
     /// <param name="detail">より詳細な場所を調べる場合、true</param>
@@ -19,7 +19,7 @@ public interface GameMap : ILifespan
     string GetRoomName(Virial.Compat.Vector2 position, bool detail, bool shortName, bool onlyVanillaRoom);
 
     /// <summary>
-    /// 与えられた点のもっともらしい部屋名を返します。
+    /// 与えられた点のもっともらしい翻訳済みの部屋名を返します。
     /// </summary>
     /// <param name="position">部屋名を調べる地点</param>
     /// <param name="detail">より詳細な場所を調べる場合、true</param>
@@ -51,5 +51,8 @@ public interface GameMap : ILifespan
     /// <returns></returns>
     bool AnyWallsBetween(Virial.Compat.Vector2 position1, Virial.Compat.Vector2 position2);
 
+    /// <summary>
+    /// 緊急招集ボタンの位置を返します。
+    /// </summary>
     Virial.Compat.Vector2 EmergencyButtonPosition { get; }
 }

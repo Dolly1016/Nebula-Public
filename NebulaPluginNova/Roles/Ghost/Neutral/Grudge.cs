@@ -30,7 +30,7 @@ public class Grudge : DefinedGhostRoleTemplate, DefinedGhostRole
         private float Alpha { get; set; } = 0f;
 
         public GrudgeIllusion(GamePlayer player, Vector3 position, bool flipX) {
-            this.player = AmongUsUtil.GetPlayerIcon(player.DefaultOutfit.outfit, null, position, new(0.35f, 0.35f, 1f), flipX, false);
+            this.player = AmongUsUtil.GetPlayerIcon(player.DefaultOutfit.outfit, null, position, new(0.35f, 0.35f, 0.001f), flipX, false);
             UnityHelper.DoForAllChildren(this.player.gameObject, obj => obj.layer = LayerExpansion.GetPlayersLayer());
             allRenderers = this.player.gameObject.GetComponentsInChildren<SpriteRenderer>();
             SetAlpha(0f);
@@ -71,6 +71,7 @@ public class Grudge : DefinedGhostRoleTemplate, DefinedGhostRole
         }
     }
 
+    [NebulaRPCHolder]
     public class Instance : RuntimeAssignableTemplate, RuntimeGhostRole
     {
         DefinedGhostRole RuntimeGhostRole.Role => MyRole;

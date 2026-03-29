@@ -23,3 +23,4 @@
 "voiceChat.settings.server.apply" : "Apply"
 "voiceChat.settings.micTest" : "Mic. Test"
 "voiceChat.settings.micTest.end" : "Interrupt Mic. Test"
+"voiceChat.settings.player.reset" : "Right Click: Reset Voice"

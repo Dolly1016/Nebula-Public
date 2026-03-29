@@ -156,6 +156,7 @@ internal class DebugVariable<T> : IDebugVariable
 
     public DebugVariable(string name, T value, Func<string, T> converter, Func<T, string> serializer)
     {
+        this.name = name;
         this.value = value;
         this.converter = converter;
         this.serializer = serializer;

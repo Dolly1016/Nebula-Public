@@ -27,5 +27,17 @@
 
 # Titles
 
+"achievement.niceSwapper.common1.title" : "神之一手"
+"achievement.niceSwapper.common1.goal" : "调换其他玩家的得票，并成功驱逐一名非船员阵营的玩家。"
+"achievement.niceSwapper.common1.splitted.1" : "手"
+
+"achievement.niceSwapper.common2.title" : "私欲"
+"achievement.niceSwapper.common2.goal" : "调换自己的得票，并成功驱逐一名玩家。"
+"achievement.niceSwapper.common2.flavor" : "“想不到吧！我还留一手！”"
+
 "achievement.niceSwapper.another1.title" : "道德崩坏"
 "achievement.niceSwapper.another1.goal" : "将得票最多的非船员与船员进行交换得票并导致船员被驱逐。"
+
+"achievement.niceSwapper.challenge.title" : "虚伪的多数派"
+"achievement.niceSwapper.challenge.goal" : "通过调换得票成功驱逐最后一名伪装者并获胜。"
+"achievement.niceSwapper.challenge.splitted.2" : "多数派"

@@ -51,10 +51,19 @@ public static class UnityHelper
         return UnityHelper.CreateObject("Adjuster", gameObject.transform, Vector3.zero).transform;
     }
 
-    public static void SetBothOrder(this Renderer renderer, int order)
+    public static void SetBothOrder(this Renderer renderer, int order, int? groupOrder = null, bool add = false)
     {
         renderer.sortingOrder = order;
-        renderer.sortingGroupOrder = order;
+        int sortingGroupOrder = groupOrder ?? order;
+        if (add) sortingGroupOrder += order;
+        renderer.sortingGroupOrder = sortingGroupOrder;
+        
+    }
+
+    public static void SetOrderAndGroup(this Renderer renderer, int order, int groupId)
+    {
+        renderer.sortingOrder = order;
+        renderer.sortingGroupID = groupId;
     }
 
     public static (MeshRenderer renderer, MeshFilter filter) CreateMeshRenderer(string objName, Transform? parent, Vector3 localPosition, int? layer,Color? color = null,Material? material = null)

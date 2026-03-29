@@ -215,6 +215,14 @@ internal class NoSVCRoom
                     PostBuilder = (text) =>
                     {
                         InstantiateSlideBar(text.transform.parent, client.Volume * 0.25f, v => client.SetVolume(v * 4f));
+                        var collider = text.gameObject.AddComponent<BoxCollider2D>();
+                        collider.size = new(1f, 0.33f);
+                        collider.isTrigger = true;
+                        var button = text.gameObject.SetUpButton(true);
+                        button.SetLocalizedOverlay("voiceChat.settings.player.reset");
+                        button.gameObject.AddComponent<ExtraPassiveBehaviour>().OnRightClicked += () => {
+                            client.AddEmptySamples(1024);
+                        };
                     }
                 };
             }, 5, -1, 0, 0.65f);
@@ -561,6 +569,8 @@ internal class NoSVCRoom
         }
 
         internal void UpdateMappedState() => mapping.UpdateMappedState();
+
+        internal void AddEmptySamples(int count) => routingInstance.AddEmpty(count);
         
     }
 

@@ -118,6 +118,8 @@ internal class Plague : DefinedRoleTemplate, DefinedRole, IAssignableDocument
         
         public void Use()
         {
+            StatsPods.Progress();
+
             if (VisualPodsOption)
             {
                 PoisonPodManager.RpcUsePod(this.ObjectId);
@@ -178,7 +180,7 @@ internal class Plague : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 
     static readonly public RoleTeam MyTeam = NebulaAPI.Preprocessor!.CreateTeam("teams.plague", new(151, 194, 22), TeamRevealType.OnlyMe);
 
-    private Plague() : base("plague", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [NumOfBottlesOption, NumOfPodsOption, VisualPodsOption, VentConfiguration, InfectDurationOption, InfectDistanceOption])
+    private Plague() : base("plague", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [NumOfBottlesOption, BottleCapacityOption, NumOfPodsOption, VisualPodsOption, VentConfiguration, InfectDurationOption, InfectDistanceOption])
     {
     }
 
@@ -193,17 +195,19 @@ internal class Plague : DefinedRoleTemplate, DefinedRole, IAssignableDocument
     }
 
     static private IntegerConfiguration NumOfBottlesOption = NebulaAPI.Configurations.Configuration("options.role.plague.numOfBottles", (1, 5, 1), 2);
+    static private IntegerConfiguration BottleCapacityOption = NebulaAPI.Configurations.Configuration("options.role.plague.bottleCapacity", (1, 3), 3);
     static private IntegerConfiguration NumOfPodsOption = NebulaAPI.Configurations.Configuration("options.role.plague.numOfPods", (1, 8, 1), 4);
     static private BoolConfiguration VisualPodsOption = NebulaAPI.Configurations.Configuration("options.role.plague.visualPods", false);
-    static private FloatConfiguration InfectDurationOption = NebulaAPI.Configurations.Configuration("options.role.plague.infectDuration", (5f, 60f, 5f), 20f, FloatConfigurationDecorator.Second);
-    static private FloatConfiguration InfectDistanceOption = NebulaAPI.Configurations.Configuration("options.role.plague.infectDistance", (0.25f, 5f, 0.25f), 1f, FloatConfigurationDecorator.Ratio);
+    static private FloatConfiguration InfectDurationOption = NebulaAPI.Configurations.Configuration("options.role.plague.infectDuration", (5f, 30f, 2.5f), 12.5f, FloatConfigurationDecorator.Second);
+    static private FloatConfiguration InfectDistanceOption = NebulaAPI.Configurations.Configuration("options.role.plague.infectDistance", (0.25f, 5f, 0.25f), 1.5f, FloatConfigurationDecorator.Ratio);
     static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.NeutralVentConfiguration("role.plague.vent", true);
 
     static public Plague MyRole = new Plague();
 
+    static private GameStatsEntry StatsPods = NebulaAPI.CreateStatsEntry("stats.plague.pods", GameStatsCategory.Roles, MyRole);
     static private GameStatsEntry StatsBottle = NebulaAPI.CreateStatsEntry("stats.plague.bottle", GameStatsCategory.Roles, MyRole);
 
-    static private int MaxPoisonLevel => 3;
+    static private int MaxPoisonLevel => BottleCapacityOption;
     static private int NumOfBottles => NumOfBottlesOption;
 
     static private readonly Image infectButtonImage = SpriteLoader.FromResource("Nebula.Resources.Buttons.InfectButton.png", 115f);
@@ -350,6 +354,15 @@ internal class Plague : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                     bottleRenderers[i] = bottle;
                 }
             }
+
+            static int[][] SpriteIndex = [
+                [],
+                [0],
+                [0, 3],
+                [0, 2, 3],
+                [0, 1, 2, 3]
+                ];
+
             public void UpdateView(Bottles bottles, int? gained)
             {
                 if (BottleLifespan.IsDeadObject) return;
@@ -365,7 +378,7 @@ internal class Plague : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                     
                     bottleRenderers[i].enabled = true;
                     int stage = bottles.GetStageAt(i);
-                    bottleRenderers[i].sprite = bottleImage.GetSprite(stage);
+                    bottleRenderers[i].sprite = bottleImage.GetSprite(SpriteIndex[MaxPoisonLevel][stage]);
                     bottleRenderers[i].color = stage == MaxPoisonLevel ? Color.white : new(0.8f, 0.8f, 0.8f);
                     ManagedEffects.Smooth(bottleRenderers[i].transform, GetLocalPos(displayed), 1f).StartOnScene();
                     if(gained.HasValue && gained == i) ManagedEffects.CoShakeTubelike(bottleRenderers[i].transform, UnreadiedBottleScale, bottles.GetStageAt(i) == MaxPoisonLevel ? 1f : UnreadiedBottleScale).StartOnScene();
@@ -517,6 +530,7 @@ internal class Plague : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                     {
                         if (currentBottles.TryConsumeBottle())
                         {
+                            StatsBottle.Progress();
                             progress.Infect(target.RealPlayer);
                             button.StartCoolDown();
                         }

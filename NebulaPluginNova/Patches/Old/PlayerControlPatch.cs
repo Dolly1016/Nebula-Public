@@ -786,8 +786,7 @@ public static class PlayerFootstepPatch
         if (!canHear && GeneralConfigurations.CanHearOthersFootstepOption)
         {
             var modPlayer = __instance.GetModInfo();
-            var modInfo = modPlayer?.Unbox();
-            canHear |= (modInfo?.VisibilityLevel ?? 2) <= 1 && !(modPlayer?.IsDived ?? false);
+            canHear |= !(modPlayer?.IsInvisible ?? true) && !(modPlayer?.IsDived ?? false);
             
         }
 

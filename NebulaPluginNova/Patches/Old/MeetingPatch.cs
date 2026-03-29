@@ -236,27 +236,57 @@ public static class MeetingModRpc
     {
         foreach (var mapping in mapList)
         {
-            if (meeting.TryGetPlayer(mapping.playerFrom, out var areaFrom) && meeting.TryGetPlayer(mapping.playerTo, out var areaTo))
+            if (mapping.playerFrom == mapping.playerTo)
             {
-                var toPos = areaTo.transform.TransformPointLocalToLocal(Vector3.zero, areaFrom.transform);
-                var child = areaFrom.transform.FindChild(MeetingHudExtension.SpreaderAndBG);
-                if (child != null && child)
+                if (meeting.TryGetPlayer(mapping.playerFrom, out var area))
                 {
-                    Vector3 addVec = mapList.Any(entry => entry.playerFrom == mapping.playerTo && entry.playerTo == mapping.playerFrom) ? toPos.normalized.RotateZ(90) : Vector3.zero;
-                    ManagedEffects.Lerp(1.3f, p =>
+                    var pos = area.transform.localPosition;
+                    IEnumerator CoShakeAnim()
                     {
-                        p = Mathn.Pow(p, 0.65f);
-                        Vector3 currentPos = toPos * p;
+                        float angle = System.Random.Shared.NextSingle() * Mathn.PI;
+                        for(int i = 0; i < 5; i++)
+                        {
+                            angle += Mathn.PI + (System.Random.Shared.NextSingle() - 0.5f) * 1.4f;
+                            float p = 0f;
+                            float cos = Mathn.Cos(angle);
+                            float sin = Mathn.Sin(angle);
+                            while (p < 0.65f)
+                            {
+                                float coeff = Mathn.Sin((1 - Mathn.Pow(1 - p, 5f)) * Mathn.PI) * 0.045f;
+                                area.transform.localPosition = pos + new Vector3(cos * coeff, sin * coeff, 0f);
+                                p += Time.deltaTime * 5.9f;
+                                yield return null;
+                            }
+                        }
+                        area.transform.localPosition = pos;
+                    }
+                    CoShakeAnim().StartOnScene();
+                }
+            }
+            else
+            {
+                if (meeting.TryGetPlayer(mapping.playerFrom, out var areaFrom) && meeting.TryGetPlayer(mapping.playerTo, out var areaTo))
+                {
+                    var toPos = areaTo.transform.TransformPointLocalToLocal(Vector3.zero, areaFrom.transform);
+                    var child = areaFrom.transform.FindChild(MeetingHudExtension.SpreaderAndBG);
+                    if (child != null && child)
+                    {
+                        Vector3 addVec = mapList.Any(entry => entry.playerFrom == mapping.playerTo && entry.playerTo == mapping.playerFrom) ? toPos.normalized.RotateZ(90) : Vector3.zero;
+                        ManagedEffects.Lerp(1.3f, p =>
+                        {
+                            p = Mathn.Pow(p, 0.65f);
+                            Vector3 currentPos = toPos * p;
 
-                        p = (p - 0.5f) / 0.5f;
-                        p = 1f - (p * p);
-                        //p: 0 - 1 - 0
+                            p = (p - 0.5f) / 0.5f;
+                            p = 1f - (p * p);
+                            //p: 0 - 1 - 0
 
-                        currentPos += addVec * p * 0.32f;
+                            currentPos += addVec * p * 0.32f;
 
-                        child.localPosition = currentPos;
+                            child.localPosition = currentPos;
 
-                    }).StartOnScene();
+                        }).StartOnScene();
+                    }
                 }
             }
         }
@@ -879,7 +909,10 @@ static class CheckForEndVotingPatch
 
             List<(byte playerFrom, byte playerTo)> mapList = GameOperatorManager.Instance?.Run(new MeetingMapVotesHostEvent())?.RawMap.Select(entry => (entry.Key, entry.Value)).ToList() ?? [];
             Dictionary<byte, GamePlayer> mappingDic = [];
-            foreach (var mapping in mapList) mappingDic[mapping.playerFrom] = GamePlayer.GetPlayer(mapping.playerTo)!;
+            foreach (var mapping in mapList)
+            {
+                mappingDic[mapping.playerFrom] = GamePlayer.GetPlayer(mapping.playerTo)!;
+            }
 
             GamePlayer exiled = null!;
             GamePlayer[] exiledAll = [];

@@ -143,15 +143,17 @@
 
 # Regions
 
-"regions.Modded NA (MNA)" : "北美洲 （Mod）"
-"regions.Modded EU (MEU)" : "欧洲 （Mod）"
-"regions.Modded Asia (MAS)" : "亚洲 （Mod）"
+"regionsMenu.message" : "※所有服务器均为第三方提供，与Innersloth无关。"
+"regions.Modded NA (MNA)" : "北美洲（Mod）"
+"regions.Modded EU (MEU)" : "欧洲（Mod）"
+"regions.Modded Asia (MAS)" : "亚洲（Mod）"
 "regions.Niko233(NA)" : "北美洲（Niko）"
 "regions.Niko233(EU)" : "欧洲（Niko）" 
 "regions.Niko233(AS)" : "亚洲（Niko）"
-"regions.Modded Shanghai (MSH FK)" : "上海（Mod）"
-"regions.Modded Beijing (MBJ MXYX)" : "北京（Mod）"
-"regions.Modded HongKong (MHK HU)" : "香港特區（Mod）"
+"regions.Modded Shanghai (MSH FK)" : "上海（方块）"
+"regions.Modded Beijing (MBJ MXYX)" : "北京（沫夏）"
+"regions.Modded HongKong (MHK HU)" : "香港（林梅）"
+
 
 # Free Play
 

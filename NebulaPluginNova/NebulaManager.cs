@@ -5,11 +5,13 @@ using Nebula.Behavior;
 using Nebula.Dev;
 using Nebula.Map;
 using Nebula.Modules.Cosmetics;
+using Nebula.Modules.GUIWidget;
 using Nebula.Patches;
 using Nebula.Roles.Crewmate;
 using Nebula.VisualProgramming;
 using Nebula.VisualProgramming.UI;
 using Nebula.VoiceChat;
+using Rewired.UI.ControlMapper;
 using Sentry.Unity.NativeUtils;
 using System.Data;
 using System.Runtime.Loader;
@@ -20,7 +22,9 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 using Virial;
 using Virial.Common;
+using Virial.DI;
 using Virial.Events.Game;
+using Virial.Game;
 using Virial.Helpers;
 using Virial.Media;
 using Virial.Runtime;
@@ -466,8 +470,6 @@ public class NebulaManager : MonoBehaviour
             () => ModSingleton<NoSVCRoom>.Instance != null,
             () => ModSingleton<NoSVCRoom>.Instance.ToggleDebugInfo()
         ){ DefaultKeyInput = new(KeyCode.F9) });
-
-
     }
 
     public void ToggleConsole()
@@ -545,12 +547,6 @@ public class NebulaManager : MonoBehaviour
                 }
             }
 
-            /*
-            if (Input.GetKeyDown(KeyCode.Tab))
-            {
-                NebulaAPI.Logging.InGameLogger(3f).Message("Update FPS Rate: " + AmongUsUtil.FastRate + "\n" + (AmongUsUtil.IsInFastUpdate ? "高FPS対策が<b>有効</b>です。" : "高FPS対策は<b>無効</b>です。"));
-            }
-            */
 
             if (AmongUsClient.Instance && AmongUsClient.Instance.GameState != InnerNet.InnerNetClient.GameStates.NotJoined)
             {
@@ -562,6 +558,21 @@ public class NebulaManager : MonoBehaviour
                 
                 if (Input.GetKeyDown(KeyCode.K))
                 {
+                    /*
+                    var window = MetaScreen.GenerateWindow(new(8.6f, 5.02f), HudManager.Instance.transform, new Vector3(0f, 0f, -400f), true, false, false, BackgroundSetting.Modern);
+
+                    window.SetWidget(new NoSGameObjectGUIWrapper(GUIAlignment.Center, () =>
+                    {
+                        var renderer = UnityHelper.CreateSpriteRenderer("Renderer", null, Vector3.zero, LayerExpansion.GetUILayer());
+                        renderer.sprite = SpriteLoader.FromResource("Nebula.Resources.composite_shader_test.png", 120f).GetSprite();
+                        renderer.material = new(NebulaAsset.TransColorGameShader);
+                        renderer.material.SetColor(PlayerMaterial.BackColor, Color.green);
+                        renderer.material.SetColor(PlayerMaterial.BodyColor, Color.blue);
+                        renderer.material.SetColor(PlayerMaterial.VisorColor, Color.red);
+                        return (renderer.gameObject, new(8f, 5f));
+                    }), new Vector2(0.5f, 0.5f), out _);
+                    */
+
                     /*
                     //new FunctionBlock(HudManager.Instance.transform, new(0f,0f,-100f));
                     foreach(var obj in UnityEngine.Resources.FindObjectsOfTypeAll(Il2CppType.Of<Texture2D>())){

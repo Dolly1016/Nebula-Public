@@ -15,10 +15,12 @@
 "achievement.sakura.title" : "樱花盛开时"
 "achievement.sakura.goal" : "游戏中设置颜色从黄绿色变成樱花色。"
 "achievement.sakura.cond" : "提示：四月限定"
+"achievement.sakura.splitted.0" : "盛开！"
 
 "achievement.koinobori.title" : "自由的爱情"
 "achievement.koinobori.goal" : "恋人自由奔跑。"
 "achievement.koinobori.cond" : "提示：五月限定、恋人两人同时拥有<br>加速效果</br>并且<br>5秒内</br>两人一起移动，仅在MIRA HQ和Airship地图。"
+"achievement.koinobori.splitted.1" : "自由的"
 
 "achievement.rainyStep.title" : "雨中散步"
 "achievement.rainyStep.goal" : "在受到减速的情况下继续走动。"
@@ -55,6 +57,7 @@
 "achievement.freshWine.goal" : "吞噬或清理掉新鲜的尸体。"
 "achievement.freshWine.cond" : "提示：11月限定"
 "achievement.freshWine.flavor" : "“来自82年的佳酿！”"
+"achievement.freshWine.splitted.1" : "高品的"
 
 "achievement.christmas.title" : "结束之日"
 "achievement.christmas.goal" : "在会议中驱逐恋人"

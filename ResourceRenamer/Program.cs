@@ -22,7 +22,14 @@ class Program
 
         Console.WriteLine($"Processing assembly: {assemblyPath}");
 
-        var assembly = AssemblyDefinition.ReadAssembly(assemblyPath, new ReaderParameters { ReadWrite = true });
+        var resolver = new DefaultAssemblyResolver();
+        string managedDir = Path.GetDirectoryName(assemblyPath);
+        resolver.AddSearchDirectory(managedDir);
+
+        var assembly = AssemblyDefinition.ReadAssembly(assemblyPath, new ReaderParameters { 
+            ReadWrite = true,
+            AssemblyResolver = resolver
+        });
 
         var resourcesToRename = assembly.MainModule.Resources
             .OfType<EmbeddedResource>()
@@ -45,7 +52,10 @@ class Program
             Console.WriteLine($"  Renamed '{originalName}' -> '{newName}'");
         }
 
-        assembly.Write();
+        assembly.Write(new WriterParameters()
+        {
+            WriteSymbols = false
+        });
         Console.WriteLine("Assembly updated successfully.");
     }
 }

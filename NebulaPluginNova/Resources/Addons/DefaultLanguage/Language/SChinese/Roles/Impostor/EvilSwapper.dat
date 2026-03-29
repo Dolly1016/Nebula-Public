@@ -26,3 +26,17 @@
 
 
 # Titles
+
+"achievement.evilSwapper.common1.title" : "恶势力"
+"achievement.evilSwapper.common1.goal" : "调换自己的得票，并成功驱逐一名玩家。"
+"achievement.evilSwapper.common1.flavor" : "“想不到吧！我还留一手！”"
+"achievement.evilSwapper.common1.splitted.0" : "恶"
+
+"achievement.evilSwapper.another1.title" : "阴谋论"
+"achievement.evilSwapper.another1.goal" : "调换得票的能力被控局者阻止。"
+"achievement.evilSwapper.another1.flavor" : "“为什么会这样？你们好邪恶！”"
+
+"achievement.evilSwapper.challenge.title" : "高端对决"
+"achievement.evilSwapper.challenge.goal" : "在存在叛徒、大神官和市长的对局中，通过调换得票获胜。"
+"achievement.evilSwapper.challenge.cond" : "提示：非船员阵营获胜，必须是因为人数优势而获得的胜利。"
+"achievement.evilSwapper.challenge.splitted.0" : "高端的"
