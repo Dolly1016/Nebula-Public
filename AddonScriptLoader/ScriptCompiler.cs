@@ -27,29 +27,56 @@ static public class ScriptCompiler
     {
         var lines = source.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
         var output = new StringBuilder();
-        var stack = new Stack<bool>();
-        stack.Push(true);
-        var regex = new Regex(@"^\s*#if\s+(\S+)\s*$");
+        var stack = new Stack<CondState>();
+        stack.Push(new CondState { Active = true, Taken = false });
+
+        var ifRegex = new Regex(@"^\s*#if\s+(\S+)\s*$");
+        var elifRegex = new Regex(@"^\s*#elif\s+(\S+)\s*$");
+        var elseRegex = new Regex(@"^\s*#else\s*$");
         var endifRegex = new Regex(@"^\s*#endif\s*$");
+
         foreach (var line in lines)
         {
-            var m = regex.Match(line);
-            if (m.Success)
+            Match m;
+            if ((m = ifRegex.Match(line)).Success)
             {
-                string symbol = m.Groups[1].Value;
-                bool condition = definedSymbols.Contains(symbol);
-                stack.Push(stack.Peek() && condition);
-                continue;
+                var top = stack.Peek();
+                bool cond = definedSymbols.Contains(m.Groups[1].Value);
+                bool active = top.Active && cond && !top.Taken;
+                if (active) top.Taken = true;
+                stack.Push(new CondState { Active = active, Taken = false });
             }
-            if (endifRegex.IsMatch(line))
+            else if ((m = elifRegex.Match(line)).Success)
             {
-                if (stack.Count > 1) stack.Pop();
-                continue;
+                var top = stack.Pop();
+                bool cond = definedSymbols.Contains(m.Groups[1].Value);
+                bool active = top.Active && !top.Taken && cond;
+                if (active) top.Taken = true;
+                stack.Push(new CondState { Active = active, Taken = false });
             }
-            if (stack.Peek())
+            else if (elseRegex.IsMatch(line))
+            {
+                var top = stack.Pop();
+                bool active = top.Active && !top.Taken;
+                if (active) top.Taken = true;
+                stack.Push(new CondState { Active = active, Taken = false });
+            }
+            else if (endifRegex.IsMatch(line))
+            {
+                stack.Pop();
+            }
+            else if (stack.Peek().Active)
+            {
                 output.AppendLine(line);
+            }
         }
         return output.ToString();
+    }
+
+    private class CondState
+    {
+        public bool Active;
+        public bool Taken;
     }
 
     static public Tuple<Assembly, object?>? CompileScripts(string moduleName, AssemblyLoadContext context, object[] reference, Action<int, string, int, int, string, string> logger, IEnumerable<(string source, string path)> sources, bool useHiddenMembers)
