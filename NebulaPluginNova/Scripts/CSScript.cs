@@ -1,4 +1,5 @@
-﻿using System.IO.Compression;
+using Cpp2IL.Core.Extensions;
+using System.IO.Compression;
 using System.Reflection;
 using System.Text;
 using Virial;
