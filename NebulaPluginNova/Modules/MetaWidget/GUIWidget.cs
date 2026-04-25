@@ -87,8 +87,8 @@ public class VerticalWidgetsHolder : WidgetsHolder {
             }
             else
             {
-                tempHeight = 0f;
                 height += Mathn.Max(current.acSize.Height, tempHeight ?? current.acSize.Height);
+                tempHeight = 0f;
             }
             return (maxWidth, height, tempHeight);
         });
@@ -143,8 +143,8 @@ public class HorizontalWidgetsHolder : WidgetsHolder
             }
             else
             {
-                tempWidth = 0f;
                 width += Mathn.Max(current.acSize.Width, tempWidth ?? current.acSize.Width);
+                tempWidth = 0f;
             }
             return (width, maxHeight, tempWidth);
         });

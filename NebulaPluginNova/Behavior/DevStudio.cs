@@ -905,6 +905,8 @@ public class DevStudio : MonoBehaviour
                 costumeNameRef.Value.SetHint(Language.Translate("devStudio.ui.cosmetics.hint.needToSetTitle").Color(Color.red.AlphaMultiplied(0.8f)));
                 return;
             }
+#if ANDROID
+#else
             DragAndDropBehaviour.Show(null, (path) =>
             {
                 if (path.Count != 1 || !path[0].EndsWith(".png")) return;
@@ -951,6 +953,7 @@ public class DevStudio : MonoBehaviour
                 }
 
             });
+#endif
         }, new(TextAttributeOld.BoldAttr) { Size = new(0.85f, 0.23f) })
         { Color = costume.GetType().GetField(fieldName)!.GetValue(costume) == null ? disabledColor : Color.white, TranslationKey = translationKey, Alignment = IMetaWidgetOld.AlignmentOption.Center, PostBuilder = (_, renderer, _) => myRenderer = renderer };
         return myButton;

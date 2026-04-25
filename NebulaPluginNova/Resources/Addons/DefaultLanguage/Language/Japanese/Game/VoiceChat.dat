@@ -1,6 +1,7 @@
 # Voice Chat
 
 "voiceChat.dialog.confirm" : "VCに参加してもよろしいですか？"
+"voiceChat.dialog.noMic" : "Androidでは音声を入力できません。"
 "voiceChat.info.mute" : "ミュート中"
 "voiceChat.info.unmute" : "通話中"
 "voiceChat.info.nomic" : "マイク入力なし"

@@ -36,8 +36,8 @@ internal class RoleTable : IRoleTable
     public void Determine()
     {
         List<NebulaRPCInvoker> allInvokers = new();
-        foreach (var role in roles) allInvokers.Add(PlayerModInfo.RpcSetAssignable.GetInvoker((role.playerId, role.role.Id, role.arguments, RoleType.Role)));
-        foreach (var modifier in modifiers) allInvokers.Add(PlayerModInfo.RpcSetAssignable.GetInvoker((modifier.playerId, modifier.modifier.Id, modifier.arguments, RoleType.Modifier)));
+        foreach (var role in roles) allInvokers.Add(PlayerModInfo.RpcSetAssignable.GetInvoker((role.playerId, role.role.Id, role.arguments, RoleType.Role, Virial.Assignable.RoleAssignType.Standard)));
+        foreach (var modifier in modifiers) allInvokers.Add(PlayerModInfo.RpcSetAssignable.GetInvoker((modifier.playerId, modifier.modifier.Id, modifier.arguments, RoleType.Modifier, Virial.Assignable.RoleAssignType.Standard)));
 
         allInvokers.Add(NebulaGameManager.RpcStartGame.GetInvoker(true));
 

@@ -208,6 +208,7 @@ public class Destroyer : DefinedSingleAbilityRoleTemplate<Destroyer.Ability>, De
 
             //死体を生成
             DeadBody deadBody = GameObject.Instantiate<DeadBody>(GameManager.Instance.deadBodyPrefab[0]);
+            deadBody.MarkAsNoAdmin();
             GameObject deadBodyObj = deadBody.gameObject;
             deadBody.enabled = CanReportKillSceneOption;
             deadBody.Reported = !CanReportKillSceneOption;

@@ -1,6 +1,7 @@
 # Voice Chat
 
 "voiceChat.dialog.confirm" : "Are you sure you want to join the voice chat?"
+"voiceChat.dialog.noMic" : "Voice input is not available on Android."
 "voiceChat.info.mute" : "Muted"
 "voiceChat.info.unmute" : "Unmuted"
 "voiceChat.info.nomic" : "No Input"

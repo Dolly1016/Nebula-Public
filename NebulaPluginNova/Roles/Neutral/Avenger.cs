@@ -16,7 +16,7 @@ public class Avenger : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 {
     static readonly public RoleTeam MyTeam = NebulaAPI.Preprocessor!.CreateTeam("teams.avenger", new(141,111,131), TeamRevealType.OnlyMe);
     private Avenger() : base("avenger", MyTeam.Color, RoleCategory.NeutralRole, MyTeam,
-        [KillCoolDownOption, VentOption, CanKnowExistanceOfAvengerOption, TargetCanKnowAvengerOption, AvengerFlashForMurdererOption, NotificationForMurdererIntervalOption, NotificationForAvengerIntervalOption, OpportunistFallbackOption.Group],
+        [KillCoolDownOption, VentOption, CanKnowExistanceOfAvengerOption, TargetCanKnowAvengerOption, AvengerFlashForMurdererOption, NotificationForMurdererIntervalOption, NotificationForAvengerIntervalOption, CanKillHidingPlayerOption, OpportunistFallbackOption.Group],
         false, optionHolderPredicate: () => (Modifier.Lover.NumOfPairsOption > 0 && Modifier.Lover.AvengerModeOption))
     {
         ConfigurationHolder?.ScheduleAddRelated(() => [Modifier.Lover.MyRole.ConfigurationHolder!]);
@@ -31,6 +31,7 @@ public class Avenger : DefinedRoleTemplate, DefinedRole, IAssignableDocument
     static private BoolConfiguration AvengerFlashForMurdererOption = NebulaAPI.Configurations.Configuration("options.role.avenger.showAvengerFlashForTarget", true);
     static private FloatConfiguration NotificationForAvengerIntervalOption = NebulaAPI.Configurations.Configuration("options.role.avenger.notificationForAvengerInterval", (2.5f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second);
     static private FloatConfiguration NotificationForMurdererIntervalOption = NebulaAPI.Configurations.Configuration("options.role.avenger.notificationForTargetInterval", (2.5f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second);
+    static public BoolConfiguration CanKillHidingPlayerOption = NebulaAPI.Configurations.Configuration("options.role.avenger.canKillHidingPlayer", false);
     static private IRelativeCooldownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.avenger.killCoolDown", CoolDownType.Relative, (2.5f, 60f, 2.5f), 25f, (-40f, 40f, 2.5f), -5f, (0.125f, 2f, 0.125f), 1f);
     static private IVentConfiguration VentOption = NebulaAPI.Configurations.NeutralVentConfiguration("options.role.avenger.vent", false);
     static private Opportunist.OpportunistFallbackOption OpportunistFallbackOption = Opportunist.FallbackConfiguration(null, null, "options.role.avenger");
@@ -60,7 +61,6 @@ public class Avenger : DefinedRoleTemplate, DefinedRole, IAssignableDocument
         {
             target = NebulaGameManager.Instance?.GetPlayer(targetId);
         }
-
         int[]? RuntimeAssignable.RoleArguments => [target?.PlayerId ?? 255];
         public override void OnActivated()
         {
@@ -69,12 +69,12 @@ public class Avenger : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                 NebulaAPI.CurrentGame?.GetModule<TitleShower>()?.SetText(Language.Translate("role.avenger.hudText"), MyRole.RoleColor.ToUnityColor(), 5.5f, true);
                 AmongUsUtil.PlayCustomFlash(MyRole.RoleColor.ToUnityColor(), 0f, 0.8f, 0.7f);
 
-                var killButton = NebulaAPI.Modules.KillButton(this, MyPlayer, true, Virial.Compat.VirtualKeyInput.Kill,
+                var killButton = NebulaAPI.Modules.KillButton(this, MyPlayer, true, Virial.Compat.VirtualKeyInput.Kill, null,
                         KillCoolDownOption.GetCooldown(MyPlayer.TeamKillCooldown), "kill", ModAbilityButton.LabelType.Impostor, null,
                         (player, button) => {
                             MyPlayer.MurderPlayer(player, PlayerState.Dead, EventDetail.Kill, KillParameter.NormalKill);
                             button.StartCoolDown();
-                        }
+                        }, canTrackInVentPlayer: CanKillHidingPlayerOption
                     );
                 
                 if (target != null) new TrackingArrowAbility(target, NotificationForAvengerIntervalOption, MyRole.RoleColor.ToUnityColor(), false).Register(this);

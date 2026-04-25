@@ -1,47 +1,46 @@
 ﻿global using BepInEx.Unity.IL2CPP.Utils.Collections;
-global using Il2CppInterop.Runtime;
-global using Nebula.Extensions;
-global using Nebula.Utilities;
-global using Nebula.Game;
-global using Nebula.Player;
-global using Nebula.Modules;
-global using Nebula.Configuration;
-global using UnityEngine;
-global using Nebula.Modules.ScriptComponents;
-global using System.Collections;
 global using HarmonyLib;
+global using Il2CppInterop.Runtime;
+global using Nebula.Configuration;
+global using Nebula.Extensions;
+global using Nebula.Game;
+global using Nebula.Modules;
+global using Nebula.Modules.ScriptComponents;
+global using Nebula.Player;
+global using Nebula.Utilities;
+global using System.Collections;
+global using UnityEngine;
 global using Virial.Attributes;
 global using Virial.Helpers;
 global using Virial.Utilities;
-global using Timer = Nebula.Modules.ScriptComponents.TimerImpl;
 global using Color = UnityEngine.Color;
-global using GUIWidget = Virial.Media.GUIWidget;
-global using GUI = Nebula.Modules.GUIWidget.NebulaGUIWidgetEngine;
-global using Image = Virial.Media.Image;
 global using GamePlayer = Virial.Game.Player;
-
-
+global using GUI = Nebula.Modules.GUIWidget.NebulaGUIWidgetEngine;
+global using GUIWidget = Virial.Media.GUIWidget;
+global using Image = Virial.Media.Image;
+global using Timer = Nebula.Modules.ScriptComponents.TimerImpl;
+using AmongUs.Data.Player;
 using BepInEx;
+using BepInEx.Configuration;
 using BepInEx.Unity.IL2CPP;
-using System.Runtime.InteropServices;
-using UnityEngine.SceneManagement;
-using Virial;
 using Cpp2IL.Core.Extensions;
+using Hazel.Udp;
+using Interstellar;
+using Nebula.Modules.CustomMap;
+using Nebula.VisualProgramming;
+using System.IO.Compression;
 using System.Reflection;
 using System.Reflection.Metadata;
-using Nebula.Modules.CustomMap;
-using System.IO.Compression;
-using Nebula.VisualProgramming;
-using Virial.VisualProgramming;
-using UnityEngine.ResourceManagement.Util;
-using UnityEngine.Networking;
-using Hazel.Udp;
-using BepInEx.Configuration;
-using System.Runtime.Loader;
-using AmongUs.Data.Player;
-using Interstellar;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Runtime.Loader;
+using System.Security.Cryptography;
 using System.Text;
+using UnityEngine.Networking;
+using UnityEngine.ResourceManagement.Util;
+using UnityEngine.SceneManagement;
+using Virial;
+using Virial.VisualProgramming;
 
 #if PC
 [assembly: System.Reflection.AssemblyFileVersionAttribute(Nebula.NebulaPlugin.PluginEpochStr + "."  + Nebula.NebulaPlugin.PluginBuildNumStr)]
@@ -53,14 +52,14 @@ public class NebulaPlugin
     public const string AmongUsVersion = "2023.7.12";
     public const string PluginGuid = "jp.dreamingpig.amongus.nebula";
     public const string PluginName = "NebulaOnTheShip";
-    public const string PluginVersion = "3.1.0.0";
+    public const string PluginVersion = "3.2.1.2";
 
-    //public const string VisualVersion = "v3.1";
-    public const string VisualVersion = "Snapshot 26.03.28a";
-    //public const string VisualVersion = "Higher Refresh Rate DEMO";
+    //public const string VisualVersion = "v3.2.1.2";
+    public const string VisualVersion = "Snapshot 26.04.25b";
+    //public const string VisualVersion = "Addon Loading DEMO 2";
 
     public const string PluginEpochStr = "108";
-    public const string PluginBuildNumStr = "1560";
+    public const string PluginBuildNumStr = "1574";
     public static readonly int PluginEpoch = int.Parse(PluginEpochStr);
     public static readonly int PluginBuildNum = int.Parse(PluginBuildNumStr);
     public const bool GuardVanillaLangData = false;
@@ -112,6 +111,7 @@ public class NebulaPlugin
     public static bool IsPreferential => NebulaLogFile.IsPreferential;
     public static BasePlugin LoaderPlugin = null!;
 
+
     static public void LoadForAndroid()
     {
         LoadInternal(true);
@@ -136,25 +136,48 @@ public class NebulaPlugin
         //if (!IsAndroid) System.Console.OutputEncoding = Encoding.UTF8;
         NebulaLogFile.Initialize(android);
 
-        void LoadLibrary(string path)
-        {
-            using var stream = StreamHelper.OpenFromResource(path);
-            if (stream != null)
+        void LoadLibraryFromResource(string path, string dllName) {
+            LoadLibrary(StreamHelper.OpenFromResource(path), dllName);
+        }
+
+        void LoadLibraryFromZip(string zipPath) {
+            using var apiStream = StreamHelper.OpenFromResource(zipPath)!;
+            using var zip = new ZipArchive(apiStream);
+            foreach(var entry in zip.Entries)
             {
-                if (android)
+                if (entry.FullName.EndsWith(".dll"))
                 {
-                    var loaded = Assembly.Load(stream.ReadBytes());
+                    LoadLibrary(entry.Open(), entry.FullName);
                 }
-                else
-                    NebulaPlugin.NoSAssemblyContext.LoadFromStream(stream);
             }
         }
 
-        if (!android)
+        void LoadLibrary(Stream dllStream, string dllName)
         {
-            LoadLibrary("Nebula.Resources.API.NebulaAPI.dll");
+            MD5 md5 = MD5.Create();
+            var dirPath = PathHelpers.NebulaLibsPath;
+            var filePath = dirPath + Path.DirectorySeparatorChar + dllName;
+            var apiBytes = dllStream.ReadBytes();
+            var apiHash = BitConverter.ToString(md5.ComputeHash(apiBytes));
+            if (Directory.Exists(dirPath) && File.Exists(filePath) && BitConverter.ToString(md5.ComputeHash(File.ReadAllBytes(filePath))) == apiHash)
+            {
+                //pass
+            }
+            else
+            {
+                Directory.CreateDirectory(dirPath);
+                File.WriteAllBytes(filePath, apiBytes);
+            }
         }
-        LoadLibrary("Nebula.Resources.Interstellar.dll");
+
+        LoadLibraryFromZip("Nebula.Resources.Libs.zip");
+        LoadLibraryFromResource("Nebula.Resources.Interstellar.dll", "Interstellar.dll");
+
+#if PC
+        Assembly.LoadFrom(Path.Combine(PathHelpers.NebulaLibsPath, "NebulaAPI.dll"));
+#endif
+        Assembly.LoadFrom(Path.Combine(PathHelpers.NebulaLibsPath, "Interstellar.dll"));
+
         LoadInterstellar();
 
         Harmony.PatchAll();

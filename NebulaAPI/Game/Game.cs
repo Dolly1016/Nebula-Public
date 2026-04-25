@@ -44,7 +44,7 @@ public interface Game : IModuleContainer, ILifespan, IArchivedGame
 
     KillButtonLikeHandler KillButtonLikeHandler { get; }
 
-    internal void RegisterEntity(IGameOperator entity, ILifespan lifespan, Action? onSubscribed = null);
+    internal void RegisterEntity(IGameComponent entity, ILifespan lifespan, Action? onSubscribed = null);
 
     /// <summary>
     /// ゲーム終了をトリガーします。

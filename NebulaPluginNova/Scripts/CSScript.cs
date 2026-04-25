@@ -1,7 +1,12 @@
-﻿using Cpp2IL.Core.Extensions;
+using Cpp2IL.Core.Extensions;
 using Iced.Intel;
+using Il2CppSystem.CodeDom.Compiler;
+using Nebula.Patches;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO.Compression;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Text;
 using Virial;
 using Virial.Runtime;
@@ -19,57 +24,17 @@ internal class AddonBehaviour
 
 internal record AddonScript(Assembly Assembly, NebulaAddon Addon, object? Reference, AddonBehaviour Behaviour);
 
-internal static class LibraryLoader
-{
-    private static ZipArchive? archive = null;
-    static public byte[]? OpenLibrary(string libraryName)
-    {
-        if(archive == null)
-        {
-            var libs = StreamHelper.OpenFromResource("Nebula.Resources.Libs.zip");
-            archive = new ZipArchive(libs!, ZipArchiveMode.Read);
-            archive.Entries.Do(e => Debug.Log(e.FullName));
-        }
-
-        return archive.GetEntry("Libs/" + libraryName)?.Open().ReadBytes();
-    }
-
-    static public void CloseZip()
-    {
-        archive?.Dispose();
-        archive = null;
-    }
-}
-
-
 [NebulaPreprocess(PreprocessPhase.CompileAddons)]
 internal static class AddonScriptManagerLoader
 {
     private static bool setUpDone = false;
-    static internal object[] ReferenceAssemblies = [];
+    static internal string[] ReferenceAssemblies = [];
     internal static void SetUp()
     {
         if (setUpDone) return;
         setUpDone = true;
 
-        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-
-        NebulaPlugin.NoSAssemblyContext.LoadFromStream(new MemoryStream(LibraryLoader.OpenLibrary("System.Collections.Immutable.dll")!));
-        NebulaPlugin.NoSAssemblyContext.LoadFromStream(new MemoryStream(LibraryLoader.OpenLibrary("System.Reflection.Metadata.dll")!));
-        NebulaPlugin.NoSAssemblyContext.LoadFromStream(new MemoryStream(LibraryLoader.OpenLibrary("Microsoft.CodeAnalysis.dll")!));
-        NebulaPlugin.NoSAssemblyContext.LoadFromStream(new MemoryStream(LibraryLoader.OpenLibrary("Microsoft.CodeAnalysis.CSharp.dll")!));
-        var loader = NebulaPlugin.NoSAssemblyContext.LoadFromStream(new MemoryStream(LibraryLoader.OpenLibrary("AddonScriptLoader.dll")!));
-        LibraryLoader.CloseZip();
-        var type = loader.GetType("AddonScriptLoader.ScriptCompiler");
-        CompileMethod = type?.GetMethod("CompileScripts", BindingFlags.Static | BindingFlags.Public)!;
-        SearchAssembliesMethod = type?.GetMethod("SearchReferences", BindingFlags.Static | BindingFlags.Public)!;
-
-#if PC
-        using var apiStream = StreamHelper.OpenFromResource("Nebula.Resources.API.NebulaAPI.dll")!;
-        ReferenceAssemblies = (object[])AddonScriptManagerLoader.SearchAssembliesMethod.Invoke(null, [assemblies, apiStream.ReadBytes()])!;
-#else
-        ReferenceAssemblies = (object[])AddonScriptManagerLoader.SearchAssembliesMethod.Invoke(null, [assemblies, null])!;
-#endif
+        ReferenceAssemblies = AppDomain.CurrentDomain.GetAssemblies().Where(a => !a.IsDynamic).Select(a => a.Location).ToArray();
     }
 
     static IEnumerator Preprocess(NebulaPreprocessor preprocessor)
@@ -79,9 +44,6 @@ internal static class AddonScriptManagerLoader
 
         yield return AddonScriptManager.CoLoad(preprocessor);
     }
-
-    static internal MethodInfo CompileMethod { get; private set; } = null!;
-    static internal MethodInfo SearchAssembliesMethod { get; private set; } = null!;
 }
 
 internal static class AddonScriptManager
@@ -89,25 +51,87 @@ internal static class AddonScriptManager
     static public IEnumerable<AddonScript> ScriptAssemblies => scriptAssemblies;
     static private List<AddonScript> scriptAssemblies = [];
     static private Virial.Logging.ILogger Log;
-    static private void PrintToLog(int severity, string path, int line, int character, string id, string message) {
-        string labeledMessage = $"{id}: {message} at {path} (Line: {line + 1}, Character: {character + 1})";
-        switch (severity)
+    static private bool TryLoadCache(NebulaAddon addon, out string dllName, [MaybeNullWhen(false)] out string dllPath)
+    {
+        dllName = $"{addon.Id}_{addon.HandshakeHash.ToBase36()}.dll";
+
+        var dirPath = PathHelpers.DllHashDirPath;
+        if (!Directory.Exists(PathHelpers.DllHashDirPath))
         {
-            case 0:
-            case 1:
-                Log.Message(labeledMessage);
-                break;
-            case 2:
-                Log.Warning(labeledMessage);
-                break;
-            default:
-                Log.Error(labeledMessage);
-                break;
+            dllPath = null;
+            return false;
+        }
+        Directory.CreateDirectory(dirPath);
+
+        dllPath = dirPath + Path.DirectorySeparatorChar + dllName;
+        return File.Exists(dllPath);
+        
+    }
+
+    static public IEnumerator CoCheckAndInstallRuntime(NebulaPreprocessor preprocessor)
+    {
+        var psi = new System.Diagnostics.ProcessStartInfo()
+        {
+            FileName = "AddonScriptCompiler.exe",
+            Arguments = $"--hello",
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            WorkingDirectory = PathHelpers.GameRootPath
+        };
+
+        var process = System.Diagnostics.Process.Start(psi);
+        if (process != null)
+        {
+            while (!process.HasExited) yield return null;
+
+
+            if (process.ExitCode == 0) yield break;
+
+            preprocessor.SetLoadingText("Installing .NET Rutime...");
+            yield return null;
+
+            string command = "winget";
+            string arguments = "install Microsoft.DotNet.DesktopRuntime.8 -e --silent --accept-source-agreements --accept-package-agreements";
+
+            psi = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = command,
+                Arguments = arguments,
+                CreateNoWindow = true,
+                UseShellExecute = true, 
+                WindowStyle = ProcessWindowStyle.Hidden,
+                Verb = "runas"
+            };
+
+            process = System.Diagnostics.Process.Start(psi);
+            if (process != null)
+            {
+                while (!process.HasExited) yield return null;
+                yield break;
+            }
+        }
+        else
+        {
+            Log.Error("Failed to start AddonScriptCompiler.exe");
         }
     }
+
     static public IEnumerator CoLoad(NebulaPreprocessor preprocessor)
     {
         Log = NebulaAPI.Logging.NebulaLogger("Scripting");
+
+        // Write references.txt at the start
+        AddonScriptManagerLoader.SetUp();
+        string referencesPath = Path.Combine(PathHelpers.DllHashDirPath, "references.txt");
+        if (!Directory.Exists(PathHelpers.DllHashDirPath))
+        {
+            Directory.CreateDirectory(PathHelpers.DllHashDirPath);
+        }
+        File.WriteAllLines(referencesPath, AddonScriptManagerLoader.ReferenceAssemblies);
+
+        bool triedChecking = false;
 
         foreach (var addon in NebulaAddon.AllAddons)
         {
@@ -136,115 +160,97 @@ internal static class AddonScriptManager
             }
             else
             {
-                var sources = addon.Archive.Entries.Where(e => e.FullName.StartsWith(prefix) && e.FullName.EndsWith(".cs")).Select(e => (e.Open().ReadToEnd(), e.FullName.Substring(prefix.Length))).ToArray();
+                if (!triedChecking)
+                {
+                    triedChecking = true;
+                    yield return CoCheckAndInstallRuntime(preprocessor);
+                }
+
+                var sources = addon.Archive.Entries.Where(e => e.FullName.StartsWith(prefix) && e.FullName.EndsWith(".cs")).ToArray();
                 if (sources.Length == 0) continue;
-
-                AddonScriptManagerLoader.SetUp();
-
                 yield return preprocessor.SetLoadingText("Compiling Addon Scripts\n" + addon.Id);
 
-                var assembly = (Tuple<Assembly, object>?)AddonScriptManagerLoader.CompileMethod.Invoke(null, ["Script." + addon.Id.HeadUpper(), NebulaPlugin.NoSAssemblyContext, AddonScriptManagerLoader.ReferenceAssemblies, (Action<int, string, int, int, string, string>)PrintToLog, sources, addonBehaviour?.UseHiddenMembers ?? false]);
-
-                if (assembly == null)
+                bool found = false;
+                if (!TryLoadCache(addon, out var dllName, out var foundPath))
                 {
-                    Log.Error("Compile Error! Scripts is ignored (Addon: " + addon.Id + ")");
-                }
-                else
-                {
-                    scriptAssemblies.Add(new(assembly.Item1, addon, assembly.Item2, addonBehaviour ?? new()));
-                    NebulaAPI.Preprocessor?.PickUpPreprocess(assembly.Item1);
-                }
-            }
-        }
-
-        /*
-        var parseOptions = CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.CSharp12);
-        var compilationOptions = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
-            .WithUsings("Virial", "Virial.Compat", "System", "System.Linq", "System.Collections.Generic")
-            .WithNullableContextOptions(NullableContextOptions.Enable)
-            .WithOptimizationLevel(OptimizationLevel.Release)
-            .WithMetadataImportOptions(MetadataImportOptions.All);
-
-        foreach (var addon in NebulaAddon.AllAddons)
-        {
-            string prefix = addon.InZipPath + "Scripts/";
-            
-            AddonBehaviour? addonBehaviour = null;
-            var behaviour = addon.Archive.GetEntry(prefix + ".behaviour");
-            if (behaviour != null)
-            {
-                using var stream = behaviour.Open();
-                addonBehaviour = JsonStructure.Deserialize<AddonBehaviour>(stream);
-            }
-
-            List<SyntaxTree> trees = [];
-            foreach(var entry in addon.Archive.Entries)
-            {
-                if (!entry.FullName.StartsWith(prefix)) continue;
-
-                if (entry.FullName.EndsWith(".cs"))
-                {
-                    //解析木をつくる
-                    trees.Add(CSharpSyntaxTree.ParseText(entry.Open().ReadToEnd(), parseOptions, entry.FullName.Substring(prefix.Length), Encoding.UTF8));
-                }
-            }
-            
-            //解析木が一つも無ければコンパイルは不要
-            if (trees.Count == 0) continue;
-
-            Patches.LoadPatch.LoadingText = "Compiling Addon Scripts\n" + addon.Id;
-            yield return null;
-
-            var myCompilationOptions = compilationOptions.WithModuleName("Script." + addon.Id.HeadUpper());
-
-            if (addonBehaviour?.UseHiddenMembers ?? false)
-            {
-                //全Internal, Privateメンバにアクセスできるようにする
-                var topLevelBinderFlagsProperty = typeof(CSharpCompilationOptions).GetProperty("TopLevelBinderFlags", BindingFlags.Instance | BindingFlags.NonPublic)!;
-                topLevelBinderFlagsProperty.SetValue(myCompilationOptions, (uint)1 << 22);
-
-                trees.Add(CSharpSyntaxTree.ParseText("[assembly: System.Runtime.CompilerServices.IgnoresAccessChecksTo(\"Nebula\")]\n[assembly: System.Runtime.CompilerServices.IgnoresAccessChecksTo(\"NebulaAPI\")]", parseOptions, "", Encoding.UTF8));
-            }
-
-            var compilation = CSharpCompilation.Create("Script." + addon.Id.HeadUpper(), trees, ReferenceAssemblies, myCompilationOptions)
-                .AddReferences(scriptAssemblies.Where(a => addon.Dependency.Contains(a.Addon)).Select(a => a.Reference));
-            
-            Assembly? assembly = null;
-            using (var stream = new MemoryStream())
-            {
-                var emitResult = compilation.Emit(stream);
-
-                if (emitResult.Diagnostics.Length > 0) {
-                    string log = "Compile Log:";
-                    foreach (var diagnostic in emitResult.Diagnostics)
+                    // Unpack sources to temp directory
+                    string tempDir = Path.Combine(PathHelpers.DllHashDirPath, "temp");
+                    if (Directory.Exists(tempDir))
                     {
-                        var pos = diagnostic.Location.GetLineSpan();
-                        var location = "(" + pos.Path + " at line " + (pos.StartLinePosition.Line + 1) + ", character" + (pos.StartLinePosition.Character + 1) + ")";
-
-                        log += $"\n[{diagnostic.Severity}, {location}] {diagnostic.Id}, {diagnostic.GetMessage()}";
+                        Directory.Delete(tempDir, true);
                     }
-                    NebulaPlugin.Log.Print(NebulaLog.LogLevel.Log, NebulaLog.LogCategory.Scripting, log);
+                    Directory.CreateDirectory(tempDir);
+                    foreach (var srcEntry in sources)
+                    {
+                        string relativePath = srcEntry.FullName.Substring(prefix.Length).Replace("..", "Dir");
+                        string outPath = Path.Combine(tempDir, relativePath.Replace('/', Path.DirectorySeparatorChar));
+                        Directory.CreateDirectory(Path.GetDirectoryName(outPath)!);
+                        using var srcStream = srcEntry.Open();
+                        using var dstStream = File.Create(outPath);
+                        srcStream.CopyTo(dstStream);
+                    }
                     
-                }
+                    string outputPath = Path.Combine(PathHelpers.DllHashDirPath, dllName);
+                    string moduleName = "Script." + addon.Id.HeadUpper();
 
-                if (emitResult.Success)
-                {
-                    stream.Seek(0, SeekOrigin.Begin);
-                    assembly = NebulaPlugin.NoSAssemblyContext.LoadFromStream(stream); //もとはデフォルトのコンテキストでロードしていた。
+                    var psi = new System.Diagnostics.ProcessStartInfo()
+                    {
+                        FileName = "AddonScriptCompiler.exe",
+                        Arguments = $"--module-name \"{moduleName}\" --source-dir \"{tempDir}\" --output \"{outputPath}\" --config \"{referencesPath}\"",
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        WorkingDirectory = PathHelpers.GameRootPath
+                    };
+                    if (addonBehaviour?.UseHiddenMembers ?? false) psi.Arguments += " --use-hidden-members";
+                    
+                    var process = System.Diagnostics.Process.Start(psi);
+                    if (process != null)
+                    {
+                        while (!process.HasExited)
+                        {
+                            yield return null;
+                        }
+
+                        if (process.ExitCode == 0 && File.Exists(outputPath))
+                        {
+                            found = true;
+                            foundPath = outputPath;
+
+                            Log.Error("Compile Finished (Addon: " + addon.Id + ")\n  " + process.StandardOutput.ReadToEnd().Replace("\n", "\n  "));
+                        }
+                        else
+                        {
+                            Log.Error("Compile Error! Scripts is ignored (Addon: " + addon.Id + ")\n  " + process.StandardError.ReadToEnd().Replace("\n", "\n  "));
+                        }
+                    }
+                    else
+                    {
+                        Log.Error("Failed to start AddonScriptCompiler.exe (Addon: " + addon.Id + ")");
+                    }
                 }
                 else
                 {
-                    NebulaPlugin.Log.Print(NebulaLog.LogLevel.Error, NebulaLog.LogCategory.Scripting, "Compile Error! Scripts is ignored (Addon: " + addon.Id + ")");
+                    found = true;
                 }
-            }
 
-            if (assembly != null)
-            {
-                scriptAssemblies.Add(new(assembly, addon, compilation.ToMetadataReference(), addonBehaviour ?? new()));
-                NebulaAPI.Preprocessor?.PickUpPreprocess(assembly);
+                if (found && foundPath != null)
+                {
+                    var compiledAssembly = NebulaPlugin.NoSAssemblyContext.LoadFromAssemblyPath(foundPath);
+                    scriptAssemblies.Add(new(compiledAssembly, addon, null, addonBehaviour ?? new()));
+                    NebulaAPI.Preprocessor?.PickUpPreprocess(compiledAssembly);
+                }
+
             }
         }
-        */
+        
+        // Clean up temp directory after compiling all addons
+        string finalTempDir = Path.Combine(PathHelpers.DllHashDirPath, "temp");
+        if (Directory.Exists(finalTempDir))
+        {
+            Directory.Delete(finalTempDir, true);
+        }
 
         yield break;
     }

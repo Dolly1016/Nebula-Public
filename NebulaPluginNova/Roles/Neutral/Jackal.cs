@@ -432,7 +432,7 @@ file static class SidekickAchievementChecker
 
 public class Sidekick : DefinedRoleTemplate, HasCitation, DefinedRole
 {
-    private Sidekick() : base("sidekick", Jackal.MyTeam.Color, RoleCategory.NeutralRole, Jackal.MyTeam, [IsModifierOption, InheritanceRuleOption, AssignedSidekickOption, SidekickCanKillOption, CanCreateSidekickChainlyOption, KillCoolDownOption, CanSuicideOption, SuicideCoolDownOption, CanFixLightOption, CanFixCommsOption, HasImpostorVisionOption, CanUseVentsOption, CanMoveInVentsOption], false, optionHolderPredicate: ()=> (Jackal.MyRole as DefinedRole).IsSpawnable && Jackal.CanCreateSidekickOption ) {
+    private Sidekick() : base("sidekick", Jackal.MyTeam.Color, RoleCategory.NeutralRole, Jackal.MyTeam, [IsModifierOption, InheritanceRuleOption, AssignedSidekickOption, SidekickCanKillOption, CanCreateSidekickChainlyOption, KillCoolDownOption, CanSuicideOption, SuicideCoolDownOption, CanFixLightOption, CanFixCommsOption, HasImpostorVisionOption, CanUseVentsOption, CanMoveInVentsOption, CanWinAsOriginalTeamOption], false, optionHolderPredicate: ()=> (Jackal.MyRole as DefinedRole).IsSpawnable && Jackal.CanCreateSidekickOption ) {
         ConfigurationHolder?.ScheduleAddRelated(() => [Jackal.MyRole.ConfigurationHolder!]);
         ConfigurationHolder!.Title = ConfigurationHolder.Title.WithComparison("jackal.sidekick");
     }

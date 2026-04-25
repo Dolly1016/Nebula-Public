@@ -24,6 +24,7 @@ public class GUIButton : NoSGUIText
     private float GetTextMargin() => TextMargin ?? (IsModern ? 0.05f : 0.26f);
     override protected bool AllowGenerateCollider => false;
     public bool IsModern = false;
+    internal Action<PassiveButton, SpriteRenderer, TextMeshPro>? ButtonPostBuilder = null;
 
 
     public GUIButton(GUIAlignment alignment, Virial.Text.TextAttribute attribute, TextComponent text, bool modern = false) : base(alignment,attribute,text)
@@ -101,6 +102,8 @@ public class GUIButton : NoSGUIText
 
         actualSize.Width += margin + 0.1f;
         actualSize.Height += margin + 0.1f;
+
+        ButtonPostBuilder?.Invoke(passiveButton, button, inner.GetComponent<TextMeshPro>());
 
         return button.gameObject;
     }

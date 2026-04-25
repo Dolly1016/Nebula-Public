@@ -131,7 +131,10 @@ public static class ToolsInstaller
             yield return null;
 
             InstallTool("CPUAffinityEditor.exe", null);
-
+            InstallTool("AddonScriptCompiler.dll", null);
+            InstallTool("AddonScriptCompiler.exe", null);
+            InstallTool("AddonScriptCompiler.runtimeconfig.json", null);
+            InstallTool("AddonScriptCompiler.deps.json", null);
             InstallTool(Environment.Is64BitProcess ? "opus_x64.dll" : "opus_x86.dll", "opus.dll");
         }
 #else

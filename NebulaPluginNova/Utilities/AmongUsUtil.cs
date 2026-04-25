@@ -162,7 +162,7 @@ public static class AmongUsUtil
     }
 
     public static UiElement CurrentUiElement => ControllerManager.Instance.CurrentUiState.CurrentSelection;
-    public static bool InMeeting => MeetingHud.Instance == null && ExileController.Instance == null;
+    public static bool InMeeting => MeetingHud.Instance && ExileController.Instance == null;
     public static byte CurrentMapId => GameOptionsManager.Instance.CurrentGameOptions.MapId;
     private static string[] mapName = new string[] { "skeld", "mira", "polus", "undefined", "airship", "fungle" };
     public static string ToMapName(byte mapId) => mapName[mapId];
@@ -200,7 +200,7 @@ public static class AmongUsUtil
         player.ToggleName(false);
         player.SetNameColor(Color.white);
         var nosCosmeticsLayer = player.cosmetics.GetComponent<NebulaCosmeticsLayer>();
-        nosCosmeticsLayer.SetSortingProperty(true, 1000f, 1000);
+        nosCosmeticsLayer.SetSortingProperty(true, 1000f);
         player.cosmetics.nameText._SortingOrder = 2000;
         var renderers = player.cosmetics.nameText.GetComponentsInChildren<Renderer>();
         nosCosmeticsLayer.gameObject.AddComponent<ScriptBehaviour>().UpdateHandler += ()=>

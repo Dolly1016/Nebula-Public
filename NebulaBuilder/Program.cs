@@ -59,7 +59,7 @@ while (!exit)
             var dscr = Console.ReadLine() ?? "";
             if (dscr.Length > 0)
             {
-                var release = CreateRelease(dscr.Replace("<br>","\r\n"));
+                var release = CreateRelease(dscr.Replace("<br>","\r\n")+ "\r\n\r\nご支援よろしくお願いいたします。励みになります。\r\n[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/N4N31Y9TUW)");
                 if (release != null)
                 {
                     githubReleaseUrl = release.HtmlUrl;

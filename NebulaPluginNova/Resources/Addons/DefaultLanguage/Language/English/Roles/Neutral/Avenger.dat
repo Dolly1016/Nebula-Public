@@ -21,6 +21,7 @@
 "options.role.avenger.showAvengerFlashForTarget" : "Show Avenger Flash"
 "options.role.avenger.notificationForAvengerInterval" : "Notification For Avenger Interval"
 "options.role.avenger.notificationForTargetInterval" : "Notification For Target Interval"
+"options.role.avenger.canKillHidingPlayer" : "Can Kill Hiding Player"
 
 # Game
 

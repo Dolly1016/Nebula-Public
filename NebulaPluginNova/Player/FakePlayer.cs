@@ -24,7 +24,7 @@ internal class FakePlayerManager : AbstractModule<Virial.Game.Game>, IGameOperat
         ModSingleton<FakePlayerManager>.Instance = this;
     }
 
-    protected override void OnInjected(Virial.Game.Game container) => GameOperatorManager.Instance?.Subscribe(this, container);
+    protected override void OnInjected(Virial.Game.Game container) => this.Register(container);
     
     public int GenerateAvailableId() => (AvailableId++) << 8 + GamePlayer.LocalPlayer!.PlayerId;
 

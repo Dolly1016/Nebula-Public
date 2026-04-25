@@ -69,10 +69,11 @@ internal class FakeInformation : AbstractModule<Virial.Game.Game>, IGameOperator
     public FakeAdmin CurrentAdmin => Admin?.Information ?? AdminFromActuals;
     public FakeVitals CurrentVitals => Vitals?.Information ?? VitalsFromActuals;
 
+    
     static public FakeAdmin AdminFromActuals { get
         {
             List<FakeAdminParam> param = new();
-            foreach(var d in Helpers.AllDeadBodies()) param.Add(new(d.ParentId, d.TruePosition, false, true));
+            foreach (var d in Helpers.AllDeadBodies()) if (d.ShouldBeOnAdmin()) param.Add(new(d.ParentId, d.TruePosition, false, true));
             //foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo) if (!p.IsDead) param.Add(new(p.PlayerId, p.VanillaPlayer.GetTruePosition(), p.Role.Role.Category == Virial.Assignable.RoleCategory.ImpostorRole, false));
             foreach (var p in NebulaGameManager.Instance!.AllPlayerlike) if (!p.IsDead) param.Add(new(p.RealPlayer.PlayerId, p.TruePosition, p.RealPlayer.Role.Role.Category == Virial.Assignable.RoleCategory.ImpostorRole, false));
             return new(param.ToArray());
@@ -96,4 +97,11 @@ internal class FakeInformation : AbstractModule<Virial.Game.Game>, IGameOperator
         }
     }
 
+}
+
+internal static class InvalidDeadbodyHelper
+{
+    public const string NoAdminDeadBodyNamePrefix = "NoAdmin";
+    public static bool ShouldBeOnAdmin(this DeadBody deadBody) => !deadBody.name.StartsWith(NoAdminDeadBodyNamePrefix);
+    public static void MarkAsNoAdmin(this DeadBody deadBody) => deadBody.name = NoAdminDeadBodyNamePrefix;
 }

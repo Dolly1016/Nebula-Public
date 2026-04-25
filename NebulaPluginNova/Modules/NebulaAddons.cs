@@ -240,7 +240,7 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
 
                 var marketplaceMeta = zip.GetEntry(".marketplace");
                 if (marketplaceMeta == null)
-                    addon.HandshakeHash = addon.HandshakeHash = System.BitConverter.ToString(md5.ComputeHash(File.OpenRead(file))).ComputeConstantHash();
+                    addon.HandshakeHash = System.BitConverter.ToString(md5.ComputeHash(File.OpenRead(file))).ComputeConstantHash();
                 else
                 {
                     using var mmStream = marketplaceMeta.Open();
@@ -248,10 +248,10 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
                     addon.HandshakeHash = mMeta?.Hash ?? 0;
                 }
             }
-            catch
+            catch(Exception e)
             {
                 zip.Dispose();
-                NebulaLogger.Instance.Error("Failed to load addon \"" + Path.GetFileName(file) + "\".");
+                NebulaLogger.Instance.Error("Failed to load addon \"" + Path.GetFileName(file) + "\".\n " + e.ToString().Replace("\n", "\n  "));
             }
         }
 

@@ -8,7 +8,7 @@ namespace Virial.Events.Player;
 
 public class ResetKillCooldownLocalEvent : AbstractPlayerEvent
 {
-    private float? cooldown { get; set; }
+    private float? cooldown { get; set; } = null;
     public bool UseDefaultCooldown => !cooldown.HasValue;
     public void SetFixedCooldown(float cooldown) => this.cooldown = cooldown;
     public float? FixedCooldown => this.cooldown;

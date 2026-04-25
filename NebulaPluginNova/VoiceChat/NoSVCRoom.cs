@@ -36,7 +36,13 @@ internal class NoSVCRoom
     {
         private static DataSaver VCSaver = new("VoiceChat");
         private static DataEntry<string> VCPlayerEntry = new StringDataEntry("@PlayerDevice", VCSaver, "");
-        private static DataEntry<string> VCMicEntry = new StringDataEntry("@MicDeviceName", VCSaver, Microphone.devices.Length > 0 ? Microphone.devices[0] : "");
+        private static DataEntry<string> VCMicEntry = new StringDataEntry("@MicDeviceName", VCSaver,
+#if ANDROID
+            ""
+#else
+            Microphone.devices.Length > 0 ? Microphone.devices[0] : ""
+#endif
+            );
         private static DataEntry<string> VCServerEntry = new StringDataEntry("@VCServer", VCSaver, "");
         private static DataEntry<float> MasterVolumeEntry = new FloatDataEntry("@PlayerVolume", VCSaver, 1f);
         public static DataEntry<float> MicVolumeEntry = new FloatDataEntry("@MicVolume", VCSaver, 1f);
@@ -162,7 +168,7 @@ internal class NoSVCRoom
 
                     var inner = new VerticalWidgetsHolder(Virial.Media.GUIAlignment.Center,
 #if ANDROID
-                        Microphone.devices
+                        ((IEnumerable<string>)[])
 #else
                         AudioDevices.MicrophoneDevices()
 #endif
@@ -214,7 +220,7 @@ internal class NoSVCRoom
                     RawText = client.PlayerName,
                     PostBuilder = (text) =>
                     {
-                        InstantiateSlideBar(text.transform.parent, client.Volume * 0.25f, v => client.SetVolume(v * 4f));
+                        InstantiateSlideBar(text.transform.parent, client.Volume * 0.25f, v => client.SetVolume(v * 4f, true));
                         var collider = text.gameObject.AddComponent<BoxCollider2D>();
                         collider.size = new(1f, 0.33f);
                         collider.isTrigger = true;
@@ -275,6 +281,9 @@ internal class NoSVCRoom
                 this.playerId = playerId;
                 this.playerName = playerName;
                 ResetMapping();
+
+                volumeEntry = VCSettings.GetPlayerVolumeEntry(playerName);
+                myVCPlayer.SetVolume(volumeEntry.Value, false);
             }
 
             public void ResetMapping()
@@ -295,11 +304,9 @@ internal class NoSVCRoom
 
                 if (mappedPlayer == null && (LobbyBehaviour.Instance || ShipStatus.Instance))
                 {
-                    mappedPlayer = PlayerControl.AllPlayerControls.GetFastEnumerator().FirstOrDefault(p => p.PlayerId == playerId)!;
+                    mappedPlayer = PlayerControl.AllPlayerControls.GetFastEnumerator<PlayerControl>().FirstOrDefault(p => p.PlayerId == playerId)!;
                     if (mappedPlayer) {
                         string puid = mappedPlayer.name;
-                        volumeEntry = VCSettings.GetPlayerVolumeEntry(puid);
-                        myVCPlayer.SetVolume(volumeEntry.Value);
                     }
                 }
 
@@ -451,6 +458,7 @@ internal class NoSVCRoom
             var localIsDead = localPlayer?.IsDead ?? false;
             var targetIsDead = mapping.MappedModPlayer?.IsDead ?? true;
             var canHearAllVoice = NebulaGameManager.Instance?.CanSeeAllInfo ?? false;
+            var ghostShouldDecay = GeneralConfigurations.DistanceDecayInGhostOption;
 
             if (GeneralConfigurations.CanTalkInWanderingPhaseOption)
             {
@@ -520,7 +528,14 @@ internal class NoSVCRoom
                         ev.NormalPan = pan;
                         if (localIsDead)
                         {
-                            ev.NormalVolume = (canHearAllVoice && targetIsDead) ? 1f : volume;
+                            if (canHearAllVoice && targetIsDead)
+                            {
+                                ev.NormalVolume = ghostShouldDecay ? GetVolume(targetPos.Distance(hearingPosition.Value), 6f, 0.5f) : 1f;
+                            }
+                            else
+                            {
+                                ev.NormalVolume = volume;
+                            }
                             ev.GhostVolume = 0f;
                         }
                         else
@@ -562,10 +577,10 @@ internal class NoSVCRoom
             }
         }
 
-        internal void SetVolume(float volume)
+        internal void SetVolume(float volume, bool save)
         {
             clientVolume.Volume = volume;
-            mapping?.UpdateVolumeEntry(volume);
+            if(save) mapping?.UpdateVolumeEntry(volume);
         }
 
         internal void UpdateMappedState() => mapping.UpdateMappedState();
@@ -680,7 +695,7 @@ internal class NoSVCRoom
                     clients.Remove(clientId);
                 },
             }.SetBufferLength(2048 *
-#if ANDROID 
+#if ANDROID
             9
 #else
             1
@@ -730,6 +745,11 @@ internal class NoSVCRoom
     private static bool UserAllowedUsingMic = false;
     private static void CheckAndShowConfirmPopup(Action action)
     {
+#if ANDROID
+        MetaUI.ShowConfirmDialog(HudManager.InstanceExists ? HudManager.Instance.transform : null,
+            GUI.API.LocalizedTextComponent("voiceChat.dialog.noMic"));
+        return;
+#endif
         if (UserAllowedUsingMic)
         {
             action.Invoke();
@@ -748,7 +768,7 @@ internal class NoSVCRoom
     public void SetMicrophone(ManualMicrophone microphone)
     {
         CheckAndShowConfirmPopup(() => {
-            this.unityMic = microphone;
+            //this.unityMic = microphone;
             interstellarRoom.Microphone = microphone;
         });
     }
@@ -817,7 +837,7 @@ internal class NoSVCRoom
     }
 
     private static float HearDistance => LightPatch.LastCalculatedRange;
-    private static float GetVolume(float distance, float hearDistance) => Mathn.Clamp(1f - distance / hearDistance, 0f, 1f);
+    private static float GetVolume(float distance, float hearDistance, float maxRatio = 0.2f) => maxRatio < 1f ? Mathn.Clamp(1f - (distance - maxRatio) / (hearDistance - maxRatio), 0f, 1f) : 1f;
     private static float GetPan(float micX, float speakerX)
     {
         var delta = speakerX - micX;
@@ -827,7 +847,10 @@ internal class NoSVCRoom
     internal record SpeakerCache(IVoiceComponent Speaker, float Volume, float Pan);
     private List<SpeakerCache> _speakerCache = [];
 
+    
 #if ANDROID
+
+    /*
     int? lastPosition = null;
     string currentMic = null!;
     AudioClip? micAudioClip = null;
@@ -865,6 +888,7 @@ internal class NoSVCRoom
         lastPosition = currentPosition;
         unityMic?.PushAudioData(audioData);
     }
+    */
 #endif
 
     byte myLastId = byte.MaxValue;
@@ -887,7 +911,7 @@ internal class NoSVCRoom
     private void UpdateInternal()
     {
 #if ANDROID
-        PushAudioData();
+        //PushAudioData();
 #endif
 
         if (LobbyBehaviour.Instance)

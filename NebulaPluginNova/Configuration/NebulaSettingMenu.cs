@@ -277,6 +277,23 @@ public class NebulaSettingMenu : MonoBehaviour
                         renderer.sortingOrder = 10;
 
                         SetUpButton(h, button);
+
+                        bool hasIcon = h.RelatedAssignable != null;
+                        if (hasIcon)
+                        {
+                            renderer.size -= new Vector2(0.14f, 0f);
+                            renderer.transform.localPosition += new Vector3(0.07f, 0f, 0f);
+
+                            text.transform.localScale *= 0.89f;
+                            text.transform.localPosition += new Vector3(0.05f, 0f, 0f);
+
+                            var iconRenderer = UnityHelper.CreateObject<SpriteRenderer>("Icon", renderer.transform, new(-0.78f, 0f, -1f));
+                            iconRenderer.transform.localScale = new(0.24f, 0.24f, 1f);
+                            iconRenderer.sprite = h.RelatedAssignable.GetRoleIcon()?.GetSprite();
+                            iconRenderer.material = RoleIcon.GetRoleIconMaterial(h.RelatedAssignable, 0.8f);
+                            iconRenderer.sortingOrder = 15;
+                            iconRenderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                        }
                     },
                     Alignment = IMetaWidgetOld.AlignmentOption.Center,
                     Color = HolderToColor(h)

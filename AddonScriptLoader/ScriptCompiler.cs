@@ -24,7 +24,7 @@ static public class ScriptCompiler
     }
 
     //loggerは、(severity, path, line, character, id, message)の順で引数を受け取る
-    static public Tuple<Assembly, object?>? CompileScripts(string moduleName, AssemblyLoadContext context, object[] reference, Action<int, string, int, int, string, string> logger, IEnumerable<(string source, string path)> sources, bool useHiddenMembers)
+    static public Tuple<Assembly, object?, byte[]>? CompileScripts(string moduleName, AssemblyLoadContext context, object[] reference, Action<int, string, int, int, string, string> logger, IEnumerable<(string source, string path)> sources, bool useHiddenMembers)
     {
         List<SyntaxTree> trees = [];
         foreach (var tuple in sources)
@@ -67,7 +67,7 @@ static public class ScriptCompiler
             {
                 stream.Seek(0, SeekOrigin.Begin);
                 assembly = context.LoadFromStream(stream); 
-                return new (assembly, compilation.ToMetadataReference());
+                return new (assembly, compilation.ToMetadataReference(), stream.ToArray());
             }
             else
             {

@@ -1,0 +1,42 @@
+# Assignable
+
+"role.spy.name" : "スパイ"
+"role.spy.short" : "ス"
+"role.spy.blurb" : "インポスターを欺け"
+
+# Document
+
+"role.spy.doc" : "インポスターに自身を仲間だと誤認させるクルーメイトです。"
+"role.spy.ability.title" : "固有能力 "宇宙船の密偵""
+"role.spy.ability.main" : "インポスターからはスパイは仲間のインポスターのように見えます。<br>一方、スパイはインポスターを把握できません。"
+"role.spy.tips" : "・スパイが出現しうるゲームでは、インポスター同士でキルが可能になります。"
+
+# Options
+
+"options.role.spy.detail" : "インポスターを欺くクルーメイトです。"
+
+# Game
+
+
+# UI
+
+
+# Game Statictics
+
+# Status
+
+# Stats
+
+# Titles
+
+"achievement.spy.common1.title" : ""
+"achievement.spy.common1.goal" : ""
+
+"achievement.spy.another1.title" : ""
+"achievement.spy.another1.goal" : ""
+
+"achievement.spy.another2.title" : ""
+"achievement.spy.another2.goal" : ""
+
+"achievement.spy.challenge.title" : ""
+"achievement.spy.challenge.goal" : ""

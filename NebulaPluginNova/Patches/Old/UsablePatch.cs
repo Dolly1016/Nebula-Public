@@ -32,7 +32,7 @@ public static class VentCanUsePatch
         }
         else {
             //ベント外にいる場合
-            couldUse &= (modInfo?.Role.CanUseVent ?? false) || @object.inVent || @object.walkingToVent;
+            couldUse &= ((modInfo?.Role.CanUseVent ?? false)) || @object.inVent || @object.walkingToVent;
             if (modInfo?.Role.HaveNormalTask ?? false) couldUse &= !@object.MustCleanVent(__instance.Id);
             couldUse &= !pc.IsDead && @object.CanMove;
         }

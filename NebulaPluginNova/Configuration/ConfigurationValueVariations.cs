@@ -97,7 +97,6 @@ internal abstract class ComparableConfigurationValueBase<T, LocalEntry> : Config
         }
         else
         {
-            LogUtils.WriteToConsole("Mapper's length is 0! (id:"+ name + ")");
             myIndex = Array.IndexOf(myMapper, 0);
         }
     }

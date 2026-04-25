@@ -16,12 +16,16 @@ public class GameShowIntroLocalEvent: Event
     public Virial.Color? TeamFadeColor { get; set; }
     public Virial.Color RoleColor { get; set; }
     public TeamRevealType RevealType { get; set; }
-
-    public void SetTeam(RoleTeam team)
+    public RoleTeam? RelatedTeam { get; private set; }
+    private HashSet<byte> additionalPlayers = [];
+    internal bool ShouldShowAdditionally(byte playerId) => additionalPlayers.Contains(playerId);
+    public void SetTeam(RoleTeam team, bool resetAdditionalPlayers = true)
     {
         TeamName = team.DisplayName;
         TeamColor = team.Color;
         RevealType = team.RevealType;
+        RelatedTeam = team;
+        if (resetAdditionalPlayers) additionalPlayers.Clear();
     }
 
     public void SetRole(RuntimeRole role)
@@ -38,6 +42,10 @@ public class GameShowIntroLocalEvent: Event
         RoleBlurb = role.DisplayIntroBlurb;
         TeamFadeColor = role.IsMadmate ? Virial.Color.ImpostorColor : null;
         RoleColor = role.Color;
+    }
+    public void AddPlayer(Virial.Game.Player player)
+    {
+        additionalPlayers.Add(player.PlayerId);
     }
 
     internal GameShowIntroLocalEvent(RoleTeam team, RuntimeRole role)

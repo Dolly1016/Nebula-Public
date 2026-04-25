@@ -13,9 +13,6 @@ namespace Nebula.Modules.Cosmetics;
 
 internal class RingMenu
 {
-    [DllImport("user32.dll")]
-    static extern bool GetCursorPos(out System.Drawing.Point lpPoint);
-
     public record RingMenuElement(GUIWidgetSupplier Widget, Action OnClick, GUIWidgetSupplier? Overlay = null);
     GameObject obj = null!;
     SpriteRenderer ringRenderer = null!;
@@ -24,7 +21,6 @@ internal class RingMenu
     RingMenuElement[] elements = null!;
     (GameObject obj, Vector2 origScale)[] generated = null!;
     int currentSelection = -1;
-    private Vector2 startPos = Vector2.zero;
 
     public RingMenu()
     {
@@ -37,9 +33,6 @@ internal class RingMenu
     public void Show(RingMenuElement[] elements, Func<bool> showWhile, Vector2? menuPosition)
     {
         if (obj) UnityEngine.Object.Destroy(obj);
-
-        GetCursorPos(out var point);
-        startPos = new(point.X, point.Y);
 
         obj = UnityHelper.CreateObject("RingMenu", HudManager.Instance.transform, menuPosition ?? Vector2.zero);
         obj.transform.SetLocalZ(-780f);

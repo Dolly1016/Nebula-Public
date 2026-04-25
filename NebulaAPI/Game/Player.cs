@@ -613,7 +613,7 @@ public interface Player : ICommandExecutor, IArchivedPlayer, IPlayerlike
     /// </remarks>
     /// <param name="role">変更する役職。</param>
     /// <param name="arguments">役職のパラメータ。</param>
-    void SetRole(DefinedRole role, int[]? arguments = null);
+    void SetRole(DefinedRole role, int[]? arguments = null, RoleAssignType assignType = RoleAssignType.Standard);
     /// <summary>
     /// 幽霊役職を変更します。
     /// このAPIはRPCを送信します。
@@ -623,7 +623,7 @@ public interface Player : ICommandExecutor, IArchivedPlayer, IPlayerlike
     /// </remarks>
     /// <param name="role">変更する幽霊役職。</param>
     /// <param name="arguments">幽霊役職のパラメータ。</param>
-    void SetGhostRole(DefinedGhostRole role, int[]? arguments = null);
+    void SetGhostRole(DefinedGhostRole role, int[]? arguments = null, RoleAssignType assignType = RoleAssignType.Standard);
     /// <summary>
     /// モディファイアを追加します。
     /// </summary>
@@ -632,7 +632,7 @@ public interface Player : ICommandExecutor, IArchivedPlayer, IPlayerlike
     /// </remarks>
     /// <param name="modifier">追加するモディファイア。</param>
     /// <param name="arguments">モディファイアのパラメータ。</param>
-    void AddModifier(DefinedModifier modifier, int[]? arguments = null);
+    void AddModifier(DefinedModifier modifier, int[]? arguments = null, RoleAssignType assignType = RoleAssignType.Standard);
     /// <summary>
     /// モディファイアを削除します。
     /// 該当するモディファイアをすべて削除します。

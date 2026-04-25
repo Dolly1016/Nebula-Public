@@ -21,6 +21,7 @@
 "options.role.avenger.showAvengerFlashForTarget" : "アヴェンジャー発生通知フラッシュの表示"
 "options.role.avenger.notificationForAvengerInterval" : "復讐対象の位置の通知間隔"
 "options.role.avenger.notificationForTargetInterval" : "アヴェンジャーの位置の通知間隔"
+"options.role.avenger.canKillHidingPlayer" : "隠れているプレイヤーをキル可能"
 
 # Game
 

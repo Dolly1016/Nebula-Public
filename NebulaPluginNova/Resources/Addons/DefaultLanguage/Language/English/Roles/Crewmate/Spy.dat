@@ -1,0 +1,42 @@
+# Assignable
+
+"role.spy.name" : "Spy"
+"role.spy.short" : "S"
+"role.spy.blurb" : "Deceive Impostors"
+
+# Document
+
+"role.spy.doc" : "A crewmate makes the impostor mistake them for one of impostor team."
+"role.spy.ability.title" : "Inherent Ability [Space Spy]"
+"role.spy.ability.main" : "To impostors, the spy appears to be a impostor. <br>On the other hand, the spy cannot recognize impostors."
+"role.spy.tips" : "・In games where the spy can appear, impostors can kill each other."
+
+# Options
+
+"options.role.spy.detail" : "The spy is a crewmate who deceives impostors."
+
+# Game
+
+
+# UI
+
+
+# Game Statictics
+
+# Status
+
+# Stats
+
+# Titles
+
+"achievement.spy.common1.title" : ""
+"achievement.spy.common1.goal" : ""
+
+"achievement.spy.another1.title" : ""
+"achievement.spy.another1.goal" : ""
+
+"achievement.spy.another2.title" : ""
+"achievement.spy.another2.goal" : ""
+
+"achievement.spy.challenge.title" : ""
+"achievement.spy.challenge.goal" : ""

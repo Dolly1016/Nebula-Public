@@ -47,6 +47,7 @@
 "achievement.plague.common1.title" : "絶望が訪れる"
 "achievement.plague.common1.goal" : "1回のゲームで毒素の瓶を2回使用する。"
 "achievement.plague.common1.flavor" : ""毒したまえ、君は後悔するだろう。毒さずにいたまえ、君は後悔するだろう。""
+"achievement.plague.common1.splitted.2" : "訪れる"
 
 "achievement.plague.common2.title" : "病の世界へようこそ"
 "achievement.plague.common2.goal" : "直接感染者として他人を感染させる。"
@@ -54,10 +55,12 @@
 
 "achievement.plague.common3.title" : "スーパースプレッダー"
 "achievement.plague.common3.goal" : "直接感染者として他人の感染を500%進行させる。"
+"achievement.plague.common3.splitted.0" : "スーパー"
 
 "achievement.plague.challenge.title" : "他ならぬ二人のフィロソフィ"
 "achievement.plague.challenge.goal" : "プレイグの勝利条件を満たしながら、プレイグ勝利以外で勝利する。"
 "achievement.plague.challenge.flavor" : ""かつて私は、その信念のために生きたのだ。" ―時を超えて、手記より"
+"achievement.plague.challenge.splitted.1" : "二人の"
 
 # Team
 
@@ -67,4 +70,4 @@
 # Document
 
 "document.tip.winCond.plague.title" : "特殊勝利"
-"document.tip.winCond.plague" : "全生存者が疾病に感染すると勝利します。直接感染したプレイヤーもともに勝利します。"
+"document.tip.winCond.plague" : "全生存者が疾病に感染すると勝利します。毒素の瓶によって直接感染したプレイヤーもともに勝利します。"

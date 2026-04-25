@@ -33,6 +33,7 @@ public enum RoleType
     GhostRole = 2,
 }
 
+
 [NebulaPreprocess(PreprocessPhase.PostBuildNoS)]
 public static class PlayerState
 {
@@ -531,8 +532,10 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         if (canSeeRole)
         {
             var assignable = ((RuntimeAssignable?)(IsDead ? myGhostRole : myRole) ?? myRole);
+            var isGhostRole = myGhostRole == assignable;
             string? roleName = assignable.DisplayColoredName;
             text += roleName ?? "Undefined";
+            if (isGhostRole) text += $"({myRole.Role.GetRoleIconTagSmall()}{myRole.DisplayColoredShort})";
 
             AssignableAction(r => { var newName = r.OverrideRoleName(text, false, canSeeAllMeta); if (newName != null) text = newName; });
         }
@@ -559,7 +562,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         roleText.gameObject.SetActive(true);
     }
 
-    private void SetRole(DefinedRole role, int[] arguments)
+    private void SetRole(DefinedRole role, int[] arguments, RoleAssignType assignType)
     {
         GameOperatorManager.Instance?.Run(new PlayerTryToChangeRoleEvent(this, myRole, role));
         myRole?.Inactivate();
@@ -577,10 +580,10 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         myRole = role.CreateInstance(this, arguments);        
         if (NebulaGameManager.Instance?.GameState == NebulaGameStates.Initialized) myRole.ActivateAssignable();
         
-        NebulaGameManager.Instance?.RoleHistory.Add(new(NebulaGameManager.Instance.CurrentTime, PlayerId, myRole, IsDead));
+        if(!assignType.HasFlag(RoleAssignType.WithoutRecording)) NebulaGameManager.Instance?.RoleHistory.Add(new(NebulaGameManager.Instance.CurrentTime, PlayerId, myRole, IsDead));
     }
 
-    private void SetGhostRole(DefinedGhostRole role, int[] arguments)
+    private void SetGhostRole(DefinedGhostRole role, int[] arguments, RoleAssignType assignType)
     {
         myGhostRole?.Inactivate();
         GameOperatorManager.Instance?.WrapUpDeadLifespans();
@@ -589,22 +592,22 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
         if (NebulaGameManager.Instance?.GameState == NebulaGameStates.Initialized) myGhostRole?.ActivateAssignable();
 
-        NebulaGameManager.Instance?.RoleHistory.Add(new(NebulaGameManager.Instance.CurrentTime, PlayerId, myGhostRole, IsDead));
+        if (!assignType.HasFlag(RoleAssignType.WithoutRecording)) NebulaGameManager.Instance?.RoleHistory.Add(new(NebulaGameManager.Instance.CurrentTime, PlayerId, myGhostRole, IsDead));
     }
 
-    private void SetModifier(DefinedModifier role, int[] arguments)
+    private void SetModifier(DefinedModifier role, int[] arguments, RoleAssignType assignType)
     {
         var modifier = role.CreateInstance(this, arguments);
         myModifiers.Add(modifier);
 
         if (NebulaGameManager.Instance?.GameState == NebulaGameStates.Initialized) modifier.ActivateAssignable();
 
-        NebulaGameManager.Instance?.RoleHistory.Add(new(NebulaGameManager.Instance.CurrentTime, PlayerId, modifier, true, IsDead));
+        if (!assignType.HasFlag(RoleAssignType.WithoutRecording)) NebulaGameManager.Instance?.RoleHistory.Add(new(NebulaGameManager.Instance.CurrentTime, PlayerId, modifier, true, IsDead));
     }
 
-    public NebulaRPCInvoker RpcInvokerSetRole(DefinedRole role, int[]? arguments) => RpcSetAssignable.GetInvoker((PlayerId, role.Id, arguments ?? Array.Empty<int>(), RoleType.Role));
-    public NebulaRPCInvoker RpcInvokerSetModifier(DefinedModifier modifier, int[]? arguments) => RpcSetAssignable.GetInvoker((PlayerId, modifier.Id, arguments ?? Array.Empty<int>(), RoleType.Modifier));
-    public NebulaRPCInvoker RpcInvokerSetGhostRole(DefinedGhostRole role, int[]? arguments) => RpcSetAssignable.GetInvoker((PlayerId, role.Id, arguments ?? Array.Empty<int>(), RoleType.GhostRole));
+    public NebulaRPCInvoker RpcInvokerSetRole(DefinedRole role, int[]? arguments, RoleAssignType assignType = RoleAssignType.Standard) => RpcSetAssignable.GetInvoker((PlayerId, role.Id, arguments ?? Array.Empty<int>(), RoleType.Role, assignType));
+    public NebulaRPCInvoker RpcInvokerSetModifier(DefinedModifier modifier, int[]? arguments, RoleAssignType assignType = RoleAssignType.Standard) => RpcSetAssignable.GetInvoker((PlayerId, modifier.Id, arguments ?? Array.Empty<int>(), RoleType.Modifier, assignType));
+    public NebulaRPCInvoker RpcInvokerSetGhostRole(DefinedGhostRole role, int[]? arguments, RoleAssignType assignType = RoleAssignType.Standard) => RpcSetAssignable.GetInvoker((PlayerId, role.Id, arguments ?? Array.Empty<int>(), RoleType.GhostRole, assignType));
     public NebulaRPCInvoker RpcInvokerUnsetModifier(DefinedModifier modifier) => RpcRemoveModifier.GetInvoker(new(PlayerId, modifier.Id));
     public void UnsetModifierLocal(Predicate<RuntimeModifier> predicate)
     {
@@ -655,18 +658,18 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         yield return PropertyRPC.CoGetProperty<int>(PlayerId, $"players.{PlayerId}.leftGuess", callback, () => callback.Invoke(-1), 100f);
     }
 
-    public readonly static RemoteProcess<(byte playerId, int assignableId, int[] arguments, RoleType roleType)> RpcSetAssignable = new(
+    public readonly static RemoteProcess<(byte playerId, int assignableId, int[] arguments, RoleType roleType, RoleAssignType assignmentType)> RpcSetAssignable = new(
         "SetAssignable",
         (message, isCalledByMe) =>
         {
             var player = NebulaGameManager.Instance!.RegisterPlayer(PlayerControl.AllPlayerControls.Find((Il2CppSystem.Predicate<PlayerControl>)(p => p.PlayerId == message.playerId))).Unbox();
 
             if (message.roleType == RoleType.Role)
-                player.SetRole(Roles.Roles.AllRoles[message.assignableId], message.arguments);
+                player.SetRole(Roles.Roles.AllRoles[message.assignableId], message.arguments, message.assignmentType);
             else if (message.roleType == RoleType.GhostRole)
-                player.SetGhostRole(Roles.Roles.AllGhostRoles[message.assignableId], message.arguments);
+                player.SetGhostRole(Roles.Roles.AllGhostRoles[message.assignableId], message.arguments, message.assignmentType);
             else
-                player.SetModifier(Roles.Roles.AllModifiers[message.assignableId], message.arguments);
+                player.SetModifier(Roles.Roles.AllModifiers[message.assignableId], message.arguments, message.assignmentType);
 
             if (NebulaGameManager.Instance.GameState != NebulaGameStates.NotStarted)
             {
@@ -1479,21 +1482,21 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         foreach (var m in myModifiers) if (m is Modifier m2) yield return m2;
     }
 
-    void GamePlayer.SetRole(DefinedRole role, int[]? arguments)
+    void GamePlayer.SetRole(DefinedRole role, int[]? arguments, RoleAssignType assignType)
     {
         var fallback = role.CheckFallback(this, arguments ?? []);
         if (fallback != null)
         {
-            (this as GamePlayer).SetRole(fallback.Role, fallback.Arguments ?? []);
+            (this as GamePlayer).SetRole(fallback.Role, fallback.Arguments ?? [], assignType);
         }
         else
         {
-            RpcInvokerSetRole(role, arguments).InvokeSingle();
+            RpcInvokerSetRole(role, arguments, assignType).InvokeSingle();
         }
     }
-    void GamePlayer.SetGhostRole(DefinedGhostRole role, int[]? arguments) => RpcInvokerSetGhostRole(role, arguments).InvokeSingle();
+    void GamePlayer.SetGhostRole(DefinedGhostRole role, int[]? arguments, RoleAssignType assignType) => RpcInvokerSetGhostRole(role, arguments, assignType).InvokeSingle();
 
-    void GamePlayer.AddModifier(DefinedModifier modifier, int[]? arguments) => RpcInvokerSetModifier(modifier, arguments).InvokeSingle();
+    void GamePlayer.AddModifier(DefinedModifier modifier, int[]? arguments, RoleAssignType assignType) => RpcInvokerSetModifier(modifier, arguments, assignType).InvokeSingle();
     void GamePlayer.RemoveModifier(DefinedModifier modifier) => RpcInvokerUnsetModifier(modifier).InvokeSingle();
     void GamePlayer.RemoveModifierLocal(RuntimeModifier modifier) => UnsetModifierLocal(m => m == modifier);
 
@@ -1564,4 +1567,13 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
            }
        }
    }, false);
+
+    /*
+    private readonly static RemoteProcess<(GamePlayer player, DefinedRole role, CommunicableTextTag state, GamePlayer relatedPlayer, string infix)> RpcShareStateExInfo = new("ExStateInfo", (message, _) =>
+    {
+        var role = message.player.Role.Role;
+        if (role != message.role) return;
+        message.player.PlayerStateExtraInfo
+    });
+    */
 }

@@ -1,4 +1,5 @@
-﻿using Nebula.Roles.Modifier;
+﻿using Nebula.Roles.Crewmate;
+using Nebula.Roles.Modifier;
 using Nebula.VoiceChat;
 using Virial;
 using Virial.Assignable;
@@ -7,7 +8,6 @@ using Virial.DI;
 using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
-using Virial.Runtime;
 
 namespace Nebula.Roles.Impostor;
 
@@ -48,7 +48,9 @@ public class ImpostorGameRule : AbstractModule<IGameModeStandard>, IGameOperator
     
     void DecoratePlayerColor(PlayerDecorateNameEvent ev)
     {
-        if (ev.Player.IsImpostor && (GamePlayer.LocalPlayer?.IsImpostor ?? false)) ev.Color = new(Palette.ImpostorRed);
+        if (GamePlayer.LocalPlayer?.IsImpostor ?? false) {
+            if (ev.Player.IsImpostor || ev.Player.Role.Role == Spy.MyRole) ev.Color = new(Palette.ImpostorRed);
+        }
     }
 
     [OnlyHost]
@@ -123,6 +125,7 @@ public class ImpostorBasicRuleOperator : AbstractModule<Virial.Game.Game>, IGame
 
     void OnCheckCanKill(PlayerCheckCanKillLocalEvent ev)
     {
+        if ((Crewmate.Spy.MyRole as ISpawnable).IsSpawnable) return; //Spyが存在するならフレンドリーファイアを強制で有効化
         if (ev.Player.IsImpostor && ev.Target.IsImpostor) ev.SetAsCannotKillBasically(); 
     }
 

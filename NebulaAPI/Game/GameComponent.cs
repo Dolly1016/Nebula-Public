@@ -3,11 +3,19 @@
 namespace Virial.Game;
 
 
+/// <summary>
+/// ゲーム内で使用するコンポーネントを表します。
+/// Lifespanと紐づけて使用します。
+/// </summary>
+public interface IGameComponent
+{
+
+}
 
 /// <summary>
 /// ゲームに作用するEntityを表します。
 /// </summary>
-public interface IGameOperator
+public interface IGameOperator : IGameComponent
 {
     /// <summary>
     /// 紐づけられたLifespanの寿命が尽きたときに呼び出されます。この後Entityは削除されます。
@@ -42,7 +50,7 @@ public static class GameEntityExtension
     /// <param name="lifespan"></param>
     /// <param name="onSubscribed">ゲーム作用素は、実際にはこの関数の呼び出しから僅かに後のタイミングで追加されます。実際に追加したタイミングに処理を差し込む場合はこのデリゲートを使用します。</param>
     /// <returns></returns>
-    public static Entity Register<Entity>(this Entity gameEntity, ILifespan lifespan, Action<Entity>? onSubscribed = null) where Entity : IGameOperator
+    public static Entity Register<Entity>(this Entity gameEntity, ILifespan lifespan, Action<Entity>? onSubscribed = null) where Entity : IGameComponent
     {
         NebulaAPI.CurrentGame?.RegisterEntity(gameEntity, lifespan, onSubscribed != null ? () => onSubscribed.Invoke(gameEntity) : null);
         return gameEntity;

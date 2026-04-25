@@ -121,6 +121,7 @@ public class HudGrid : MonoBehaviour
                     {
                         float widthSum = 3 - column - 1;
                         float div = numOfLastLineContents - 1;
+                        if (widthSum < 0.1f) widthSum = Mathn.Min(div, 3) * 0.1f;
                         int index = 0;
                         DoForRemains(c =>
                         {
@@ -197,9 +198,17 @@ public class HudContent : MonoBehaviour
     private static float EdgeY => HudGrid.UseSmallerHud ? 
         -(3.0f / 0.72f - 0.65f) :
         -(3.0f - 0.7f);
-    private static float EdgeX => HudGrid.UseSmallerHud ?
+    private static float EdgeX
+    {
+        get
+        {
+            var edge = HudGrid.UseSmallerHud ?
         (3.0f / 0.72f) * (float)Screen.width / (float)Screen.height - 0.67f :
         3.0f * (float)Screen.width / (float)Screen.height - 0.8f;
+            if (Input.GetKey(KeyCode.L)) edge += 5f;
+            return edge;
+        }
+    }
 
     public Vector3 ToLocalPos
     {

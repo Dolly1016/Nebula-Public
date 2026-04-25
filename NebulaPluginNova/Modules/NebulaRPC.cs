@@ -692,7 +692,7 @@ public class DivisibleRemoteProcess<Parameter, DividedParameter> : RemoteProcess
     {
         void dividedSend(DividedParameter param)
         {
-            RPCRouter.SendRpc(Name, Hash, (writer) => DividedSender(writer, param), () => Body.Invoke(param, true), false);
+            RPCRouter.SendRpc(Name, Hash, (writer) => DividedSender(writer, param), () => Body.Invoke(param, true), true);
         }
         var enumerator = Divider.Invoke(parameter);
         while (enumerator.MoveNext()) dividedSend(enumerator.Current);

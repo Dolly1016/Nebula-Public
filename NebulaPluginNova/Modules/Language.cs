@@ -94,7 +94,8 @@ public class Language
 
     public static void SetGuestLanguage(Language? language) => GuestLanguage = language;
 
-    public static string GetCurrentLanguage() => GetLanguage((uint)AmongUs.Data.DataManager.Settings.Language.CurrentLanguage);
+    public static uint GetCurrentLanguageId() => (uint)AmongUs.Data.DataManager.Settings.Language.CurrentLanguage;
+    public static string GetCurrentLanguage() => GetLanguage(GetCurrentLanguageId());
     
     
     public static IEnumerable<uint> AllLanguageId()

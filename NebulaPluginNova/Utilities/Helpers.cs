@@ -99,6 +99,30 @@ public static class Helpers
         return AllDeadBodies().FirstOrDefault((p) => p.ParentId == id);
     }
 
+    // 使用する36文字（数字 + アルファベット小文字）
+    private const string Base36Chars = "0123456789abcdefghijklmnopqrstuvwxyz";
+
+    /// <summary>
+    /// int値をBase36文字列に変換します。
+    /// </summary>
+    public static string ToBase36(this int value)
+    {
+        uint uval = (uint)value;
+        if (uval == 0) return "0";
+
+        char[] buffer = new char[7];
+        int index = 6;
+
+        while (uval > 0)
+        {
+            buffer[index] = Base36Chars[(int)(uval % 36)];
+            uval /= 36;
+            index--;
+        }
+
+        return new string(buffer, index + 1, 6 - index);
+    }
+
     public static int ComputeConstantOldHash(this string str)
     {
         const long MulPrime = 467;

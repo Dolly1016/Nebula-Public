@@ -410,7 +410,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         instance = null;
     }
 
-    void Virial.Game.Game.RegisterEntity(IGameOperator entity, ILifespan lifespan, Action? onSubscribed = null) => GameEntityManager.Subscribe(entity, lifespan, onSubscribed);
+    void Virial.Game.Game.RegisterEntity(IGameComponent entity, ILifespan lifespan, Action? onSubscribed = null) => GameEntityManager.Subscribe(entity, lifespan, onSubscribed);
     
 
     public GamePlayer RegisterPlayer(PlayerControl player)

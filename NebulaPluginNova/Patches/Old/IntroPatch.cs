@@ -48,10 +48,10 @@ public static class ShowIntroPatch
         switch (introInfo.RevealType)
         {
             case Virial.Assignable.TeamRevealType.OnlyMe:
-                shownPlayers = new PlayerControl[] { PlayerControl.LocalPlayer };
+                shownPlayers = shownPlayers.Where(p => p.AmOwner || introInfo.ShouldShowAdditionally(p.PlayerId));
                 break;
             case Virial.Assignable.TeamRevealType.Teams:
-                shownPlayers = shownPlayers.Where(p => p.GetModInfo()?.Role.Role.Team == myInfo.Role.Role.Team);
+                shownPlayers = shownPlayers.Where(p => p.GetModInfo()?.Role.Role.Team == myInfo.Role.Role.Team || introInfo.ShouldShowAdditionally(p.PlayerId));
                 break;
         }
 

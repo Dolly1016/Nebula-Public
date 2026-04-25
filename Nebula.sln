@@ -35,6 +35,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ソリューション項目
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AddonScriptCompiler", "AddonScriptCompiler\AddonScriptCompiler.csproj", "{E5844264-E0FE-4C75-995B-6B9E0EF5F75D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -183,6 +185,18 @@ Global
 		{578D30C8-FBB7-4968-95AE-BB3BC1A54E7C}.Release|x64.Build.0 = Release|Any CPU
 		{578D30C8-FBB7-4968-95AE-BB3BC1A54E7C}.Release|x86.ActiveCfg = Release|Any CPU
 		{578D30C8-FBB7-4968-95AE-BB3BC1A54E7C}.Release|x86.Build.0 = Release|Any CPU
+		{E5844264-E0FE-4C75-995B-6B9E0EF5F75D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E5844264-E0FE-4C75-995B-6B9E0EF5F75D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E5844264-E0FE-4C75-995B-6B9E0EF5F75D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E5844264-E0FE-4C75-995B-6B9E0EF5F75D}.Debug|x64.Build.0 = Debug|Any CPU
+		{E5844264-E0FE-4C75-995B-6B9E0EF5F75D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E5844264-E0FE-4C75-995B-6B9E0EF5F75D}.Debug|x86.Build.0 = Debug|Any CPU
+		{E5844264-E0FE-4C75-995B-6B9E0EF5F75D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E5844264-E0FE-4C75-995B-6B9E0EF5F75D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E5844264-E0FE-4C75-995B-6B9E0EF5F75D}.Release|x64.ActiveCfg = Release|Any CPU
+		{E5844264-E0FE-4C75-995B-6B9E0EF5F75D}.Release|x64.Build.0 = Release|Any CPU
+		{E5844264-E0FE-4C75-995B-6B9E0EF5F75D}.Release|x86.ActiveCfg = Release|Any CPU
+		{E5844264-E0FE-4C75-995B-6B9E0EF5F75D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

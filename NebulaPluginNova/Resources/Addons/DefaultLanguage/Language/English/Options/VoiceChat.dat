@@ -16,6 +16,7 @@
 "options.voiceChat.killersHearDead.allKillers" : "Only Killers"
 "options.voiceChat.affectedByCommsSab" : "Affected By Comms. Sabotage"
 "options.voiceChat.isolateGhostsStrictly" : "Isolate Ghosts Strictly"
+"options.voiceChat.distanceDecayInGhost" : "Distance Decay In Ghost"
 "options.voiceChat.radio" : "Radio Settings"
 "options.voiceChat.impostorsRadio" : "Impostors Radio"
 "options.voiceChat.jackalRadio" : "Jackal Radio"

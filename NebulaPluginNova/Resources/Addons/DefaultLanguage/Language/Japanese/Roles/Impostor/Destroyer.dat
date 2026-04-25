@@ -31,7 +31,7 @@
 
 # UI
 
-"button.label.destroyerKill" : "キル"
+"button.label.destroyerKill" : "クラッシュ"
 "ui.action.destroyer.kill" : "プレイヤーの真横に立ち、押し潰してキルします。"
 
 # Game Statictics

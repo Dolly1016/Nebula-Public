@@ -4,6 +4,8 @@ using UnityEngine.Rendering;
 
 namespace Nebula.Behavior;
 
+#if ANDROID
+#else
 public enum HookType : int
 {
     WH_JOURNALRECORD = 0,
@@ -505,4 +507,4 @@ public class DragAndDropBehaviour : MonoBehaviour
     }
 }
 
-
+#endif

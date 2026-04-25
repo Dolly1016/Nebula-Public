@@ -11,25 +11,6 @@ namespace Virial.Helpers;
 public static class EnumerableHelper
 {
     /// <summary>
-    /// Joinの別名です。
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="enumerable"></param>
-    /// <param name="delimiter"></param>
-    /// <returns></returns>
-    [Obsolete("Use Join instead.")]
-    static public IEnumerable<T> Delimit<T>(this IEnumerable<T> enumerable, T delimiter)
-    {
-        bool isFirst = true;
-        foreach (T item in enumerable)
-        {
-            if (!isFirst) yield return delimiter;
-            yield return item;
-            isFirst = false;
-        }
-    }
-
-    /// <summary>
     /// 二重のコレクションを1つのコレクションに展開します。
     /// </summary>
     /// <typeparam name="T"></typeparam>
@@ -126,6 +107,21 @@ public static class EnumerableHelper
             else
                 yield return separator.Invoke();
             yield return item;
+        }
+    }
+
+    /// <summary>
+    /// 多重なコレクションを展開します。
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="enumerator"></param>
+    /// <param name="separator"></param>
+    /// <returns></returns>
+    static public IEnumerable<T> JoinMany<T>(this IEnumerable<IEnumerable<T>> enumerator)
+    {
+        foreach (var item in enumerator)
+        {
+            foreach (var subItem in item) yield return subItem;
         }
     }
 

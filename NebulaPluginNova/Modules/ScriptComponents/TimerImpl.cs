@@ -181,7 +181,7 @@ public class TimerImpl : FlexibleLifespan, GameTimer, IGameOperator
 
     GameTimer GameTimer.ResetsAtTaskPhase()
     {
-        GameOperatorManager.Instance?.Subscribe(new TimerCoolDownHelper(this), this);
+        new TimerCoolDownHelper(this).Register(this);
         return this;
     }
 }

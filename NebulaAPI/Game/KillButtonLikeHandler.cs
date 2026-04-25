@@ -55,6 +55,8 @@ internal class KillButtonLikeHandlerImpl : KillButtonLikeHandler
         var ev = NebulaAPI.RunEvent(new ResetKillCooldownLocalEvent(NebulaAPI.CurrentGame!.LocalPlayer));
         killButtonLikes.Do(kbl =>
         {
+            if (kbl.IsDeadObject) return;
+
             if (ev.UseDefaultCooldown)
                 kbl.StartCooldown();
             else

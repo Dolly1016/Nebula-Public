@@ -1,5 +1,7 @@
 ﻿using Nebula.Behavior;
 using Nebula.Game.Statistics;
+using Nebula.Roles.Assignment;
+using Nebula.Roles.Complex;
 using Nebula.Roles.Impostor;
 using Nebula.Roles.Modifier;
 using Nebula.VoiceChat;
@@ -356,8 +358,7 @@ internal class Plague : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             }
 
             static int[][] SpriteIndex = [
-                [],
-                [0],
+                [3],
                 [0, 3],
                 [0, 2, 3],
                 [0, 1, 2, 3]

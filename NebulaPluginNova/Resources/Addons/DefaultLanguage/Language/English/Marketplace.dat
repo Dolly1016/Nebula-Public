@@ -47,3 +47,7 @@
 "marketplace.ui.marketplace.state" : "State"
 "marketplace.ui.marketplace.state.owning" : "Activated"
 "marketplace.ui.marketplace.state.unowning" : "Unactivated"
+"marketplace.ui.marketplace.unknownBlurb" : "Retrieval failed."
+"marketplace.ui.marketplace.unknownTitle" : "Unknown Addon"
+"marketplace.ui.marketplace.unknownDetail" : "Retrieval failed."
+"marketplace.ui.marketplace.unknownAuthor" : "-"

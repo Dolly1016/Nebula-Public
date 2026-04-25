@@ -18,14 +18,16 @@ namespace Nebula.Behavior
     [NebulaRPCHolder]
     public class Certification
     {
-        private static RemoteProcess<(byte playerId, int epoch, int build, int addonHash, string vanilla)> RpcHandshake = new(
+        private static RemoteProcess<(byte playerId, int epoch, int build, int addonHash)> RpcHandshake = new(
             "Handshake", (message, calledByMe) => {
                 var player = Helpers.GetPlayer(message.playerId);
                 if (player?.gameObject.TryGetComponent<UncertifiedPlayer>(out var certification) ?? false)
                 {
-                    if(message.vanilla != Application.version)
+                    /*
+                    if(message.vanilla.All(v => !Constants.CompatVersions.Contains(v)))
                         certification.Reject(UncertifiedReason.UnmatchedVanilla);
-                    else if (message.epoch != NebulaPlugin.PluginEpoch)
+                    else*/
+                    if (message.epoch != NebulaPlugin.PluginEpoch)
                         certification.Reject(UncertifiedReason.UnmatchedEpoch);
                     else if (message.build != NebulaPlugin.PluginBuildNum)
                         certification.Reject(UncertifiedReason.UnmatchedBuild);
@@ -55,7 +57,7 @@ namespace Nebula.Behavior
         private static void Handshake()
         {
             byte id = PlayerControl.LocalPlayer.PlayerId;
-            RpcHandshake.Invoke((PlayerControl.LocalPlayer.PlayerId, NebulaPlugin.PluginEpoch, NebulaPlugin.PluginBuildNum, NebulaAddon.AddonHandshakeHash, Application.version));
+            RpcHandshake.Invoke((PlayerControl.LocalPlayer.PlayerId, NebulaPlugin.PluginEpoch, NebulaPlugin.PluginBuildNum, NebulaAddon.AddonHandshakeHash));
             RpcShareAchievement.Invoke((PlayerControl.LocalPlayer.PlayerId, NebulaAchievementManager.MyTitleData));
             ModSingleton<ShowUp>.Instance?.ShareLocalAfk();
             DynamicPalette.RpcShareMyColor();

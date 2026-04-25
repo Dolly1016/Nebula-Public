@@ -24,7 +24,7 @@ internal class NebulaWebRequest
 
         if (request.result != UnityWebRequest.Result.Success)
         {
-            LogUtils.WriteToConsole($"Failed (URL: {url}): {request.result.ToString()}");
+            LogUtils.WriteToConsole($"Failed (Get, URL: {url}): {request.result.ToString()}");
             onFailed?.Invoke();
             request.Dispose();
             yield break;
@@ -45,7 +45,7 @@ internal class NebulaWebRequest
 
         if (request.result != UnityWebRequest.Result.Success)
         {
-            LogUtils.WriteToConsole($"Failed (URL: {url}): {request.result.ToString()}");
+            LogUtils.WriteToConsole($"Failed (Get r, URL: {url}): {request.result.ToString()}");
             onFailed?.Invoke();
             request.Dispose();
             yield break;
@@ -75,7 +75,7 @@ internal class NebulaWebRequest
 
         if (request.result != UnityWebRequest.Result.Success)
         {
-            LogUtils.WriteToConsole($"Failed (URL: {url}): {request.result.ToString()}");
+            LogUtils.WriteToConsole($"Failed (Get wp, URL: {url}): {request.result.ToString()}");
             onFailed?.Invoke();
             request.Dispose();
             yield break;
@@ -100,7 +100,7 @@ internal class NebulaWebRequest
 
         if (request.result != UnityWebRequest.Result.Success)
         {
-            LogUtils.WriteToConsole($"Failed (URL: {url}): {request.result.ToString()}");
+            LogUtils.WriteToConsole($"Failed (Post, URL: {url}): {request.result.ToString()}");
             onFailed?.Invoke();
             request.Dispose();
             yield break;

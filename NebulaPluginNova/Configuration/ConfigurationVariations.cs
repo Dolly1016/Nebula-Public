@@ -303,5 +303,9 @@ public class GroupConfiguration : IConfiguration
 
     string? IConfiguration.GetDisplayText() => Title.GetString() + (":\n" + string.Join('\n', innerConfigurations.Where(c => c.IsShown).Select(c => c.GetDisplayText()).Where(str => str != null))).Replace("\n", "\n   ");
 
-    GUIWidgetSupplier IConfiguration.GetEditor() => new NoSGUIFramedConfiguration(Title, GUI.API.VerticalHolder(GUIAlignment.Left, innerConfigurations.Where(c => c.IsShown).Select(c => c.GetEditor().Invoke())), color);
+    GUIWidgetSupplier IConfiguration.GetEditor() => () =>
+    {
+        var inner = innerConfigurations.Where(c => c.IsShown).Select(c => c.GetEditor().Invoke()).ToArray();
+        return inner.Length > 0 ? new NoSGUIFramedConfiguration(Title, GUI.API.VerticalHolder(GUIAlignment.Left, inner), color) : GUI.API.EmptyWidget;
+    };
 }

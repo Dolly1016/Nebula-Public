@@ -182,27 +182,38 @@ public class Marketplace : MonoBehaviour
             List<LocalMarketplaceItem> owningItems = (isAddon ? MarketplaceData.Data.OwningAddons : MarketplaceData.Data.OwningCostumes);
             var localItem = owningItems.FirstOrDefault(item => item.EntryId == entryId);
             bool owning = localItem != null;
-            Virial.Color color = owning ? Virial.Color.Red : new(1f,1f,0f);
+            bool canObtain = result.Url != null && result.Title != null;
+            Virial.Color color = owning ? Virial.Color.Red : canObtain ? new(1f,1f,0f) : Virial.Color.Gray;
+
+            string GetFromResult(string? str, string translateKey)
+            {
+                if (str != null) return Uri.UnescapeDataString(str);
+                else return Language.Translate(translateKey);
+            }
+            var blurb = GetFromResult(result.Blurb, "marketplace.ui.marketplace.unknownBlurb");
+            var title = GetFromResult(result.Title, "marketplace.ui.marketplace.unknownTitle");
+            var detail = GetFromResult(result.Title, "marketplace.ui.marketplace.unknownDetail");
+            var author = GetFromResult(result.Author, "marketplace.ui.marketplace.unknownAuthor");
 
             window.SetWidget(new GUIScrollView(GUIAlignment.Center, new(6.8f, 3.5f), new VerticalWidgetsHolder(GUIAlignment.Center,
-                new HorizontalWidgetsHolder(GUIAlignment.Left, GUI.API.RawText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.MarketplaceTitle), Uri.UnescapeDataString(result.Title)), GUI.API.RawText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), Uri.UnescapeDataString(result.Author))),
-                GUI.API.RawText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), Uri.UnescapeDataString(result.Blurb)),
+                new HorizontalWidgetsHolder(GUIAlignment.Left, GUI.API.RawText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.MarketplaceTitle), title), GUI.API.RawText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), author)),
+                GUI.API.RawText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), blurb),
                 GUI.API.VerticalMargin(0.1f),
                 new HorizontalWidgetsHolder(GUIAlignment.Left,
                     GUI.API.LocalizedText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), "marketplace.ui.marketplace.state"),
                     GUI.API.RawText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), ":"),
                     new NoSGUIMargin(GUIAlignment.Center, new(0.12f, 0f)),
                     GUI.API.Text(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.LeftBoldFixed), GUI.API.TextComponent(owning ? Virial.Color.Green : Virial.Color.Red, owning ? "marketplace.ui.marketplace.state.owning" : "marketplace.ui.marketplace.state.unowning")),
-                    GUI.API.Button(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.MarketplacePublishButton), GUI.API.TextComponent(color, owning ? "marketplace.ui.marketplace.deactivate" : "marketplace.ui.marketplace.activate"), clickable =>
+                    GUI.API.Button(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.MarketplacePublishButton), GUI.API.TextComponent(color, owning ? "marketplace.ui.marketplace.deactivate" : canObtain ? "marketplace.ui.marketplace.activate" : "marketplace.ui.marketplace.invalid"), clickable =>
                     {
                         if (owning)
                         {
                             owningItems.RemoveAll(item => item.EntryId == entryId);
                             MetaUI.ShowConfirmDialog(parent, new TranslateTextComponent("marketplace.ui.marketplace.inactivated"));
                         }
-                        else
+                        else if(canObtain)
                         {
-                            LocalMarketplaceItem item = new (){ EntryId = entryId, Title = Uri.UnescapeDataString(result.Title), Url = Uri.UnescapeDataString(result.Url) };
+                            LocalMarketplaceItem item = new (){ EntryId = entryId, Title = title, Url = Uri.UnescapeDataString(result.Url!) };
                             owningItems.Add(item);
                             if (!isAddon)
                             {
@@ -220,7 +231,7 @@ public class Marketplace : MonoBehaviour
                     new NoSGUIMargin(GUIAlignment.Center, new(0.25f,0f)),
                     (isAddon && owning) ? new HorizontalWidgetsHolder(GUIAlignment.Center, new NoSGUICheckbox(GUIAlignment.Left, localItem!.AutoUpdate) { OnValueChanged = val => { localItem.AutoUpdate = val; MarketplaceData.Save(); } }, GUI.API.HorizontalMargin(0.1f),  GUI.API.LocalizedText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.DocumentBold), "marketplace.ui.marketplace.autoUpdate")) : GUIEmptyWidget.Default
                 ),
-                GUI.API.RawText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), Uri.UnescapeDataString(result.Detail).Replace("\r","<br>"))
+                GUI.API.RawText(GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), detail.Replace("\r","<br>"))
                 )), out _);
         }
 

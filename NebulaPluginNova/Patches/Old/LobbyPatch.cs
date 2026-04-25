@@ -538,7 +538,7 @@ public class GlobalCosMismatchShowerPatch
         {
             __instance.HostInfoPanel.playerHolder.AddComponent<SortingGroup>();
             var layer = __instance.HostInfoPanel.playerHolder.GetComponentInChildren<NebulaCosmeticsLayer>();
-            layer.SetSortingProperty(true, 10000f, 1000);
+            layer.SetSortingProperty(true, 10000f);
             layer.MaskRenderers().Do(r => r.maskInteraction = SpriteMaskInteraction.VisibleInsideMask);
             __instance.HostInfoPanel.playerHolder.transform.SetLocalZ(1f);
             var mask = __instance.HostInfoPanel.playerHolder.GetComponentInChildren<SpriteMask>(true);

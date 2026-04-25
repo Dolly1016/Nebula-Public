@@ -96,11 +96,27 @@ public class MetaAbility : DependentLifespan, IGameOperator, IModule
 
             if (tab == 0)
             {
-                inner = GUI.API.Arrange(Virial.Media.GUIAlignment.Center, Roles.AllRoles.Where(r => r.ShowOnFreeplayScreen).Select(r => GUI.API.RawButton(Virial.Media.GUIAlignment.Center, roleMaskedTittleAttr, r.DisplayColoredName, button =>
-                {
-                    GamePlayer.LocalPlayer?.SetRole(r, r.DefaultAssignableArguments);
-                    window.CloseScreen();
-                }))
+                inner = GUI.API.Arrange(Virial.Media.GUIAlignment.Center, Roles.AllRoles.Where(r => r.ShowOnFreeplayScreen).Select(r => new GUIButton(Virial.Media.GUIAlignment.Center, roleMaskedTittleAttr, GUI.API.RawTextComponent(r.DisplayColoredName)){
+                    OnClick = button => {
+                        GamePlayer.LocalPlayer?.SetRole(r, r.DefaultAssignableArguments);
+                        window.CloseScreen();
+                    }, ButtonPostBuilder = (button, renderer, text) =>
+                    {
+                        text.transform.localPosition += new Vector3(0.07f, 0f, 0f);
+                        text.transform.localScale *= 0.905f;
+                        button.transform.localPosition -= new Vector3(0.07f, 0f, 0f);
+
+                        var roleIcon = r.GetRoleIcon()?.GetSprite();
+                        if (roleIcon)
+                        {
+                            var icon = UnityHelper.CreateObject<SpriteRenderer>("Icon", button.transform, new(-0.73f, 0f, -0.01f));
+                            icon.sprite = roleIcon;
+                            icon.material = RoleIcon.GetRoleIconMaterial(r, 0.8f);
+                            icon.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                            icon.transform.localScale = new(0.27f, 0.27f, 1f);
+                        }
+                    }
+                })
                     /*
                     .Concat(Roles.AllRoles.Where(r => r.IsJackalizable).Select(r => GUI.API.RawButton(Virial.Media.GUIAlignment.Center, roleMaskedTittleAttr, r.DisplayName.Color(Jackal.MyRole.UnityColor), button =>
                 {

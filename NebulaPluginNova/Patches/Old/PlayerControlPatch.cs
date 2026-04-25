@@ -98,6 +98,11 @@ public static class PlayerUpdatePatch
     }
 
     static private float lastKillTimer = 0f;
+    static internal void EditLocalKillTimer(float timer)
+    {
+        lastKillTimer = timer;
+    }
+
     static void Prefix(PlayerControl __instance)
     {
         lastKillTimer = __instance.killTimer;
@@ -890,6 +895,22 @@ public class DissolvedDeadBodyClickPatch
                 __instance.Reported = true;
                 MeetingHudExtension.ModCmdReportDeadBody(GamePlayer.LocalPlayer, GamePlayer.GetPlayer((byte)(__instance.ParentId & ~DissolvedDeadBodyMask)), MeetingHudExtension.ReportType.ReportDissolvedBody, true, false);
             }
+            return false;
+        }
+        return true;
+    }
+}
+
+[HarmonyPatch(typeof(PlayerNameColor), nameof(PlayerNameColor.Get), [typeof(NetworkedPlayerInfo)])]
+public class PlayerNameColorChatPatch
+{
+    public static bool Prefix(ref UnityEngine.Color __result, [HarmonyArgument(0)] NetworkedPlayerInfo pc)
+    {
+        var player = GamePlayer.GetPlayer(pc.PlayerId);
+        if (player != null)
+        {
+            var ev = GameOperatorManager.Instance?.Run(new PlayerDecorateNameEvent(player, "", NebulaGameManager.Instance?.CanSeeAllInfo ?? false));
+            __result = ev.Color?.ToUnityColor() ?? Color.white;
             return false;
         }
         return true;

@@ -254,7 +254,7 @@ public class TextField : MonoBehaviour
             string str = myInput.Insert(cursor, compStr);
             if (IsSelecting) str = str.Insert(ConsiderComposition(Math.Max(cursor, selectingBegin), compStr), "\\EMK").Insert(ConsiderComposition(Math.Min(cursor, selectingBegin), compStr), "\\BMK");
 
-            str = Regex.Replace(str, "[<>]", "<noparse>$0</noparse>").Replace("\\EMK", "</mark>").Replace("\\BMK", "<mark=#5F74A5AA>").Replace("\r", "<br>");
+            str = System.Text.RegularExpressions.Regex.Replace(str, "[<>]", "<noparse>$0</noparse>").Replace("\\EMK", "</mark>").Replace("\\BMK", "<mark=#5F74A5AA>").Replace("\r", "<br>");
 
             myText.text = str + " ";
         }

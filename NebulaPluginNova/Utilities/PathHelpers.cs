@@ -16,4 +16,6 @@ static public class PathHelpers
 #endif
 
     static public string BepInExRootPath => BepInEx.Paths.BepInExRootPath;
+    static public string DllHashDirPath => PathHelpers.GameRootPath + Path.DirectorySeparatorChar + "Cache" + Path.DirectorySeparatorChar + "Dll";
+    static public string NebulaLibsPath => PathHelpers.GameRootPath + Path.DirectorySeparatorChar + "NebulaLibs";
 }

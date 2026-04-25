@@ -6,6 +6,13 @@ using System.Threading.Tasks;
 
 namespace Virial.Assignable;
 
+[Flags]
+public enum RoleAssignType
+{
+    Standard = 0x00,
+    WithoutRecording = 0x01
+}
+
 public record AssignmentCandidate(int Id, byte PlayerId, DefinedRole Role);
 
 /// <summary>

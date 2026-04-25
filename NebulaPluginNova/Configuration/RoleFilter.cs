@@ -337,6 +337,22 @@ public class SimpleRoleFilterConfiguration : IConfiguration, IExclusiveAssignmen
     StringArrayDataEntry dataEntry;
     ISharableVariable<int>[] sharableVariables;
 
+    Func<IEnumerable<DefinedRole>, IEnumerable<(string? displayText, IEnumerable<DefinedRole> roles)>>? group = null;
+
+    public void SetCategorization<T>(Func<T, string?> localizer, Func<DefinedRole, T> mapper, T[] allCategories)
+    {
+        IEnumerable<(string?, IEnumerable<DefinedRole>)> Convert(IEnumerable<DefinedRole> roles)
+        {
+            var groups = roles.GroupBy(mapper).ToArray();
+            foreach (var category in allCategories)
+            {
+                var index = groups.FindIndex(g => g.Key?.Equals(category) ?? false);
+                if (index != -1) yield return (localizer.Invoke(category), groups[index]);
+            }
+        }
+        group = Convert;
+    }
+
     public SimpleRoleFilterConfiguration(string id)
     {
         dataEntry = new(id, ConfigurationValues.ConfigurationSaver, []);
@@ -383,12 +399,14 @@ public class SimpleRoleFilterConfiguration : IConfiguration, IExclusiveAssignmen
 
     GUIWidgetSupplier IConfiguration.GetEditor()
     {
+        var roles = Roles.Roles.AllRoles.Where(r => RolePredicate?.Invoke(r) ?? true);
+
         return () => new HorizontalWidgetsHolder(GUIAlignment.Left,
         new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitleHalf), new TranslateTextComponent(this.dataEntry.Name)) { OverlayWidget = ConfigurationAssets.GetOptionOverlay(this.dataEntry.Name), OnClickText = ConfigurationAssets.GetCopyAction(this.dataEntry.Name) },
         ConfigurationAssets.Semicolon,
         GUI.API.HorizontalMargin(0.08f),
         new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsTitle), new LazyTextComponent(() => ValueAsDisplayString ?? "None")),
-        new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), new TranslateTextComponent("options.exclusiveAssignment.edit")) { OnClick = _ => RoleOptionHelper.OpenFilterScreen(ScrollerTag, Roles.Roles.AllRoles.Where(r => RolePredicate?.Invoke(r) ?? true), r => Contains(r), null, r => { ToggleAndShare(r); NebulaAPI.Configurations.RequireUpdateSettingScreen(); }, canFilterSpawnable: PreviewOnlySpawnableRoles) }
+        new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButton), new TranslateTextComponent("options.exclusiveAssignment.edit")) { OnClick = _ => RoleOptionHelper.OpenFilterScreen(ScrollerTag, group?.Invoke(roles) ?? [(null, roles)], r => Contains(r), null, r => { ToggleAndShare(r); NebulaAPI.Configurations.RequireUpdateSettingScreen(); }, canFilterSpawnable: PreviewOnlySpawnableRoles) }
         );
     }
 

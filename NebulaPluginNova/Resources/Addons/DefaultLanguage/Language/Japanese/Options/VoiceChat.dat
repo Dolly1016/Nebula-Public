@@ -16,6 +16,7 @@
 "options.voiceChat.killersHearDead.allKillers" : "キラーのみ"
 "options.voiceChat.affectedByCommsSab" : "通信障害による通話の無効化"
 "options.voiceChat.isolateGhostsStrictly" : "厳密な幽霊チャットの隔離"
+"options.voiceChat.distanceDecayInGhost" : "幽霊チャットの距離減衰"
 "options.voiceChat.radio" : "ラジオの設定"
 "options.voiceChat.impostorsRadio" : "インポスターラジオ"
 "options.voiceChat.jackalRadio" : "ジャッカルラジオ"

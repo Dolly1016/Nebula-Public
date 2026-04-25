@@ -1,8 +1,37 @@
 ﻿using TMPro;
+using UnityEngine.SceneManagement;
+using Virial;
 
 namespace Nebula.Patches;
 
 
+#if ANDROID
+[HarmonyPatch(typeof(SplashManager),nameof(SplashManager.Start))]
+public static class LoadPatch
+{
+    static public string LoadingText { set {  } }
+    public static void Postfix(SplashManager __instance)
+    {
+        bool isFirst = true;
+        SceneManager.sceneLoaded += (UnityEngine.Events.UnityAction<Scene, LoadSceneMode>)((scene, loadMode) =>
+        {
+            if (isFirst)
+            {
+                isFirst = false;
+
+                var enumerator = new StackfullCoroutine(PreloadManager.CoLoad());
+                while (enumerator.MoveNext())
+                {
+                    Thread.Sleep(1);
+                }
+                Language.OnChangeLanguage(Language.GetCurrentLanguageId());
+            }
+
+        });
+    }
+
+}
+#else
 [HarmonyPatch(typeof(SplashManager),nameof(SplashManager.Update))]
 public static class LoadPatch
 {
@@ -136,3 +165,4 @@ public static class LoadPatch
         return false;
     }
 }
+#endif

@@ -1053,6 +1053,9 @@ public class CustomItemBundle : CostumePermissionHolder
             {
                 MoreCosmic.Log.Error($"Error occurred in costume deserialize (URL: {url})\n" + ex.ToString());
             }
+        }, ()=>
+        {
+            MoreCosmic.Log.Error($"Failed to download Contents.json (URL: {url})");
         });
 
         var bundle = result.Value;
@@ -1064,6 +1067,10 @@ public class CustomItemBundle : CostumePermissionHolder
             bundle.BundleName ??= url;
 
             yield return bundle.CoLoad();
+        }
+        else
+        {
+            MoreCosmic.Log.Error($"Bundle is null! (url: {url})");
         }
     }
 
@@ -1197,7 +1204,8 @@ public static class MoreCosmic
 
         yield return NebulaWebRequest.CoGet(Helpers.ConvertUrl("https://raw.githubusercontent.com/Dolly1016/MoreCosmic/master/UserCosmics.dat"), true, (repos) =>
         {
-            allRepos.AddRange(repos.Split("\n").Select(url => ((LocalMarketplaceItem? onlineItem, string url))(null, url)));
+            var range = repos.Split("\n").Select(url => ((LocalMarketplaceItem? onlineItem, string url))(null, url)).ToArray();
+            allRepos.AddRange(range);
         });
         allRepos.AddRange(MarketplaceData.Data?.OwningCostumes
             .Where(item => item.EntryId != 34 && item.ToCostumeUrl.Length > 3 && !allRepos.Any(r => r.url == item.ToCostumeUrl))
@@ -1206,6 +1214,7 @@ public static class MoreCosmic
         foreach (var repo in allRepos.ToArray())
         {
             Virial.Compat.Wrapping<CustomItemBundle> result = new(null!);
+            MoreCosmic.Log.Message("Scheduled Loading: " + repo.url);
             yield return CustomItemBundle.CoLoadOnline(repo.onlineItem, repo.url, result);
             if(result.Value != null) loadedBundles.Add(result.Value);
         }
@@ -1607,7 +1616,6 @@ public class SetVisorMaterialPatch
 {
     static bool Prefix(VisorLayer __instance)
     {
-        LogUtils.WriteToConsole("VisorLayer.UpdateMaterial");
         if (UIMaterial.ShouldUseUIMaterial(__instance.matProperties.MaskType))
         {
             __instance.Image.sharedMaterial = UIMaterial.GetMaterial();
@@ -1635,7 +1643,6 @@ public class SkinLayerUpdateMaterialPatch
 {
     static bool Prefix(SkinLayer __instance)
     {
-        LogUtils.WriteToConsole("SkinLayer.UpdateMaterial");
         if (UIMaterial.ShouldUseUIMaterial(__instance.matProperties.MaskType))
         {
             __instance.layer.sharedMaterial = UIMaterial.GetMaterial();
@@ -1656,7 +1663,6 @@ public class HatParentUpdateMaterialPatch
 {
     static bool Prefix(HatParent __instance)
     {
-        LogUtils.WriteToConsole("HatParent.UpdateMaterial");
         if (UIMaterial.ShouldUseUIMaterial(__instance.matProperties.MaskType))
         {
             var front = __instance.FrontLayer;
@@ -1682,7 +1688,6 @@ public class CosmeticsLayerGetBodyMaterialPatch
 {
     static bool Prefix(CosmeticsLayer __instance, ref Material __result, [HarmonyArgument(0)] MaskType type)
     {
-        LogUtils.WriteToConsole("GetBodyMaterial");
         if (UIMaterial.ShouldUseUIMaterial(type))
         {
             __result = UIMaterial.GetMaterial();
@@ -1697,7 +1702,6 @@ public class CosmeticsLayerGetBodySpriteMaskInteractionPatch
 {
     static bool Prefix(CosmeticsLayer __instance)
     {
-        LogUtils.WriteToConsole("UpdateBodyMaterial");
         if (UIMaterial.ShouldUseUIMaterial(__instance.bodyMatProperties.MaskType))
         {
             Material bodyMaterial = UIMaterial.GetMaterial();
@@ -2031,7 +2035,6 @@ public class NebulaCosmeticsLayer : MonoBehaviour
     public PlayerAnimState LastAnimState = PlayerAnimState.Idle;
 
     public bool ShouldSort = false;
-    public int SortingBaseOrder = 0;
     public float SortingScale = 1000f;
 
     public bool IsExileCut { get; set; } = false;
@@ -2044,7 +2047,6 @@ public class NebulaCosmeticsLayer : MonoBehaviour
     public void Awake()
     {
         ShouldSort = false;
-        SortingBaseOrder = 0;
         SortingScale = 1000f;
         renderersCache = null!;
 
@@ -2065,7 +2067,7 @@ public class NebulaCosmeticsLayer : MonoBehaviour
         }
         else if(bodyParent.parent)
         {
-            SetSortingProperty(true, 10000f, 1000);
+            SetSortingProperty(true, 10000f);
             bodyParent.parent.gameObject.AddComponent<SortingGroup>();
         }
         else
@@ -2163,40 +2165,56 @@ public class NebulaCosmeticsLayer : MonoBehaviour
     private CosmeticsOrder Order = new();
     private struct CosmeticsOrder
     {
-        public const int HatFrontDefault = 1000 + 20;
-        public const int HatFrontSkinny = 1000 + 11;
-        public const int HatBackDefault = 1000 - 20;
-        public const int VisorFrontDefault = 1000 + 30;
-        public const int VisorFrontBehindHat = 1000 + 15;
-        public const int VisorBackDefault = 1000 - 11;
-        public const int VisorBackBackmost = 1000 - 30;
+        public int BaseOrder = 1000;
 
-        public int HatFront = HatFrontDefault;
+        public int HatFrontDefault => BaseOrder + 20;
+        public int HatFrontSkinny => BaseOrder + 11;
+        public int HatBackDefault => BaseOrder - 20;
+        public int VisorFrontDefault => BaseOrder + 30;
+        public int VisorFrontBehindHat => BaseOrder + 15;
+        public int VisorBackDefault => BaseOrder - 11;
+        public int VisorBackBackmost => BaseOrder - 30;
+
+        private int? customHatFront = null;
+        private int? customHatBack = null;
+        private bool useSkinnyHat = false;
+        private bool useBehindHatVisor = false;
+        private bool useBackmostBackVisor = false;
+        public int HatFront => customHatFront ?? (useSkinnyHat ? HatFrontSkinny : HatFrontDefault);
         public int HatFrontExDiff = 1;
         public int HatFrontEx => HatFront + HatFrontExDiff;
-        public int HatBack = HatBackDefault;
+        public int HatBack => customHatBack ?? HatBackDefault;
         public int HatBackExDiff = 1;
         public int HatBackEx => HatBack + HatBackExDiff;
-        public int VisorFront = VisorFrontDefault;
+        public int VisorFront => useBehindHatVisor ? VisorFrontBehindHat : VisorFrontDefault;
         public int VisorFrontExDiff = 1;
         public int VisorFrontEx => VisorFront + VisorFrontExDiff;
-        public int VisorBack = VisorBackDefault;
+        public int VisorBack => useBackmostBackVisor ? VisorBackBackmost : VisorBackDefault;
         public int VisorBackExDiff = 1;
         public int VisorBackEx => VisorBack + VisorBackExDiff;
-        public int Body = 1000;
+        public int Body => BaseOrder;
         public int BodyPreMask => Body - 9;
         public int BodyPostMask => Body + 9;
-        public int Skin = 1015;
+        public int Skin => BaseOrder + 15;
 
         public void ResetHatToDefault()
         {
-            HatFront = HatFrontDefault;
-            HatBack = HatBackDefault;
+            customHatFront = null;
+            customHatBack = null;
         }
-        public void ResetVisorToDefault()
+        public void CustomHatOrder(int front, int back)
         {
-            VisorFront = VisorFrontDefault;
-            VisorBack = VisorBackDefault;
+            customHatFront = front;
+            customHatBack = back;
+        }
+        public void UpdateHatSetting(bool skinny)
+        {
+            useSkinnyHat = skinny;
+        }
+        public void UpdateVisorSetting(bool behindHat, bool backmostBack)
+        {
+            useBehindHatVisor = behindHat;
+            useBackmostBackVisor = backmostBack;
         }
         public CosmeticsOrder() { }
     }
@@ -2397,12 +2415,9 @@ public class NebulaCosmeticsLayer : MonoBehaviour
             //インデックスの調整
             if ((frontImage?.AnimSync ?? 0) > 0 && MyAnimations != null)
             {
-                LogUtils.WriteToConsole("NormalizedTime: " + normalizedAnimTime);
-                
                 var length = frontImage!.GetLength();
                 var animSync = frontImage.AnimSync;
 
-                LogUtils.WriteToConsole("Length: " + length);
                 HatFrontIndex = (int)((normalizedAnimTime % animSync) / animSync * (float)length) % length;
             }
             else
@@ -2457,9 +2472,8 @@ public class NebulaCosmeticsLayer : MonoBehaviour
             }
 
 
-            Order.HatFront = visualHat?.IsSkinny ?? false ? CosmeticsOrder.HatFrontSkinny : CosmeticsOrder.HatFrontDefault;
+            Order.UpdateHatSetting(visualHat?.IsSkinny ?? false);
             Order.HatFrontExDiff = frontImage?.ExIsFront ?? false ? 1 : -1;
-            Order.HatBack = CosmeticsOrder.HatBackDefault;
             Order.HatBackExDiff = backImage?.ExIsFront ?? false ? 1 : -1;
         }
         else if (MyLayer.hat != null)
@@ -2594,9 +2608,8 @@ public class NebulaCosmeticsLayer : MonoBehaviour
                 visorBackExRenderer.transform.SetLocalZ(MyLayer.zIndexSpacing * (backImage?.ExIsFront ?? false ? -0.125f : 0.125f));
             }
 
-            Order.VisorFront = visualVisor!.BehindHat ? CosmeticsOrder.VisorFrontBehindHat : CosmeticsOrder.VisorFrontDefault;
+            Order.UpdateVisorSetting(visualVisor!.BehindHat, visualVisor!.BackmostBack);
             Order.VisorFrontExDiff = image?.ExIsFront ?? false ? 1 : -1;
-            Order.VisorBack = visualVisor!.BackmostBack ? CosmeticsOrder.VisorBackBackmost : CosmeticsOrder.VisorBackDefault;
             Order.VisorBackExDiff = backImage?.ExIsFront ?? false ? 1 : -1;
         }
         else if (MyLayer.visor != null)
@@ -2659,31 +2672,36 @@ public class NebulaCosmeticsLayer : MonoBehaviour
         UpdateZ();
     }
 
-    public int? GroupOrderDiff = null;
+    /// <summary>
+    /// SortingOrderとSortingGroupOrderに違いをつけたい場合はここで差を設定します。
+    /// </summary>
+    /// <param name="diff"></param>
+    public void SetGroupOrderDiff(int? diff = null) => groupOrderDiff = diff;
+    private int? groupOrderDiff = null;
     void UpdateZ()
     {
         try
         {
-            bool useDiff = GroupOrderDiff.HasValue;
+            bool useDiff = groupOrderDiff.HasValue;
 
             if(MyLayer != null)
             {
-                if (MyLayer.currentBodySprite != null && MyLayer.currentBodySprite.BodySprite) MyLayer.currentBodySprite.BodySprite.SetBothOrder(Order.Body, GroupOrderDiff, useDiff);
-                MyLayer.skin.layer.SetBothOrder(Order.Skin, GroupOrderDiff, useDiff);
-                MyLayer.hat.FrontLayer.SetBothOrder(Order.HatFront, GroupOrderDiff, useDiff);
-                MyLayer.hat.BackLayer.SetBothOrder(Order.HatBack, GroupOrderDiff, useDiff);
-                MyLayer.visor.Image.SetBothOrder(Order.VisorFront, GroupOrderDiff, useDiff);
+                if (MyLayer.currentBodySprite != null && MyLayer.currentBodySprite.BodySprite) MyLayer.currentBodySprite.BodySprite.SetBothOrder(Order.Body, groupOrderDiff, useDiff);
+                MyLayer.skin.layer.SetBothOrder(Order.Skin, groupOrderDiff, useDiff);
+                MyLayer.hat.FrontLayer.SetBothOrder(Order.HatFront, groupOrderDiff, useDiff);
+                MyLayer.hat.BackLayer.SetBothOrder(Order.HatBack, groupOrderDiff, useDiff);
+                MyLayer.visor.Image.SetBothOrder(Order.VisorFront, groupOrderDiff, useDiff);
             }
-            hatFrontExRenderer?.SetBothOrder(Order.HatFrontEx, GroupOrderDiff, useDiff);
-            hatBackExRenderer?.SetBothOrder(Order.HatBackEx, GroupOrderDiff, useDiff);
-            visorFrontExRenderer?.SetBothOrder(Order.VisorFrontEx, GroupOrderDiff, useDiff);
-            visorBackRenderer?.SetBothOrder(Order.VisorBack, GroupOrderDiff, useDiff);
-            visorBackExRenderer?.SetBothOrder(Order.VisorBackEx, GroupOrderDiff, useDiff);
+            hatFrontExRenderer?.SetBothOrder(Order.HatFrontEx, groupOrderDiff, useDiff);
+            hatBackExRenderer?.SetBothOrder(Order.HatBackEx, groupOrderDiff, useDiff);
+            visorFrontExRenderer?.SetBothOrder(Order.VisorFrontEx, groupOrderDiff, useDiff);
+            visorBackRenderer?.SetBothOrder(Order.VisorBack, groupOrderDiff, useDiff);
+            visorBackExRenderer?.SetBothOrder(Order.VisorBackEx, groupOrderDiff, useDiff);
 
-            BodyHatPreMask?.SetBothOrder(Order.BodyPreMask, GroupOrderDiff, useDiff);
-            BodyHatPostMask?.SetBothOrder(Order.BodyPostMask, GroupOrderDiff, useDiff);
-            BodyVisorPreMask?.SetBothOrder(Order.BodyPreMask, GroupOrderDiff, useDiff);
-            BodyVisorPostMask?.SetBothOrder(Order.BodyPostMask, GroupOrderDiff, useDiff);
+            BodyHatPreMask?.SetBothOrder(Order.BodyPreMask, groupOrderDiff, useDiff);
+            BodyHatPostMask?.SetBothOrder(Order.BodyPostMask, groupOrderDiff, useDiff);
+            BodyVisorPreMask?.SetBothOrder(Order.BodyPreMask, groupOrderDiff, useDiff);
+            BodyVisorPostMask?.SetBothOrder(Order.BodyPostMask, groupOrderDiff, useDiff);
         }
         catch { }
         /*
@@ -2731,11 +2749,11 @@ public class NebulaCosmeticsLayer : MonoBehaviour
         */
     }
 
-    public void SetSortingProperty(bool shouldSort, float sortingScale, int sortingBaseOrder)
+    public void SetSortingProperty(bool shouldSort, float sortingScale, int? sortingBaseOrder = null)
     {
         ShouldSort = shouldSort;
         SortingScale = sortingScale;
-        SortingBaseOrder = sortingBaseOrder;
+        if (sortingBaseOrder.HasValue) Order.BaseOrder = sortingBaseOrder.Value;
     }
 
     public void FixVisor()
@@ -3300,7 +3318,7 @@ public static class MoreCosmicExtensions
 {
     public static void SetAsGUIComponent(this PoolablePlayer player, bool inMask = true)
     {
-        player.cosmetics.GetComponent<NebulaCosmeticsLayer>().GroupOrderDiff = -950;
+        player.cosmetics.GetComponent<NebulaCosmeticsLayer>().SetGroupOrderDiff(-950);
         player.cosmetics.SetMaskType(inMask ? MaskType.SimpleUI : MaskType.None);
     }
 }

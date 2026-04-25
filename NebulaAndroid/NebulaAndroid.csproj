@@ -14,8 +14,8 @@
 	</ItemGroup>
 	
 	<ItemGroup>
-		<Reference Include="$(AmongUsAndroid)\core\*.dll" />
-		<Reference Include="$(AmongUsAndroid)\interop\*.dll" />
+		<Reference Include="$(AmongUs)\BepInEx\core\*.dll" />
+		<Reference Include="$(AmongUs)\BepInEx\interop\*.dll" />
 		<Reference Include="$(AmongUsRelease)\Interstellar.dll" />
 	</ItemGroup>
 	

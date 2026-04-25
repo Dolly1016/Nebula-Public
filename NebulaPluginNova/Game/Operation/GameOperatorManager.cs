@@ -4,6 +4,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Virial;
+using Virial.Assignable;
 using Virial.Events.Player;
 using Virial.Game;
 
@@ -34,7 +35,7 @@ internal class GameOperatorBuilder
 
     static public GameOperatorBuilder GetBuilderFromType(Type entityType)
     {
-        List<(Type type, Func<object, (Action<object>? generator, int priority)> action)> builderActions = new();
+        List<(Type type, Func<object, (Action<object>? generator, int priority)> action)> builderActions = [];
 
         //公開メソッドをすべて拾い上げる
         IEnumerable<MethodInfo> methods = entityType.GetMethods(BindingFlags.Instance | BindingFlags.Public);
@@ -147,13 +148,13 @@ public class GameOperatorManager
     static public GameOperatorManager? Instance => instance;
 
     // 現在有効な作用素
-    private Dictionary<Type, List<GameOperatorInstance>> allOperatorInstance = new();
+    private Dictionary<Type, List<GameOperatorInstance>> allOperatorInstance = [];
 
     //特殊な作用素 (OnReleasedに限り、属性による指定なしでバインドされた寿命オブジェクトの寿命が尽きたときに個別に呼び出される。)
-    private List<(ILifespan lifespan, IGameOperator operation)> allOperators = new();
+    private List<(ILifespan lifespan, IGameOperator operation)> allOperators = [];
 
     // 同じ型の作用素を登録する処理を高速化するためのキャッシュ
-    static private Dictionary<Type, GameOperatorBuilder> allBuildersCache = new();
+    static private Dictionary<Type, GameOperatorBuilder> allBuildersCache = [];
 
     private void DoSingleOperation(object e, Type type)
     {
@@ -246,8 +247,8 @@ public class GameOperatorManager
     }
 
     // 反復中に作用素が追加されないよう、一時的に退避する
-    private List<(IGameOperator entity, ILifespan lifespan, Action? onSubscribed)> newOperations = new();
-    private List<(Type eventType, Action<object> operation, ILifespan lifespan, int priority)> newFuncOperations = new();
+    private List<(IGameOperator entity, ILifespan lifespan, Action? onSubscribed)> newOperations = [];
+    private List<(Type eventType, Action<object> operation, ILifespan lifespan, int priority)> newFuncOperations = [];
 
     private void RegisterEntity(IGameOperator operation, ILifespan lifespan)
     {
@@ -305,15 +306,18 @@ public class GameOperatorManager
     }
     public void RegisterOnReleased(Action onReleased, ILifespan lifespan, Action? onSubscribed = null) => Subscribe(new ReleaseAction(onReleased), lifespan, onSubscribed);
 
-    public void Subscribe(IGameOperator entity, ILifespan lifespan, Action? onSubscribed = null)
+    public void Subscribe(IGameComponent component, ILifespan lifespan, Action? onSubscribed = null)
     {
-        if (entity is INestedLifespan nl && nl != lifespan)
+        if (component is INestedLifespan nl && nl != lifespan)
         {
             //入れ子にするタイプの寿命オブジェクトなら指定した寿命オブジェクトの入れ子にする。
             if(nl.Bind(lifespan)) lifespan = nl;
         }
-        newOperations.Add((entity, lifespan, onSubscribed));
-        operatorsDic[entity] = lifespan;
+        if (component is IGameOperator gameOperator)
+        {
+            newOperations.Add((gameOperator, lifespan, onSubscribed));
+            operatorsDic[gameOperator] = lifespan;
+        }
     }
 
     Dictionary<IGameOperator, ILifespan> operatorsDic = [];
@@ -420,6 +424,8 @@ public static class WinCheckBlocker
             CheckGameEnd();
         }
     }
+
+    //単純にゲーム終了のチェックを実行します。
     private static void CheckGameEnd()
     {
         NebulaGameManager.Instance?.CriteriaManager.CheckAndTriggerGameEnd();

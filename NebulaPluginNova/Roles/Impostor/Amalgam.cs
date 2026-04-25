@@ -49,6 +49,11 @@ internal class Amalgam : DefinedRoleTemplate, DefinedRole, DefinedSingleAbilityR
     static private readonly SimpleRoleFilterConfiguration RoleFilterOption = new("options.role.amalgam.abilityFilter") { RolePredicate = r => r.MultipleAssignment != MultipleAssignmentType.NotAllowed, ScrollerTag = "amalgamFilter", InvertOption = true, PreviewOnlySpawnableRoles = false };
     static public readonly Amalgam MyRole = new();
 
+    static Amalgam()
+    {
+        RoleFilterOption.SetCategorization(GetTabText, role => role.MultipleAssignment, [MultipleAssignmentType.AsUniqueKillAbility, MultipleAssignmentType.AsUniqueMapAbility, MultipleAssignmentType.Allowed]);
+    }
+
     bool IAssignableDocument.HasTips => true;
     bool IAssignableDocument.HasAbility => true;
     IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
@@ -286,5 +291,15 @@ internal class Amalgam : DefinedRoleTemplate, DefinedRole, DefinedSingleAbilityR
                 ability.AddAbility(message.role, []);
             }
         });
+    }
+
+    static string GetTabText(MultipleAssignmentType type)
+    {
+        return type switch
+        {
+            MultipleAssignmentType.AsUniqueKillAbility => Language.Translate("role.amalgam.tabs.kill"),
+            MultipleAssignmentType.AsUniqueMapAbility => Language.Translate("role.amalgam.tabs.map"),
+            _ => Language.Translate("role.amalgam.tabs.others")
+        };
     }
 }

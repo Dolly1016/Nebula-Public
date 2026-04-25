@@ -43,6 +43,7 @@
 "achievement.plague.common1.title" : "Despair Comes"
 "achievement.plague.common1.goal" : "Use the vial of venom twice in one game."
 "achievement.plague.common1.flavor" : ""Poison, and you will regret it; do not poison, and you will also regret it.""
+"achievement.plague.common1.splitted.2" : "Comes"
 
 "achievement.plague.common2.title" : "Welcome to the World of Disease"
 "achievement.plague.common2.goal" : "Infect others as a direct infected player."
@@ -50,10 +51,12 @@
 
 "achievement.plague.common3.title" : "Super Spreader"
 "achievement.plague.common3.goal" : "As a direct indected player, increase the infection rate of others by 500%."
+"achievement.plague.common1.splitted.0" : "Super "
 
 "achievement.plague.challenge.title" : "The philosophies of These Two"
 "achievement.plague.challenge.goal" : "Achieve a win through means other than a Plague win,<br>while fulfilling Plague's win conditions."
 "achievement.plague.challenge.flavor" : ""I once lived for that belief." ―From a Memoir, Across Time"
+"achievement.plague.challenge.splitted.1" : "of These "
 
 # Team
 

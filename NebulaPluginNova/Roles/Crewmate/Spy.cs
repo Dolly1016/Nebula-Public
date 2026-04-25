@@ -7,11 +7,13 @@ using Virial;
 using Virial.Assignable;
 using Virial.Components;
 using Virial.Configuration;
+using Virial.Events.Game;
 using Virial.Game;
+using static Nebula.Roles.Impostor.Creeping;
 
 namespace Nebula.Roles.Crewmate;
-/*
-internal class Spy : DefinedRoleTemplate, HasCitation, DefinedRole
+
+internal class Spy : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignableDocument
 {
     private Spy() : base("spy", new(Palette.ImpostorRed), RoleCategory.CrewmateRole, Crewmate.MyTeam, [])
     {
@@ -24,6 +26,10 @@ internal class Spy : DefinedRoleTemplate, HasCitation, DefinedRole
 
     static public readonly Spy MyRole = new();
 
+    bool IAssignableDocument.HasTips => true;
+    bool IAssignableDocument.HasAbility => true;
+    
+
     public class Instance : RuntimeVentRoleTemplate, RuntimeRole
     {
         public override DefinedRole Role => MyRole;
@@ -35,7 +41,12 @@ internal class Spy : DefinedRoleTemplate, HasCitation, DefinedRole
         {   
         }
         int[]? RuntimeAssignable.RoleArguments => null;
+
+        [EventPriority(-100)]
+        void OnIntro(GameShowIntroLocalEvent ev)
+        {
+            if (ev.RelatedTeam == Impostor.Impostor.MyTeam) ev.AddPlayer(MyPlayer);
+        }
     }
 }
 
-*/
