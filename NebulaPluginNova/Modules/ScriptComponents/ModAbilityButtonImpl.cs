@@ -526,6 +526,7 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
     Predicate<ModAbilityButton> ModAbilityButton.Visibility { set => Visibility = value; }
     Action<ModAbilityButton> ModAbilityButton.OnUpdate { set => OnUpdate = value; }
     Action<ModAbilityButton> ModAbilityButton.OnClick { set => OnClick = value; }
+    Action<ModAbilityButton> ModAbilityButton.OnMeeting { set => OnMeeting = value; }
     Action<ModAbilityButton> ModAbilityButton.OnSubAction { set => OnSubAction = value; }
     Action<ModAbilityButton> ModAbilityButton.OnEffectStart { set => OnEffectStart = value; }
     Action<ModAbilityButton> ModAbilityButton.OnEffectEnd { set => OnEffectEnd = value; }

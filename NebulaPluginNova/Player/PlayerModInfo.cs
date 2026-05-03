@@ -201,6 +201,9 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     
     public bool WillDie { get; set; } = false;
 
+    /// <summary>
+    /// Among Usの通常のタスクを所持しているか
+    /// </summary>
     public bool HasAnyTasks
     {
         get
@@ -209,6 +212,16 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
             //実際は持っていなくとも、クルータスクを持っていると思しきプレイヤーの場合
             if (Role.TaskType == RoleTaskType.CrewmateTask) hasTasks = FeelLikeHaveCrewmateTasks;
             return hasTasks;
+        }
+    }
+
+    public bool HasTaskProgress
+    {
+        get
+        {
+            if (HasAnyTasks) return true;
+            if (Role.TaskType == RoleTaskType.SpecialRoleTask || Role.TaskType == RoleTaskType.SpecialCrewmateTask) return (this as GamePlayer).Tasks.Quota > 0;
+            return false;
         }
     }
 
@@ -228,7 +241,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         {
             if (NebulaGameManager.Instance?.CanBeSpectator ?? false) return HasCrewmateTasks;
 
-            bool hasCrewmateTasks = Role.TaskType == RoleTaskType.CrewmateTask;
+            bool hasCrewmateTasks = Role.TaskType == RoleTaskType.CrewmateTask || Role.TaskType == RoleTaskType.SpecialCrewmateTask;
             AssignableAction((assignable) => { hasCrewmateTasks &= !assignable.InvalidateCrewmateTask; });
             return hasCrewmateTasks;
         }
@@ -545,7 +558,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         }
 
         if (canSeeTask) {
-            if (HasAnyTasks && (!(this as GamePlayer).IsDisconnected) && ((this as GamePlayer).Tasks.Quota > 0 || (this as GamePlayer).Tasks.TotalTasks > 0))
+            if (HasTaskProgress && (!(this as GamePlayer).IsDisconnected) && ((this as GamePlayer).Tasks.Quota > 0 || (this as GamePlayer).Tasks.TotalTasks > 0))
                 text += (" (" + (this as GamePlayer).Tasks.Unbox().ToString((NebulaGameManager.Instance?.CanSeeAllInfo ?? false) || !AmongUsUtil.InCommSab) + ")").Color((FeelLikeHaveCrewmateTasks) ? CrewTaskColor : FakeTaskColor);
         }
 

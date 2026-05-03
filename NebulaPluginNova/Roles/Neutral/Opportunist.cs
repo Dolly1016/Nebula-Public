@@ -74,9 +74,17 @@ internal class Opportunist : DefinedRoleTemplate, HasCitation, DefinedRole
                 myArrow.SetColor(MyRole.UnityColor);
             }
         }
+
+        [Local]
+        void OnGameStart(GameStartEvent ev)
+        {
+            MyPlayer.Tasks.Custom(0, NumOfTasks, false);
+        }
+        
+
         bool RuntimeAssignable.CanFixComm => CanFixCommsOption;
         bool RuntimeAssignable.CanFixLight => CanFixLightOption;
-        RoleTaskType RuntimeRole.TaskType => RoleTaskType.SpecialTask;
+        RoleTaskType RuntimeRole.TaskType => RoleTaskType.SpecialRoleTask;
         private Arrow? myArrow;
 
         private TaskInfo[] myTasks = [];
@@ -124,7 +132,7 @@ internal class Opportunist : DefinedRoleTemplate, HasCitation, DefinedRole
         void CheckExtraWins(PlayerCheckExtraWinEvent ev)
         {
             if (ev.Phase != ExtraWinCheckPhase.OpportunistPhase) return;
-            if(MyPlayer.IsAlive && MyPlayer.Tasks.IsCompletedTotalTasks)
+            if(MyPlayer.IsAlive && MyPlayer.Tasks.TotalCompleted > 0 && MyPlayer.Tasks.IsCompletedTotalTasks)
             {
                 ev.ExtraWinMask.Add(NebulaGameEnd.ExtraOpportunistWin);
                 ev.IsExtraWin = true;

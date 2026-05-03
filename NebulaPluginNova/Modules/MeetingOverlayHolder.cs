@@ -64,7 +64,7 @@ internal class MeetingOverlayHolder : AbstractModule<Virial.Game.Game>, OverlayH
         bool IsNew() => isNew?.Value ?? true;
         void UpdateIsNew()
         {
-            if (isNew != null) isNew.Value = true;
+            if (isNew != null) isNew.Value = false;
         }
 
         var notification = UnityHelper.CreateObject<SpriteRenderer>("Notification", renderer.transform, new(0.19f, 0.19f, -1.5f));

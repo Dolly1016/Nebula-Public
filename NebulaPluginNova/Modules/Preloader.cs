@@ -130,11 +130,11 @@ public static class ToolsInstaller
             Patches.LoadPatch.LoadingText = "Installing Tools";
             yield return null;
 
-            InstallTool("CPUAffinityEditor.exe", null);
-            InstallTool("AddonScriptCompiler.dll", null);
-            InstallTool("AddonScriptCompiler.exe", null);
-            InstallTool("AddonScriptCompiler.runtimeconfig.json", null);
-            InstallTool("AddonScriptCompiler.deps.json", null);
+            InstallTool("CPUAffinityEditor.exe", null, "Tools");
+            InstallTool("AddonScriptCompiler.dll", null, "Tools");
+            InstallTool("AddonScriptCompiler.exe", null, "Tools");
+            InstallTool("AddonScriptCompiler.runtimeconfig.json", null, "Tools");
+            InstallTool("AddonScriptCompiler.deps.json", null, "Tools");
             InstallTool(Environment.Is64BitProcess ? "opus_x64.dll" : "opus_x86.dll", "opus.dll");
         }
 #else
@@ -142,13 +142,17 @@ public static class ToolsInstaller
 #endif
     }
 
-    private static void InstallTool(string name, string? outputName)
+    private static void InstallTool(string name, string? outputName, string? directory = null)
     {
+        if (directory != null) Directory.CreateDirectory(directory);
+
         Assembly assembly = Assembly.GetExecutingAssembly();
         using Stream? stream = assembly.GetManifestResourceStream("Nebula.Resources.Tools." + name);
         if (stream == null) return;
 
-        using var file = File.Create(outputName ?? name);
+        var filePath = outputName ?? name;
+        if (directory != null) filePath = directory + Path.DirectorySeparatorChar + filePath;
+        using var file = File.Create(filePath);
         byte[] data = new byte[stream.Length];
         stream.Read(data);
         file.Write(data);

@@ -25,7 +25,7 @@ internal static class JackalAssignmentType
     static public AssignmentType JackalizeType;
     public static void Preprocess(NebulaPreprocessor preprocessor)
     {
-        JackalizeType = preprocessor.RegisterAssignmentType(() => Neutral.Jackal.MyRole, (lastArgs, role) => Jackal.GenerateArgument(lastArgs.Get(0, 0), role), "jackalized", Color, (status, role) => status.HasFlag(AbilityAssignmentStatus.CanLoadToKillNeutral), () => (Jackal.MyRole as ISpawnable).IsSpawnable && Jackal.JackalizedImpostorOption);
+        JackalizeType = preprocessor.RegisterAssignmentType(() => Neutral.Jackal.MyRole, (lastArgs, role) => Jackal.GenerateArgument(lastArgs.Get(0, 0), role), "jackalized", Color, (status, role) => status.HasFlag(AbilityAssignmentStatus.CanLoadToKillNeutral), () => (Jackal.MyRole as ISpawnable).CanSpawnInCurrentGame && Jackal.JackalizedImpostorOption);
     }
 }
 
@@ -67,7 +67,7 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignable
     }
 
     DefinedRole[] DefinedRole.AdditionalRoles => Sidekick.AssignedSidekickOption /*&& !Sidekick.IsModifierOption*/ ? [Sidekick.MyRole] : [];
-    IEnumerable<DefinedRole> DefinedRole.GetGuessableAbilityRoles() => ((this as DefinedRole).IsSpawnable && !JackalizedImpostorOption) ? [this] : [];
+    IEnumerable<DefinedRole> DefinedRole.GetGuessableAbilityRoles() => ((this as DefinedRole).CanSpawnInCurrentGame && !JackalizedImpostorOption) ? [this] : [];
     Citation? HasCitation.Citation => Citations.TheOtherRoles;
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments.Get(0, player.PlayerId), arguments.Get(1, 0), arguments.Get(2, 0), arguments.Get(3, 0), Roles.GetRole(arguments.Get(4, -1)), arguments.Skip(5).ToArray());
@@ -432,7 +432,7 @@ file static class SidekickAchievementChecker
 
 public class Sidekick : DefinedRoleTemplate, HasCitation, DefinedRole
 {
-    private Sidekick() : base("sidekick", Jackal.MyTeam.Color, RoleCategory.NeutralRole, Jackal.MyTeam, [IsModifierOption, InheritanceRuleOption, AssignedSidekickOption, SidekickCanKillOption, CanCreateSidekickChainlyOption, KillCoolDownOption, CanSuicideOption, SuicideCoolDownOption, CanFixLightOption, CanFixCommsOption, HasImpostorVisionOption, CanUseVentsOption, CanMoveInVentsOption, CanWinAsOriginalTeamOption], false, optionHolderPredicate: ()=> (Jackal.MyRole as DefinedRole).IsSpawnable && Jackal.CanCreateSidekickOption ) {
+    private Sidekick() : base("sidekick", Jackal.MyTeam.Color, RoleCategory.NeutralRole, Jackal.MyTeam, [IsModifierOption, InheritanceRuleOption, AssignedSidekickOption, SidekickCanKillOption, CanCreateSidekickChainlyOption, KillCoolDownOption, CanSuicideOption, SuicideCoolDownOption, CanFixLightOption, CanFixCommsOption, HasImpostorVisionOption, CanUseVentsOption, CanMoveInVentsOption, CanWinAsOriginalTeamOption], false, optionHolderPredicate: ()=> (Jackal.MyRole as DefinedRole).CanSpawnInCurrentGame && Jackal.CanCreateSidekickOption ) {
         ConfigurationHolder?.ScheduleAddRelated(() => [Jackal.MyRole.ConfigurationHolder!]);
         ConfigurationHolder!.Title = ConfigurationHolder.Title.WithComparison("jackal.sidekick");
     }

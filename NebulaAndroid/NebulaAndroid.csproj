@@ -11,6 +11,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.3.0" />
 	</ItemGroup>
 	
 	<ItemGroup>
@@ -47,4 +48,5 @@
 
 		<Exec Command="dotnet run --project $(RenamerProject) -- &quot;$(TargetPath)&quot;" />
 	</Target>
+	
 </Project>

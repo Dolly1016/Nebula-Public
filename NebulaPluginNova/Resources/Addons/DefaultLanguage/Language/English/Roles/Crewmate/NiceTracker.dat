@@ -1,0 +1,35 @@
+# Assignable
+
+"role.niceTracker.name" : "Nice Tracker"
+"role.niceTracker.short" : "T"
+"role.niceTracker.blurb" : "The Truth Lies There"
+"role.niceTracker.hint" : ""
+
+# Document
+
+"role.niceTracker.doc" : "A Crewmate that tracks the movements of the player you choose."
+"role.niceTracker.ability.title" : "Inherent Ability [Tracking]"
+"role.niceTracker.ability.main" : "Nice Tracker can track the movements of players who have attached tracking devices."
+"role.niceTracker.ability.track" : "<title>Track</title>Start to track."
+
+# Options
+
+"options.role.niceTracker.detail" : "Nice Tracker tracks the player's movement."
+"options.role.niceTracker.trackCooldown" : "Track Cooldown"
+"options.role.niceTracker.trackDuration" : "Track Duration"
+"options.role.niceTracker.trackAdditionalDuration" : "Track Additional Duration"
+"options.role.niceTracker.trackerDuration" : "Tracker Duration"
+"options.role.niceTracker.resetOnMeeting" : "Reset Tracking Target On Meeting"
+"options.role.niceTracker.showWhereTrackingIs" : "Show Where Tracking Is"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.niceTracker.track" : "Num of Tracking"
+
+# Titles

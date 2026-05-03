@@ -16,6 +16,7 @@
 "options.voiceChat.killersHearDead.allKillers" : "全部杀手"
 "options.voiceChat.affectedByCommsSab" : "处于通讯破坏期间不能语音"
 "options.voiceChat.isolateGhostsStrictly" : "鬼魂不能听到幸存者聊天"
+"options.voiceChat.distanceDecayInGhost" : "鬼魂语音距离衰减"
 "options.voiceChat.radio" : "语音频道设定"
 "options.voiceChat.impostorsRadio" : "伪装者阵营语音频道"
 "options.voiceChat.jackalRadio" : "豺狼阵营语音频道"

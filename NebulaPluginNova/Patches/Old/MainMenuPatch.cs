@@ -343,7 +343,7 @@ public static class MainMenuSetUpPatch
 
             void UpdateContents(ModUpdater.ReleasedInfo.ReleaseCategory? category = null)
             {
-                if (versions == null) return;
+                //if (versions == null) return;
 
                 var inner = new MetaWidgetOld();
 
@@ -383,6 +383,10 @@ public static class MainMenuSetUpPatch
                             NebulaPlugin.GetLoaderConfig<bool>(nameof(NebulaLoader.NebulaLoader.UseSnapshot))?.Value = true;
                         });
 
+                if((versions?.Count ?? 0) == 0)
+                {
+
+                }
                 foreach (var version in versions)
                 {
                     if (category != null && version.Category != category) continue;

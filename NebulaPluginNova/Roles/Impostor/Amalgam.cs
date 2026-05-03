@@ -1,6 +1,8 @@
 ﻿using Il2CppSystem.Buffers;
+using Nebula.Modules.GUIWidget;
 using Nebula.Roles.Complex;
 using Nebula.Roles.Neutral;
+using Sentry.Unity.NativeUtils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +14,7 @@ using Virial.Assignable;
 using Virial.Configuration;
 using Virial.DI;
 using Virial.Events.Game;
+using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Events.Role;
 using Virial.Game;
@@ -22,9 +25,10 @@ using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 namespace Nebula.Roles.Impostor;
 
+[NebulaRPCHolder]
 internal class Amalgam : DefinedRoleTemplate, DefinedRole, DefinedSingleAbilityRole<Amalgam.Ability>, ICustomAssignableStatus, IAssignableDocument
 {
-    private Amalgam() : base("amalgam", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [MaxRolesOption, RandomAssignmentOption, NumOfRandomAssignmentOption, CanBeGuessedAsLoadedRolesOption, RoleFilterOption])
+    private Amalgam() : base("amalgam", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, Impostor.MyTeam, [MaxRolesOption, RandomAssignmentOption, NumOfRandomAssignmentOption, CanBeGuessedAsLoadedRolesOption, AmalgamBreakdownOption, RoleFilterOption])
     {
         ICustomAssignableStatus.Register(this);
     }
@@ -34,7 +38,7 @@ internal class Amalgam : DefinedRoleTemplate, DefinedRole, DefinedSingleAbilityR
     AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.KillersSide;
     bool ICustomAssignableStatus.CanSpawn(DefinedAssignable assignable)
     {
-        bool amSpawnable = (this as ISpawnable).IsSpawnable;
+        bool amSpawnable = (this as ISpawnable).CanSpawnInCurrentGame;
         if (assignable == this) return amSpawnable;
         bool amSpawnableInAnyForm = (this as DefinedRole).IsSpawnableInSomeForm();
         if (!amSpawnableInAnyForm) return false;
@@ -47,6 +51,7 @@ internal class Amalgam : DefinedRoleTemplate, DefinedRole, DefinedSingleAbilityR
     static private readonly BoolConfiguration RandomAssignmentOption = NebulaAPI.Configurations.Configuration("options.role.amalgam.randomAssignment", false);
     static private readonly IntegerConfiguration NumOfRandomAssignmentOption = NebulaAPI.Configurations.Configuration("options.role.amalgam.numOfRandomAssignment", (0, 16), 2, () => RandomAssignmentOption, decorator: num => num == 0 ? Language.Translate("options.role.amalgam.numOfRandomAssignment.all") : num.ToString());
     static private readonly SimpleRoleFilterConfiguration RoleFilterOption = new("options.role.amalgam.abilityFilter") { RolePredicate = r => r.MultipleAssignment != MultipleAssignmentType.NotAllowed, ScrollerTag = "amalgamFilter", InvertOption = true, PreviewOnlySpawnableRoles = false };
+    static private readonly BoolConfiguration AmalgamBreakdownOption = NebulaAPI.Configurations.Configuration("options.role.amalgam.breakdownAmalgam", false, () => RandomAssignmentOption);
     static public readonly Amalgam MyRole = new();
 
     static Amalgam()
@@ -64,13 +69,20 @@ internal class Amalgam : DefinedRoleTemplate, DefinedRole, DefinedSingleAbilityR
 
     IEnumerable<AssignableDocumentReplacement> IAssignableDocument.GetDocumentReplacements()
     {
+        string indent = Language.Translate("role.amalgam.tips.indent");
+        var candRoles = Roles.AllRoles.Where(CheckAssignable).ToList();
+        string GetRoles(MultipleAssignmentType type) => string.Join(",<br>" + indent, candRoles.Where(r => r.MultipleAssignment == type).Select(r => r.DisplayColoredName).Chunk(6).Select(group => string.Join(", ", group)));
         yield return new("%ABILITY%", Language.Translate(RandomAssignmentOption ? "role.amalgam.ability.main.random" : "role.amalgam.ability.main.selection"));
+        yield return new("%KILLAIM%", GetRoles(MultipleAssignmentType.AsUniqueKillAbility));
+        yield return new("%MAP%", GetRoles(MultipleAssignmentType.AsUniqueMapAbility));
+        yield return new("%OTHERS%", GetRoles(MultipleAssignmentType.Allowed));
     }
         
 
     int[]? DefinedAssignable.DefaultAssignableArguments => RandomAssignmentOption ? GetRandomAssignment() : null;
     static int[] GetRandomAssignment()
     {
+        List<DefinedRole> selectedRoles = [];
         int leftNum = MaxRolesOption.GetValue();
         int randomNum = NumOfRandomAssignmentOption.GetValue();
         if (randomNum > 0 && leftNum > randomNum) leftNum = randomNum;
@@ -84,6 +96,7 @@ internal class Amalgam : DefinedRoleTemplate, DefinedRole, DefinedSingleAbilityR
                 //候補を全て割り当て可能な場合はそのまま割り当てる
                 foreach (var c in cand)
                 {
+                    selectedRoles.Add(c);
                     args.Add(c.Id);
                     args.Add(0);
                 }
@@ -95,6 +108,7 @@ internal class Amalgam : DefinedRoleTemplate, DefinedRole, DefinedSingleAbilityR
                     if (cand.Count == 0) break;
 
                     var selected = cand.Random();
+                    selectedRoles.Add(selected);
                     args.Add(selected.Id);
                     args.Add(0); //サブ能力の引数長は0
 
@@ -109,6 +123,7 @@ internal class Amalgam : DefinedRoleTemplate, DefinedRole, DefinedSingleAbilityR
                     }
                 }
             }
+            if(AmalgamBreakdownOption) RpcAmalgamBreakdown.Invoke(selectedRoles.ToArray());
             return args.ToArray();
         }
         return [];
@@ -302,4 +317,13 @@ internal class Amalgam : DefinedRoleTemplate, DefinedRole, DefinedSingleAbilityR
             _ => Language.Translate("role.amalgam.tabs.others")
         };
     }
+
+    static RemoteProcess<DefinedRole[]> RpcAmalgamBreakdown = new("AmalgamBreakdown", (message, _) =>
+    {
+        var roles = message.Select(role => role.DisplayColoredName).ToArray();
+            NebulaAPI.CurrentGame?.GetModule<MeetingOverlayHolder>()?.RegisterOverlay(GUI.API.VerticalHolder(Virial.Media.GUIAlignment.Left,
+                new NoSGUIText(Virial.Media.GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayTitle), new TranslateTextComponent("role.amalgam.ui.title")),
+                new NoSGUIText(Virial.Media.GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayContent), new RawTextComponent(string.Join("<br>", roles)))
+            ), MeetingOverlayHolder.IconsSprite[7], MyRole.RoleColor);
+    });
 }

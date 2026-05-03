@@ -266,6 +266,24 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     }
 
     public IGameModeModule? GameMode { get; private set; } = null;
+
+    private GameParameters GenerateParameter()
+    {
+        bool notStarted = GameState == NebulaGameStates.NotStarted;
+        
+        int players = notStarted ? PlayerControl.AllPlayerControls.Count : allModPlayers.Count;
+        int impostors = AmongUsUtil.AdjustedImpostors(players);
+        byte mapId = AmongUsUtil.CurrentMapId;
+        return new GameParameters(mapId, impostors, players);
+    }
+
+    public GameParameters GameParameter { get {
+            if (GameState == NebulaGameStates.NotStarted) return GenerateParameter();
+            if (field == null) field = GenerateParameter();
+            return field;
+        }
+        private set;
+    } = null!;
     void Virial.Game.Game.SetGameMode(IGameModeModule gamemode)
     {
         (this as IModuleContainer).AddModule(gamemode);

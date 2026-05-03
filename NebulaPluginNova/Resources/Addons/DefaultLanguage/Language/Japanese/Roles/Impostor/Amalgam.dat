@@ -13,7 +13,8 @@
 "role.amalgam.ability.main.selection" : "<var>役職の能力を融合できます。</var>"
 "role.amalgam.ability.main.random" : "<var>いくつかの役職の能力が融合されています。</var><br>融合されている役職はヘルプ画面の「情報」タブを開くと簡単に確認できます。"
 "role.amalgam.ability.amalgam" : "<title>融合</title>能力を融合します。<br>一度融合した能力は取り外せません。"
-"role.amalgam.tips" : "・<b>キル、エイム能力</b>と<b>ミニマップに関連する能力</b>はそれぞれ同時に一つまで融合できます。<br>・キー割り当てはキル、エイム能力のみ有効です。"
+"role.amalgam.tips" : "・<b>キル、エイム能力</b>と<b>ミニマップに関連する能力</b>はそれぞれ同時に一つまで融合できます。<br>・キー割り当てはキル、エイム能力のみ有効です。<br>・現在の設定で融合可能な役職は以下の通りです。<br>　<b>キル・エイム役職</b><br>　%KILLAIM%<br>　<b>マップ役職</b><br>　%MAP%<br>　<b>その他役職</b><br>　%OTHERS%"
+"role.amalgam.tips.indent" : "　"
 
 # Options
 
@@ -24,12 +25,14 @@
 "options.role.amalgam.numOfRandomAssignment.all" : "全て"
 "options.role.amalgam.abilityFilter" : "役職フィルタ"
 "options.role.amalgam.canBeGuessedAsLoadedRoles" : "融合した役職で推察可能"
+"options.role.amalgam.breakdownAmalgam" : "アマルガムの内訳開示"
 
 # Game
 
 "role.amalgam.tabs.kill" : "キル・エイム役職"
 "role.amalgam.tabs.map" : "マップ役職"
 "role.amalgam.tabs.others" : "その他役職"
+"role.amalgam.ui.title" : "本日のアマルガム"
 
 # UI
 

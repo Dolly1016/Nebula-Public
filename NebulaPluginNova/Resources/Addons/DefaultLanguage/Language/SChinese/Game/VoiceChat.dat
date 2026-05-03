@@ -1,6 +1,7 @@
 # Voice Chat
 
 "voiceChat.dialog.confirm" : "你确定要加入语音聊天吗？"
+"voiceChat.dialog.noMic" : "安卓设备无法使用语音功能。"
 "voiceChat.info.mute" : "静音"
 "voiceChat.info.unmute" : "取消静音"
 "voiceChat.info.nomic" : "无麦克风输入"
@@ -23,3 +24,4 @@
 "voiceChat.settings.micTest.end" : "结束麦克风测试"
 "voiceChat.settings.server" : "连接语音服务器"
 "voiceChat.settings.server.apply" : "应用"
+"voiceChat.settings.player.reset" : "鼠标右击重置语音"

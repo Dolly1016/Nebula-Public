@@ -337,7 +337,7 @@ public class Trapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
                     foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
                     {
                         if (p.AmOwner) continue;
-                        if (p.IsDead || p.VanillaPlayer.Data.Role.IsImpostor) continue;
+                        if (p.IsDead || !MyPlayer.CanKill(p)) continue;
 
                         if (p.VanillaPlayer.transform.position.Distance(killTrap.Position) < KillTrapSizeOption * 0.35f)
                         {

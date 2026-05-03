@@ -97,7 +97,7 @@ public static class CountOverlayUpdatePatch
                             {
                                 AddToMask(p.PlayerId);
                                 counter++;
-                                if (p.Role.Role.Category == Virial.Assignable.RoleCategory.ImpostorRole && MapBehaviourExtension.CanIdentifyImpostors) impostors++;
+                                if (p.IsImpostorlike && MapBehaviourExtension.CanIdentifyImpostors) impostors++;
                             }
                         }
                     }

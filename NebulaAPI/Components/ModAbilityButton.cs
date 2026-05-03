@@ -121,6 +121,11 @@ public interface ModAbilityButton : ILifespan, IHudContent
     Action<ModAbilityButton> OnClick { set; }
 
     /// <summary>
+    /// ボタンがクリックされた際に呼び出されます。
+    /// </summary>
+    Action<ModAbilityButton> OnMeeting { set; }
+
+    /// <summary>
     /// サブ効果がクリックされた際に呼び出されます。
     /// </summary>
     Action<ModAbilityButton> OnSubAction { set; }

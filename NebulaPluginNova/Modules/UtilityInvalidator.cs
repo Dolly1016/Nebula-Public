@@ -156,7 +156,11 @@ public class UtilityInvalidationSystem : AbstractModule<Virial.Game.Game>, IGame
         var desealButton =  new Modules.ScriptComponents.ModAbilityButtonImpl(priority: -100).RegisterPermanently();
         desealButton.SetSprite(desealButtonSprite.GetSprite());
         desealButton.Availability = (button) => localPlayer.CanMove;
-        desealButton.Visibility = (button) => (MyContainer.LocalPlayer?.Role?.CanUseVent ?? false) && (CurrentInvalidVent != null || CurrentInvalidDoor != null) && !localPlayer.IsDead;
+        desealButton.Visibility = (button) =>
+        {
+            var ventState = GameOperatorManager.Instance?.Run(new Virial.Events.Player.PlayerUpdateVentStateLocalEvent(MyContainer.LocalPlayer));
+            return (ventState?.ShouldShowVentButton ?? false) && (CurrentInvalidVent != null || CurrentInvalidDoor != null) && !localPlayer.IsDead;
+        };
         desealButton.OnClick = (button) => {
             button.ActivateEffect();
         };

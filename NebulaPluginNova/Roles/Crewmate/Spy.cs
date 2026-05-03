@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Nebula.Roles.Complex;
+using Nebula.Roles.Impostor;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,7 +15,7 @@ using static Nebula.Roles.Impostor.Creeping;
 
 namespace Nebula.Roles.Crewmate;
 
-internal class Spy : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignableDocument
+internal class Spy : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignableDocument, ISpawnable
 {
     private Spy() : base("spy", new(Palette.ImpostorRed), RoleCategory.CrewmateRole, Crewmate.MyTeam, [])
     {
@@ -28,8 +30,14 @@ internal class Spy : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignableD
 
     bool IAssignableDocument.HasTips => true;
     bool IAssignableDocument.HasAbility => true;
-    
+    bool DefinedRole.IsImpostorlike => true;
+    bool AssignableFilterHolder.CanLoadDefault(DefinedAssignable assignable) => CanLoadDefaultTemplate(assignable) && assignable != ShownSecret.OptionRole;
 
+    bool ISpawnable.CanSpawnIn(GameParameters game)
+    {
+        return game.Impostors > 1;
+    }
+    
     public class Instance : RuntimeVentRoleTemplate, RuntimeRole
     {
         public override DefinedRole Role => MyRole;
@@ -41,6 +49,7 @@ internal class Spy : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignableD
         {   
         }
         int[]? RuntimeAssignable.RoleArguments => null;
+        
 
         [EventPriority(-100)]
         void OnIntro(GameShowIntroLocalEvent ev)
@@ -49,4 +58,3 @@ internal class Spy : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignableD
         }
     }
 }
-

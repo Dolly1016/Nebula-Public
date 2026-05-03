@@ -529,7 +529,7 @@ public class BalloonManager : AbstractModule<Virial.Game.Game>, IGameOperator
 
     void OnGameStart(GameStartEvent ev)
     {
-        IsAvailable = GeneralConfigurations.CurrentGameMode == Virial.Game.GameModes.FreePlay || (Whammy.MyRole as ISpawnable).IsSpawnable;
+        IsAvailable = GeneralConfigurations.CurrentGameMode == Virial.Game.GameModes.FreePlay || (Whammy.MyRole as ISpawnable).CanSpawnInCurrentGame;
 
         if (!IsAvailable) return;
 

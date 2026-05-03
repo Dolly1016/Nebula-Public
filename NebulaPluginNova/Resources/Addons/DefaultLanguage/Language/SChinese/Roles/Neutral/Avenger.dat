@@ -21,6 +21,7 @@
 "options.role.avenger.showAvengerFlashForTarget" : "闪光告知目标触发复仇者事件"
 "options.role.avenger.notificationForAvengerInterval" : "复仇目标位置通知间隔"
 "options.role.avenger.notificationForTargetInterval" : "复仇者位置通知间隔"
+"options.role.avenger.canKillHidingPlayer" : "可以击杀通风口内玩家"
 
 # Game
 

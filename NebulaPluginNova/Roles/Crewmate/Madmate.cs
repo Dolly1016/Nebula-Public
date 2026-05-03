@@ -22,7 +22,7 @@ internal static class MadmateAssignmentSetUp
 {
     public static void Preprocess(NebulaPreprocessor preprocessor)
     {
-        preprocessor.RegisterAssignmentType(() => Madmate.MyRole, (lastArgs, role) => Madmate.GenerateArgument(role), "madden", new(Palette.ImpostorRed), (status, role) => status.HasFlag(AbilityAssignmentStatus.CanLoadToMadmate), () => (Madmate.MyRole as ISpawnable).IsSpawnable && Madmate.MaddenRoleOption);
+        preprocessor.RegisterAssignmentType(() => Madmate.MyRole, (lastArgs, role) => Madmate.GenerateArgument(role), "madden", new(Palette.ImpostorRed), (status, role) => status.HasFlag(AbilityAssignmentStatus.CanLoadToMadmate), () => (Madmate.MyRole as ISpawnable).CanSpawnInCurrentGame && Madmate.MaddenRoleOption);
     }
 }
 
@@ -94,7 +94,7 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignabl
     static public int[] GenerateArgument(DefinedRole? madden) => [madden?.Id ?? -1, ..(madden?.DefaultAssignableArguments ?? [])];
     static private readonly GameStatsEntry StatsFound = NebulaAPI.CreateStatsEntry("stats.madmate.foundImpostors", GameStatsCategory.Roles, MyRole);
     static private readonly GameStatsEntry StatsEmbroil = NebulaAPI.CreateStatsEntry("stats.madmate.embroil", GameStatsCategory.Roles, MyRole);
-    IEnumerable<DefinedRole> DefinedRole.GetGuessableAbilityRoles() => ((this as DefinedRole).IsSpawnable && !MaddenRoleOption) ? [this] : [];
+    IEnumerable<DefinedRole> DefinedRole.GetGuessableAbilityRoles() => ((this as DefinedRole).CanSpawnInCurrentGame && !MaddenRoleOption) ? [this] : [];
 
     bool IAssignableDocument.HasTips => false;
     bool IAssignableDocument.HasAbility => CanSuicideOption;

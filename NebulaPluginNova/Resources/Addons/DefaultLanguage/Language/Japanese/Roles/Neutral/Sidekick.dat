@@ -28,6 +28,7 @@
 "options.role.sidekick.hasImpostorVision" : "インポスター視界"
 "options.role.sidekick.canUseVents" : "ベントの使用"
 "options.role.sidekick.canMoveInVents" : "ベント間の移動"
+"options.role.sidekick.canWinAsOriginalTeam" : "元役職で勝利可能"
 
 # Game
 

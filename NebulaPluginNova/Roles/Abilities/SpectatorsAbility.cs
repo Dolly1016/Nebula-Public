@@ -81,18 +81,33 @@ public class SpectatorsAbility : IGameOperator
         
     }
 
+    bool canZoom = false;
+    bool canMonitor = false;
+    void Update(GameUpdateEvent ev)
+    {
+        var spectator = GameOperatorManager.Instance?.Run<UpdateSpectatorEvent>(new());
+        canZoom = spectator?.CanZoom ?? true;
+        canMonitor = spectator?.CanMonitorAlives ?? true;
+    }
     void HudUpdate(GameHudUpdateEvent ev)
     {
-        if (!Utilities.NebulaInput.SomeUiIsActive)
+        if (canZoom)
         {
-            float axis = Input.GetAxis("Mouse ScrollWheel");
+            if (!Utilities.NebulaInput.SomeUiIsActive)
+            {
+                float axis = Input.GetAxis("Mouse ScrollWheel");
 
-            float rate = NebulaGameManager.Instance!.WideCamera.TargetRate;
-            if (axis < 0f) rate -= 0.25f;
-            if (axis > 0f) rate += 0.25f;
-            rate = Mathn.Clamp(rate, 1f, 6f);
+                float rate = NebulaGameManager.Instance!.WideCamera.TargetRate;
+                if (axis < 0f) rate -= 0.25f;
+                if (axis > 0f) rate += 0.25f;
+                rate = Mathn.Clamp(rate, 1f, 6f);
 
-            NebulaGameManager.Instance!.WideCamera.TargetRate = rate;
+                NebulaGameManager.Instance!.WideCamera.TargetRate = rate;
+            }
+        }
+        else
+        {
+            NebulaGameManager.Instance!.WideCamera.TargetRate = 1f;
         }
     }
 
@@ -103,7 +118,7 @@ public class SpectatorsAbility : IGameOperator
             .KeyBind(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.SpectatorRight)).SubKeyBind(Virial.Compat.VirtualKeyInput.SpectatorLeft).Register(NebulaAPI.CurrentGame);
         spectatorChangeButton.SetSprite(spectatorChangeSprite.GetSprite());
         spectatorChangeButton.Availability = button => true;
-        spectatorChangeButton.Visibility = button => !(GamePlayer.LocalPlayer?.Tasks.IsCrewmateTask ?? false) || (GamePlayer.LocalPlayer?.Tasks.IsCompletedCurrentTasks ?? true);
+        spectatorChangeButton.Visibility = button => !(GamePlayer.LocalPlayer?.Tasks.IsCrewmateTask ?? false) || (GamePlayer.LocalPlayer?.Tasks.IsCompletedCurrentTasks ?? true) && canMonitor;
         spectatorChangeButton.OnClick = (button) =>
         {
             ChangeTarget(true);

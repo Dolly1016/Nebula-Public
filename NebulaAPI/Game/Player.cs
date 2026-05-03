@@ -704,6 +704,7 @@ public interface Player : ICommandExecutor, IArchivedPlayer, IPlayerlike
     /// インポスター陣営の場合、trueを返します。
     /// </summary>
     bool IsImpostor => Role.Role.Category is RoleCategory.ImpostorRole;
+    bool IsImpostorlike => IsImpostor || Role.Role.IsImpostorlike;
     /// <summary>
     /// クルーメイト陣営の場合、trueを返します。マッドメイトであってもtrueを返します。
     /// </summary>

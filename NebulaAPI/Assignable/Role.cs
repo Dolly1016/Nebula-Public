@@ -45,9 +45,14 @@ public enum RoleTaskType
     RoleTask,
     /// <summary>
     /// 特別なタスク。
-    /// タスクノルマを持つものの、通常のタスクにはインタラクトできません。
+    /// クルーメイト勝利に必要なタスクノルマを持つものの、通常のタスクにはインタラクトできません。
     /// </summary>
-    SpecialTask,
+    SpecialCrewmateTask,
+    /// <summary>
+    /// 特別なタスク。
+    /// タスクノルマを持つものの、通常のタスクにはインタラクトできません。クルーメイト勝利に必要なタスクにはカウントされません。
+    /// </summary>
+    SpecialRoleTask,
     /// <summary>
     /// タスクを持たない。
     /// 主にインポスターや第三陣営が該当します。
@@ -76,8 +81,26 @@ public interface ISpawnable
     /// <summary>
     /// ゲーム中に出現しうる場合はtrueを返します。
     /// この値は主にゲーム設定によって変化します。
+    /// GameParameterで渡される情報はここでは加味しないでください。
     /// </summary>
     bool IsSpawnable { get; }
+
+    /// <summary>
+    /// 指定の条件下で出現できるか返します。
+    /// </summary>
+    /// <param name="game"></param>
+    /// <returns></returns>
+    bool CanSpawnIn(GameParameters game) => true;
+
+    internal bool CanSpawnInCurrentGame
+    {
+        get
+        {
+            var game = NebulaAPI.CurrentGame;
+            if (game == null) return IsSpawnable;
+            return CanSpawnIn(game.GameParameter) && IsSpawnable;
+        }
+    }
 }
 
 /// <summary>
@@ -531,6 +554,10 @@ public interface DefinedRole : DefinedSingleAssignable, RuntimeAssignableGenerat
     /// マッドメイト系の役職の場合はtrueを返します。
     /// </summary>
     bool IsMadmate => false;
+    /// <summary>
+    /// インポスターのような見た目の役職の場合はtrueを返します。
+    /// </summary>
+    bool IsImpostorlike => Category == RoleCategory.ImpostorRole;
 
     bool IsKiller => Category == RoleCategory.ImpostorRole;
 

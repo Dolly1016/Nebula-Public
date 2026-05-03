@@ -6,11 +6,11 @@
 
 # Document
 
-"role.mayor.doc" : "市长可以在会议上存票。<br>市长在投票阶段的任意时间都可以使用存下的投票。<br>将投票数设为0可以累积选票。<br>在投票界面中，将有两个按钮来调节市长在本次会议中的投票数。<br>市长若决定存票，市长需要将投票数调为0。"
+"role.mayor.doc" : "市长可以在会议中投出很多票。<br>根据设置，可以在会议中投出指定数量的票。<br>如果在投票的时候没有用完剩余的票，则会存起来为下次会议中使用。"
 
 # Options
 
-"options.role.mayor.detail" : "市长可以在会议上存票。<br>市长可以在合适的时机存票或投票。"
+"options.role.mayor.detail" : "市长可以在会议中投出很多票。"
 "options.role.mayor.fixedVotes" : "固定票数"
 "options.role.mayor.fixedVotes.detail" : "开启后只能投出固定票数。"
 "options.role.mayor.minVote" : "最小投票数"
@@ -18,9 +18,9 @@
 "options.role.mayor.maxVote" : "最大投票数"
 "options.role.mayor.maxVote.detail" : "设置每次会议可以投出的最大票数。"
 "options.role.mayor.maxVotesStock" : "可存下最大票数"
-"options.role.mayor.maxVotesStock.detail" : "市长通过之前所存储的票来进行投票。<br>如果在投票的时候没有选择票数，则会存起来为下次会议中使用。"
-"options.role.mayor.voteAssignment" : "会议投票分配"
-"options.role.mayor.voteAssignment.detail" : "每次会议都会获得额外的票数。<br>此设置可以用来更快地存票。"
+"options.role.mayor.maxVotesStock.detail" : "配置可存下票数的上限。"
+"options.role.mayor.voteAssignment" : "会议获得票数"
+"options.role.mayor.voteAssignment.detail" : "每次进入会议时都会获得额外的票数。<br>如果在投票的时候没有用完剩余的票，则会存起来为下次会议中使用。"
 "options.role.mayor.voteAssignmentOnReporting" : "自身报告尸体额外获得票数"
 "options.role.mayor.voteAssignmentPerTasks" : "每完成一个任务获得票数"
 

@@ -70,7 +70,7 @@
 "perk.hookshot.detail" : "一度だけ、フックショットを使用できる。<br>フックショットはカーソルの方向に射出される。"
 
 "perk.doubleVote.name" : "声高な主張"
-"perk.doubleVote.detail" : "スキップや白票、0票投票以外で<br>投じる票数を一度だけ2倍にする。"
+"perk.doubleVote.detail" : "スキップや投票放棄、0票投票以外で<br>投じる票数を一度だけ2倍にする。"
 
 "perk.monowayX.name" : "風見鶏 -赤-"
 "perk.monowayX.detail" : "発動すると%D%秒間、<b>自身以外</b>の縦方向移動を禁止する。<br>このパークには%CD%秒のクールダウンがある。<br>クールダウンはタスクフェイズの間のみ進み、会議が始まるたびにリセットされない。"

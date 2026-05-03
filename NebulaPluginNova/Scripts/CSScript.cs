@@ -2,6 +2,9 @@ using Cpp2IL.Core.Extensions;
 using Iced.Intel;
 using Il2CppSystem.CodeDom.Compiler;
 using Nebula.Patches;
+#if ANDROID
+using NebulaAndroid.CSScriptAndroid;
+#endif
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO.Compression;
@@ -55,8 +58,8 @@ internal static class AddonScriptManager
     {
         dllName = $"{addon.Id}_{addon.HandshakeHash.ToBase36()}.dll";
 
-        var dirPath = PathHelpers.DllHashDirPath;
-        if (!Directory.Exists(PathHelpers.DllHashDirPath))
+        var dirPath = PathHelpers.DllCacheDirPath;
+        if (!Directory.Exists(PathHelpers.DllCacheDirPath))
         {
             dllPath = null;
             return false;
@@ -70,9 +73,10 @@ internal static class AddonScriptManager
 
     static public IEnumerator CoCheckAndInstallRuntime(NebulaPreprocessor preprocessor)
     {
+#if PC
         var psi = new System.Diagnostics.ProcessStartInfo()
         {
-            FileName = "AddonScriptCompiler.exe",
+            FileName = $"Tools{Path.DirectorySeparatorChar}AddonScriptCompiler.exe",
             Arguments = $"--hello",
             UseShellExecute = false,
             CreateNoWindow = true,
@@ -116,6 +120,9 @@ internal static class AddonScriptManager
         {
             Log.Error("Failed to start AddonScriptCompiler.exe");
         }
+#else
+        yield break;
+#endif
     }
 
     static public IEnumerator CoLoad(NebulaPreprocessor preprocessor)
@@ -124,12 +131,13 @@ internal static class AddonScriptManager
 
         // Write references.txt at the start
         AddonScriptManagerLoader.SetUp();
-        string referencesPath = Path.Combine(PathHelpers.DllHashDirPath, "references.txt");
-        if (!Directory.Exists(PathHelpers.DllHashDirPath))
-        {
-            Directory.CreateDirectory(PathHelpers.DllHashDirPath);
-        }
+
+        if (!Directory.Exists(PathHelpers.DllCacheDirPath)) Directory.CreateDirectory(PathHelpers.DllCacheDirPath);
+
+#if PC
+        string referencesPath = Path.Combine(PathHelpers.DllCacheDirPath, "references.txt");
         File.WriteAllLines(referencesPath, AddonScriptManagerLoader.ReferenceAssemblies);
+#endif
 
         bool triedChecking = false;
 
@@ -170,11 +178,28 @@ internal static class AddonScriptManager
                 if (sources.Length == 0) continue;
                 yield return preprocessor.SetLoadingText("Compiling Addon Scripts\n" + addon.Id);
 
-                bool found = false;
-                if (!TryLoadCache(addon, out var dllName, out var foundPath))
+                bool TryLoadFrom(string addonPath)
                 {
-                    // Unpack sources to temp directory
-                    string tempDir = Path.Combine(PathHelpers.DllHashDirPath, "temp");
+                    try
+                    {
+                        var compiledAssembly = NebulaPlugin.NoSAssemblyContext.LoadFromAssemblyPath(addonPath);
+                        scriptAssemblies.Add(new(compiledAssembly, addon, null, addonBehaviour ?? new()));
+                        NebulaAPI.Preprocessor?.PickUpPreprocess(compiledAssembly);
+                    }catch(Exception e)
+                    {
+                        return false;
+                    }
+                    return true;
+                }
+
+                if (!TryLoadCache(addon, out var dllName, out var foundPath) || !TryLoadFrom(foundPath))
+                {
+                    
+                    string outputPath = Path.Combine(PathHelpers.DllCacheDirPath, dllName);
+                    string moduleName = "Script." + addon.Id.HeadUpper();
+
+#if PC
+                    string tempDir = Path.Combine(PathHelpers.DllCacheDirPath, "temp");
                     if (Directory.Exists(tempDir))
                     {
                         Directory.Delete(tempDir, true);
@@ -189,13 +214,10 @@ internal static class AddonScriptManager
                         using var dstStream = File.Create(outPath);
                         srcStream.CopyTo(dstStream);
                     }
-                    
-                    string outputPath = Path.Combine(PathHelpers.DllHashDirPath, dllName);
-                    string moduleName = "Script." + addon.Id.HeadUpper();
 
                     var psi = new System.Diagnostics.ProcessStartInfo()
                     {
-                        FileName = "AddonScriptCompiler.exe",
+                        FileName = $"Tools{Path.DirectorySeparatorChar}AddonScriptCompiler.exe",
                         Arguments = $"--module-name \"{moduleName}\" --source-dir \"{tempDir}\" --output \"{outputPath}\" --config \"{referencesPath}\"",
                         UseShellExecute = false,
                         CreateNoWindow = true,
@@ -215,10 +237,8 @@ internal static class AddonScriptManager
 
                         if (process.ExitCode == 0 && File.Exists(outputPath))
                         {
-                            found = true;
-                            foundPath = outputPath;
-
-                            Log.Error("Compile Finished (Addon: " + addon.Id + ")\n  " + process.StandardOutput.ReadToEnd().Replace("\n", "\n  "));
+                            TryLoadFrom(outputPath);
+                            Log.Message("Compile Finished (Addon: " + addon.Id + ")\n  " + process.StandardOutput.ReadToEnd().Replace("\n", "\n  "));
                         }
                         else
                         {
@@ -229,24 +249,17 @@ internal static class AddonScriptManager
                     {
                         Log.Error("Failed to start AddonScriptCompiler.exe (Addon: " + addon.Id + ")");
                     }
+#else
+                    var found = Compiler.Compile(moduleName, AddonScriptManagerLoader.ReferenceAssemblies, sources.Select(s => (s.FullName.Substring(prefix.Length), new StreamReader(s.Open()).ReadToEnd())).ToArray(), outputPath, addonBehaviour?.UseHiddenMembers ?? false);
+                    if (found) TryLoadFrom(outputPath);
+                    
+#endif
                 }
-                else
-                {
-                    found = true;
-                }
-
-                if (found && foundPath != null)
-                {
-                    var compiledAssembly = NebulaPlugin.NoSAssemblyContext.LoadFromAssemblyPath(foundPath);
-                    scriptAssemblies.Add(new(compiledAssembly, addon, null, addonBehaviour ?? new()));
-                    NebulaAPI.Preprocessor?.PickUpPreprocess(compiledAssembly);
-                }
-
             }
         }
         
         // Clean up temp directory after compiling all addons
-        string finalTempDir = Path.Combine(PathHelpers.DllHashDirPath, "temp");
+        string finalTempDir = Path.Combine(PathHelpers.DllCacheDirPath, "temp");
         if (Directory.Exists(finalTempDir))
         {
             Directory.Delete(finalTempDir, true);

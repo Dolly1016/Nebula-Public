@@ -3,6 +3,7 @@ using Nebula.Roles.Crewmate;
 using Nebula.Roles.Neutral;
 using Virial.Assignable;
 using Virial.Events.Role;
+using Virial.Game;
 using static Rewired.Glyphs.UnityUI.UnityUITextMeshProGlyphHelper.Tag;
 
 namespace Nebula.Roles.Assignment;
@@ -172,9 +173,9 @@ public class StandardRoleAllocator : IRoleAllocator
         }
     }
 
-    void CreateRolePool(out List<RoleChance> impostorRoles, out List<RoleChance> crewmateRoles, out List<RoleChance> neutralRoles, out List<RoleChance>[] customChances, out List<RoleChance>[] allRoles)
+    void CreateRolePool(GameParameters gameParameter, out List<RoleChance> impostorRoles, out List<RoleChance> crewmateRoles, out List<RoleChance> neutralRoles, out List<RoleChance>[] customChances, out List<RoleChance>[] allRoles)
     {
-        List<RoleChance> GetRolePool(RoleCategory category) => new(Roles.AllRoles.Where(r => r.Category == category && (r.AllocationParameters?.RoleCountSum ?? 0) > 0).Select(r => new RoleChance(r) { cost = 1, otherCost = 0 }));
+        List<RoleChance> GetRolePool(RoleCategory category) => new(Roles.AllRoles.Where(r => r.Category == category && r.CanSpawnIn(gameParameter) && (r.AllocationParameters?.RoleCountSum ?? 0) > 0).Select(r => new RoleChance(r) { cost = 1, otherCost = 0 }));
         customChances = AssignmentType.AllTypes.Select(t => new List<RoleChance>(Roles.AllRoles.Where(r => t.Predicate.Invoke(r.AssignmentStatus, r) && (r.GetCustomAllocationParameters(t)?.RoleCountSum ?? 0) > 0).Select(r => new RoleChance(r, r.GetCustomAllocationParameters(t)) { cost = 1, otherCost = 0 }))).ToArray();
 
         crewmateRoles = GetRolePool(RoleCategory.CrewmateRole);
@@ -205,8 +206,11 @@ public class StandardRoleAllocator : IRoleAllocator
     {
         RoleTable table = new();
 
+        int players = impostors.Count + others.Count;
+        GameParameters gameParameters = new(AmongUsUtil.CurrentMapId, AmongUsUtil.AdjustedImpostors(players), players);
+
         //ロールプールを作る
-        CreateRolePool(out var impostorRoles, out var crewmateRoles, out var neutralRoles, out var customChances, out var allRoles);
+        CreateRolePool(gameParameters, out var impostorRoles, out var crewmateRoles, out var neutralRoles, out var customChances, out var allRoles);
 
         void AssignCustomAbilities(RoleCategory category)
         {

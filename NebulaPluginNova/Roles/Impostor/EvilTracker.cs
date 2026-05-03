@@ -216,13 +216,13 @@ public class EvilTracker : DefinedSingleAbilityRoleTemplate<EvilTracker.Ability>
                         StringBuilder text = new();
 
                         if (trackingTarget != null && !trackingTarget.IsDead) text.AppendLine((trackingTarget.Name + ": " + AmongUsUtil.GetRoomName(trackingTarget.TruePosition, true)).Color(Color.Lerp(DynamicPalette.PlayerColors[trackingTarget.PlayerId], Color.white, 0.25f)));
-                        if (MyPlayer.IsImpostor) foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo.Where(p => !p.AmOwner && p.IsImpostor && !p.IsDead)) text.AppendLine((p.Name + ": " + AmongUsUtil.GetRoomName(p.TruePosition, true)).Color(Palette.ImpostorRed));
+                        if (MyPlayer.IsImpostor) foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo.Where(p => !p.AmOwner && p.IsImpostorlike && !p.IsDead)) text.AppendLine((p.Name + ": " + AmongUsUtil.GetRoomName(p.TruePosition, true)).Color(Palette.ImpostorRed));
 
                         tmPro.text = text.ToString();
                     });
                 }
                 //インポスターに矢印を付ける
-                if (TrackImpostorsOption && MyPlayer.IsImpostor) NebulaGameManager.Instance?.AllPlayerInfo.Where(p => !p.AmOwner && p.Role.Role.Category == RoleCategory.ImpostorRole).Do(p => TryRegisterArrow(p));
+                if (TrackImpostorsOption && (MyPlayer.IsImpostor)) NebulaGameManager.Instance?.AllPlayerInfo.Where(p => !p.AmOwner && p.IsImpostorlike).Do(p => TryRegisterArrow(p));
 
                 var trackTracker = ObjectTrackers.ForPlayerlike(this, null, MyPlayer, p => ObjectTrackers.PlayerlikeStandardPredicate(p));
 

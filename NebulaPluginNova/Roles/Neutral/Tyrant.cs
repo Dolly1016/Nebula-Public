@@ -25,7 +25,7 @@ internal static class TyrantAssignmentSetUp
     static public Virial.Color Color = new(185, 137, 0);
     public static void Preprocess(NebulaPreprocessor preprocessor)
     {
-        preprocessor.RegisterAssignmentType(() => Tyrant.MyRole, (lastArgs, role) => Tyrant.GenerateArgument(lastArgs, role), "tyrant", Color, (status, role) => status.HasFlag(AbilityAssignmentStatus.CanLoadToKillNeutral), () => (Tyrant.MyRole as ISpawnable).IsSpawnable && Tyrant.UseImpostorAbilityOption);
+        preprocessor.RegisterAssignmentType(() => Tyrant.MyRole, (lastArgs, role) => Tyrant.GenerateArgument(lastArgs, role), "tyrant", Color, (status, role) => status.HasFlag(AbilityAssignmentStatus.CanLoadToKillNeutral), () => (Tyrant.MyRole as ISpawnable).CanSpawnInCurrentGame && Tyrant.UseImpostorAbilityOption);
     }
 }
 
@@ -68,7 +68,7 @@ internal class Tyrant : DefinedRoleTemplate, DefinedRole
         if (ability is UsurpedImpostorAbility a) return a.Role.GetDisplayShort(a.Ability);
         return (this as DefinedRole).DisplayShort;
     }
-    IEnumerable<DefinedRole> DefinedRole.GetGuessableAbilityRoles() => ((this as DefinedRole).IsSpawnable && !UseImpostorAbilityOption) ? [this] : [];
+    IEnumerable<DefinedRole> DefinedRole.GetGuessableAbilityRoles() => ((this as DefinedRole).CanSpawnInCurrentGame && !UseImpostorAbilityOption) ? [this] : [];
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
     {
         DefinedRole RuntimeRole.Role => MyRole;

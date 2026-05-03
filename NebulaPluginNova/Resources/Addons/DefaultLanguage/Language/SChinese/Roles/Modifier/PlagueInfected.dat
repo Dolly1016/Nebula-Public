@@ -1,0 +1,22 @@
+# Assignable
+
+"role.plagueInfected.name" : "感染体"
+"role.plagueInfected.generalBlurb" : "你得了不明的传染病。"
+
+# Document
+
+"role.plagueInfected.doc" : "拥有感染体的玩家代表已经被完全感染，进入会议时会得到提示。<br>如果该玩家是被直接感染，那么当疫医获胜时，也会跟随获胜。"
+
+# Options
+
+"options.role.plagueInfected.detail" : "当玩家完全感染后，进入紧急会议后就会出现。"
+
+# Game
+
+# UI
+
+# Stats
+
+
+# Titles
+

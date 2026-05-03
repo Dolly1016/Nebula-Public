@@ -28,6 +28,7 @@
 "options.role.sidekick.hasImpostorVision" : "Has Impostor Vision"
 "options.role.sidekick.canUseVents" : "Can Use Vents"
 "options.role.sidekick.canMoveInVents" : "Can Move In Vents"
+"options.role.sidekick.canWinAsOriginalTeam" : "Can Win As Original Team"
 
 # Game
 

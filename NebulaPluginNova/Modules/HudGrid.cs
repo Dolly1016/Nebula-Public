@@ -205,7 +205,7 @@ public class HudContent : MonoBehaviour
             var edge = HudGrid.UseSmallerHud ?
         (3.0f / 0.72f) * (float)Screen.width / (float)Screen.height - 0.67f :
         3.0f * (float)Screen.width / (float)Screen.height - 0.8f;
-            if (Input.GetKey(KeyCode.L)) edge += 5f;
+            //if (Input.GetKey(KeyCode.L)) edge += 5f;
             return edge;
         }
     }

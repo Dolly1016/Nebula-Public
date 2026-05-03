@@ -167,7 +167,7 @@ internal class AssignmentPreview
     /// </summary>
     /// <param name="players"></param>
     /// <returns></returns>
-    public static AssignmentFlag[] CalcPreview(int players)
+    public static AssignmentFlag[] CalcPreview(int players, out GameParameters gameParameter)
     {
         AssignmentFlag[] result = new AssignmentFlag[players];
         for (int i = 0; i < players; i++) result[i] = 0;
@@ -179,6 +179,9 @@ internal class AssignmentPreview
         if (modNeutral < 0) modNeutral = 99;
         int modCrewmates = GeneralConfigurations.AssignmentCrewmateOption;
         if (modCrewmates < 0) modCrewmates = 99;
+
+        GameParameters copiedGameParameter = new(AmongUsUtil.CurrentMapId, impostors, players);
+        gameParameter = copiedGameParameter;
 
         var exOptions = IExclusiveAssignmentRule.AllRules.ToArray();
 
@@ -196,6 +199,7 @@ internal class AssignmentPreview
             foreach(var role in Roles.AllRoles)
             {
                 if (role.Category != category) continue;
+                if (!role.CanSpawnIn(copiedGameParameter)) continue;
 
                 var allocParam = role.AllocationParameters;
                 var count = allocParam?.GetRoleCountWhich(get100) ?? 0;
@@ -338,7 +342,7 @@ internal class AssignmentPreview
         return result;
     }
 
-    public static AssignmentSummary CalcSummary(AssignmentFlag allFlag) {
+    public static AssignmentSummary CalcSummary(AssignmentFlag allFlag, GameParameters gameParameter) {
         List<ProbabilityAssignment> roles = [];
         List<AdditionalAssignment> additionalRoles = [];
         List<ModifierlikeAssignment<DefinedAllocatableModifier>> modifiers = [];
@@ -355,6 +359,8 @@ internal class AssignmentPreview
 
             foreach (var role in roles)
             {
+                if (!role.CanSpawnIn(gameParameter)) continue;
+
                 var param = type == null ? role.AllocationParameters : role.GetCustomAllocationParameters(type);
 
                 int countSum = param?.RoleCountSum ?? 0;
@@ -453,6 +459,6 @@ internal class AssignmentPreview
         return new AssignmentSummary(roles, modifiers, ghostRoles, specials, additionalRoles);
     }
 
-    public static AssignmentSummary CalcSummary(AssignmentFlag[] flags) => CalcSummary(CombineFlags(flags));
-    public static AssignmentSummary CalcSummary(int players) => CalcSummary(CalcPreview(players));
+    public static AssignmentSummary CalcSummary(AssignmentFlag[] flags, GameParameters parameters) => CalcSummary(CombineFlags(flags), parameters);
+    public static AssignmentSummary CalcSummary(int players) => CalcSummary(CalcPreview(players, out var parameters), parameters);
 }

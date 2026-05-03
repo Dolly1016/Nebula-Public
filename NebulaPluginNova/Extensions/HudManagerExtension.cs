@@ -28,7 +28,8 @@ public static class HudManagerExtension
         manager.ReportButton.ToggleVisible(!flag && (modRole?.CanReport ?? false) && ShipStatus.Instance != null);
         manager.KillButton.ToggleVisible((modPlayer?.ShowKillButton ?? true) && !flag);
         manager.SabotageButton.ToggleVisible((modRole?.CanInvokeSabotage ?? false));
-        manager.ImpostorVentButton.ToggleVisible(!flag && ((modRole?.CanUseVent ?? false) || PlayerControl.LocalPlayer.walkingToVent || PlayerControl.LocalPlayer.inVent));
+        var ventState = GameOperatorManager.Instance?.Run(new Virial.Events.Player.PlayerUpdateVentStateLocalEvent(modPlayer));
+        manager.ImpostorVentButton.ToggleVisible(!flag && ((ventState?.ShouldShowVentButton ?? false) || PlayerControl.LocalPlayer.walkingToVent || PlayerControl.LocalPlayer.inVent));
         manager.MapButton.gameObject.SetActive(NebulaGameManager.Instance.GameMode?.ShowMap ?? true);
     }
 

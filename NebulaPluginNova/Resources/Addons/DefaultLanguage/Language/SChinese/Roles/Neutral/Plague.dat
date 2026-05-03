@@ -1,0 +1,73 @@
+# Assignable
+
+"role.plague.name" : "疫医"
+"role.plague.short" : "疫"
+"role.plague.blurb" : "感染所有人"
+
+# Document
+
+"role.plague.doc" : "疫医需要让幸存者全部感染瘟疫才能获胜。"
+"role.plague.winCond" : "将所有幸存者全部感染。感染体也会一起获胜。"
+"role.plague.ability.title" : "固有能力【瘟疫】"
+"role.plague.ability.main" : "在任务阶段，收集毒素并注入到幸存者身上，被注入的玩家会成为感染体。<br>瘟疫传播有两个方式，分别是<b>直接感染</b>和<b>间接感染</b>。<br><br><b>直接感染</b>：疫医直接向幸存者注入，使目标完全感染。<br><b>间接感染</b>：与完全感染的幸存者停留一段时间，当进度达到100%时完全感染。"
+"role.plague.ability.plant" : "<title>猪笼草</title>地图上会出现最多<var>%PLANTS%</var>株可采集毒素的猪笼草。<br>被采集的猪笼草需要等到下次会议结束时才能重新采集。"
+"role.plague.ability.use" : "<title>采集</title>从猪笼草中获取毒素。<br>多次获取直到瓶子装满。"
+"role.plague.ability.infect" : "<title>感染</title>装满后对其他幸存者进行注入病毒。<br>最多可以直接感染<var>%BOTTLES%</var>名幸存者。"
+"role.plague.tips" : "・会议结束后的前10秒不会增加感染进度。<br>・猪笼草被采集时<var>%VISUAL%</var>。"
+"role.plague.tips.visual.visual" : "所有人都更新"
+"role.plague.tips.visual.indiv" : "仅附近玩家"
+
+# Options
+
+"options.role.plague.detail" : "疫医需要让幸存者全部感染瘟疫才能获胜。"
+"options.role.plague.numOfBottles" : "瓶子数量"
+"options.role.plague.bottleCapacity" : "瓶子容积"
+"options.role.plague.bottleCapacity.detail" : "配置后，需要多次采集猪笼草中的毒素才能解锁感染能力。"
+"options.role.plague.numOfPods" : "猪笼草最大出现数量"
+"options.role.plague.visualPods" : "猪笼草状态更新可见"
+"options.role.plague.visualPods.detail" : "开启后，当猪笼草被采集时，所有人都可以看出来。<br>如果你发现有人靠近猪笼草后猪笼草状态更新，那么该玩家就是疫医"
+"options.role.plague.infectDuration" : "间接感染所需时间"
+"options.role.plague.infectDistance" : "间接感染范围"
+
+# Game
+
+# UI
+
+"button.label.plague.infect" : "感染"
+"role.plague.gui.progress" : "感染进度"
+"role.plague.gui.infected" : "已感染"
+
+# Stats
+
+"stats.plague.pods" : "采集毒素次数"
+"stats.plague.bottle" : "感染玩家次数"
+
+# Titles
+
+"achievement.plague.common1.title" : "绝望抉择"
+"achievement.plague.common1.goal" : "在一局内注入两次毒素。"
+"achievement.plague.common1.flavor" : "“一场瘟疫而已，你也没有选择。”"
+"achievement.plague.common1.splitted.2" : "抉择"
+
+"achievement.plague.common2.title" : "初步传染"
+"achievement.plague.common2.goal" : "作为感染体感染其他幸存者。"
+"achievement.plague.common2.flavor" : "“我并非故意，但也没有办法。”"
+
+"achievement.plague.common3.title" : "一场未知病毒的预兆"
+"achievement.plague.common3.goal" : "作为感染体感染其他幸存者进度达到500%。"
+"achievement.plague.common3.splitted.0" : "超级"
+
+"achievement.plague.challenge.title" : "并非治愈"
+"achievement.plague.challenge.goal" : "在满足疫医胜利的条件时，以非疫医胜利的方式胜利。"
+"achievement.plague.challenge.flavor" : "“瘟疫也只是一种病而已……”"
+"achievement.plague.challenge.splitted.1" : "两人的"
+
+# Team
+
+"teams.plague" : "疫医"
+"end.plague" : "疫医%EXTRA%胜利"
+
+# Document
+
+"document.tip.winCond.plague.title" : "特殊胜利"
+"document.tip.winCond.plague" : "将所有幸存者全部感染后获胜。直接感染体也会一起获胜。"

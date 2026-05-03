@@ -335,7 +335,7 @@ public class ClientOption
 
             ProcessStartInfo processStartInfo = new()
             {
-                FileName = "CPUAffinityEditor.exe",
+                FileName = $"Tools{Path.DirectorySeparatorChar}CPUAffinityEditor.exe",
                 Arguments = id + " " + mode,
                 CreateNoWindow = true,
                 UseShellExecute = false

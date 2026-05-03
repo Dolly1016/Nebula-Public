@@ -44,7 +44,7 @@ public class CombiImageInfo {
 
     private static bool CheckSpawnable(params ISpawnable[] spawnables)
     {
-        return spawnables.All(s => s.IsSpawnable) && IExclusiveAssignmentRule.AllRules.All(option => spawnables.Count(spawnable => spawnable is DefinedRole dr && option.Contains(dr)) <= 1);
+        return spawnables.All(s => s.CanSpawnInCurrentGame) && IExclusiveAssignmentRule.AllRules.All(option => spawnables.Count(spawnable => spawnable is DefinedRole dr && option.Contains(dr)) <= 1);
     }
 
     public static bool TryGetSuitableImage([MaybeNullWhen(false)]out CombiImageInfo info)
@@ -547,7 +547,7 @@ public static class HelpScreen
     {
         scaler ??= l => l >= 18 ? 0.33f : 0.48f;
         int players = lastArgument.PreviewSimulation == -1 ? PlayerControl.AllPlayerControls.Count : lastArgument.PreviewSimulation;
-        var flags = AssignmentPreview.CalcPreview(players);
+        var flags = AssignmentPreview.CalcPreview(players, out _);
 
         //出現しうるカテゴリを全て集計する。
         AssignmentPreview.AssignmentFlag allFlags = 0;
@@ -732,9 +732,9 @@ public static class HelpScreen
         }
 
         int players = lastArgument.PreviewSimulation == -1 ? (GamePlayer.AllPlayers.Any() ? GamePlayer.AllPlayers.Count() : PlayerControl.AllPlayerControls.Count) : lastArgument.PreviewSimulation;
-        var flags = AssignmentPreview.CalcPreview(players);
+        var flags = AssignmentPreview.CalcPreview(players, out var gameParameter);
         var iconHolder = GetPreviewIconsWidget(out var allFlag);
-        var summary = AssignmentPreview.CalcSummary(allFlag);
+        var summary = AssignmentPreview.CalcSummary(allFlag, gameParameter);
 
         Virial.Media.GUIWidget GetRoleOverview(RoleCategory category, string categoryName, bool with100View, bool withRandomView)
         {

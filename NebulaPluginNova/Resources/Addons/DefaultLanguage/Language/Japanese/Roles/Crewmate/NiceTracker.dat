@@ -1,0 +1,36 @@
+# Assignable
+
+"role.niceTracker.name" : "ナイストラッカー"
+"role.niceTracker.short" : "ト"
+"role.niceTracker.blurb" : "追跡せよ"
+"role.niceTracker.hint" : ""
+
+# Document
+
+"role.niceTracker.doc" : "選んだプレイヤーの移動を追跡するクルーメイトです。"
+"role.niceTracker.ability.title" : "固有能力 "トラッキング""
+"role.niceTracker.ability.main" : "追跡機を取り付けたプレイヤーの移動を追跡します。"
+"role.niceTracker.ability.track" : "<title>追跡</title>追跡を開始します。"
+
+# Options
+
+"options.role.niceTracker.detail" : "ナイストラッカーは、プレイヤーの移動を追跡します。"
+"options.role.niceTracker.trackCooldown" : "追跡クールダウン"
+"options.role.niceTracker.trackDuration" : "追跡所要時間"
+"options.role.niceTracker.trackAdditionalDuration" : "追跡の追加所要時間"
+"options.role.niceTracker.trackAdditionalDuration.detail" : "追跡に要する時間を、既に追跡中の人数に応じてさらに延長できます。<br>この設定に追跡中の人数を乗じた秒数だけ延長します。"
+"options.role.niceTracker.trackerDuration" : "追跡効果時間"
+"options.role.niceTracker.resetOnMeeting" : "緊急会議で追跡対象をリセット"
+"options.role.niceTracker.showWhereTrackingIs" : "追跡対象の位置を部屋名で表示"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.niceTracker.track" : "追跡回数"
+
+# Titles

@@ -8,7 +8,7 @@ namespace AddonScriptCompiler;
 
 public static class Compiler
 {
-    private static readonly CSharpParseOptions ParseOptions = CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.CSharp12);
+    private static readonly CSharpParseOptions ParseOptions = CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.CSharp14);
     
     private static readonly CSharpCompilationOptions CompilationOptions = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
             .WithUsings("Virial", "Virial.Compat", "System", "System.Linq", "System.Collections.Generic")

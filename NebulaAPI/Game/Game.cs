@@ -10,6 +10,8 @@ public interface Game : IModuleContainer, ILifespan, IArchivedGame
 {
     IGameModeModule? GameMode { get; }
 
+    GameParameters GameParameter { get; }
+
     /// <summary>
     /// プレイヤーを取得します。
     /// </summary>

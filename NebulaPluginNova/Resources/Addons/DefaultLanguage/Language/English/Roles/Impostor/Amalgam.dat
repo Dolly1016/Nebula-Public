@@ -24,6 +24,7 @@
 "options.role.amalgam.numOfRandomAssignment.all" : "All"
 "options.role.amalgam.abilityFilter" : "Ability Role Filter"
 "options.role.amalgam.canBeGuessedAsLoadedRoles" : "Can Be Guessed As Loaded Roles"
+"options.role.amalgam.breakdownAmalgam" : "Amalgam Breakdown"
 
 # Game
 

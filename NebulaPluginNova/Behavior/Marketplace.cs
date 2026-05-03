@@ -30,7 +30,7 @@ public class DeveloperMarketplaceItem
     public IEnumerator TryOnlineCheck(Action onSucceeded, Action onFailed)
     {
         LocalMarketplaceItem item = new() { Url = Url };
-        yield return NebulaWebRequest.CoGet(IsAddon ? item.ToAddonUrl : item.ToCostumeUrl + "/Contents.json", true, _ => onSucceeded.Invoke(), onFailed);
+        yield return NebulaWebRequest.CoGet(IsAddon ? item.ToAddonUrl : (item.ToCostumeUrl + "/Contents.json"), true, _ => onSucceeded.Invoke(), onFailed);
     }
 }
 

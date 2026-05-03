@@ -1,0 +1,42 @@
+# Assignable
+ 
+"role.spy.name" : "卧底"
+"role.spy.short" : "卧"
+"role.spy.blurb" : "扰乱伪装者们的行动"
+ 
+# Document
+ 
+"role.spy.doc" : "卧底可以让伪装者误以为是自己的队友。"
+"role.spy.ability.title" : "固有能力【无间道】"
+"role.spy.ability.main" : "伪装者会将卧底视为自己的队友，但卧底无法确定真正的伪装者是谁。"
+"role.spy.tips" : "・卧底出现在游戏中时，伪装者可以互相击杀。"
+ 
+# Options
+ 
+"options.role.spy.detail" : "卧底可以让伪装者误以为是自己的队友。"
+ 
+# Game
+ 
+ 
+# UI
+ 
+ 
+# Game Statictics
+ 
+# Status
+ 
+# Stats
+ 
+# Titles
+ 
+"achievement.spy.common1.title" : ""
+"achievement.spy.common1.goal" : ""
+ 
+"achievement.spy.another1.title" : ""
+"achievement.spy.another1.goal" : ""
+ 
+"achievement.spy.another2.title" : ""
+"achievement.spy.another2.goal" : ""
+ 
+"achievement.spy.challenge.title" : ""
+"achievement.spy.challenge.goal" : ""

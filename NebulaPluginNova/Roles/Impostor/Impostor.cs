@@ -49,7 +49,7 @@ public class ImpostorGameRule : AbstractModule<IGameModeStandard>, IGameOperator
     void DecoratePlayerColor(PlayerDecorateNameEvent ev)
     {
         if (GamePlayer.LocalPlayer?.IsImpostor ?? false) {
-            if (ev.Player.IsImpostor || ev.Player.Role.Role == Spy.MyRole) ev.Color = new(Palette.ImpostorRed);
+            if (ev.Player.IsImpostorlike) ev.Color = new(Palette.ImpostorRed);
         }
     }
 
@@ -123,9 +123,12 @@ public class ImpostorBasicRuleOperator : AbstractModule<Virial.Game.Game>, IGame
         }
     }
 
+    bool thereIsSpy = false;
+
     void OnCheckCanKill(PlayerCheckCanKillLocalEvent ev)
     {
-        if ((Crewmate.Spy.MyRole as ISpawnable).IsSpawnable) return; //Spyが存在するならフレンドリーファイアを強制で有効化
+        thereIsSpy |= GamePlayer.AllPlayers.Any(p => !p.IsImpostor && p.IsImpostorlike);
+        if (thereIsSpy) return; //Spyが存在するならフレンドリーファイアを強制で有効化
         if (ev.Player.IsImpostor && ev.Target.IsImpostor) ev.SetAsCannotKillBasically(); 
     }
 

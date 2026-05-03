@@ -55,25 +55,25 @@ public class NebulaGameEnd
         RegisterWinCondTip(ImpostorWin, () => true, "impostor.kill", text => ImpostorTeam(JackalTeam(LoverTeam(text))));
         //RegisterWinCondTip(ImpostorWin, () => true, "impostor.extinction", text => LoverTeam(text));
         RegisterWinCondTip(ImpostorWin, () => true, "impostor.sabotage");
-        RegisterWinCondTip(JackalWin, () => (Roles.Neutral.Jackal.MyRole as ISpawnable).IsSpawnable, "jackal.kill", text => ImpostorTeam(JackalTeam(LoverTeam(text))));
-        RegisterWinCondTip(JackalWin, () => (Roles.Neutral.Jackal.MyRole as ISpawnable).IsSpawnable, "jackal.extinction", text => LoverTeam(text));
-        RegisterWinCondTip(JesterWin, () => (Roles.Neutral.Jester.MyRole as ISpawnable).IsSpawnable, "jester");
-        RegisterWinCondTip(GamblerWin, () => (Roles.Neutral.Gambler.MyRole as ISpawnable).IsSpawnable, "gambler", text => text.Replace("%NUM%", Roles.Neutral.Gambler.GoalChipsOption.GetValue().ToString()));
-        RegisterWinCondTip(VultureWin, () => GeneralConfigurations.NeutralSpawnable && (Roles.Neutral.Vulture.MyRole as ISpawnable).IsSpawnable, "vulture");
-        RegisterWinCondTip(ArsonistWin, () => GeneralConfigurations.NeutralSpawnable && (Roles.Neutral.Arsonist.MyRole as ISpawnable).IsSpawnable, "arsonist");
-        RegisterWinCondTip(PaparazzoWin, () => GeneralConfigurations.NeutralSpawnable && (Roles.Neutral.Paparazzo.MyRole as ISpawnable).IsSpawnable, "paparazzo");
-        RegisterWinCondTip(ScarletWin, () => GeneralConfigurations.NeutralSpawnable && (Roles.Neutral.Scarlet.MyRole as ISpawnable).IsSpawnable, "scarlet");
-        RegisterWinCondTip(LoversWin, () => (Roles.Modifier.Lover.MyRole as ISpawnable).IsSpawnable || (Roles.Impostor.Cupid.MyRole as ISpawnable).IsSpawnable, "lovers.normal");
-        RegisterWinCondTip(LoversWin, () => ((Roles.Modifier.Lover.MyRole as ISpawnable).IsSpawnable || (Roles.Impostor.Cupid.MyRole as ISpawnable).IsSpawnable) && Roles.Modifier.Lover.AllowExtraWinOption, "lovers.extra");
-        RegisterWinCondTip(AvengerWin, () => ((Roles.Modifier.Lover.MyRole as ISpawnable).IsSpawnable || (Roles.Impostor.Cupid.MyRole as ISpawnable).IsSpawnable) && Roles.Modifier.Lover.AvengerModeOption, "avenger");
-        RegisterWinCondTip(DancerWin, () => GeneralConfigurations.NeutralSpawnable && (Roles.Neutral.Dancer.MyRole as ISpawnable).IsSpawnable, "dancer");
-        RegisterWinCondTip(SpectreWin, () => (Roles.Neutral.Spectre.MyRole as ISpawnable).IsSpawnable, "spectre");
-        RegisterWinCondTip(TrilemmaWin, () => (Roles.Modifier.Trilemma.MyRole as ISpawnable).IsSpawnable && Roles.Modifier.Trilemma.WinConditionOption.GetValue() == 2, "trilemma");
-        RegisterWinCondTip(TyrantWin, () => (Roles.Neutral.Tyrant.MyRole as ISpawnable).IsSpawnable, "tyrant", text => text.Replace("%NUM%", Roles.Neutral.Tyrant.RequiredKillingToWin.ToString()));
-        RegisterWinCondTip(VanityWin, () => (Roles.Neutral.Vanity.MyRole as ISpawnable).IsSpawnable && Roles.Neutral.Vanity.IndependentTeamOption, "vanity.kill");
-        RegisterWinCondTip(VanityWin, () => (Roles.Neutral.Vanity.MyRole as ISpawnable).IsSpawnable && Roles.Neutral.Vanity.IndependentTeamOption, "vanity.extra.crewOnly", text => { if (!Roles.Neutral.Vanity.CanExtraWinEvenIfVanityDied) text += "<br>" + Language.Translate("document.tip.winCond.vanity.extra.surviveCond"); return text; });
-        RegisterWinCondTip(VanityWin, () => (Roles.Neutral.Vanity.MyRole as ISpawnable).IsSpawnable && !Roles.Neutral.Vanity.IndependentTeamOption, "vanity.extra", text => { if (!Roles.Neutral.Vanity.CanExtraWinEvenIfVanityDied) text += "<br>" + Language.Translate("document.tip.winCond.vanity.extra.surviveCond"); return text; });
-        RegisterWinCondTip(PlagueWin, () => (Roles.Neutral.Plague.MyRole as ISpawnable).IsSpawnable, "plague");
+        RegisterWinCondTip(JackalWin, () => (Roles.Neutral.Jackal.MyRole as ISpawnable).CanSpawnInCurrentGame, "jackal.kill", text => ImpostorTeam(JackalTeam(LoverTeam(text))));
+        RegisterWinCondTip(JackalWin, () => (Roles.Neutral.Jackal.MyRole as ISpawnable).CanSpawnInCurrentGame, "jackal.extinction", text => LoverTeam(text));
+        RegisterWinCondTip(JesterWin, () => (Roles.Neutral.Jester.MyRole as ISpawnable).CanSpawnInCurrentGame, "jester");
+        RegisterWinCondTip(GamblerWin, () => (Roles.Neutral.Gambler.MyRole as ISpawnable).CanSpawnInCurrentGame, "gambler", text => text.Replace("%NUM%", Roles.Neutral.Gambler.GoalChipsOption.GetValue().ToString()));
+        RegisterWinCondTip(VultureWin, () => GeneralConfigurations.NeutralSpawnable && (Roles.Neutral.Vulture.MyRole as ISpawnable).CanSpawnInCurrentGame, "vulture");
+        RegisterWinCondTip(ArsonistWin, () => GeneralConfigurations.NeutralSpawnable && (Roles.Neutral.Arsonist.MyRole as ISpawnable).CanSpawnInCurrentGame, "arsonist");
+        RegisterWinCondTip(PaparazzoWin, () => GeneralConfigurations.NeutralSpawnable && (Roles.Neutral.Paparazzo.MyRole as ISpawnable).CanSpawnInCurrentGame, "paparazzo");
+        RegisterWinCondTip(ScarletWin, () => GeneralConfigurations.NeutralSpawnable && (Roles.Neutral.Scarlet.MyRole as ISpawnable).CanSpawnInCurrentGame, "scarlet");
+        RegisterWinCondTip(LoversWin, () => (Roles.Modifier.Lover.MyRole as ISpawnable).CanSpawnInCurrentGame || (Roles.Impostor.Cupid.MyRole as ISpawnable).CanSpawnInCurrentGame, "lovers.normal");
+        RegisterWinCondTip(LoversWin, () => ((Roles.Modifier.Lover.MyRole as ISpawnable).CanSpawnInCurrentGame || (Roles.Impostor.Cupid.MyRole as ISpawnable).CanSpawnInCurrentGame) && Roles.Modifier.Lover.AllowExtraWinOption, "lovers.extra");
+        RegisterWinCondTip(AvengerWin, () => ((Roles.Modifier.Lover.MyRole as ISpawnable).CanSpawnInCurrentGame || (Roles.Impostor.Cupid.MyRole as ISpawnable).CanSpawnInCurrentGame) && Roles.Modifier.Lover.AvengerModeOption, "avenger");
+        RegisterWinCondTip(DancerWin, () => GeneralConfigurations.NeutralSpawnable && (Roles.Neutral.Dancer.MyRole as ISpawnable).CanSpawnInCurrentGame, "dancer");
+        RegisterWinCondTip(SpectreWin, () => (Roles.Neutral.Spectre.MyRole as ISpawnable).CanSpawnInCurrentGame, "spectre");
+        RegisterWinCondTip(TrilemmaWin, () => (Roles.Modifier.Trilemma.MyRole as ISpawnable).CanSpawnInCurrentGame && Roles.Modifier.Trilemma.WinConditionOption.GetValue() == 2, "trilemma");
+        RegisterWinCondTip(TyrantWin, () => (Roles.Neutral.Tyrant.MyRole as ISpawnable).CanSpawnInCurrentGame, "tyrant", text => text.Replace("%NUM%", Roles.Neutral.Tyrant.RequiredKillingToWin.ToString()));
+        RegisterWinCondTip(VanityWin, () => (Roles.Neutral.Vanity.MyRole as ISpawnable).CanSpawnInCurrentGame && Roles.Neutral.Vanity.IndependentTeamOption, "vanity.kill");
+        RegisterWinCondTip(VanityWin, () => (Roles.Neutral.Vanity.MyRole as ISpawnable).CanSpawnInCurrentGame && Roles.Neutral.Vanity.IndependentTeamOption, "vanity.extra.crewOnly", text => { if (!Roles.Neutral.Vanity.CanExtraWinEvenIfVanityDied) text += "<br>" + Language.Translate("document.tip.winCond.vanity.extra.surviveCond"); return text; });
+        RegisterWinCondTip(VanityWin, () => (Roles.Neutral.Vanity.MyRole as ISpawnable).CanSpawnInCurrentGame && !Roles.Neutral.Vanity.IndependentTeamOption, "vanity.extra", text => { if (!Roles.Neutral.Vanity.CanExtraWinEvenIfVanityDied) text += "<br>" + Language.Translate("document.tip.winCond.vanity.extra.surviveCond"); return text; });
+        RegisterWinCondTip(PlagueWin, () => (Roles.Neutral.Plague.MyRole as ISpawnable).CanSpawnInCurrentGame, "plague");
     }
 
     private static void RegisterWinCondTip(GameEnd gameEnd, Func<bool> predicate, string name, Func<string,string>? decorator = null)

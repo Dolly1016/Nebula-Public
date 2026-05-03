@@ -4,34 +4,7 @@ using Virial;
 
 namespace Nebula.Patches;
 
-
-#if ANDROID
-[HarmonyPatch(typeof(SplashManager),nameof(SplashManager.Start))]
-public static class LoadPatch
-{
-    static public string LoadingText { set {  } }
-    public static void Postfix(SplashManager __instance)
-    {
-        bool isFirst = true;
-        SceneManager.sceneLoaded += (UnityEngine.Events.UnityAction<Scene, LoadSceneMode>)((scene, loadMode) =>
-        {
-            if (isFirst)
-            {
-                isFirst = false;
-
-                var enumerator = new StackfullCoroutine(PreloadManager.CoLoad());
-                while (enumerator.MoveNext())
-                {
-                    Thread.Sleep(1);
-                }
-                Language.OnChangeLanguage(Language.GetCurrentLanguageId());
-            }
-
-        });
-    }
-
-}
-#else
+[HarmonyPriority(Priority.HigherThanNormal)]
 [HarmonyPatch(typeof(SplashManager),nameof(SplashManager.Update))]
 public static class LoadPatch
 {
@@ -151,12 +124,19 @@ public static class LoadPatch
 
         __instance.sceneChanger.AllowFinishLoadingScene();
         __instance.startedSceneLoad = true;
+        finishedLoadNebula = true;
     }
 
     static bool loadedNebula = false;
+    static bool finishedLoadNebula = false;
+
+    static bool cachedDoneLoadingRefData = false;
     public static bool Prefix(SplashManager __instance)
     {
-        if (__instance.doneLoadingRefdata && !__instance.startedSceneLoad && Time.time - __instance.startTime > __instance.minimumSecondsBeforeSceneChange && !loadedNebula)
+        cachedDoneLoadingRefData |= __instance.doneLoadingRefdata;
+        __instance.doneLoadingRefdata = false;
+
+        if (cachedDoneLoadingRefData && !__instance.startedSceneLoad && Time.time - __instance.startTime > __instance.minimumSecondsBeforeSceneChange && !loadedNebula)
         {
             loadedNebula = true;
             __instance.StartCoroutine(CoLoadNebula(__instance).WrapToIl2Cpp());
@@ -164,5 +144,9 @@ public static class LoadPatch
 
         return false;
     }
+
+    public static void Postfix(SplashManager __instance)
+    {
+        __instance.doneLoadingRefdata = cachedDoneLoadingRefData;
+    }
 }
-#endif

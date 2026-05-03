@@ -101,7 +101,7 @@ public class DanceModule : AbstractModule<GamePlayer>, IGameOperator
             {
                 eventInvoked = true;
                 RpcDance.Invoke((MyContainer, DanceStartPos, playerMask, corpseMask));
-                if((Dancer.MyRole as ISpawnable).IsSpawnable || NebulaGameManager.Instance.AllPlayerInfo.Any(p => p.Role.Role == Dancer.MyRole))
+                if((Dancer.MyRole as ISpawnable).CanSpawnInCurrentGame || NebulaGameManager.Instance.AllPlayerInfo.Any(p => p.Role.Role == Dancer.MyRole))
                 {
                     AmongUsUtil.PlayQuickFlash(Dancer.MyRole.UnityColor.RGBMultiplied(0.5f));
                 }

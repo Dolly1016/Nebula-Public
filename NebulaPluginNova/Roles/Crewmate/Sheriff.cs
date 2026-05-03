@@ -158,7 +158,7 @@ public class Sheriff : DefinedSingleAbilityRoleTemplate<Sheriff.Ability>, HasCit
                 };
                 killButton.RelatedAbility = this;
 
-                if((Neutral.Vanity.MyRole as DefinedRole).IsSpawnable)
+                if((Neutral.Vanity.MyRole as DefinedRole).CanSpawnInCurrentGame)
                 {
                     GamePlayer? lastMyExile = null;
                     GameOperatorManager.Instance?.Subscribe<PlayerVoteDisclosedLocalEvent>(ev =>
