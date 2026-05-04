@@ -9,6 +9,7 @@ using Nebula.Patches;
 using Nebula.Roles.Impostor;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
@@ -503,6 +504,20 @@ public static class MeetingHudExtension
             if (!keepCurrentVoting) meetingHud.ResetPlayerState();
             meetingHud.ForceSkipAll();
         }
+    });
+
+    internal static RemoteProcess<int> RpcShareAbandonment = new("ShareVoteAbandonment", (mask, _) =>
+    {
+        GameOperatorManager.Instance?.SubscribeSingleListener<TaskPhaseRestartEvent>(ev =>
+        {
+            var localPlayer = GamePlayer.LocalPlayer;
+            if (localPlayer == null) return;
+            if (((1 << localPlayer.PlayerId) & mask) != 0)
+            {
+                if (GeneralConfigurations.KillCooldownPenaltyOption > 0f) localPlayer.GainAttribute(PlayerAttributes.CooldownSpeed, GeneralConfigurations.KillCooldownPenaltyOption, -1f, true, 0);
+                if (GeneralConfigurations.DecelerationPenaltyRateOption < 1f) localPlayer.GainSpeedAttribute(GeneralConfigurations.DecelerationPenaltyRateOption, GeneralConfigurations.DecelerationPenaltyDurationOption, true, 0);
+            }
+        });
     });
 
 }

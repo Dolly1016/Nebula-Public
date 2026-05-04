@@ -282,11 +282,17 @@ public static class GeneralConfigurations
     static public FloatConfiguration ShortenCooldownAtGameStartOption = NebulaAPI.Configurations.Configuration("options.meeting.shortenCooldown", (0f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second, () => UseShortenCooldownAtGameStartOption);
     static public ValueConfiguration<int> NonCrewmateCanSeeTaskTrackerOption = NebulaAPI.Configurations.Configuration("options.meeting.nonCrewCanSeeTaskTracker", OptionValuesForNonCrew, 0, TaskTrackerIsOff);
     static public ValueConfiguration<int> NonCrewmateCanSeeSabotageStatusOption = NebulaAPI.Configurations.Configuration("options.meeting.nonCrewCanSeeSabotageStatus", OptionValuesForNonCrew, 0);
+    static public BoolConfiguration VoteAbandonmentPenaltyOption = NebulaAPI.Configurations.Configuration("options.meeting.abandonmentPenalty", false);
+    static public FloatConfiguration KillCooldownPenaltyOption = NebulaAPI.Configurations.Configuration("options.meeting.abandonmentPenalty.killCooldown", (0f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second, () => VoteAbandonmentPenaltyOption);
+    static public BoolConfiguration KillCooldownPenaltyElseImpostorOption = NebulaAPI.Configurations.Configuration("options.meeting.abandonmentPenalty.killCooldownElseImpostors", false, () => VoteAbandonmentPenaltyOption && KillCooldownPenaltyOption > 0f);
+    static public FloatConfiguration DecelerationPenaltyRateOption = NebulaAPI.Configurations.Configuration("options.meeting.abandonmentPenalty.decelerationRate", (0.125f, 1f, 0.125f), 0.75f, FloatConfigurationDecorator.Ratio, () => VoteAbandonmentPenaltyOption);
+    static public FloatConfiguration DecelerationPenaltyDurationOption = NebulaAPI.Configurations.Configuration("options.meeting.abandonmentPenalty.decelerationDuration", (5f, 60f, 5f), 20f, FloatConfigurationDecorator.Second, () => VoteAbandonmentPenaltyOption && DecelerationPenaltyRateOption < 1f);
     static internal IConfigurationHolder MeetingOptions = NebulaAPI.Configurations.Holder("options.meeting", [ConfigurationTab.Settings], [GameModes.FreePlay, GameModes.Standard]).AppendConfigurations([
         NumOfMeetingsOption, DeathPenaltyOption,EmergencyCooldownAtGameStart, ShowVoteStateOption,
         Group("options.meeting.group.gameStart", UseShortenCooldownAtGameStartOption, ShortenCooldownAtGameStartOption), 
         Group("options.meeting.group.earlySettings", EarlyExtraEmergencyCoolDownOption, EarlyDiscussionReductionOption, EarlyExtraEmergencyCoolDownCondOption),
         Group("options.meeting.group.nonCrewmateInformation", NonCrewmateCanSeeTaskTrackerOption, NonCrewmateCanSeeSabotageStatusOption),
+        Group("options.meeting.group.abandonmentPenalty", VoteAbandonmentPenaltyOption, KillCooldownPenaltyOption, KillCooldownPenaltyElseImpostorOption, DecelerationPenaltyRateOption, DecelerationPenaltyDurationOption),
         ProhibitMeetingTool
         ]);
 

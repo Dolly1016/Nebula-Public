@@ -162,6 +162,7 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
         float a = 1f;
         while (a > 0f)
         {
+            if (!renderer) yield break;
             renderer.transform.localScale = UnityEngine.Vector3.one * (2f - a);
             renderer.material.SetColor("_Color", new(1f, 1f, 1f, a * 0.85f));
             a -= Time.deltaTime * 1.5f;

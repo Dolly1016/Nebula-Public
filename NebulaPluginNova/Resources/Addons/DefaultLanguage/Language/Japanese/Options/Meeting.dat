@@ -8,6 +8,7 @@
 "options.meeting.group.gameStart" : "短縮クールダウンの設定"
 "options.meeting.group.earlySettings" : "ゲーム序盤の緊急会議設定"
 "options.meeting.group.nonCrewmateInformation" : "非クルーに開示される情報の設定"
+"options.meeting.group.abandonmentPenalty" : "投票放棄ペナルティの設定"
 
 # Options
 
@@ -30,3 +31,9 @@
 "options.meeting.shortenCooldown" : "短縮クールダウン"
 "options.meeting.nonCrewCanSeeTaskTracker" : "緊急会議中のタスク進捗確認"
 "options.meeting.nonCrewCanSeeSabotageStatus" : "緊急会議中のサボタージュ状態確認"
+"options.meeting.abandonmentPenalty" : "投票放棄ペナルティ"
+"options.meeting.abandonmentPenalty.detail" : "投票を放棄したプレイヤーは、次のタスクフェイズでペナルティを受けます。"
+"options.meeting.abandonmentPenalty.killCooldown" : "クールダウン停止"
+"options.meeting.abandonmentPenalty.killCooldownElseImpostors" : "インポスターのクールダウン停止を免除"
+"options.meeting.abandonmentPenalty.decelerationRate" : "移動速度"
+"options.meeting.abandonmentPenalty.decelerationDuration" : "移動速度低下時間"

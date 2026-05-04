@@ -17,6 +17,7 @@ using UnityEngine.SceneManagement;
 using Virial;
 using Virial.Assignable;
 using Virial.Events.Game;
+using Virial.Events.Lobby;
 using Virial.Game;
 using static Il2CppSystem.Net.Http.Headers.Parser;
 
@@ -176,6 +177,7 @@ public class GameStartManagerBeginGame
             }
 
             Certification.RequireHandshake();
+            GameOperatorManager.Instance?.Run<LobbyCountdownStartHostEvent>(new(NebulaGameManager.Instance!.GameParameter));
         }
         GameStartNotification.Notification();
 

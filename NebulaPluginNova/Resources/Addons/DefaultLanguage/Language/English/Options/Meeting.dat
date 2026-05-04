@@ -8,6 +8,7 @@
 "options.meeting.group.gameStart" : "Shorten Cooldown Settings"
 "options.meeting.group.earlySettings" : "In The Early Settings"
 "options.meeting.group.nonCrewmateInformation" : "Information for Non-Crewmate Settings"
+"options.meeting.group.abandonmentPenalty" : "Vote Abandonment Penalty Settings"
 
 # Options
 
@@ -30,3 +31,8 @@
 "options.meeting.shortenCooldown" : "Shorten Cooldown"
 "options.meeting.nonCrewCanSeeTaskTracker" : "# Can See Task Tracker"
 "options.meeting.nonCrewCanSeeSabotageStatus" : "# Can See Sabotage Status"
+"options.meeting.abandonmentPenalty" : "Vote Abandonment Penalty"
+"options.meeting.abandonmentPenalty.killCooldown" : "Kill Cooldown Stop"
+"options.meeting.abandonmentPenalty.killCooldownElseImpostors" : "Kill Cooldown Stop Else Impostors"
+"options.meeting.abandonmentPenalty.decelerationRate" : "Move Speed"
+"options.meeting.abandonmentPenalty.decelerationDuration" : "Move Speed Down Duration"

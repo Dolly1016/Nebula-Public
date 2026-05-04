@@ -879,6 +879,13 @@ static class CheckForEndVotingPatch
         //投票が済んでない場合、なにもしない
         if (!__instance.playerStates.All((PlayerVoteArea ps) => ps.AmDead || ps.DidVote || !MeetingHudExtension.HasVote(ps.TargetPlayerId))) return false;
 
+        if(GeneralConfigurations.VoteAbandonmentPenaltyOption){
+            bool CheckAbandonment(PlayerVoteArea playerVoteArea) => playerVoteArea.VotedFor == 252 || playerVoteArea.VotedFor == 255 || playerVoteArea.VotedFor == 254;
+            int abandonmentMask = 0;
+            __instance.playerStates.Where(ps => !ps.AmDead && CheckAbandonment(ps)).Do(ps => abandonmentMask |= 1 << ps.TargetPlayerId);
+            if (abandonmentMask != 0) MeetingHudExtension.RpcShareAbandonment.Invoke(abandonmentMask);
+        }
+
         {
             Dictionary<byte, int> dictionary = ModCalculateVotes(__instance);
             KeyValuePair<byte, int> max = dictionary.MaxPair(out bool tie);
