@@ -916,3 +916,13 @@ public class PlayerNameColorChatPatch
         return true;
     }
 }
+
+[HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.GetTruePosition))]
+public class PlayerGetTruePositionPatch
+{
+    public static bool Prefix(PlayerControl __instance, ref Vector2 __result)
+    {
+        __result = (Vector2)__instance.transform.position + __instance.transform.localScale.x * __instance.Collider.offset;
+        return false;
+    }
+}

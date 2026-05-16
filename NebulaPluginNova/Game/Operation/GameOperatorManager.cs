@@ -1,12 +1,15 @@
 ﻿using Hazel;
+using Il2CppSystem.Xml;
 using Nebula.Modules.Logging;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using UnityEngine.Rendering.VirtualTexturing;
 using Virial;
 using Virial.Assignable;
 using Virial.Events.Player;
 using Virial.Game;
+using static Il2CppMono.Net.Security.MobileAuthenticatedStream;
 
 namespace Nebula.Game;
 
@@ -14,13 +17,80 @@ internal record GameOperatorInstance(ILifespan lifespan, Action<object> action, 
 internal class GameOperatorBuilder
 {
     List<(Type type, Func<object, (Action<object>? generator, int priority)> action)> allActions;
+    private Type entityType;
 
-    private GameOperatorBuilder(List<(Type type, Func<object, (Action<object>? generator, int priority)> action)> actions)
+    private GameOperatorBuilder(Type entityType, List<(Type type, Func<object, (Action<object>? generator, int priority)> action)> actions)
     {
+        this.entityType = entityType;
         this.allActions = actions;
     }
 
-    int num = 0;
+    private record AttributeInfo(MethodInfo Method)
+    {
+        public bool HasOnlyMyPlayerAttr = Method.GetCustomAttribute<OnlyMyPlayer>() != null;
+        public bool HasLocalAttr = Method.GetCustomAttribute<Local>() != null;
+        public bool HasOnlyLocalPlayerAttr = Method.GetCustomAttribute<OnlyLocalPlayer>() != null;
+        public bool HasOnlyHostAttr = Method.GetCustomAttribute<OnlyHost>() != null;
+    }
+    static private Action<object>? BuildAction(object instance, Action<object, object> procedure, AttributeInfo attributes)
+    {
+        var pBinder = instance as IBindPlayer;
+        Action<object>? myProcedure = e => procedure(instance, e);
+
+        if (attributes.HasOnlyMyPlayerAttr)
+        {
+            var lastProcedure = myProcedure;
+            myProcedure = e =>
+            {
+                byte p = Unsafe.As<AbstractPlayerEvent>(e).Player.PlayerId;
+                if (p == (pBinder?.MyPlayer.PlayerId ?? byte.MaxValue)) lastProcedure.Invoke(e);
+            };
+        }
+
+        if (attributes.HasLocalAttr && !(pBinder?.AmOwner ?? false)) return null;
+
+        if (attributes.HasOnlyLocalPlayerAttr)
+        {
+            var lastProcedure = myProcedure;
+            myProcedure = e =>
+            {
+                if (Unsafe.As<AbstractPlayerEvent>(e).Player.AmOwner) lastProcedure.Invoke(e);
+            };
+        }
+
+        if (attributes.HasOnlyHostAttr)
+        {
+            var lastProcedure = myProcedure;
+            myProcedure = e =>
+            {
+                if (AmongUsClient.Instance.AmHost) lastProcedure.Invoke(e);
+            };
+        }
+        return myProcedure;
+    }
+
+    /// <summary>
+    /// ゲーム作用素を拡張します。
+    /// </summary>
+    /// <typeparam name="T">entityTypeと同じものである必要があります。</typeparam>
+    /// <typeparam name="E"></typeparam>
+    /// <param name="operation"></param>
+    /// <param name="priority"></param>
+    public void Extend<T, E>(Action<T, E> operation, int priority) where E : Virial.Events.Event {
+        var eventType = typeof(E);
+
+        var instanceParam = Expression.Parameter(typeof(object), "instance");
+        var eventParam = Expression.Parameter(typeof(object), "ev");
+        var operationConstant = Expression.Constant(operation, typeof(Action<T,E>));
+        var convertEv = Expression.Convert(eventParam, eventType);
+        var convertInstance = Expression.Convert(instanceParam, entityType);
+        var call = Expression.Invoke(operationConstant, [convertInstance, convertEv]);
+        var exp = Expression.Lambda<Action<object, object>>(call, instanceParam, eventParam).Compile();
+        AttributeInfo attributes = new(operation.Method);
+
+        allActions.Add((eventType, (instance) => (BuildAction(instance, exp, attributes), priority)));
+    }
+
     /// <summary>
     /// ゲーム作用素を登録します。
     /// </summary>
@@ -74,59 +144,13 @@ internal class GameOperatorBuilder
             var convertInstance = Expression.Convert(instanceParam, entityType);
             var call = Expression.Call(convertInstance, method, convertEv);
             var exp = Expression.Lambda<Action<object, object>>(call, instanceParam, eventParam).Compile();
+            AttributeInfo attributes = new(method);
+            int priority = method.GetCustomAttribute<EventPriority>()?.Priority ?? EventPriority.Default;
 
-            Action<object, object> procedure = exp/*(instance, e) => method.Invoke(instance, [e])*/;
-
-            Func<object, Action<object>> curried = instance => (e => procedure.Invoke(instance, e));
-
-            bool hasOnlyMyPlayerAttr = method.GetCustomAttribute<OnlyMyPlayer>() != null;
-            bool hasLocalAttr = method.GetCustomAttribute<Local>() != null;
-            bool hasOnlyLocalPlayerAttr = method.GetCustomAttribute<OnlyLocalPlayer>() != null;
-            bool hasOnlyHostAttr = method.GetCustomAttribute<OnlyHost>() != null;
-
-            Action<object>? BuildAction(object instance)
-            {
-                var pBinder = instance as IBindPlayer;
-                Action<object>? myProcedure = e => procedure(instance, e);
-
-                if (hasOnlyMyPlayerAttr)
-                {
-                    var lastProcedure = myProcedure;
-                    myProcedure = e =>
-                    {
-                        byte p = Unsafe.As<AbstractPlayerEvent>(e).Player.PlayerId;
-                        if (p == (pBinder?.MyPlayer.PlayerId ?? byte.MaxValue)) lastProcedure.Invoke(e);
-                    };
-                }
-
-                if (hasLocalAttr && !(pBinder?.AmOwner ?? false)) return null;
-
-                if (hasOnlyLocalPlayerAttr)
-                {
-                    var lastProcedure = myProcedure;
-                    myProcedure = e =>
-                    {
-                        if (Unsafe.As<AbstractPlayerEvent>(e).Player.AmOwner) lastProcedure.Invoke(e);
-                    };
-                }
-
-                if (hasOnlyHostAttr)
-                {
-                    var lastProcedure = myProcedure;
-                    myProcedure = e =>
-                    {
-                        if (AmongUsClient.Instance.AmHost) lastProcedure.Invoke(e);
-                    };
-                }
-                return myProcedure;
-            }
-
-            int priority = method.GetCustomAttribute<EventPriority>()?.Priority ?? 0;
-
-            builderActions.Add((eventType, (instance) => (BuildAction(instance), priority)));
+            builderActions.Add((eventType, (instance) => (BuildAction(instance, exp, attributes), priority)));
         }
 
-        return new(builderActions);
+        return new(entityType, builderActions);
     }
 }
 
@@ -250,17 +274,27 @@ public class GameOperatorManager
     private List<(IGameOperator entity, ILifespan lifespan, Action? onSubscribed)> newOperations = [];
     private List<(Type eventType, Action<object> operation, ILifespan lifespan, int priority)> newFuncOperations = [];
 
+    static private GameOperatorBuilder GetBuilder(Type type)
+    {
+        if (!allBuildersCache.TryGetValue(type, out var builder))
+        {
+            builder = GameOperatorBuilder.GetBuilderFromType(type);
+            allBuildersCache.Add(type, builder);
+        }
+        return builder;
+    }
+
+    static public void RegisterExtension<T, E>(Action<T, E> operation, int priority = EventPriority.Default) where E : Virial.Events.Event
+    {
+        GameOperatorBuilder builder = GetBuilder(typeof(T));
+        builder.Extend<T, E>(operation, priority);
+
+    }
+
     private void RegisterEntity(IGameOperator operation, ILifespan lifespan)
     {
         allOperators.Add((lifespan, operation));
-
-        var operationType = operation.GetType();
-        GameOperatorBuilder? builder;
-        if (!allBuildersCache.TryGetValue(operationType, out builder))
-        {
-            builder = GameOperatorBuilder.GetBuilderFromType(operationType);
-            allBuildersCache.Add(operationType, builder);
-        }
+        GameOperatorBuilder builder = GetBuilder(operation.GetType());
         builder.Register(RegisterImpl, lifespan, operation);
     }
 

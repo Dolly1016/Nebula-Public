@@ -514,7 +514,7 @@ public static class MeetingHudExtension
             if (localPlayer == null) return;
             if (((1 << localPlayer.PlayerId) & mask) != 0)
             {
-                if (GeneralConfigurations.KillCooldownPenaltyOption > 0f) localPlayer.GainAttribute(PlayerAttributes.CooldownSpeed, GeneralConfigurations.KillCooldownPenaltyOption, -1f, true, 0);
+                if (GeneralConfigurations.KillCooldownPenaltyOption > 0f && (!GeneralConfigurations.KillCooldownPenaltyElseImpostorOption || !localPlayer.IsImpostor)) localPlayer.GainAttribute(PlayerAttributes.CooldownSpeed, GeneralConfigurations.KillCooldownPenaltyOption, -1f, true, 0);
                 if (GeneralConfigurations.DecelerationPenaltyRateOption < 1f) localPlayer.GainSpeedAttribute(GeneralConfigurations.DecelerationPenaltyRateOption, GeneralConfigurations.DecelerationPenaltyDurationOption, true, 0);
             }
         });

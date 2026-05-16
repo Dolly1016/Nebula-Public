@@ -59,6 +59,7 @@ public static class LoadPatch
                     }
                 }
 
+                BepInEx.Logging.Logger.CreateLogSource("NebulaError").LogError(errorText);
 
                 GameObject.Destroy(logo.gameObject);
                 GameObject.Destroy(logoGlow.gameObject);

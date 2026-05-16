@@ -60,7 +60,7 @@ internal class NiceTracker : DefinedSingleAbilityRoleTemplate<NiceTracker.Abilit
             {
                 var iconHolder = new PlayersIconHolder(false).Register(this);
                 iconHolder.XInterval = 0.35f;
-
+                
                 List<Tracking> trackings = [];
 
                 if (ShowWhereTrackingIsOption)
@@ -119,7 +119,7 @@ internal class NiceTracker : DefinedSingleAbilityRoleTemplate<NiceTracker.Abilit
                 GameOperatorManager.Instance?.Subscribe<GameUpdateEvent>(ev => {
                     trackings.RemoveAll(tuple =>
                     {
-                        if (!tuple.Duration.IsProgressing)
+                        if (!tuple.Duration.IsProgressing || tuple.Player.IsDead)
                         {
                             tuple.Lifespan.Release();
                             iconHolder.Remove(tuple.Icon);
@@ -143,7 +143,5 @@ internal class NiceTracker : DefinedSingleAbilityRoleTemplate<NiceTracker.Abilit
                 }
             }
         }
-
-
     }
 }

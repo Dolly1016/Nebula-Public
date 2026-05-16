@@ -96,6 +96,7 @@ public static class KillAnimationExtension
             if (killCharacteristics.HasFlag(KillCharacteristics.FlagLeftDeadBody))
             {
                 targetDeadBody = GenerateDisableDeadBody(1, pos);
+                ManagedEffects.RpcDisappearEffect.LocalInvoke((realTarget.Position.AsVector3(-1f), LayerExpansion.GetPlayersLayer()));
             }
             else
             {

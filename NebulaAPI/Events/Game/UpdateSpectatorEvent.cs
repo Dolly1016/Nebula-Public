@@ -13,10 +13,12 @@ public class UpdateSpectatorEvent : Event
 {
     public bool CanZoom { get; set; }
     public bool CanMonitorAlives { get; set; }
+    public bool CanSeeRoles { get; set; }
 
     internal UpdateSpectatorEvent()
     {
         CanZoom = true;
         CanMonitorAlives = true;
+        CanSeeRoles = true;
     }
 }

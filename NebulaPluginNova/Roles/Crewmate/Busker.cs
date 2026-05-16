@@ -22,7 +22,7 @@ public class Busker : DefinedSingleAbilityRoleTemplate<Busker.Ability>, DefinedR
 
     static private GameActionType BuskerRevivingAction;
 
-    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
+    public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0), arguments.GetAsBool(1));
 
     AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.CanLoadToMadmate;
 
@@ -45,6 +45,7 @@ public class Busker : DefinedSingleAbilityRoleTemplate<Busker.Ability>, DefinedR
         yield return new(reviveButtonSprite, "role.busker.ability.revive");
     }
 
+    int[]? DefinedAssignable.DefaultAssignableArguments => [0, 0];
 
 
     static private Image pseudocideButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.BuskPseudocideButton.png", 115f);
@@ -61,17 +62,20 @@ public class Busker : DefinedSingleAbilityRoleTemplate<Busker.Ability>, DefinedR
             if(AmOwner) PlayerModInfo.RpcRemoveAttr.Invoke((MyPlayer.PlayerId, PlayerAttributes.BuskerEffect.Id));
         }
 
-        int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
-        public Ability(GamePlayer player, bool isUsurped) : base(player, isUsurped)
+        int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt(), shouldNotArrangeAsKillButton.AsInt()];
+
+        private bool shouldNotArrangeAsKillButton = false;
+        public Ability(GamePlayer player, bool isUsurped, bool shouldNotArrangeAsKillButton) : base(player, isUsurped)
         {
+            this.shouldNotArrangeAsKillButton = shouldNotArrangeAsKillButton;
             if (AmOwner)
             {
-                var pseudocideButton = NebulaAPI.Modules.AbilityButton(this, isArrangedAsKillButton: !MyPlayer.IsImpostor)
+                var pseudocideButton = NebulaAPI.Modules.AbilityButton(this, isArrangedAsKillButton: !MyPlayer.IsImpostor && !shouldNotArrangeAsKillButton)
                     .BindKey(Virial.Compat.VirtualKeyInput.Ability)
                     .SetImage(pseudocideButtonSprite)
                     .SetLabel("pseudocide")
                     .SetAsUsurpableButton(this);
-                var reviveButton = NebulaAPI.Modules.AbilityButton(this, isArrangedAsKillButton: !MyPlayer.IsImpostor)
+                var reviveButton = NebulaAPI.Modules.AbilityButton(this, isArrangedAsKillButton: !MyPlayer.IsImpostor && !shouldNotArrangeAsKillButton)
                     .BindKey(Virial.Compat.VirtualKeyInput.Ability)
                     .SetImage(reviveButtonSprite)
                     .SetLabel("revive")

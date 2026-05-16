@@ -84,6 +84,8 @@
 "version.fetching.applied" : "適用中"
 "version.fetching.mismatched.detail" : "対応するAmong Us本体のバージョンがかけ離れているため、変更できません。<br>お手数をおかけしますが、再導入をお願いします。"
 "version.fetching.loadMore" : "さらに読み込む"
+"version.fetching.failed" : "バージョン情報取得失敗"
+"version.fetching.failed.detail" : "　時間をおいて再度お試しください。"
 
 # Game Mode
 

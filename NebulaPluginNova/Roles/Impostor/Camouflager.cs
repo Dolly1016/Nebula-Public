@@ -95,3 +95,15 @@ public class Camouflager : DefinedSingleAbilityRoleTemplate<Camouflager.Ability>
         }
         );
 }
+
+[NebulaPreprocess(PreprocessPhase.PostRoles)]
+public static class CamoExtensions
+{
+    static CamoExtensions(){
+
+        NebulaAPI.RegisterExtension<Camouflager.Ability, PlayerKillPlayerEvent>([OnlyMyPlayer](ability, ev) =>
+        {
+            if (ev.Player == ability.MyPlayer) NebulaAPI.Logging.InGameLogger(3f).Message("Camouflager killed a player!");
+        });
+    }
+}

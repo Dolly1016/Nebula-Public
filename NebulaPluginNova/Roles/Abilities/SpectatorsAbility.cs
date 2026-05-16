@@ -83,11 +83,15 @@ public class SpectatorsAbility : IGameOperator
 
     bool canZoom = false;
     bool canMonitor = false;
+    bool canSeeRole = false;
+    public bool CanSeeRole => canSeeRole;
+
     void Update(GameUpdateEvent ev)
     {
         var spectator = GameOperatorManager.Instance?.Run<UpdateSpectatorEvent>(new());
         canZoom = spectator?.CanZoom ?? true;
         canMonitor = spectator?.CanMonitorAlives ?? true;
+        canSeeRole = spectator?.CanSeeRoles ?? true;
     }
     void HudUpdate(GameHudUpdateEvent ev)
     {

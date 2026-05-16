@@ -14,6 +14,8 @@
 # Options
 
 "options.role.spy.detail" : "インポスターを欺くクルーメイトです。"
+"options.role.spy.numOfExemptedTasks" : "タスクの免除数"
+"options.role.spy.numOfExemptedTasks.detail" : "指定した数だけ、スパイの総タスク数が少なくなります。"
 
 # Game
 

@@ -561,7 +561,7 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 
             if (acTokenChallenge != null)
             {
-                acTokenChallenge.Value.cleared |= (acTokenChallenge.Value.lastAlive ?? 0) - NebulaGameManager.Instance!.AllPlayerInfo.Count(p => !p.IsDead && !p.AmOwner) >= 4;
+                acTokenChallenge.Value.cleared |= (acTokenChallenge.Value.lastAlive ?? 0) - NebulaGameManager.Instance!.AllPlayerInfo.Count(p => !p.IsDead && !p.AmOwner) >= 4 && !MyPlayer.IsDead;
                 acTokenChallenge.Value.lastAlive = null;
             }
         }

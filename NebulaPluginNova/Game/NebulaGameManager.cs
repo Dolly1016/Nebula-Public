@@ -104,12 +104,14 @@ public static class RoleHistoryHelper {
             result = isShort ? ghostRole.Role.GetRoleIconTag() + ghostRole.Role.DisplayColoredShort : ghostRole.Role.DisplayColoredName;
             color = ghostRole.Role.UnityColor;
             ghostRole.DecorateNameConstantly(ref result, true, true);
+            result = ghostRole.OverrideRoleName(result, isShort, true) ?? result;
         }
         else
         {
             result = isShort ? role.Role.GetRoleIconTag() + role.DisplayColoredShort : role.DisplayColoredName;
             color = role.Role.UnityColor;
             role.DecorateNameConstantly(ref result, true, true);
+            result = role.OverrideRoleName(result, isShort, true) ?? result;
         }
 
         foreach (var m in modifier)
@@ -338,7 +340,8 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
 
     //天界視点フラグ
     public bool CanBeSpectator { get; private set; }
-    public bool CanSeeAllInfo => CanBeSpectator && (ClientOption.GetValue(ClientOption.ClientOptionType.SpoilerAfterDeath) == 1 || !HudManager.InstanceExists);
+    private SpectatorsAbility? LocalSpectatorAbility { get; set; } = null;
+    public bool CanSeeAllInfo => (CanBeSpectator && ClientOption.GetValue(ClientOption.ClientOptionType.SpoilerAfterDeath) == 1 && (LocalSpectatorAbility?.CanSeeRole ?? true)) || GameState >= NebulaGameStates.Finished;
     public void ChangeToSpectator(bool tryGhostAssignment = true)
     {
         if (CanBeSpectator) return;
@@ -347,9 +350,8 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         if (!HudManager.InstanceExists) return;
 
         if (!LocalPlayer.AttemptedGhostAssignment) RpcTryAssignGhostRole.Invoke(LocalPlayer);
-        
 
-        new SpectatorsAbility().Register(this);
+        LocalSpectatorAbility = new SpectatorsAbility().Register(this);
     }
 
     //ゲーム内履歴

@@ -64,6 +64,7 @@ internal interface INebula
     internal AmongUsLL AmongUs { get; }
 
     E RunEvent<E>(E ev) where E : class, Virial.Events.Event;
+    void RegisterExtension<T, E>(Action<T, E> operation, int priority) where E : Virial.Events.Event;
 
     IModuleFactory Modules { get; }
 
@@ -161,6 +162,7 @@ public static class NebulaAPI
     /// <param name="ev"></param>
     /// <returns></returns>
     static public E RunEvent<E>(E ev) where E : class, Virial.Events.Event => instance.RunEvent(ev);
+    static public void RegisterExtension<T, E>(Action<T, E> operation, int priority = 0) where E : Virial.Events.Event => instance.RegisterExtension(operation, priority);
     static public GameStatsEntry CreateStatsEntry(string id, GameStatsCategory category, DefinedAssignable? assignable = null, TextComponent? displayTitle = null, int innerPriority = 0) => instance.CreateStatsEntry(id, category, assignable, displayTitle, innerPriority);
     static public void Progress(this GameStatsEntry entry, int num = 1) => instance.IncrementStatsEntry(entry.Id, num);
     static public void IncrementStatsEntry(string  entryId, int num = 1) => instance.IncrementStatsEntry(entryId, num);

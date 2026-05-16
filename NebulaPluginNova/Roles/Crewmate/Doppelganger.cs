@@ -190,7 +190,7 @@ internal class Doppelganger : DefinedSingleAbilityRoleTemplate<Doppelganger.Abil
             lifespan.Bind(this);
             fakePlayerReleasable = lifespan;
 
-            fakePlayer = FakePlayerController.SpawnSyncFakePlayer(MyPlayer, new(position, KillCharacteristics.KillAllAndLeaveBodyOne, true, flipX, MyPlayer.VanillaCosmetics.GetPetPosition())).BindLifespan(lifespan);
+            fakePlayer = FakePlayerController.SpawnSyncFakePlayer(MyPlayer, new(position, KillCharacteristics.KillAllAndLeaveBodyOne, true, true, flipX, MyPlayer.VanillaCosmetics.GetPetPosition())).BindLifespan(lifespan);
             isMoving = false;
         }
 
@@ -203,6 +203,7 @@ internal class Doppelganger : DefinedSingleAbilityRoleTemplate<Doppelganger.Abil
             var path = NavVerticesHelpers.CalcPath(fakePlayer!.TruePosition, to);
             if (path == null)
             {
+                DebugScreen.Push("経路が見つかりませんでした。", 3f);
                 return false;
             }
             else

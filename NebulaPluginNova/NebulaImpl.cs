@@ -56,7 +56,7 @@ public class NebulaImpl : INebula
     Virial.Game.Game? INebula.CurrentGame => NebulaGameManager.Instance;
 
     E INebula.RunEvent<E>(E ev) => GameOperatorManager.Instance?.Run(ev)!;
-
+    void INebula.RegisterExtension<T, E>(Action<T, E> operation, int priority) => GameOperatorManager.RegisterExtension(operation, priority);
     GameStatsEntry INebula.CreateStatsEntry(string id, GameStatsCategory category, DefinedAssignable? assignable, TextComponent? displayTitle, int innerPriority) => NebulaAchievementManager.RegisterStats(id, category, assignable, displayTitle, innerPriority);
 
     void INebula.IncrementStatsEntry(string id, int num) {

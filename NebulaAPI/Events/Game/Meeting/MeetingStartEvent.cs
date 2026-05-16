@@ -12,9 +12,10 @@ namespace Virial.Events.Game.Meeting;
 public class MeetingStartEvent : Event
 {
     /// <summary>
-    /// 会議で投票を禁じる場合、<c>false</c>にしてください。
+    /// ローカルプレイヤーに会議での通常の投票を禁じる場合、<c>false</c>にしてください。
     /// このプロパティはプレイヤーの生死による投票の可否を表すものではありません。
     /// 本来投票しえない状況での投票を可能にしません。
+    /// このプロパティがfalseになっても、投票権自体は奪われません。
     /// </summary>
     public bool CanVote { get; set; } = true;
     internal MeetingStartEvent() { }

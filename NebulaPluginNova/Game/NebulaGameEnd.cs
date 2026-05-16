@@ -467,17 +467,16 @@ public class EndGameManagerSetUpPatch
 }
 
 
-[HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.CoEndGame))]
+[HarmonyPatch(typeof(AmongUsClient._CoEndGame_d__35), nameof(AmongUsClient._CoEndGame_d__35.MoveNext))]
 public class EndGamePatch
 {
 
-    public static bool Prefix(AmongUsClient __instance, ref Il2CppSystem.Collections.IEnumerator __result)
+    public static bool Prefix(AmongUsClient._CoEndGame_d__35 __instance, ref bool __result)
     {
-        if (NebulaGameManager.Instance == null) return true;
+        __result = false;
+        if (NebulaGameManager.Instance == null) return false;
         NebulaGameManager.Instance.ReceiveVanillaGameResult();
         NebulaGameManager.Instance.ToGameEnd();
-
-        __result = Effects.Wait(0.1f);
         return false;
     }
 }

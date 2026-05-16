@@ -84,6 +84,8 @@
 "version.fetching.applied" : "Applied"
 "version.fetching.mismatched.detail" : "The version of Among Us is too far apart to change. <br>Please reinstall. Sorry!"
 "version.fetching.loadMore" : "More"
+"version.fetching.failed" : "Failed to fetching"
+"version.fetching.failed.detail" : "Please try again later!"
 
 # Game Mode
 

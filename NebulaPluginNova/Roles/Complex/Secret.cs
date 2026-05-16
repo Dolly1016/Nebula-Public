@@ -160,7 +160,7 @@ public class Secret : DefinedRoleTemplate, DefinedRole
         string? RuntimeAssignable.OverrideRoleName(string lastRoleName, bool isShort, bool canSeeAllInfo)
         {
             string str = (isShort ? "?" : "???").Color(Palette.CrewmateBlue);
-            if(canSeeAllInfo) str += $" ({savedRole.DisplayShort.Color(savedRole.UnityColor)})".Color(Color.gray);
+            if(canSeeAllInfo) str += $" ({savedRole.DisplayColoredShort})".Color(Color.gray);
             return str;
         }
 

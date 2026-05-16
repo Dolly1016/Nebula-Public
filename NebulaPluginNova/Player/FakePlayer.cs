@@ -428,7 +428,7 @@ internal class FakePet : IGameOperator
 
 
 [NebulaPreprocess(PreprocessPhase.BuildNoSModuleContainer), NebulaRPCHolder]
-internal record FakePlayerParameters(Vector2 position, KillCharacteristics KillCharacteristics, bool CanBeTarget, bool InitialFlipX, Vector2? petInitialPos, OutfitCandidate? specialOutfit = null)
+internal record FakePlayerParameters(Vector2 position, KillCharacteristics KillCharacteristics, bool CanBeTarget, bool CanWalk, bool InitialFlipX, Vector2? petInitialPos, OutfitCandidate? specialOutfit = null)
 {
     static FakePlayerParameters()
     {
@@ -438,13 +438,14 @@ internal record FakePlayerParameters(Vector2 position, KillCharacteristics KillC
             writer.Write(parameters.position.y);
             writer.Write((int)parameters.KillCharacteristics);
             writer.Write(parameters.CanBeTarget);
+            writer.Write(parameters.CanWalk);
             writer.Write(parameters.InitialFlipX);
             writer.Write(parameters.petInitialPos?.x ?? parameters.position.x);
             writer.Write(parameters.petInitialPos?.y ?? (parameters.position.y + 0.2f));
             writer.WriteIfNotNullCustom(parameters.specialOutfit);
         }, (reader) =>
         {
-            return new(new(reader.ReadSingle(), reader.ReadSingle()), (KillCharacteristics)reader.ReadInt32(), reader.ReadBoolean(), reader.ReadBoolean(),new(reader.ReadSingle(), reader.ReadSingle()), reader.ReadIfNotNullCustom<OutfitCandidate>());
+            return new(new(reader.ReadSingle(), reader.ReadSingle()), (KillCharacteristics)reader.ReadInt32(), reader.ReadBoolean(), reader.ReadBoolean(), reader.ReadBoolean(),new(reader.ReadSingle(), reader.ReadSingle()), reader.ReadIfNotNullCustom<OutfitCandidate>());
         });
     }
 }
@@ -503,6 +504,7 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
         NebulaGameManager.Instance.RegisterFakePlayer(this);
 
         Logics = new(this);
+        Logics.SetMovement(parameters.CanWalk);
 
         //スポーン & デスポーン
         GameOperatorManager.Instance?.RegisterOnReleased(() =>
@@ -544,7 +546,7 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
     public KillCharacteristics KillCharacteristics => killCharacteristics;
     public bool CanBeTarget => canBeTarget;
 
-    public Virial.Compat.Vector2 TruePosition => new((Vector2)displayPlayer.transform.position + collider.offset);
+    public Virial.Compat.Vector2 TruePosition => new((Vector2)displayPlayer.transform.position + collider.offset * collider.transform.localScale);
 
     public Virial.Compat.Vector2 Position => new(displayPlayer.transform.position);
 

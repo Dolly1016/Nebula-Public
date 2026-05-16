@@ -804,4 +804,11 @@ public static class AmongUsUtil
             return deltaTime > 0f ? 1f / deltaTime / 60f : 1f;
         }
     }
+
+    public static RemoteProcess<string> RpcLobbyNotification = new("LobbyGearNotification", (message, _) =>
+    {
+        var notifier = HudManager.Instance.Notifier;
+        AmongUsUtil.AddLobbyNotification(message, notifier.settingsChangeColor, notifier.settingsChangeSprite);
+    });
 }
+

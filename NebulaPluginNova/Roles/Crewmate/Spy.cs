@@ -10,6 +10,7 @@ using Virial.Assignable;
 using Virial.Components;
 using Virial.Configuration;
 using Virial.Events.Game;
+using Virial.Events.Player;
 using Virial.Game;
 using static Nebula.Roles.Impostor.Creeping;
 
@@ -17,11 +18,12 @@ namespace Nebula.Roles.Crewmate;
 
 internal class Spy : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignableDocument, ISpawnable
 {
-    private Spy() : base("spy", new(Palette.ImpostorRed), RoleCategory.CrewmateRole, Crewmate.MyTeam, [])
+    private Spy() : base("spy", new(Palette.ImpostorRed), RoleCategory.CrewmateRole, Crewmate.MyTeam, [VentConfiguration, NumOfExemptedTasksOption])
     {
     }
 
     static private readonly IVentConfiguration VentConfiguration = NebulaAPI.Configurations.VentConfiguration("role.spy.vent", false, null, 0, (0f, 30f, 2.5f), 0f, (0f, 20f, 2.5f), 10f);
+    static private readonly IntegerConfiguration NumOfExemptedTasksOption = NebulaAPI.Configurations.Configuration("options.role.spy.numOfExemptedTasks", (1, 8), 3);
 
     Citation? HasCitation.Citation => Citations.TheOtherRoles;
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
@@ -55,6 +57,17 @@ internal class Spy : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignableD
         void OnIntro(GameShowIntroLocalEvent ev)
         {
             if (ev.RelatedTeam == Impostor.Impostor.MyTeam) ev.AddPlayer(MyPlayer);
+        }
+
+        [OnlyMyPlayer]
+        void OnSetTaskLocal(PlayerTasksTrySetLocalEvent ev)
+        {
+            int extempts = NumOfExemptedTasksOption;
+            for (int i = 0; i < extempts; i++)
+            {
+                if (ev.Tasks.Count == 0) break;
+                ev.Tasks.RemoveAt(System.Random.Shared.Next(ev.Tasks.Count));
+            }
         }
     }
 }

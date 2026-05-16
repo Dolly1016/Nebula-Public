@@ -78,7 +78,7 @@ public static class NavVerticesHelpers
         List<int> fromNearby = [], toNearby = [];
 
         //現在のゲーム空間で移動の可能性を調べます。
-        bool CanMove(Vector2 from, float toX, float toY) => !Helpers.AnyCustomNonTriggersBetweenThick(from, new(toX, toY), radius, null);
+        bool CanMove(Vector2 from, float toX, float toY) => !Helpers.AnyCustomNonTriggersBetweenThick(from, new(toX, toY), radius, null, null, true);
 
         foreach (var node in structure.MainNodes)
         {
@@ -514,7 +514,7 @@ public static class NavVerticesHelpers
 
     static public NavPath? CalcPath(Vector2 from, Vector2 to)
     {
-        if (Helpers.AnyCustomNonTriggersBetweenThick(from, to, 0.15f, null))
+        if (Helpers.AnyCustomNonTriggersBetweenThick(from, to, 0.15f, null, null, true))
         {
             MapData.GetCurrentMapData().MapNavData.GetPathfindingNode(from, to, 0.15f, 8f, 3.2f, out var positions, out var nextNodes, out var conds);
             var indexPath = Pathfinding.FindPath(positions, nextNodes, positions.Length - 2, positions.Length - 1);

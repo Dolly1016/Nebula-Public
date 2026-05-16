@@ -34,3 +34,13 @@
 "stats.niceTracker.track" : "追跡回数"
 
 # Titles
+
+"achievement.niceTracker.common1.title" : "過干渉"
+"achievement.niceTracker.common1.goal" : "累計で5人を追跡する。"
+"achievement.niceTracker.common3.flavor" : ""もうガキじゃないんだよ！わかってよ！！""
+
+"achievement.niceTracker.common2.title" : "障子に目あり"
+"achievement.niceTracker.common2.goal" : "追跡中のプレイヤーが瞬間的に5m以上移動する。"
+
+"achievement.niceTracker.challenge.title" : "異論は認めない"
+"achievement.niceTracker.challenge.goal" : "全インポスターを追跡し、キルの瞬間を目撃した上で<br>非クルーメイトのみを追放してクルーメイト勝利する。"

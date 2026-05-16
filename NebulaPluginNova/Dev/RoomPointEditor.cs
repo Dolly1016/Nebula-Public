@@ -1,5 +1,6 @@
 ﻿using Il2CppSystem.IO;
 using Nebula.Behavior;
+using Nebula.Map;
 using Nebula.Patches;
 using System;
 using System.Collections.Generic;
@@ -162,6 +163,56 @@ internal class RoomPointEditor : AbstractModule<Virial.Game.Game>, IGameOperator
         };
     }
 
+    void Load(NavVerticesStructure structure)
+    {
+        DestroyAll();
+        LogUtils.WriteToConsole(JsonStructure.Serialize(structure));
+
+        foreach (var node in structure.MainNodes)
+        {
+            AddNode(new(node.X, node.Y), false);
+            var myNode = MainNodes[^1];
+            foreach (var target in node.Nodes) if (target < MainNodes.Count) AddEdge(MainNodes[target], myNode);
+        }
+        foreach (var node in structure.SubNodes)
+        {
+            AddNode(new(node.X, node.Y), true);
+            var myNode = DetailNodes[^1];
+            foreach (var target in node.Nodes) AddEdge(MainNodes[target], myNode);
+        }
+        CopiedSpecialEdges = structure.SpecialEdges;
+    }
+
+    void Load(string json)
+    {
+        NavVerticesStructure? structure = null;
+        try
+        {
+            structure = JsonStructure.Deserialize<NavVerticesStructure>(json);
+        }
+        catch
+        {
+            DebugScreen.Push("JSONが不適格です。", 2f);
+            return;
+        }
+        if (structure == null)
+        {
+            DebugScreen.Push("読み込みに失敗しました。", 2f);
+        }
+        else
+        {
+            Load(structure);
+
+            DebugScreen.Push("JSONから読み込みました。", 2f);
+        }
+    }
+
+    void OnGameStart(GameStartEvent ev)
+    {
+        Load(MapData.GetCurrentMapData().MapNavData);
+        DebugScreen.Push("現在のマップから読み込みました。", 2f);
+    } 
+
     Vector2 fromCache;
     void OnUpdate(GameHudUpdateEvent ev)
     {
@@ -175,43 +226,7 @@ internal class RoomPointEditor : AbstractModule<Virial.Game.Game>, IGameOperator
         {
             if (Input.GetKey(KeyCode.LeftShift) && Input.GetKey(KeyCode.RightShift))
             {
-                var json = Helpers.GetClipboardString();
-                NavVerticesStructure? structure = null;
-                try
-                {
-                    structure = JsonStructure.Deserialize<NavVerticesStructure>(json);
-                }
-                catch
-                {
-                    DebugScreen.Push("JSONが不適格です。", 2f);
-                    return;
-                }
-                if(structure == null)
-                {
-                    DebugScreen.Push("読み込みに失敗しました。", 2f);
-                }
-                else
-                {
-                    DestroyAll();
-                    LogUtils.WriteToConsole(JsonStructure.Serialize(structure));
-
-                    foreach (var node in structure.MainNodes)
-                    {
-                        AddNode(new(node.X, node.Y), false);
-                        var myNode = MainNodes[^1];
-                        foreach (var target in node.Nodes) if(target < MainNodes.Count) AddEdge(MainNodes[target], myNode);
-                    }
-                    foreach (var node in structure.SubNodes)
-                    {
-                        AddNode(new(node.X, node.Y), true);
-                        var myNode = DetailNodes[^1];
-                        foreach(var target in node.Nodes) AddEdge(MainNodes[target], myNode);
-                    }
-                    CopiedSpecialEdges = structure.SpecialEdges;
-                    
-                    DebugScreen.Push("クリップボードから読み込みました。", 2f);
-                }
-                
+                Load(Helpers.GetClipboardString());
             }
             else
             {

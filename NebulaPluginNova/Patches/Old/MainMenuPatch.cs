@@ -385,7 +385,9 @@ public static class MainMenuSetUpPatch
 
                 if((versions?.Count ?? 0) == 0)
                 {
-
+                    inner.Append(new MetaWidgetOld.VerticalMargin(0.8f));
+                    inner.Append(new MetaWidgetOld.Text(new(NameAttribute) { Alignment = TMPro.TextAlignmentOptions.Center }) { RawText = Language.Translate("version.fetching.failed"), Alignment = IMetaWidgetOld.AlignmentOption.Center });
+                    inner.Append(new MetaWidgetOld.Text(new(NameAttribute) { Alignment = TMPro.TextAlignmentOptions.Center }) { RawText = Language.Translate("version.fetching.failed.detail").Sized(70), Alignment = IMetaWidgetOld.AlignmentOption.Center });
                 }
                 foreach (var version in versions)
                 {
@@ -407,7 +409,13 @@ public static class MainMenuSetUpPatch
                                 button.OnMouseOver.AddListener(() =>
                                 {
                                     text.color = Color.green;
-                                    if (version.Body != null) NebulaManager.Instance.SetHelpWidget(button, version.Body);
+                                    if (version.Body != null)
+                                    {
+                                        string text = version.Body;
+                                        int index = text.IndexOf("ご支援よろしくお願いいたします。");
+                                        if (index >= 0) text = text.Substring(0, index);
+                                        NebulaManager.Instance.SetHelpWidget(button, text.Trim());
+                                    }
                                 });
                                 button.OnMouseOut.AddListener(() =>
                                 {

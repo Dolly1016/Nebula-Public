@@ -99,7 +99,11 @@ public class Agent : DefinedRoleTemplate, DefinedRole, IAssignableDocument
         void OnSetTaskLocal(PlayerTasksTrySetLocalEvent ev)
         {
             int extempts = NumOfExemptedTasksOption;
-            for (int i = 0; i < extempts; i++) ev.Tasks.RemoveAt(System.Random.Shared.Next(ev.Tasks.Count));
+            for (int i = 0; i < extempts; i++)
+            {
+                if (ev.Tasks.Count == 0) break;
+                ev.Tasks.RemoveAt(System.Random.Shared.Next(ev.Tasks.Count));
+            }
         }
 
         public override void OnActivated()

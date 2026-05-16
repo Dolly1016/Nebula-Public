@@ -1,21 +1,22 @@
 ﻿using AmongUs.GameOptions;
+using Nebula.Documents;
 using Nebula.Game.Statistics;
+using Nebula.Roles.Abilities;
+using PowerTools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Virial;
 using Virial.Assignable;
+using Virial.Components;
 using Virial.Configuration;
+using Virial.DI;
+using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
-using Virial;
-using PowerTools;
-using Virial.Events.Game;
-using Nebula.Roles.Abilities;
-using Virial.DI;
-using Virial.Components;
-using Nebula.Documents;
+using static UnityEngine.GraphicsBuffer;
 
 namespace Nebula.Roles.Impostor;
 
@@ -125,13 +126,19 @@ public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, De
                         RpcBubbleKill.Invoke((myPlayer, localPlayer, localPlayer.Position, index));
                         used = true;
                     }
-                }
 
-                foreach( var p in GamePlayer.AllOwningFakePlayers)
-                {
-                    if(p.IsActive && p.Position.Distance((Virial.Compat.Vector2)renderer.transform.position) < bubbleOption)
+                    foreach (var p in GamePlayer.AllOwningFakePlayers)
                     {
-                        myPlayer.MurderPlayer(p, PlayerState.Bubbled, null, KillParameter.RemoteKill, KillCondition.TargetAlive | KillCondition.InTaskPhase);
+                        if (p.IsActive && p.Position.Distance((Virial.Compat.Vector2)renderer.transform.position) < bubbleOption)
+                        {
+                            if (!(GameOperatorManager.Instance?.Run(new PlayerInteractPlayerLocalEvent(myPlayer, localPlayer, new(IsKillInteraction: true, ResetCooldownEvenIfFailed: false))).IsCanceled ?? true))
+                            {
+                                RpcBubbleKill.Invoke((myPlayer, localPlayer, p.Position, index));
+                                ManagedEffects.RpcPlayerDisappearEffect.Invoke(localPlayer);
+                                used = true;
+                                break;
+                            }
+                        }
                     }
                 }
             }

@@ -8,6 +8,7 @@ using Virial;
 using Virial.Events.Game;
 using Virial.Game;
 using Virial.Text;
+using static Il2CppSystem.DateTimeParse;
 
 
 namespace Nebula.Utilities;
@@ -366,16 +367,23 @@ public static class Helpers
         return result;
     }
 
-    public static bool AnyCustomNonTriggersBetweenThick(Vector2 pos1, Vector2 pos2, float radius, Predicate<Collider2D>? predicate, int? layerMask = null)
+    public static bool AnyCustomNonTriggersBetweenThick(Vector2 pos1, Vector2 pos2, float radius, Predicate<Collider2D>? predicate, int? layerMask = null, bool ignoreHittingOnPos1 = false)
     {
         layerMask ??= Constants.ShipAndAllObjectsMask;
         var vector = pos2 - pos1;
 
-        int num = Physics2D.CircleCastNonAlloc(pos1, radius, vector.normalized, PhysicsHelpers.castHits, vector.magnitude, layerMask!.Value);
+        //pos1近くでの衝突を無視するため、pos1からより遠い衝突を優先して取得するため、pos2からレイを出す。
+        int num = Physics2D.CircleCastNonAlloc(pos2, radius, -vector.normalized, PhysicsHelpers.castHits, vector.magnitude, layerMask!.Value);
         bool flag = false;
         for (int i = 0; i < num; i++)
         {
-            if (!PhysicsHelpers.castHits[i].collider.isTrigger && (predicate?.Invoke(PhysicsHelpers.castHits[i].collider) ?? true))
+            var hit = PhysicsHelpers.castHits[i];
+            if (hit.collider.isTrigger) continue;
+            if (ignoreHittingOnPos1 && Vector2.Dot(((Vector2)(hit.point - pos1)).normalized, vector.normalized) < 0f)
+            {
+                continue;
+            }
+            if ((predicate?.Invoke(hit.collider) ?? true))
             {
                 flag = true;
                 break;

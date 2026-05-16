@@ -198,7 +198,7 @@ public class Marionette : DefinedSingleAbilityRoleTemplate<Marionette.Ability>, 
             }
             else
             {
-                myFakePlayer = FakePlayerController.SpawnSyncFakePlayer(MyPlayer, new(MyPlayer.Position, KillCharacteristics.Disappear, true, MyPlayer.VanillaCosmetics.FlipX, null, FixDecoyAppearanceOption ? new OutfitCandidate(MyPlayer.CurrentOutfit, "marionette", OutfitPriority.FakeSpecialOutfit, true) : null)).BindLifespan(this);
+                myFakePlayer = FakePlayerController.SpawnSyncFakePlayer(MyPlayer, new(MyPlayer.Position, KillCharacteristics.Disappear, true, false, MyPlayer.VanillaCosmetics.FlipX, null, FixDecoyAppearanceOption ? new OutfitCandidate(MyPlayer.CurrentOutfit, "marionette", OutfitPriority.FakeSpecialOutfit, true) : null)).BindLifespan(this);
             }
         }
 

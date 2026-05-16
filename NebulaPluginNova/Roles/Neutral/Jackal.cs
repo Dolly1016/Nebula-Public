@@ -58,7 +58,7 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignable
 
     private Jackal() : base("jackal", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [KillCoolDownOption, CanCreateSidekickOption, NumOfKillingToCreateSidekickOption, JackalizedImpostorOption],
     othersAssignments: () => {
-        return (Sidekick.AssignedSidekickOption /*&& !Sidekick.IsModifierOption*/) ? [new((_, playerId)=> (Sidekick.MyRole, [0, playerId]), RoleCategory.NeutralRole)] : [];
+        return (CanCreateSidekickOption && Sidekick.AssignedSidekickOption /*&& !Sidekick.IsModifierOption*/) ? [new((_, playerId)=> (Sidekick.MyRole, [0, playerId]), RoleCategory.NeutralRole)] : [];
         
     })
     {
@@ -66,7 +66,7 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignable
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Jackal.png");
     }
 
-    DefinedRole[] DefinedRole.AdditionalRoles => Sidekick.AssignedSidekickOption /*&& !Sidekick.IsModifierOption*/ ? [Sidekick.MyRole] : [];
+    DefinedRole[] DefinedRole.AdditionalRoles => (CanCreateSidekickOption && Sidekick.AssignedSidekickOption) /*&& !Sidekick.IsModifierOption*/ ? [Sidekick.MyRole] : [];
     IEnumerable<DefinedRole> DefinedRole.GetGuessableAbilityRoles() => ((this as DefinedRole).CanSpawnInCurrentGame && !JackalizedImpostorOption) ? [this] : [];
     Citation? HasCitation.Citation => Citations.TheOtherRoles;
 
@@ -502,8 +502,8 @@ public class Sidekick : DefinedRoleTemplate, HasCitation, DefinedRole
 
                 if (SidekickCanKillOption)
                 {
-                    var killButton = NebulaAPI.Modules.KillButton(this, MyPlayer, true, Virial.Compat.VirtualKeyInput.Kill,
-                        KillCoolDownOption.Cooldown, "kill", ModAbilityButton.LabelType.Impostor, null!,
+                    var killButton = NebulaAPI.Modules.PlayerlikeKillButton(this, MyPlayer, true, Virial.Compat.VirtualKeyInput.Kill,
+                        null, KillCoolDownOption.Cooldown, "kill", ModAbilityButton.LabelType.Impostor, null!,
                         (player, _) => {
                             MyPlayer.MurderPlayer(player, PlayerState.Dead, EventDetail.Kill, KillParameter.NormalKill);
                             NebulaAPI.CurrentGame?.KillButtonLikeHandler.StartCooldown();

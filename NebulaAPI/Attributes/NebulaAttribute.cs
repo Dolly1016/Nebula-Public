@@ -164,6 +164,7 @@ public class EventPriority : Attribute
 
     public const int VeryHigh = 1000;
     public const int High = 100;
+    public const int Default = 0;
     public const int Low = -100;
     public const int VeryLow = -1000;
 }
