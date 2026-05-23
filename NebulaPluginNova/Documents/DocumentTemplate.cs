@@ -1,17 +1,19 @@
-using Virial;
-using Virial.Text;
-using Virial.Assignable;
-using Virial.Media;
-using Virial.Helpers;
-using Nebula.Modules.GUIWidget;
-using System;
-using Nebula.Modules;
-using Nebula.Utilities;
-using System.Linq;
-using Nebula.Player;
-using Nebula.Configuration;
 using Nebula;
+using Nebula.Configuration;
+using Nebula.Modules;
+using Nebula.Modules.GUIWidget;
+using Nebula.Player;
 using Nebula.Roles;
+using Nebula.Utilities;
+using System;
+using System.Linq;
+using System.Text.RegularExpressions;
+using TMPro;
+using Virial;
+using Virial.Assignable;
+using Virial.Helpers;
+using Virial.Media;
+using Virial.Text;
 
 namespace Nebula.Documents;
 
@@ -130,6 +132,13 @@ static public class RoleDocumentHelper
         .Replace("</client>", "</color></b>")
         .Replace("<title>", "<b><size=110%>")
         .Replace("</title>", "</size></b><br>");
+    static private string ReplaceVariableTextToEmpty(string orig) => orig
+        .Replace("<var>", "")
+        .Replace("</var>", "")
+        .Replace("<client>", "")
+        .Replace("</client>", "")
+        .Replace("<title>", "")
+        .Replace("</title>", "");
 
     static public GUIWidget GetChapter(string chapterName, IEnumerable<AssignableDocumentReplacement> replacements) => GetChapter(chapterName, [GetDocumentLocalizedText(chapterName + ".main", replacements)]);
     static public GUIWidget GetChapter(string chapterName, GUIWidget?[] inner)
@@ -142,7 +151,9 @@ static public class RoleDocumentHelper
     }
 
     static public GUIWidget GetTipsChapter(string assignableName, IEnumerable<AssignableDocumentReplacement> replacements) => GetChapter("document.tips", [GetDocumentLocalizedText(assignableName + ".tips", replacements)]);
+    static public string GetTipsText(string assignableName, IEnumerable<AssignableDocumentReplacement> replacements) => GetDocumentLocalizedTextForSearch(assignableName + ".tips", replacements);
     static public GUIWidget GetWinCondChapter(string assignableName, IEnumerable<AssignableDocumentReplacement> replacements) => GetChapter("document.winCond", [GetDocumentLocalizedText(assignableName + ".winCond", replacements)]);
+    static public string GetWinCondText(string assignableName, IEnumerable<AssignableDocumentReplacement> replacements) => GetDocumentLocalizedTextForSearch(assignableName + ".winCond", replacements);
     static public GUIWidget GetDocumentText(string? rawText) => rawText == null ? NebulaAPI.GUI.EmptyWidget : NebulaAPI.GUI.RawText(GUIAlignment.Left, NebulaAPI.GUI.GetAttribute(AttributeAsset.DocumentStandard), ReplaceVariableText(rawText));
     static public GUIWidget GetDocumentLocalizedText(string translationKey) => NebulaAPI.GUI.RawText(GUIAlignment.Left, NebulaAPI.GUI.GetAttribute(AttributeAsset.DocumentStandard), ReplaceVariableText(NebulaAPI.Language.Translate(translationKey)));
     static public GUIWidget GetDocumentLocalizedText(string translationKey, IEnumerable<AssignableDocumentReplacement> replacements)
@@ -150,6 +161,14 @@ static public class RoleDocumentHelper
         var text = NebulaAPI.Language.Translate(translationKey);
         foreach(var r in replacements) text = text.Replace(r.Key, r.Replacement);
         return NebulaAPI.GUI.RawText(GUIAlignment.Left, NebulaAPI.GUI.GetAttribute(AttributeAsset.DocumentStandard), ReplaceVariableText(text));
+    }
+
+    private static readonly Regex RichTextRegex = new Regex(@"<[^>]*>", RegexOptions.Compiled);
+    static public string GetDocumentLocalizedTextForSearch(string translationKey, IEnumerable<AssignableDocumentReplacement> replacements)
+    {
+        var text = NebulaAPI.Language.Translate(translationKey);
+        foreach (var r in replacements) text = text.Replace(r.Key, r.Replacement);
+        return RichTextRegex.Replace(text, string.Empty);
     }
 
     static public GUIWidget GetConfigurationCaption() => NebulaAPI.GUI.VerticalHolder(GUIAlignment.Left, NebulaAPI.GUI.VerticalMargin(0.2f), GetDocumentLocalizedText("document.caption.configuration"));

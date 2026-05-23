@@ -12,12 +12,24 @@ public class NoSGUIFramed : AbstractGUIWidget
     public Color? Color = null;
     public GUIWidgetSupplier? Inner { get; }
     public Action<SpriteRenderer>? PostBuilder { get; set; }
+    public Action? OnClicked { get; init; }
 
     public NoSGUIFramed(GUIAlignment alignment, GUIWidgetSupplier? inner, UnityEngine.Vector2 margin, Color? color = null) : base(alignment)
     {
         this.Inner = inner;
         this.Margin = margin;
         this.Color = color;
+    }
+
+    private void SetAsButton(SpriteRenderer renderer)
+    {
+        renderer.transform.localPosition = new(0, 0, 0.1f);
+        renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+        var button = renderer.gameObject.SetUpButton(true, renderer, Color, UnityEngine.Color.Lerp(UnityEngine.Color.cyan, UnityEngine.Color.green, 0.4f).AlphaMultiplied(0.3f));
+        var collider = renderer.gameObject.AddComponent<BoxCollider2D>();
+        collider.size = renderer.size;
+        collider.isTrigger = true;
+        button.OnClick.AddListener(OnClicked);
     }
 
     internal override GameObject? Instantiate(Size size, out Size actualSize)
@@ -38,6 +50,7 @@ public class NoSGUIFramed : AbstractGUIWidget
         actualSize.Width += Margin.x * 2f;
         actualSize.Height += Margin.y * 2f;
 
+        if (OnClicked != null) SetAsButton(renderer);
         PostBuilder?.Invoke(renderer);
 
         return frame.gameObject;

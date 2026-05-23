@@ -84,6 +84,7 @@ public static class HelpScreen
         Achievements = 0x10,
         Overview = 0x20,
         Stamps = 0x40,
+        Search = 0x80,
     }
 
     public record HelpTabInfo(HelpTab Tab,string TranslateKey)
@@ -93,6 +94,7 @@ public static class HelpScreen
     }
 
     public static readonly HelpTabInfo[] AllHelpTabInfo = [
+        new(HelpTab.Search, "help.tabs.search"),
         new(HelpTab.MyInfo, "help.tabs.myInfo"),
         new(HelpTab.Roles, "help.tabs.roles"),
         new(HelpTab.Overview, "help.tabs.overview"),
@@ -147,7 +149,7 @@ public static class HelpScreen
     {
         var screen = MetaScreen.GenerateWindow(new(7.8f, HelpHeight + 0.6f), HudManager.Instance.transform, new Vector3(0, 0, 0), true, false, background: BackgroundSetting.Modern);
 
-        HelpTab validTabs = HelpTab.Roles | HelpTab.Overview | HelpTab.Options | HelpTab.Achievements | HelpTab.Stamps;
+        HelpTab validTabs = HelpTab.Search | HelpTab.Roles | HelpTab.Overview | HelpTab.Options | HelpTab.Achievements | HelpTab.Stamps;
 
         if (NebulaGameManager.Instance?.GameState == NebulaGameStates.Initialized && !OnHelpCurrentAssignables.IsEmpty()) validTabs |= HelpTab.MyInfo;
 
@@ -155,15 +157,23 @@ public static class HelpScreen
         if (AmongUsClient.Instance.AmHost && (NebulaGameManager.Instance?.LobbySlideManager.IsValid ?? false) && LobbySlideManager.AllTemplates.Count > 0) validTabs |= HelpTab.Slides;
 #endif
 
-        //開こうとしているタブが存在しない場合は、ロール一覧を開く
-        if ((tab & validTabs) == (HelpTab)0) tab = PlayerControl.AllPlayerControls.Count > 5 ? HelpTab.Overview : HelpTab.Roles;
+        //開こうとしているタブが存在しない場合は、既定のタブを開く
+        if ((tab & validTabs) == (HelpTab)0)
+        {
+            if (Input.GetKey(KeyCode.LeftShift))
+                tab = HelpTab.Search;
+            else if ((validTabs & HelpTab.MyInfo) != 0)
+                tab = HelpTab.MyInfo;
+            else
+                tab = PlayerControl.AllPlayerControls.Count > 5 ? HelpTab.Overview : HelpTab.Roles;
+        }
 
         ShowScreen(screen, argument, tab, validTabs);
 
         return screen;
     }
 
-    private static TextAttributeOld TabButtonAttr = new(TextAttributeOld.BoldAttr) { Size = new(1f, 0.26f) };
+    private static TextAttributeOld TabButtonAttr = new(TextAttributeOld.BoldAttr) { Size = new(0.82f, 0.21f), FontSize = 1.6f, FontMaxSize = 1.6f };
     private static IMetaWidgetOld GetTabsWidget(MetaScreen screen, HelpTab tab, HelpTab validTabs)
     {
         List<IMetaParallelPlacableOld> tabs = [];
@@ -185,6 +195,9 @@ public static class HelpScreen
 
         switch (tab)
         {
+            case HelpTab.Search:
+                widget.Append(ShowSearchScreen());
+                break;
             case HelpTab.MyInfo:
                 widget.Append(ShowMyRolesSrceen(screen, out backImage));
                 break;
@@ -214,16 +227,18 @@ public static class HelpScreen
         screen.SetBackImage(backImage, 0.2f);
     }
 
-    static private MetaScreen ShowDocumentScreen(IDocument doc, Image? illustration)
+    static private MetaScreen ShowDocumentScreen(IDocument doc)
     {
-        var screen = MetaScreen.GenerateWindow(new(7f, 4.5f), HudManager.Instance.transform, Vector3.zero, true, true, background: BackgroundSetting.Modern);
+        float width = Mathn.Max(doc.RequiredWidth ?? 7f, 7f);
+        float height = Mathn.Max(doc.RequiredHeight ?? 4.5f, 4.5f);
 
         Virial.Compat.Artifact<GUIScreen>? inner = null;
-        var scrollView = new GUIScrollView(Virial.Media.GUIAlignment.Left, new(7f, 4.5f), () => doc.Build(inner) ?? GUIEmptyWidget.Default);
+        var scrollView = new GUIScrollView(Virial.Media.GUIAlignment.Left, new(width, height), () => doc.Build(inner) ?? GUIEmptyWidget.Default);
         inner = scrollView.Artifact;
         Variable<MetaWidgetOld.ScrollView.InnerScreen> innerRef = new();
 
-        screen.SetWidget(scrollView, illustration, out _);
+        var screen = MetaScreen.GenerateWindow(new(width, height), HudManager.Instance.transform, Vector3.zero, true, true, background: BackgroundSetting.Modern);
+        screen.SetWidget(scrollView, doc.Illustlation, out _);
         return screen;
     }
 
@@ -259,7 +274,7 @@ public static class HelpScreen
             Debug.Log("Not Existed: " + "role." + assignable.InternalName);
             return null;
         }
-        return ShowDocumentScreen(doc, assignable.ConfigurationHolder?.Illustration);
+        return ShowDocumentScreen(doc);
     }
 
     private static IMetaWidgetOld ShowAssignableScreen()
@@ -1002,6 +1017,71 @@ public static class HelpScreen
                 new GUIScrollView(GUIAlignment.Center, new(7.4f, HelpHeight - 1.5f), 
                     GUI.API.VerticalHolder(GUIAlignment.Center, widgets)
                 )
+            )
+         );
+    }
+
+
+    private static IMetaWidgetOld ShowSearchScreen()
+    {
+        GUITextField textField = null!;
+        GUIScrollView scrollView = null!;
+        textField = new GUITextField(GUIAlignment.Center, new(5f, 0.38f)) { HintText = Language.Translate("help.search.hint").Color(Color.gray), WithMaskMaterial = false, IsSharpField = false, MaxLines = 1, EnterAction = text => { OnSearch(); return true; }, GainFocus = true };
+        scrollView = new GUIScrollView(GUIAlignment.Center, new(7.4f, HelpHeight - 0.9f), null);
+        
+        void OnSearch() {
+            var query = textField.Artifact.First().Text.Split(' ', '　');
+
+            List<Virial.Media.GUIWidget> widgets = [];
+            bool over100 = false;
+            foreach(var doc in DocumentManager.AllDocuments)
+            {
+                if (!doc.CanBeShown) continue;
+
+                string GetTitle()
+                {
+                    var customTitle = doc.CustomTitle;
+                    if (customTitle != null) return customTitle;
+                    var assignable = doc.RelatedAssignable;
+                    if (assignable != null) return assignable.GetRoleIconTag(true) + " " + assignable.DisplayColoredName;
+                    return "";
+                }
+                string? title = null;
+                foreach(var piece in doc.Pieces)
+                {
+                    if(piece.Text.Any(t => query.All(q => t.Contains(q))))
+                    {
+                        if(widgets.Count == 100)
+                        {
+                            over100 = true;
+                            break;
+                        }
+                        title ??= GetTitle();
+                        widgets.Add(
+                            new NoSGUIFramed(GUIAlignment.Left,
+                                GUI.API.VerticalHolder(GUIAlignment.Left,
+                                    GUI.API.HorizontalMargin(6.8f),
+                                    GUI.API.RawText(GUIAlignment.Left, AttributeAsset.DocumentBold, title),
+                                    GUI.API.VerticalMargin(0.1f),
+                                    piece.Widget.Invoke().Move(new(0.1f, 0f))
+                                ), new(0.1f, 0.05f), new(0.3f, 0.3f, 0.3f, 0.2f)
+                            )
+                            { OnClicked = () => ShowDocumentScreen(doc) }
+                            );
+                    }
+                }
+                if (over100) break;
+            }
+
+            IEnumerable<Virial.Media.GUIWidget> viewInner = widgets;
+            if (over100) viewInner = viewInner.Prepend(GUI.API.LocalizedText(GUIAlignment.Center, AttributeAsset.DocumentBold, "help.search.tooManyResults"));
+            scrollView.Artifact.Do(a => a.SetWidget(GUI.API.VerticalHolder(GUIAlignment.Left, viewInner), out _));
+        }
+
+        return new MetaWidgetOld.WrappedWidget(
+            GUI.API.VerticalHolder(GUIAlignment.Center,
+                GUI.API.HorizontalHolder(GUIAlignment.Center, textField, GUI.API.LocalizedButton(GUIAlignment.Center, AttributeAsset.MarketplaceTabNonMaskedButton, "help.search.search", _ => OnSearch())),
+                scrollView
             )
          );
     }

@@ -16,6 +16,7 @@ public class GUITextField : AbstractGUIWidget
     public string DefaultText { get; init; } = "";
     public bool WithMaskMaterial { get; init; } = true;
     public int MaxLines { get; init; } = 1;
+    public bool GainFocus { get; init; } = false;
     public Predicate<string>? EnterAction { get; init; } = null;
     public Action<string>? LostFocusAction { get; init; } = null;
     public GUITextField(GUIAlignment alignment, Size size) : base(alignment)
@@ -49,6 +50,7 @@ public class GUITextField : AbstractGUIWidget
         var button = background.gameObject.SetUpButton(true, background);
         button.OnClick.AddListener(() => field.GainFocus());
         Artifact.Values.Add(field);
+        if (GainFocus) field.GainFocus();
         if (DefaultText.Length > 0) field.SetText(DefaultText);
         if (HintText != null) field.SetHint(HintText!);
         

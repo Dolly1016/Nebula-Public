@@ -24,13 +24,21 @@ internal class ConfigurationHolder : IConfigurationHolder
     List<ConfigurationTag> tags;
     Func<bool>? isShown;
     Func<ConfigurationHolderState>? state;
+    public IReadOnlyList<IConfiguration> Configurations => myConfigurations;
 
     static private List<ConfigurationHolder> allHolders = [];
     static public IEnumerable<IConfigurationHolder> AllHolders = allHolders;
 
+
     static void Preprocess(NebulaPreprocessor preprocessor)
     {
         allHolders.Sort((h1, h2) => h1.tabs.AsRawPattern != h2.tabs.AsRawPattern ? (int)h1.tabs.AsRawPattern - (int)h2.tabs.AsRawPattern : h1.title.TextForCompare.CompareTo(h2.title.TextForCompare));
+
+        for (int h = 0; h < allHolders.Count; h++)
+        {
+            var holder = allHolders[h];
+            DocumentManager.Register($"config.{h}", new ConfigurationDocument(holder));
+        }
     }
 
     public ConfigurationHolder(TextComponent title, TextComponent detail, BitMask<ConfigurationTab> tabs, BitMask<GameModeDefinition> gamemodes, IEnumerable<IConfiguration> configurations, Func<bool>? isShown = null, Func<ConfigurationHolderState>? state = null)

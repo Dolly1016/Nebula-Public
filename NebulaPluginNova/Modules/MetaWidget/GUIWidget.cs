@@ -2,6 +2,7 @@
 using Nebula.Behavior;
 using Nebula.Modules.MetaWidget;
 using Nebula.Roles;
+using UnityEngine.Device;
 using Virial;
 using Virial.Assignable;
 using Virial.Compat;
@@ -526,6 +527,12 @@ public class GUIScreenImpl : GUIScreen
 
     public void SetWidget(Virial.Media.GUIWidget? widget, out Size actualSize)
     {
+        if (!myScreen)
+        {
+            actualSize = new(0f, 0f);
+            return;
+        }
+
         myScreen.ForEachChild((Il2CppSystem.Action<GameObject>)(obj => GameObject.Destroy(obj)));
 
         if (widget != null)

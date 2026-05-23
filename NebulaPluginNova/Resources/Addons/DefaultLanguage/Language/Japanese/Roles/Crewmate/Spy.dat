@@ -31,14 +31,15 @@
 
 # Titles
 
-"achievement.spy.common1.title" : ""
-"achievement.spy.common1.goal" : ""
+"achievement.spy.common1.title" : "生きて帰るまでが遠足です"
+"achievement.spy.common1.goal" : "生きてクルーメイト勝利で勝利する。"
+"achievement.spy.common1.flavor" : ""寄り道せず、まっすぐ帰りましょう。" ―遠足（ていさつ）のしおり"
 
-"achievement.spy.another1.title" : ""
-"achievement.spy.another1.goal" : ""
+"achievement.spy.common2.title" : "かかったな！"
+"achievement.spy.common2.goal" : "インポスターによるキル現場を間近に目撃する。"
 
-"achievement.spy.another2.title" : ""
-"achievement.spy.another2.goal" : ""
+"achievement.spy.another1.title" : "裏切り者には死を"
+"achievement.spy.another1.goal" : "インポスターにキルされるか推測され死亡する。"
 
-"achievement.spy.challenge.title" : ""
-"achievement.spy.challenge.goal" : ""
+"achievement.spy.challenge.title" : "動乱を呼ぶ密偵"
+"achievement.spy.challenge.goal" : "1人以上のインポスターがインポスターにキルされたうえで<br>クルーメイト勝利によって勝利する。"

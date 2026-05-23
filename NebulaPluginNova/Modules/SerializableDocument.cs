@@ -3,6 +3,7 @@ using Nebula.Behavior;
 using Nebula.Modules.GUIWidget;
 using Nebula.Modules.Logging;
 using Nebula.Scripts;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TMPro;
 using UnityEngine;
@@ -21,12 +22,15 @@ namespace Nebula.Modules;
 public class DocumentManager
 {
     private static Dictionary<string, IDocument> allDocuments = new();
-    static public IDocument? GetDocument(string id)
+    static public IEnumerable<IDocument> AllDocuments => allDocuments.Values;
+    static public IDocument? GetDocument(string? id)
     {
+        if (id == null) return null;
         if(allDocuments.TryGetValue(id, out var document)) return document;
         return null;
     }
-
+    static public IDocument? GetAssignableDocument(DefinedAssignable? assignable) => GetDocument(GetAssignableDocumentId(assignable));
+    [return: NotNullIfNotNull("assignable")]static public string? GetAssignableDocumentId(DefinedAssignable? assignable) => assignable != null ? "role." + assignable.InternalName : null;
     static IEnumerator Preprocess(NebulaPreprocessor preprocessor)
     {
         yield return preprocessor.SetLoadingText("Loading Serializable Documents");
@@ -132,6 +136,9 @@ public class SerializableDocument : IDocument
         if (Contents != null) foreach (var doc in Contents) foreach (var c in doc.AllConents()) yield return c;
         if (Aligned != null) foreach (var doc in Aligned) foreach (var c in doc.AllConents()) yield return c;
     }
+
+    IEnumerable<DocumentPiece> IDocument.Pieces => [];
+    Image? IDocument.Illustlation => null;
 
     //使用している引数(任意)
     [JsonSerializableField(true)]

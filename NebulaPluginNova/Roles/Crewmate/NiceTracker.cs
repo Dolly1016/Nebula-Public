@@ -14,6 +14,7 @@ using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Text;
 
 namespace Nebula.Roles.Crewmate;
 
@@ -51,7 +52,10 @@ internal class NiceTracker : DefinedSingleAbilityRoleTemplate<NiceTracker.Abilit
     [NebulaRPCHolder]
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
-        private record Tracking(GamePlayer Player, PlayerIconInfo Icon, GameTimer Duration, FlexibleLifespan Lifespan);
+        private record Tracking(GamePlayer Player, PlayerIconInfo Icon, GameTimer Duration, FlexibleLifespan Lifespan)
+        {
+            public Vector2? LastPosition = null;
+        }
         
         public Ability(GamePlayer player, bool isUsurped) : base(player, isUsurped)
         {
@@ -75,6 +79,7 @@ internal class NiceTracker : DefinedSingleAbilityRoleTemplate<NiceTracker.Abilit
                     });
                 }
 
+                EditableBitMask<GamePlayer> trackedHistoryMask = BitMasks.AsPlayer();
                 var trackTracker = ObjectTrackers.ForPlayerlike(this, null, MyPlayer, p => ObjectTrackers.PlayerlikeStandardPredicate(p) && !trackings.Any(tuple => !tuple.Lifespan.IsDeadObject && tuple.Player == p));
                 var trackButton = NebulaAPI.Modules.EffectButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, TrackCooldownOption, TrackDurationOption, "track", buttonImage,
                     _ => trackTracker.CurrentTarget != null);
@@ -107,8 +112,12 @@ internal class NiceTracker : DefinedSingleAbilityRoleTemplate<NiceTracker.Abilit
                         var arrow = new TrackingArrowAbility(target.RealPlayer, 0f, Color.white).Register(lifespan);
                         timer.SetCondition(() => !MeetingHud.Instance && !ExileController.Instance);
                         timer.Start();
+                        
                         trackings.Add(new(target.RealPlayer, icon, timer, lifespan));
                         StatsTrack.Progress();
+                        new StaticAchievementToken("niceTracker.common1");
+                        trackedHistoryMask.Add(target.RealPlayer);
+                        
                         trackButton.StartCoolDown();
                     }
                 };
@@ -116,9 +125,25 @@ internal class NiceTracker : DefinedSingleAbilityRoleTemplate<NiceTracker.Abilit
                 
                 (trackButton.EffectTimer as GameTimer)?.SetCondition(() => MeetingHud.Instance == null && ExileController.Instance == null);
 
+                float meetingCooldown = 0f;
                 GameOperatorManager.Instance?.Subscribe<GameUpdateEvent>(ev => {
+                    //meetingCooldownの更新
+                    if (MeetingHud.Instance || ExileController.Instance) meetingCooldown = 5f;
+                    else meetingCooldown -= ev.DeltaTime;
+
+                    //trackingsの更新
                     trackings.RemoveAll(tuple =>
                     {
+                        //座標の更新
+                        var lastPos = tuple.LastPosition;
+                        var currentPos = tuple.Player.Position;
+                        tuple.LastPosition = currentPos;
+
+                        if(meetingCooldown < 0f)
+                        {
+                            if (lastPos.HasValue && lastPos.Value.Distance(currentPos) > 5f) new StaticAchievementToken("niceTracker.common2");
+                        }
+
                         if (!tuple.Duration.IsProgressing || tuple.Player.IsDead)
                         {
                             tuple.Lifespan.Release();
@@ -141,6 +166,29 @@ internal class NiceTracker : DefinedSingleAbilityRoleTemplate<NiceTracker.Abilit
                         trackings.Clear();
                     }, this);
                 }
+
+                int monitorKillCount = 0;
+                GameOperatorManager.Instance?.Subscribe<PlayerKillPlayerEvent>(ev =>
+                {
+                    if (trackings.Any(tuple => tuple.Player == ev.Murderer))
+                    {
+                        monitorKillCount++;
+                        if(monitorKillCount == AmongUsUtil.AdjustedImpostors(GamePlayer.AllPlayers.Count()))
+                        {
+                            GameOperatorManager.Instance?.Subscribe<GameEndEvent>(ev => {
+                                if (
+                                    ev.EndState.EndCondition == NebulaGameEnd.CrewmateWin &&
+                                    GamePlayer.AllPlayers.All(p =>
+                                        (!p.IsImpostor || trackedHistoryMask.Test(p)) && //全インポスターを追跡済み
+                                        (!p.IsTrueCrewmate || p.PlayerState != PlayerStates.Exiled) //クルーメイトを追放していない
+                                    )) new StaticAchievementToken("niceTracker.challenge");
+
+                            }, this);
+                        }
+                    }
+
+                }, this);
+                
             }
         }
     }

@@ -17,6 +17,8 @@ namespace Nebula.Configuration;
 public class ConfigurationsAPI : Virial.Configuration.Configurations
 {
     static public ConfigurationsAPI API { get; private set; } = new();
+    private Action? updateAction = null;
+    internal void SetUpdateAction(Action? updateAction) => this.updateAction = updateAction;
 
     IOrderedSharableVariable<bool> Configurations.SharableVariable(string id, bool defaultValue) => new BoolConfigurationValue(id, defaultValue);
     IOrderedSharableVariable<float> Configurations.SharableVariable(string id, FloatSelection values, float defaultValue) => new FloatConfigurationValue(id, values.Selection, defaultValue);
@@ -87,6 +89,7 @@ public class ConfigurationsAPI : Virial.Configuration.Configurations
     void Configurations.RequireUpdateSettingScreen()
     {
         if (NebulaSettingMenu.Instance) NebulaSettingMenu.Instance.UpdateSecondaryPage();
+        updateAction?.Invoke();
     }
 
 

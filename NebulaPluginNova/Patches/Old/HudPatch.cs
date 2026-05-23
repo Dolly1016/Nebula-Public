@@ -95,7 +95,7 @@ public static class HudManagerUpdatePatch
 
         if (!TextField.AnyoneValid &&  NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Help).KeyDownForAction && !IntroCutscene.Instance && !Minigame.Instance && !ExileController.Instance)
         {
-            HelpScreen.TryOpenHelpScreen(HelpTab.MyInfo);
+            HelpScreen.TryOpenHelpScreen(0);
         }
     }
 }

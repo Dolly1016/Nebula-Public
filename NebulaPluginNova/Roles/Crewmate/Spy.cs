@@ -12,6 +12,7 @@ using Virial.Configuration;
 using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Text;
 using static Nebula.Roles.Impostor.Creeping;
 
 namespace Nebula.Roles.Crewmate;
@@ -68,6 +69,33 @@ internal class Spy : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignableD
                 if (ev.Tasks.Count == 0) break;
                 ev.Tasks.RemoveAt(System.Random.Shared.Next(ev.Tasks.Count));
             }
+        }
+
+        [Local]
+        void OnGameEnd(GameEndEvent ev) {
+            if (MyPlayer.IsAlive && ev.EndState.EndCondition == NebulaGameEnd.CrewmateWin && ev.EndState.Winners.Test(MyPlayer)) new StaticAchievementToken("spy.common1");
+        }
+
+        [Local]
+        void OnAnyoneMurdered(PlayerMurderedEvent ev)
+        {
+            if(ev.Dead.IsImpostor && ev.Murderer.IsImpostor)
+            {
+                GameOperatorManager.Instance?.Subscribe<GameEndEvent>(ev => {
+                    if (ev.EndState.EndCondition == NebulaGameEnd.CrewmateWin && ev.EndState.Winners.Test(MyPlayer)) new StaticAchievementToken("spy.challenge");
+                }, this);
+            }
+
+            if (!MeetingHud.Instance && !ev.Dead.AmOwner)
+            {
+                if (ev.Murderer.IsImpostor && ev.Dead.Position.Distance(MyPlayer.Position) < 3f) new StaticAchievementToken("spy.common2");
+            }
+        }
+
+        [OnlyMyPlayer, Local]
+        void OnDead(PlayerMurderedEvent ev)
+        {
+            if (ev.Murderer.IsImpostor) new StaticAchievementToken("spy.another1");
         }
     }
 }

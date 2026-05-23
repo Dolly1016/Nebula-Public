@@ -271,20 +271,12 @@ public class Marketplace : MonoBehaviour
                     GUI.API.RawText(Virial.Media.GUIAlignment.Left, AttributeAsset.MarketplaceBlurb, Uri.UnescapeDataString(r.Blurb))
                 ), new(0.1f, 0.1f), Color.clear)
                 { 
-                    PostBuilder = renderer =>
+                    OnClicked = () =>
                     {
-                        renderer.transform.localPosition = new(0, 0, 0.1f);
-                        renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
-                        var button = renderer.gameObject.SetUpButton(true, renderer, Color.clear, UnityEngine.Color.Lerp(UnityEngine.Color.cyan, UnityEngine.Color.green, 0.4f).AlphaMultiplied(0.3f));
-                        var collider = renderer.gameObject.AddComponent<BoxCollider2D>();
-                        collider.size = renderer.size;
-                        collider.isTrigger = true;
-                        button.OnClick.AddListener(() =>
+                        OpenDetailWindow(isAddon, r.Id, transform, () =>
                         {
-                            OpenDetailWindow(isAddon, r.Id, transform, () => { 
-                                if (MyItemsScreen.isActiveAndEnabled) UpdateItemsScreen();
-                                if (MarketplaceScreen.isActiveAndEnabled) RefreshMarketplaceInnerScreen();
-                            });
+                            if (MyItemsScreen.isActiveAndEnabled) UpdateItemsScreen();
+                            if (MarketplaceScreen.isActiveAndEnabled) RefreshMarketplaceInnerScreen();
                         });
                     }
                 }));

@@ -38,6 +38,11 @@ public class GUIScrollView : AbstractGUIWidget
 
         public void SetWidget(Virial.Media.GUIWidget? widget, out Size actualSize)
         {
+            if (!screen)
+            {
+                actualSize = new(0f, 0f);
+                return;
+            }
             screen.ForEachChild((Il2CppSystem.Action<GameObject>)(obj => GameObject.Destroy(obj)));
 
             if (widget != null)

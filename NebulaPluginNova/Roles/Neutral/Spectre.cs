@@ -39,6 +39,7 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole, IAssignableDocument
         new GroupConfiguration("options.role.spectre.group.immoralist", [ImmoralistOption , SpectreFollowerChanceOption], MyTeam.Color.ToUnityColor().RGBMultiplied(0.65f)),
         new GroupConfiguration("options.role.spectre.group.dish", [NumOfDishesOption, SatietyRateOption, MaxSatietyOption, InitialSatietyOption, RequiredSatietyForWinningOption, ShowDishesOnMapOption, FriesReplenishmentCooldownOption], MyTeam.Color.ToUnityColor().RGBMultiplied(0.65f)),
         new GroupConfiguration("options.role.spectre.group.vanish", [VanishCostOption, VanishCooldownOption, VanishDurationOption], MyTeam.Color.ToUnityColor().RGBMultiplied(0.65f)),
+        new GroupConfiguration("options.role.spectre.group.adrenaline", [AdrenalineOption, AdrenalineRateOption], MyTeam.Color.ToUnityColor().RGBMultiplied(0.65f)),
         ],
         othersAssignments: () => {
             return ImmoralistOption.GetValue() switch
@@ -82,6 +83,8 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole, IAssignableDocument
     static private BoolConfiguration ShowWhereKillersAreOption = NebulaAPI.Configurations.Configuration("options.role.spectre.showWhereKillersAre", true);
     static private BoolConfiguration ShowDishesOnMapOption = NebulaAPI.Configurations.Configuration("options.role.spectre.showDishesOnMap", true);
     static private BoolConfiguration ClairvoyanceOption = NebulaAPI.Configurations.Configuration("options.role.spectre.clairvoyance", true);
+    static private BoolConfiguration AdrenalineOption = NebulaAPI.Configurations.Configuration("options.role.spectre.adrenalineOption", false);
+    static private FloatConfiguration AdrenalineRateOption = NebulaAPI.Configurations.Configuration("options.role.spectre.adrenalineRateOption", (0f, 0.875f, 0.125f), 0.25f, FloatConfigurationDecorator.Ratio, () => AdrenalineOption);
     static public ValueConfiguration<int> ImmoralistOption = NebulaAPI.Configurations.Configuration("options.role.spectre.immoralistVariation", [
         "options.role.spectre.immoralistVariation.none",
         "options.role.spectre.immoralistVariation.spectreFollower", 
@@ -341,7 +344,7 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole, IAssignableDocument
         
         private GamePlayer player;
         public float LeftSatiety => leftAliveTime.Value / SatietyRateOption;
-
+        public Func<bool>? NearbyKillers = null;
         public FriesGuageViewer(GamePlayer myPlayer, IFunctionalGetProperty<float> leftAliveTime)
         {
             player = myPlayer;
@@ -376,6 +379,7 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             var foxRenderer = UnityHelper.CreateObject<SpriteRenderer>("Fox", center.transform, new(-gaugeWidth * 0.5f, 0.1f, -0.1f));
             foxRenderer.sprite = guageIconSprite.GetSprite(1);
 
+            Color redColor = new(1f, 0.7f, 0.7f);
             GameOperatorManager.Instance?.Subscribe<GameHudUpdateEvent>((ev) => {
                 gauge.gameObject.SetActive(!player.IsDead && !AmongUsUtil.MapIsOpen && !ExileController.Instance);
                 if (MeetingHud.Instance)
@@ -391,6 +395,18 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                     float foodLevel = leftAliveTime.Value / SatietyRateOption;
                 if (center) guageFries.Do(g => g.Update(foodLevel));
                 foxRenderer.sprite = guageIconSprite.GetSprite(foodLevel < (float)Spectre.RequiredSatietyForWinningOption ? 0 : 1);
+
+                if (NearbyKillers != null) {
+                    if (NearbyKillers.Invoke())
+                    {
+                        var p = Mathn.Sin(Time.time * 6.7f) * 0.2f + 0.6f;
+                        gaugeRenderer.color = new(1f, p, p);
+                    }
+                    else
+                    {
+                        gaugeRenderer.color = Color.white;
+                    }
+                }
             }, this);
         }
     }
@@ -455,6 +471,8 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             );
         
         List<TrackingArrowAbility> killerArrows = [];
+
+        private bool ThereIsKillerNearbyMe() => GamePlayer.AllPlayers.Any(p => p.IsAlive && !p.AmOwner && IsKiller(p, out _) && p.Position.Distance(MyPlayer.Position) < 4f);
         public override void OnActivated()
         {
             if (AmOwner)
@@ -464,6 +482,8 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                 FunctionalGetter<float> leftAliveTimeProperty = new(()=>leftAliveTime);
 
                 var guage = new FriesGuageViewer(MyPlayer, leftAliveTimeProperty).Register(this);
+
+                if(AdrenalineOption) guage.NearbyKillers = ThereIsKillerNearbyMe;
 
                 var vanishButton = NebulaAPI.Modules.EffectButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
                     VanishCooldownOption, VanishDurationOption, "vanish", buttonSprite,
@@ -491,7 +511,15 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole, IAssignableDocument
         [Local]
         void OnUpdate(GameUpdateEvent ev)
         {
-            if (!MeetingHud.Instance && !ExileController.Instance) leftAliveTime -= Time.deltaTime;
+            if (!MeetingHud.Instance && !ExileController.Instance)
+            {
+                if (AdrenalineOption && ThereIsKillerNearbyMe()){
+                    leftAliveTime -= Time.deltaTime * AdrenalineRateOption;
+                }
+                else {
+                    leftAliveTime -= Time.deltaTime;
+                }
+            }
 
             if (!(leftAliveTime > 0f))
             {
@@ -538,6 +566,27 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             if (ShowWhereKillersAreOption) CheckAndTrackKiller(ev.Player);
         }
 
+        private bool IsKiller(GamePlayer player, out Color color)
+        {
+            if (player.IsImpostor)
+            {
+                color = Palette.ImpostorRed;
+                return true;
+            }
+            if (player.Role.Role is Sheriff)
+            {
+                color = Color.white;
+                return true;
+            }
+            if (player.IsKiller)
+            {
+                color = player.Role.Role.UnityColor;
+                return true;
+            }
+            color = Color.white;
+            return false;
+        }
+
         private void CheckAndTrackKiller(GamePlayer player)
         {
             void RegisterArrow(GamePlayer player, Color color) => killerArrows.Add(new TrackingArrowAbility(player.Unbox(), 0f, color, false).Register(this));
@@ -545,11 +594,7 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             killerArrows.RemoveAll(a => { if (a.MyPlayer == player) { a.Release(); return true; } else return false; });
             if (player.AmOwner) return;
 
-            if (player.IsImpostor) RegisterArrow(player, Palette.ImpostorRed);
-            if (player.Role is Jackal.Instance) RegisterArrow(player, Jackal.MyRole.UnityColor);
-            if (player.Role.Role is Sheriff) RegisterArrow(player, Color.white);
-            if (player.Role is Avenger.Instance) RegisterArrow(player, Avenger.MyRole.UnityColor);
-
+            if (IsKiller(player, out var color)) RegisterArrow(player, color);
         }
 
         DishMapLayer? mapLayer = null;

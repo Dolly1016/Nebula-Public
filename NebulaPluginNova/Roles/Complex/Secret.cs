@@ -56,6 +56,7 @@ public class Secret : DefinedRoleTemplate, DefinedRole
     Image? DefinedAssignable.IconImage => ShownSecret.OptionRole.GetRoleIcon();
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => IsEvil ? new EvilInstance(player,arguments) : new NiceInstance(player,arguments);
     bool DefinedAssignable.ShowOnHelpScreen => false;
+    bool DefinedAssignable.ShowOnFreeplayScreen => false;
     bool IGuessed.CanBeGuessDefault => false;
     bool AssignableFilterHolder.CanLoadDefault(Virial.Assignable.DefinedAssignable assignable) => false;
 

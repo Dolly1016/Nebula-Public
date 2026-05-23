@@ -641,8 +641,8 @@ public static class UsePlatformPatch
             __instance.IsLeft = !__instance.IsLeft;
             yield return Effects.All(
             (Il2CppSystem.Collections.IEnumerator[])[
-            Effects.Slide2D(__instance.transform, sourcePos, targetPos, target.MyPhysics.Speed),
-            Effects.Slide2DWorld(target.transform, worldSourcePos, worldTargetPos, target.MyPhysics.Speed)
+            Effects.Slide2D(__instance.transform, sourcePos, targetPos, /*target.MyPhysics.Speed*/ 2.5f),
+            Effects.Slide2DWorld(target.transform, worldSourcePos, worldTargetPos, /*target.MyPhysics.Speed*/ 2.5f)
             ]);
             if (Constants.ShouldPlaySfx()) SoundManager.Instance.StopNamedSound("PlatformMoving");
             if (target == null)
@@ -834,7 +834,17 @@ public class PetBehaviourStartPatch
 {
     public static void Postfix(PetBehaviour __instance)
     {
-        __instance.gameObject.ForEachAllChildren(obj => obj.layer = LayerExpansion.GetPlayersLayer());
+        var parent = __instance.transform.parent;
+        if (parent != null && parent.gameObject.layer == LayerExpansion.GetUILayer())
+        {
+            __instance.gameObject.layer = LayerExpansion.GetUILayer();
+            __instance.gameObject.ForEachAllChildren(obj => obj.layer = LayerExpansion.GetUILayer());
+        }
+        else
+        {
+            __instance.gameObject.layer = LayerExpansion.GetPlayersLayer();
+            __instance.gameObject.ForEachAllChildren(obj => obj.layer = LayerExpansion.GetPlayersLayer());
+        }
     }
 }
 

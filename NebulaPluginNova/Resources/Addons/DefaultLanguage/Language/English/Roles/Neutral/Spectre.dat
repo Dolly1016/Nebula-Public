@@ -35,9 +35,12 @@
 "options.role.spectre.immoralistVariation.random" : "Random"
 "options.role.spectre.immoralistVariation.alternate" : "Alternate"
 "options.role.spectre.spectreFollowerChance" : "Spectre Follower Spawn Chance"
+"options.role.spectre.adrenalineOption" : "Adrenaline Mode"
+"options.role.spectre.adrenalineRateOption" : "Adrenaline Rate"
 "options.role.spectre.group.immoralist" : "Immoralist Settings"
 "options.role.spectre.group.dish" : "Dish Settings"
 "options.role.spectre.group.vanish" : "Vanish Ability Settings"
+"options.role.spectre.group.adrenaline" : "Adrenaline Mode Settings"
 
 # Game
 

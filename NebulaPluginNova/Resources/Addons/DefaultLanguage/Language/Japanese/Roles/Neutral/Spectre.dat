@@ -35,9 +35,13 @@
 "options.role.spectre.immoralistVariation.random" : "ランダム"
 "options.role.spectre.immoralistVariation.alternate" : "交互"
 "options.role.spectre.spectreFollowerChance" : "子狐の出現確率"
+"options.role.spectre.adrenalineOption" : "アドレナリンモード"
+"options.role.spectre.adrenalineOption.detail" : "キラーのそばに近づくと緊張感が増し、満腹度が減りづらくなります。"
+"options.role.spectre.adrenalineRateOption" : "キラー接近時の腹持ち減少速度"
 "options.role.spectre.group.immoralist" : "背徳者の設定"
 "options.role.spectre.group.dish" : "お揚げの設定"
-"options.role.spectre.group.vanish" : "透明化能力"
+"options.role.spectre.group.vanish" : "透明化能力の設定"
+"options.role.spectre.group.adrenaline" : "アドレナリンモードの設定"
 
 # Game
 
