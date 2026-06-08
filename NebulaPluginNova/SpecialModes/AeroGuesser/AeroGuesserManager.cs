@@ -19,7 +19,7 @@ using Virial.DI;
 using Virial.Game;
 using Virial.Text;
 
-namespace Nebula.AeroGuesser;
+namespace Nebula.SpecialModes.AeroGuesser;
 
 [NebulaRPCHolder]
 internal class AeroGuesserSenario : AbstractModuleContainer, IModule, IGameModeAeroGuesser, IMinimapViewerInteraction, IMapButtonInteraction, IMapCameraInteraction, IWithAnswerPhase, IScoreBoardViewerInteraction, IAnswerMenuInteraction

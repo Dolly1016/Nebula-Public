@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Virial.Text;
 
-namespace Nebula.AeroGuesser;
+namespace Nebula.SpecialModes.AeroGuesser;
 
 internal class AnswerMinimapViewer : AbstractMinimapViewer
 {

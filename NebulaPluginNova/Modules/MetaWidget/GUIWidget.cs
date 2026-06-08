@@ -59,6 +59,37 @@ public abstract class AbstractGUIWidget : Virial.Media.GUIWidget
     }
 }
 
+public class LogicGUIWidget : Virial.Media.GUIWidget
+{
+    private Virial.Media.GUIWidget innerWidget;
+    private Action<GameObject, Size> logic;
+    public LogicGUIWidget(Virial.Media.GUIWidget innerWidget, Action<GameObject, Size> logic)
+    {
+        this.innerWidget = innerWidget;
+        this.logic = logic;
+    }
+
+    internal override GUIAlignment Alignment => innerWidget.Alignment;
+    internal override Image? BackImage { get => innerWidget.BackImage; set => innerWidget.BackImage = value; } 
+    internal override bool GrayoutedBackImage { get => innerWidget.GrayoutedBackImage; set => innerWidget.GrayoutedBackImage = value; }
+    
+    internal override GameObject? Instantiate(Size size, out Size actualSize)
+    {
+        var obj = innerWidget.Instantiate(size, out actualSize);
+        logic.Invoke(obj, actualSize);
+        return obj;
+    }
+
+    internal override GameObject? Instantiate(Anchor anchor, Size size, out Size actualSize)
+    {
+        var obj = innerWidget.Instantiate(anchor, size, out actualSize);
+        logic.Invoke(obj, actualSize);
+        return obj;
+    }
+
+    public override bool PostponesConsideringSize { get => innerWidget.PostponesConsideringSize; set => innerWidget.PostponesConsideringSize = value; }
+}
+
 public abstract class WidgetsHolder : AbstractGUIWidget
 {
     protected IEnumerable<Virial.Media.GUIWidget> widgets;
@@ -463,6 +494,8 @@ public class NebulaGUIWidgetEngine : Virial.Media.GUI
     public TextComponent FunctionalTextComponent(Func<string> supplier, string textForCompare) => new LazyTextComponent(supplier, textForCompare);
     public Virial.Media.GUIWidget Masked(Virial.Media.GUIWidget inner) => new GUIMasking(inner);
     public Virial.Media.GUIWidget ButtonGrouped(Virial.Media.GUIWidget inner) => new GUIButtonGroup(inner);
+    public Virial.Media.GUIWidget Logic(Virial.Media.GUIWidget inner, Action<GameObject, Size> logic) => new LogicGUIWidget(inner, logic);
+    public void MarkAsCenter(GameObject obj, Size size) => ScrollViewInitializer.Adjust(obj, size);
 
     public void OpenAssignableFilterWindow<R>(string scrollerTag, IEnumerable<R> allRoles, Func<R, bool> test, Action<R> toggleAndShare) where R : DefinedAssignable
     {

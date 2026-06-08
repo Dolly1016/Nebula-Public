@@ -1,4 +1,5 @@
 ﻿using AmongUs.Data.Player;
+using AmongUs.GameOptions;
 using Hazel;
 using Nebula.Behavior;
 using Nebula.Game.Statistics;
@@ -703,20 +704,54 @@ public static class CoUseLadderPatch
 }
 
 [HarmonyPatch(typeof(NetworkedPlayerInfo), nameof(NetworkedPlayerInfo.Deserialize))]
-internal class RPCSealingPatch
+internal class NetworkedPlayerInfoPatch
 {
-    static private bool lastIsDead = false;
-    static void Prefix(NetworkedPlayerInfo __instance, [HarmonyArgument(1)] ref bool initialState)
+    static bool Prefix(NetworkedPlayerInfo __instance, [HarmonyArgument(0)] MessageReader reader, [HarmonyArgument(1)] bool initialState)
     {
-        lastIsDead = __instance.IsDead;
-        initialState = true;
-    }
+        __instance.PlayerId = reader.ReadByte();
+        __instance.ClientId = reader.ReadPackedInt32();
+        byte b = reader.ReadByte();
+        __instance.Outfits.Clear();
+        for (int i = 0; i < (int)b; i++)
+        {
+            PlayerOutfitType playerOutfitType = (PlayerOutfitType)reader.ReadByte();
+            NetworkedPlayerInfo.PlayerOutfit playerOutfit = new NetworkedPlayerInfo.PlayerOutfit();
+            playerOutfit.Deserialize(reader);
+            __instance.Outfits[playerOutfitType] = playerOutfit;
+        }
+        __instance.PlayerLevel = reader.ReadPackedUInt32();
+        byte b2 = reader.ReadByte();
+        __instance.Disconnected = (b2 & 1) > 0;
+        //__instance.IsDead = (b2 & 4) > 0;
+        __instance.RoleType = (RoleTypes)reader.ReadUInt16();
+        if (reader.ReadBoolean())
+        {
+            __instance.RoleWhenAlive = new((RoleTypes)reader.ReadUInt16());
+        }
+        byte b3 = reader.ReadByte();
+        __instance.Tasks.Clear();
+        for (int j = 0; j < (int)b3; j++)
+        {
+            NetworkedPlayerInfo.TaskInfo taskInfo = new NetworkedPlayerInfo.TaskInfo();
+            taskInfo.Deserialize(reader);
+            __instance.Tasks.Add(taskInfo);
+        }
+        __instance.FriendCode = reader.ReadString();
+        __instance.Puid = reader.ReadString();
+        if (initialState && GameData.Instance.GetPlayerById(__instance.PlayerId) == null && !GameData.Instance.IsProcessingInfo(__instance))
+        {
+            GameData.Instance.AddPlayerInfo(__instance);
+        }
+        if (!initialState && __instance.Object != null)
+        {
+            __instance.Object.MyPhysics.ResetAnimState();
+        }
+        //GameData.Instance.RecomputeTaskCounts();
 
-    static void Postfix(NetworkedPlayerInfo __instance)
-    {
-        __instance.IsDead = lastIsDead || __instance.Disconnected;
+        return false;
     }
 }
+
 
 [HarmonyPatch(typeof(CustomNetworkTransform), nameof(CustomNetworkTransform.OnEnable))]
 public class SyncTransformPatch

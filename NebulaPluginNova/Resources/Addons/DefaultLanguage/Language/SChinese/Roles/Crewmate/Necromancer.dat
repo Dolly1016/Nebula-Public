@@ -21,7 +21,7 @@
 "options.role.necromancer.reviveDuration" : "复活所需时间"
 "options.role.necromancer.reviveDuration.detail" : "这是设置按下复活键复活尸体所需的等待时间。"
 "options.role.necromancer.detectedRange" : "最大通知距离"
-"options.role.necromancer.detectedRange.detail" : "当死灵法师与尸体足够进时，屏幕会变的有点紫。<br>这可以让其感知到尸体的存在。"
+"options.role.necromancer.detectedRange.detail" : "当死灵法师与尸体足够近时，屏幕会有紫色滤镜提示。<br>这可以让其感知到尸体的存在。"
 "options.role.necromancer.reviveMinRange" : "到复活室的最小距离"
 "options.role.necromancer.reviveMinRange.detail" : "复活尸体的房间是根据尸体的位置来确定的。<br>此设置是指定复活房间与尸体之间的最小距离。"
 "options.role.necromancer.reviveMaxRange" : "到复活室的最大距离"

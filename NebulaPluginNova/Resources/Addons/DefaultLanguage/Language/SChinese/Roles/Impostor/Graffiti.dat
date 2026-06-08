@@ -1,0 +1,43 @@
+# Assignable
+ 
+"role.graffiti.name" : "涂鸦者"
+"role.graffiti.short" : "涂"
+"role.graffiti.blurb" : "街头艺术家"
+"role.graffiti.hint" : "一起来涂鸦吧！"
+ 
+# Document
+ 
+"role.graffiti.doc" : "涂鸦者可以在地图中留下红色的涂鸦。"
+"role.graffiti.ability.title" : "固有能力【涂鸦艺术】"
+"role.graffiti.ability.main" : "通过专属地图对任何位置进行绘制涂鸦。"
+"role.graffiti.ability.draw" : "<title>涂鸦</title>打开地图，在选中位置留下涂鸦。"
+ 
+# Options
+ 
+"options.role.graffiti.detail" : "涂鸦者可以在地图中留下红色的涂鸦。"
+"options.role.graffiti.numOfDrawings" : "涂鸦可用次数"
+ 
+# Game
+ 
+# UI
+ 
+"button.label.draw" : "涂鸦"
+ 
+# Stats
+ 
+"stats.graffiti.drawing" : "涂鸦使用次数"
+ 
+# Titles
+ 
+"achievement.graffiti.common1.title" : ""
+"achievement.graffiti.common1.goal" : ""
+"achievement.graffiti.common1.cond" : ""
+ 
+"achievement.graffiti.common2.title" : ""
+"achievement.graffiti.common2.goal" : ""
+"achievement.graffiti.common2.cond" : ""
+ 
+"achievement.graffiti.challenge.title" : ""
+"achievement.graffiti.challenge.goal" : ""
+"achievement.graffiti.challenge.cond" : ""
+ 

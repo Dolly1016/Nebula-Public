@@ -113,16 +113,15 @@ public class Collator : DefinedSingleAbilityRoleTemplate<Collator.Ability>, HasC
             (matched ? StatsMatched : StatsUnmatched).Progress();
 
             NebulaAPI.CurrentGame?.GetModule<MeetingOverlayHolder>()?.RegisterOverlay(GUI.API.VerticalHolder(Virial.Media.GUIAlignment.Left,
-                new NoSGUIText(Virial.Media.GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayTitle), new TranslateTextComponent("role.collator.ui.title")),
-                new NoSGUIText(Virial.Media.GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayContent), 
-                new RawTextComponent(
+                GUI.API.LocalizedText(Virial.Media.GUIAlignment.Left, Virial.Text.AttributeAsset.OverlayTitle, "role.collator.ui.title"),
+                GUI.API.RawText(Virial.Media.GUIAlignment.Left, Virial.Text.AttributeAsset.OverlayContent,
                     Language.Translate("role.collator.ui.target") + ":<br>"
                     + "  " + player1.player.ColoredName + "<br>"
                     + "  " + player2.player.ColoredName + "<br>"
                     + "<br>"
-                    + Language.Translate("role.collator.ui.result") + ": " + (matched ? Language.Translate("role.collator.ui.matched").Color(Color.green) : Language.Translate("role.collator.ui.unmatched").Color(Color.red)).Bold()                     
-                )))
-                , MeetingOverlayHolder.IconsSprite[2], MyRole.RoleColor);
+                    + Language.Translate("role.collator.ui.result") + ": " + (matched ? Language.Translate("role.collator.ui.matched").Color(Color.green) : Language.Translate("role.collator.ui.unmatched").Color(Color.red)).Bold()
+                )
+            ), MeetingOverlayHolder.IconsSprite[2], MyRole.RoleColor);
             ShareResult.Invoke((MyPlayer, player1.player, player2.player, matched));
         }
 

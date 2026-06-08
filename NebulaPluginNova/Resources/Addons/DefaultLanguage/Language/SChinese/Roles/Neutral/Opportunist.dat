@@ -50,8 +50,8 @@
 "role.opportunist.task.loc.fungle.highlands.bigGem" : "宝石"
 "role.opportunist.task.loc.fungle.highlands.landing" : "中间平台"
 "role.opportunist.task.loc.fungle.jungle.monitoring" : "监测点"
-"options.role.opportunist.group.fallback" : "备用选项设定"
-"options.role.opportunist.fallback" : "备用选项"
+"options.role.opportunist.group.fallback" : "投机者备选方案设定"
+"options.role.opportunist.fallback" : "投机者备选方案"
 "options.role.opportunist.fallback.tasks" : "停留任务数量"
 
 # UI

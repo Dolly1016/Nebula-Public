@@ -16,7 +16,7 @@
 
 # Options
 
-"options.role.reaper.detail" : "死体を引きずって移動させてしまうインポスターです。<br><var>死体を持ったまま</var>ベント間を自由に移動できます。"
+"options.role.reaper.detail" : "死体を引きずって移動させてしまうインポスターです。<br>死体を持ってベント間を自由に移動できます。"
 "options.role.reaper.useVentWhileHoldingDeadbody" : "死体を抱えながらのベント使用"
 "options.role.reaper.connectAllVents" : "全ベントを接続"
 

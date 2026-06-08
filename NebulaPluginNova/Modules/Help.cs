@@ -1049,7 +1049,7 @@ public static class HelpScreen
                 string? title = null;
                 foreach(var piece in doc.Pieces)
                 {
-                    if(piece.Text.Any(t => query.All(q => t.Contains(q))))
+                    if(query.All(q => piece.Text.Any(t => t.Contains(q))))
                     {
                         if(widgets.Count == 100)
                         {
@@ -1066,7 +1066,14 @@ public static class HelpScreen
                                     piece.Widget.Invoke().Move(new(0.1f, 0f))
                                 ), new(0.1f, 0.05f), new(0.3f, 0.3f, 0.3f, 0.2f)
                             )
-                            { OnClicked = () => ShowDocumentScreen(doc) }
+                            { OnClicked = () =>
+                            {
+                                using (HighlightedDocument.Mark(piece.PieceId))
+                                {
+                                    ShowDocumentScreen(doc);
+                                }
+                            }
+                            }
                             );
                     }
                 }

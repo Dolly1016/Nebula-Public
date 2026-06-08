@@ -52,6 +52,8 @@
 "config.client.vcServerSettings.detail" : "设置语音聊天功能使用的服务器地址。"
 "config.client.smallHud" : "HUD紧凑化"
 "config.client.smallHud.detail" : "将屏幕中的按钮等界面元素以更小巧紧凑的方式显示。"
+"config.client.arrowRework" : "箭头显示优化"
+"config.client.arrowRework.detail" : "优化指向任务等箭头会与技能按钮等显示重叠的情况。"
 
 # Discord Webhook
 

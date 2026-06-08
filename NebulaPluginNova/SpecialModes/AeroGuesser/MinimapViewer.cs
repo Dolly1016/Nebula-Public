@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Virial.Events.Game.Minimap;
 using Virial.Text;
 
-namespace Nebula.AeroGuesser;
+namespace Nebula.SpecialModes.AeroGuesser;
 
 internal interface IMinimapViewerInteraction : IWithAnswerPhase
 {

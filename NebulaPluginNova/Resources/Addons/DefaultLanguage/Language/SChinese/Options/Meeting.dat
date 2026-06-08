@@ -8,6 +8,7 @@
 "options.meeting.group.gameStart" : "缩短冷却时间设定"
 "options.meeting.group.earlySettings" : "游戏前期紧急会议设定"
 "options.meeting.group.nonCrewmateInformation" : "非船员可见信息设定"
+"options.meeting.group.abandonmentPenalty" : "未投票惩罚设定"
 
 # Options
 
@@ -30,3 +31,9 @@
 "options.meeting.shortenCooldown" : "缩短冷却时间"
 "options.meeting.nonCrewCanSeeTaskTracker" : "紧急会议中可以查看任务进度"
 "options.meeting.nonCrewCanSeeSabotageStatus" : "紧急会议中可以查看破坏状态"
+"options.meeting.abandonmentPenalty" : "未投票惩罚"
+"options.meeting.abandonmentPenalty.detail" : "未投票的玩家将在会议结束后受到惩罚。"
+"options.meeting.abandonmentPenalty.killCooldown" : "击杀冷却禁止更新"
+"options.meeting.abandonmentPenalty.killCooldownElseImpostors" : "伪装者免除击杀冷却禁止更新"
+"options.meeting.abandonmentPenalty.decelerationRate" : "移动速度降低"
+"options.meeting.abandonmentPenalty.decelerationDuration" : "移动速度降低持续时间"

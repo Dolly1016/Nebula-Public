@@ -206,6 +206,7 @@ internal class KillRequestHandler
 
            var withBlink = param.KillParam.HasFlag(KillParameter.WithBlink);
            var useViperDeadBody = param.KillParam.HasFlag(KillParameter.WithViperDeadBody);
+           var withDeadBody = param.KillParam.HasFlag(KillParameter.WithDeadBody);
 
            bool realTargetWillDie = param.Target is GamePlayer || param.Target.KillCharacteristics.HasFlag(KillCharacteristics.FlagKillRealPlayer);
 
@@ -265,7 +266,8 @@ internal class KillRequestHandler
                }
            }
 
-           vanillaKiller?.MyPhysics.StartCoroutine(vanillaKiller.KillAnimations[System.Random.Shared.Next(vanillaKiller.KillAnimations.Count)].CoPerformModKill(param.RequestSender, param.RequestId, vanillaKiller, new(param.Target, param.TargetPos), param.RealTarget, param.KillCharacteristics, withBlink, param.TargetIsUsingUtility, param.DeadGoalPos, useViperDeadBody, vanillaKiller, param.PlayerState).WrapToIl2Cpp());
+           var killAnim = vanillaKiller?.KillAnimations[System.Random.Shared.Next(vanillaKiller.KillAnimations.Count)].CoPerformModKill(param.RequestSender, param.RequestId, vanillaKiller, new(param.Target, param.TargetPos), param.RealTarget, param.KillCharacteristics, withBlink, param.TargetIsUsingUtility, param.DeadGoalPos, useViperDeadBody, vanillaKiller, param.PlayerState);
+           if(killAnim?.enumerator != null) vanillaKiller?.MyPhysics.StartCoroutine(killAnim.Value.enumerator.WrapToIl2Cpp());
            // MurderPlayer ここまで
 
 
@@ -307,8 +309,8 @@ internal class KillRequestHandler
                    //幽霊役職割り当ての前にイベントを発火させる。
                    if (killerInfo != null)
                    {
-                       GameOperatorManager.Instance?.Run(new PlayerKillPlayerEvent(killerInfo, targetInfo), true);
-                       GameOperatorManager.Instance?.Run(new PlayerMurderedEvent(targetInfo, killerInfo, withBlink), true, shouldNotCheckGameEnd: false);
+                       GameOperatorManager.Instance?.Run(new PlayerKillPlayerEvent(killerInfo, targetInfo, withDeadBody, killAnim?.deadPos), true);
+                       GameOperatorManager.Instance?.Run(new PlayerMurderedEvent(targetInfo, killerInfo, withBlink, withDeadBody, killAnim?.deadPos), true, shouldNotCheckGameEnd: false);
                    }
                    else
                    {
@@ -382,8 +384,8 @@ internal class KillRequestHandler
               //Entityイベント発火
               if (killer != null)
               {
-                  GameOperatorManager.Instance?.Run(new PlayerKillPlayerEvent(killer, target), true);
-                  GameOperatorManager.Instance?.Run(new PlayerMurderedEvent(target, killer, false), true, shouldNotCheckGameEnd: false);
+                  GameOperatorManager.Instance?.Run(new PlayerKillPlayerEvent(killer, target, false), true);
+                  GameOperatorManager.Instance?.Run(new PlayerMurderedEvent(target, killer, false, false), true, shouldNotCheckGameEnd: false);
               }
               else
                   GameOperatorManager.Instance?.Run(new PlayerDieEvent(target), shouldNotCheckGameEnd: false);

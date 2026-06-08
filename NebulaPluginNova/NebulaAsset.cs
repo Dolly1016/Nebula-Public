@@ -281,6 +281,7 @@ public static class NebulaAsset
     static public Shader RoleIconShader { get; private set; } = null!;
     static public Shader TransColorGameShader { get; private set; } = null!;
 
+    static public readonly Image WhiteImage = SpriteLoader.FromResource("Nebula.Resources.White.png", 100f);
     static public ResourceExpandableSpriteLoader SharpWindowBackgroundSprite = new("Nebula.Resources.StatisticsBackground.png", 100f,5,5);
     static public Material BrokenShaderMat { get; private set; } = null!;
     static public GameObject PaparazzoShot { get; private set; } = null!;

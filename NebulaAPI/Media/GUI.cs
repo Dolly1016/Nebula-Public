@@ -84,8 +84,8 @@ public delegate void GUIClickableAction(GUIClickable clickable);
 public abstract class GUIWidget
 {
     internal abstract GUIAlignment Alignment { get; }
-    internal Image? BackImage { get; set; } = null!;
-    internal bool GrayoutedBackImage { get; set; } = false;
+    internal virtual Image? BackImage { get; set; } = null!;
+    internal virtual bool GrayoutedBackImage { get; set; } = false;
     internal abstract GameObject? Instantiate(Size size, out Size actualSize);
     internal abstract GameObject? Instantiate(Anchor anchor, Size size, out Size actualSize);
 
@@ -93,7 +93,7 @@ public abstract class GUIWidget
     /// 大きさの考慮を先送りにさせるウィジェットで使用します。
     /// 同じ位置に複数のウィジェットを配置できます。
     /// </summary>
-    public bool PostponesConsideringSize { get; set; } = false;
+    public virtual bool PostponesConsideringSize { get; set; } = false;
 
     /// <summary>
     /// GUIWidgetをSupplierの形式に変換します。
@@ -466,6 +466,8 @@ public interface GUI
 
     GUIWidget Masked(Virial.Media.GUIWidget inner);
     GUIWidget ButtonGrouped(Virial.Media.GUIWidget inner);
+    internal GUIWidget Logic(Virial.Media.GUIWidget inner, Action<GameObject, Size> logic);
+    internal void MarkAsCenter(GameObject obj, Size size);
 
     internal void OpenAssignableFilterWindow<R>(string scrollerTag, IEnumerable<R> allRoles, Func<R, bool> test, Action<R> toggleAndShare) where R : DefinedAssignable;
 
@@ -506,6 +508,7 @@ public static class GUIWidgetHelpers
 {
     public static GUIWidget Enmask(this GUIWidget inner) => NebulaAPI.GUI.Masked(inner);
     public static GUIWidget AsButtonGroup(this GUIWidget inner) => NebulaAPI.GUI.ButtonGrouped(inner);
+    public static GUIWidget WithLogic(this GUIWidget inner, Action<GameObject, Size> logic) => NebulaAPI.GUI.Logic(inner, logic);
     public static GUIWidget Move(this GUIWidget inner, Virial.Compat.Vector2 diff)
     {
         if (diff.x > 0f)
@@ -534,4 +537,13 @@ public static class GUIWidgetHelpers
         }
         return inner;
     }
+
+    public static GUIWidget MarkCenterIf(this GUIWidget inner, string pieceId) => inner.WithLogic((obj, size) => {
+        if (pieceId == HighlightedDocument.CurrentPiece) NebulaAPI.GUI.MarkAsCenter(obj, size);
+    });
+
+    public static GUIWidget MarkCenterIf(this GUIWidget inner, Predicate<string> predicate) => inner.WithLogic((obj, size) => {
+        var currentPiece = HighlightedDocument.CurrentPiece;
+        if (currentPiece != null && predicate.Invoke(currentPiece)) NebulaAPI.GUI.MarkAsCenter(obj, size);
+    });
 }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Virial.Events.Game;
 using Virial.Game;
 
-namespace Nebula.AeroGuesser;
+namespace Nebula.SpecialModes.AeroGuesser;
 
 internal class AchievementChecker : IGameOperator
 {
@@ -43,7 +43,7 @@ internal class AchievementChecker : IGameOperator
         new AchievementToken<int>("stats.aeroGuesser.totalScore", myScore, (v, _) => v);
         if(myScore == 1000) new StaticAchievementToken("stats.aeroGuesser.perfectScore");
 
-        if (myScore >= 800 && maxElseMe * 2 <= myScore && maxElseMe > 0) new StaticAchievementToken("aeroGuesser.doubleScore2");
+        if (myScore >= 800 && maxElseMe * 2 <= myScore && maxElseMe > 0 && PlayerControl.AllPlayerControls.Count >= 5) new StaticAchievementToken("aeroGuesser.doubleScore2");
         recordLess900 |= myScore < 900;
     }
 

@@ -79,7 +79,7 @@ internal class Spy : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignableD
         [Local]
         void OnAnyoneMurdered(PlayerMurderedEvent ev)
         {
-            if(ev.Dead.IsImpostor && ev.Murderer.IsImpostor)
+            if(ev.Dead.IsImpostor && ev.Murderer.IsImpostor && ev.Dead != ev.Murderer)
             {
                 GameOperatorManager.Instance?.Subscribe<GameEndEvent>(ev => {
                     if (ev.EndState.EndCondition == NebulaGameEnd.CrewmateWin && ev.EndState.Winners.Test(MyPlayer)) new StaticAchievementToken("spy.challenge");

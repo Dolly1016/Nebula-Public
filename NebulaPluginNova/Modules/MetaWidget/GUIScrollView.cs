@@ -1,7 +1,11 @@
 ﻿using Nebula.Behavior;
+using System.Diagnostics.CodeAnalysis;
 using UnityEngine.Rendering;
+using UnityEngine.UIElements;
+using UnityEngine.UIElements.Experimental;
 using Virial.Compat;
 using Virial.Media;
+using static UnityEngine.GraphicsBuffer;
 
 namespace Nebula.Modules.GUIWidget;
 
@@ -149,3 +153,97 @@ public class GUIScrollView : AbstractGUIWidget
         return view;
     }
 }
+
+
+/// <summary>
+/// スクロール位置を調整するスクリプト。
+/// 特定のウィジェットの表示位置を追跡するために使用する。
+/// </summary>
+internal class ScrollViewInitializer
+{
+    private GameObject targetObject;
+    private Size size;
+    private record ScrollViewInfo(Transform InnerParent, Scroller Scroller, float ViewRange);
+    private ScrollViewInitializer(GameObject targetObject, Size size)
+    {
+        this.targetObject = targetObject;
+        this.size = size;
+    }
+    private bool LookUpScroller([MaybeNullWhen(false)]out ScrollViewInfo info)
+    {
+        var childParent = targetObject.transform.parent;
+        while(childParent != null)
+        {
+            var parentParent = childParent.parent;
+            if (parentParent == null) break;
+            if(childParent.name == "Inner" && parentParent.name == "ScrollView")
+            {
+                var scroller = parentParent.FindChild("NebulaScroller");
+                var mask = parentParent.FindChild("Mask");
+                if (scroller != null && scroller.gameObject.TryGetComponent<Scroller>(out var scrollerComponent) && mask != null)
+                {
+                    info = new(childParent, scrollerComponent, mask.localScale.y);
+                    return true;
+                }
+            }
+            childParent = parentParent;
+        }
+        info = null;
+        return false;
+    }
+
+    private IEnumerator CoAdjust()
+    {
+        while (true)
+        {
+            if (!targetObject) yield break;
+            if (LookUpScroller(out var info))
+            {
+                var scroller = info.Scroller;
+
+                var target_y = info.InnerParent.InverseTransformPoint(targetObject.transform.position).y;
+
+                var ideal_scroll_y = info.ViewRange > size.Height ? -target_y : -target_y - (size.Height - info.ViewRange) / 2f;
+                var final_scroll_y = scroller.ContentYBounds.Clamp(ideal_scroll_y);
+
+                //スクロール実行ここから
+                scroller.velocity = UnityEngine.Vector2.zero;
+                UnityEngine.Vector3 localPosition = scroller.Inner.transform.localPosition;
+                localPosition.y = final_scroll_y;
+                info.InnerParent.localPosition = localPosition;
+                scroller.UpdateScrollBars();
+                //スクロール実行ここまで
+
+                //強調表示ここから
+                var effectPos = info.InnerParent.InverseTransformPoint(targetObject.transform.position);
+                effectPos.z = 0.08f;
+                var effectRenderer = UnityHelper.CreateSpriteRenderer("TargetObj", info.InnerParent, effectPos);
+                effectRenderer.sprite = VanillaAsset.FullScreenSprite;
+                effectRenderer.color = Color.clear;
+                effectRenderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                effectRenderer.transform.localScale = new(size.Width + 0.12f, size.Height + 0.05f, 1f);
+                effectRenderer.SetBothOrder(0);
+                yield return ManagedEffects.Lerp(1.5f, p =>
+                {
+                    if(effectRenderer) effectRenderer.color = new UnityEngine.Color(1f, 1f, 0f, Easing.OutQuad(1f - p) * 0.3f);
+                });
+
+                if (effectRenderer) GameObject.Destroy(effectRenderer.gameObject);
+                //強調表示ここまで
+
+                yield break;
+            }
+            yield return null;
+        }
+    }
+
+    /// <summary>
+    /// 指定の大きさのGameObjectをScrollViewの表示範囲内に収めます。表示範囲より大きい場合は、上端か下端のいずれかが表示範囲内に収まります。
+    /// </summary>
+    /// <param name="targetObject"></param>
+    /// <param name="size"></param>
+    /// <returns></returns>
+    static public IEnumerator CoAdjust(GameObject targetObject, Size size) => new ScrollViewInitializer(targetObject, size).CoAdjust();
+    static public void Adjust(GameObject targetObject, Size size) => CoAdjust(targetObject, size).StartOnScene();
+}
+

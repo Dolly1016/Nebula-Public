@@ -1,14 +1,5 @@
-﻿using Nebula.Modules;
-using Nebula.Player;
-using Nebula.Roles;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Virial;
+﻿using Virial;
 using Virial.Assignable;
-using Virial.Attributes;
 using Virial.Compat;
 using Virial.Media;
 using Virial.Runtime;
@@ -17,6 +8,7 @@ namespace Nebula.Documents;
 
 public class AssignableDocument : IDocumentWithId
 {
+    static private string GetAbilityPieceTag(int index) => "ability" + index;
     string documentId;
     DefinedAssignable? staticAssignable;
     IAssignableDocument? assignableDocumentCache;
@@ -40,7 +32,7 @@ public class AssignableDocument : IDocumentWithId
             (assignableDocumentCache?.HasWinCondition ?? false) ? RoleDocumentHelper.GetWinCondChapter(documentId, replacements) : null,
             (assignableDocumentCache?.HasAbility ?? false) ? RoleDocumentHelper.GetChapter($"{documentId}.ability", [
                 RoleDocumentHelper.GetDocumentLocalizedText($"{documentId}.ability.main", replacements),
-                ..abilityContents.Select(c => RoleDocumentHelper.GetImageLocalizedContent(c.Image, c.Content, replacements)),
+                ..abilityContents.Select((c, index) => RoleDocumentHelper.GetImageLocalizedContent(c.Image, c.Content, replacements).MarkCenterIf(GetAbilityPieceTag(index))),
                 ]) : null,
             (assignableDocumentCache?.HasTips ?? false) ? RoleDocumentHelper.GetTipsChapter(documentId, replacements) : null,
             RoleDocumentHelper.GetConfigurationCaption()
@@ -52,15 +44,17 @@ public class AssignableDocument : IDocumentWithId
         var abilityContents = assignableDocumentCache?.GetDocumentImages().ToArray() ?? [];
         var replacements = assignableDocumentCache?.GetDocumentReplacements().ToArray() ?? [];
 
-        if(staticAssignable != null) yield return new([staticAssignable.GeneralBlurb, staticAssignable.DisplayName], ()=> RoleDocumentHelper.GetAssignableNameWidget(staticAssignable, replacements)!, this);
+        if(staticAssignable != null) yield return new(RoleDocumentHelper.HeaderPieceTag, [staticAssignable.GeneralBlurb, staticAssignable.DisplayName], ()=> RoleDocumentHelper.GetAssignableNameWidget(staticAssignable, replacements)!, this);
 
-        if (assignableDocumentCache?.HasWinCondition ?? false) yield return new([RoleDocumentHelper.GetWinCondText(documentId, replacements)], () => RoleDocumentHelper.GetWinCondChapter(documentId, replacements), this);
-        if (assignableDocumentCache?.HasTips ?? false) yield return new([RoleDocumentHelper.GetTipsText(documentId, replacements)], () => RoleDocumentHelper.GetTipsChapter(documentId, replacements), this);
+        if (assignableDocumentCache?.HasWinCondition ?? false) yield return new(RoleDocumentHelper.WinCondPieceTag, [RoleDocumentHelper.GetWinCondText(documentId, replacements)], () => RoleDocumentHelper.GetWinCondChapter(documentId, replacements), this);
+        if (assignableDocumentCache?.HasTips ?? false) yield return new(RoleDocumentHelper.TipsPieceTag, [RoleDocumentHelper.GetTipsText(documentId, replacements)], () => RoleDocumentHelper.GetTipsChapter(documentId, replacements), this);
         if (assignableDocumentCache?.HasAbility ?? false)
         {
+            int index = 0;
             foreach(var contents in assignableDocumentCache?.GetDocumentImages() ?? [])
             {
-                yield return new([RoleDocumentHelper.GetDocumentLocalizedTextForSearch(contents.Content, replacements)], () => RoleDocumentHelper.GetImageLocalizedContent(contents.Image, contents.Content, replacements), this);
+                yield return new(GetAbilityPieceTag(index), [RoleDocumentHelper.GetDocumentLocalizedTextForSearch(contents.Content, replacements)], () => RoleDocumentHelper.GetImageLocalizedContent(contents.Image, contents.Content, replacements), this);
+                index++;
             }
         }
     }

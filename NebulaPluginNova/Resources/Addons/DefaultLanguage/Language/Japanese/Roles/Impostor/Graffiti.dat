@@ -1,0 +1,39 @@
+# Assignable
+
+"role.graffiti.name" : "グラフィティ"
+"role.graffiti.short" : "グ"
+"role.graffiti.blurb" : "裏街道の芸術家"
+"role.graffiti.hint" : "落書きしちゃおう！"
+
+# Document
+
+"role.graffiti.doc" : "血文字のダイイングメッセージのような落書きを残せるインポスターです。"
+"role.graffiti.ability.title" : "固有能力 "スプレー1本のゲリラアート""
+"role.graffiti.ability.main" : "専用のミニマップで任意の箇所に落書きを残します。"
+"role.graffiti.ability.draw" : "<title>落書き</title>ミニマップを開き、指定した場所に落書きします。"
+
+# Options
+
+"options.role.graffiti.detail" : "グラフィティは血文字のダイイングメッセージのような落書きをするインポスターです。"
+"options.role.graffiti.numOfDrawings" : "最大落書き回数"
+
+# Game
+
+# UI
+
+"button.label.draw" : "落書き"
+
+# Stats
+
+"stats.graffiti.drawing" : "落書き回数"
+
+# Titles
+
+"achievement.graffiti.common1.title" : "アートには意味がある"
+"achievement.graffiti.common1.goal" : "落書きする。"
+"achievement.graffiti.common1.flavor" : ""世界を掻き立てるのは、芸術だ。""
+
+"achievement.graffiti.challenge.title" : "愛はごみ箱の中に"
+"achievement.graffiti.challenge.goal" : "ダイイングメッセージを持つプレイヤーがいるゲームで、<br>本物のダイイングメッセージが出現しながらも味方が全員生存したまま勝利する。"
+"achievement.graffiti.challenge.cond" : "味方の人数: 自身のほか1人以上"
+"achievement.graffiti.challenge.splitted.1" : "ごみ箱の"

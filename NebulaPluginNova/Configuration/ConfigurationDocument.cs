@@ -34,7 +34,7 @@ internal class ConfigurationDocument : IDocument
         {
             if (c.IsShown)
             {
-                yield return new DocumentPiece([c.GetDisplayText() ?? ""], () => GUI.API.RawText(GUIAlignment.Left, AttributeAsset.DocumentBold, (c.GetDisplayText() ?? "") + extraText), this);
+                yield return new DocumentPiece(RoleDocumentHelper.GetOptionPieceTag(index), [c.GetDisplayText() ?? "", myHolder.RelatedAssignable?.DisplayName ?? ""], () => GUI.API.RawText(GUIAlignment.Left, AttributeAsset.DocumentBold, (c.GetDisplayText() ?? "") + extraText), this);
             }
             index++;
         }
@@ -54,10 +54,18 @@ internal class ConfigurationDocument : IDocument
     {
         if (CanEditNow)
         {
-            var widget = GUI.API.VerticalHolder(GUIAlignment.Left, myHolder.Configurations.Where(c => c.IsShown).Select(c => c.GetEditor().Invoke()).Prepend(GUI.API.Text(GUIAlignment.Left, AttributeAsset.DocumentTitle, myHolder.Title)));
+            List<GUIWidget> widgets = [GUI.API.Text(GUIAlignment.Left, AttributeAsset.DocumentTitle, myHolder.Title)];
+            int index = 0;
+            foreach(var config in myHolder.Configurations)
+            {
+                if (config.IsShown) widgets.Add(config.GetEditor().Invoke().MarkCenterIf(RoleDocumentHelper.GetOptionPieceTag(index)));
+                index++;
+            }
+            var widget = GUI.API.VerticalHolder(GUIAlignment.Left, widgets);
             ConfigurationsAPI.API.SetUpdateAction(() => target.Do(screen =>
             {
-                screen.SetWidget(widget, out _);
+                List<GUIWidget> newWidgets = [GUI.API.Text(GUIAlignment.Left, AttributeAsset.DocumentTitle, myHolder.Title), ..myHolder.Configurations.Where(c => c.IsShown).Select(c => c.GetEditor().Invoke())];
+                screen.SetWidget(GUI.API.VerticalHolder(GUIAlignment.Left, newWidgets), out _);
             }));
             return widget;
         }

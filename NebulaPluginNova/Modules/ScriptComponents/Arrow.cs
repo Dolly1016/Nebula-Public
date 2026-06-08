@@ -1,4 +1,5 @@
 ﻿using Nebula.Modules.Cosmetics;
+using Nebula.Patches;
 using Virial;
 using Virial.Events.Game;
 using Virial.Game;
@@ -106,6 +107,8 @@ public class Arrow : FlexibleLifespan, IGameOperator
     {
         if (!arrowRenderer) return;
 
+        bool ovalMode = ClientOption.GetValue(ClientOption.ClientOptionType.ArrowRework) == 1;
+
         //視点中心からのベクトル
 
         //表示するカメラ
@@ -131,7 +134,7 @@ public class Arrow : FlexibleLifespan, IGameOperator
         //スクリーン上の位置
         Vector2 viewportPoint = worldCam.WorldToViewportPoint(TargetPos);
 
-        if (Between(viewportPoint.x, 0f, 1f) && Between(viewportPoint.y, 0f, 1f))
+        if (ArrowUpdatePatch.InArea(ovalMode, viewportPoint))
         {
             if (ShowOnlyOutside) arrowRenderer!.gameObject.SetActive(false);
             else
@@ -144,7 +147,7 @@ public class Arrow : FlexibleLifespan, IGameOperator
         else
         {
             //画面外を指す矢印
-            Vector2 vector3 = new Vector2(Mathn.Clamp(viewportPoint.x * 2f - 1f, -1f, 1f), Mathn.Clamp(viewportPoint.y * 2f - 1f, -1f, 1f));
+            Vector2 vector3 = ArrowUpdatePatch.AdjustVector(ovalMode, viewportPoint);
             
             //UIのカメラに合わせて位置を調節する
             float orthographicSize = main.orthographicSize;

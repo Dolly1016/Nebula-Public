@@ -93,6 +93,9 @@
 "perk.sacrifice.detail" : "Summons a decoy at the location.<br>If the decoy is killed, the perk user will not die.<br>The decoy will disappear after %D% seconds."
 "perk.sacrifice.duration" : "Decoy Duration"
 
+"perk.ketchupMessage.name" : "Ketchup Message"
+"perk.ketchupMessage.detail" : "Draw a message on the spot."
+
 # Game Statictics
 
 "statistics.events.meteor" : "Meteor"

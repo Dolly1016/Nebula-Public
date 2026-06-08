@@ -1,0 +1,30 @@
+# Assignable
+ 
+"role.dyingMessage.name" : "临终遗言"
+"role.dyingMessage.generalBlurb" : "留下最后的遗言。"
+ 
+# Document
+ 
+"role.dyingMessage.doc" : "临终遗言是一个无法被感知的附加能力。<br>死亡后可以留下一幅涂鸦。"
+ 
+# Options
+ 
+"options.role.dyingMessage.detail" : "临终遗言是一个无法被感知的附加能力。<br>在死亡后的一段时间内可以留下一幅涂鸦。"
+ 
+# Game
+ 
+"options.role.dyingMessage.messageDuration" : "遗言绘制时间"
+ 
+# UI
+ 
+"game.dyingMessage.ui.title" : "临终遗言"
+"game.dyingMessage.ui.content" : "发现与%ROOM%内。"
+ 
+# Game Statictics
+ 
+# Status
+ 
+# Stats
+ 
+# Titles
+ 

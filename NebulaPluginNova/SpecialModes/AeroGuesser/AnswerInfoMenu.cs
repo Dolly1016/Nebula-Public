@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine.Rendering;
 
-namespace Nebula.AeroGuesser;
+namespace Nebula.SpecialModes.AeroGuesser;
 
 internal interface IAnswerMenuInteraction
 {

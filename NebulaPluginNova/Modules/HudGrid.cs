@@ -17,6 +17,8 @@ public class HudGrid : MonoBehaviour
 
     public void Awake()
     {
+        ContentsOccupyMultipleLines = [false, false];
+
         var buttonParent = HudManager.Instance.UseButton.transform.parent;
         buttonParent.localPosition= Vector3.zero;
         buttonParent.name = "Buttons";
@@ -50,6 +52,8 @@ public class HudGrid : MonoBehaviour
     static public bool UseSmallerHud => ClientOption.GetValue(ClientOption.ClientOptionType.SmallHud) == 1;
     bool lastUseSmallerHud = false;
 
+    public bool[] ContentsOccupyMultipleLines;
+
     private void UpdateHudSize()
     {
         lastUseSmallerHud = UseSmallerHud;
@@ -61,6 +65,8 @@ public class HudGrid : MonoBehaviour
     {
         if (UseSmallerHud != lastUseSmallerHud) UpdateHudSize();
 
+        ContentsOccupyMultipleLines[0] = false;
+        ContentsOccupyMultipleLines[1] = false;
 
         for (int i = 0; i < 2; i++)
         {
@@ -90,6 +96,8 @@ public class HudGrid : MonoBehaviour
                 var c = Contents[i][e];
 
                 if(!ShouldBeShown(c.Value)) continue;
+
+                if (row > 0) ContentsOccupyMultipleLines[i] |= true;
 
                 if (c.Value.ShouldBeInLastLine)
                 {

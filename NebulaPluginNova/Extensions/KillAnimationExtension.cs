@@ -14,8 +14,9 @@ public static class KillAnimationExtension
         public bool AmOwner => (Player?.AmOwner ?? false) && Player is GamePlayer;
         public Vector2 Position => (Player?.IsActive ?? false) ? Player.Position : AlterPosition;
     }
-    static public IEnumerator CoPerformModKill(this KillAnimation killAnim, byte requestSender, int requestId, PlayerControl source, IPlayerlikePosition target, GamePlayer realTarget, KillCharacteristics killCharacteristics, bool blink, bool targetIsUsingUtility, Vector2 deadGoalPos, bool useViperDeadBody, PlayerControl killer, CommunicableTextTag deadState)
+    static public (IEnumerator enumerator, Vector2? deadPos) CoPerformModKill(this KillAnimation killAnim, byte requestSender, int requestId, PlayerControl source, IPlayerlikePosition target, GamePlayer realTarget, KillCharacteristics killCharacteristics, bool blink, bool targetIsUsingUtility, Vector2 deadGoalPos, bool useViperDeadBody, PlayerControl killer, CommunicableTextTag deadState)
     {
+        Vector2? finalDeadPos = null;
         FollowerCamera cam = Camera.main.GetComponent<FollowerCamera>();
         bool isParticipant = source.AmOwner || target.AmOwner;
         PlayerPhysics sourcePhys = source.MyPhysics;
@@ -29,6 +30,7 @@ public static class KillAnimationExtension
 
         DeadBody GenerateDisableDeadBody(int variation, Vector2 position)
         {
+            finalDeadPos = position;
             DeadBody deadBody = GameObject.Instantiate<DeadBody>(GameManager.Instance.deadBodyPrefab[useViperDeadBody ? 1 : 0]);
             if (useViperDeadBody)
             {
@@ -39,7 +41,7 @@ public static class KillAnimationExtension
             deadBody.ParentId = realTarget.PlayerId;
             foreach (var r in deadBody.bodyRenderers) realTarget.VanillaPlayer.SetPlayerMaterialColors(r);
             deadBody.gameObject.ForEachAllChildren(c => c.layer = LayerExpansion.GetPlayersLayer());
-            
+
             realTarget.VanillaPlayer.SetPlayerMaterialColors(deadBody.bloodSplatter);
 
             Vector3 vector = (Vector3)position + killAnim.BodyOffset;
@@ -91,7 +93,8 @@ public static class KillAnimationExtension
         }
 
         DeadBody? targetDeadBody = null;
-        if (!targetIsRealPlayer){
+        if (!targetIsRealPlayer)
+        {
             var pos = target.Player?.Position ?? target.AlterPosition;
             if (killCharacteristics.HasFlag(KillCharacteristics.FlagLeftDeadBody))
             {
@@ -128,32 +131,36 @@ public static class KillAnimationExtension
             PlayerExtension.ResetOnDying(realTarget.VanillaPlayer);
         }
 
-        if (blink)
+        IEnumerator GetEnumerator()
         {
-            if (!source.Data.IsDead)
+            if (blink)
             {
-                float timeout = 0.2f;
-                var anim = source.MyPhysics.Animations.CoPlayCustomAnimation(killAnim.BlurAnim);
-                while(timeout > 0f && anim.MoveNext())
+                if (!source.Data.IsDead)
                 {
-                    timeout -= Time.deltaTime;
-                    yield return null;
+                    float timeout = 0.2f;
+                    var anim = source.MyPhysics.Animations.CoPlayCustomAnimation(killAnim.BlurAnim);
+                    while (timeout > 0f && anim.MoveNext())
+                    {
+                        timeout -= Time.deltaTime;
+                        yield return null;
+                    }
                 }
+                source.NetTransform.SnapTo(target.Position);
+                sourcePhys.Animations.PlayIdleAnimation();
+                KillAnimation.SetMovement(source, true);
             }
-            source.NetTransform.SnapTo(target.Position);
-            sourcePhys.Animations.PlayIdleAnimation();
-            KillAnimation.SetMovement(source, true);
+
+            if (target.Player?.IsActive ?? false) target.Player?.Logic?.SetMovement(true);
+
+            if (targetDeadBody != null) targetDeadBody.enabled = true;
+            if (realDeadbody != null) realDeadbody.enabled = true;
+
+            if (isParticipant)
+            {
+                cam.Locked = false;
+            }
+            yield break;
         }
-
-        if(target.Player?.IsActive ?? false) target.Player?.Logic?.SetMovement(true);
-
-        if (targetDeadBody != null) targetDeadBody.enabled = true;
-        if (realDeadbody != null) realDeadbody.enabled = true;
-
-        if (isParticipant)
-        {
-            cam.Locked = false;
-        }
-        yield break;
+        return (GetEnumerator(), finalDeadPos);
     }
 }

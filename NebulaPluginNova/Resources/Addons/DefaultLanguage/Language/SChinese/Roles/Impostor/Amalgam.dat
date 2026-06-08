@@ -13,7 +13,8 @@
 "role.amalgam.ability.main.selection" : "<var>可以融合多个职业能力。</var>"
 "role.amalgam.ability.main.random" : "<var>融合了多个职业能力。</var><br>在当前界面中，会显示当前融合职业能力的介绍选项卡，点击即可展开。"
 "role.amalgam.ability.amalgam" : "<title>融合</title>融合能力。<br>融合后将无法修改。"
-"role.amalgam.tips" : "・<b>特殊行动型</b>和<b>地图控制型</b>分别只能融合一个职业能力。<br>・除击杀按钮和瞄准类能力以外没有快捷键，需要手动点击。"
+"role.amalgam.tips" : "・<b>特殊行动型</b>和<b>地图控制型</b>分别只能融合一个职业能力。<br>・除击杀按钮和瞄准类能力以外没有快捷键，需要手动点击。<br>・当前配置下可融合以下职业：<br>　<b>特殊行动型</b><br>　%KILLAIM%<br>　<b>地图控制型</b><br>　%MAP%<br>　<b>其他扩展型</b><br>　%OTHERS%"
+"role.amalgam.tips.indent" : "　"
 
 # Options
 
@@ -24,12 +25,14 @@
 "options.role.amalgam.numOfRandomAssignment.all" : "全部"
 "options.role.amalgam.abilityFilter" : "职业能力过滤"
 "options.role.amalgam.canBeGuessedAsLoadedRoles" : "可以猜测融合职业进行赌杀"
+"options.role.amalgam.breakdownAmalgam" : "展示融合体详细构造"
 
 # Game
 
 "role.amalgam.tabs.kill" : "特殊行动型"
 "role.amalgam.tabs.map" : "地图控制型"
 "role.amalgam.tabs.others" : "其他扩展型"
+"role.amalgam.ui.title" : "本局的融合体"
 
 # UI
 

@@ -195,7 +195,7 @@ internal class FakePlayerNetTransform : IGameOperator
             if (netTransform.IsInMiddleOfAnimationThatMakesPlayerInvisible()) netTransform.tempSnapPosition = vector;
             else netTransform.tempSnapPosition = null;
 
-        });
+        }, false);
 
     public void Sync()
     {

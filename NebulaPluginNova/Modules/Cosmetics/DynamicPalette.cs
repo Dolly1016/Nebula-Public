@@ -736,7 +736,7 @@ public class NebulaPlayerTab : MonoBehaviour
         if (AmongUsClient.Instance && AmongUsClient.Instance.IsInGame && PlayerControl.LocalPlayer) DynamicPalette.RpcShareColor.Invoke(new DynamicPalette.ShareColorMessage() { playerId = PlayerControl.LocalPlayer.PlayerId }.ReflectMyColor());
     }
 
-    static private Image squareImage = SpriteLoader.FromResource("Nebula.Resources.White.png", 100f);
+    static private Image squareImage => NebulaAsset.WhiteImage;
 
 #if PC
     private void OpenColorCodeWindow()

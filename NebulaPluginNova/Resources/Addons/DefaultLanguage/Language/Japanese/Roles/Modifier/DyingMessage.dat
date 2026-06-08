@@ -1,0 +1,45 @@
+# Assignable
+
+"role.dyingMessage.name" : "ダイイングメッセージ"
+"role.dyingMessage.generalBlurb" : "最期のメッセージ"
+
+# Document
+
+"role.dyingMessage.doc" : "自覚できないモディファイアです。<br>死亡時、その場に手書きのメッセージを遺せます。"
+"role.dyingMessage.tips" : "・自殺、あるいは通報可能な死体が残らないキルの場合、ダイイングメッセージは遺せません。"
+
+# Options
+
+"options.role.dyingMessage.detail" : "ダイイングメッセージは自覚できないモディファイアです。<br>命が尽きるまでのわずかな間、その場に手書きのメッセージを遺せます。"
+
+# Game
+
+"options.role.dyingMessage.messageDuration" : "メッセージの書き込み時間"
+
+# UI
+
+"game.dyingMessage.ui.title" : "ダイイングメッセージ"
+"game.dyingMessage.ui.content" : "%ROOM%にて発見。"
+
+# Game Statictics
+
+# Status
+
+# Stats
+
+# Titles
+
+"achievement.dyingMessage.common1.title" : "ただで死んでなるものか"
+"achievement.dyingMessage.common1.goal" : "ダイイングメッセージを遺す。"
+
+"achievement.dyingMessage.another1.title" : "薄れゆく意識"
+"achievement.dyingMessage.another1.goal" : "ダイイングメッセージを遺し損ねる。"
+
+"achievement.dyingMessage.common2.title" : "ダイニングメッセージ"
+"achievement.dyingMessage.common2.goal" : "カフェテリアかキッチンでダイイングメッセージを遺す。"
+"achievement.dyingMessage.common2.flavor" : ""ごはんよー""
+"achievement.dyingMessage.common2.splitted.2" : "メッセージ"
+
+"achievement.dyingMessage.challenge.title" : "散って咲くのは人の華"
+"achievement.dyingMessage.challenge.goal" : "ダイイングメッセージを遺した上で、自身をキルした相手が直後の会議で追放される。"
+"achievement.dyingMessage.challenge.splitted.1" : "人の"

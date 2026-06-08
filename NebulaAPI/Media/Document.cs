@@ -13,7 +13,7 @@ namespace Virial.Media;
 /// </summary>
 /// <param name="Text"></param>
 /// <param name="Widget"></param>
-public record DocumentPiece(string[] Text, Func<GUIWidget> Widget, IDocument Document);
+public record DocumentPiece(string PieceId, string[] Text, Func<GUIWidget> Widget, IDocument Document);
 
 public interface IDocument
 {
@@ -40,4 +40,24 @@ public interface IDocument
 public interface IDocumentWithId : IDocument
 {
     void OnSetId(string documentId);
+}
+
+public class HighlightedDocument : IDisposable
+{
+    static internal HighlightedDocument? currentHighlight = null;
+
+    private string pieceId;
+    private HighlightedDocument(string pieceId)
+    {
+        this.pieceId = pieceId;
+        currentHighlight = this;
+    }
+
+    void IDisposable.Dispose()
+    {
+        if (currentHighlight == this) currentHighlight = null;
+    }
+
+    static public HighlightedDocument Mark(string pieceId) => new HighlightedDocument(pieceId);
+    static internal string? CurrentPiece => currentHighlight?.pieceId;
 }

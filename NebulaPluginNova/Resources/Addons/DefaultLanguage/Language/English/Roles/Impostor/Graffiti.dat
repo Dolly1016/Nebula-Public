@@ -1,0 +1,40 @@
+# Assignable
+
+"role.graffiti.name" : "Graffiti"
+"role.graffiti.short" : "Gr"
+"role.graffiti.blurb" : "Heart Is in the Bin"
+"role.graffiti.hint" : "Let's make a graffiti!"
+
+# Document
+
+"role.graffiti.doc" : "The Graffiti is imposters who create graffiti that<br>resembles dying messages written in blood."
+"role.graffiti.ability.title" : "Inherent Ability [Graffiti Claims]"
+"role.graffiti.ability.main" : "Leave graffiti anywhere on the minimap."
+"role.graffiti.ability.draw" : "<title>Draw</title>Open the minimap to create graffiti."
+
+# Options
+
+"options.role.graffiti.detail" : "The Graffiti is imposters who create graffiti that<br>resembles dying messages written in blood."
+"options.role.graffiti.numOfDrawings" : "# Drawings"
+
+# Game
+
+# UI
+
+# Stats
+
+"stats.graffiti.drawing" : "Num of Drawings"
+
+# Titles
+
+"achievement.graffiti.common1.title" : ""
+"achievement.graffiti.common1.goal" : ""
+"achievement.graffiti.common1.cond" : ""
+
+"achievement.graffiti.common2.title" : ""
+"achievement.graffiti.common2.goal" : ""
+"achievement.graffiti.common2.cond" : ""
+
+"achievement.graffiti.challenge.title" : ""
+"achievement.graffiti.challenge.goal" : ""
+"achievement.graffiti.challenge.cond" : ""

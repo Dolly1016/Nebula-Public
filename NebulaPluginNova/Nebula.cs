@@ -39,6 +39,7 @@ using System.Text;
 using UnityEngine.Networking;
 using UnityEngine.ResourceManagement.Util;
 using UnityEngine.SceneManagement;
+using UnityEngine.Scripting;
 using Virial;
 using Virial.VisualProgramming;
 
@@ -52,14 +53,14 @@ public class NebulaPlugin
     public const string AmongUsVersion = "2023.7.12";
     public const string PluginGuid = "jp.dreamingpig.amongus.nebula";
     public const string PluginName = "NebulaOnTheShip";
-    public const string PluginVersion = "3.2.2.1";
+    public const string PluginVersion = "3.3.0.0";
 
-    //public const string VisualVersion = "v3.2.2.1";
-    public const string VisualVersion = "Snapshot 26.05.23a";
+    public const string VisualVersion = "v3.3";
+    //public const string VisualVersion = "Snapshot 26.06.07a";
     //public const string VisualVersion = "Addon Loading DEMO 2";
 
     public const string PluginEpochStr = "108";
-    public const string PluginBuildNumStr = "1591";
+    public const string PluginBuildNumStr = "1598";
     public static readonly int PluginEpoch = int.Parse(PluginEpochStr);
     public static readonly int PluginBuildNum = int.Parse(PluginBuildNumStr);
     public const bool GuardVanillaLangData = false;
@@ -214,6 +215,10 @@ public class NebulaPlugin
     static private void SetUpNebulaImpl()
     {
         NebulaAPI.instance = new NebulaImpl();
+
+        LogUtils.WriteToConsole($"Incremental GC: {GarbageCollector.isIncremental}");
+        LogUtils.WriteToConsole($"GC time slice: {GarbageCollector.incrementalTimeSliceNanoseconds} ns");
+        LogUtils.WriteToConsole($"GC time slice: {GarbageCollector.incrementalTimeSliceNanoseconds / 1_000_000.0} ms");
     }
 }
 

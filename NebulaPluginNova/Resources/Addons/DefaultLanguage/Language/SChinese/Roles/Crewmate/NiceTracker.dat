@@ -1,0 +1,47 @@
+# Assignable
+ 
+"role.niceTracker.name" : "正义的追踪者"
+"role.niceTracker.short" : "正追"
+"role.niceTracker.blurb" : "追寻足迹"
+"role.niceTracker.hint" : ""
+ 
+# Document
+ 
+"role.niceTracker.doc" : "正义的追踪者可以追踪其他玩家的位置。"
+"role.niceTracker.ability.title" : "固有能力【追踪】"
+"role.niceTracker.ability.main" : "在任务阶段追踪目标以获得目标位置。"
+"role.niceTracker.ability.track" : "<title>追踪</title>追踪指定目标。"
+ 
+# Options
+ 
+"options.role.niceTracker.detail" : "正义的追踪者可以追踪其他玩家的位置。"
+"options.role.niceTracker.trackCooldown" : "追踪冷却时间"
+"options.role.niceTracker.trackDuration" : "追踪所需时间"
+"options.role.niceTracker.trackAdditionalDuration" : "追踪额外所需时间"
+"options.role.niceTracker.trackAdditionalDuration.detail" : "追踪所需时间会根据此选项进一步延长。<br>追踪所需时间 = 追踪额外所需时间 x 人数 + 追踪所需时间"
+"options.role.niceTracker.trackerDuration" : "追踪持续时间"
+"options.role.niceTracker.resetOnMeeting" : "会议后重置目标"
+"options.role.niceTracker.showWhereTrackingIs" : "追踪对象位置以房间名表示"
+ 
+# Game
+ 
+ 
+# UI
+ 
+ 
+# Stats
+ 
+"stats.niceTracker.track" : "追踪使用次数"
+ 
+# Titles
+ 
+"achievement.niceTracker.common1.title" : "越界"
+"achievement.niceTracker.common1.goal" : "累计追踪5名玩家。"
+"achievement.niceTracker.common1.flavor" : "“过渡越界会适得其反，因此要懂得距离产生美。”"
+ 
+"achievement.niceTracker.common2.title" : "隔门有眼"
+"achievement.niceTracker.common2.goal" : "追踪的目标瞬间移动到5米以上。"
+ 
+"achievement.niceTracker.challenge.title" : "事件发生时"
+"achievement.niceTracker.challenge.goal" : "追踪所有伪装者，并目击到所有伪装者的击杀过程。<br>最终在会议中驱逐非船员玩家并通过船员阵营获胜。"
+"achievement.niceTracker.challenge.splitted.1" : "目的地"

@@ -461,7 +461,8 @@ public class CosmicHat : CustomCosmicGenericItem<CosmicHat, HatData>
     public bool? DoAnimationIfDead = null;
 
     override public string ProductId => IdToProductId(Id);
-    public static string IdToProductId(string id) => "noshat_" + id;
+    private const string ProductIdPrefix = MoreCosmic.NoSIdPrefix + "hat_";
+    public static string IdToProductId(string id) => ProductIdPrefix + id;
 
     public HatData MyHat { get; private set; } = null!;
     public HatViewData MyView { get; private set; } = null!;
@@ -514,7 +515,7 @@ public class CosmicHat : CustomCosmicGenericItem<CosmicHat, HatData>
         if (ClimbDown != null) ClimbDown.RequirePlayFirstState = true;
         if (ClimbDownFlip != null) ClimbDownFlip.RequirePlayFirstState = true;
 
-        if (addToMoreCosmic) MoreCosmic.AllHats[MyHat.ProductId] = this;
+        if (addToMoreCosmic) MoreCosmic.Add(MyHat.ProductId, this);
     }
 
     public override string Category { get => "hats"; }
@@ -613,7 +614,8 @@ public class CosmicVisor : CustomCosmicGenericItem<CosmicVisor, VisorData>
     public bool? DoAnimationIfDead = null;
 
     override public string ProductId => IdToProductId(Id);
-    public static string IdToProductId(string id) => "nosvisor_" + id;
+    private const string ProductIdPrefix = MoreCosmic.NoSIdPrefix + "visor_";
+    public static string IdToProductId(string id) => ProductIdPrefix + id;
     public VisorData MyVisor { get; private set; } = null!;
     public VisorViewData MyView { get; private set; } = null!;
     public override VisorData VanillaItem => MyVisor;
@@ -668,7 +670,7 @@ public class CosmicVisor : CustomCosmicGenericItem<CosmicVisor, VisorData>
         if (ClimbDown != null) ClimbDown.RequirePlayFirstState = true;
         if (ClimbDownFlip != null) ClimbDownFlip.RequirePlayFirstState = true;
 
-        if (addToMoreCosmic) MoreCosmic.AllVisors[MyVisor.ProductId] = this;
+        if (addToMoreCosmic) MoreCosmic.Add(MyVisor.ProductId, this);
     }
     public override string Category { get => "visors"; }
 
@@ -748,7 +750,7 @@ public class CosmicNameplate : CustomCosmicGenericItem<CosmicNameplate, NamePlat
 
         MyPlate.CreateAddressableAsset();
 
-        if (addToMoreCosmic) MoreCosmic.AllNameplates[MyPlate.ProductId] = this;
+        if (addToMoreCosmic) MoreCosmic.Add(MyPlate.ProductId, this);
     }
     public override string Category { get => "nameplates"; }
 
@@ -960,18 +962,6 @@ public class CustomItemBundle : CostumePermissionHolder
         if (addToMoreCosmic)
         {
             foreach (var package in Packages) MoreCosmic.AllPackages[package.Package] = package;
-
-            var hatList = HatManager.Instance.allHats.ToList();
-            foreach (var item in Hats) if (item.IsValid) hatList.Add(item.MyHat);
-            HatManager.Instance.allHats = hatList.ToArray();
-
-            var visorList = HatManager.Instance.allVisors.ToList();
-            foreach (var item in Visors) if (item.IsValid) visorList.Add(item.MyVisor);
-            HatManager.Instance.allVisors = visorList.ToArray();
-
-            var nameplateList = HatManager.Instance.allNamePlates.ToList();
-            foreach (var item in Nameplates) if (item.IsValid) nameplateList.Add(item.MyPlate);
-            HatManager.Instance.allNamePlates = nameplateList.ToArray();
         }
 
         MoreCosmic.Log.Message($"Finish to flush costume bundle! (Bundle: {BundleName})");
@@ -1106,6 +1096,29 @@ public static class MoreCosmic
     public static readonly Dictionary<string, CosmicNameplate> AllNameplates = [];
     public static readonly Dictionary<string, CosmicStamp> AllStamps = [];
     public static readonly Dictionary<string, CosmicPackage> AllPackages = [];
+    public static readonly List<HatData> AllHatsList = [];
+    public static readonly List<VisorData> AllVisorsList = [];
+    public static readonly List<NamePlateData> AllNameplatesList = [];
+    public const string NoSIdPrefix = "nos";
+    public static bool CheckModItem(string id) => id.StartsWith(NoSIdPrefix);
+    public static void Add(string id, CosmicHat hat)
+    {
+        AllHats[id] = hat;
+        AllHatsList.Add(hat.VanillaItem);
+    }
+
+    public static void Add(string id, CosmicVisor visor)
+    {
+        AllVisors[id] = visor;
+        AllVisorsList.Add(visor.VanillaItem);
+    }
+
+    public static void Add(string id, CosmicNameplate nameplate)
+    {
+        AllNameplates[id] = nameplate;
+        AllNameplatesList.Add(nameplate.VanillaItem);
+    }
+
     public static Dictionary<string, HashSet<string>> VanillaTags = [];
     internal static readonly CustomHooksManager<SimpleActionList> NodeSyncHooks = new(() => new());
     internal static readonly CustomHooksManager<SimpleActionList> LongNeckHooks = new(() => new());
@@ -3103,10 +3116,12 @@ public static class TabEnablePatch
     {
         public static bool Prefix(HatsTab __instance)
         {
-            var unlockedHats = DestroyableSingleton<HatManager>.Instance.GetUnlockedHats().Select(hat => MoreCosmic.AllHats.TryGetValue(hat.ProductId, out var modHat) ? (hat, modHat) : (hat, null));
+            IEnumerable<(HatData vanillaData, CosmicHat? modData)> unlockedVanillaHats = DestroyableSingleton<HatManager>.Instance.GetUnlockedHats().Select(hat => (hat, (CosmicHat?)null));
+            IEnumerable<(HatData vanillaData, CosmicHat? modData)> modHats = MoreCosmic.AllHats.Values.Select(hat => (hat.VanillaItem, (CosmicHat?)hat));
+
             __instance.currentHat = DestroyableSingleton<HatManager>.Instance.GetHatById(DataManager.Player.Customization.Hat);
 
-            SetUpTab(__instance, HatManager.Instance.allHats.First(h => h.IsEmpty), unlockedHats,
+            SetUpTab(__instance, HatManager.Instance.allHats.First(h => h.IsEmpty), unlockedVanillaHats.Concat(modHats),
                 () => HatManager.Instance.GetHatById(DataManager.Player.Customization.Hat),
                 (hat) => __instance.SelectHat(hat)
             );
@@ -3132,9 +3147,10 @@ public static class TabEnablePatch
     {
         public static bool Prefix(VisorsTab __instance)
         {
-            var unlockedVisors = DestroyableSingleton<HatManager>.Instance.GetUnlockedVisors().Select(visor => MoreCosmic.AllVisors.TryGetValue(visor.ProductId, out var modVisor) ? (visor, modVisor) : (visor, null));
+            IEnumerable<(VisorData vanillaData, CosmicVisor? modData)> unlockedVanillaVisors = DestroyableSingleton<HatManager>.Instance.GetUnlockedVisors().Select(hat => (hat, (CosmicVisor?)null));
+            IEnumerable<(VisorData vanillaData, CosmicVisor? modData)> modVisors = MoreCosmic.AllVisors.Values.Select(visor => (visor.VanillaItem, (CosmicVisor?)visor));
 
-            SetUpTab(__instance, HatManager.Instance.allVisors.First(v => v.IsEmpty), unlockedVisors,
+            SetUpTab(__instance, HatManager.Instance.allVisors.First(v => v.IsEmpty), unlockedVanillaVisors.Concat(modVisors),
                 () => HatManager.Instance.GetVisorById(DataManager.Player.Customization.Visor),
                 (visor) => __instance.SelectVisor(visor)
             );
@@ -3160,10 +3176,11 @@ public static class TabEnablePatch
     {
         public static bool Prefix(NameplatesTab __instance)
         {
-            var unlockedNamePlates = DestroyableSingleton<HatManager>.Instance.GetUnlockedNamePlates().Select(nameplate => MoreCosmic.AllNameplates.TryGetValue(nameplate.ProductId, out var modNameplate) ? (nameplate, modNameplate) : (nameplate, null));
+            IEnumerable<(NamePlateData vanillaData, CosmicNameplate? modData)> unlockedVanillaNameplates = DestroyableSingleton<HatManager>.Instance.GetUnlockedNamePlates().Select(hat => (hat, (CosmicNameplate?)null));
+            IEnumerable<(NamePlateData vanillaData, CosmicNameplate? modData)> modNameplates = MoreCosmic.AllNameplates.Values.Select(plate => (plate.VanillaItem, (CosmicNameplate?)plate));
 
             __instance.previewArea.TargetPlayerId = NebulaPlayerTab.PreviewColorId;
-            SetUpTab(__instance, HatManager.Instance.allNamePlates.First(v => v.IsEmpty), unlockedNamePlates,
+            SetUpTab(__instance, HatManager.Instance.allNamePlates.First(v => v.IsEmpty), unlockedVanillaNameplates.Concat(modNameplates),
                 () => HatManager.Instance.GetNamePlateById(DataManager.Player.Customization.NamePlate),
                 (nameplate) => __instance.SelectNameplate(nameplate),
                 (item, chip) =>
@@ -3312,6 +3329,8 @@ public static class TabEnablePatch
             return false;
         }
     }
+
+   
 }
 
 public static class MoreCosmicExtensions

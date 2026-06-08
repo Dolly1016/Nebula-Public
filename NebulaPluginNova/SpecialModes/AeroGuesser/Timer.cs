@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Virial.Media;
 
-namespace Nebula.AeroGuesser;
+namespace Nebula.SpecialModes.AeroGuesser;
 
 internal class Timer
 {

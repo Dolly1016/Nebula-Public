@@ -93,6 +93,9 @@
 "perk.sacrifice.detail" : "在原地召唤一个替身。<br>替身死亡，本体不会死亡。<br>替身会在%D%秒内消失。"
 "perk.sacrifice.duration" : "替身持续时间"
 
+"perk.ketchupMessage.name" : "涂鸦"
+"perk.ketchupMessage.detail" : "在原地留下涂鸦。"
+
 # Game Statictics
 
 "statistics.events.meteor" : "陨石砸落"

@@ -87,4 +87,4 @@
 # Document
 
 "document.tip.winCond.scarlet.title" : "窃取胜利"
-"document.tip.winCond.scarlet" : "当本命存活且其阵营获胜时，将窃取其阵营胜利并与本命一起获胜。<br>但对于复仇者获胜时，仅本命是复仇者的情况下才能窃取胜利。"
+"document.tip.winCond.scarlet" : "当本命存活且获胜时，将窃取胜利并与本命一起获胜。<br>但对于复仇者获胜时，仅本命是复仇者的情况下才能窃取胜利。<br>魅魔也需要存活。"

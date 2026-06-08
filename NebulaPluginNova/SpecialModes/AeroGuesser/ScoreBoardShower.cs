@@ -9,7 +9,7 @@ using TMPro;
 using UnityEngine.Rendering;
 using Virial.Text;
 
-namespace Nebula.AeroGuesser;
+namespace Nebula.SpecialModes.AeroGuesser;
 
 internal interface IScoreBoardViewerInteraction
 {

@@ -583,12 +583,11 @@ public static class Helpers
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     static public double ScaledCos(float speed)
     {
-
         return Math.Cos(ScaledRepeatTime(speed));
     }
 
     static private readonly Image whiteCircleSprite = SpriteLoader.FromResource("Nebula.Resources.WhiteCircle.png", 100f);
-    static private readonly Image whiteBoxSprite = SpriteLoader.FromResource("Nebula.Resources.White.png", 100f);
+    static private Image whiteBoxSprite => NebulaAsset.WhiteImage;
     static public void DisplayDot(Vector2 position, string rawText, Color color, Vector2 size)
     {
         var renderer = UnityHelper.CreateSpriteRenderer("Dot", null, position.AsVector3(-10f));

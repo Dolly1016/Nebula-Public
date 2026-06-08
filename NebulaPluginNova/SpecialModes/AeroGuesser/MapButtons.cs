@@ -9,7 +9,7 @@ using UnityEngine;
 using Virial.Compat;
 using Virial.Text;
 
-namespace Nebula.AeroGuesser;
+namespace Nebula.SpecialModes.AeroGuesser;
 
 internal interface IMapButtonInteraction : IWithAnswerPhase
 {

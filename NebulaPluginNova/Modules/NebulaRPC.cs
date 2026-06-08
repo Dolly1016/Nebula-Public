@@ -2,8 +2,10 @@
 using Il2CppInterop.Generator.Extensions;
 using Il2CppSystem.Reflection.Internal;
 using InnerNet;
+using MonoMod.Utils;
 using Nebula.Modules.Logging;
 using Nebula.Scripts;
+using Sentry.Internal.Extensions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using UnityEngine.IO;
@@ -383,6 +385,25 @@ public abstract class RemoteProcessArgumentBase
 
         new RemoteProcessArgument<INebulaAchievement>((writer, achievement) => writer.Write((ulong)achievement!.Id.ComputeConstantLongHash()), (reader) => (NebulaAchievementManager.TryGetAchievement((long)reader.ReadUInt64(), out var ach) ? ach : null)!);
 
+        new RemoteProcessArgument<DefinedAssignable>((writer, role) => { 
+            writer.Write(role switch { DefinedRole => (byte)0, DefinedModifier => (byte)1, DefinedGhostRole => (byte)2, _ => byte.MaxValue });
+            writer.Write(role?.Id ?? -1); 
+        }, reader =>
+        {
+            var b = reader.ReadByte();
+            var id = reader.ReadInt32();
+            switch (b)
+            {
+                case 0:
+                    return Roles.Roles.GetRole(id)!;
+                case 1:
+                    return Roles.Roles.GetModifier(id)!;
+                case 2:
+                    return Roles.Roles.GetGhostRole(id)!;
+                default:
+                    return null!;
+            }
+        });
         new RemoteProcessArgument<DefinedRole>((writer, role) => writer.Write(role?.Id ?? -1), reader => Roles.Roles.GetRole(reader.ReadInt32())!);
         new RemoteProcessArgument<DefinedGhostRole>((writer, role) => writer.Write(role?.Id ?? -1), reader => Roles.Roles.GetGhostRole(reader.ReadInt32())!);
         new RemoteProcessArgument<DefinedModifier>((writer, role) => writer.Write(role?.Id ?? -1), reader => Roles.Roles.GetModifier(reader.ReadInt32())!);
@@ -520,9 +541,9 @@ public class RemoteProcess<Parameter> : RemoteProcessBase
 {
     public delegate void Process(Parameter parameter, bool isCalledByMe);
 
-    private Action<MessageWriter, Parameter> Sender { get; set; }
-    private Func<MessageReader, Parameter> Receiver { get; set; }
-    private Process Body { get; set; }
+    protected Action<MessageWriter, Parameter> Sender { get; private set; }
+    protected Func<MessageReader, Parameter> Receiver { get; private set; }
+    protected Process Body { get; private set; }
 
     public RemoteProcess(string name, Action<MessageWriter, Parameter> sender, Func<MessageReader, Parameter> receiver, RemoteProcess<Parameter>.Process process, bool shouldBeReliable = true)
     : base(name, shouldBeReliable)
@@ -540,12 +561,12 @@ public class RemoteProcess<Parameter> : RemoteProcessBase
         Receiver = receiver;
     }
 
-    public void Invoke(Parameter parameter)
+    public virtual void Invoke(Parameter parameter)
     {
         RPCRouter.SendRpc(Name,Hash,(writer)=>Sender(writer,parameter),()=>Body.Invoke(parameter,true), ShouldBeReliable);
     }
 
-    public NebulaRPCInvoker GetInvoker(Parameter parameter)
+    public virtual NebulaRPCInvoker GetInvoker(Parameter parameter)
     {
         return new NebulaRPCInvoker(Hash, (writer) => Sender(writer, parameter), () => Body.Invoke(parameter, true));
     }
@@ -709,6 +730,148 @@ public class DivisibleRemoteProcess<Parameter, DividedParameter> : RemoteProcess
         try
         {
             Body.Invoke(Receiver.Invoke(reader), false);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Error in RPC(Received: {Name})\n" + ex.ToString());
+        }
+    }
+}
+
+file class MessageTreaters
+{
+    const int MessageLength = 32384;
+    static MessageWriter writer = new((int)MessageLength);
+    static MessageReader reader = new();
+    static MessageTreaters()
+    {
+        reader.Buffer = new byte[0];
+        reader.Offset = 0;
+        reader.Position = 0;
+        reader.Length = 0;
+        reader.Tag = byte.MaxValue;
+    }
+
+    static public MessageWriter GetWriter()
+    {
+        writer.Position = 0;
+        return writer;
+    }
+
+    static public MessageReader GetReader()
+    {
+        reader.Position = 0;
+        reader.Offset = 0;
+        return reader;
+    }
+
+}
+//内部で800Byteずつに分割して送信するRPCを作成する。ダミーのMessageWriterとMessageReaderを作成すれば、既存のReader等が使用できそう。メッセージ自体はバイト列と分割数、自身の位置を含めれば十分。
+public class LongRemoteProcess<Parameter> : RemoteProcess<Parameter>
+{
+    private class CachedMessage
+    {
+        public ushort Id;
+        public byte[] Data;
+        public bool[] Flags;
+        public float Time;
+
+        public bool Check(int length, int num) => Data.Length == length && Flags.Length == num;
+
+        public CachedMessage(ushort id, int messageLength, int packetsLength, float time) {
+            this.Id = id;
+            this.Data = new byte[messageLength];
+            this.Flags = new bool[packetsLength];
+            this.Time = time;
+        }
+    }
+
+    static private byte availableCacheId = 0;
+    const int MessageLengthPerPacket = 800;
+    static private ushort GetAvailableCacheId() => (ushort)((int)PlayerControl.LocalPlayer.PlayerId | ((int)(availableCacheId++) << 8));
+
+    private List<CachedMessage> cached = [];
+
+    public LongRemoteProcess(string name, Action<MessageWriter, Parameter> sender, Func<MessageReader, Parameter> receiver, RemoteProcess<Parameter>.Process process)
+    : base(name, sender, receiver, process, true)
+    {
+    }
+
+    public LongRemoteProcess(string name, RemoteProcess<Parameter>.Process process) : base(name, process, true)
+    {
+    }
+
+    public override void Invoke(Parameter parameter)
+    {
+        var writer = MessageTreaters.GetWriter();
+        this.Sender(writer, parameter);
+        var length = writer.Position;
+        var byteArray = writer.Buffer.Take(length).ToArray();
+        var id = GetAvailableCacheId();
+
+        //分割数
+        var num = length / MessageLengthPerPacket;
+        bool lastIsNotFull = length % MessageLengthPerPacket != 0;
+        if (lastIsNotFull) num++;
+
+        for (int i = 0; i < num; i++)
+        {
+            int copiedI = i;
+            RPCRouter.SendRpc(Name, Hash, (writer) =>
+            {
+                writer.Write(id);
+                writer.Write(length);
+                writer.Write(num);
+                writer.Write(copiedI);
+                writer.Write(byteArray, copiedI * MessageLengthPerPacket, (copiedI != num - 1 || !lastIsNotFull) ? MessageLengthPerPacket : (length % MessageLengthPerPacket));
+            }, () => Body.Invoke(parameter, true), ShouldBeReliable);
+        }
+    }
+
+    public override NebulaRPCInvoker GetInvoker(Parameter parameter) => throw new NotImplementedException("LongRemoteProcess does not support Invoker for delayed invocation.");
+
+    public override void Receive(MessageReader reader)
+    {
+        try
+        {
+            var currentTime = Time.time;
+            cached.RemoveAll(c => c.Time + 10f < currentTime);
+
+            var id = reader.ReadUInt16();
+            var length = reader.ReadInt32();
+            var num = reader.ReadInt32();
+            var index = reader.ReadInt32();
+            bool lastIsNotFull = length % MessageLengthPerPacket != 0;
+
+            var currentLength = (index != num - 1 || !lastIsNotFull) ? MessageLengthPerPacket : (length % MessageLengthPerPacket);
+
+            var cache = cached.FirstOrDefault(c => c.Id == id);
+            if(cache == null)
+            {
+                cache = new CachedMessage(id, length, num, currentTime);
+                cached.Add(cache);
+            }
+
+            if(!cache.Check(length, num))
+            {
+                Debug.LogError($"Unmatched RPC Header(Received: {Name})");
+                return;
+            }
+
+            byte[] bytes = reader.ReadBytes(currentLength);
+            Array.Copy(bytes, 0, cache.Data, index * MessageLengthPerPacket, currentLength);
+            cache.Flags[index] = true;
+
+            if (cache.Flags.All(f => f))
+            {
+                cached.Remove(cache);
+                var messageReader = MessageTreaters.GetReader();
+                messageReader.Buffer = cache.Data;
+                messageReader.Offset = 0;
+                messageReader.Position = 0;
+                messageReader.Length = length;
+                Body.Invoke(Receiver.Invoke(messageReader), false);
+            }
         }
         catch (Exception ex)
         {

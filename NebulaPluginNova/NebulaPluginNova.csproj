@@ -82,6 +82,7 @@
 
 	<ItemGroup>
 	  <Folder Include="Documents\" />
+	  <Folder Include="SpecialModes\PaintQuiz\" />
 	</ItemGroup>
 
 	<Target Name="CopyCustomContent" AfterTargets="AfterBuild">

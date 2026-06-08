@@ -52,6 +52,7 @@
 "config.client.vcServerSettings.detail" : "Set the VC server to connect to when using VC."
 "config.client.smallHud" : "Compact Hud"
 "config.client.smallHud.detail" : "The buttons at the bottom of the screen are displayed smaller and more compact."
+"config.client.arrowRework" : "Arrow Rework"
 
 # Discord Webhook
 

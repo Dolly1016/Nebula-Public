@@ -14,7 +14,9 @@
 # Options
  
 "options.role.spy.detail" : "卧底可以让伪装者误以为是自己的队友。"
- 
+"options.role.spy.numOfExemptedTasks" : "可减少的任务数"
+"options.role.spy.numOfExemptedTasks.detail" : "减少指定配置的任务数量。"
+
 # Game
  
  
@@ -29,14 +31,15 @@
  
 # Titles
  
-"achievement.spy.common1.title" : ""
-"achievement.spy.common1.goal" : ""
- 
-"achievement.spy.another1.title" : ""
-"achievement.spy.another1.goal" : ""
- 
-"achievement.spy.another2.title" : ""
-"achievement.spy.another2.goal" : ""
- 
-"achievement.spy.challenge.title" : ""
-"achievement.spy.challenge.goal" : ""
+"achievement.spy.common1.title" : "隐藏的正义"
+"achievement.spy.common1.goal" : "存活并通过船员阵营获胜。"
+"achievement.spy.common1.flavor" : "“负重前行只为那最重要的一刻。”"
+
+"achievement.spy.common2.title" : "你掉进陷阱了！"
+"achievement.spy.common2.goal" : "近距离目击伪装者击杀过程。"
+
+"achievement.spy.another1.title" : "未能算尽"
+"achievement.spy.another1.goal" : "被伪装者击杀或被赌杀。"
+
+"achievement.spy.challenge.title" : "反间计"
+"achievement.spy.challenge.goal" : "在有一名以上伪装者被伪装者杀死的情况下通过船员并获胜。"

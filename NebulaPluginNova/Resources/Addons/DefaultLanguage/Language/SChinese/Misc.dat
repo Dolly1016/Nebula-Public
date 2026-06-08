@@ -84,6 +84,8 @@
 "version.fetching.applied" : "已应用"
 "version.fetching.mismatched.detail" : "由于NoS与Among Us版本不匹配，无法进行更改。<br>请使用对应的版本。"
 "version.fetching.loadMore" : "加载更多"
+"version.fetching.failed" : "获取版本信息失败"
+"version.fetching.failed.detail" : "　请稍后在试。"
 
 # Game Mode
 

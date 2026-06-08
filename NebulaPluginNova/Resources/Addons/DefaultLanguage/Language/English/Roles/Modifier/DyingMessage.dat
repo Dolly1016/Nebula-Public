@@ -1,0 +1,29 @@
+# Assignable
+
+"role.dyingMessage.name" : "Dying Message"
+"role.dyingMessage.generalBlurb" : "The Last Message"
+
+# Document
+
+"role.dyingMessage.doc" : "An unconscious modifier.<br>They can leave a message when they die."
+
+# Options
+
+"options.role.dyingMessage.detail" : "An unconscious modifier.<br>They can leave a message when they die."
+
+# Game
+
+"options.role.dyingMessage.messageDuration" : "Message Drawing Duration"
+
+# UI
+
+"game.dyingMessage.ui.title" : "Dying Message"
+"game.dyingMessage.ui.content" : "Found at %ROOM%."
+
+# Game Statictics
+
+# Status
+
+# Stats
+
+# Titles

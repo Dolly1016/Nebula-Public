@@ -35,10 +35,13 @@
 "options.role.spectre.immoralistVariation.random" : "随机"
 "options.role.spectre.immoralistVariation.alternate" : "交替"
 "options.role.spectre.spectreFollowerChance" : "狐狸生成概率"
+"options.role.spectre.adrenalineOption" : "肾上腺素模式"
+"options.role.spectre.adrenalineOption.detail" : "当靠近有击杀能力的玩家时，不会容易饿。"
+"options.role.spectre.adrenalineRateOption" : "靠近击杀能力者饥饿减缓速度"
 "options.role.spectre.group.immoralist" : "追随者设定"
 "options.role.spectre.group.dish" : "油豆腐设定"
 "options.role.spectre.group.vanish" : "隐身能力设定"
-
+"options.role.spectre.group.adrenaline" : "肾上腺素模式设定"
 # Game
 
 

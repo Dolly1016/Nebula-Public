@@ -14,6 +14,7 @@ public static class PlayerParticlesPatch
 {
     static void Prefix(PlayerParticles __instance)
     {
+        if (__instance.pool == null) return;
         var pool = __instance.pool;
         pool.poolSize = 18;
         while(pool.NotInUse < pool.poolSize) pool.CreateOneInactive(pool.Prefab);

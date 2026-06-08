@@ -38,6 +38,7 @@ public class ClientOption
         MuteAmbienceOnMeeting,
         OutputPaparazzoPhoto,
         SmallHud,
+        ArrowRework
     }
 
     /*
@@ -269,6 +270,7 @@ public class ClientOption
 
         new ClientOption(ClientOptionType.SmallHud, "smallHud", simpleSwitch, 0);
 #endif
+        new ClientOption(ClientOptionType.ArrowRework, "arrowRework", simpleSwitch, 0);
     }
 
     static public IEnumerator CoChangeAmbientVolume(bool mute) {

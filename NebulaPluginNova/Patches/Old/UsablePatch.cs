@@ -1,5 +1,6 @@
 ﻿// 各種使用可能なオブジェクトに関するパッチ
 
+using Virial;
 using Virial.Events.Player;
 using Virial.Game;
 using Virial.Game.Console;
@@ -385,7 +386,75 @@ class SystemConsoleStartPatch
 public static class ArrowUpdatePatch
 {
     public static bool Prefix(ArrowBehaviour __instance) => FixInternal(__instance, __instance.transform);
+
+    private const float LowerPowY = 0.8f;
+    private static bool ShouldUseConcave(float x, float y)
+    {
+        if (y > 0f) return false;
+        return NebulaGameManager.Instance?.HudGrid.ContentsOccupyMultipleLines[x < 0f ? 0 : 1] ?? false;
+    }
+    internal static bool InArea(bool ovalMode, Vector2 vector)
+    {
+        if (ovalMode)
+        {
+            float x = (vector.x - 0.5f) * 2f;
+            float y = (vector.y - 0.5f) * 2f;
+            if (ShouldUseConcave(x, y))
+            {
+                float x2 = Mathn.Pow(Mathn.Abs(x), LowerPowY);
+                float y2 = Mathn.Pow(Mathn.Abs(y), LowerPowY);
+                return x2 + y2 < 1f;
+            }
+            else
+            {
+                float x2 = x * x;
+                float y2 = y * y;
+                return x2 + y2 < 1f;
+            }
+        }
+        else
+        {
+            var x = vector.x;
+            var y = vector.y;
+            return 0f < x && x < 1f && 0f < y && y < 1f;
+        }
+    }
+
+    internal static Vector2 AdjustVector(bool ovalMode, Vector2 vpPoint)
+    {
+        Vector2 vector = new(Mathn.Clamp(vpPoint.x * 2f - 1f, -1f, 1f), Mathn.Clamp(vpPoint.y * 2f - 1f, -1f, 1f));
+        if (ovalMode)
+        {
+            if (ShouldUseConcave(vector.x, vector.y))
+            {
+                float sum = Mathn.Pow(Mathn.Abs(vector.x), LowerPowY) + Mathn.Pow(Mathn.Abs(vector.y), LowerPowY);
+                sum = Mathn.Pow(sum, 1.0f / LowerPowY);
+                vector /= Mathn.Max(sum, 1.0f);
+            }
+            else
+            {
+                vector /= vector.magnitude;
+            }
+        }
+        return vector;
+    }
+
+    private static void DistancedBehaviour(bool ovalMode, ArrowBehaviour __instance, Vector2 vpPoint, Vector2 del, float delLen, Camera cam)
+    {
+        float safeOrthographicSize = CameraSafeArea.GetSafeOrthographicSize(cam);
+
+        Vector2 vector = AdjustVector(ovalMode, vpPoint);
+
+        float num = safeOrthographicSize * cam.aspect;
+        Vector3 vector2 = new(Mathn.LerpUnclamped(0f, num * 0.88f, vector.x), Mathn.LerpUnclamped(0f, safeOrthographicSize * 0.79f, vector.y), 0f);
+        var transform = __instance.transform;
+        var maxScale = __instance.MaxScale;
+        transform.position = cam.transform.position + vector2;
+        transform.localScale = new Vector3(maxScale, maxScale, maxScale);
+    }
     internal static bool FixInternal(ArrowBehaviour __instance, Transform lookAt) {
+        bool ovalMode = ClientOption.GetValue(ClientOption.ClientOptionType.ArrowRework) == 1;
+
         try
         {
             var transform = __instance.transform;
@@ -412,7 +481,7 @@ public static class ArrowUpdatePatch
             pos.z = tempTarget.z;
             __instance.target = pos;
 
-            if (__instance.Between(vector.x, 0f, 1f) && __instance.Between(vector.y, 0f, 1f))
+            if (InArea(ovalMode, vector))
             {
                 Vector2 temp = worldCam.transform.position + (__instance.target - worldCam.transform.position) * (worldCam.orthographicSize / Camera.main.orthographicSize);
                 transform.position = temp - del.normalized * 0.6f * (worldCam.orthographicSize / Camera.main.orthographicSize);
@@ -422,7 +491,7 @@ public static class ArrowUpdatePatch
                     transform.localScale = Vector3.one * Mathn.Clamp(num, 0f, __instance.MaxScale);
             }
             else
-                __instance.DistancedBehaviour(vector, del, num, main);
+                DistancedBehaviour(ovalMode, __instance, vector, del, num, main);
 
             transform.localScale *= (worldCam.orthographicSize / Camera.main.orthographicSize);
 

@@ -52,6 +52,8 @@
 "config.client.vcServerSettings.detail" : "VC使用時に接続するVCサーバーを設定します。"
 "config.client.smallHud" : "コンパクトなHUD"
 "config.client.smallHud.detail" : "画面下部のボタン等をより小さくコンパクトに表示します。"
+"config.client.arrowRework" : "矢印の表示位置改善"
+"config.client.arrowRework.detail" : "タスク等を指す矢印がボタン等の表示に被ってしまう問題を改善します。"
 
 # Discord Webhook
 

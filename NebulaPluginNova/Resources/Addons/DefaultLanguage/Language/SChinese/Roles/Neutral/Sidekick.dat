@@ -28,6 +28,7 @@
 "options.role.sidekick.hasImpostorVision" : "拥有伪装者视野"
 "options.role.sidekick.canUseVents" : "可以使用通风口"
 "options.role.sidekick.canMoveInVents" : "可以在通风口中移动"
+"options.role.sidekick.canWinAsOriginalTeam" : "可以跟随原职业阵营获胜"
 
 # Game
 

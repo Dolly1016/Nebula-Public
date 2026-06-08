@@ -19,6 +19,11 @@ namespace Nebula.Documents;
 
 static public class RoleDocumentHelper
 {
+    static internal string HeaderPieceTag = "header";
+    static internal string OptionsPieceTag = "options";
+    static internal string GetOptionPieceTag(int index) => OptionsPieceTag + index;
+    static internal string WinCondPieceTag = "winCond";
+    static internal string TipsPieceTag = "tips";
     static private TextAttribute RoleBlurbAttribute = new(NebulaAPI.GUI.GetAttribute(Virial.Text.AttributeAsset.DocumentBold)) { FontSize = new(1.3f) };
     static private TextAttribute RoleNameAttribute = new(NebulaAPI.GUI.GetAttribute(Virial.Text.AttributeAsset.DocumentBold)) { FontSize = new(2.8f) };
     static private TextAttribute ChapterTitleAttribute = new(NebulaAPI.GUI.GetAttribute(Virial.Text.AttributeAsset.DocumentBold)) { FontSize = new(1.7f) };
@@ -71,7 +76,7 @@ static public class RoleDocumentHelper
                     gui.VerticalMargin(0.15f),
                     GetDocumentText(docText),
                     gui.VerticalMargin(0.15f)
-                );
+                ).MarkCenterIf(HeaderPieceTag);
     }
 
     static private GUIWidget GetConfigurationsWidget(DefinedAssignable assignable)
@@ -82,7 +87,7 @@ static public class RoleDocumentHelper
         if(text.Length == 0) text = Language.Translate("document.configurations.empty");
         return NebulaAPI.GUI.RawText(GUIAlignment.Left, NebulaAPI.GUI.GetAttribute(AttributeAsset.DocumentStandard), text);
     }
-    static public GUIWidget GetConfigurationsChapter(DefinedAssignable assignable) => GetChapter("document.configurations", [GetConfigurationsWidget(assignable)]);
+    static public GUIWidget GetConfigurationsChapter(DefinedAssignable assignable) => GetChapter("document.configurations", [GetConfigurationsWidget(assignable)]).MarkCenterIf(tag => tag.StartsWith(OptionsPieceTag));
 
     static internal GUIWidget GetAssignableWidget(DefinedAssignable? assignable, IEnumerable<AssignableDocumentReplacement> replacements, params GUIWidget?[] inner)
     {
@@ -150,9 +155,9 @@ static public class RoleDocumentHelper
             );
     }
 
-    static public GUIWidget GetTipsChapter(string assignableName, IEnumerable<AssignableDocumentReplacement> replacements) => GetChapter("document.tips", [GetDocumentLocalizedText(assignableName + ".tips", replacements)]);
+    static public GUIWidget GetTipsChapter(string assignableName, IEnumerable<AssignableDocumentReplacement> replacements) => GetChapter("document.tips", [GetDocumentLocalizedText(assignableName + ".tips", replacements)]).MarkCenterIf(TipsPieceTag);
     static public string GetTipsText(string assignableName, IEnumerable<AssignableDocumentReplacement> replacements) => GetDocumentLocalizedTextForSearch(assignableName + ".tips", replacements);
-    static public GUIWidget GetWinCondChapter(string assignableName, IEnumerable<AssignableDocumentReplacement> replacements) => GetChapter("document.winCond", [GetDocumentLocalizedText(assignableName + ".winCond", replacements)]);
+    static public GUIWidget GetWinCondChapter(string assignableName, IEnumerable<AssignableDocumentReplacement> replacements) => GetChapter("document.winCond", [GetDocumentLocalizedText(assignableName + ".winCond", replacements)]).MarkCenterIf(WinCondPieceTag);
     static public string GetWinCondText(string assignableName, IEnumerable<AssignableDocumentReplacement> replacements) => GetDocumentLocalizedTextForSearch(assignableName + ".winCond", replacements);
     static public GUIWidget GetDocumentText(string? rawText) => rawText == null ? NebulaAPI.GUI.EmptyWidget : NebulaAPI.GUI.RawText(GUIAlignment.Left, NebulaAPI.GUI.GetAttribute(AttributeAsset.DocumentStandard), ReplaceVariableText(rawText));
     static public GUIWidget GetDocumentLocalizedText(string translationKey) => NebulaAPI.GUI.RawText(GUIAlignment.Left, NebulaAPI.GUI.GetAttribute(AttributeAsset.DocumentStandard), ReplaceVariableText(NebulaAPI.Language.Translate(translationKey)));

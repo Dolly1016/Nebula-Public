@@ -82,3 +82,40 @@ public unsafe class Il2CppListEnumerable<T> : System.Collections.Generic.IEnumer
 
 }
 
+public sealed class ConcatReadOnlyList<T> : IReadOnlyList<T>
+{
+    private readonly IList<T> _first;
+    private readonly IList<T> _second;
+
+    public ConcatReadOnlyList(IList<T> first, IList<T> second)
+    {
+        _first = first ?? throw new ArgumentNullException(nameof(first));
+        _second = second ?? throw new ArgumentNullException(nameof(second));
+    }
+
+    public int Count => _first.Count + _second.Count;
+
+    public T this[int index]
+    {
+        get
+        {
+            if ((uint)index >= (uint)Count)
+                throw new ArgumentOutOfRangeException(nameof(index));
+
+            return index < _first.Count
+                ? _first[index]
+                : _second[index - _first.Count];
+        }
+    }
+
+    public IEnumerator<T> GetEnumerator()
+    {
+        for (int i = 0; i < _first.Count; i++)
+            yield return _first[i];
+
+        for (int i = 0; i < _second.Count; i++)
+            yield return _second[i];
+    }
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+}

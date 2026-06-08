@@ -24,7 +24,7 @@ internal class GUIPercentageBackground : AbstractGUIWidget
         this.FitToActualSize = fitToActualSize;
     }
 
-    static private Image squareImage = SpriteLoader.FromResource("Nebula.Resources.White.png", 100f);
+    static private Image squareImage => NebulaAsset.WhiteImage;
     internal override GameObject? Instantiate(Size size, out Size actualSize)
     {
         var frame = UnityHelper.CreateObject("PercentageFrame", null, new(0f, 0f, 0f));
