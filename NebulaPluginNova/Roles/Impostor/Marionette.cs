@@ -190,10 +190,10 @@ public class Marionette : DefinedSingleAbilityRoleTemplate<Marionette.Ability>, 
         {
             if (MannequinMode)
             {
+                var localPlayer = AmongUsLLImpl.LocalPlayer;
+                var localPos = localPlayer.transform.localPosition;
                 myDecoy = (NebulaSyncObject.RpcInstantiate(Decoy.MyTag, [
-                           PlayerControl.LocalPlayer.transform.localPosition.x,
-                        PlayerControl.LocalPlayer.transform.localPosition.y,
-                        PlayerControl.LocalPlayer.cosmetics.FlipX ? -1f : 1f
+                           localPos.x, localPos.y, localPlayer.cosmetics.FlipX ? -1f : 1f
                            ]).SyncObject as Decoy);
             }
             else

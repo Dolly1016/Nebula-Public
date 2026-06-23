@@ -1,6 +1,7 @@
 ﻿using Il2CppInterop.Runtime.Injection;
 using Il2CppSystem.Text.RegularExpressions;
 using TMPro;
+using Virial;
 
 namespace Nebula.Behavior;
 
@@ -271,8 +272,8 @@ public class TextField : MonoBehaviour
             0f : myText.textInfo.lineInfo[lineNum].baseline - myCursor.textInfo.lineInfo[0].baseline, -1f);
         
 
-        Vector2 compoPos = UnityHelper.WorldToScreenPoint(transform.position + new Vector3(GetCursorX(cursor), 0.15f, 0f), LayerExpansion.GetUILayer());
-        compoPos.y = Screen.height - compoPos.y;
+        VVector2 compoPos = UnityHelper.WorldToScreenPoint(transform.position + new Vector3(GetCursorX(cursor), 0.15f, 0f), LayerExpansion.GetUILayer());
+        compoPos.y = NebulaAPI.AmongUs.ScreenHeight - compoPos.y;
         Input.compositionCursorPos = compoPos;
     }
 
@@ -295,7 +296,7 @@ public class TextField : MonoBehaviour
     {
         Alignment = alignment,
         AllowAutoSizing = false,
-        Color = Color.white,
+        Color = VColor.White,
         FontSize = fontSize,
         Size = size,
         Styles = FontStyles.Normal

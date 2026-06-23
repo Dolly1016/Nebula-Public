@@ -109,16 +109,16 @@ public class InnerslothDefaultNamespace : IResourceAllocator
 {
     Dictionary<string, INebulaResource> resources = new()
     {
-        { "button.vitalsbutton", new VanillaImageResource(new WrapSpriteLoader(() => HudManager.InstanceExists ? HudManager.Instance.UseButton.fastUseSettings[ImageNames.VitalsButton].Image : null!)) },
-        { "button.skeldadminbutton", new VanillaImageResource(new WrapSpriteLoader(() => HudManager.InstanceExists ? HudManager.Instance.UseButton.fastUseSettings[ImageNames.AdminMapButton].Image : null!)) },
-        { "button.miraadminbutton", new VanillaImageResource(new WrapSpriteLoader(() => HudManager.InstanceExists ? HudManager.Instance.UseButton.fastUseSettings[ImageNames.MIRAAdminButton].Image : null!)) },
-        { "button.polusadminbutton", new VanillaImageResource(new WrapSpriteLoader(() => HudManager.InstanceExists ? HudManager.Instance.UseButton.fastUseSettings[ImageNames.PolusAdminButton].Image : null!)) },
-        { "button.airshipadminbutton", new VanillaImageResource(new WrapSpriteLoader(() => HudManager.InstanceExists ? HudManager.Instance.UseButton.fastUseSettings[ImageNames.AirshipAdminButton].Image : null!)) },
-        { "button.camerabutton", new VanillaImageResource(new WrapSpriteLoader(() => HudManager.InstanceExists ? HudManager.Instance.UseButton.fastUseSettings[ImageNames.CamsButton].Image : null!)) },
-        { "button.doorlogsbutton", new VanillaImageResource(new WrapSpriteLoader(() => HudManager.InstanceExists ? HudManager.Instance.UseButton.fastUseSettings[ImageNames.DoorLogsButton].Image : null!)) },
-        { "button.usebutton", new VanillaImageResource(new WrapSpriteLoader(() => HudManager.InstanceExists ? HudManager.Instance.UseButton.fastUseSettings[ImageNames.UseButton].Image : null!)) },
-        { "button.petbutton", new VanillaImageResource(new WrapSpriteLoader(() => HudManager.InstanceExists ? HudManager.Instance.UseButton.fastUseSettings[ImageNames.PetButton].Image : null!)) },
-        { "button.killbutton", new VanillaImageResource(new WrapSpriteLoader(() => HudManager.InstanceExists ? HudManager.Instance.KillButton.graphic.sprite : null!)) }
+        { "button.vitalsbutton", new VanillaImageResource(new WrapSpriteLoader(() => AmongUsLLImpl.TryGetHudManager(out _, out var bridge) ? bridge.UseButtonVanillaSettings[ImageNames.VitalsButton].Image : null!)) },
+        { "button.skeldadminbutton", new VanillaImageResource(new WrapSpriteLoader(() => AmongUsLLImpl.TryGetHudManager(out _, out var bridge) ? bridge.UseButtonVanillaSettings[ImageNames.AdminMapButton].Image : null!)) },
+        { "button.miraadminbutton", new VanillaImageResource(new WrapSpriteLoader(() => AmongUsLLImpl.TryGetHudManager(out _, out var bridge) ? bridge.UseButtonVanillaSettings[ImageNames.MIRAAdminButton].Image : null!)) },
+        { "button.polusadminbutton", new VanillaImageResource(new WrapSpriteLoader(() => AmongUsLLImpl.TryGetHudManager(out _, out var bridge) ? bridge.UseButtonVanillaSettings[ImageNames.PolusAdminButton].Image : null!)) },
+        { "button.airshipadminbutton", new VanillaImageResource(new WrapSpriteLoader(() => AmongUsLLImpl.TryGetHudManager(out _, out var bridge) ? bridge.UseButtonVanillaSettings[ImageNames.AirshipAdminButton].Image : null!)) },
+        { "button.camerabutton", new VanillaImageResource(new WrapSpriteLoader(() => AmongUsLLImpl.TryGetHudManager(out _, out var bridge) ? bridge.UseButtonVanillaSettings[ImageNames.CamsButton].Image : null!)) },
+        { "button.doorlogsbutton", new VanillaImageResource(new WrapSpriteLoader(() => AmongUsLLImpl.TryGetHudManager(out _, out var bridge) ? bridge.UseButtonVanillaSettings[ImageNames.DoorLogsButton].Image : null!)) },
+        { "button.usebutton", new VanillaImageResource(new WrapSpriteLoader(() => AmongUsLLImpl.TryGetHudManager(out _, out var bridge) ? bridge.UseButtonVanillaSettings[ImageNames.UseButton].Image : null!)) },
+        { "button.petbutton", new VanillaImageResource(new WrapSpriteLoader(() => AmongUsLLImpl.TryGetHudManager(out _, out var bridge) ? bridge.UseButtonVanillaSettings[ImageNames.PetButton].Image : null!)) },
+        { "button.killbutton", new VanillaImageResource(new WrapSpriteLoader(() => AmongUsLLImpl.TryGetHudManager(out _, out var bridge) ? bridge.KillButton.graphic.sprite : null!)) }
     };
     INebulaResource? IResourceAllocator.GetResource(IReadOnlyArray<string> namespaceArray, string name)
     {

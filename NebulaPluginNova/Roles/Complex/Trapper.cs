@@ -52,7 +52,7 @@ file static class TrapperSystem
 
             if (Trapper.KillTrapSoundDistanceOption > 0f)
             {
-                if (buttonVariation[buttonIndex].id == KillTrapId) NebulaAsset.RpcPlaySE.Invoke((NebulaAudioClip.TrapperKillTrap, PlayerControl.LocalPlayer.transform.position, Trapper.KillTrapSoundDistanceOption * 0.6f, Trapper.KillTrapSoundDistanceOption));
+                if (buttonVariation[buttonIndex].id == KillTrapId) NebulaAsset.RpcPlaySE.Invoke((NebulaAudioClip.TrapperKillTrap, AmongUsLLImpl.LocalPlayer.transform.position, Trapper.KillTrapSoundDistanceOption * 0.6f, Trapper.KillTrapSoundDistanceOption));
             }
 
             if (isEvil && buttonVariation[buttonIndex].id == DecelTrapId)
@@ -185,12 +185,12 @@ public class Trapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
             TypeId = type;
 
             //不可視
-            if (TypeId >= 2 && !isLocal) Color = Color.clear;
+            if (TypeId >= 2 && !isLocal) Color = VColor.Clear;
         }
 
         public void SetAsOwner()
         {
-            if (!(Color.a > 0f)) Color = Color.white;
+            if (!(Color.A > 0f)) Color = VColor.White;
         }
 
         static Trap()
@@ -207,19 +207,22 @@ public class Trapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
         public void SetSpriteAsUsedKillTrap()
         {
             Sprite = trapSprites[4].GetSprite();
-            Color = Color.white;
+            Color = VColor.White;
         }
 
         void Update(GameUpdateEvent ev)
         {
-            if(TypeId < 2 && !(Color.a < 1f))
+            if(TypeId < 2 && !(Color.A < 1f))
             {
                 //加減速トラップはそれぞれで処理する
 
-                if (Position.Distance(PlayerControl.LocalPlayer.transform.position) < SpeedTrapSizeOption*0.35f)
+                var localPlayer = GamePlayer.LocalPlayer;
+                if (localPlayer == null) return;
+
+                if (Position.Distance(localPlayer.Position) < SpeedTrapSizeOption*0.35f)
                 {
-                    var invoker = PlayerModInfo.RpcAttrModulator.GetInvoker((PlayerControl.LocalPlayer.PlayerId,
-                        new SpeedModulator(TypeId == 0 ? AccelRateOption : DecelRateOption, Vector2.one, true, Trapper.SpeedTrapDurationOption, false, 50, "nebula.trap" + TypeId), false));
+                    var invoker = PlayerModInfo.RpcAttrModulator.GetInvoker((localPlayer.PlayerId,
+                        new SpeedModulator(TypeId == 0 ? AccelRateOption : DecelRateOption, VVector2.One, true, Trapper.SpeedTrapDurationOption, false, 50, "nebula.trap" + TypeId), false));
 
                     if(NebulaGameManager.Instance?.HavePassed(lastAccelTime, 0.3f) ?? false)
                     {
@@ -268,7 +271,7 @@ public class Trapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
         void LocalUpdate(GameUpdateEvent ev)
         {
             //会議中はなにもしない
-            if (MeetingHud.Instance || ExileController.Instance) return;
+            if (MeetingHud.Instance.AsBoolFast() || ExileController.Instance.AsBoolFast()) return;
 
             uint commMask = 0;
             foreach(var commTrap in commTraps)
@@ -277,7 +280,7 @@ public class Trapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
                 {
                     if (p.AmOwner) continue;
                     if (p.IsDead || p.IsInvisible) continue;
-                    if (p.VanillaPlayer.transform.position.Distance(commTrap.Position) < CommTrapSizeOption * 0.35f)
+                    if (p.Position.Distance(commTrap.Position) < CommTrapSizeOption * 0.35f)
                     {
                         //直前にトラップを踏んでいるプレイヤーは無視する
                         commMask |= 1u << p.PlayerId;
@@ -326,7 +329,7 @@ public class Trapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
         void LocalUpdate(GameUpdateEvent ev)
         {
             //会議中はなにもしない
-            if (MeetingHud.Instance || ExileController.Instance) return;
+            if (MeetingHud.Instance.AsBoolFast() || ExileController.Instance.AsBoolFast()) return;
 
             var killButton = NebulaAPI.CurrentGame?.KillButtonLikeHandler.KillButtonLike.FirstOrDefault();
             
@@ -339,7 +342,7 @@ public class Trapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
                         if (p.AmOwner) continue;
                         if (p.IsDead || !MyPlayer.CanKill(p)) continue;
 
-                        if (p.VanillaPlayer.transform.position.Distance(killTrap.Position) < KillTrapSizeOption * 0.35f)
+                        if (p.Position.Distance(killTrap.Position) < KillTrapSizeOption * 0.35f)
                         {
                                 using (RPCRouter.CreateSection("TrapKill"))
                                 {

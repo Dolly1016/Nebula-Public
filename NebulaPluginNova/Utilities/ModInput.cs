@@ -1,4 +1,5 @@
 ﻿using Nebula.Behavior;
+using Nebula.Roles.Abilities;
 using Virial.Runtime;
 
 namespace Nebula.Utilities;
@@ -85,7 +86,7 @@ public class VirtualInput
 [NebulaPreprocess(PreprocessPhase.PostBuildNoS)]
 public class NebulaInput
 {
-    public static bool SomeUiIsActive => (ControllerManager.Instance && ControllerManager.Instance.CurrentUiState?.BackButton != null) || NebulaManager.Instance.HasSomeUI || TextField.AnyoneValid;
+    public static bool SomeUiIsActive => (ControllerManager.Instance.AsBoolFast(out var controller) && controller.CurrentUiState?.BackButton != null) || NebulaManager.Instance.HasSomeUI || TextField.AnyoneValid || DyingMessages.ThereIsAnyCanvas;
     private static bool SomeInputUiIsActive
     {
         get

@@ -1,4 +1,5 @@
 ﻿using AmongUs.GameOptions;
+using Discord;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Il2CppSystem.Security.Cryptography;
 using Virial.Events.Game;
@@ -17,24 +18,42 @@ public class LightPatch
 
     public static bool Prefix(ref float __result, ShipStatus __instance, [HarmonyArgument(0)] NetworkedPlayerInfo? player)
     {
+        NebulaProfiler.LapTimer("Before ShipStatus.CalculateLightRadius");
+
         if (__instance == null)
         {
             lastRange = 1f;
             return true;
         }
 
+        var gameMap = ModSingleton<GameMap>.Instance;
+        if (gameMap == null || gameMap.IsDeadObject)
+        {
+            __result = __instance.MaxLightRadius;
+            return false;
+        }
         if (player == null || player.IsDead)
         {
             __result = __instance.MaxLightRadius;
             return false;
         }
 
+        NebulaProfiler.LapTimer("ShipStatus.CalculateLightRadius.1");
+
         if ((NebulaGameManager.Instance?.GameState ?? NebulaGameStates.NotStarted) == NebulaGameStates.NotStarted) return true;
 
+        NebulaProfiler.LapTimer("ShipStatus.CalculateLightRadius.2");
+
         ISystemType? systemType = __instance.Systems.ContainsKey(SystemTypes.Electrical) ? __instance.Systems[SystemTypes.Electrical] : null;
+
+        NebulaProfiler.LapTimer("ShipStatus.CalculateLightRadius.3");
+
         SwitchSystem? switchSystem = systemType?.TryCast<SwitchSystem>();
 
+        NebulaProfiler.LapTimer("ShipStatus.CalculateLightRadius.4");
+
         float t = (float)(switchSystem?.Value ?? 255f) / 255f;
+
 
         var info = GamePlayer.LocalPlayer;
         var modinfo = info?.Unbox();
@@ -43,13 +62,19 @@ public class LightPatch
 
         if (ignoreBlackOut) t = 1f;
 
-        float radiusRate = Mathn.Lerp(__instance.MinLightRadius, __instance.MaxLightRadius, t);
-        float range = GameOptionsManager.Instance.CurrentGameOptions.GetFloat(hasImpostorVision ? FloatOptionNames.ImpostorLightMod : FloatOptionNames.CrewLightMod);
-        var ev = GameOperatorManager.Instance?.Run(new LightRangeUpdateEvent(1f));
+        NebulaProfiler.LapTimer("ShipStatus.CalculateLightRadius.4");
+
+        float radiusRate = Mathn.Lerp(gameMap.ShipMinLightRadius, gameMap.ShipMaxLightRadius, t);
+        float range = hasImpostorVision ? gameMap.ImpostorLightMod : gameMap.CrewmateLightMod;
+        var ev = GameOperatorManager.Instance?.Run(LightRangeUpdateEvent.Get(1f));
         float rate = ev?.LightRange ?? 1f;
         float quickRate = ev?.LightQuickRange ?? 1f;
 
+        NebulaProfiler.LapTimer("ShipStatus.CalculateLightRadius.5");
+
         rate *= GamePlayer.LocalPlayer?.Unbox().CalcAttributeVal(PlayerAttributes.Eyesight) ?? 1f;
+
+        NebulaProfiler.LapTimer("ShipStatus.CalculateLightRadius.6");
 
         lastRange -= (lastRange - rate).Delta(0.7f * (ev?.LightSpeed ?? 1f), 0.005f);
         __result = radiusRate * range * lastRange;
@@ -62,6 +87,8 @@ public class LightPatch
 
         __result *= lastRangeForDive;
         __result *= quickRate;
+
+        NebulaProfiler.LapTimer("ShipStatus.CalculateLightRadius.7");
 
         return false;
     }
@@ -105,7 +132,7 @@ public static class LightSourceGpuRendererPatch
             if (!collider2D.isTrigger && (!LightSource.NoShadows.TryGetValue(collider2D.gameObject, out noShadowBehaviour2) || !(noShadowBehaviour2.hitOverride == collider2D)) && (!LightSource.OneWayShadows.TryGetValue(collider2D.gameObject, out oneWayShadows) || !oneWayShadows.IsIgnored(lightSource)))
             {
                 EdgeCollider2D? edgeCollider2D = collider2D.TryCast<EdgeCollider2D>();
-                if (edgeCollider2D)
+                if (edgeCollider2D.AsBoolFast())
                 {
                     Vector2[] points = edgeCollider2D!.points;
                     for (int j = 0; j < points.Length - 1; j++)
@@ -118,7 +145,7 @@ public static class LightSourceGpuRendererPatch
                 else
                 {
                     PolygonCollider2D? polygonCollider2D = collider2D.TryCast<PolygonCollider2D>();
-                    if (polygonCollider2D)
+                    if (polygonCollider2D.AsBoolFast())
                     {
                         Vector2[] points2 = polygonCollider2D!.points;
                         for (int k = 0; k < points2.Length; k++)
@@ -136,7 +163,7 @@ public static class LightSourceGpuRendererPatch
                     else
                     {
                         BoxCollider2D? boxCollider2D = collider2D.TryCast<BoxCollider2D>();
-                        if (boxCollider2D)
+                        if (boxCollider2D.AsBoolFast())
                         {
                             Vector2 vector7 = boxCollider2D!.size / 2f;
                             Vector2 vector8 = boxCollider2D.transform.TransformPoint(boxCollider2D.offset - vector7);
@@ -188,7 +215,7 @@ public static class LightSourceRaycastRendererPatch
             if (!collider2D.isTrigger)
             {
                 EdgeCollider2D? edgeCollider2D = collider2D.TryCast<EdgeCollider2D>();
-                if (edgeCollider2D)
+                if (edgeCollider2D.AsBoolFast())
                 {
                     Vector2[] points = edgeCollider2D!.points;
                     for (int j = 0; j < points.Length; j++)
@@ -201,7 +228,7 @@ public static class LightSourceRaycastRendererPatch
                 else
                 {
                     PolygonCollider2D? polygonCollider2D = collider2D.TryCast<PolygonCollider2D>();
-                    if (polygonCollider2D)
+                    if (polygonCollider2D.AsBoolFast())
                     {
                         Vector2[] points2 = polygonCollider2D!.points;
                         for (int k = 0; k < points2.Length; k++)
@@ -214,7 +241,7 @@ public static class LightSourceRaycastRendererPatch
                     else
                     {
                         BoxCollider2D? boxCollider2D = collider2D.TryCast<BoxCollider2D>();
-                        if (boxCollider2D)
+                        if (boxCollider2D.AsBoolFast())
                         {
                             Vector2 vector3 = boxCollider2D!.size / 2f;
                             Vector2 vector4 = (Vector2)boxCollider2D.transform.TransformPoint(boxCollider2D.offset - vector3) - origin;

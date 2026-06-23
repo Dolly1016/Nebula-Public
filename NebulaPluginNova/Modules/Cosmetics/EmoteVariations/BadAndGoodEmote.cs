@@ -17,7 +17,7 @@ file static class HandEmoteHelpers
     {
         var anim = physics.Animations;
         
-        while (renderer)
+        while (renderer.AsBoolFast())
         {
             bool shouldNegative = layer.FlipX == negativeOnFlipped;
             renderer.flipX = layer.FlipX;
@@ -42,7 +42,7 @@ file static class HandEmoteHelpers
     public static EmoteHandBehaviour GetOrAddEmoteHand(PlayerControl player)
     {
         var child = player.cosmetics.transform.FindChild("EmoteHand");
-        if (child) return child.GetComponent<EmoteHandBehaviour>();
+        if (child.AsBoolFast()) return child.GetComponent<EmoteHandBehaviour>();
 
         var hand = UnityHelper.CreateObject<EmoteHandBehaviour>("EmoteHand", player.cosmetics.transform, new(0f, 0f, 0f), LayerExpansion.GetPlayersLayer());
         hand.Initialize(player.cosmetics);
@@ -62,9 +62,9 @@ internal class EmoteHandBehaviour : MonoBehaviour
 
     void LateUpdate()
     {
-        if (!nodeSync && layer) layer.visor.TryGetComponent<SpriteAnimNodeSync>(out nodeSync);
+        if (!nodeSync.AsBoolFast() && layer.AsBoolFast()) layer.visor.TryGetComponent<SpriteAnimNodeSync>(out nodeSync);
 
-        if (nodeSync)
+        if (nodeSync.AsBoolFast())
         {
             float y = nodeSync.Parent.GetLocalPosition(nodeSync.NodeId, false).y;
             transform.localPosition = new(0f, y - 0.55f, 0f);
@@ -86,18 +86,18 @@ internal class BadEmote : AbstractEmote
         NebulaManager.Instance.StartCoroutine(HandEmoteHelpers.CoUpdateHand(hand, player.cosmetics, player.MyPhysics, true).WrapToIl2Cpp());
         hand.sprite = HandEmoteHelpers.Hand.GetSprite(2);
         yield return Effects.Wait(0.15f);
-        if (hand) hand.sprite = HandEmoteHelpers.Hand.GetSprite(3);
+        if (hand.AsBoolFast()) hand.sprite = HandEmoteHelpers.Hand.GetSprite(3);
         for(int i = 0; i < 3; i++)
         {
-            if (hand) hand.transform.localPosition = new(1.1f.FlipIf(player.cosmetics.FlipX), 0.18f, 0f);
+            if (hand.AsBoolFast()) hand.transform.localPosition = new(1.1f.FlipIf(player.cosmetics.FlipX), 0.18f, 0f);
             yield return Effects.Wait(0.05f);
-            if (hand) hand.transform.localPosition = new(1.1f.FlipIf(player.cosmetics.FlipX), 0.14f, 0f);
+            if (hand.AsBoolFast()) hand.transform.localPosition = new(1.1f.FlipIf(player.cosmetics.FlipX), 0.14f, 0f);
             yield return Effects.Wait(0.05f);
-            if (hand) hand.transform.localPosition = new(1.1f.FlipIf(player.cosmetics.FlipX), 0.1f, 0f);
+            if (hand.AsBoolFast()) hand.transform.localPosition = new(1.1f.FlipIf(player.cosmetics.FlipX), 0.1f, 0f);
             yield return Effects.Wait(0.25f);
         }
         yield return Effects.Wait(0.8f);
-        if (hand)
+        if (hand.AsBoolFast())
         {
             hand.enabled = false;
             GameObject.Destroy(hand.gameObject);
@@ -120,14 +120,14 @@ internal class GoodEmote : AbstractEmote
         NebulaManager.Instance.StartCoroutine(HandEmoteHelpers.CoUpdateHand(hand, player.cosmetics, player.MyPhysics, true).WrapToIl2Cpp());
         hand.sprite = HandEmoteHelpers.Hand.GetSprite(0);
         yield return Effects.Wait(0.15f);
-        if (hand)
+        if (hand.AsBoolFast())
         {
             hand.sprite = HandEmoteHelpers.Hand.GetSprite(1);
             hand.transform.localPosition = new(1.1f.FlipIf(player.cosmetics.FlipX), 0.1f, 0f);
             hand.transform.localEulerAngles = new(0f, 0f, 0f);
         }
         yield return Effects.Wait(1f);
-        if (hand)
+        if (hand.AsBoolFast())
         {
             hand.enabled = false;
             GameObject.Destroy(hand.gameObject);
@@ -152,25 +152,25 @@ internal class GreetingEmote : AbstractEmote
         for (int i = 0; i < 5; i++)
         {
             yield return Effects.Wait(0.1f);
-            if (hand)
+            if (hand.AsBoolFast())
             {
                 hand.transform.localEulerAngles = new(0f, 0f, 40f.FlipIf(player.cosmetics.FlipX));
                 hand.transform.SetLocalX(0.98f.FlipIf(player.cosmetics.FlipX));
             }
             yield return Effects.Wait(0.1f);
-            if (hand)
+            if (hand.AsBoolFast())
             {
                 hand.transform.localEulerAngles = new(0f, 0f, 35f.FlipIf(player.cosmetics.FlipX));
                 hand.transform.SetLocalX(1.02f.FlipIf(player.cosmetics.FlipX));
             }
             yield return Effects.Wait(0.05f);
-            if (hand)
+            if (hand.AsBoolFast())
             {
                 hand.transform.localEulerAngles = new(0f, 0f, 30f.FlipIf(player.cosmetics.FlipX));
                 hand.transform.SetLocalX(1.05f.FlipIf(player.cosmetics.FlipX));
             }
         }
-        if (hand)
+        if (hand.AsBoolFast())
         {
             hand.enabled = false;
             GameObject.Destroy(hand.gameObject);

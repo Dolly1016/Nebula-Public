@@ -90,19 +90,21 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
         assignChance = 0;
     }
 
-    static public Color[] Colors => colors;
-    static private Color[] colors = new Color[] { MyRole.UnityColor,
-        (Color)new Color32(254, 132, 3, 255) ,
-        (Color)new Color32(3, 254, 131, 255) ,
-        (Color)new Color32(164, 96, 203, 255) ,
-        (Color)new Color32(3, 183, 254, 255) ,
-        (Color)new Color32(8, 255, 10, 255) ,
-        (Color)new Color32(132, 3, 254, 255),
-        (Color)new Color32(177, 241, 64, 255),
-        (Color)new Color32(255, 255, 255, 255),
-        (Color)new Color32(255, 255, 40, 255),
-        (Color)new Color32(211, 129, 142, 255),
-        (Color)new Color32(255, 189, 99, 255),};
+    static public VColor[] Colors => colors;
+    static private VColor[] colors = [ 
+        MyRole.RoleColor,
+        new(254, 132, 3, 255) ,
+        new(3, 254, 131, 255) ,
+        new(164, 96, 203, 255) ,
+        new(3, 183, 254, 255) ,
+        new(8, 255, 10, 255) ,
+        new(132, 3, 254, 255),
+        new(177, 241, 64, 255),
+        new(255, 255, 255, 255),
+        new(255, 255, 40, 255),
+        new(211, 129, 142, 255),
+        new(255, 189, 99, 255)
+        ];
 
     bool IAssignableDocument.HasTips => false;
     bool IAssignableDocument.HasAbility => false;
@@ -138,7 +140,7 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
 
         void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo, bool inEndScene)
         {
-            Color loverColor = colors[canSeeAllInfo ? loversId : 0];
+            VColor loverColor = colors[canSeeAllInfo ? loversId : 0];
             var myLover = MyLover.Get();
             bool canSee = false;
 
@@ -150,7 +152,7 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
                 int optionValue = Avenger.CanKnowExistanceOfAvengerOption.GetValue();
                 if(optionValue == 2 || ((optionValue == 1) && ((myLover!.Role as Avenger.Instance)?.AvengerTarget?.AmOwner ?? false))){
                     canSee = true;
-                    loverColor = Avenger.MyRole.UnityColor;
+                    loverColor = Avenger.MyRole.Color;
                 }
             }
 
@@ -225,7 +227,7 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
             {
                 if (GeneralConfigurations.LoversRadioOption)
                 {
-                    ModSingleton<NoSVCRoom>.Instance?.RegisterRadioChannel(Language.Translate("voiceChat.info.loversRadio"), 2, p => p == MyLover.Get(), this, MyRole.UnityColor);
+                    ModSingleton<NoSVCRoom>.Instance?.RegisterRadioChannel(Language.Translate("voiceChat.info.loversRadio"), 2, p => p == MyLover.Get(), this, MyRole.Color);
                 }
             }
         }
@@ -249,7 +251,7 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
         //相方は一度決定したら変更されないため、キャッシュさせる。
         public Cache<GamePlayer> MyLover;
         
-        string? RuntimeModifier.DisplayIntroBlurb => Language.Translate("role.lover.blurb").Replace("%NAME%", (MyLover.Get()?.Name ?? "ERROR").Color(MyRole.UnityColor));
+        string? RuntimeModifier.DisplayIntroBlurb => Language.Translate("role.lover.blurb").Replace("%NAME%", (MyLover.Get()?.Name ?? "ERROR").Color(MyRole.Color));
         bool RuntimeAssignable.InvalidateCrewmateTask => true;
         bool RuntimeAssignable.MyCrewmateTaskIsIgnored => true;
 

@@ -94,17 +94,17 @@ internal class FakePlayerMapLayer : MonoBehaviour
 
     void OnDestroy()
     {
-        if (camera) GameObject.Destroy(camera.gameObject);
+        if (camera.AsBoolFast()) GameObject.Destroy(camera.gameObject);
     }
 
     void OnEnable()
     {
-        if (cameraDotRenderer) cameraDotRenderer.enabled = true;
+        if (cameraDotRenderer.AsBoolFast()) cameraDotRenderer.enabled = true;
     }
 
     virtual protected void OnDisable()
     {
-        if (cameraDotRenderer) cameraDotRenderer.enabled = false;
+        if (cameraDotRenderer.AsBoolFast()) cameraDotRenderer.enabled = false;
     }
 
     virtual protected void OnClick(Vector2 worldPos, Vector2 minimapPos) { }

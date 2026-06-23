@@ -1,12 +1,15 @@
-﻿using Nebula.AeroGuesser;
-using Nebula.Behavior;
+﻿using Nebula.Behavior;
+using Nebula.Dev;
 using Nebula.Modules.Logging;
 using Nebula.Roles;
 using Nebula.Roles.Abilities;
 using Nebula.Roles.Crewmate;
 using Nebula.Roles.Impostor;
+using Nebula.SpecialModes.AeroGuesser;
+using Nebula.SpecialModes.PaintQuiz;
 using System.Reflection;
 using Virial;
+using Virial.Achievements;
 using Virial.Assignable;
 using Virial.DI;
 using Virial.Game;
@@ -116,6 +119,8 @@ internal class NebulaPreprocessorImpl : NebulaPreprocessor
     UseButtonAlternative NebulaPreprocessor.RegisterUseButtonAlternative(Virial.Media.Image buttonImage, Action onUsed) => new(buttonImage, () => true, _ => onUsed.Invoke(), false);
 
     private List<Func<IEnumerator>>[] preprocessList;
+
+    ITitlesRegister NebulaPreprocessor.Titles => TitleRegisterImpl.Instance;
 }
 
 
@@ -176,6 +181,7 @@ public static class PreloadManager
         DIManager.Instance.RegisterContainer(() => new GameModeFreePlayImpl());
         DIManager.Instance.RegisterContainer(() => new GameModeStandardImpl());
         DIManager.Instance.RegisterContainer(() => new AeroGuesserSenario());
+        DIManager.Instance.RegisterContainer(() => new PaintQuizSenario());
 
         //IModule<Virial.Game.Game>
         DIManager.Instance.RegisterModule(() => new Synchronizer());

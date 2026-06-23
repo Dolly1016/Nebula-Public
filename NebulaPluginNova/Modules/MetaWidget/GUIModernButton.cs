@@ -165,7 +165,7 @@ internal class GUIModernButton : NoSGUIText
         AsMaskedButton = attribute.Font.FontMaterial != null;
     }
 
-    static private Virial.Color piledModernColor = new(41 * 0.5f, 235 * 0.5f, 198 * 0.5f);
+    static private Virial.Color piledModernColor = new(41 * 0.5f / 255f, 235 * 0.5f / 255f, 198 * 0.5f / 255f);
     static private Virial.Color selectedModernColor = new(16, 16, 16);
 
     internal override GameObject? Instantiate(Size size, out Size actualSize)

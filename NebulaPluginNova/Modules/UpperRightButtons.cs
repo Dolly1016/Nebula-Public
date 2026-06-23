@@ -67,7 +67,7 @@ public class CustomUpperRightContent : IUpperRightContent
         Priority = priority;
         renderer = UnityHelper.CreateObject<SpriteRenderer>("Button", ModSingleton<UpperRightButtons>.Instance.ButtonsHolder, Vector3.zero);
         renderer.sprite = inactiveSprite.GetSprite();
-        button = renderer.gameObject.SetUpButton(true, renderer, Color.white, Color.white);
+        button = renderer.gameObject.SetUpButton(true, renderer, Virial.Color.White, Virial.Color.White);
         button.transform.localScale = new(UpperRightButtons.BackgroundScale, UpperRightButtons.BackgroundScale, 1f);
         var collider = renderer.gameObject.AddComponent<BoxCollider2D>();
         collider.size = new(1f, 1f);
@@ -90,7 +90,7 @@ public class CustomUpperRightContent : IUpperRightContent
             NebulaManager.Instance.StartCoroutine(ManagedEffects.Wait(selectedSpritePredicate, () =>
             {
                 imageLocked = false;
-                if (renderer) renderer.sprite = inactiveSprite.GetSprite();
+                if (renderer.AsBoolFast()) renderer.sprite = inactiveSprite.GetSprite();
             }).WrapToIl2Cpp());
         });
 

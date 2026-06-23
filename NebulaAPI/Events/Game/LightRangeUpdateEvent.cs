@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.Attributes;
 
 namespace Virial.Events.Game;
 
 /// <summary>
 /// 視界の広さを更新する際に発火します。
 /// </summary>
+[RecyclableEvent]
 public class LightRangeUpdateEvent : Event
 {
     /// <summary>
@@ -24,9 +26,14 @@ public class LightRangeUpdateEvent : Event
     /// </summary>
     public float LightQuickRange { get => lightQuickRange; set => lightQuickRange = MathF.Max(0f, value); }
     private float lightQuickRange;
-    internal LightRangeUpdateEvent(float lightRange)
+    
+    private LightRangeUpdateEvent() { }
+    static private LightRangeUpdateEvent ev = new();
+    static internal LightRangeUpdateEvent Get(float lightRange)
     {
-        LightRange = lightRange;
-        LightQuickRange = 1f;
+        ev.lightSpeed = 1f;
+        ev.LightRange = lightRange;
+        ev.lightQuickRange = 1f;
+        return ev;
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Virial.Helpers;
 
 namespace Virial;
 
@@ -30,7 +31,7 @@ internal class GameObjectLifespan : ILifespan
 {
     UnityEngine.GameObject obj;
     public GameObjectLifespan(UnityEngine.GameObject obj) { this.obj = obj; }
-    public bool IsDeadObject => !obj;
+    public bool IsDeadObject => !obj.AsBoolFast();
 }
 
 /// <summary>
@@ -138,4 +139,24 @@ public class FlexibleLifespan : DependentLifespan, INestedLifespan, IReleasable
     {
         this.Bind(parentLifespan);
     }
+}
+
+/// <summary>
+/// 内部で使用するLifespan。IsDeadObjectは複数のLifespanの論理和をとる。
+/// このLifespanは複数のLifespanを統合するために使用する。いつどんな用途で他のLifespanが追加されるか分からないので、他メソッドの引数等の用途で使用するべきではない。
+/// </summary>
+internal class CombinedInternalLifespan : ILifespan
+{
+    List<ILifespan> lifespans = [];
+    internal void Add(ILifespan lifespan) => lifespans.Add(lifespan);
+    public bool IsDeadObject
+    {
+        get
+        {
+            if (lifespans.Count == 0) return true;
+            lifespans.RemoveAll(l => l.IsDeadObject);
+            return lifespans.Count == 0;
+        }
+    }
+
 }

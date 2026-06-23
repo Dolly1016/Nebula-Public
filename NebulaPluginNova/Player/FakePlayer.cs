@@ -253,7 +253,7 @@ internal class FakePlayerNetTransform : IGameOperator
     private void SkipExcessiveFrames()
     {
         if (incomingPosQueue.Count < QUEUE_LENGTH_FOR_SNAPPING) return;
-        if (body)
+        if (body.AsBoolFast())
         {
             body.position = incomingPosQueue.Peek();
             MoveTowardNextPoint();
@@ -339,11 +339,11 @@ internal class FakePet : IGameOperator
 
     void IGameOperator.OnReleased()
     {
-        if(vanillaPet) GameObject.Destroy(vanillaPet.gameObject);
+        if(vanillaPet.AsBoolFast()) GameObject.Destroy(vanillaPet.gameObject);
     }
     public void UpdatePet(PetData petData, Vector2? position = null)
     {
-        if (vanillaPet) GameObject.Destroy(vanillaPet.gameObject);
+        if (vanillaPet.AsBoolFast()) GameObject.Destroy(vanillaPet.gameObject);
         
         cosmeticsLayer.UnloadAddressableAsset(cosmeticsLayer.petAsset);
         NebulaManager.Instance.StartCoroutine(cosmeticsLayer.CoLoadAssetAsync<PetBehaviour>(petData.Cast<IAddressableAssetProvider<PetBehaviour>>(),(Il2CppSystem.Action<PetBehaviour>)(Action<PetBehaviour>)((PetBehaviour pet)=>
@@ -378,7 +378,7 @@ internal class FakePet : IGameOperator
 
     void OnUpdate(GameUpdateEvent ev)
     {
-        if (!vanillaPet) return;
+        if (!vanillaPet.AsBoolFast()) return;
 
         Vector2 truePosition = player.TruePosition.ToUnityVector();
         Vector2 truePosition2 = vanillaPet.GetTruePosition();
@@ -418,7 +418,7 @@ internal class FakePet : IGameOperator
 
     void LateUpdate(GameLateUpdateEvent ev)
     {
-        if (!vanillaPet) return;
+        if (!vanillaPet.AsBoolFast()) return;
 
         Vector3 localPosition = vanillaPet.transform.localPosition;
         localPosition.z = (localPosition.y + vanillaPet.yOffset) / 1000f + 0.0002f;
@@ -464,6 +464,7 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
     }
 
     protected readonly PlayerDisplay displayPlayer;
+    protected readonly CosmeticsLayer cosmeticsLayer;
     protected readonly Collider2D collider;
     protected readonly Rigidbody2D body;
     private readonly FakePet pet;
@@ -487,14 +488,15 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
         this.id = id;
         this.displayPlayer = VanillaAsset.GetPlayerDisplay(true, true);
         this.displayPlayer.transform.position = parameters.position.AsVector3(parameters.position.y / 1000f);
-        this.displayPlayer.Cosmetics.GetComponent<NebulaCosmeticsLayer>().fakePlayerCache = this;
-        this.displayPlayer.Cosmetics.SetFlipX(parameters.InitialFlipX);
+        this.cosmeticsLayer = displayPlayer.Cosmetics;
+        this.cosmeticsLayer.GetComponent<NebulaCosmeticsLayer>().fakePlayerCache = this;
+        this.cosmeticsLayer.SetFlipX(parameters.InitialFlipX);
         this.collider = displayPlayer.GetComponent<Collider2D>();
         this.body = displayPlayer.GetComponent<Rigidbody2D>();
         this.visualPlayer = visualPlayer;
         this.amOwner = amOwner;
         this.NetTransform = new FakePlayerNetTransform(body, this, amOwner).Register(this);
-        this.pet = new FakePet(displayPlayer.Cosmetics, this).Register(this);
+        this.pet = new FakePet(cosmeticsLayer, this).Register(this);
 
         this.killCharacteristics = parameters.KillCharacteristics;
         this.canBeTarget = parameters.CanBeTarget;
@@ -585,8 +587,8 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
             fp.MovingPlatState = MovingPlatformState.None;
         if (AmongUsClient.Instance.AmHost)
         {
-            AirshipStatus airship = ShipStatus.Instance.TryCast<AirshipStatus>();
-            if (airship)
+            AirshipStatus airship = AmongUsLLImpl.ShipStatusInstance.TryCast<AirshipStatus>();
+            if (airship.AsBoolFast())
             {
                 Vector2 vector = (Vector2)airship!.GapPlatform!.transform.position - player.Position.ToUnityVector();
                 bool canUse = !airship.GapPlatform.Target && vector.magnitude < 3f;
@@ -617,8 +619,8 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
         cosmetics.SetSkin(outfit.SkinId, outfit.ColorId, (Il2CppSystem.Action)(() =>
         {
             if (animations.IsPlayingSpawnAnimation()) cosmetics.AnimateSkinSpawn(animations.Time);
-            ShipStatus instance = ShipStatus.Instance;
-            if (instance != null && instance.Type == ShipStatus.MapType.Fungle)
+            ShipStatus instance = AmongUsLLImpl.ShipStatusInstance;
+            if (instance.AsBoolFast() && instance.Type == ShipStatus.MapType.Fungle)
             {
                 if (vanilla_inMovingPlat) cosmetics.AnimateSkinJump();
                 if (animations.IsPlayingClimbAnimation())
@@ -712,7 +714,7 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
 
         static readonly private RemoteProcess<(int ladderId, int playerId)> RpcSendUseLadder = new("FakeSendUseLadder", (message, calledByMe) =>
         {
-            if(!calledByMe) NebulaManager.Instance.StartCoroutine((NebulaGameManager.Instance?.GetPlayerlike(message.playerId) as FakePlayer)?.Logics.UseLadderImpl(ShipStatus.Instance.Ladders.FirstOrDefault(l => l.Id == message.ladderId)!));
+            if(!calledByMe) NebulaManager.Instance.StartCoroutine((NebulaGameManager.Instance?.GetPlayerlike(message.playerId) as FakePlayer)?.Logics.UseLadderImpl(AmongUsLLImpl.ShipStatusInstance.Ladders.FirstOrDefault(l => l.Id == message.ladderId)!));
         });
 
         private IEnumerator UseLadderImpl(Ladder ladder)
@@ -755,8 +757,8 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
         {
             if (!calledByMe)
             {
-                var fungleShipStatus = ShipStatus.Instance.TryCast<FungleShipStatus>();
-                if (fungleShipStatus)
+                var fungleShipStatus = AmongUsLLImpl.ShipStatusInstance.TryCast<FungleShipStatus>();
+                if (fungleShipStatus.AsBoolFast())
                 {
                     if(fungleShipStatus!.Zipline.gameObject.GetComponentsInChildren<ZiplineConsole>().Find(c => c.atTop == message.atTop, out var zipline))
                     {
@@ -793,7 +795,7 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
 
             void ZiplinePlaySound(AudioClip sound, Vector2 soundPosition)
             {
-                float soundVolume = SoundManager.GetSoundVolume(soundPosition, PlayerControl.LocalPlayer.GetTruePosition(), 2f, 6f, 0f);
+                float soundVolume = SoundManager.GetSoundVolume(soundPosition, AmongUsLLImpl.LocalPlayer.GetTruePosition(), 2f, 6f, 0f);
                 if (soundVolume <= 0f) return;
                 SoundManager.Instance.PlaySoundImmediate(sound, false, soundVolume, 1f, null);
             }
@@ -945,10 +947,10 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
         {
             if (!calledByMe)
             {
-                var airship = ShipStatus.Instance.TryCast<AirshipStatus>();
-                if (airship)
+                var airship = AmongUsLLImpl.ShipStatusInstance.TryCast<AirshipStatus>();
+                if (airship.AsBoolFast())
                 {
-                    NebulaManager.Instance.StartCoroutine((NebulaGameManager.Instance?.GetPlayerlike(message) as FakePlayer)?.Logics.UseMovePlatformImpl(airship.GapPlatform));   
+                    NebulaManager.Instance.StartCoroutine((NebulaGameManager.Instance?.GetPlayerlike(message) as FakePlayer)?.Logics.UseMovePlatformImpl(airship!.GapPlatform));   
                 }
             }
         });
@@ -961,32 +963,36 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
             ClearPositionQueues();
             Body.isKinematic = true;
             player.vanilla_inMovingPlat = true;
-            
-            Vector3 vector = (movingPlatform.IsLeft ? movingPlatform.LeftUsePosition : movingPlatform.RightUsePosition);
-            Vector3 vector2 = ((!movingPlatform.IsLeft) ? movingPlatform.LeftUsePosition : movingPlatform.RightUsePosition);
-            Vector3 sourcePos = (movingPlatform.IsLeft ? movingPlatform.LeftPosition : movingPlatform.RightPosition);
-            Vector3 targetPos = ((!movingPlatform.IsLeft) ? movingPlatform.LeftPosition : movingPlatform.RightPosition);
-            Vector3 vector3 = movingPlatform.transform.parent.TransformPoint(vector);
-            Vector3 worldUseTargetPos = movingPlatform.transform.parent.TransformPoint(vector2);
-            Vector3 worldSourcePos = movingPlatform.transform.parent.TransformPoint(sourcePos);
-            Vector3 worldTargetPos = movingPlatform.transform.parent.TransformPoint(targetPos);
-            yield return WalkPlayerTo(vector3, 0.01f, 1f, false);
-            yield return WalkPlayerTo(worldSourcePos, 0.01f, 1f, false);
+
+            var movingPlatformTransform = movingPlatform.transform;
+            var movingPlatformTransformParent = movingPlatformTransform.parent;
+
+            VVector3 vector = (movingPlatform.IsLeft ? movingPlatform.LeftUsePosition : movingPlatform.RightUsePosition);
+            VVector3 vector2 = ((!movingPlatform.IsLeft) ? movingPlatform.LeftUsePosition : movingPlatform.RightUsePosition);
+            VVector3 sourcePos = (movingPlatform.IsLeft ? movingPlatform.LeftPosition : movingPlatform.RightPosition);
+            VVector3 targetPos = ((!movingPlatform.IsLeft) ? movingPlatform.LeftPosition : movingPlatform.RightPosition);
+            VVector3 vector3 = movingPlatformTransformParent.TransformPoint(vector);
+            VVector3 worldUseTargetPos = movingPlatformTransformParent.TransformPoint(vector2);
+            VVector3 worldSourcePos = movingPlatformTransformParent.TransformPoint(sourcePos);
+            VVector3 worldTargetPos = movingPlatformTransformParent.TransformPoint(targetPos);
+            yield return WalkPlayerTo(vector3.ToUnityVector(), 0.01f, 1f, false);
+            yield return WalkPlayerTo(worldSourcePos.ToUnityVector(), 0.01f, 1f, false);
             yield return Effects.Wait(0.1f);
-            worldSourcePos -= (Vector3)player.collider.offset;
-            worldTargetPos -= (Vector3)player.collider.offset;
+            var offset = (VVector3)player.collider.offset;
+            worldSourcePos -= offset;
+            worldTargetPos -= offset;
             if (Constants.ShouldPlaySfx())
             {
                 SoundManager.Instance.PlayDynamicSound("PlatformMoving", movingPlatform.MovingSound, true, (DynamicSound.GetDynamicsFunction)movingPlatform.SoundDynamics, SoundManager.Instance.SfxChannel);
             }
             movingPlatform.IsLeft = !movingPlatform.IsLeft;
             yield return Effects.All(
-                Effects.Slide2D(movingPlatform.transform, sourcePos, targetPos, PlayerModInfo.OriginalSpeed),
-                Effects.Slide2DWorld(player.displayPlayer.transform, worldSourcePos, worldTargetPos, PlayerModInfo.OriginalSpeed)
+                Effects.Slide2D(movingPlatform.transform, sourcePos.ToUnityVector(), targetPos.ToUnityVector(), PlayerModInfo.OriginalSpeed),
+                Effects.Slide2DWorld(player.displayPlayer.transform, worldSourcePos.ToUnityVector(), worldTargetPos.ToUnityVector(), PlayerModInfo.OriginalSpeed)
             );
             if (Constants.ShouldPlaySfx()) SoundManager.Instance.StopNamedSound("PlatformMoving");
             
-            yield return WalkPlayerTo(worldUseTargetPos, 0.01f, 1f, false);
+            yield return WalkPlayerTo(worldUseTargetPos.ToUnityVector(), 0.01f, 1f, false);
             player.displayPlayer.Cosmetics.SetPetPosition(player.Position.ToUnityVector());
             player.vanilla_inMovingPlat = false;
             UpdateNetworkTransformState(true);
@@ -1062,7 +1068,7 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
         if (animations.IsPlayingSpawnAnimation()) return;
         //if (this.DoingCustomAnimation) return;
         
-        if (!GameData.Instance) return;
+        if (!GameData.Instance.AsBoolFast()) return;
 
         body.transform.SetWorldZ(body.transform.position.y / 1000f);
 
@@ -1108,32 +1114,32 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
 
         PlayerModInfo.UpdateNameTextTransform(cosmetics.nameText.transform.parent);
 
-        UpdateVisibility(true, false, true);
+        UpdateVisibility(ev.DeltaTime, true, false, true);
     }
 
     bool IsInShadowCache = false;
     private void SetPlayerAlpha(float alpha, float bodyAlpha)
     {
-        var cosmetics = displayPlayer.Cosmetics;
+        var cosmetics = cosmeticsLayer;
         var color = Color.white.AlphaMultiplied(alpha);
-        if (cosmetics.currentBodySprite.BodySprite != null) cosmetics.currentBodySprite.BodySprite.color = Color.white.AlphaMultiplied(bodyAlpha);
+        if (cosmetics.currentBodySprite.BodySprite.AsBoolFast(out var body)) body.color = Color.white.AlphaMultiplied(bodyAlpha);
 
-        if (cosmetics.skin.layer != null) cosmetics.skin.layer.color = color;
+        if (cosmetics.skin.layer.AsBoolFast(out var skin)) skin.color = color;
 
-        if (cosmetics.hat)
+        if (cosmetics.hat.AsBoolFast(out var hat))
         {
-            if (cosmetics.hat.FrontLayer != null) cosmetics.hat.FrontLayer.color = color;
-            if (cosmetics.hat.BackLayer != null) cosmetics.hat.BackLayer.color = color;
+            if (hat.FrontLayer.AsBoolFast(out var front)) front.color = color;
+            if (hat.BackLayer.AsBoolFast(out var back)) back.color = color;
         }
 
-        if (cosmetics.visor != null) cosmetics.visor.Image.color = color;
+        if (cosmetics.visor.AsBoolFast(out var visor)) visor.Image.color = color;
 
         cosmetics.GetComponent<NebulaCosmeticsLayer>().AdditionalRenderers().Do(r => r.color = color);
-        foreach (var r in additionalRenderers) if (r) r.color = color;
+        foreach (var r in additionalRenderers) if (r.AsBoolFast()) r.color = color;
     }
-    public void UpdateVisibility(bool update, bool ignoreShadow = false, bool showNameText = false)
+    public void UpdateVisibility(float? deltaTime, bool update, bool ignoreShadow = false, bool showNameText = false)
     {
-        var cosmetics = displayPlayer.Cosmetics;
+        var cosmetics = cosmeticsLayer;
         try
         {
             if (IsDead)
@@ -1153,9 +1159,9 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
                     int shadowMask = Constants.ShadowMask;
                     int objectMask = Constants.ShipAndAllObjectsMask;
 
-                    var light = PlayerControl.LocalPlayer.lightSource;
-                    Vector2 pos = light.transform.position;
-                    Vector2 myPos = Position;
+                    var light = AmongUsLLImpl.LocalPlayer.lightSource;
+                    VVector2 pos = light.transform.position;
+                    VVector2 myPos = Position;
 
                     var isAcrossWalls = PlayerModInfo.VisibilityCheckVectors.All(v => Helpers.AnyNonTriggersBetween(pos, myPos + v * 0.22f, out _, objectMask));
 
@@ -1174,7 +1180,7 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
             }
 
             var shadowHidesPlayer = !ignoreShadow && IsInShadowCache;
-            displayPlayer.Cosmetics.nameText.transform.parent.gameObject.SetActive(!shadowHidesPlayer && showNameText);
+            cosmetics.nameText.transform.parent.gameObject.SetActive(!shadowHidesPlayer && showNameText);
 
             float immadiateAlpha = 0 switch { 2 => 0f, 1 => 0.25f, _ => 1f };
             float alpha = Mathn.Min(immadiateAlpha, shadowHidesPlayer ? 0f : 1f);

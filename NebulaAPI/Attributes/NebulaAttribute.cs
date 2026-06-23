@@ -170,6 +170,17 @@ public class EventPriority : Attribute
 }
 
 /// <summary>
+/// イベントインスタンスが再利用されるイベントを表します。
+/// このイベントをキャッシュしてはいけません。
+/// このイベントのインスタンスをキャッシュすると、リスナの処理終了後に値が変わってしまいます。
+/// </summary>
+[AttributeUsage(AttributeTargets.Class)]
+public class RecyclableEvent : Attribute
+{
+
+}
+
+/// <summary>
 /// ID付きドキュメントを表すクラスです。
 /// </summary>
 [AttributeUsage(AttributeTargets.Class,AllowMultiple =true)]

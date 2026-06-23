@@ -26,8 +26,8 @@ internal class Gimlet : DefinedSingleAbilityRoleTemplate<Gimlet.Ability>, Define
     {
         GameActionTypes.DrillAction = new("gimlet.drill", this, isPhysicalAction: true);
 
-        MetaAbility.RegisterCircle(new("role.gimlet.soundRange", () => DrillSEStrengthOption, () => null, UnityColor));
-        MetaAbility.RegisterCircle(new("role.gimlet.drillSize", () => DrillSizeOption * 0.82f + 0.25f, () => null, UnityColor));
+        MetaAbility.RegisterCircle(new("role.gimlet.soundRange", () => DrillSEStrengthOption, () => null, RoleColor));
+        MetaAbility.RegisterCircle(new("role.gimlet.drillSize", () => DrillSizeOption * 0.82f + 0.25f, () => null, RoleColor));
     }
 
     
@@ -119,7 +119,7 @@ internal class Gimlet : DefinedSingleAbilityRoleTemplate<Gimlet.Ability>, Define
 
         void OnOpenConsoleLocal(PlayerBeginMinigameByConsoleLocalEvent ev)
         {
-            var task = ev.Console.FindTask(PlayerControl.LocalPlayer);
+            var task = ev.Console.FindTask(AmongUsLLImpl.LocalPlayer);
             if (task.TryCast<SabotageTask>())
             {
                 RpcBeginSabotageMinigame.Invoke(ev.Player);
@@ -263,13 +263,13 @@ internal class Gimlet : DefinedSingleAbilityRoleTemplate<Gimlet.Ability>, Define
         }
         player.VanillaPlayer.MyPhysics.body.velocity = Vector2.zero;
 
-        if(drillSE) GameObject.Destroy(drillSE.gameObject);
-        if (drillFricSE) GameObject.Destroy(drillFricSE.gameObject);
+        if(drillSE.AsBoolFast()) GameObject.Destroy(drillSE.gameObject);
+        if (drillFricSE.AsBoolFast()) GameObject.Destroy(drillFricSE.gameObject);
         NebulaAsset.PlaySE(NebulaAudioClip.DrillEnd, player.Position, 0.95f, DrillSEStrengthOption, 1f);
 
         if (!player.IsDead) anim.Animator.Play(anim.group.ExitVentAnim, 1f);
         yield return Effects.Wait(0.1f);
-        if (drillRenderer) GameObject.Destroy(drillRenderer.gameObject);
+        if (drillRenderer.AsBoolFast()) GameObject.Destroy(drillRenderer.gameObject);
         PlayerModInfo.RpcRemoveAttrByTag.LocalInvoke((player.PlayerId, GimletAttrTag));
         while (anim.Animator.IsPlaying(anim.group.ExitVentAnim)) yield return null;
         if (!player.IsDead)

@@ -23,7 +23,7 @@ public class Synchronizer : AbstractModule<Virial.Game.Game>
     {
         DebugScreen.Push(new FunctionalDebugTextContent(() => {
             if (LastSync == null) return null;
-            if (!PlayerControl.LocalPlayer) return null;
+            if (!AmongUsLLImpl.LocalPlayer.AsBoolFast()) return null;
 
             float wait = 3f;
             if (LastSync.Value.tag == SynchronizeTag.PreSpawnMinigame) return null;
@@ -73,7 +73,7 @@ public class Synchronizer : AbstractModule<Virial.Game.Game>
 
     public void SendSync(SynchronizeTag tag)
     {
-        RpcSync.Invoke((tag,PlayerControl.LocalPlayer.PlayerId));
+        RpcSync.Invoke((tag, AmongUsLLImpl.LocalPlayer.PlayerId));
     }
     
     public IEnumerator CoSync(SynchronizeTag tag, bool withSurviver = true,bool withGhost = false,bool withBot = false, bool withVanilla = false)

@@ -7,7 +7,7 @@ namespace Nebula.Map;
 public class AirshipData : MapData
 {
     override public int Id => 4;
-    static private readonly Vector2[] MapPositions = [ 
+    static private readonly VVector2[] MapPositions = [ 
         //金庫
         new(-9f, 12.8f), new(-8.7f, 4.9f), new(-12.8f, 8.7f), new(-4.8f, 8.7f), new(-7.1f, 6.8f), new(-10.4f, 6.9f), new(-7f, 10.2f),
         //宿舎前
@@ -179,8 +179,8 @@ public class AirshipData : MapData
         new(2.3f, 0.3f, MapObjectType.SmallOpened), //エンジン右階段
         ];
     public override MapObjectPoint[] MapObjectPoints => mapObjectPoints;
-    public override IReadOnlyList<Vector2> MapArea => MapPositions;
-    public override IReadOnlyList<Vector2> NonMapArea => [];
+    public override IReadOnlyList<VVector2> MapArea => MapPositions;
+    public override IReadOnlyList<VVector2> NonMapArea => [];
     protected override (AdditionalRoomArea area, string key, bool detailRoom)[] AdditionalRooms => additionalRooms;
     protected override (SystemTypes room, AdditionalRoomArea area, string key)[] OverrideRooms => overrideRooms;
 

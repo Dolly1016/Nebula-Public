@@ -11,7 +11,7 @@ public class EffectCommand : ICommand
     {
         public float duration = 10f;
         public float ratio = 1f;
-        public UnityEngine.Vector2 ratioVec = UnityEngine.Vector2.one;
+        public VVector2 ratioVec = VVector2.One;
         public bool canPassMeeting = true;
         public string? tag = null;
         public bool flipX, flipY, rotate;

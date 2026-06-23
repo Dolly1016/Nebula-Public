@@ -152,7 +152,7 @@ internal class Fixer : DefinedSingleAbilityRoleTemplate<Fixer.Ability>, DefinedR
                 IEnumerator CoNoiseUpdate()
                 {
                     void SetInactive() {
-                        if (noise.renderer)
+                        if (noise.renderer.AsBoolFast())
                         {
                             noiseMat.SetFloat("_GlitchYAmount", 0f);
                             noiseMat.SetFloat("_GlitchBlockAmount", 0.001f);
@@ -160,13 +160,13 @@ internal class Fixer : DefinedSingleAbilityRoleTemplate<Fixer.Ability>, DefinedR
                     }
                     void SetActive()
                     {
-                        if (noise.renderer)
+                        if (noise.renderer.AsBoolFast())
                         {
                             noiseMat.SetFloat("_GlitchYAmount", 0.01f);
                             noiseMat.SetFloat("_GlitchBlockAmount", 0.005f);
                         }
                     }
-                    while (noise.renderer)
+                    while (noise.renderer.AsBoolFast())
                     {
                         SetInactive();
                         yield return Effects.Wait(2f + System.Random.Shared.NextSingle() * 1.5f);

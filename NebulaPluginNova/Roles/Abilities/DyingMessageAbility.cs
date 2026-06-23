@@ -1,5 +1,7 @@
-﻿using Il2CppInterop.Runtime.Injection;
+﻿using Il2CppInterop.Runtime.Attributes;
+using Il2CppInterop.Runtime.Injection;
 using Il2CppSystem.Runtime.Remoting.Messaging;
+using JetBrains.Annotations;
 using Nebula.Behavior;
 using Nebula.Modules.Cosmetics;
 using Nebula.Modules.GUIWidget;
@@ -18,22 +20,46 @@ using Virial.Game;
 using static Hazel.Udp.UdpConnection;
 using static Il2CppSystem.Linq.Expressions.Interpreter.CastInstruction.CastInstructionNoT;
 using static Nebula.Modules.ScriptComponents.NebulaSyncStandardObject;
+using static UnityEngine.ParticleSystem;
 using static UnityEngine.UI.GridLayoutGroup;
 
 namespace Nebula.Roles.Abilities;
 
+public record DyingMessageBrush(Color Color, float Width);
 public class DyingMessageCanvasRenderRequest : MonoBehaviour
 {
     static DyingMessageCanvasRenderRequest() => ClassInjector.RegisterTypeInIl2Cpp<DyingMessageCanvasRenderRequest>();
-    private List<Vector2> requests = [];
-    public void AddPoint(Vector2 point) => requests.Add(point);
+    private List<VVector2> requests = [];
+    private Queue<(DyingMessageBrush brush, List<VVector2> dots)> storedQueue = [];
+    public void AddPoint(VVector2 point) => requests.Add(point);
+    public void AddPoint(VVector2 point, DyingMessageBrush brush)
+    {
+        if (storedQueue.Count == 0) {
+            if (brush.Equals(this.brush))
+                requests.Add(point);
+            else
+                storedQueue.Enqueue((brush, [point]));
+        }
+        else {
+            var last = storedQueue.Last();
+            if (last.brush.Equals(brush))
+                last.dots.Add(point);
+            else
+                storedQueue.Enqueue((brush, [point]));
+        }
+    }
     public bool HasNoRequest => requests.Count == 0;
     private RenderTexture myTexture;
     private Material glMaterial;
+    private DyingMessageBrush? brush;
     public float brushRadius = 0.014f;
 
-    public void SetUp(RenderTexture texture)
+    public const float DyingMessageBrushRadius = 0.014f;
+    public const float PaintQuizBrushRadius = 0.003f;
+
+    public void SetUp(RenderTexture texture, float brushRadius)
     {
+        this.brushRadius = brushRadius;
         myTexture = texture;
         glMaterial = new(Shader.Find("Unlit/Color"));
         //glMaterial.color = Color.red;
@@ -41,9 +67,18 @@ public class DyingMessageCanvasRenderRequest : MonoBehaviour
     }
     void OnPostRender()
     {
-        if (requests.Count == 0) return;
+        if (requests.Count == 0 && storedQueue.Count == 0) return;
         if (glMaterial == null) return;
         if (Camera.current != Camera.main) return;
+
+        if(requests.Count == 0)
+        {
+            var next = storedQueue.Dequeue();
+            requests = next.dots;
+            brush = next.brush;
+            glMaterial.color = brush?.Color ?? Color.white;
+            brushRadius = brush?.Width ?? 0.014f;
+        }
 
         RenderTexture.active = myTexture;
         GL.PushMatrix();
@@ -61,7 +96,7 @@ public class DyingMessageCanvasRenderRequest : MonoBehaviour
                 for (int i = 0; i <= quarterSegments; i++)
                 {
                     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                    void DrawTriangle(Vector2 center, Vector3 offset1, Vector3 offset2)
+                    void DrawTriangle(VVector2 center, VVector3 offset1, VVector3 offset2)
                     {
                         GL.Vertex3(center.x, center.y, 0);
                         GL.Vertex3(center.x + offset1.x, center.y + offset1.y, 0);
@@ -79,13 +114,13 @@ public class DyingMessageCanvasRenderRequest : MonoBehaviour
 
                     // 4つの象限に対して三角形をスタンプ
                     // 第1象限 (+, +)
-                    DrawTriangle(pos, new Vector3(c1, s1), new Vector3(c2, s2));
+                    DrawTriangle(pos, new(c1, s1), new(c2, s2));
                     // 第2象限 (-, +)
-                    DrawTriangle(pos, new Vector3(-s1, c1), new Vector3(-s2, c2));
+                    DrawTriangle(pos, new(-s1, c1), new(-s2, c2));
                     // 第3象限 (-, -)
-                    DrawTriangle(pos, new Vector3(-c1, -s1), new Vector3(-c2, -s2));
+                    DrawTriangle(pos, new(-c1, -s1), new(-c2, -s2));
                     // 第4象限 (+, -)
-                    DrawTriangle(pos, new Vector3(s1, -c1), new Vector3(s2, -c2));
+                    DrawTriangle(pos, new(s1, -c1), new(s2, -c2));
                 }
             }
         }catch(Exception e)
@@ -113,7 +148,7 @@ internal class DyingMessageCanvas : MonoBehaviour
 {
     static DyingMessageCanvas() => ClassInjector.RegisterTypeInIl2Cpp<DyingMessageCanvas>(); 
 
-    private const int TextureSize = 512;
+    private int TextureSize = 512;
     private float rendererSize = 3.5f;
     public float minDistance = 0.01f; // 同じ場所に書かないための閾値
 
@@ -121,20 +156,25 @@ internal class DyingMessageCanvas : MonoBehaviour
     private MeshRenderer canvasRenderer;
     private Il2CppArgument<DyingMessageCanvasRenderRequest> request;
 
-    private Vector2? lastPos = null;
+    private VVector2? lastPos = null;
 
-    private List<Vector2> currentStroke = new List<Vector2>();
-    private List<List<Vector2>> allStrokes = new List<List<Vector2>>();
+    private List<VVector2> currentStroke = [];
+    private List<List<VVector2>> allStrokes = [];
 
+    private bool asDyingMessage = false;
+    private bool asQuizCanvas = false;
     private SpriteRenderer backRenderer, guageRenderer;
     private float leftTime = 1f;
     private float maxTime = 1f;
     private float inP = 0f;
-    private Vector2 worldPosition;
+    private VVector2 worldPosition;
     private Action<Texture2D>? callBack;
     private Action? onFailed;
+    public Action? OnDestroyCallBack;
+    private DyingMessageBrush? brush;
     private DefinedAssignable? assignable;
-    public void SetUp(float leftTime, Vector2 pos, DefinedAssignable? assignable, Action<Texture2D>? callBack, Action? onFailed = null)
+    private float brushRadius = 0f;
+    public void SetUpAsDyingMessage(float leftTime, VVector2 pos, DefinedAssignable? assignable, Action<Texture2D>? callBack, Action? onFailed = null)
     {
         this.maxTime = leftTime;
         this.leftTime = leftTime;
@@ -142,57 +182,107 @@ internal class DyingMessageCanvas : MonoBehaviour
         this.callBack = callBack;
         this.onFailed = onFailed;
         this.assignable = assignable;
+
+        this.TextureSize = 512;
+        this.rendererSize = 3.5f;
+
+        this.asDyingMessage = true;
+        this.asQuizCanvas = false;
+
+        this.brushRadius = DyingMessageCanvasRenderRequest.DyingMessageBrushRadius;
+        this.brush = null;
+    }
+
+    public void SetUpAsQuizPaint()
+    {
+        this.maxTime = -1f;
+        this.leftTime = 1f;
+
+        this.TextureSize = 768;
+        this.rendererSize = 6.2f;
+
+        this.asDyingMessage = false;
+        this.asQuizCanvas = true;
+
+        this.brushRadius = DyingMessageCanvasRenderRequest.PaintQuizBrushRadius;
+        this.brush = null;
     }
 
     private static readonly Image guageImage = SpriteLoader.FromResource("Nebula.Resources.WhiteFramed.png", 100f);
-    internal static Color BloodColor = new(205f / 255f, 10f / 255f, 19f / 255f);
-    internal static Color BloodDarkColor = new(145f / 255f, 7f / 255f, 14f / 255f);
+    
     void Start()
     {
         canvas = new RenderTexture(TextureSize, TextureSize, 32, RenderTextureFormat.ARGB32);
         var mesh = UnityHelper.CreateMeshRenderer("MeshRenderer", transform, new(0f, 0f, -0.02f), LayerExpansion.GetUILayer(), Color.white, UnityHelper.GetMeshRendererMaterial());
-        mesh.filter.CreateRectMesh(new(rendererSize, rendererSize), null);
+        if (asDyingMessage)
+        {
+            mesh.filter.CreateRectMesh(new(rendererSize, rendererSize), null);
+            mesh.renderer.material.color = DyingMessages.BloodColor.ToUnityColor();
+        }
+        else if (asQuizCanvas)
+        {
+            var margin = (7f / 16f / 2f);
+            mesh.filter.CreateRectMesh(new(rendererSize, rendererSize * 9f / 16f), null, 0f, 1f, 0f + margin, 1f - margin);
+            mesh.renderer.material.color = Color.white;
+        }
         mesh.renderer.sharedMaterial.mainTexture = canvas;
-        mesh.renderer.material.color = BloodColor;
         canvasRenderer = mesh.renderer;
 
+
+
         request = Camera.main.gameObject.AddComponent<DyingMessageCanvasRenderRequest>();
-        request.Value.SetUp(canvas);
+        request.Value.SetUp(canvas, brushRadius);
 
-        backRenderer = UnityHelper.CreateSpriteRenderer("Background", transform, new(0f, 0f, 0f), LayerExpansion.GetUILayer());
-        backRenderer.sprite = guageImage.GetSprite();
-        backRenderer.color = new(164f / 255f, 155f / 255f, 138f / 255f);
+        if (asDyingMessage)
+        {
+            backRenderer = UnityHelper.CreateSpriteRenderer("Background", transform, new(0f, 0f, 0f), LayerExpansion.GetUILayer());
+            backRenderer.sprite = guageImage.GetSprite();
+            backRenderer.color = new(164f / 255f, 155f / 255f, 138f / 255f);
 
-        guageRenderer = UnityHelper.CreateSpriteRenderer("Background", backRenderer.transform, new(0f, 0f, -0.01f), LayerExpansion.GetUILayer());
-        guageRenderer.material = new(NebulaAsset.GuageShader);
-        guageRenderer.material.SetFloat("_Guage", 1f);
-        guageRenderer.material.SetColor("_Color", new(245f / 255f, 230f / 255f, 201f / 255f));
-        guageRenderer.sprite = guageImage.GetSprite();
+            guageRenderer = UnityHelper.CreateSpriteRenderer("Background", backRenderer.transform, new(0f, 0f, -0.01f), LayerExpansion.GetUILayer());
+            guageRenderer.material = new(NebulaAsset.GuageShader);
+            guageRenderer.material.SetFloat("_Guage", 1f);
+            guageRenderer.material.SetColor("_Color", new(245f / 255f, 230f / 255f, 201f / 255f));
+            guageRenderer.sprite = guageImage.GetSprite();
 
-        var collider = backRenderer.gameObject.AddComponent<BoxCollider2D>();
-        collider.size = new(1.2f, 1.2f);
-        collider.isTrigger = true;
-        collider.gameObject.SetUpButton();
+            var collider = backRenderer.gameObject.AddComponent<BoxCollider2D>();
+            collider.size = new(1.2f, 1.2f);
+            collider.isTrigger = true;
+            collider.gameObject.SetUpButton();
+        }else if (asQuizCanvas)
+        {
+            backRenderer = UnityHelper.CreateSpriteRenderer("Background", transform, new(0f, 0f, 0f), LayerExpansion.GetUILayer());
+            backRenderer.sprite = NebulaAsset.WhiteImage.GetSprite();
+            backRenderer.color = new(200f / 255f, 200f / 255f, 200f / 255f);
+            backRenderer.transform.localScale = new(rendererSize, rendererSize / 16f * 9f);
+            minDistance = 0.0035f;
+        }
     }
 
-    void StartDraw(Vector2 mousePos)
+    [HideFromIl2Cpp]
+    public void SetBrush(DyingMessageBrush? brush)
     {
-        currentStroke = new List<Vector2>();
+        this.brush = brush;
+    }
+
+    void StartDraw(VVector2 mousePos)
+    {
+        currentStroke = [];
         DrawPoint(mousePos, true);
         lastPos = mousePos;
     }
 
     //lastPos.HasValue == trueが前提条件
-    void UpdateDraw(Vector2 mousePos)
+    void UpdateDraw(VVector2 mousePos)
     {
-        float dist = Vector2.Distance(lastPos.Value, mousePos);
+        float dist = VVector2.Distance(lastPos.Value, mousePos);
         if (dist > minDistance)
         {
             // 点の間を補間して描画（円を並べる）
-            int steps = Mathf.CeilToInt(dist / (minDistance * 0.5f));
+            int steps = Mathn.CeilToInt(dist / (minDistance * 0.5f));
             for (int i = 1; i <= steps; i++)
             {
-                Vector2 lerpPos = Vector2.Lerp(lastPos.Value, mousePos, (float)i / steps);
+                VVector2 lerpPos = VVector2.Lerp(lastPos.Value, mousePos, (float)i / steps);
                 DrawPoint(lerpPos, i == steps);
             }
             lastPos = mousePos;
@@ -210,7 +300,7 @@ internal class DyingMessageCanvas : MonoBehaviour
 
     void Update()
     {
-        if(inP < 1f)
+        if(inP < 1f && asDyingMessage)
         {
             inP += Time.deltaTime * 5f;
             if (inP > 1f) inP = 1f;
@@ -221,10 +311,13 @@ internal class DyingMessageCanvas : MonoBehaviour
         }
         if (leftTime > 0f)
         {
-            guageRenderer.material.SetFloat("_Guage", leftTime / maxTime);
-            leftTime -= Time.deltaTime;
+            if (asDyingMessage)
+            {
+                guageRenderer.material.SetFloat("_Guage", leftTime / maxTime);
+                leftTime -= Time.deltaTime;
+            }
 
-            Vector2 mousePos = GetNormalizedMousePos();
+            VVector2 mousePos = GetNormalizedMousePos();
 
             if (Input.GetMouseButtonDown(0))
             {
@@ -243,11 +336,11 @@ internal class DyingMessageCanvas : MonoBehaviour
                 FinishDraw();
             }
 
-            if(!(leftTime > 0f))
+            if(asDyingMessage && !(leftTime > 0f))
             {
                 DyingMessages.Send(Serialize(), this.worldPosition, this.assignable, this.callBack, this.onFailed);
                 StartCoroutine(CoDestroy().WrapToIl2Cpp());
-                StartCoroutine(ManagedEffects.Lerp(1f, p => canvasRenderer.material.color = Color.Lerp(BloodColor, BloodDarkColor, p)).WrapToIl2Cpp());
+                StartCoroutine(ManagedEffects.Lerp(1f, p => canvasRenderer.material.color = VColor.Lerp(DyingMessages.BloodColor, DyingMessages.BloodDarkColor, p).ToUnityColor()).WrapToIl2Cpp());
             }
         }
     }
@@ -274,21 +367,26 @@ internal class DyingMessageCanvas : MonoBehaviour
     void OnDestroy()
     {
         if (request.Value) GameObject.Destroy(request.Value);
+        OnDestroyCallBack?.Invoke();
     }
 
     // GL命令による円の描画
     void DrawPoint(Vector2 pos, bool shouldRecord)
     {
         if(shouldRecord) currentStroke.Add(pos);
-        request.Value.AddPoint(pos);
+
+        if (asQuizCanvas)
+            request.Value.AddPoint(pos, brush!);
+        else 
+            request.Value.AddPoint(pos);
     }
 
-    private Vector2 GetNormalizedMousePos()
+    private VVector2 GetNormalizedMousePos()
     {
         // Viewport座標(0-1)を取得、またはRaycastの結果からUVを取得
-        Vector2 localPos = UnityHelper.ScreenToLocalPoint(Input.mousePosition, LayerExpansion.GetUILayer(), transform);
+        VVector2 localPos = UnityHelper.ScreenToLocalPoint(Input.mousePosition, LayerExpansion.GetUILayer(), transform);
         localPos.y = -localPos.y;
-        return localPos / rendererSize + new Vector2(0.5f, 0.5f);
+        return localPos / rendererSize + new VVector2(0.5f, 0.5f);
     }
 
     private const int MinDelta = -7;
@@ -304,11 +402,11 @@ internal class DyingMessageCanvas : MonoBehaviour
         {
             if (rawStroke == null || rawStroke.Count <= 1) continue;
 
-            List<Vector2> currentInViewPath = new List<Vector2>();
+            List<VVector2> currentInViewPath = new List<VVector2>();
 
             for (int i = 0; i < rawStroke.Count - 1; i++)
             {
-                if (ClipLine(rawStroke[i], rawStroke[i + 1], out Vector2 pStart, out Vector2 pEnd, out bool isStartClipped, out bool isEndClipped))
+                if (ClipLine(rawStroke[i], rawStroke[i + 1], out var pStart, out var pEnd, out bool isStartClipped, out bool isEndClipped))
                 {
                     // はじめて範囲内に入った、あるいは外側から戻ってきた
                     if (currentInViewPath.Count == 0 || isStartClipped)
@@ -350,7 +448,7 @@ internal class DyingMessageCanvas : MonoBehaviour
         return encoded.ToArray();
     }
 
-    private bool ClipLine(Vector2 p1, Vector2 p2, out Vector2 start, out Vector2 end, out bool isStartClipped, out bool isEndClipped)
+    private bool ClipLine(VVector2 p1, VVector2 p2, out VVector2 start, out VVector2 end, out bool isStartClipped, out bool isEndClipped)
     {
         float t0 = 0, t1 = 1;
         float dx = p2.x - p1.x;
@@ -400,10 +498,10 @@ internal class DyingMessageCanvas : MonoBehaviour
         return true;
     }
 
-    private void SerializeNormalizedStroke(List<Vector2> stroke, List<(byte beginX, byte beginY, byte[] trajectory)> list)
+    private void SerializeNormalizedStroke(List<VVector2> stroke, List<(byte beginX, byte beginY, byte[] trajectory)> list)
     {
-        byte bX = (byte)Mathf.Clamp(Mathf.RoundToInt(stroke[0].x * 255f), 0, 255);
-        byte bY = (byte)Mathf.Clamp(Mathf.RoundToInt(stroke[0].y * 255f), 0, 255);
+        byte bX = (byte)Mathn.Clamp(Mathn.RoundToInt(stroke[0].x * 255f), 0, 255);
+        byte bY = (byte)Mathn.Clamp(Mathn.RoundToInt(stroke[0].y * 255f), 0, 255);
         var nibbles = new List<byte>();
 
         int lastX = bX;
@@ -411,8 +509,8 @@ internal class DyingMessageCanvas : MonoBehaviour
 
         for (int i = 1; i < stroke.Count; i++)
         {
-            int targetX = Mathf.Clamp(Mathf.RoundToInt(stroke[i].x * 255f), 0, 255);
-            int targetY = Mathf.Clamp(Mathf.RoundToInt(stroke[i].y * 255f), 0, 255);
+            int targetX = Mathn.Clamp(Mathn.RoundToInt(stroke[i].x * 255f), 0, 255);
+            int targetY = Mathn.Clamp(Mathn.RoundToInt(stroke[i].y * 255f), 0, 255);
 
             while (lastX != targetX || lastY != targetY)
             {
@@ -422,13 +520,13 @@ internal class DyingMessageCanvas : MonoBehaviour
                 float divX = fullDx > 0 ? (float)fullDx / MaxDelta : (fullDx < 0 ? (float)fullDx / MinDelta : 0);
                 float divY = fullDy > 0 ? (float)fullDy / MaxDelta : (fullDy < 0 ? (float)fullDy / MinDelta : 0);
 
-                int stepsNeeded = Mathf.CeilToInt(Mathf.Max(divX, divY, 1.0f));
+                int stepsNeeded = Mathn.CeilToInt(Mathn.Max(divX, divY, 1.0f));
 
-                int dx = Mathf.RoundToInt((float)fullDx / stepsNeeded);
-                int dy = Mathf.RoundToInt((float)fullDy / stepsNeeded);
+                int dx = Mathn.RoundToInt((float)fullDx / stepsNeeded);
+                int dy = Mathn.RoundToInt((float)fullDy / stepsNeeded);
 
-                dx = Mathf.Clamp(dx, MinDelta, MaxDelta);
-                dy = Mathf.Clamp(dy, MinDelta, MaxDelta);
+                dx = Mathn.Clamp(dx, MinDelta, MaxDelta);
+                dy = Mathn.Clamp(dy, MinDelta, MaxDelta);
 
                 byte nX = (byte)((dx - MinDelta) & 0x0F);
                 byte nY = (byte)((dy - MinDelta) & 0x0F);
@@ -447,23 +545,23 @@ internal class DyingMessageObject : IGameOperator, ILifespan
 {
     SpriteRenderer renderer;
     bool found = false;
-    Vector2 position;
+    VVector2 position;
     Sprite messageSprite;
-    public DyingMessageObject(Vector2 pos, Sprite messageSprite)
+    public DyingMessageObject(VVector2 pos, Sprite messageSprite)
     {
         this.position = pos;
         this.messageSprite = messageSprite;
         renderer = UnityHelper.CreateSpriteRenderer("Renderer", null, new(pos.x, pos.y - 0.12f, pos.y / 1000f + 0.001f));
         renderer.sprite = messageSprite;
         renderer.transform.localScale = new(0.14f, 0.14f, 1f);
-        renderer.color = Color.Lerp(DyingMessageCanvas.BloodColor, DyingMessageCanvas.BloodDarkColor, 0.7f);
+        renderer.color = VColor.Lerp(DyingMessages.BloodColor, DyingMessages.BloodDarkColor, 0.7f).ToUnityColor();
     }
 
     bool ILifespan.IsDeadObject => false;
 
     void OnGameUpdate(GameUpdateEvent ev)
     {
-        if (MeetingHud.Instance || ExileController.Instance) return;
+        if (MeetingHud.Instance.AsBoolFast() || ExileController.Instance.AsBoolFast()) return;
 
         var localPlayer = GamePlayer.LocalPlayer;
         if (localPlayer == null) return;
@@ -475,8 +573,8 @@ internal class DyingMessageObject : IGameOperator, ILifespan
             NebulaAPI.CurrentGame?.GetModule<MeetingOverlayHolder>()?.RegisterOverlay(GUI.API.VerticalHolder(Virial.Media.GUIAlignment.Left,
                 GUI.API.LocalizedText(Virial.Media.GUIAlignment.Left, Virial.Text.AttributeAsset.OverlayTitle, "game.dyingMessage.ui.title"),
                 GUI.API.RawText(Virial.Media.GUIAlignment.Left, Virial.Text.AttributeAsset.OverlayContent, Language.Translate("game.dyingMessage.ui.content").Replace("%ROOM%", roomName)),
-                new NoSGUIImage(Virial.Media.GUIAlignment.Left, new WrapSpriteLoader(() => messageSprite), new(1.8f, 1.8f), Color.Lerp(DyingMessageCanvas.BloodColor, DyingMessageCanvas.BloodDarkColor, 0.5f))
-                ), MeetingOverlayHolder.IconsSprite[8], Virial.Color.Red);
+                new NoSGUIImage(Virial.Media.GUIAlignment.Left, new WrapSpriteLoader(() => messageSprite), new(1.8f, 1.8f), VColor.Lerp(DyingMessages.BloodColor, DyingMessages.BloodDarkColor, 0.5f))
+                ), MeetingOverlayHolder.IconsSprite[8], VColor.Red);
         }
     }
 }
@@ -484,7 +582,12 @@ internal class DyingMessageObject : IGameOperator, ILifespan
 [NebulaRPCHolder]
 internal static class DyingMessages
 {
-    static public void Send((byte beginX, byte beginY, byte[] trajectory)[] trajectories, Vector2 worldPos, DefinedAssignable? relatedRole, Action<Texture2D>? callBack, Action? onFailed = null)
+    internal static VColor BloodColor = new(205, 10, 19);
+    internal static VColor BloodDarkColor = new(145, 7, 14);
+
+    static private List<DyingMessageCanvas> currentCanvases = [];
+    static public bool ThereIsAnyCanvas => currentCanvases.Count > 0 && currentCanvases.Any(c => c.AsBoolFast());
+    static public void Send((byte beginX, byte beginY, byte[] trajectory)[] trajectories, VVector2 worldPos, DefinedAssignable? relatedRole, Action<Texture2D>? callBack, Action? onFailed = null)
     {
         if (trajectories.Length == 0)
         {
@@ -500,7 +603,7 @@ internal static class DyingMessages
         });
     }
 
-    static private LongRemoteProcess<((byte beginX, byte beginY, byte[] trajectory)[] trajectories, Vector2 worldPos, DefinedAssignable relatedRole)> RpcDyingMessage = new("DyingMessage", (message, calledByMe) =>
+    static private LongRemoteProcess<((byte beginX, byte beginY, byte[] trajectory)[] trajectories, VVector2 worldPos, DefinedAssignable relatedRole)> RpcDyingMessage = new("DyingMessage", (message, calledByMe) =>
     {
         if (calledByMe) return; //自身はコールバックを実行ため、呼び出し元で実行している。
         GenerateDyingMessage(message.trajectories, texture =>
@@ -512,9 +615,9 @@ internal static class DyingMessages
     });
 
     private const float minDistance = 0.01f; // DyingMessageCanvasからコピー。本当は共有するべき。
-    static void DecodeTrajectory(byte beginX, byte beginY, byte[] trajectory, Action<Vector2> drawPoint)
+    static void DecodeTrajectory(byte beginX, byte beginY, byte[] trajectory, Action<VVector2> drawPoint)
     {
-        Vector2 currentPos = new Vector2(beginX / 255f, beginY / 255f);
+        VVector2 currentPos = new(beginX / 255f, beginY / 255f);
         drawPoint(currentPos); 
 
         float drawStepThreshold = (minDistance * 0.5f);
@@ -525,17 +628,17 @@ internal static class DyingMessages
             int dxInt = ((b >> 4) & 0x0F) - 7;
             int dyInt = (b & 0x0F) - 7;
 
-            Vector2 delta = new Vector2(dxInt / 255f, dyInt / 255f);
-            Vector2 targetPos = currentPos + delta;
+            VVector2 delta = new(dxInt / 255f, dyInt / 255f);
+            VVector2 targetPos = currentPos + delta;
 
-            float dist = delta.magnitude;
+            float dist = delta.Magnitude;
 
             if (dist > drawStepThreshold)
             {
-                int subSteps = Mathf.CeilToInt(dist / drawStepThreshold);
+                int subSteps = Mathn.CeilToInt(dist / drawStepThreshold);
                 for (int s = 1; s < subSteps; s++)
                 {
-                    Vector2 lerpPos = Vector2.Lerp(currentPos, targetPos, (float)s / subSteps);
+                    VVector2 lerpPos = VVector2.Lerp(currentPos, targetPos, (float)s / subSteps);
                     drawPoint(lerpPos);
                 }
             }
@@ -550,7 +653,7 @@ internal static class DyingMessages
     {
         var request = Camera.main.gameObject.AddComponent<DyingMessageCanvasRenderRequest>();
         var rt = new RenderTexture(TextureSize, TextureSize, 32, RenderTextureFormat.ARGB32);
-        request.SetUp(rt);
+        request.SetUp(rt, DyingMessageCanvasRenderRequest.DyingMessageBrushRadius);
 
         foreach (var entry in encoded) DecodeTrajectory(entry.beginX, entry.beginY, entry.trajectory, request.AddPoint);
 
@@ -569,10 +672,12 @@ internal static class DyingMessages
         
     }
 
-    static public DyingMessageCanvas GenerateCanvas(Vector2 position, float duration, DefinedAssignable? assignable, Action<Texture2D>? callBack = null, Action? onFailed = null)
+    static public DyingMessageCanvas GenerateCanvas(VVector2 position, float duration, DefinedAssignable? assignable, Action<Texture2D>? callBack = null, Action? onFailed = null)
     {
-        var canvas = UnityHelper.CreateObject<DyingMessageCanvas>("DyingMessageCanvas", HudManager.Instance.transform, new(0f, 0f, -480f));
-        canvas.SetUp(duration, position, assignable, callBack, onFailed);
+        var canvas = UnityHelper.CreateObject<DyingMessageCanvas>("DyingMessageCanvas", AmongUsLLImpl.HudManagerInstance.transform, new(0f, 0f, -480f));
+        canvas.SetUpAsDyingMessage(duration, position, assignable, callBack, onFailed);
+        currentCanvases.Add(canvas);
+        canvas.OnDestroyCallBack = () => currentCanvases.Remove(canvas);
         return canvas;
     }
 }
@@ -580,9 +685,9 @@ internal static class DyingMessages
 internal class DyingMessageGenerateEvent : Virial.Events.Event
 {
     public DefinedAssignable? RelatedAssignable { get; }
-    public Vector2 Position { get; }
+    public VVector2 Position { get; }
 
-    internal DyingMessageGenerateEvent(DefinedAssignable? relatedAssignable, Vector2 position)
+    internal DyingMessageGenerateEvent(DefinedAssignable? relatedAssignable, VVector2 position)
     {
         this.RelatedAssignable = relatedAssignable;
         this.Position = position;

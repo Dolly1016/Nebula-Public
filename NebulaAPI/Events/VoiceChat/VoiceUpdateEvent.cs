@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.Attributes;
 using Virial.Events.Player;
 
 namespace Virial.Events.VoiceChat;
 
+[RecyclableEvent]
 public class VoiceUpdateEvent : AbstractPlayerEvent
 {
-    public bool InMeeting { get; }
+    public bool InMeeting { get; private set; }
     public float NormalVolume { get; set; }
     public float NormalPan { get; set; }
     public float GhostVolume { get; set; }
@@ -17,14 +19,18 @@ public class VoiceUpdateEvent : AbstractPlayerEvent
     public float DroneVolume { get; set; }
     public float DronePan { get; set; }
 
-    internal VoiceUpdateEvent(Virial.Game.Player player, bool inMeeting, float normalVolume, float normalPan, float ghostVolume, float radioVolume, float droneVolume, float dronePan) : base(player)
+    private VoiceUpdateEvent() : base(null!) { }
+    static private VoiceUpdateEvent ev = new();
+    static internal VoiceUpdateEvent Get(Virial.Game.Player player, bool inMeeting, float normalVolume, float normalPan, float ghostVolume, float radioVolume, float droneVolume, float dronePan)
     {
-        InMeeting = inMeeting;
-        NormalVolume = normalVolume;
-        NormalPan = normalPan;
-        GhostVolume = ghostVolume;
-        RadioVolume = radioVolume;
-        DroneVolume = droneVolume;
-        DronePan = dronePan;
+        ev.Recycle(player);
+        ev.InMeeting = inMeeting;
+        ev.NormalVolume = normalVolume;
+        ev.NormalPan = normalPan;
+        ev.GhostVolume = ghostVolume;
+        ev.RadioVolume = radioVolume;
+        ev.DroneVolume = droneVolume;
+        ev.DronePan = dronePan;
+        return ev;
     }
 }

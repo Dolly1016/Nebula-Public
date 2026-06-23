@@ -18,6 +18,7 @@ using UnityEngine.SocialPlatforms.Impl;
 using Virial;
 using Virial.Achievements;
 using Virial.Assignable;
+using Virial.DI;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
@@ -132,6 +133,28 @@ public static class AchievementTokens
     }
 }
 
+[NebulaPreprocess(PreprocessPhase.BuildNoSModule)]
+public class TitleHandlerImpl : AbstractModule<Virial.Game.Game>, ITitleHandler
+{
+    static private void Preprocess(NebulaPreprocessor preprocessor) => preprocessor.DIManager.RegisterModule(() => new TitleHandlerImpl());
+
+    void ITitleHandler.Progress(string id, int num) {
+        if (num == 1)
+        {
+            _ = new StaticAchievementToken(id);
+        }
+        else
+        {
+            _ = new AchievementToken<bool>(id, false, (_, _) => num);
+        }
+    }
+
+    void ITitleHandler.Progress(string id)
+    {
+        _ = new StaticAchievementToken(id);
+    }
+}
+
 public class AchievementType
 {
     static public readonly AchievementType Challenge = new("challenge");
@@ -142,15 +165,14 @@ public class AchievementType
     static public readonly AchievementType Perk = new("perk");
     static public readonly AchievementType AeroGuesser = new("aeroGuesser");
 
-    static public readonly AchievementType Uljun = new("uljun");
-    static public readonly AchievementType Mememura = new("meme");
+    //static public readonly AchievementType SomeCollab = new("collab");
+
     static private readonly Dictionary<string, AchievementType> CollabTypes;
     static public bool TryGetCollabType(string id, [MaybeNullWhen(false)] out AchievementType type) => CollabTypes.TryGetValue(id, out type);
     static AchievementType()
     {
         CollabTypes = [];
-        CollabTypes.Add("uljun", Uljun);
-        CollabTypes.Add("meme", Mememura);
+        //CollabTypes.Add("collab", SomeCollab);
     }
     private AchievementType(string key)
     {
@@ -244,8 +266,8 @@ public interface INebulaAchievement
     }
 
     static public readonly TextComponent HiddenComponent = new TranslateTextComponent("achievement.title.unachieved");
-    static public readonly TextComponent HiddenDescriptiveComponent = new ColorTextComponent(new Color(0.4f, 0.4f, 0.4f), new TranslateTextComponent("achievement.title.hidden"));
-    static public readonly TextComponent HiddenDetailComponent = new ColorTextComponent(new Color(0.8f, 0.8f, 0.8f), new TranslateTextComponent("achievement.title.hiddenDetail"));
+    static public readonly TextComponent HiddenDescriptiveComponent = new ColorTextComponent(new(0.4f, 0.4f, 0.4f), new TranslateTextComponent("achievement.title.hidden"));
+    static public readonly TextComponent HiddenDetailComponent = new ColorTextComponent(new(0.8f, 0.8f, 0.8f), new TranslateTextComponent("achievement.title.hiddenDetail"));
     static public readonly TextAttribute DetailTitleAttribute = GUI.API.GetAttribute(AttributeAsset.OverlayTitle);
     static public readonly TextAttribute SocialCaptionAttribute = new(GUI.API.GetAttribute(AttributeAsset.OverlayTitle)) { FontSize = new(1.3f) };
     static public readonly TextAttribute SocialCategoryAttribute= new(GUI.API.GetAttribute(AttributeAsset.OverlayTitle)) { FontSize = new(1.2f) };
@@ -347,7 +369,7 @@ public interface INebulaAchievement
 #if PC
             list.Add(new NoSGUIText(GUIAlignment.Left, DetailContentAttribute, new LazyTextComponent(() =>
             (NebulaAchievementManager.AmEquipping(this)) ?
-            (Language.Translate("achievement.ui.equipped").Color(Color.green).Bold() + "<br>" + Language.Translate("achievement.ui.unsetTitle")) :
+            (Language.Translate("achievement.ui.equipped").Color(VColor.Green).Bold() + "<br>" + Language.Translate("achievement.ui.unsetTitle")) :
             Language.Translate("achievement.ui.setTitle"))));
 #elif ANDROID
             list.Add(GUI.API.Button(GUIAlignment.Left, AttributeAsset.SmallWideButton, 
@@ -759,7 +781,7 @@ public class CompleteAchievement : SumUpAchievement, INebulaAchievement
         var button = collider.gameObject.SetUpButton();
         button.OnMouseOver.AddListener(() =>
         {
-            string text = string.Join("\n", records.Select(r => "- " + Language.Translate(r.TranslationKey).Color(r.IsCleared ? Color.green : Color.white)));
+            string text = string.Join("\n", records.Select(r => "- " + Language.Translate(r.TranslationKey).Color(r.IsCleared ? VColor.Green : VColor.White)));
             NebulaManager.Instance.SetHelpWidget(button, new NoSGUIText(GUIAlignment.Left, TextAttr, new RawTextComponent(text)));
         });
         button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
@@ -797,8 +819,8 @@ public class TitleRegisterImpl : ITitlesRegister
         {
             var id = builder.Id;
             var group = builder.Group;
-            int trophy = Math.Clamp((int)builder.Rank, 0, 2);
-            int goal = Math.Max(builder.Goal ?? 1, 1);
+            int trophy = Mathn.Clamp((int)builder.Rank, 0, 2);
+            int goal = Mathn.Max(builder.Goal ?? 1, 1);
             if (id == null || group == null) continue;
 
             DefinedAssignable[] relatedRoles = builder.RelatedRole != null ? [builder.RelatedRole] : [];
@@ -925,7 +947,7 @@ static public class NebulaAchievementManager
         else
             myTitleEntry.Value = "-";
 
-        if (PlayerControl.LocalPlayer && !ShipStatus.Instance) Certification.RpcShareAchievement.Invoke((PlayerControl.LocalPlayer.PlayerId, MyTitleData));
+        if (AmongUsLLImpl.LocalPlayer.AsBoolFast() && !AmongUsLLImpl.ShipStatusInstance.AsBoolFast()) Certification.RpcShareAchievement.Invoke((AmongUsLLImpl.LocalPlayer.PlayerId, MyTitleData));
     }
 
     static internal void SetCustomTitle(CustomAchievement achievement, bool canUnset = true)
@@ -934,7 +956,7 @@ static public class NebulaAchievementManager
             myTitleEntry.Value = achievement.Id;
         else
             myTitleEntry.Value = "-";
-        if (PlayerControl.LocalPlayer && !ShipStatus.Instance) Certification.RpcShareAchievement.Invoke((PlayerControl.LocalPlayer.PlayerId, MyTitleData));
+        if (AmongUsLLImpl.LocalPlayer.AsBoolFast() && !AmongUsLLImpl.ShipStatusInstance.AsBoolFast()) Certification.RpcShareAchievement.Invoke((AmongUsLLImpl.LocalPlayer.PlayerId, MyTitleData));
     }
 
     static public (int num,int max, int hidden)[] Aggregate(Predicate<INebulaAchievement>? predicate)
@@ -1448,12 +1470,12 @@ static public class NebulaAchievementManager
 
     static public void SendLastClearedAchievements()
     {
-        if(LastFirstClearedArchive.Length > 0) RpcShareClearedAchievement.Invoke((PlayerControl.LocalPlayer.name, LastFirstClearedArchive));
+        if(LastFirstClearedArchive.Length > 0) RpcShareClearedAchievement.Invoke((AmongUsLLImpl.LocalPlayer.name, LastFirstClearedArchive));
     }
 
     static public void SendPickedUpAchievements()
     {
-        if (ClearedArchive.Count > 0) RpcSharePickedUpAchievement.Invoke((PlayerControl.LocalPlayer.name, ClearedArchive.ToArray()));
+        if (ClearedArchive.Count > 0) RpcSharePickedUpAchievement.Invoke((AmongUsLLImpl.LocalPlayer.name, ClearedArchive.ToArray()));
     }
 
     static public readonly RemoteProcess<(string playerName, INebulaAchievement[] achievements)> RpcShareClearedAchievement = new("ShareClearedAchievement", (message, _) =>

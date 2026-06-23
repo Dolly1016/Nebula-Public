@@ -18,13 +18,13 @@ public sealed class GameEnd
     internal byte Id { get; }
     public bool AllowWin { get; internal init; }
     public TextComponent DisplayText { get; private init; }
-    internal UnityEngine.Color Color { get; }
+    internal Virial.Color Color { get; }
     internal string ImmutableId { get; private init; }
     internal Func<UnityEngine.AudioClip?>? AlternativeClip { get; init; }
     public bool SpecifyNobodyWins { get; private init; }
 
 
-    internal GameEnd(byte id, string immutableId, TextComponent dislayText, UnityEngine.Color color, int priority, bool allowWin = true, bool specifyNobodyWins = true)
+    internal GameEnd(byte id, string immutableId, TextComponent dislayText, Virial.Color color, int priority, bool allowWin = true, bool specifyNobodyWins = true)
     {
         Priority = priority;
         Id = id;
@@ -36,10 +36,10 @@ public sealed class GameEnd
         allEndConditions.Add(id, this);
     }
 
-    internal GameEnd(byte id, string localizedName, UnityEngine.Color color, int priority, bool allowWin = true, bool specifyNobodyWins = true) : this(id, localizedName, NebulaAPI.GUI.LocalizedTextComponent("end." + localizedName), color, priority, allowWin, specifyNobodyWins) { }
+    internal GameEnd(byte id, string localizedName, Virial.Color color, int priority, bool allowWin = true, bool specifyNobodyWins = true) : this(id, localizedName, NebulaAPI.GUI.LocalizedTextComponent("end." + localizedName), color, priority, allowWin, specifyNobodyWins) { }
 
-    internal GameEnd(string immutableId, TextComponent dislayText, Virial.Color color, int priority, bool specifyNobodyWins = true) : this(++usedIdForAddon, immutableId, dislayText, color.ToUnityColor(), priority, specifyNobodyWins: specifyNobodyWins) { }
-    internal GameEnd(string localizedName, Virial.Color color, int priority, bool specifyNobodyWins = true) : this(++usedIdForAddon, localizedName, color.ToUnityColor(), priority, specifyNobodyWins: specifyNobodyWins) { }
+    internal GameEnd(string immutableId, TextComponent dislayText, Virial.Color color, int priority, bool specifyNobodyWins = true) : this(++usedIdForAddon, immutableId, dislayText, color, priority, specifyNobodyWins: specifyNobodyWins) { }
+    internal GameEnd(string localizedName, Virial.Color color, int priority, bool specifyNobodyWins = true) : this(++usedIdForAddon, localizedName, color, priority, specifyNobodyWins: specifyNobodyWins) { }
 }
 
 public sealed class ExtraWin

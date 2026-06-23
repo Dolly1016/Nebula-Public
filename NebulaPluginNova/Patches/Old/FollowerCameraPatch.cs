@@ -5,18 +5,30 @@ static public class FollowerCameraPatch
 {
     public static void Prefix(FollowerCamera __instance)
     {
+        NebulaProfiler.LapTimer("Before FollowerCamera.Update");
         try
         {
-            var localPlayer = PlayerControl.LocalPlayer;
-            if (!__instance.Target) __instance.Target = localPlayer;
-
-            if (localPlayer && localPlayer.lightSource)
+            MonoBehaviour target = __instance.Target;
+            var localPlayer = AmongUsLLImpl.LocalPlayer;
+            if (!target.AsBoolFast())
             {
-                localPlayer.lightSource.transform.SetParent(null);
-                localPlayer.lightSource.transform.position = __instance.Target.transform.position;
+                __instance.Target = localPlayer;
+                target = localPlayer;
+            }
+
+            if (localPlayer.AsBoolFast())
+            {
+                var lightSource = localPlayer.lightSource;
+                if (lightSource.AsBoolFast())
+                {
+                    var lightSourceTransform = lightSource.transform;
+                    lightSourceTransform.SetParent(null);
+                    lightSourceTransform.position = target.transform.position;
+                }
             }
         }
         catch { }
+        NebulaProfiler.LapTimer("FollowerCamera.Update");
     }
 
     public static void Postfix(FollowerCamera __instance)

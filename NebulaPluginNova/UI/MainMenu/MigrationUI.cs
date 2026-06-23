@@ -67,7 +67,7 @@ internal class MigrationUI
         var inputWindow = MetaScreen.GenerateWindow(new(4f, 1.9f), null, new Vector3(0f, 0f, -300f), true, true, true, BackgroundSetting.Old, false);
         GUITextField passwordField = new(GUIAlignment.Center, new(3.4f, 0.42f))
         {
-            HintText = Language.Translate("ui.migration.download.password").Color(Color.gray),
+            HintText = Language.Translate("ui.migration.download.password").Color(VColor.Gray),
             IsSharpField = false,
             MaxLines = 1,
             WithMaskMaterial = false

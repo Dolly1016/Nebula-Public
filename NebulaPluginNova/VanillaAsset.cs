@@ -172,11 +172,11 @@ public class VanillaAsset
         yield break;
     }
 
-    static public Scroller GenerateScroller(Vector2 size, Transform transform, Vector3 scrollBarLocalPos, Transform target, FloatRange bounds, float scrollerHeight)
+    static public Scroller GenerateScroller(VVector2 size, Transform transform, VVector3 scrollBarLocalPos, Transform target, FloatRange bounds, float scrollerHeight)
     {
         var barBack = GameObject.Instantiate(PlayerOptionsMenuPrefab.transform.GetChild(4).FindChild("UI_ScrollbarTrack").gameObject, transform);
         var bar = GameObject.Instantiate(PlayerOptionsMenuPrefab.transform.GetChild(4).FindChild("UI_Scrollbar").gameObject, transform);
-        barBack.transform.localPosition = scrollBarLocalPos + new Vector3(0.12f, 0f, 0f);
+        barBack.transform.localPosition = scrollBarLocalPos + new VVector3(0.12f, 0f, 0f);
         bar.transform.localPosition = scrollBarLocalPos;
 
         var scrollBar = bar.GetComponent<Scrollbar>();

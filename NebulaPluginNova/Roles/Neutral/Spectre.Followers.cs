@@ -98,18 +98,18 @@ internal class SpectreFollower : DefinedRoleTemplate, DefinedRole, IAssignableDo
         {
             if (!ShowDishesOnMapOption) return;
 
-            if (mapLayer is null)
+            if (!mapLayer.AsBoolFast())
             {
                 mapLayer = UnityHelper.CreateObject<DishMapLayer>("DishLayer", MapBehaviour.Instance.transform, new(0, 0, -1f));
                 this.BindGameObject(mapLayer.gameObject);
             }
-            mapLayer.gameObject.SetActive(true);
+            mapLayer!.gameObject.SetActive(true);
         }
 
         [Local]
         void OnOpenAdminMap(MapOpenAdminEvent ev)
         {
-            if (mapLayer) mapLayer?.gameObject.SetActive(false);
+            if (mapLayer.AsBoolFast()) mapLayer?.gameObject.SetActive(false);
         }
 
         bool RuntimeRole.HasImpostorVision => true;
@@ -262,10 +262,10 @@ internal class SpectreImmoralist : DefinedRoleTemplate, DefinedRole, IAssignable
         {
             if (!ShowKillFlashOption) return;
 
-            if (MeetingHud.Instance || ExileController.Instance) return;
+            if (MeetingHud.Instance.AsBoolFast() || ExileController.Instance.AsBoolFast()) return;
 
             if (ev.Player.AmOwner) return;
-            if (!ev.Dead.HasAttribute(PlayerAttributes.BuskerEffect)) AmongUsUtil.PlayFlash(MyRole.UnityColor);
+            if (!ev.Dead.HasAttribute(PlayerAttributes.BuskerEffect)) AmongUsUtil.PlayFlash(MyRole.Color);
         }
 
         bool RuntimeRole.HasImpostorVision => true;

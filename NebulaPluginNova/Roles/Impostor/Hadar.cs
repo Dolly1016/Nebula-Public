@@ -122,9 +122,10 @@ public class Hadar : DefinedSingleAbilityRoleTemplate<Hadar.Ability>, DefinedRol
                     {
                         NebulaManager.Instance.StartDelayAction(0.3f,() =>
                         {
+                            var localPos = AmongUsLLImpl.LocalPlayer.transform.localPosition;
                             NebulaSyncObject.RpcInstantiate(HadarEvidence.MyTag, [
-                                PlayerControl.LocalPlayer.transform.localPosition.x,
-                                PlayerControl.LocalPlayer.transform.localPosition.y - 0.35f
+                                localPos.x,
+                                localPos.y - 0.35f
                             ]);
                         });
                     }
@@ -146,7 +147,7 @@ public class Hadar : DefinedSingleAbilityRoleTemplate<Hadar.Ability>, DefinedRol
 
                 if (!GushFromVentsOption)
                 {
-                    gushButton.Availability = (button) => MyPlayer.VanillaPlayer.CanMove && MapData.GetCurrentMapData().CheckMapArea(PlayerControl.LocalPlayer.GetTruePosition());
+                    gushButton.Availability = (button) => MyPlayer.VanillaPlayer.CanMove && MapData.GetCurrentMapData().CheckMapArea(AmongUsLLImpl.LocalPlayer.GetTruePosition());
                     gushButton.OnClick = (button) =>
                     {
                         NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, GameActionTypes.HadarAppearingAction);
@@ -163,7 +164,7 @@ public class Hadar : DefinedSingleAbilityRoleTemplate<Hadar.Ability>, DefinedRol
                 else
                 {
                     Arrow? ventArrow = new Arrow(null, true).Register(this);
-                    ventArrow.SetColor(Palette.ImpostorRed);
+                    ventArrow.SetColor(new(Palette.ImpostorRed));
                     ventArrow.IsActive = false;
                     var tracker = ObjectTrackers.ForVents(this, VentDetectionRangeOption, MyPlayer, v => !v.TryGetComponent<InvalidVent>(out _), Palette.ImpostorRed, true);
                     gushButton.Availability = (button) => MyPlayer.VanillaPlayer.CanMove && tracker.CurrentTarget != null;

@@ -68,9 +68,9 @@ internal class TaskConfiguration : ITaskConfiguration
                 longTasks = 0;
                 for (int i = 0; i < numOfTasks; i++)
                 {
-                    if (ContainsCommonTasks && Helpers.Prob(0.2f) && commonTasks < 2)
+                    if (ContainsCommonTasks && Mathn.Prob(0.2f) && commonTasks < 2)
                         commonTasks++;
-                    else if (Helpers.Prob(0.3f))
+                    else if (Mathn.Prob(0.3f))
                         longTasks++;
                     else
                         shortTasks++;

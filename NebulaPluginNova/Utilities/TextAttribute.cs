@@ -40,7 +40,7 @@ public class TextAttributeOld
     };
     static public readonly TextAttributeOld BoldAttrLeft = new(BoldAttr) { Alignment = TMPro.TextAlignmentOptions.Left };
 
-    public Color Color { get; set; } = Color.white;
+    public Virial.Color Color { get; set; } = Virial.Color.White;
     public TMPro.TextAlignmentOptions Alignment { get; set; } = TMPro.TextAlignmentOptions.Center;
     public TMPro.FontStyles Styles { get; set; } = TMPro.FontStyles.Normal;
     public Material? FontMaterial { get; set; } = null;
@@ -49,7 +49,7 @@ public class TextAttributeOld
     public float FontMaxSize { get; set; } = 2f;
     public float FontSize { get; set; } = 1.5f;
     public bool AllowAutoSizing { get; set; } = true;
-    public Vector2 Size { get; set; } = new Vector2(3f, 0.5f);
+    public VVector2 Size { get; set; } = new VVector2(3f, 0.5f);
     public TextAttributeOld EditFontSize(float size) => EditFontSize(size, size, size);
     public TextAttributeOld EditFontSize(float size,float min,float max)
     {
@@ -61,7 +61,7 @@ public class TextAttributeOld
 
     public void Reflect(TMPro.TextMeshPro text)
     {
-        text.color = Color;
+        text.color = Color.ToUnityColor();
         text.alignment = Alignment;
         text.fontStyle = Styles;
         text.fontSize = FontSize;
@@ -89,6 +89,6 @@ public class TextAttributeOld
         FontMaterial= orig.FontMaterial;
     }
 
-    public TextAttributeOld AlterColor(Color color) => new (this) { Color = color};
+    public TextAttributeOld AlterColor(Virial.Color color) => new (this) { Color = color};
     public TextAttributeOld AlterAutoSizing(bool allowAutoSizing) => new(this) { AllowAutoSizing = allowAutoSizing };
 }

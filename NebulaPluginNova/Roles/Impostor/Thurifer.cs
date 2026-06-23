@@ -21,7 +21,7 @@ public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, Defi
         static private IDividedSpriteLoader sprites = DividedSpriteLoader.FromResource("Nebula.Resources.Thuribulum.png", 100f, 3, 1);
         static private IDividedSpriteLoader effect1sprites = DividedSpriteLoader.FromResource("Nebula.Resources.ThuriferEffect1.png", 100f, 8, 1);
         static private IDividedSpriteLoader effect2sprites = DividedSpriteLoader.FromResource("Nebula.Resources.ThuriferEffect2.png", 100f, 8, 1);
-        public Thuribulum(Vector2 pos) : base(pos, ZOption.Just, sprites.GetSprite(0), Color.white)
+        public Thuribulum(Vector2 pos) : base(pos, ZOption.Just, sprites.GetSprite(0), UnityEngine.Color.white)
         {
             ModSingleton<ThuribulumManager>.Instance.RegisterThuribulum(this);
             MyRenderer.material = VanillaAsset.GetHighlightMaterial();
@@ -48,7 +48,7 @@ public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, Defi
             activeTimer = Math.Max(activeTimer, duration);
             activeAnimTimer = -1f;
 
-            if(playAnim) NebulaManager.Instance.StartCoroutine(ManagedEffects.CoPlayAnimEffect(LayerExpansion.GetDefaultLayer(), "ThuriferSmoke", effect2sprites, null, Position.AsVector3(-1f) + new Vector3(0f,-0.1f,0f), 1.4f, Color.white, 0.08f, Helpers.Prob(0.5f)).WrapToIl2Cpp());
+            if(playAnim) NebulaManager.Instance.StartCoroutine(ManagedEffects.CoPlayAnimEffect(LayerExpansion.GetDefaultLayer(), "ThuriferSmoke", effect2sprites, null, Position.AsVector3(-1f) + new VVector3(0f,-0.1f,0f), 1.4f, UnityEngine.Color.white, 0.08f, Mathn.Prob(0.5f)).WrapToIl2Cpp());
         }
 
         float activeTimer = 0f;
@@ -64,10 +64,10 @@ public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, Defi
             //会議及び追放中でなく、アクティブならばタイマーを進めてアニメーションをさせる。
             if (activeTimer > 0f)
             {
-                if (!MeetingHud.Instance && !ExileController.Instance)
+                if (!MeetingHud.Instance.AsBoolFast() && !ExileController.Instance.AsBoolFast())
                 {
-                    activeAnimTimer -= Time.deltaTime;
-                    activeTimer -= Time.deltaTime;
+                    activeAnimTimer -= ev.DeltaTime;
+                    activeTimer -= ev.DeltaTime;
                     if (activeAnimTimer < 0f)
                     {
                         activeSpriteIndex = (activeSpriteIndex + 1) % 2;
@@ -82,7 +82,7 @@ public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, Defi
 
                     if (activatedCircle == null && GamePlayer.LocalPlayer.Role.Role == Thurifer.MyRole)
                     {
-                        activatedCircle = EffectCircle.SpawnEffectCircle(null, Position, new(202f / 255f, 1f, 0f), ThuribulumRangeOption, null, true);
+                        activatedCircle = EffectCircle.SpawnEffectCircle(null, Position.AsVector3(), new(202f / 255f, 1f, 0f), ThuribulumRangeOption, null, true);
                     }
                     if(activatedCircle != null && GamePlayer.LocalPlayer.Role.Role != Thurifer.MyRole)
                     {
@@ -105,7 +105,9 @@ public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, Defi
         {
             isIgnored = true;
         }
-        void ResetOutline(GameHudUpdateFasterEvent ev)
+
+        [EventPriority(EventPriority.VeryHigh + 10)]
+        void ResetOutline(GameHudUpdateEvent ev)
         {
             AmongUsUtil.SetHighlight(MyRenderer, false);
         }
@@ -114,7 +116,7 @@ public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, Defi
         {
             IEnumerator CoDelayedActivate()
             {
-                Action PlayEffect = ()=> NebulaManager.Instance.StartCoroutine(ManagedEffects.CoPlayAnimEffect(LayerExpansion.GetDefaultLayer(), "ThuriferSmoke", effect1sprites, null, Position.AsVector3(-1f) + new Vector3(0f, -0.1f, 0f), 1.4f, Color.white, 0.08f, Helpers.Prob(0.5f)).WrapToIl2Cpp()); ;
+                Action PlayEffect = ()=> NebulaManager.Instance.StartCoroutine(ManagedEffects.CoPlayAnimEffect(LayerExpansion.GetDefaultLayer(), "ThuriferSmoke", effect1sprites, null, Position.AsVector3(-1f) + new VVector3(0f, -0.1f, 0f), 1.4f, UnityEngine.Color.white, 0.08f, Mathn.Prob(0.5f)).WrapToIl2Cpp()); ;
                 while (delay > 0.8f)
                 {
                     PlayEffect.Invoke();
@@ -200,7 +202,7 @@ public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, Defi
         {
             if (!IsAvailable) return;
 
-            if (MeetingHud.Instance || ExileController.Instance)
+            if (MeetingHud.Instance.AsBoolFast() || ExileController.Instance.AsBoolFast())
             {
                 meetingCooldown = 5f;
                 return;
@@ -208,7 +210,7 @@ public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, Defi
 
             if (meetingCooldown > 0f)
             {
-                meetingCooldown -= Time.deltaTime;
+                meetingCooldown -= ev.DeltaTime;
             }
             else
             {
@@ -217,7 +219,7 @@ public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, Defi
                 //生存中のみ進行する
                 if (!localPlayer.IsDead)
                 {
-                    shareTimer -= Time.deltaTime;
+                    shareTimer -= ev.DeltaTime;
 
                     foreach (var thuribulum in allThuribulums)
                     {
@@ -227,12 +229,12 @@ public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, Defi
                         float temp = (ThuribulumRangeOption - distance) / ThuribulumRangeOption;
                         if (temp > 0f)
                         {
-                            localInhalation += Mathf.Pow(temp, 0.4f) * Time.deltaTime; //そこそこ遠くなると急激に上がらなくなる
+                            localInhalation += Mathn.Pow(temp, 0.4f) * ev.DeltaTime; //そこそこ遠くなると急激に上がらなくなる
                         }
                     }
 
                     //上限を設ける
-                    localInhalation = Mathf.Min(MaxInhalation, localInhalation);
+                    localInhalation = Mathn.Min(MaxInhalation, localInhalation);
 
                     if (shareTimer < 0f)
                     {
@@ -395,11 +397,11 @@ public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, Defi
                         while (t < delay)
                         {
                             //アニメーション中、追放中は何もしない
-                            if (MeetingHud.Instance && MeetingHud.Instance.state < MeetingHud.VoteStates.Discussion)
+                            if (MeetingHud.Instance.AsBoolFast() && MeetingHud.Instance.state < MeetingHud.VoteStates.Discussion)
                             {
                                 yield return null;
                             }
-                            else if (ExileController.Instance)
+                            else if (ExileController.Instance.AsBoolFast())
                             {
                                 yield return null;
                             }
@@ -412,7 +414,7 @@ public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, Defi
 
                         if (!ev.Target.IsDead)
                         {
-                            if (MeetingHud.Instance) acTokenChallenge.DoIf(a => a.Value.inMeetingKill = true);
+                            if (MeetingHud.Instance.AsBoolFast()) acTokenChallenge.DoIf(a => a.Value.inMeetingKill = true);
                             if (!(inhalation < 1f)) acTokenChallenge.DoIf(a => a.Value.maxDelayKill = true);
                             acTokenChallenge.DoIf(a => a.Value.killed++);
 

@@ -67,7 +67,7 @@ public class Avenger : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             if (AmOwner)
             {
                 NebulaAPI.CurrentGame?.GetModule<TitleShower>()?.SetText(Language.Translate("role.avenger.hudText"), MyRole.RoleColor.ToUnityColor(), 5.5f, true);
-                AmongUsUtil.PlayCustomFlash(MyRole.RoleColor.ToUnityColor(), 0f, 0.8f, 0.7f);
+                AmongUsUtil.PlayCustomFlash(MyRole.RoleColor, 0f, 0.8f, 0.7f);
 
                 var killButton = NebulaAPI.Modules.KillButton(this, MyPlayer, true, Virial.Compat.VirtualKeyInput.Kill, null,
                         KillCoolDownOption.GetCooldown(MyPlayer.TeamKillCooldown), "kill", ModAbilityButton.LabelType.Impostor, null,
@@ -77,7 +77,7 @@ public class Avenger : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                         }, canTrackInVentPlayer: CanKillHidingPlayerOption
                     );
                 
-                if (target != null) new TrackingArrowAbility(target, NotificationForAvengerIntervalOption, MyRole.RoleColor.ToUnityColor(), false).Register(this);
+                if (target != null) new TrackingArrowAbility(target, NotificationForAvengerIntervalOption, MyRole.RoleColor, false).Register(this);
 
                 if((target?.TryGetModifier<Damned.Instance>(out var damned) ?? false) && MyPlayer.TryGetModifier<Lover.Instance>(out var lover))
                 {
@@ -101,8 +101,8 @@ public class Avenger : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 
             if (target?.AmOwner ?? false)
             {
-                if (TargetCanKnowAvengerOption) new TrackingArrowAbility(MyPlayer, NotificationForMurdererIntervalOption, MyRole.RoleColor.ToUnityColor(), false).Register(this);
-                if (AvengerFlashForMurdererOption) AmongUsUtil.PlayFlash(MyRole.RoleColor.ToUnityColor());
+                if (TargetCanKnowAvengerOption) new TrackingArrowAbility(MyPlayer, NotificationForMurdererIntervalOption, MyRole.RoleColor, false).Register(this);
+                if (AvengerFlashForMurdererOption) AmongUsUtil.PlayFlash(MyRole.RoleColor);
             }
         }
 
@@ -172,7 +172,7 @@ public class Avenger : DefinedRoleTemplate, DefinedRole, IAssignableDocument
         {
             if (!CheckKillCondition && ev.Player == target && !MyPlayer.IsDead && ev is PlayerMurderedEvent or PlayerDisconnectEvent)
             {
-                if (MeetingHud.Instance || ExileController.Instance)
+                if (MeetingHud.Instance.AsBoolFast() || ExileController.Instance.AsBoolFast())
                 {
                     MyPlayer.Suicide(PlayerState.Suicide, EventDetail.Kill, KillParameter.WithAssigningGhostRole);
                 }

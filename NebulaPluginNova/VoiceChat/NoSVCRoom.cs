@@ -1,4 +1,5 @@
-﻿using Interstellar;
+﻿using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using Interstellar;
 using Interstellar.Routing;
 using Interstellar.Routing.Router;
 using Interstellar.VoiceChat;
@@ -241,7 +242,7 @@ internal class NoSVCRoom
         {
             var window = MetaScreen.GenerateWindow(new(5f, 1.35f), null, Vector3.zero, true, false);
 
-            var field = new GUITextField(GUIAlignment.Center, new(4.8f, 0.4f)) { IsSharpField = false, MaxLines = 1, HintText = "ws://<address>:<port>".Color(Color.gray), DefaultText = VCSettings.VCServerEntry.Value, WithMaskMaterial = false };
+            var field = new GUITextField(GUIAlignment.Center, new(4.8f, 0.4f)) { IsSharpField = false, MaxLines = 1, HintText = "ws://<address>:<port>".Color(VColor.Gray), DefaultText = VCSettings.VCServerEntry.Value, WithMaskMaterial = false };
             window.SetWidget(GUI.API.VerticalHolder(GUIAlignment.Center, [
                 GUI.API.LocalizedText(GUIAlignment.Center, AttributeAsset.OverlayBold, "voiceChat.settings.server"),
                 field,
@@ -302,17 +303,17 @@ internal class NoSVCRoom
                     ResetMapping();
                 }
 
-                if (mappedPlayer == null && (LobbyBehaviour.Instance || ShipStatus.Instance))
+                if (mappedPlayer == null && (LobbyBehaviour.Instance.AsBoolFast() || AmongUsLLImpl.ShipStatusInstance.AsBoolFast()))
                 {
                     mappedPlayer = PlayerControl.AllPlayerControls.GetFastEnumerator<PlayerControl>().FirstOrDefault(p => p.PlayerId == playerId)!;
                     if (mappedPlayer) {
                         string puid = mappedPlayer.name;
                     }
                 }
-
+                
                 if (mappedModPlayer == null && mappedPlayer)
                 {
-                    if (mappedPlayer && ShipStatus.Instance) mappedModPlayer = mappedPlayer.GetModInfo();
+                    if (mappedPlayer && AmongUsLLImpl.ShipStatusInstance.AsBoolFast()) mappedModPlayer = mappedPlayer.GetModInfo();
                 }
             }
 
@@ -435,7 +436,7 @@ internal class NoSVCRoom
         private void CheckAndReflectProperties(bool inMeeting, float normalVolume, float normalPan, float ghostVolume, float radioVolume, float droneVolume, float dronePan)
         {
             var mappedPlayer = mapping.MappedModPlayer;
-            var voiceEvent = new VoiceUpdateEvent(mappedPlayer!, true, normalVolume, normalPan, ghostVolume, radioVolume, droneVolume, dronePan);
+            var voiceEvent = VoiceUpdateEvent.Get(mappedPlayer!, true, normalVolume, normalPan, ghostVolume, radioVolume, droneVolume, dronePan);
             CheckAndReflectProperties(voiceEvent);
         }
 
@@ -482,7 +483,7 @@ internal class NoSVCRoom
 
                 var target = mapping.MappedModPlayer;
 
-                VoiceUpdateEvent ev = new(target!, false, 0f, 0f, 0f, 0f, 0f, 0f);
+                VoiceUpdateEvent ev = VoiceUpdateEvent.Get(target!, false, 0f, 0f, 0f, 0f, 0f, 0f);
 
                 if (target != null && hearingPosition.HasValue && GamePlayer.LocalPlayer?.VanillaPlayer && target.VanillaPlayer)
                 {
@@ -897,7 +898,7 @@ internal class NoSVCRoom
 
     private void UpdateLocalProfile(bool always)
     {
-        var localPlayer = PlayerControl.LocalPlayer;
+        var localPlayer = AmongUsLLImpl.LocalPlayer;
         if (!localPlayer) return;
 
         if (always || localPlayer.PlayerId != myLastId || localPlayer.name != myLastName)
@@ -1002,10 +1003,12 @@ internal class NoSVCRoom
     }
 
     static public Image IconRadioImage = SpriteLoader.FromResource("Nebula.Resources.UpperIconRadio.png", 100f);
+
+    static readonly private IDividedSpriteLoader radioImages = DividedSpriteLoader.FromResource("Nebula.Resources.RadioIcons.png", 100f, 50, 50, true);
+
     private class RadioChannel
     {
-        static readonly private IDividedSpriteLoader radioImages = DividedSpriteLoader.FromResource("Nebula.Resources.RadioIcons.png", 100f, 50, 50, true);
-        public Color Color { get; }
+        public VColor Color { get; }
         public string LocalizedName { get; }
         public Image Image { get; }
         Func<GamePlayer, bool> canHear;
@@ -1013,19 +1016,23 @@ internal class NoSVCRoom
         public ILifespan Lifespan => lifespan;
         public bool IsDead => lifespan.IsDeadObject;
         public bool CanHear(GamePlayer player) => canHear.Invoke(player);
-        public RadioChannel(string localizedName,int imageId, Func<GamePlayer, bool> canHear, ILifespan lifespan, Color color)
+
+        public RadioChannel(string localizedName, Virial.Media.Image image, Func<GamePlayer, bool> canHear, ILifespan lifespan, VColor color)
         {
             this.LocalizedName = localizedName;
-            this.Image = radioImages.AsLoader(imageId);
+            this.Image = image;
             this.canHear = canHear;
             this.lifespan = lifespan;
             Color = color;
         }
     }
 
-    public void RegisterRadioChannel(string localizedName, int imageId, Func<GamePlayer, bool> canHear, ILifespan lifespan, Color color)
+    public void RegisterRadioChannel(string localizedName, int imageId, Func<GamePlayer, bool> canHear, ILifespan lifespan, VColor color)
+        => RegisterRadioChannel(localizedName, radioImages.AsLoader(imageId), canHear, lifespan, color);
+
+    public void RegisterRadioChannel(string localizedName, Virial.Media.Image image, Func<GamePlayer, bool> canHear, ILifespan lifespan, VColor color)
     {
-        var radio = new RadioChannel(localizedName, imageId, canHear, lifespan, color);
+        var radio = new RadioChannel(localizedName, image, canHear, lifespan, color);
         radios.Add(radio);
         RegisterWidget(localizedName, color, radio.Image, lifespan, () => CurrentRadio == radio, 10);
     }
@@ -1110,9 +1117,9 @@ internal class NoSVCRoom
     private record WidgetRecord(IMetaWidgetOld widget, ILifespan lifespan, Func<bool> predicate, int priority);
     private OrderedList<WidgetRecord, int> widgets = OrderedList<WidgetRecord, int>.DescendingList(v => v.priority);
 
-    static private IMetaWidgetOld GetNormalWidget(string localizedText, Color? color) => new MetaWidgetOld.Text(TextAttribute) { Alignment = IMetaWidgetOld.AlignmentOption.Center, RawText = color.HasValue ? localizedText.Color(color.Value) : localizedText };
-    private void RegisterWidget(string localizedText, Color? color, Image? radioIcon, ILifespan lifespan, Func<bool> predicate, int priority)
-    {
+    static private IMetaWidgetOld GetNormalWidget(string localizedText, VColor? color) => new MetaWidgetOld.Text(TextAttribute) { Alignment = IMetaWidgetOld.AlignmentOption.Center, RawText = color.HasValue ? localizedText.Color(color.Value) : localizedText };
+    private void RegisterWidget(string localizedText, VColor? color, Image? radioIcon, ILifespan lifespan, Func<bool> predicate, int priority)
+    {   
         MetaWidgetOld GetRadioWidget()
         {
             var widget = new MetaWidgetOld();

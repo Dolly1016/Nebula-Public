@@ -128,8 +128,8 @@ public class Mayor : DefinedSingleAbilityRoleTemplate<Mayor.Ability>, HasCitatio
                 var leftRenderer = UnityHelper.CreateObject<SpriteRenderer>("MayorButton-Minus", binder.transform, new Vector3(2f, 0f));
                 leftRenderer.sprite = leftButtonSprite.GetSprite();
                 var leftButton = leftRenderer.gameObject.SetUpButton(true);
-                leftButton.OnMouseOver.AddListener(() => leftRenderer.color = Color.gray);
-                leftButton.OnMouseOut.AddListener(() => leftRenderer.color = Color.white);
+                leftButton.OnMouseOver.AddListener(() => leftRenderer.color = UnityEngine.Color.gray);
+                leftButton.OnMouseOut.AddListener(() => leftRenderer.color = UnityEngine.Color.white);
                 leftButton.OnClick.AddListener(() => {
                     if (myArea.DidVote) return;
                     UpdateVotes(false);
@@ -139,8 +139,8 @@ public class Mayor : DefinedSingleAbilityRoleTemplate<Mayor.Ability>, HasCitatio
                 var rightRenderer = UnityHelper.CreateObject<SpriteRenderer>("MayorButton-Plus", binder.transform, new Vector3(3.6f, 0f));
                 rightRenderer.sprite = rightButtonSprite.GetSprite();
                 var rightButton = rightRenderer.gameObject.SetUpButton(true);
-                rightButton.OnMouseOver.AddListener(() => rightRenderer.color = Color.gray);
-                rightButton.OnMouseOut.AddListener(() => rightRenderer.color = Color.white);
+                rightButton.OnMouseOver.AddListener(() => rightRenderer.color = UnityEngine.Color.gray);
+                rightButton.OnMouseOut.AddListener(() => rightRenderer.color = UnityEngine.Color.white);
                 rightButton.OnClick.AddListener(() => {
                     if (myArea.DidVote) return;
                     UpdateVotes(true);

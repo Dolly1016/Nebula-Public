@@ -12,7 +12,7 @@ using Virial.Text;
 
 namespace Nebula.Roles.Abilities;
 
-public record EffectCircleInfo(string translationKey, Func<float> outerRadious, Func<float?> innerRadious, Color color);
+public record EffectCircleInfo(string translationKey, Func<float> outerRadious, Func<float?> innerRadious, VColor color);
 
 [NebulaPreprocess(PreprocessPhase.BuildNoSModule)]
 public class MetaAbility : DependentLifespan, IGameOperator, IModule
@@ -34,14 +34,14 @@ public class MetaAbility : DependentLifespan, IGameOperator, IModule
         var reviveButton = NebulaAPI.Modules.AbilityButton(this, true, false, 98)
             .SetImage(reviveSprite).SetLabel("revive");
         reviveButton.Availability = (button) => true;
-        reviveButton.Visibility = (button) => PlayerControl.LocalPlayer.Data.IsDead;
-        reviveButton.OnClick = (button) => NebulaManager.Instance.ScheduleDelayAction(() => GamePlayer.LocalPlayer!.Revive(null, new(PlayerControl.LocalPlayer.transform.position), true, false));
+        reviveButton.Visibility = (button) => AmongUsLLImpl.LocalPlayer.Data.IsDead;
+        reviveButton.OnClick = (button) => NebulaManager.Instance.ScheduleDelayAction(() => GamePlayer.LocalPlayer!.Revive(null, new(AmongUsLLImpl.LocalPlayer.transform.position), true, false));
 
 
         var suicideButton = NebulaAPI.Modules.AbilityButton(this, true, false, 98)
             .SetLabel("suicide");
         suicideButton.Availability = (button) => true;
-        suicideButton.Visibility = (button) => !PlayerControl.LocalPlayer.Data.IsDead;
+        suicideButton.Visibility = (button) => !AmongUsLLImpl.LocalPlayer.Data.IsDead;
         suicideButton.OnClick = (button) => NebulaManager.Instance.ScheduleDelayAction(()=> GamePlayer.LocalPlayer!.Suicide(PlayerState.Suicide, null, KillParameter.WithDeadBody));
         
 
@@ -61,11 +61,11 @@ public class MetaAbility : DependentLifespan, IGameOperator, IModule
     static EffectCircle circle = null!;
     private void OpenCircleWindow()
     {
-        var window = MetaScreen.GenerateWindow(new Vector2(4f, 3.8f), HudManager.Instance.transform, new Vector3(0, 0, -400f), true, false);
+        var window = MetaScreen.GenerateWindow(new(4f, 3.8f), AmongUsLLImpl.HudManagerInstance.transform, new(0, 0, -400f), true, false);
         var maskedTittleAttr = new TextAttribute(GUI.API.GetAttribute(Virial.Text.AttributeAsset.MetaRoleButton)) { Size = new(3f, 0.26f) };
 
         window.SetWidget(GUI.API.ScrollView(Virial.Media.GUIAlignment.Center, new(3.8f, 3.8f), "circleMenu", GUI.API.VerticalHolder(Virial.Media.GUIAlignment.Center,
-            allEffectCircleInfo.Select(info => GUI.API.Button(Virial.Media.GUIAlignment.Center, maskedTittleAttr, GUI.API.ColorTextComponent(new(info.color), GUI.API.LocalizedTextComponent(info.translationKey)), button =>
+            allEffectCircleInfo.Select(info => GUI.API.Button(Virial.Media.GUIAlignment.Center, maskedTittleAttr, GUI.API.ColorTextComponent(info.color, GUI.API.LocalizedTextComponent(info.translationKey)), button =>
             {
                 if (circle) circle.Disappear();
                 circle = EffectCircle.SpawnEffectCircle(null, GamePlayer.LocalPlayer.Position.ToUnityVector(), info.color, info.outerRadious.Invoke(), info.innerRadious.Invoke(), true);
@@ -76,7 +76,7 @@ public class MetaAbility : DependentLifespan, IGameOperator, IModule
 
     private void OpenRoleWindow()
     {
-        var window = MetaScreen.GenerateWindow(new Vector2(7.5f, 4.5f), HudManager.Instance.transform, new Vector3(0, 0, -400f), true, false);
+        var window = MetaScreen.GenerateWindow(new(7.5f, 4.5f), AmongUsLLImpl.HudManagerInstance.transform, new(0, 0, -400f), true, false);
 
         //widget.Append(new MetaWidgetOld.Text(TextAttributeOld.TitleAttr) { RawText = Language.Translate("role.metaRole.ui.roles") });
 

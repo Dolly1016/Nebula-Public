@@ -32,7 +32,7 @@ public static class PolishTeleportStonePatch
 {
     static Exception Finalizer(PolishRubyGame __instance, Exception __exception)
     {
-        if (__instance.MyNormTask) return __exception;
+        if (__instance.MyNormTask.AsBoolFast()) return __exception;
 
         for (int k = 0; k < __instance.Buttons.Length; k++)
         {
@@ -41,7 +41,7 @@ public static class PolishTeleportStonePatch
 
         //ルビー磨きタスクが実際に終わっていれば、テレポートを実行する
         if (__instance.amClosing == Minigame.CloseState.Closing) return null!;
-        if(ModSingleton<TeleportationSystem>.Instance.TryTeleport(PlayerControl.LocalPlayer.transform.position)) __instance.Close();
+        if(ModSingleton<TeleportationSystem>.Instance.TryTeleport(AmongUsLLImpl.LocalPlayer.transform.position)) __instance.Close();
         return null!;
     }
 }
@@ -52,13 +52,13 @@ public static class PolishTeleportStoneStartPatch
 
     internal static void OnPostUseConsole(SystemConsole __instance)
     {
-        if (!Minigame.Instance) return;
+        if (!Minigame.Instance.AsBoolFast()) return;
         var rubyGame = Minigame.Instance.TryCast<PolishRubyGame>();
         if (!rubyGame) return;
 
         if (GeneralConfigurations.NonCrewmateCanUseTeleporterImmediatelyOption && !GamePlayer.LocalPlayer!.FeelBeTrueCrewmate)
         {
-            ModSingleton<TeleportationSystem>.Instance.TryTeleport(PlayerControl.LocalPlayer.transform.position);
+            ModSingleton<TeleportationSystem>.Instance.TryTeleport(AmongUsLLImpl.LocalPlayer.transform.position);
             rubyGame!.ForceClose();
             return;
         }
@@ -113,7 +113,7 @@ public class TeleportationSystem : AbstractModule<Virial.Game.Game>, IGameOperat
     void OnGameStart(GameStartEvent ev)
     {
         //ホストがテレポーターを生成する
-        if (AmongUsClient.Instance.AmHost)
+        if (AmongUsLLImpl.AmongUsClientInstance.AmHost)
         {
             var spawner = NebulaAPI.CurrentGame?.GetModule<IMapObjectSpawner>();
 
@@ -218,7 +218,7 @@ public class Teleporter : NebulaSyncStandardObject
     private SpriteRenderer ShadowRenderer;
     
     public Color BaseColor { get; set; }
-    public Teleporter(Vector2 pos, int kind) : base(pos, ZOption.Just, true, null, Color.white)
+    public Teleporter(Vector2 pos, int kind) : base(pos, ZOption.Just, true, null, VColor.White)
     {
         ConsoleRenderer = UnityHelper.CreateObject<SpriteRenderer>("Console", MyRenderer.transform, Vector3.zero);
         ConsoleRenderer.sprite = sprite.GetSprite(kind);

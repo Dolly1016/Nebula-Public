@@ -148,21 +148,21 @@ internal class ShowUp : AbstractModule<Virial.Game.Game>, IGameOperator
         var afkButton = new ModAbilityButtonImpl().Register(lobbyLifespan);
         afkButton.SetSprite(afkButtonSprite.GetSprite());
         afkButton.Availability = (button) => true;
-        afkButton.Visibility = (button) => LobbyBehaviour.Instance;
+        afkButton.Visibility = (button) => AmongUsLLImpl.LobbyInstance.AsBoolFast();
         afkButton.OnClick = (button) =>
         {
-            RpcAfk.Invoke((PlayerControl.LocalPlayer.PlayerId, !LocalPlayerIsAfk));
+            RpcAfk.Invoke((AmongUsLLImpl.LocalPlayer.PlayerId, !LocalPlayerIsAfk));
         };
         afkButton.SetLabel("afk");
 
         var showUpButton = new ModAbilityButtonImpl(true).RegisterPermanently();
         showUpButton.SetSprite(buttonSprite.GetSprite());
         showUpButton.Availability = (button) => true;
-        showUpButton.Visibility = (button) => LobbyBehaviour.Instance ? CanAppealInLobby : CanAppealInGame;
+        showUpButton.Visibility = (button) => AmongUsLLImpl.LobbyInstance.AsBoolFast() ? CanAppealInLobby : CanAppealInGame;
         showUpButton.OnClick = (button) =>
         {
             button.StartCoolDown();
-            RpcRequestShowUp.Invoke(PlayerControl.LocalPlayer.PlayerId);
+            RpcRequestShowUp.Invoke(AmongUsLLImpl.LocalPlayer.PlayerId);
         };
         showUpButton.CoolDownTimer = NebulaAPI.Modules.Timer(NebulaAPI.CurrentGame!, 5f).Start();
         showUpButton.SetLabel("appeal");
@@ -171,7 +171,7 @@ internal class ShowUp : AbstractModule<Virial.Game.Game>, IGameOperator
         var playButton = new ModAbilityButtonImpl(true).Register(lobbyLifespan);
         playButton.SetSprite(playButtonSprite.GetSprite());
         playButton.Availability = (button) => true;
-        playButton.Visibility = (button) => LobbyBehaviour.Instance && NebulaAchievementManager.HasAnyAchievementResult && AmongUsClient.Instance.AmHost && !fired;
+        playButton.Visibility = (button) => AmongUsLLImpl.LobbyInstance.AsBoolFast() && NebulaAchievementManager.HasAnyAchievementResult && AmongUsLLImpl.AmongUsClientInstance.AmHost && !fired;
         playButton.OnClick = (button) =>
         {
             button.StartCoolDown();
@@ -188,9 +188,10 @@ internal class ShowUp : AbstractModule<Virial.Game.Game>, IGameOperator
         if(timer > 0f) timer -= Time.fixedDeltaTime;
         try
         {
-            if (lastPlayerNum != PlayerControl.AllPlayerControls.Count)
+            var currentCount = PlayerControl.AllPlayerControls.Count;
+            if (lastPlayerNum != currentCount)
             {
-                lastPlayerNum = PlayerControl.AllPlayerControls.Count;
+                lastPlayerNum = currentCount;
                 if (timer < 5f) timer = 5f;
             }
         }
@@ -198,7 +199,7 @@ internal class ShowUp : AbstractModule<Virial.Game.Game>, IGameOperator
 
         if (AnySocialShown && timer < 1f) timer = 1f;
 
-        if (!InLobbySetting && LobbyBehaviour.Instance && AmongUsClient.Instance.AmHost && GameStartManager.InstanceExists && ShouldBeShownSocialSettings)
+        if (!InLobbySetting && AmongUsLLImpl.LobbyInstance.AsBoolFast() && AmongUsLLImpl.AmongUsClientInstance.AmHost && GameStartManager.InstanceExists && ShouldBeShownSocialSettings)
         {
             var widget = ModSingleton<ShowUp>.Instance.GetSettingWidget().Instantiate(new(100f, 100f), out _);
             widget!.AddComponent<SortingGroup>();
@@ -208,7 +209,7 @@ internal class ShowUp : AbstractModule<Virial.Game.Game>, IGameOperator
             InLobbySetting = widget;
         }
 
-        if (AmongUsClient.Instance.AmHost && LobbyBehaviour.Instance && !AnySocialShown && PlayerControl.AllPlayerControls.Count >= 2 && !(timer > 0f) && lastClearedAchievementsQueue.Count > 0) {
+        if (AmongUsLLImpl.AmongUsClientInstance.AmHost && AmongUsLLImpl.LobbyInstance.AsBoolFast() && !AnySocialShown && PlayerControl.AllPlayerControls.Count >= 2 && !(timer > 0f) && lastClearedAchievementsQueue.Count > 0) {
             var sent = lastClearedAchievementsQueue.Dequeue();
             RpcSendLastCleared.Invoke((sent.playerName, sent.achievement));
         }
@@ -236,8 +237,8 @@ internal class ShowUp : AbstractModule<Virial.Game.Game>, IGameOperator
 
     void OnGameStart(GameStartEvent ev)
     {
-        if (LocalPlayerIsAfk) RpcAfk.LocalInvoke((PlayerControl.LocalPlayer.PlayerId, false));
-        foreach (var afk in afkList) if (afk.renderer) GameObject.Destroy(afk.renderer.gameObject);
+        if (LocalPlayerIsAfk) RpcAfk.LocalInvoke((AmongUsLLImpl.LocalPlayer.PlayerId, false));
+        foreach (var afk in afkList) if (afk.renderer.AsBoolFast()) GameObject.Destroy(afk.renderer.gameObject);
         afkList.Clear();
     }
 
@@ -266,7 +267,7 @@ internal class ShowUp : AbstractModule<Virial.Game.Game>, IGameOperator
             NebulaManager.Instance.StartCoroutine(
                 CoShowSocial("PlayerZoom", new(1.5f, -0.6f),
                 GUI.API.VerticalHolder(Virial.Media.GUIAlignment.Center,
-                    GUI.API.RawText(Virial.Media.GUIAlignment.Center, TitleAttribute, titleText.Color(Color.Lerp(Color.white, DynamicPalette.PlayerColors[player.PlayerId], 0.25f))),
+                    GUI.API.RawText(Virial.Media.GUIAlignment.Center, TitleAttribute, titleText.Color(VColor.Lerp(VColor.White, DynamicPalette.PlayerColors[player.PlayerId], 0.25f))),
                     GUI.API.VerticalMargin(-0.05f),
                     GUI.API.RawText(Virial.Media.GUIAlignment.Center, NameAttribute, text)
                 ),
@@ -327,14 +328,17 @@ internal class ShowUp : AbstractModule<Virial.Game.Game>, IGameOperator
                 float time = 0f;
                 float interval = 2f;
                 float p = 0f;
+
+                var rendererTransform = renderer.transform;
                 while (renderer)
                 {
-                    time += Time.deltaTime;
-                    interval -= Time.deltaTime;
-                    renderer.transform.localPosition = new(0f, Mathn.Sin(time * 0.7f) * 0.08f, -0.5f);
+                    var deltaTime = Time.deltaTime;
+                    time += deltaTime;
+                    interval -= deltaTime;
+                    rendererTransform.localPosition = new(0f, Mathn.Sin(time * 0.7f) * 0.08f, -0.5f);
                     float scale = Mathn.Sin(p * Mathn.PI) * 0.23f + 1f;
-                    renderer.transform.localScale = new(scale, scale, 1f);
-                    renderer.transform.localEulerAngles = new(0f, 0f, p * 360f);
+                    rendererTransform.localScale = new(scale, scale, 1f);
+                    rendererTransform.localEulerAngles = new(0f, 0f, p * 360f);
                     p -= p.Delta(5f, 0.04f);
                     if (p < 0f) p = 0f;
                     if(interval < 0f)
@@ -363,7 +367,7 @@ internal class ShowUp : AbstractModule<Virial.Game.Game>, IGameOperator
 
     internal void ShareLocalAfk()
     {
-        if (LocalPlayerIsAfk) RpcAfk.Invoke((PlayerControl.LocalPlayer.PlayerId, true));
+        if (LocalPlayerIsAfk) RpcAfk.Invoke((AmongUsLLImpl.LocalPlayer.PlayerId, true));
     }
 
 

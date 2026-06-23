@@ -97,19 +97,19 @@ public static class RoleHistoryHelper {
     {
         string result;
 
-        Color color;
+        VColor color;
 
         if (ghostRole != null)
         {
             result = isShort ? ghostRole.Role.GetRoleIconTag() + ghostRole.Role.DisplayColoredShort : ghostRole.Role.DisplayColoredName;
-            color = ghostRole.Role.UnityColor;
+            color = ghostRole.Role.Color;
             ghostRole.DecorateNameConstantly(ref result, true, true);
             result = ghostRole.OverrideRoleName(result, isShort, true) ?? result;
         }
         else
         {
             result = isShort ? role.Role.GetRoleIconTag() + role.DisplayColoredShort : role.DisplayColoredName;
-            color = role.Role.UnityColor;
+            color = role.Role.Color;
             role.DecorateNameConstantly(ref result, true, true);
             result = role.OverrideRoleName(result, isShort, true) ?? result;
         }
@@ -195,9 +195,10 @@ public class TitleShower : AbstractModule<Virial.Game.Game>, IGameOperator, ITit
         float shakeTimer = 0f;
         SetText(text, color, new(_ =>
         {
+            var deltaTime = Time.deltaTime;
             if (shake)
             {
-                shakeTimer -= Time.deltaTime;
+                shakeTimer -= deltaTime;
                 if (shakeTimer < 0f)
                 {
                     shakeTimer = 0.08f;
@@ -213,12 +214,12 @@ public class TitleShower : AbstractModule<Virial.Game.Game>, IGameOperator, ITit
 
             if (timer > 0f)
             {
-                timer -= Time.deltaTime;
+                timer -= deltaTime;
                 alpha = 1f;
             }
             else
             {
-                alpha -= Time.deltaTime * 0.5f;
+                alpha -= deltaTime * 0.5f;
             }
             alpha = Mathn.Clamp01(alpha);
 
@@ -361,7 +362,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     IEnumerable<IArchivedPlayer> IArchivedGame.GetAllPlayers() => AllPlayerInfo;
     IArchivedEvent[] IArchivedGame.ArchivedEvents => GameStatistics.Sealed;
     byte IArchivedGame.MapId => AmongUsUtil.CurrentMapId;
-    ArchivedColor IArchivedGame.GetColor(byte colorId) => new(new(DynamicPalette.PlayerColors[colorId]), new(DynamicPalette.ShadowColors[colorId]), new(DynamicPalette.VisorColors[colorId]));
+    ArchivedColor IArchivedGame.GetColor(byte colorId) => new(DynamicPalette.PlayerColors[colorId], DynamicPalette.ShadowColors[colorId], DynamicPalette.VisorColors[colorId]);
 
     static private SpriteLoader vcConnectSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.VCReconnectButton.png", 100f);
     public NebulaGameManager()
@@ -398,7 +399,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         }, this);
 #endif
 
-        localPlayerCache = new(() => GetPlayer(PlayerControl.LocalPlayer ? PlayerControl.LocalPlayer.PlayerId : (byte)255)!);
+        localPlayerCache = new(() => GetPlayer(PlayerControl.LocalPlayer.AsBoolFast() ? PlayerControl.LocalPlayer.PlayerId : (byte)255)!);
 
         SendHandshakeRequest();
     }
@@ -406,13 +407,13 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     void SendHandshakeRequest() {
         IEnumerator CoHandshake()
         {
-            while (!PlayerControl.LocalPlayer) yield return Effects.Wait(0.2f);
+            while (!PlayerControl.LocalPlayer.AsBoolFast()) yield return Effects.Wait(0.2f);
             var localPlayer = PlayerControl.LocalPlayer;
             PlayerControl hostPlayer = null!;
             do
             {
                 hostPlayer = PlayerControl.AllPlayerControls.Find((Il2CppSystem.Predicate<PlayerControl>)(p => p.AmHost()));
-            } while (!hostPlayer);
+            } while (!hostPlayer.AsBoolFast());
 
             Certification.RequireHandshake();
         }
@@ -517,7 +518,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     public void OnMeetingStart()
     {
 
-        if (PlayerControl.LocalPlayer.Data.IsDead) ChangeToSpectator();
+        if (AmongUsLLImpl.LocalPlayer.Data.IsDead) ChangeToSpectator();
 
         foreach (var p in allModPlayers) p.Value.Unbox().OnMeetingStart();
 
@@ -529,7 +530,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
 
     public void OnMeetingEnd(GamePlayer[]? players)
     {
-        if (PlayerControl.LocalPlayer.Data.IsDead) ChangeToSpectator();
+        if (AmongUsLLImpl.LocalPlayer.Data.IsDead) ChangeToSpectator();
 
         foreach (var p in PlayerControl.AllPlayerControls.GetFastEnumerator()) p.onLadder = false;
 
@@ -544,7 +545,9 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
 
     public void OnLateUpdate()
     {
-        GameEntityManager.Run(new GameLateUpdateEvent(this));
+        NebulaProfiler.LapTimer("Before LateUpdateEvent");
+        GameEntityManager.Run(GameLateUpdateEvent.Get(this));
+        NebulaProfiler.LapTimer("LateUpdateEvent");
     }
 
     public void OnUpdate() {
@@ -553,18 +556,18 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         //WideCamera.Update();
         GameEntityManager.Update();
 
-        GameEntityManager.Run(new GameHudUpdateFasterEvent(this));
-        GameEntityManager.Run(new GameHudUpdateEvent(this, Time.deltaTime, CurrentTime, Time.time));
-        GameEntityManager.Run(new GameHudUpdateLaterEvent(this));
+        GameEntityManager.Run(GameHudUpdateEvent.Get(this, Time.deltaTime, CurrentTime, Time.time));
 
-        if (!PlayerControl.LocalPlayer) return;
+        var localPlayer = AmongUsLLImpl.LocalPlayer;
+        if (!localPlayer.AsBoolFast()) return;
         //バニラボタンの更新
         var localModInfo = GamePlayer.LocalPlayer?.Unbox();
         if (localModInfo != null)
         {
 
             //ベントボタン
-            var ventTimer = PlayerControl.LocalPlayer.inVent ? localModInfo.Role?.VentDuration : localModInfo.Role?.VentCoolDown;
+            var inVent = localPlayer.inVent;
+            var ventTimer = inVent ? localModInfo.Role?.VentDuration : localModInfo.Role?.VentCoolDown;
             string ventText = "";
             float ventPercentage = 0f;
             if (ventTimer != null && ventTimer.IsProgressing)
@@ -572,18 +575,18 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
                 ventText = Mathn.CeilToInt(ventTimer.CurrentTime).ToString();
                 ventPercentage = ventTimer.Percentage;
             }
-            if (ventTimer != null && !ventTimer.IsProgressing && PlayerControl.LocalPlayer.inVent)
+            if (ventTimer != null && !ventTimer.IsProgressing && inVent)
             {
                 Vent.currentVent.SetButtons(false);
                 var exitVent = Vent.currentVent.GetValidVent();
-                if(exitVent != null) PlayerControl.LocalPlayer.MyPhysics.RpcExitVent(exitVent.Id);
+                if(exitVent != null) localPlayer.MyPhysics.RpcExitVent(exitVent.Id);
             }
 
-            var ventButton = HudManager.Instance.ImpostorVentButton;
+            var ventButton = AmongUsLLImpl.HudManagerInstance.ImpostorVentButton;
             ventButton.SetCooldownFill(ventPercentage);
             CooldownHelpers.SetCooldownNormalizedUvs(ventButton.graphic);
             ventButton.cooldownTimerText.text = ventText;
-            ventButton.cooldownTimerText.color = PlayerControl.LocalPlayer.inVent ? Color.green : Color.white;
+            ventButton.cooldownTimerText.color = inVent ? Color.green : Color.white;
             
             //サボタージュボタン
 
@@ -594,9 +597,9 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
 
     }
 
-    public void OnFixedAlwaysUpdate()
+    public void OnFixedAlwaysUpdate(float deltaTime)
     {
-        GameEntityManager.Run(new UpdateEvent());
+        GameEntityManager.Run(UpdateEvent.Get(deltaTime));
 
         //ベントのターゲットを修正する
         var localModInfo = LocalPlayer;
@@ -607,7 +610,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
 
             //無効なベントをターゲットしている場合は対象から外す。
             UtilityInvalidationSystem.Instance.CurrentInvalidVent = null;
-            if (ventButton.currentTarget != null && ventButton.currentTarget.TryGetComponent<InvalidVent>(out var invalidVent))
+            if (ventButton.currentTarget.AsBoolFast(out var target) && target.TryGetComponent<InvalidVent>(out var invalidVent))
             {
                 UtilityInvalidationSystem.Instance.CurrentInvalidVent = invalidVent;
                 ventButton.SetTarget(null);
@@ -616,30 +619,35 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
 
     }
 
-    public void OnFixedUpdate() {
-        GameEntityManager.Run(new GameUpdateEvent(this, Time.fixedDeltaTime, CurrentTime, Time.time), shouldNotCheckGameEnd: false);
-        if (AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started && HudManager.Instance.KillButton.gameObject.active)
+    public void OnFixedUpdate(float deltaTime) {
+        GameEntityManager.Run(GameUpdateEvent.Get(this, deltaTime, CurrentTime, Time.time), shouldNotCheckGameEnd: false);
+        if (AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started)
         {
-            var info = GamePlayer.LocalPlayer;
-            if (info != null && (info.IsDived || info.IsBlown || info.VanillaPlayer.inVent))
+            var killButton = HudManager.Instance.KillButton;
+            if (killButton.gameObject.active)
             {
-                HudManager.Instance.KillButton.SetTarget(null);
-            }
-            else if(info != null)
-            {
-                KillButtonTracker ??= ObjectTrackers.ForPlayerlike(NebulaAPI.CurrentGame!, null, info, (p) => (info.AllAbilities.Any(a => a.KillIgnoreTeam) ? ObjectTrackers.PlayerlikeStandardPredicate(p) : ObjectTrackers.PlayerlikeLocalKillablePredicate(p)) && HudManager.Instance.KillButton.gameObject.active, Palette.ImpostorRed, Roles.Impostor.Impostor.CanKillHidingPlayerOption);
-                if(KillButtonTracker.CurrentTarget != null)
-                    HudManager.Instance.KillButton.SetEnabled();
+                var info = GamePlayer.LocalPlayer;
+                if (info != null && (info.IsDived || info.IsBlown || info.VanillaPlayer.inVent))
+                {
+                    killButton.SetTarget(null);
+                }
+                else if (info != null)
+                {
+                    KillButtonTracker ??= ObjectTrackers.ForPlayerlike(NebulaAPI.CurrentGame!, null, info, (p) => (info.AllAbilities.Any(a => a.KillIgnoreTeam) ? ObjectTrackers.PlayerlikeStandardPredicate(p) : ObjectTrackers.PlayerlikeLocalKillablePredicate(p)) && killButton.gameObject.active, Palette.ImpostorRed, Roles.Impostor.Impostor.CanKillHidingPlayerOption);
+                    bool hasAnyTarget = KillButtonTracker.CurrentTarget != null;
+                    
+                    if (hasAnyTarget)
+                        killButton.SetEnabled();
+                    else
+                        killButton.SetDisabled();
+                    //HudManager.Instance.KillButton.SetTarget(KillButtonTracker.CurrentTarget?.VanillaPlayer);
+                }
                 else
-                    HudManager.Instance.KillButton.SetDisabled();
-                //HudManager.Instance.KillButton.SetTarget(KillButtonTracker.CurrentTarget?.VanillaPlayer);
-            }
-            else
-            {
-                HudManager.Instance.KillButton.SetTarget(null);
+                {
+                    killButton.SetTarget(null);
+                }
             }
         }
-
     }
     public void OnGameStart()
     {
@@ -648,9 +656,9 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
 
 #if PC
         //マップの取得
-        RuntimeAsset.MinimapPrefab = ShipStatus.Instance.MapPrefab;
+        RuntimeAsset.MinimapPrefab = AmongUsLLImpl.ShipStatusInstance.MapPrefab;
         RuntimeAsset.MinimapPrefab.gameObject.MarkDontUnload();
-        RuntimeAsset.MapScale = ShipStatus.Instance.MapScale;
+        RuntimeAsset.MapScale = AmongUsLLImpl.ShipStatusInstance.MapScale;
 
 #endif
 
@@ -776,11 +784,11 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     {
         if(GameState != NebulaGameStates.Finished) GameState = NebulaGameStates.WaitGameResult;
 
-        while (ExileController.Instance && !Minigame.Instance) yield return null;
-        while ((HudManager.Instance.shhhEmblem.isActiveAndEnabled || IntroCutscene.Instance) && !Minigame.Instance) yield return null;
+        while (ExileController.Instance.AsBoolFast() && !Minigame.Instance.AsBoolFast()) yield return null;
+        while ((HudManager.Instance.shhhEmblem.isActiveAndEnabled || IntroCutscene.Instance.AsBoolFast()) && !Minigame.Instance.AsBoolFast()) yield return null;
 
         yield return DestroyableSingleton<HudManager>.Instance.CoFadeFullScreen(Color.clear, Color.black, 0.5f, false);
-        if (AmongUsClient.Instance.AmHost) GameManager.Instance.RpcEndGame(EndState?.EndCondition == NebulaGameEnd.CrewmateWin ? GameOverReason.CrewmatesByTask : GameOverReason.ImpostorsByKill, false);
+        if (AmongUsLLImpl.AmongUsClientInstance.AmHost) AmongUsLLImpl.GameManagerInstance.RpcEndGame(EndState?.EndCondition == NebulaGameEnd.CrewmateWin ? GameOverReason.CrewmatesByTask : GameOverReason.ImpostorsByKill, false);
 
         while (GameState != NebulaGameStates.Finished) yield return null;
 
@@ -795,12 +803,13 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
 
     public void ToGameEnd()
     {
-        if (Minigame.Instance)
+        var minigame = Minigame.Instance;
+        if (minigame.AsBoolFast())
         {
             try
             {
-                Minigame.Instance.Close();
-                Minigame.Instance.Close();
+                minigame.Close();
+                minigame.Close();
             }
             catch
             {
@@ -897,7 +906,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         {
             if (message.AttemptedGhostAssignment) return;
 
-            if (AmongUsClient.Instance.AmHost)
+            if (AmongUsLLImpl.AmongUsClientInstance.AmHost)
             {
                 var role = Instance?.RoleAllocator?.AssignToGhost(message);
                 if (role != null) message.Unbox().RpcInvokerSetGhostRole(role, null).InvokeSingle();
@@ -951,7 +960,7 @@ internal static class NebulaGameManagerExpansion
 {
     static internal GamePlayer? GetModInfo(this PlayerControl? player)
     {
-        if (!player) return null;
+        if (!player.AsBoolFast()) return null;
         return NebulaGameManager.Instance?.GetPlayer(player!.PlayerId);
     }
 }

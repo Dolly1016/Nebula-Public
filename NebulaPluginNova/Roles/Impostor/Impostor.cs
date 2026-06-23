@@ -56,12 +56,11 @@ public class ImpostorGameRule : AbstractModule<IGameModeStandard>, IGameOperator
     [OnlyHost]
     void CheckSabotageWin(GameUpdateEvent ev)
     {
-        if (ShipStatus.Instance != null)
+        if (AmongUsLLImpl.TryGetShipStatus(out var ship))
         {
-            var status = ShipStatus.Instance;
-            if (status.Systems != null)
+            if (ship.Systems != null)
             {
-                ISystemType? systemType = status.Systems.ContainsKey(SystemTypes.LifeSupp) ? status.Systems[SystemTypes.LifeSupp] : null;
+                ISystemType? systemType = ship.Systems.ContainsKey(SystemTypes.LifeSupp) ? ship.Systems[SystemTypes.LifeSupp] : null;
                 if (systemType != null)
                 {
                     LifeSuppSystemType lifeSuppSystemType = systemType.TryCast<LifeSuppSystemType>()!;
@@ -119,7 +118,7 @@ public class ImpostorBasicRuleOperator : AbstractModule<Virial.Game.Game>, IGame
     {
         if (GeneralConfigurations.ImpostorsRadioOption && ev.Role.Role.Category == RoleCategory.ImpostorRole)
         {
-            ModSingleton<NoSVCRoom>.Instance?.RegisterRadioChannel(Language.Translate("voiceChat.info.impostorRadio"), 0, p => p.Role.Role.Category == RoleCategory.ImpostorRole, ev.Role, Palette.ImpostorRed);
+            ModSingleton<NoSVCRoom>.Instance?.RegisterRadioChannel(Language.Translate("voiceChat.info.impostorRadio"), 0, p => p.Role.Role.Category == RoleCategory.ImpostorRole, ev.Role, new(Palette.ImpostorRed));
         }
     }
 

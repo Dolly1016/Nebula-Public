@@ -43,21 +43,24 @@ public class JailerAbility : IGameOperator, ILifespan
         this.canMoveWithMapWatching = canMoveWithMapWatching;
         this.canUseAdminOnMeeting = canUseAdminOnMeeting;
 
-        if (MapBehaviour.Instance) GameObject.Destroy(MapBehaviour.Instance.gameObject);
+        var map = MapBehaviour.Instance;
+        if (map.AsBoolFast()) GameObject.Destroy(map.gameObject);
     }
 
     void OnOpenNormalMap(MapOpenNormalEvent ev)
     {
-        if (MeetingHud.Instance)
+        if (MeetingHud.Instance.AsBoolFast())
         {
             if (canUseAdminOnMeeting)
             {
-                MapBehaviour.Instance.countOverlay.gameObject.SetActive(true);
-                MapBehaviour.Instance.countOverlay.SetModOption(canIdentifyImpostors, canIdentifyDeadBodies, false, false);
-                MapBehaviour.Instance.countOverlay.SetOptions(true, true);
+                var map = MapBehaviour.Instance;
+                var countOverlay = map.countOverlay;
+                countOverlay.gameObject.SetActive(true);
+                countOverlay.SetModOption(canIdentifyImpostors && (GamePlayer.LocalPlayer?.IsImpostor ?? false), canIdentifyDeadBodies, false, false);
+                countOverlay.SetOptions(true, true);
                 ConsoleTimer.MarkAsNonConsoleMinigame();
 
-                MapBehaviour.Instance.taskOverlay.Hide();
+                map.taskOverlay.Hide();
             }
         }
         else
@@ -68,20 +71,23 @@ public class JailerAbility : IGameOperator, ILifespan
 
     void OnOpenSabotageMap(MapOpenSabotageEvent ev)
     {
-        MapBehaviour.Instance.countOverlay.gameObject.SetActive(true);
-        MapBehaviour.Instance.countOverlay.SetModOption(canIdentifyImpostors, canIdentifyDeadBodies, false, false, true, Palette.ImpostorRed);
-        MapBehaviour.Instance.countOverlay.SetOptions(true, true);
+        var map = MapBehaviour.Instance;
+        var countOverlay = map.countOverlay;
+        countOverlay.gameObject.SetActive(true);
+        countOverlay.SetModOption(canIdentifyImpostors && (GamePlayer.LocalPlayer?.IsImpostor ?? false), canIdentifyDeadBodies, false, false, true, Palette.ImpostorRed);
+        countOverlay.SetOptions(true, true);
         ConsoleTimer.MarkAsNonConsoleMinigame();
 
-        MapBehaviour.Instance.taskOverlay.Hide();
+        map.taskOverlay.Hide();
 
-        MapBehaviour.Instance.countOverlayAllowsMovement = canMoveWithMapWatching;
-        if (!MapBehaviour.Instance.countOverlayAllowsMovement) PlayerControl.LocalPlayer.NetTransform.Halt();
+        map.countOverlayAllowsMovement = canMoveWithMapWatching;
+        if (!map.countOverlayAllowsMovement) AmongUsLLImpl.LocalPlayer.NetTransform.Halt();
     }
 
     void IGameOperator.OnReleased()
     {
-        if (MapBehaviour.Instance) GameObject.Destroy(MapBehaviour.Instance.gameObject);
+        var map = MapBehaviour.Instance;
+        if (map.AsBoolFast()) GameObject.Destroy(map.gameObject);
     }
 
     void OnMapInstantiated(MapInstantiateEvent ev)

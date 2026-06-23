@@ -23,7 +23,7 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny, ConfigurationTags.TagDifficult);
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Raider.png");
 
-        MetaAbility.RegisterCircle(new("role.raider.axeSize", () => AxeSizeOption * 0.4f, () => null, UnityColor));
+        MetaAbility.RegisterCircle(new("role.raider.axeSize", () => AxeSizeOption * 0.4f, () => null, RoleColor));
 
         GameActionTypes.RaiderEquippingAction = new("raider.equip", this, isEquippingAction: true);
         GameActionTypes.RaiderThrowingAction = new("raider.throw", this, isPhysicalAction: true);
@@ -102,30 +102,30 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
             {
                 if (AmOwner) Owner.Unbox().RequireUpdateMouseAngle();
                 MyRenderer.transform.localEulerAngles = new Vector3(0, 0, Owner.Unbox().MouseAngle * 180f / Mathn.PI);
-                var pos = Owner.VanillaPlayer.transform.position + new Vector3(Mathn.Cos(Owner.Unbox().MouseAngle), Mathn.Sin(Owner.Unbox().MouseAngle), -1f) * 0.67f;
-                var diff = (pos - MyRenderer.transform.position) * Time.deltaTime * 7.5f;
-                Position += (Vector2)diff;
+                var pos = (VVector3)Owner.VanillaPlayer.transform.position + new VVector3(Mathn.Cos(Owner.Unbox().MouseAngle), Mathn.Sin(Owner.Unbox().MouseAngle), -1f) * 0.67f;
+                var diff = (pos - (VVector3)MyRenderer.transform.position) * ev.DeltaTime * 7.5f;
+                Position += diff.AsVector2();
                 MyRenderer.flipY = Mathn.Cos(Owner.Unbox().MouseAngle) < 0f;
 
                 if (AmOwner)
                 {
-                    var vec = MyRenderer.transform.position - PlayerControl.LocalPlayer.transform.position;
-                    if(PhysicsHelpers.AnyNonTriggersBetween(PlayerControl.LocalPlayer.GetTruePosition(),(Vector2)vec.normalized,((Vector2)vec).magnitude, Constants.ShipAndAllObjectsMask) && !Physics2D.Raycast(PlayerControl.LocalPlayer.GetTruePosition(), vec, vec.magnitude, 1 << LayerExpansion.GetRaiderColliderLayer()))
-                        MyRenderer.color = Color.red;
+                    var vec = MyRenderer.transform.position - AmongUsLLImpl.LocalPlayer.transform.position;
+                    if(PhysicsHelpers.AnyNonTriggersBetween(AmongUsLLImpl.LocalPlayer.GetTruePosition(),(Vector2)vec.normalized,((Vector2)vec).magnitude, Constants.ShipAndAllObjectsMask) && !Physics2D.Raycast(PlayerControl.LocalPlayer.GetTruePosition(), vec, vec.magnitude, 1 << LayerExpansion.GetRaiderColliderLayer()))
+                        MyRenderer.color = UnityEngine.Color.red;
                     else
-                        MyRenderer.color = Color.white;
+                        MyRenderer.color = UnityEngine.Color.white;
                 }
             }
             else if (state == 1)
             {
                 //進行方向ベクトル
-                var vec = new Vector2(Mathn.Cos(thrownAngle), Mathn.Sin(thrownAngle));
+                var vec = new VVector2(Mathn.Cos(thrownAngle), Mathn.Sin(thrownAngle));
 
                 if (AmOwner)
                 {
                     var pos = Position;
                     var size = AxeSizeOption;
-                    if (!MeetingHud.Instance)
+                    if (!MeetingHud.Instance.AsBoolFast())
                     {
                         foreach (var p in GamePlayer.AllPlayerlikes)
                         {
@@ -185,7 +185,7 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
                     MyRenderer.transform.eulerAngles = new Vector3(0f, 0f, thrownAngle * 180f / Mathf.PI);
 
                     if (AmOwner && killedMask == 0)
-                        NebulaGameManager.Instance?.GameStatistics.RpcRecordEvent(GameStatistics.EventVariation.Kill, EventDetail.Missed, NebulaGameManager.Instance.CurrentTime - thrownTime, PlayerControl.LocalPlayer, 0);
+                        NebulaGameManager.Instance?.GameStatistics.RpcRecordEvent(GameStatistics.EventVariation.Kill, EventDetail.Missed, NebulaGameManager.Instance.CurrentTime - thrownTime, AmongUsLLImpl.LocalPlayer, 0);
                 }
                 else
                 {
@@ -208,13 +208,13 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
                     {
                         var hit = hits.MinBy(h => h.distance);
                         Position = hit.point;
-                        Color = Color.cyan;
+                        Color = VColor.Cyan;
                         MyRenderer.sprite = stuckAxeSprite.GetSprite();
                     }
                     else
                     {
                         Position = (Vector2)Owner.Position + (dir * 0.8f);
-                        Color = Color.red;
+                        Color = VColor.Red;
                         MyRenderer.sprite = staticAxeSprite.GetSprite();
                     }
                 }
@@ -231,7 +231,7 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
             CanSeeInShadow = true;
             MyRenderer.sprite = thrownAxeSprite.GetSprite();
             thrownTime = NebulaGameManager.Instance!.CurrentTime;
-            MyRenderer.color = Color.white;
+            MyRenderer.color = UnityEngine.Color.white;
         }
 
         static RaiderAxe()
@@ -346,7 +346,7 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
 
         void EquipAxe()
         {
-            MyAxe = (NebulaSyncObject.RpcInstantiate(RaiderAxe.MyTag, [(float)PlayerControl.LocalPlayer.PlayerId]).SyncObject as RaiderAxe);
+            MyAxe = (NebulaSyncObject.RpcInstantiate(RaiderAxe.MyTag, [(float)AmongUsLLImpl.LocalPlayer.PlayerId]).SyncObject as RaiderAxe);
         }
 
         void UnequipAxe()

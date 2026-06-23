@@ -34,7 +34,7 @@ public class PlayerTaskState : AbstractModule<GamePlayer>, PlayerTasks
     }
     public static void GetTasks(out int shortTasks, out int longTasks, out int commonTasks)
     {
-        var option = GameOptionsManager.Instance.CurrentGameOptions;
+        var option = AmongUsLLImpl.CurrentGameOptionsInstance;
         shortTasks = option.GetInt(Int32OptionNames.NumShortTasks);
         longTasks = option.GetInt(Int32OptionNames.NumLongTasks);
         commonTasks = option.GetInt(Int32OptionNames.NumCommonTasks);
@@ -125,7 +125,7 @@ public class PlayerTaskState : AbstractModule<GamePlayer>, PlayerTasks
     private void RemoveAllTasks()
     {
         MyContainer.VanillaPlayer.myTasks.RemoveAll((Il2CppSystem.Predicate<PlayerTask>)((task) => {
-            if (ShipStatus.Instance.SpecialTasks.Any(t => t.TaskType == task.TaskType)) return false;
+            if (AmongUsLLImpl.ShipStatusInstance.SpecialTasks.Any(t => t.TaskType == task.TaskType)) return false;
             GameObject.Destroy(task.gameObject);
             return true;
         }));
@@ -137,11 +137,11 @@ public class PlayerTaskState : AbstractModule<GamePlayer>, PlayerTasks
 
         foreach(var t in tasks.Select(task =>
         {
-            var orig = ShipStatus.Instance.GetTaskById(task.TypeId);
-            var t = GameObject.Instantiate<NormalPlayerTask>(orig, PlayerControl.LocalPlayer.transform);
+            var orig = AmongUsLLImpl.ShipStatusInstance.GetTaskById(task.TypeId);
+            var t = GameObject.Instantiate<NormalPlayerTask>(orig, AmongUsLLImpl.LocalPlayer.transform);
             t.Id = task.Id;
             t.Index = t.Index;
-            t.Owner = PlayerControl.LocalPlayer;
+            t.Owner = AmongUsLLImpl.LocalPlayer;
             t.Initialize();
             GameOperatorManager.Instance?.Run(new PlayerGetTaskLocalEvent(MyContainer, t));
             return t;
@@ -157,30 +157,33 @@ public class PlayerTaskState : AbstractModule<GamePlayer>, PlayerTasks
         Il2CppSystem.Collections.Generic.HashSet<TaskTypes> hashSet = new();
         int num = 0;
 
-        num = 0; foreach (var t in ShipStatus.Instance.CommonTasks.ToList().OrderBy(t => Guid.NewGuid())) taskCandidates.Add(t);
-        ShipStatus.Instance.AddTasksFromList(ref num, commonTasks, newTaskIdList, hashSet, taskCandidates);
+        var ship = AmongUsLLImpl.ShipStatusInstance;
+
+        num = 0; foreach (var t in ship.CommonTasks.ToList().OrderBy(t => Guid.NewGuid())) taskCandidates.Add(t);
+        ship.AddTasksFromList(ref num, commonTasks, newTaskIdList, hashSet, taskCandidates);
         
         taskCandidates.Clear();
 
-        num = 0; foreach (var t in ShipStatus.Instance.LongTasks.ToList().OrderBy(t => Guid.NewGuid())) taskCandidates.Add(t);
-        ShipStatus.Instance.AddTasksFromList(ref num, longTasks, newTaskIdList, hashSet, taskCandidates);
+        num = 0; foreach (var t in ship.LongTasks.ToList().OrderBy(t => Guid.NewGuid())) taskCandidates.Add(t);
+        ship.AddTasksFromList(ref num, longTasks, newTaskIdList, hashSet, taskCandidates);
 
         taskCandidates.Clear();
 
-        num = 0; foreach (var t in ShipStatus.Instance.ShortTasks.ToList().OrderBy(t => Guid.NewGuid())) taskCandidates.Add(t);
-        ShipStatus.Instance.AddTasksFromList(ref num, shortTasks, newTaskIdList, hashSet, taskCandidates);
+        num = 0; foreach (var t in ship.ShortTasks.ToList().OrderBy(t => Guid.NewGuid())) taskCandidates.Add(t);
+        ship.AddTasksFromList(ref num, shortTasks, newTaskIdList, hashSet, taskCandidates);
 
-        MyContainer.VanillaPlayer.Data.Tasks = new(newTaskIdList.Count);
+        var data = MyContainer.VanillaPlayer.Data;
+        data.Tasks = new(newTaskIdList.Count);
         for (int i = 0; i < newTaskIdList.Count; i++)
         {
-            MyContainer.VanillaPlayer.Data.Tasks.Add(new NetworkedPlayerInfo.TaskInfo(newTaskIdList[i], (uint)i));
-            MyContainer.VanillaPlayer.Data.Tasks[i].Id = (uint)i;
+            data.Tasks.Add(new NetworkedPlayerInfo.TaskInfo(newTaskIdList[i], (uint)i));
+            data.Tasks[i].Id = (uint)i;
         }
 
-        for (int i = 0; i < MyContainer.VanillaPlayer.Data.Tasks.Count; i++)
+        for (int i = 0; i < data.Tasks.Count; i++)
         {
-            NetworkedPlayerInfo.TaskInfo taskInfo = MyContainer.VanillaPlayer.Data.Tasks[i];
-            NormalPlayerTask normalPlayerTask = GameObject.Instantiate<NormalPlayerTask>(ShipStatus.Instance.GetTaskById(taskInfo.TypeId), MyContainer.VanillaPlayer.transform);
+            NetworkedPlayerInfo.TaskInfo taskInfo = data.Tasks[i];
+            NormalPlayerTask normalPlayerTask = GameObject.Instantiate<NormalPlayerTask>(ship.GetTaskById(taskInfo.TypeId), MyContainer.VanillaPlayer.transform);
             normalPlayerTask.Id = taskInfo.Id;
             normalPlayerTask.Owner = MyContainer.VanillaPlayer;
             normalPlayerTask.Initialize();
@@ -199,9 +202,9 @@ public class PlayerTaskState : AbstractModule<GamePlayer>, PlayerTasks
             int longTasks = 0;
             for (int i = 0; i < numOfTasks; i++)
             {
-                if (containsCommonTasks && Helpers.Prob(0.2f) && commonTasks < 2)
+                if (containsCommonTasks && Mathn.Prob(0.2f) && commonTasks < 2)
                     commonTasks++;
-                else if (Helpers.Prob(0.3f))
+                else if (Mathn.Prob(0.3f))
                     longTasks++;
                 else
                     shortTasks++;
@@ -240,30 +243,37 @@ public class PlayerTaskState : AbstractModule<GamePlayer>, PlayerTasks
         CurrentCompleted -= numOfTasks;
         TotalCompleted -= numOfTasks;
 
+        ShipStatus ship = AmongUsLLImpl.ShipStatusInstance;
+
+        var data = MyContainer.VanillaPlayer.Data;
+        var transform = MyContainer.VanillaPlayer.transform;
+
         List<int> indexCand = [];
-        for (int i = 0; i < MyContainer.VanillaPlayer.Data.Tasks.Count; i++)
+        for (int i = 0; i < data.Tasks.Count; i++)
         {
-            NetworkedPlayerInfo.TaskInfo taskInfo = MyContainer.VanillaPlayer.Data.Tasks[i];
+            NetworkedPlayerInfo.TaskInfo taskInfo = data.Tasks[i];
             if (!taskInfo.Complete) continue;
-            NormalPlayerTask normalPlayerTask = ShipStatus.Instance.GetTaskById(taskInfo.TypeId);
+            NormalPlayerTask normalPlayerTask = ship.GetTaskById(taskInfo.TypeId);
             if (normalPlayerTask) indexCand.Add(i);
         }
+
+        var mytasks = MyContainer.VanillaPlayer.myTasks;
 
         for (int i = 0; i < numOfTasks; i++)
         {
             var selectedIndex = indexCand.Random();
             indexCand.Remove(selectedIndex);
 
-            NetworkedPlayerInfo.TaskInfo taskInfo = MyContainer.VanillaPlayer.Data.Tasks[selectedIndex];
+            NetworkedPlayerInfo.TaskInfo taskInfo = data.Tasks[selectedIndex];
             taskInfo.Complete = false;
-            NormalPlayerTask normalPlayerTask = GameObject.Instantiate<NormalPlayerTask>(ShipStatus.Instance.GetTaskById(taskInfo.TypeId), MyContainer.VanillaPlayer.transform);
+            NormalPlayerTask normalPlayerTask = GameObject.Instantiate<NormalPlayerTask>(ship.GetTaskById(taskInfo.TypeId), transform);
             normalPlayerTask.Id = taskInfo.Id;
             normalPlayerTask.Owner = MyContainer.VanillaPlayer;
             normalPlayerTask.Initialize();
-            int index = MyContainer.VanillaPlayer.myTasks.FindIndex((Il2CppSystem.Predicate<PlayerTask>)(task => task.Id == taskInfo.Id));
-            var oldTask = MyContainer.VanillaPlayer.myTasks[index];
+            int index = mytasks.FindIndex((Il2CppSystem.Predicate<PlayerTask>)(task => task.Id == taskInfo.Id));
+            var oldTask = mytasks[index];
             GameObject.Destroy(oldTask.gameObject);
-            MyContainer.VanillaPlayer.myTasks[index] = normalPlayerTask;
+            mytasks[index] = normalPlayerTask;
         }
 
         RpcSyncTaskState.Invoke(this);

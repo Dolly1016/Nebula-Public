@@ -18,7 +18,7 @@ file interface TutorialParameter
     float Duration { get; }
     bool CanClickToClose { get; }
     Virial.Media.GUIWidget Widget { get; }
-    Func<UnityEngine.Vector2> Position { get; }
+    Func<VVector2> Position { get; }
     Func<bool> ShowWhile { get; }
     bool HideWhileMinigameOpen { get; }
     bool HideWhileSomeUiOpen { get; }
@@ -30,7 +30,7 @@ public class TutorialBuilder : TutorialParameter
     private float duration = 7f;
     private bool canClickToClose = true;
     private Virial.Media.GUIWidget widget = GUIEmptyWidget.Default;
-    private Func<UnityEngine.Vector2> position;
+    private Func<VVector2> position;
     private Func<bool> showWhile = () => true;
     private bool hideWhileMinigameOpen = true, hideWhileSomeUiOpen = true;
 
@@ -41,7 +41,7 @@ public class TutorialBuilder : TutorialParameter
     Virial.Media.GUIWidget TutorialParameter.Widget => GUI.API.VerticalHolder(GUIAlignment.Left, widget, 
         GUI.API.VerticalMargin(0.15f), 
         GUI.API.Text(GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayContent), GUI.API.TextComponent(new(0.8f,0.8f,0.8f), canClickToClose ? "tutorial.guide.canClose" : "tutorial.guide.cannotClose").Size(0.8f)));
-    Func<UnityEngine.Vector2> TutorialParameter.Position => position;
+    Func<VVector2> TutorialParameter.Position => position;
     Func<bool> TutorialParameter.ShowWhile => showWhile;
     bool TutorialParameter.HideWhileMinigameOpen => hideWhileMinigameOpen;
     bool TutorialParameter.HideWhileSomeUiOpen => hideWhileSomeUiOpen;
@@ -164,7 +164,7 @@ public static class Tutorial
         float left = parameters.Duration;
 
         Func<bool> predicate = () => parameters.ShowWhile.Invoke() && left > 0f &&
-        (!parameters.HideWhileMinigameOpen || !(Minigame.Instance && Minigame.Instance.amOpening)) &&
+        (!parameters.HideWhileMinigameOpen || !(Minigame.Instance.AsBoolFast() && Minigame.Instance.amOpening)) &&
         (!parameters.HideWhileSomeUiOpen || !NebulaInput.SomeUiIsActive);
 
         bool isShownAlready = false;

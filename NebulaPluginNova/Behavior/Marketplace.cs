@@ -130,7 +130,7 @@ public class Marketplace : MonoBehaviour
 
         if (!MarketplaceData.Data.Confirmed)
         {
-            var window = MetaScreen.GenerateWindow(new(7.3f, 4.3f), HudManager.InstanceExists ? HudManager.Instance.transform : null, Vector3.zero, true, false, true, BackgroundSetting.Modern, false);
+            var window = MetaScreen.GenerateWindow(new(7.3f, 4.3f), HudManager.InstanceExists ? HudManager.Instance.transform : null, VVector3.Zero, true, false, true, BackgroundSetting.Modern, false);
             var textSet = BuiltInLanguage.CurrentTextSet;
             TextAttribute contentAttr = new(GUI.API.GetAttribute(AttributeAsset.DocumentStandard)) { FontSize = new(1.5f, 1.4f, 1.5f, true), Wrapping = true, Size = new(7.05f, 3.6f) };
             window.SetWidget(GUI.API.VerticalHolder(GUIAlignment.Center,
@@ -171,7 +171,7 @@ public class Marketplace : MonoBehaviour
 
     static public MetaScreen OpenDetailWindow(bool isAddon, int entryId, Transform? parent = null, Action? onUpdate = null)
     {
-        var window = MetaScreen.GenerateWindow(new(7f, 3.6f), parent, Vector3.zero, true, true);
+        var window = MetaScreen.GenerateWindow(new(7f, 3.6f), parent, VVector3.Zero, true, true);
         window.SetWidget(new VerticalWidgetsHolder(GUIAlignment.Center, new GUILoadingIcon(GUIAlignment.Center) { Size = 0.3f }, new NoSGUIText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OverlayTitle), new TranslateTextComponent("marketplace.ui.loading"))), new Vector2(0.5f,0.5f), out _);
 
         void ShowDetail(OnlineMarketplace.ItemDetail? result)
@@ -254,7 +254,7 @@ public class Marketplace : MonoBehaviour
         int lastPage = 0;
         List<GUIWidget> lastContents = [];
 
-        var textField = new GUITextField(Virial.Media.GUIAlignment.Center, new(4.8f, 0.4f)) { IsSharpField = false, HintText = Language.Translate("marketplace.ui.hint").Color(Color.gray) };
+        var textField = new GUITextField(Virial.Media.GUIAlignment.Center, new(4.8f, 0.4f)) { IsSharpField = false, HintText = Language.Translate("marketplace.ui.hint").Color(VColor.Gray) };
         var viewer = new GUIScrollView(Virial.Media.GUIAlignment.Left, new(7f, 3.9f), null);
 
         IEnumerator CoSetToViewer(OnlineMarketplace.SearchResult? result)
@@ -262,14 +262,14 @@ public class Marketplace : MonoBehaviour
             if (result?.Items != null)
             {
                 lastContents.AddRange(result.Items.Select(r => new NoSGUIFramed(Virial.Media.GUIAlignment.Left, new VerticalWidgetsHolder(Virial.Media.GUIAlignment.Left,
-                    GUI.API.Text(GUIAlignment.Left, AttributeAsset.DocumentStandard, GUI.API.FunctionalTextComponent(() => MarketplaceData.CheckOwning(r.Id) ? Language.Translate("marketplace.ui.marketplace.state.owning").Color(Color.green) : Language.Translate("marketplace.ui.marketplace.state.unowning").Color(Color.red))),
+                    GUI.API.Text(GUIAlignment.Left, AttributeAsset.DocumentStandard, GUI.API.FunctionalTextComponent(() => MarketplaceData.CheckOwning(r.Id) ? Language.Translate("marketplace.ui.marketplace.state.owning").Color(VColor.Green) : Language.Translate("marketplace.ui.marketplace.state.unowning").Color(VColor.Red))),
                     GUI.API.VerticalMargin(-0.05f),
                     new HorizontalWidgetsHolder(Virial.Media.GUIAlignment.Left,
                         GUI.API.RawText(Virial.Media.GUIAlignment.Left, AttributeAsset.MarketplaceTitle, Uri.UnescapeDataString(r.Title)),
                         GUI.API.RawText(Virial.Media.GUIAlignment.Left, AttributeAsset.MarketplaceDeveloper, Uri.UnescapeDataString(r.Author))
                     ),
                     GUI.API.RawText(Virial.Media.GUIAlignment.Left, AttributeAsset.MarketplaceBlurb, Uri.UnescapeDataString(r.Blurb))
-                ), new(0.1f, 0.1f), Color.clear)
+                ), new(0.1f, 0.1f), VColor.Clear)
                 { 
                     OnClicked = () =>
                     {
@@ -351,7 +351,7 @@ public class Marketplace : MonoBehaviour
                 )));
 
         MarketplaceScreen.SetBorder(new(9f, 5f));
-        MarketplaceScreen.SetWidget(widget, new Vector2(0f, 1f), out _);
+        MarketplaceScreen.SetWidget(widget, new VVector2(0f, 1f), out _);
         StartCoroutine(OnlineMarketplace.CoGetLatestContents(isAddon, 0, CoSetToViewer).WrapToIl2Cpp());
     }
 
@@ -374,13 +374,13 @@ public class Marketplace : MonoBehaviour
     {
         List<GUIWidget> contents = new(result?.Select(r => new NoSGUIFramed(Virial.Media.GUIAlignment.Left,
                 GUI.API.RawText(Virial.Media.GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.MarketplaceTitle), Uri.UnescapeDataString(r.Title))
-       , new(0.1f, 0.1f), Color.clear)
+       , new(0.1f, 0.1f), VColor.Clear)
         {
             PostBuilder = renderer =>
             {
                 renderer.transform.localPosition = new(0, 0, 0.1f);
                 renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
-                var button = renderer.gameObject.SetUpButton(true, renderer, Color.clear, UnityEngine.Color.Lerp(UnityEngine.Color.cyan, UnityEngine.Color.green, 0.4f).AlphaMultiplied(0.3f));
+                var button = renderer.gameObject.SetUpButton(true, renderer, VColor.Clear, Virial.Color.Lerp(VColor.Cyan, VColor.Green, 0.4f).AlphaMultiplied(0.3f));
                 var collider = renderer.gameObject.AddComponent<BoxCollider2D>();
                 collider.size = renderer.size;
                 button.OnClick.AddListener(() => currentItemsAction.action.Invoke(r));
@@ -414,7 +414,7 @@ public class Marketplace : MonoBehaviour
             ).Move(new(2.4f, 0f)));
 
         MyItemsScreen.SetBorder(new(9f, 5f));
-        MyItemsScreen.SetWidget(widget, new Vector2(0f, 1f), out _);
+        MyItemsScreen.SetWidget(widget, new VVector2(0f, 1f), out _);
     }
 
     public void Awake()
@@ -432,7 +432,7 @@ public class Marketplace : MonoBehaviour
         if(IsInLobby) buttons = buttons.Take(2).ToArray();
 
         var tabScreen = MetaScreen.GenerateScreen(new(8f, 1f), transform, new(2.2f, 1.9f, -10f), false, false, false);
-        tabScreen.SetWidget(new GUIFixedView(GUIAlignment.Center, new Vector2(8f,1f), new HorizontalWidgetsHolder(GUIAlignment.Center, buttons.Select(b => new GUIModernButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.MarketplaceTabButton), new TranslateTextComponent("marketplace.tab." + b.key)) { OnClick = _ => b.action.Invoke(), SelectedDefault = b.defaultSelection, BlockSelectingOnClicked = b.cannotSelect }))).AsButtonGroup(), new Vector2(0f,0.5f),out _);
+        tabScreen.SetWidget(new GUIFixedView(GUIAlignment.Center, new(8f,1f), new HorizontalWidgetsHolder(GUIAlignment.Center, buttons.Select(b => new GUIModernButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.MarketplaceTabButton), new TranslateTextComponent("marketplace.tab." + b.key)) { OnClick = _ => b.action.Invoke(), SelectedDefault = b.defaultSelection, BlockSelectingOnClicked = b.cannotSelect }))).AsButtonGroup(), new Vector2(0f,0.5f),out _);
         
         MarketplaceScreen = MainMenuManagerInstance.SetUpScreen(transform, () => Close());
         MyItemsScreen = MainMenuManagerInstance.SetUpScreen(transform, () => Close(), true);
@@ -440,7 +440,7 @@ public class Marketplace : MonoBehaviour
 
     void EditContent(bool isAddon, DevMarketplaceItem item)
     {
-        var waitWindow = MetaScreen.GenerateWindow(new(3f, 1f), transform, Vector3.zero, true, true, withMask: true);
+        var waitWindow = MetaScreen.GenerateWindow(new(3f, 1f), transform, VVector3.Zero, true, true, withMask: true);
         waitWindow.SetWidget(new VerticalWidgetsHolder(GUIAlignment.Center, new GUILoadingIcon(GUIAlignment.Center) { Size = 0.35f }, GUI.API.LocalizedText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), "marketplace.ui.edit.fetch")), new Vector2(0.5f, 0.5f), out _);
 
         StartCoroutine(OnlineMarketplace.CoGetContent(item.EntryId, result =>
@@ -452,7 +452,7 @@ public class Marketplace : MonoBehaviour
                     MetaUI.ShowConfirmDialog(transform, new TranslateTextComponent("marketplace.ui.edit.fetch.error"));
                 else
                     ShowEditWindow(isAddon, edited => {
-                        var waitUpdateWindow = MetaScreen.GenerateWindow(new(3f, 1f), transform, Vector3.zero, true, true, withMask: true);
+                        var waitUpdateWindow = MetaScreen.GenerateWindow(new(3f, 1f), transform, VVector3.Zero, true, true, withMask: true);
                         waitUpdateWindow.SetWidget(new VerticalWidgetsHolder(GUIAlignment.Center, new GUILoadingIcon(GUIAlignment.Center) { Size = 0.35f }, GUI.API.LocalizedText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), "marketplace.ui.edit.wait")), new Vector2(0.5f, 0.5f), out _);
 
                         StartCoroutine(OnlineMarketplace.CoEditContent(edited.EntryId, edited.Key, edited.Title, edited.Blurb, edited.Detail, edited.Author, edited.Url, result => {
@@ -476,11 +476,11 @@ public class Marketplace : MonoBehaviour
 
     void ShowEditWindow(bool isAddon, Action<DeveloperMarketplaceItem> callback, DeveloperMarketplaceItem? item = null)
     {
-        var window = MetaScreen.GenerateWindow(new(8f, 4.8f), transform, Vector3.zero, true, true, withMask: true);
+        var window = MetaScreen.GenerateWindow(new(8f, 4.8f), transform, VVector3.Zero, true, true, withMask: true);
 
         (GUIWidget widget, GUITextField textField) TextField(bool isMultiple, float width, string translateKey, string? defaultText = null)
         {
-            var textField = new GUITextField(GUIAlignment.Left, new(width, isMultiple ? 2.2f : 0.22f)) { HintText = Language.Translate("marketplace.ui.publish." + translateKey + ".hint").Color(Color.gray), TextPredicate = c => c != '"', IsSharpField = false, MaxLines = isMultiple ? 10 : 1, FontSize = isMultiple ? 1.5f : 1.8f, DefaultText = defaultText ?? "" };
+            var textField = new GUITextField(GUIAlignment.Left, new(width, isMultiple ? 2.2f : 0.22f)) { HintText = Language.Translate("marketplace.ui.publish." + translateKey + ".hint").Color(VColor.Gray), TextPredicate = c => c != '"', IsSharpField = false, MaxLines = isMultiple ? 10 : 1, FontSize = isMultiple ? 1.5f : 1.8f, DefaultText = defaultText ?? "" };
             return (new HorizontalWidgetsHolder(GUIAlignment.Left, GUI.API.LocalizedText(isMultiple ? GUIAlignment.TopLeft : GUIAlignment.Left, GUI.API.GetAttribute(AttributeAsset.OptionsTitleShortest), "marketplace.ui.publish." + translateKey), textField), textField);
         }
 
@@ -507,7 +507,7 @@ public class Marketplace : MonoBehaviour
                 {
                     if (a.Text.Length == 0) {
                         flag = true;
-                        a.SetHint(Language.Translate("marketplace.ui.publish.blankField").Color(new UnityEngine.Color(0.6f, 0f, 0f)));
+                        a.SetHint(Language.Translate("marketplace.ui.publish.blankField").Color(new VColor(0.6f, 0f, 0f)));
                     }
                 });
             }
@@ -522,7 +522,7 @@ public class Marketplace : MonoBehaviour
                 window.CloseScreen();
             }, () =>
             {
-                repositoryField.Artifact.Do(t => { t.SetText(""); t.SetHint(Language.Translate("marketplace.ui.publish.invalidRepos" + (isAddon ? ".addons" : ".cosmetics")).Color(new UnityEngine.Color(0.6f, 0f, 0f))); });
+                repositoryField.Artifact.Do(t => { t.SetText(""); t.SetHint(Language.Translate("marketplace.ui.publish.invalidRepos" + (isAddon ? ".addons" : ".cosmetics")).Color(new VColor(0.6f, 0f, 0f))); });
             });
 
             isChecking = false;
@@ -549,15 +549,15 @@ public class Marketplace : MonoBehaviour
     void ShowPublishWindow()
     {
 
-        var typeWindow = MetaScreen.GenerateWindow(new(3f, 1f), transform, Vector3.zero, true, true, withMask: true);
+        var typeWindow = MetaScreen.GenerateWindow(new(3f, 1f), transform, VVector3.Zero, true, true, withMask: true);
         GUIWidget TypeButton(bool isAddon) => GUI.API.LocalizedButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButtonMedium), "marketplace.type." + (isAddon ? "addons" : "cosmetics"),
             clickable =>
             {
                 typeWindow.CloseScreen();
                 ShowEditWindow(isAddon, item =>
                 {
-                    var waitWindow = MetaScreen.GenerateWindow(new(3f, 1f), transform, Vector3.zero, true, true, withMask: true);
-                    waitWindow.SetWidget(new VerticalWidgetsHolder(GUIAlignment.Center, new GUILoadingIcon(GUIAlignment.Center) { Size = 0.35f }, GUI.API.LocalizedText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), "marketplace.ui.publish.wait")), new Vector2(0.5f, 0.5f), out _);
+                    var waitWindow = MetaScreen.GenerateWindow(new(3f, 1f), transform, VVector3.Zero, true, true, withMask: true);
+                    waitWindow.SetWidget(new VerticalWidgetsHolder(GUIAlignment.Center, new GUILoadingIcon(GUIAlignment.Center) { Size = 0.35f }, GUI.API.LocalizedText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.DocumentStandard), "marketplace.ui.publish.wait")), new VVector2(0.5f, 0.5f), out _);
 
                     IEnumerator CoFinishPublish(bool success)
                     {

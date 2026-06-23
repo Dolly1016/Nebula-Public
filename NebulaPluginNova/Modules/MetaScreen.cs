@@ -28,11 +28,11 @@ public interface IMetaWidgetOld
         Right
     }
     public AlignmentOption Alignment { get; }
-    public float Generate(GameObject screen, Vector2 cursor, Vector2 size, out (float min, float max) width);
-    public float Generate(GameObject screen, Vector2 cursor, Vector2 size) => Generate(screen, cursor, size, out var _);
+    public float Generate(GameObject screen, VVector2 cursor, VVector2 size, out (float min, float max) width);
+    public float Generate(GameObject screen, VVector2 cursor, VVector2 size) => Generate(screen, cursor, size, out var _);
 
-    protected static (float, float) CalcWidth(AlignmentOption alignment, Vector2 cursor, Vector2 size, float width) => CalcWidth(alignment, cursor, size, width, -width / 2f, width / 2f);
-    protected static (float,float) CalcWidth(AlignmentOption alignment, Vector2 cursor, Vector2 size,float width,float actualMin,float actualMax)
+    protected static (float, float) CalcWidth(AlignmentOption alignment, VVector2 cursor, VVector2 size, float width) => CalcWidth(alignment, cursor, size, width, -width / 2f, width / 2f);
+    protected static (float,float) CalcWidth(AlignmentOption alignment, VVector2 cursor, VVector2 size,float width,float actualMin,float actualMax)
     {
         float center = 0;
         switch (alignment)
@@ -51,24 +51,24 @@ public interface IMetaWidgetOld
         return new(center + actualMin, center + actualMax);
     }
 
-    protected static Vector3 ReflectAlignment(AlignmentOption alignment,Vector2 mySize,Vector2 cursor,Vector2 size)
+    protected static VVector3 ReflectAlignment(AlignmentOption alignment, VVector2 mySize, VVector2 cursor, VVector2 size)
     {
         switch (alignment)
         {
             case AlignmentOption.Left:
-                return new Vector3(cursor.x + mySize.x / 2, cursor.y - mySize.y / 2);
+                return new VVector3(cursor.x + mySize.x / 2, cursor.y - mySize.y / 2);
             case AlignmentOption.Right:
-                return new Vector3(cursor.x + size.x - mySize.x / 2, cursor.y - mySize.y / 2);
+                return new VVector3(cursor.x + size.x - mySize.x / 2, cursor.y - mySize.y / 2);
             case AlignmentOption.Center:
             default:
-                return new Vector3(cursor.x + size.x / 2, cursor.y - mySize.y / 2);
+                return new VVector3(cursor.x + size.x / 2, cursor.y - mySize.y / 2);
         }
     }
 }
 
 public interface IMetaParallelPlacableOld
 {
-    public float Generate(GameObject screen, Vector2 center,out float width);
+    public float Generate(GameObject screen, VVector2 center,out float width);
 
 }
 
@@ -81,7 +81,7 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
     public int Count => contents.Count;
     public AlignmentOption Alignment => AlignmentOption.Center;
     public float? MaxWidth = null;
-    public float Generate(GameObject screen, Vector2 cursor, Vector2 size,out (float min, float max) width)
+    public float Generate(GameObject screen, VVector2 cursor, VVector2 size,out (float min, float max) width)
     {
         if (contents.Count == 0)
         {
@@ -98,8 +98,8 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
         foreach (var c in contents)
         {
             float height = c.Generate(screen, cursor, size,out var innerWidth);
-            widthMin = Math.Min(widthMin, innerWidth.min);
-            widthMax = Math.Max(widthMax, innerWidth.max);
+            widthMin = Mathn.Min(widthMin, innerWidth.min);
+            widthMax = Mathn.Max(widthMax, innerWidth.max);
             heightSum += height;
             cursor.y -= height;
             size.y -= height;
@@ -109,7 +109,7 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
         return heightSum;
     }
 
-    public float Generate(GameObject screen, Vector2 center, out float width)
+    public float Generate(GameObject screen, VVector2 center, out float width)
     {
         if (contents.Count == 0)
         {
@@ -125,9 +125,9 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
         float heightSum = 0;
         foreach (var c in contents)
         {
-            float height = c.Generate(subscreen, new Vector2(0, -heightSum), new Vector2(MaxWidth ?? 0f, 0), out var innerWidth);
-            widthMin = Math.Min(widthMin, innerWidth.min);
-            widthMax = Math.Max(widthMax, innerWidth.max);
+            float height = c.Generate(subscreen, new VVector2(0, -heightSum), new VVector2(MaxWidth ?? 0f, 0), out var innerWidth);
+            widthMin = Mathn.Min(widthMin, innerWidth.min);
+            widthMax = Mathn.Max(widthMax, innerWidth.max);
             heightSum += height;
         }
 
@@ -202,18 +202,18 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
             Sprite = sprite;
         }
 
-        public float Generate(GameObject screen, Vector2 center, out float width)
+        public float Generate(GameObject screen, VVector2 center, out float width)
         {
-            var renderer = UnityHelper.CreateObject<SpriteRenderer>("Image", screen.transform,center);
+            var renderer = UnityHelper.CreateObject<SpriteRenderer>("Image", screen.transform, center.AsUnityVector3(0f));
             renderer.sprite = Sprite;
             renderer.sortingOrder = 10;
-            if (Sprite) renderer.transform.localScale = Vector3.one * (Width / Sprite!.bounds.size.x);
+            if (Sprite) renderer.transform.localScale = VVector3.One * (Width / Sprite!.bounds.size.x);
             PostBuilder?.Invoke(renderer);
             width = Width + 0.1f;
             return (Sprite ? renderer.transform.localScale.y * Sprite!.bounds.size.y : 0f) + 0.1f;
         }
 
-        public float Generate(GameObject screen, Vector2 cursor, Vector2 size, out (float min, float max) width)
+        public float Generate(GameObject screen, VVector2 cursor, VVector2 size, out (float min, float max) width)
         {
             Vector2 mySize = Sprite ? Sprite!.bounds.size * (Width / Sprite!.bounds.size.x) : new(Width, Width);
 
@@ -221,7 +221,7 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
             {
                 var renderer = UnityHelper.CreateObject<SpriteRenderer>("Image", screen.transform, ReflectAlignment(Alignment, mySize + new Vector2(0.1f, 0.1f), cursor, size));
                 renderer.sprite = Sprite;
-                renderer.transform.localScale = Vector3.one * (Width / Sprite!.bounds.size.x);
+                renderer.transform.localScale = VVector3.One * (Width / Sprite!.bounds.size.x);
                 renderer.sortingOrder = 10;
                 PostBuilder?.Invoke(renderer);
             }
@@ -247,9 +247,9 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
                     var canvas = UnityHelper.CreateObject("OnMapContent", renderer.transform, new Vector3(0, 0, -1f));
                     var order = canvas.AddComponent<SortingGroup>();
                     order.sortingOrder = 15;
-                    var posCenter = VanillaAsset.GetMapCenter(mapId);
+                    VVector2 posCenter = VanillaAsset.GetMapCenter(mapId);
                     var posScale = VanillaAsset.GetMapScale(mapId);
-                    Vector2 GetMapPos(Vector2 pos) => (Vector2)(pos / posScale) + posCenter;
+                    VVector2 GetMapPos(VVector2 pos) => (VVector2)(pos / posScale) + posCenter;
 
                     foreach (var c in contents)
                     {
@@ -276,13 +276,13 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
             TextAttribute = attribute;
         }
 
-        public float Generate(GameObject screen, Vector2 center, out float width)
+        public float Generate(GameObject screen, VVector2 center, out float width)
         {
             var text = GameObject.Instantiate(VanillaAsset.StandardTextPrefab, screen.transform);
             text.UseRoleIcon();
             TextAttribute.Reflect(text);
             text.text = MyText?.GetString() ?? "";
-            text.transform.localPosition = center;
+            text.transform.localPosition = center.AsUnityVector3(0f);
             text.sortingOrder = 10;
 
             PostBuilder?.Invoke(text);
@@ -292,7 +292,7 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
             return TextAttribute.Size.y;
         }
 
-        public float Generate(GameObject screen, Vector2 cursor, Vector2 size, out (float min, float max) width)
+        public float Generate(GameObject screen, VVector2 cursor, VVector2 size, out (float min, float max) width)
         {
             var text = GameObject.Instantiate(VanillaAsset.StandardTextPrefab, screen.transform);
             TextAttribute.Reflect(text);
@@ -328,13 +328,13 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
             TextAttribute = attribute;
         }
 
-        public float Generate(GameObject screen, Vector2 center, out float width)
+        public float Generate(GameObject screen, VVector2 center, out float width)
         {
             var text = GameObject.Instantiate(VanillaAsset.StandardTextPrefab, screen.transform);
             TextAttribute.Reflect(text);
             text.UseRoleIcon();
             text.text = MyText?.GetString() ?? "";
-            text.transform.localPosition = center;
+            text.transform.localPosition = center.AsUnityVector3(0f);
             text.sortingOrder = 10;
 
             text.ForceMeshUpdate();
@@ -351,7 +351,7 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
             return text.rectTransform.sizeDelta.y;
         }
 
-        public float Generate(GameObject screen, Vector2 cursor, Vector2 size, out (float min, float max) width)
+        public float Generate(GameObject screen, VVector2 cursor, VVector2 size, out (float min, float max) width)
         {
             var text = GameObject.Instantiate(VanillaAsset.StandardTextPrefab, screen.transform);
             TextAttribute.Reflect(text);
@@ -383,7 +383,7 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
         public Action? OnClick { get; set; }
         public Action? OnMouseOver { get; set; }
         public Action? OnMouseOut { get; set; }
-        public Color? Color { get; set; }
+        public Virial.Color? Color { get; set; }
 
         public Virial.Text.TextComponent? Text { get; set; }
         public string RawText { set { Text = new RawTextComponent(value); } }
@@ -415,7 +415,7 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
             button.sprite = VanillaAsset.TextButtonSprite;
             button.drawMode = SpriteDrawMode.Sliced;
             button.tileMode = SpriteTileMode.Continuous;
-            button.size = TextAttribute.Size + new Vector2(TextMargin * 0.84f + TextHorizonotalExtraMargin, TextMargin * 0.84f);
+            button.size = TextAttribute.Size + new VVector2(TextMargin * 0.84f + TextHorizonotalExtraMargin, TextMargin * 0.84f);
             button.gameObject.layer = LayerExpansion.GetUILayer();
             button.gameObject.AddComponent<SortingGroup>();
 
@@ -427,7 +427,7 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
             text.sortingOrder = 15;
 
             var collider = button.gameObject.AddComponent<BoxCollider2D>();
-            collider.size = TextAttribute.Size + new Vector2(TextMargin * 0.6f + TextHorizonotalExtraMargin, TextMargin * 0.6f);
+            collider.size = TextAttribute.Size + new VVector2(TextMargin * 0.6f + TextHorizonotalExtraMargin, TextMargin * 0.6f);
             collider.isTrigger = true;
 
             passiveButton = button.gameObject.SetUpButton(true, button, Color);
@@ -436,9 +436,9 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
             if (OnMouseOver != null) passiveButton.OnMouseOver.AddListener(OnMouseOver);
         }
 
-        public float Generate(GameObject screen, Vector2 center, out float width)
+        public float Generate(GameObject screen, VVector2 center, out float width)
         {
-            var renderer = UnityHelper.CreateObject<SpriteRenderer>("Button", screen.transform, center);
+            var renderer = UnityHelper.CreateObject<SpriteRenderer>("Button", screen.transform, center.AsUnityVector3());
             Generate(renderer,out var button,out var text);
             PostBuilder?.Invoke(button, renderer, text);
 
@@ -447,10 +447,10 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
             return TextAttribute.Size.y + TextMargin;
         }
 
-        public float Generate(GameObject screen, Vector2 cursor, Vector2 size, out (float min, float max) width)
+        public float Generate(GameObject screen, VVector2 cursor, VVector2 size, out (float min, float max) width)
         {
             var renderer = UnityHelper.CreateObject<SpriteRenderer>("Button", screen.transform, 
-                ReflectAlignment(Alignment, TextAttribute.Size + new Vector2(TextMargin + TextHorizonotalExtraMargin, TextMargin), cursor, size));
+                ReflectAlignment(Alignment, TextAttribute.Size + new VVector2(TextMargin + TextHorizonotalExtraMargin, TextMargin), cursor, size));
             renderer.sortingOrder = 5;
             Generate(renderer, out var button, out var text);
             PostBuilder?.Invoke(button, renderer, text);
@@ -520,19 +520,19 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
             var passiveButton = obj.SetUpButton(true);
             passiveButton.OnClick.AddListener(() => SwitchState());
             passiveButton.OnMouseOut.AddListener(() => box.color = Color.white);
-            passiveButton.OnMouseOver.AddListener(()=>box.color = Color.green);
+            passiveButton.OnMouseOver.AddListener(() => box.color = Color.green);
         }
 
-        public float Generate(GameObject screen, Vector2 center, out float width)
+        public float Generate(GameObject screen, VVector2 center, out float width)
         {
-            var obj = UnityHelper.CreateObject("CheckBox",screen.transform,center);
+            var obj = UnityHelper.CreateObject("CheckBox", screen.transform, center.ToUnityVector());
             Generate(obj);
 
             width = 0.25f;
             return 0.25f;
         }
 
-        public float Generate(GameObject screen, Vector2 cursor, Vector2 size, out (float min, float max) width)
+        public float Generate(GameObject screen, VVector2 cursor, VVector2 size, out (float min, float max) width)
         {
             var obj = UnityHelper.CreateObject("CheckBox", screen.transform, ReflectAlignment(Alignment, new Vector2(0.25f, 0.25f), cursor, size));
             Generate(obj);
@@ -589,14 +589,14 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
                 generator.Invoke(holder.transform);
             }) { }
 
-        public float Generate(GameObject screen, Vector2 cursor, Vector2 size, out (float min, float max) width)
+        public float Generate(GameObject screen, VVector2 cursor, VVector2 size, out (float min, float max) width)
         {
             width = CalcWidth(Alignment, cursor, size, Size.x);
-            ContentGenerator.Invoke(screen.transform, new Vector2((width.min + width.max)*0.5f, cursor.y - Size.y*0.5f));
+            ContentGenerator.Invoke(screen.transform, new VVector2((width.min + width.max) * 0.5f, cursor.y - Size.y * 0.5f));
             return Size.y;
         }
 
-        public float Generate(GameObject screen, Vector2 center, out float width)
+        public float Generate(GameObject screen, VVector2 center, out float width)
         {
             width = Size.x;
             ContentGenerator.Invoke(screen.transform, center);
@@ -614,7 +614,7 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
             Widget = widget;
         }
 
-        public float Generate(GameObject screen, Vector2 cursor, Vector2 size, out (float min, float max) width)
+        public float Generate(GameObject screen, VVector2 cursor, VVector2 size, out (float min, float max) width)
         {
             var result = (Widget ?? GUIEmptyWidget.Default).Instantiate(new Anchor(new(0f, 1f), new(cursor.x, cursor.y)), new(size), out var actual);
             if (result != null) result.transform.SetParent(screen.transform, false);
@@ -622,7 +622,7 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
             return actual.Height;
         }
 
-        public float Generate(GameObject screen, Vector2 center, out float width)
+        public float Generate(GameObject screen, VVector2 center, out float width)
         {
             var result = Widget.Instantiate(new Anchor(new(0.5f, 0.5f), new(0f, 0f)), new(10f, 10f), out var actual);
             if (result != null)
@@ -648,13 +648,13 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
             Margin = margin;
         }
 
-        public float Generate(GameObject screen, Vector2 cursor, Vector2 size, out (float min, float max) width)
+        public float Generate(GameObject screen, VVector2 cursor, VVector2 size, out (float min, float max) width)
         {
             width = new(cursor.x, cursor.x);
             return Margin;
         }
 
-        public float Generate(GameObject screen, Vector2 center, out float width)
+        public float Generate(GameObject screen, VVector2 center, out float width)
         {
             width = 0f;
             return Margin;
@@ -672,12 +672,12 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
             Width = margin;
         }
 
-        public float Generate(GameObject screen, Vector2 cursor, Vector2 size, out (float min, float max) width)
+        public float Generate(GameObject screen, VVector2 cursor, VVector2 size, out (float min, float max) width)
         {
             width = new(cursor.x, cursor.x + Width);
             return 0f;
         }
-        public float Generate(GameObject screen, Vector2 center,out float width)
+        public float Generate(GameObject screen, VVector2 center,out float width)
         {
             width = Width;
             return 0f;
@@ -707,7 +707,7 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
                 //子を削除
                 screen.ForEachChild((Il2CppSystem.Action<GameObject>)((obj) => GameObject.Destroy(obj)));
 
-                float height = widget?.Generate(screen, new Vector2(-innerSize.x / 2f, innerSize.y / 2f), innerSize) ?? 0f;
+                float height = widget?.Generate(screen, new VVector2(-innerSize.x / 2f, innerSize.y / 2f), innerSize) ?? 0f;
                 scroller.SetBounds(new FloatRange(0, height - scrollViewSizeY), null);
                 scroller.ScrollRelative(Vector2.zero);
 
@@ -719,7 +719,7 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
                 //子を削除
                 screen.ForEachChild((Il2CppSystem.Action<GameObject>)((obj) => GameObject.Destroy(obj)));
 
-                widget?.Generate(screen, new Vector2(0f, 0f), out _);
+                widget?.Generate(screen, new(0f, 0f), out _);
                 scroller.SetBounds(new FloatRange(0f, 0f), null);
                 scroller.ScrollRelative(Vector2.zero);
             }
@@ -739,42 +739,42 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
 
         public AlignmentOption Alignment { get; set; }
         public IMetaWidgetOld? Inner = null;
-        public Vector2 Size;
+        public VVector2 Size;
         public bool WithMask;
         public Variable<InnerScreen>? InnerRef = null;
         public string? ScrollerTag = null;
         public Action? PostBuilder = null;
 
-        public ScrollView(Vector2 size,IMetaWidgetOld inner,bool withMask=true)
+        public ScrollView(VVector2 size,IMetaWidgetOld inner,bool withMask=true)
         {
             this.Size = size;
             this.Inner = inner;
             this.WithMask = withMask;
         }
 
-        public ScrollView(Vector2 size, Variable<InnerScreen> reference, bool withMask = true)
+        public ScrollView(VVector2 size, Variable<InnerScreen> reference, bool withMask = true)
         {
             this.Size = size;
             this.InnerRef = reference;
             this.WithMask = withMask;
         }
 
-        public float Generate(GameObject screen, Vector2 center, out float width)
+        public float Generate(GameObject screen, VVector2 center, out float width)
         {
             var view = UnityHelper.CreateObject("ScrollView", screen.transform, new Vector3(center.x, center.y, -0.01f));
             var inner = UnityHelper.CreateObject("Inner", view.transform, new Vector3(0, 0, 0));
-            var innerSize = Size - new Vector2(0.4f, 0f);
+            var innerSize = Size - new VVector2(0.4f, 0f);
 
             if (WithMask)
             {
                 view.AddComponent<SortingGroup>();
                 var mask = UnityHelper.CreateObject<SpriteMask>("Mask", view.transform, new Vector3(0, 0, 0));
                 mask.sprite = VanillaAsset.FullScreenSprite;
-                mask.transform.localScale = innerSize;
+                mask.transform.localScale = innerSize.AsUnityVector3(1f);
             }
 
-            float height = Inner?.Generate(inner, new Vector2(-innerSize.x / 2f, innerSize.y / 2f), innerSize) ?? 0f;
-            var scroller = VanillaAsset.GenerateScroller(Size, view.transform, new Vector2(Size.x / 2 - 0.15f, 0f), inner.transform, new FloatRange(0, height - Size.y), Size.y);
+            float height = Inner?.Generate(inner, new VVector2(-innerSize.x / 2f, innerSize.y / 2f), innerSize) ?? 0f;
+            var scroller = VanillaAsset.GenerateScroller(Size, view.transform, new VVector3(Size.x / 2 - 0.15f, 0f), inner.transform, new FloatRange(0, height - Size.y), Size.y);
 
             if (ScrollerTag != null && distDic.TryGetValue(ScrollerTag, out var val))
                 scroller.Inner.transform.localPosition = scroller.Inner.transform.localPosition +
@@ -796,22 +796,22 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
             return Size.y;
         }
 
-        public float Generate(GameObject screen, Vector2 cursor, Vector2 size,out (float min,float max) width)
+        public float Generate(GameObject screen, VVector2 cursor, VVector2 size,out (float min,float max) width)
         {
             var view = UnityHelper.CreateObject("ScrollView", screen.transform, ReflectAlignment(Alignment, Size, cursor, size));
             var inner = UnityHelper.CreateObject("Inner", view.transform, new Vector3(0, 0, 0));
-            var innerSize = Size - new Vector2(0.2f, 0f);
+            var innerSize = Size - new VVector2(0.2f, 0f);
 
             if (WithMask)
             {
                 view.AddComponent<SortingGroup>();
                 var mask = UnityHelper.CreateObject<SpriteMask>("Mask", view.transform, new Vector3(0, 0, 0));
                 mask.sprite = VanillaAsset.FullScreenSprite;
-                mask.transform.localScale = innerSize;
+                mask.transform.localScale = innerSize.AsUnityVector3(1f);
             }
 
-            float height = Inner?.Generate(inner, new Vector2(-innerSize.x / 2f, innerSize.y / 2f), innerSize) ?? 0f;
-            var scroller = VanillaAsset.GenerateScroller(Size, view.transform, new Vector2(Size.x / 2 - 0.1f, 0f), inner.transform, new FloatRange(0, height - Size.y), Size.y);
+            float height = Inner?.Generate(inner, new VVector2(-innerSize.x / 2f, innerSize.y / 2f), innerSize) ?? 0f;
+            var scroller = VanillaAsset.GenerateScroller(Size, view.transform, new VVector3(Size.x / 2 - 0.1f, 0f), inner.transform, new FloatRange(0, height - Size.y), Size.y);
 
             if (ScrollerTag != null && distDic.TryGetValue(ScrollerTag, out var val))
             {
@@ -840,7 +840,7 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
     {
 
         public AlignmentOption Alignment { get; set; } = AlignmentOption.Left;
-        private Vector2 fieldSize;
+        private VVector2 fieldSize;
         private int maxLines;
         private float fontSize;
         private bool useSharpFieldFlag;
@@ -851,7 +851,7 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
         public string? Hint = null;
         public bool WithMaskMaterial = false;
 
-        public TextInput(int maxLines,float fontSize,Vector2 size,bool useSharpField = false)
+        public TextInput(int maxLines,float fontSize,VVector2 size,bool useSharpField = false)
         {
             this.maxLines = maxLines;
             this.fontSize = fontSize;
@@ -859,11 +859,11 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
             useSharpFieldFlag = useSharpField;
         }
 
-        private Vector2 ActualSize => fieldSize + new Vector2(0.15f, 0.15f);
-        private void Generate(Transform screen,Vector2 center)
+        private VVector2 ActualSize => fieldSize + new VVector2(0.15f, 0.15f);
+        private void Generate(Transform screen,VVector2 center)
         {
             Vector2 actualSize = ActualSize;
-            var obj = UnityHelper.CreateObject("TextField", screen, center);
+            var obj = UnityHelper.CreateObject("TextField", screen, center.AsUnityVector3());
 
             var field = UnityHelper.CreateObject<TextField>("Text", obj.transform, new Vector3(0, 0, -0.5f));
             field.SetSize(fieldSize, fontSize, maxLines);
@@ -889,15 +889,15 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
             PostBuilder?.Invoke(field);
         }
 
-        public float Generate(GameObject screen, Vector2 cursor, Vector2 size, out (float min, float max) width)
+        public float Generate(GameObject screen, VVector2 cursor, VVector2 size, out (float min, float max) width)
         {
-            Vector2 actualSize = ActualSize;
-            Generate(screen.transform, ReflectAlignment(Alignment, actualSize, cursor, size));
+            VVector2 actualSize = ActualSize;
+            Generate(screen.transform, ReflectAlignment(Alignment, actualSize, cursor, size).AsVector2());
             width = CalcWidth(Alignment, cursor, size, actualSize.x, -actualSize.x / 2f, actualSize.x / 2f);
 
             return actualSize.y + 0.05f;
         }
-        public float Generate(GameObject screen, Vector2 center, out float width)
+        public float Generate(GameObject screen, VVector2 center, out float width)
         {
             Generate(screen.transform, center);
             width = ActualSize.x;
@@ -910,33 +910,33 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
     {
         public AlignmentOption Alignment => (widget as IMetaWidgetOld)?.Alignment ?? AlignmentOption.Center;
         object widget { get; set; }
-        Vector2 extended { get; set; }
-        public Color? HighlightColor { get; set; }
+        VVector2 extended { get; set; }
+        public Virial.Color? HighlightColor { get; set; }
         public Action<SpriteRenderer>? PostBuilder { get; set; }
 
-        public FramedWidget(IMetaWidgetOld widget,Vector2 extended) { 
+        public FramedWidget(IMetaWidgetOld widget,VVector2 extended) { 
             this.widget = widget;
             this.extended = extended;
         }
 
-        public FramedWidget(IMetaParallelPlacableOld widget,Vector2 extended)
+        public FramedWidget(IMetaParallelPlacableOld widget,VVector2 extended)
         {
             this.widget = widget;
             this.extended = extended;
         }
 
 
-        public float Generate(GameObject screen, Vector2 cursor, Vector2 size, out (float min, float max) width)
+        public float Generate(GameObject screen, VVector2 cursor, VVector2 size, out (float min, float max) width)
         {
             var frame = UnityHelper.CreateObject("SizedFrame", screen.transform, new(0f, 0f, -0.5f));
 
             IMetaWidgetOld mc = (widget as IMetaWidgetOld) ?? new MetaWidgetOld();
 
 
-            float height = mc.Generate(frame, cursor + new Vector2(extended.x, -extended.y), size - new Vector2(extended.x, extended.y) * 2f, out width);
+            float height = mc.Generate(frame, cursor + new VVector2(extended.x, -extended.y), size - new VVector2(extended.x, extended.y) * 2f, out width);
             if (HighlightColor != null)
             {
-                var backGround = NebulaAsset.CreateSharpBackground(new Vector2(width.max - width.min, height) + extended * 1.8f, HighlightColor.Value, screen.transform);
+                var backGround = NebulaAsset.CreateSharpBackground(new VVector2(width.max - width.min, height) + extended * 1.8f, HighlightColor.Value, screen.transform);
                 backGround.transform.localPosition += new Vector3((width.min + width.max) * 0.5f, cursor.y - height * 0.5f - extended.y, 0.5f);
                 backGround.sortingOrder = 7;
                 PostBuilder?.Invoke(backGround);
@@ -945,19 +945,19 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
             return extended.y * 2f + height;
         }
 
-        public float Generate(GameObject screen, Vector2 center, out float width)
+        public float Generate(GameObject screen, VVector2 center, out float width)
         {
             float height = 0f;
             var frame = UnityHelper.CreateObject("SizedFrame", screen.transform, new(center.x, center.y, -1f));
             width = 0f;
             if(widget is IMetaParallelPlacableOld mpp)
             {
-                height = mpp.Generate(frame, Vector2.zero,out width);
+                height = mpp.Generate(frame, VVector2.Zero,out width);
             }
 
             if(HighlightColor != null)
             {
-                var backGround = NebulaAsset.CreateSharpBackground(new Vector2(width + extended.x * 1.8f, height + extended.y * 1.8f), HighlightColor.Value, frame.transform);
+                var backGround = NebulaAsset.CreateSharpBackground(new VVector2(width + extended.x * 1.8f, height + extended.y * 1.8f), HighlightColor.Value, frame.transform);
                 backGround.transform.localPosition += new Vector3(0, 0, 0.5f);
                 backGround.sortingOrder = 7;
                 PostBuilder?.Invoke(backGround);
@@ -980,7 +980,7 @@ public class ParallelWidgetOld : IMetaWidgetOld
 
     public AlignmentOption Alignment { get; set; }
 
-    public float Generate(GameObject screen, Vector2 cursor, Vector2 size,out (float min,float max) width)
+    public float Generate(GameObject screen, VVector2 cursor, VVector2 size,out (float min,float max) width)
     {
         float sum = contents.Sum(c => c.Item2);
         float height = 0;
@@ -996,7 +996,7 @@ public class ParallelWidgetOld : IMetaWidgetOld
         foreach (var c in contents)
         {
             float myX = (c.Item2 / sum) * size.x;
-            float temp = c.Item1.Generate(screen, cursor, new Vector2(myX, size.y),out var innerWidth);
+            float temp = c.Item1.Generate(screen, cursor, new VVector2(myX, size.y),out var innerWidth);
 
             widthMin = Mathn.Min(widthMin, innerWidth.min);
             widthMax = Mathn.Min(widthMax, innerWidth.max);
@@ -1028,7 +1028,7 @@ public class CombinedWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
     public CombinedWidgetOld(float height, params IMetaParallelPlacableOld[] contents) : this(height, AlignmentOption.Center, contents) { }
     public CombinedWidgetOld(params IMetaParallelPlacableOld[] contents) : this(-1f, AlignmentOption.Center, contents) { }
 
-    public float Generate(GameObject screen, Vector2 cursor,Vector2 size, out (float min, float max) width)
+    public float Generate(GameObject screen, VVector2 cursor, VVector2 size, out (float min, float max) width)
     {
         var combinedScreen = UnityHelper.CreateObject("CombinedScreen", screen.transform, Vector3.zero);
         float x = 0f;
@@ -1036,7 +1036,7 @@ public class CombinedWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
         foreach(var c in contents)
         {
             var alloc = UnityHelper.CreateObject("Allocator", combinedScreen.transform, new Vector3(x, 0f, 0f));
-            height = Mathn.Max(height, c.Generate(alloc, Vector2.zero,out float cWidth));
+            height = Mathn.Max(height, c.Generate(alloc, VVector2.Zero,out float cWidth));
             alloc.transform.localPosition += new Vector3(cWidth * 0.5f, 0f);
             x += cWidth;
         }
@@ -1065,15 +1065,15 @@ public class CombinedWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
         return height;
     }
 
-    public float Generate(GameObject screen, Vector2 center, out float width)
+    public float Generate(GameObject screen, VVector2 center, out float width)
     {
-        var combinedScreen = UnityHelper.CreateObject("CombinedScreen", screen.transform, center);
+        var combinedScreen = UnityHelper.CreateObject("CombinedScreen", screen.transform, center.AsUnityVector3());
         float x = 0f;
         float height = 0f;
         foreach (var c in contents)
         {
             var alloc = UnityHelper.CreateObject("Allocator", combinedScreen.transform, new Vector3(x, 0f, 0f));
-            height = Mathn.Max(height, c.Generate(alloc, Vector2.zero, out float cWidth));
+            height = Mathn.Max(height, c.Generate(alloc, VVector2.Zero, out float cWidth));
             alloc.transform.localPosition += new Vector3(cWidth * 0.5f, 0f);
             x += cWidth;
         }
@@ -1105,8 +1105,8 @@ public class MetaScreen : MonoBehaviour, GUIScreen
 
     private GameObject? combinedObject = null;
     public LineRenderer? borderLine = null;
-    private Vector2 border;
-    public Vector2 Border { get => border; private set {
+    private VVector2 border;
+    public VVector2 Border { get => border; private set {
             bool lastShownFlag = ShowBorderLine;
             ShowBorderLine = false;
             border = value;
@@ -1137,7 +1137,7 @@ public class MetaScreen : MonoBehaviour, GUIScreen
             }
         } }
 
-    public float SetWidget(Vector2? border, IMetaWidgetOld? widget)
+    public float SetWidget(VVector2? border, IMetaWidgetOld? widget)
     {
         if(border != null) Border = border.Value;
 
@@ -1176,7 +1176,7 @@ public class MetaScreen : MonoBehaviour, GUIScreen
         catch { }
     }
 
-    static public PassiveButton InstantiateCloseButton(Transform parent, Vector3 localPos)
+    static public PassiveButton InstantiateCloseButton(Transform parent, VVector3 localPos)
     {
         var collider = UnityHelper.CreateObject<CircleCollider2D>("CloseButton", parent, localPos);
         collider.isTrigger = true;
@@ -1190,7 +1190,7 @@ public class MetaScreen : MonoBehaviour, GUIScreen
         return button;
     }
 
-    static public PassiveButton InstantiateCloseButton(MetaScreen target, Vector3 localPos) {
+    static public PassiveButton InstantiateCloseButton(MetaScreen target, VVector3 localPos) {
         var button = InstantiateCloseButton(target.transform.parent, localPos);
         var targetObj = target.combinedObject;
         button.OnClick.AddListener(() => GameObject.Destroy(targetObj));
@@ -1204,9 +1204,9 @@ public class MetaScreen : MonoBehaviour, GUIScreen
     static public Image BackInnerImage => backInnerSprite;
     static private MultiImage closeButtonSprite = DividedSpriteLoader.FromResource("Nebula.Resources.GUI.CloseButton.png", 100f, 2, 1);
     static private MultiImage navButtonSprite = DividedSpriteLoader.FromResource("Nebula.Resources.GUI.NavButton.png", 100f, 2, 2);
-    static public MetaScreen GenerateScreen(Vector2 size, Transform? parent, Vector3 localPos, bool withBackground, bool withBlackScreen, bool withClickGuard)
+    static public MetaScreen GenerateScreen(VVector2 size, Transform? parent, VVector3 localPos, bool withBackground, bool withBlackScreen, bool withClickGuard)
         => GenerateScreen(size, parent, localPos, withBackground ? BackgroundSetting.Old : BackgroundSetting.Off, withBlackScreen, withClickGuard);
-    static public MetaScreen GenerateScreen(Vector2 size,Transform? parent,Vector3 localPos,BackgroundSetting backgroundSetting,bool withBlackScreen,bool withClickGuard)
+    static public MetaScreen GenerateScreen(VVector2 size, Transform? parent, VVector3 localPos, BackgroundSetting backgroundSetting, bool withBlackScreen, bool withClickGuard)
     {
         var window = UnityHelper.CreateObject("MetaWindow", parent, localPos);
         if (backgroundSetting == BackgroundSetting.Old)
@@ -1215,7 +1215,7 @@ public class MetaScreen : MonoBehaviour, GUIScreen
             renderer.sprite = VanillaAsset.PopUpBackSprite;
             renderer.drawMode = SpriteDrawMode.Sliced;
             renderer.tileMode = SpriteTileMode.Continuous;
-            renderer.size = size + new Vector2(0.45f, 0.35f);
+            renderer.size = size + new VVector2(0.45f, 0.35f);
             renderer.gameObject.layer = LayerExpansion.GetUILayer();
         }else if(backgroundSetting == BackgroundSetting.Modern)
         {
@@ -1223,7 +1223,7 @@ public class MetaScreen : MonoBehaviour, GUIScreen
             inner.sprite = backInnerSprite.GetSprite();
             inner.drawMode = SpriteDrawMode.Sliced;
             inner.tileMode = SpriteTileMode.Continuous;
-            inner.size = size + new Vector2(0.75f, 0.75f);
+            inner.size = size + new VVector2(0.75f, 0.75f);
             inner.gameObject.layer = LayerExpansion.GetUILayer();
             inner.color = Color.white.RGBMultiplied(0.55f);
 
@@ -1231,7 +1231,7 @@ public class MetaScreen : MonoBehaviour, GUIScreen
             frame.sprite = backFrameSprite.GetSprite();
             frame.drawMode = SpriteDrawMode.Sliced;
             frame.tileMode = SpriteTileMode.Continuous;
-            frame.size = size + new Vector2(0.75f, 0.75f);
+            frame.size = size + new VVector2(0.75f, 0.75f);
             frame.gameObject.layer = LayerExpansion.GetUILayer();
         }
 
@@ -1268,18 +1268,18 @@ public class MetaScreen : MonoBehaviour, GUIScreen
     /// <param name="closeButtonPos"></param>
     /// <param name="withBlackScreen"></param>
     /// <returns></returns>
-    static public MetaScreen GenerateBlankWindow(Vector2 size, Transform? parent, Vector3 localPos, Vector2 closeButtonPos, bool withBlackScreen)
+    static public MetaScreen GenerateBlankWindow(VVector2 size, Transform? parent, VVector3 localPos, VVector2 closeButtonPos, bool withBlackScreen)
     {
         var screen = GenerateScreen(size, parent, localPos, true, withBlackScreen, true);
         var obj = screen.transform.parent.gameObject;
-        var button = InstantiateCloseButton(screen, closeButtonPos);
+        var button = InstantiateCloseButton(screen, closeButtonPos.AsVector3(0f));
         NebulaManager.Instance.RegisterUI(obj, button);
         return screen;
     }
 
-    static public MetaScreen GenerateWindow(Vector2 size, Transform? parent, Vector3 localPos, bool withBlackScreen, bool closeOnClickOutside, bool withMask, bool withBackground)
+    static public MetaScreen GenerateWindow(VVector2 size, Transform? parent, VVector3 localPos, bool withBlackScreen, bool closeOnClickOutside, bool withMask, bool withBackground)
         => GenerateWindow(size, parent, localPos, withBlackScreen, closeOnClickOutside, withMask, withBackground ? BackgroundSetting.Old : BackgroundSetting.Off);
-    static public MetaScreen GenerateWindow(Vector2 size, Transform? parent, Vector3 localPos, bool withBlackScreen, bool closeOnClickOutside, bool withMask = false, BackgroundSetting background = BackgroundSetting.Old, bool withCloseButton = true)
+    static public MetaScreen GenerateWindow(VVector2 size, Transform? parent, VVector3 localPos, bool withBlackScreen, bool closeOnClickOutside, bool withMask = false, BackgroundSetting background = BackgroundSetting.Old, bool withCloseButton = true)
     {
         var screen = GenerateScreen(size, parent, localPos, background, withBlackScreen, true);
 
@@ -1329,7 +1329,7 @@ public class MetaScreen : MonoBehaviour, GUIScreen
             var group = UnityHelper.CreateObject<SortingGroup>("Group", obj.transform, Vector3.zero);
             var mask = UnityHelper.CreateObject<SpriteMask>("Mask", group.transform, Vector3.zero);
             mask.sprite = VanillaAsset.FullScreenSprite;
-            mask.transform.localScale = size;
+            mask.transform.localScale = size.AsUnityVector3(0f);
 
             obj.transform.FindChild("Screen").SetParent(group.transform);
         }
@@ -1408,16 +1408,16 @@ public class MetaScreen : MonoBehaviour, GUIScreen
         this.border = border;
     }
 
-    public void SetWidget(Virial.Media.GUIWidget widget, out Virial.Compat.Size actualSize) => SetWidget(widget, new Vector2(0f, 1f), out actualSize);
-    public void SetWidget(Virial.Media.GUIWidget widget, Image? image, out Virial.Compat.Size actualSize) => SetWidget(widget, new(0f, 1f), image, out actualSize);
-    public void SetWidget(Virial.Media.GUIWidget widget, UnityEngine.Vector2 anchor, out Virial.Compat.Size actualSize)
+    public void SetWidget(Virial.Media.GUIWidget widget, out Virial.Compat.Size actualSize) => SetWidget(widget, new VVector2(0f, 1f), out actualSize);
+    public void SetWidget(Virial.Media.GUIWidget widget, Image? image, out Virial.Compat.Size actualSize) => SetWidget(widget, new VVector2(0f, 1f), image, out actualSize);
+    public void SetWidget(Virial.Media.GUIWidget widget, VVector2 anchor, out Virial.Compat.Size actualSize)
     {
         ClearWidget();
 
         var obj = widget.Instantiate(new Anchor(new(anchor.x,anchor.y), new Virial.Compat.Vector3(border.x * (anchor.x - 0.5f), border.y * (anchor.y - 0.5f), -0.1f)), new(border), out actualSize);
-        if (obj != null)
+        if (obj.AsBoolFast())
         {
-            obj.transform.SetParent(transform, false);
+            obj!.transform.SetParent(transform, false);
         }
     }
 
@@ -1438,7 +1438,7 @@ public class MetaScreen : MonoBehaviour, GUIScreen
         try
         {
             var image = transform.FindChild("BackImage");
-            if (image) GameObject.Destroy(image.gameObject);
+            if (image.AsBoolFast()) GameObject.Destroy(image.gameObject);
         }
         catch
         {

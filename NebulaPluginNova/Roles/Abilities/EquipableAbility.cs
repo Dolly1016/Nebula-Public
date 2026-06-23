@@ -29,7 +29,7 @@ namespace Nebula.Roles.Abilities
 
         protected virtual void HudUpdate(GameHudUpdateEvent ev)
         {
-            if (!Renderer) return;
+            if (!Renderer.AsBoolFast()) return;
 
             var o = Owner.Unbox();
             if (Owner.AmOwner) o.RequireUpdateMouseAngle();
@@ -46,7 +46,7 @@ namespace Nebula.Roles.Abilities
 
         void IGameOperator.OnReleased()
         {
-            if (Renderer) GameObject.Destroy(Renderer.gameObject);
+            if (Renderer.AsBoolFast()) GameObject.Destroy(Renderer.gameObject);
             Renderer = null!;
         }
     }

@@ -48,7 +48,7 @@ internal class KillCoolDownConfiguration : IRelativeCooldownConfiguration
 
     bool IConfiguration.IsShown => predicate?.Invoke() ?? true;
 
-    string? IConfiguration.GetDisplayText() => title.GetString() + ": " + CurrentCoolDownStr +( " (" + (this as IRelativeCooldownConfiguration).Cooldown + Language.Translate("options.sec") + ")").Color(Color.gray);
+    string? IConfiguration.GetDisplayText() => title.GetString() + ": " + CurrentCoolDownStr +( " (" + (this as IRelativeCooldownConfiguration).Cooldown + Language.Translate("options.sec") + ")").Color(VColor.Gray);
 
     GUIWidgetSupplier IConfiguration.GetEditor() =>
     new HorizontalWidgetsHolder(GUIAlignment.Left,

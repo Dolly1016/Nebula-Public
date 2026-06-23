@@ -22,7 +22,7 @@ public class FakeSabotageStatus
         var lastCount = fictitiousTasks.Count;
         fictitiousTasks.RemoveWhere(t=>
         {
-            var type = ShipStatus.Instance.GetSabotageTask(t).GetIl2CppType();
+            var type = AmongUsLLImpl.ShipStatusInstance.GetSabotageTask(t).GetIl2CppType();
             return type.IsEquivalentTo(task.GetIl2CppType());
         });
 
@@ -40,7 +40,7 @@ public class FakeSabotageStatus
         {
             foreach (var type in types)
             {
-                RpcPopTaskToPlayer.Invoke((PlayerControl.LocalPlayer.PlayerId, type));
+                RpcPopTaskToPlayer.Invoke((AmongUsLLImpl.LocalPlayer.PlayerId, type));
             }
         }
     }
@@ -58,28 +58,29 @@ public class FakeSabotageStatus
 
             player?.Unbox().FakeSabotage.PushFakeSabotage(message.task);
 
-            if (message.target == PlayerControl.LocalPlayer.PlayerId)
+            var localPlayer = AmongUsLLImpl.LocalPlayer;
+            if (message.target == localPlayer.PlayerId)
             {
 
                 //同様のタスクが無ければ追加
-                if(PlayerControl.LocalPlayer.myTasks.Find((Il2CppSystem.Predicate<PlayerTask>)(task=> task.GetIl2CppType().IsEquivalentTo(ShipStatus.Instance.GetSabotageTask(message.task).GetIl2CppType()))) == null)
+                if(localPlayer.myTasks.Find((Il2CppSystem.Predicate<PlayerTask>)(task=> task.GetIl2CppType().IsEquivalentTo(AmongUsLLImpl.ShipStatusInstance.GetSabotageTask(message.task).GetIl2CppType()))) == null)
                 {
-                    PlayerControl.LocalPlayer.AddSystemTask(message.task);
+                    localPlayer.AddSystemTask(message.task);
 
                     if(message.task == SystemTypes.Reactor || message.task == SystemTypes.Laboratory)
                     {
-                        var reactor = ShipStatus.Instance.Systems[message.task].CastFast<ReactorSystemType>();
+                        var reactor = AmongUsLLImpl.ShipStatusInstance.Systems[message.task].CastFast<ReactorSystemType>();
                         reactor.Countdown = Mathn.Min(reactor.Countdown, reactor.ReactorDuration);
                     }else if (message.task == SystemTypes.LifeSupp)
                     {
-                        var reactor = ShipStatus.Instance.Systems[message.task].CastFast<LifeSuppSystemType>();
+                        var reactor = AmongUsLLImpl.ShipStatusInstance.Systems[message.task].CastFast<LifeSuppSystemType>();
                         Debug.Log(reactor.Countdown);
                         Debug.Log(reactor.LifeSuppDuration);
                         reactor.Countdown = Mathn.Min(reactor.Countdown, reactor.LifeSuppDuration);
                     }
                     else if (message.task == SystemTypes.HeliSabotage)
                     {
-                        var reactor = ShipStatus.Instance.Systems[message.task].CastFast<HeliSabotageSystem>();
+                        var reactor = AmongUsLLImpl.ShipStatusInstance.Systems[message.task].CastFast<HeliSabotageSystem>();
                         reactor.Countdown = Mathn.Min(reactor.Countdown, GeneralConfigurations.AirshipHeliDurationOption.CurrentValue);
                         reactor.CompletedConsoles.Clear();
                         reactor.ActiveConsoles.Clear();

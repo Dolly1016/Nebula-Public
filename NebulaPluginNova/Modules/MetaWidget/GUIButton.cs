@@ -14,8 +14,8 @@ public class GUIButton : NoSGUIText
     public GUIClickableAction? OnRightClick { get; init; }
     public GUIClickableAction? OnMouseOver { get; init; }
     public GUIClickableAction? OnMouseOut { get; init; }
-    public Color? Color { get; init; }
-    public Color? SelectedColor { get; init; }
+    public Virial.Color? Color { get; init; }
+    public Virial.Color? SelectedColor { get; init; }
 
     public string RawText { init { Text = new RawTextComponent(value); } }
     public string TranslationKey { init { Text = new TranslateTextComponent(value); } }
@@ -112,8 +112,8 @@ public class GUIButton : NoSGUIText
 public class GUISpinButton : AbstractGUIWidget
 {
     public Action<bool> OnClick { get; init; }
-    public Color? Color { get; init; }
-    public Color? SelectedColor { get; init; }
+    public VColor? Color { get; init; }
+    public VColor? SelectedColor { get; init; }
 
     public bool AsMaskedButton { get; init; } = true;
     public float TextMargin { get; init; } = 0.26f;

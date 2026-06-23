@@ -131,12 +131,12 @@ public static class RPCRouter
         {
             MessageWriter writer;
 
-            writer = AmongUsClient.Instance.StartRpcImmediately(PlayerControl.LocalPlayer.NetId, 128, shouldBeReliable ? SendOption.Reliable : SendOption.None, -1);
+            writer = AmongUsLLImpl.AmongUsClientInstance.StartRpcImmediately(AmongUsLLImpl.LocalPlayer.NetId, 128, shouldBeReliable ? SendOption.Reliable : SendOption.None, -1);
             writer.Write(hash);
             sender.Invoke(writer);
             //NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Log, null, "sent RPC:" + name + "(size:" + writer.Length + ")");
 
-            AmongUsClient.Instance.FinishRpcImmediately(writer);
+            AmongUsLLImpl.AmongUsClientInstance.FinishRpcImmediately(writer);
 
 
             try
@@ -286,6 +286,7 @@ public abstract class RemoteProcessArgumentBase
 
         new RemoteProcessArgument<Vector2>((writer, vec) =>
         {
+            writer.Buffer[0] = 1;
             writer.Write(vec.x);
             writer.Write(vec.y);
         }, reader => new(reader.ReadSingle(), reader.ReadSingle()));
@@ -296,6 +297,25 @@ public abstract class RemoteProcessArgumentBase
             writer.Write(vec.z);
         }, reader => new(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()));
         new RemoteProcessArgument<Vector4>((writer, vec) =>
+        {
+            writer.Write(vec.x);
+            writer.Write(vec.y);
+            writer.Write(vec.z);
+            writer.Write(vec.w);
+        }, reader => new(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()));
+
+        new RemoteProcessArgument<VVector2>((writer, vec) =>
+        {
+            writer.Write(vec.x);
+            writer.Write(vec.y);
+        }, reader => new(reader.ReadSingle(), reader.ReadSingle()));
+        new RemoteProcessArgument<VVector3>((writer, vec) =>
+        {
+            writer.Write(vec.x);
+            writer.Write(vec.y);
+            writer.Write(vec.z);
+        }, reader => new(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()));
+        new RemoteProcessArgument<VVector4>((writer, vec) =>
         {
             writer.Write(vec.x);
             writer.Write(vec.y);
@@ -408,7 +428,7 @@ public abstract class RemoteProcessArgumentBase
         new RemoteProcessArgument<DefinedGhostRole>((writer, role) => writer.Write(role?.Id ?? -1), reader => Roles.Roles.GetGhostRole(reader.ReadInt32())!);
         new RemoteProcessArgument<DefinedModifier>((writer, role) => writer.Write(role?.Id ?? -1), reader => Roles.Roles.GetModifier(reader.ReadInt32())!);
 
-        new RemoteProcessArgument<PlayerControl>((writer, player) => writer.Write(player?.PlayerId ?? byte.MaxValue), reader => Helpers.GetPlayer(reader.ReadByte())!);
+        new RemoteProcessArgument<PlayerControl>((writer, player) => writer.Write(player.AsBoolFast() ? player!.PlayerId : byte.MaxValue), reader => Helpers.GetPlayer(reader.ReadByte())!);
     }
 }
 public class RemoteProcessArgument<T> : RemoteProcessArgumentBase
@@ -1009,9 +1029,9 @@ public static class PropertyRPC
     private static RemoteProcess<(byte targetId, int requestId, string propertyId, RequestType type)> RpcPropertyRequest = new(
         "PropertyRequest",
         (message, _)=>{
-            if (!PlayerControl.LocalPlayer) return;
+            if (!AmongUsLLImpl.TryGetLocalPlayer(out var localPlayer)) return;
 
-            if(message.targetId == PlayerControl.LocalPlayer.PlayerId)
+            if(message.targetId == localPlayer.PlayerId)
             {
                 var property = PropertyManager.GetProperty(message.propertyId);
                 if(property == null)

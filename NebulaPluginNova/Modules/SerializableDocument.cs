@@ -314,7 +314,7 @@ public class SerializableDocument : IDocument
             PostBuilder = renderer =>
             {
                 renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
-                var button = renderer.gameObject.SetUpButton(true, renderer, UnityEngine.Color.white.AlphaMultiplied(0.15f), UnityEngine.Color.Lerp(UnityEngine.Color.cyan, UnityEngine.Color.green, 0.4f).AlphaMultiplied(0.3f));
+                var button = renderer.gameObject.SetUpButton(true, renderer, VColor.White.AlphaMultiplied(0.15f), VColor.Lerp(VColor.Cyan, VColor.Green, 0.4f).AlphaMultiplied(0.3f));
                 var collider = renderer.gameObject.AddComponent<BoxCollider2D>();
                 collider.size = renderer.size;
                 editorBuilder.Invoke(button,this,parent);

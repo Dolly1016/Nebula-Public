@@ -69,7 +69,7 @@ public class ClientOption
     private static string DiscordWebhookOtherPrefix = "https://discordapp.com/api/webhooks/";
     public record DiscordWebhookOption(StringDataEntry urlEntry, BooleanDataEntry autoSendEntry) { 
         public string url => DiscordWebhookPrefix + urlEntry.Value; 
-        public string urlShorten => urlEntry.Value.Length == 0 ? "    -    ".Color(Color.gray) : urlEntry.Value.Substring(0,3) + " ... " + urlEntry.Value.Substring(urlEntry.Value.Length - 4);
+        public string urlShorten => urlEntry.Value.Length == 0 ? "    -    ".Color(VColor.Gray) : urlEntry.Value.Substring(0,3) + " ... " + urlEntry.Value.Substring(urlEntry.Value.Length - 4);
 
     };
     static public DiscordWebhookOption WebhookOption { get; private set; } = new(new("discordUrl", ClientOptionSaver, ""), new("discordAutoSend", ClientOptionSaver, false));
@@ -107,7 +107,7 @@ public class ClientOption
             GUI.API.HorizontalHolder(Virial.Media.GUIAlignment.Center,
                 currentDisplay,
                 new NoSGUIMargin(Virial.Media.GUIAlignment.Center, new(0.1f, 0f)),
-                GUI.API.Button(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.StandardMediumMasked), new TranslateTextComponent("ui.discordWebhook.urlFromClipboard"), _ => currentText.text = SetWebhookStringFromClipboard() ? GetCurrentWebhookString() : Language.Translate("ui.discordWebhook.failedPasteUrl").Color(Color.red))
+                GUI.API.Button(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.StandardMediumMasked), new TranslateTextComponent("ui.discordWebhook.urlFromClipboard"), _ => currentText.text = SetWebhookStringFromClipboard() ? GetCurrentWebhookString() : Language.Translate("ui.discordWebhook.failedPasteUrl").Color(VColor.Red))
             ),
             GUI.API.HorizontalHolder(Virial.Media.GUIAlignment.Center,
                 checkBox,
@@ -215,7 +215,7 @@ public class ClientOption
         new ClientOption(ClientOptionType.PlayLobbyMusic, "playLobbyMusic", simpleSwitch, 1) { 
             OnValueChanged = () =>
             {
-                if (!LobbyBehaviour.Instance) return;
+                if (!AmongUsLLImpl.LobbyInstance.AsBoolFast()) return;
                 bool playMusic = AllOptions[ClientOptionType.PlayLobbyMusic].Value == 1;
 
                 if (playMusic)
@@ -247,7 +247,7 @@ public class ClientOption
         {
             OnValueChanged = () =>
             {
-                if (MeetingHud.Instance)
+                if (MeetingHud.Instance.AsBoolFast())
                 {
                     foreach(var area in MeetingHud.Instance.playerStates)
                     {
@@ -260,7 +260,7 @@ public class ClientOption
         new ClientOption(ClientOptionType.MuteAmbienceOnMeeting, "muteAmbienceOnMeeting", simpleSwitch, 0) { 
             OnValueChanged = () => {
                 bool mute = AllOptions[ClientOptionType.MuteAmbienceOnMeeting].Value == 1;
-                if (MeetingHud.Instance) ChangeAmbientVolumeIfNecessary(mute, true);
+                if (MeetingHud.Instance.AsBoolFast()) ChangeAmbientVolumeIfNecessary(mute, true);
             }
         };
 #if PC
@@ -287,7 +287,7 @@ public class ClientOption
     static private bool ShouldMuteAmbienceOnMeeting => AllOptions[ClientOption.ClientOptionType.MuteAmbienceOnMeeting].Value == 1;
     static public void TryChangeAmbientVolumeImmediately()
     {
-        if (MeetingHud.Instance)
+        if (MeetingHud.Instance.AsBoolFast())
         {
             var sfxVol = DataManager.Settings.Audio.SfxVolume;
             var shouldMuteAmbienceOnMeeting = ShouldMuteAmbienceOnMeeting;
@@ -362,7 +362,7 @@ public static class StartOptionMenuPatch
             if (button.name != "DoneButton") continue;
 
             button.onClick.AddListener(() => {
-                if (AmongUsClient.Instance && AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started)
+                if (AmongUsLLImpl.AmongUsClientInstance.AsBoolFast() && AmongUsLLImpl.AmongUsClientInstance.GameState == InnerNet.InnerNetClient.GameStates.Started)
                     HudManager.Instance.ShowVanillaKeyGuide();
             });
         }
@@ -423,12 +423,12 @@ public static class StartOptionMenuPatch
                 AddBottomButton("vcSettings", () => NoSVCRoom.VCSettings.OpenSettingScreen(__instance));
                 AddBottomButton("vcRejoin", () => ModSingleton<NoSVCRoom>.Instance?.Rejoin());
             }
-            if (!AmongUsClient.Instance || AmongUsClient.Instance.GameState < InnerNet.InnerNetClient.GameStates.Joined)
+            if (!AmongUsClient.Instance.AsBoolFast() || AmongUsClient.Instance.GameState < InnerNet.InnerNetClient.GameStates.Joined)
             {
                 AddBottomButton("vcServerSettings", () => NoSVCRoom.VCSettings.OpenServerSettingScreen(__instance));
             }
 
-            if (!AmongUsClient.Instance || AmongUsClient.Instance.GameState != InnerNet.InnerNetClient.GameStates.Started)
+            if (!AmongUsClient.Instance.AsBoolFast() || AmongUsClient.Instance.GameState != InnerNet.InnerNetClient.GameStates.Started)
             {
                 AddBottomButton("keyBindings", () =>
                 {

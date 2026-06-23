@@ -38,7 +38,7 @@ public class ExtraMission : DefinedAllocatableModifierTemplate, DefinedAllocatab
         void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo, bool inEndScene)
         {
             if (inEndScene || (canSeeAllInfo && !AmOwner))
-                name += $" ({(target?.Name ?? "Undefined")})".Color(MyRole.UnityColor);
+                name += $" ({(target?.Name ?? "Undefined")})".Color(MyRole.RoleColor);
             else if (AmOwner)
                 name += MyRole.GetRoleIconTagSmall();
         }
@@ -46,7 +46,7 @@ public class ExtraMission : DefinedAllocatableModifierTemplate, DefinedAllocatab
         [Local]
         void DecorateOtherPlayerName(PlayerDecorateNameEvent ev)
         {
-            if(target == ev.Player) ev.Color = new(MyRole.UnityColor);
+            if(target == ev.Player) ev.Color = MyRole.RoleColor;
         }
 
         [OnlyMyPlayer]
@@ -85,7 +85,7 @@ public class ExtraMission : DefinedAllocatableModifierTemplate, DefinedAllocatab
         [Local]
         void AppendExtraTaskText(PlayerTaskTextLocalEvent ev)
         {
-            ev.AppendText(Language.Translate("role.extraMission.taskText").Replace("%PLAYER%", target?.Name ?? "Undefined").Color((target?.IsDead ?? false) ? Color.green : MyRole.UnityColor));
+            ev.AppendText(Language.Translate("role.extraMission.taskText").Replace("%PLAYER%", target?.Name ?? "Undefined").Color((target?.IsDead ?? false) ? VColor.Green : MyRole.RoleColor));
         }
     }
 

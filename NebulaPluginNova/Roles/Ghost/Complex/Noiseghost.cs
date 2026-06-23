@@ -33,7 +33,7 @@ public class Noiseghost : DefinedGhostRoleTemplate, DefinedGhostRole
 
         static private readonly Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.GhostNoiseButton.png", 115f);
 
-        string RuntimeAssignable.DisplayColoredName => (MyRole as DefinedAssignable).DisplayName.Color(MyPlayer.IsImpostor ? NebulaTeams.ImpostorTeam.UnityColor : MyRole.UnityColor);
+        string RuntimeAssignable.DisplayColoredName => (MyRole as DefinedAssignable).DisplayName.Color(MyPlayer.IsImpostor ? NebulaTeams.ImpostorTeam.Color : MyRole.RoleColor);
         void RuntimeAssignable.OnActivated()
         {
             if (AmOwner)

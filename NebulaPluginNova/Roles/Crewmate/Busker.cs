@@ -100,7 +100,7 @@ public class Busker : DefinedSingleAbilityRoleTemplate<Busker.Ability>, DefinedR
 
                 StaticAchievementToken? acTokenCommon1 = null;
 
-                reviveButton.Availability = button => MyPlayer.CanMove && MapData.GetCurrentMapData().CheckMapArea(PlayerControl.LocalPlayer.GetTruePosition());
+                reviveButton.Availability = button => MyPlayer.CanMove && MapData.GetCurrentMapData().CheckMapArea(AmongUsLLImpl.LocalPlayer.GetTruePosition());
                 reviveButton.Visibility = button => button.IsInEffect && Helpers.AllDeadBodies().Any(deadBody => deadBody.ParentId == MyPlayer.PlayerId);
                 reviveButton.EffectTimer = NebulaAPI.Modules.Timer(this, PseudocideDurationOption);
                 reviveButton.PlayFlashWhile = button => true;

@@ -129,7 +129,7 @@ internal class Snatcher : DefinedSingleAbilityRoleTemplate<Snatcher.Ability>, De
                 MetaScreen lastWindow = null!;
                 lastWindow = Complex.MeetingRoleSelectWindow.OpenRoleSelectWindow(null, null, true, " ", r =>
                 {
-                    if (PlayerControl.LocalPlayer.Data.IsDead) return;
+                    if (AmongUsLLImpl.LocalPlayer.Data.IsDead) return;
 
                     var isMatched = p.Role.CheckGuessAbility(r);
                     UpdateHasTried.RpcSync(MyPlayer, 1);
@@ -150,11 +150,11 @@ internal class Snatcher : DefinedSingleAbilityRoleTemplate<Snatcher.Ability>, De
                         NebulaAsset.PlaySE(NebulaAudioClip.SnatcherFailed);
                     }
 
-                    if (lastWindow) lastWindow.CloseScreen();
+                    if (lastWindow.AsBoolFast()) lastWindow.CloseScreen();
                     lastWindow = null!;
                 });
             },
-            p => !p.MyPlayer.IsDead && !p.MyPlayer.AmOwner && !HasTried && !PlayerControl.LocalPlayer.Data.IsDead
+            p => !p.MyPlayer.IsDead && !p.MyPlayer.AmOwner && !HasTried && !AmongUsLLImpl.LocalPlayer.Data.IsDead
             ));
             }
         }

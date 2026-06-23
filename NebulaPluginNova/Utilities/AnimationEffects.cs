@@ -19,11 +19,11 @@ static internal class AnimationEffects
         renderer.color = color;
         for (int i = 0; i < 5; i++)
         {
-            if (!renderer) break;
+            if (!renderer.AsBoolFast()) break;
             renderer.sprite = NameEffectsImage.GetSprite(i);
             yield return new WaitForSeconds(0.09f);
         }
-        if (renderer) UnityEngine.Object.Destroy(renderer.gameObject);
+        if (renderer.AsBoolFast()) UnityEngine.Object.Destroy(renderer.gameObject);
         yield break;
     }
 

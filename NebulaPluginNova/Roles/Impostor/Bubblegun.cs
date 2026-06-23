@@ -114,7 +114,7 @@ public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, De
             if (moving) renderer.gameObject.transform.position += (new Vector2(1f, 0f).Rotate(degreeAngle) * 0.8f * bubbleSpeedOption * Time.deltaTime).AsVector3(0f);
 
 
-            if (!MeetingHud.Instance && moving && !isFake)
+            if (!MeetingHud.Instance.AsBoolFast() && moving && !isFake)
             {
                 float bubbleOption = (1.7f / 2f * bubbleSizeOption);
 
@@ -368,10 +368,11 @@ public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, De
     {
         AmongUsUtil.PlayCinematicKill(killer, player, 0.7f, 0.55f, PlayerState.Bubbled, EventDetail.Bubbled, () => {
             var bubbleHolder = UnityHelper.CreateObject("Bubble", null, position.AsVector3(-1f), LayerExpansion.GetDefaultLayer());
+            var bubbleHolderTransform = bubbleHolder.transform;
             allBubbles.Add(bubbleHolder);
 
-            bubbleHolder.transform.localScale = new Vector3(1f, 1f, 0.1f);
-            var bubble = UnityHelper.CreateObject("Sin", bubbleHolder.transform, Vector3.zero);
+            bubbleHolderTransform.localScale = new Vector3(1f, 1f, 0.1f);
+            var bubble = UnityHelper.CreateObject("Sin", bubbleHolderTransform, Vector3.zero);
             var bubbleRenderer = UnityHelper.CreateObject<SpriteRenderer>("Sprite", bubble.transform, Vector3.zero);
             bubbleRenderer.transform.localScale = new(0.43f, 0.43f, 1f);
             bubbleRenderer.sprite = bubbleSprite.GetSprite(0);
@@ -398,7 +399,7 @@ public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, De
             deadBody.StartCoroutine(CoUpdateImage().WrapToIl2Cpp());
             deadBody.StartCoroutine(CoUpdateSat().WrapToIl2Cpp());
             if (player.AmOwner) NebulaAsset.PlaySE(NebulaAudioClip.BubbleLong, volume: 1f);
-            else if (killer.AmOwner) NebulaAsset.PlaySE(Helpers.Prob(50) ? NebulaAudioClip.Bubble1 : NebulaAudioClip.Bubble2, oneshot: true, volume: 1f);
+            else if (killer.AmOwner) NebulaAsset.PlaySE(Mathn.Prob(50) ? NebulaAudioClip.Bubble1 : NebulaAudioClip.Bubble2, oneshot: true, volume: 1f);
 
             IEnumerator CoAnimDeadBody()
             {
@@ -437,23 +438,24 @@ public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, De
                 float sin = 0f;
                 while (true)
                 {
-                    angle += Time.deltaTime * 15f;
-                    sin += Time.deltaTime * 1f;
+                    var deltaTime = Time.deltaTime;
+                    angle += deltaTime * 15f;
+                    sin += deltaTime * 1f;
                     bubbleInner.transform.localEulerAngles = new(0f, 0f, -angle);
                     bubble.transform.localPosition = new(0f, Mathn.Sin(sin) * 0.12f, 0f);
                     if (angle > 360f) angle -= 360f;
 
                     allBubbles.Do(b =>
                     {
-                        if (!b) return;
+                        if (!b.AsBoolFast()) return;
                         if (b == bubbleHolder) return;
-                        var distance = b.transform.position.Distance(bubbleHolder.transform.position);
+                        var distance = b.transform.position.Distance(bubbleHolderTransform.position);
                         if (distance < 1.1f)
                         {
-                            var vec = (bubbleHolder.transform.position - b.transform.position).normalized;
-                            var z = bubbleHolder.transform.localPosition.z;
-                            bubbleHolder.transform.position += vec * (1.1f - distance) * Time.deltaTime;
-                            bubbleHolder.transform.SetLocalZ(z);
+                            var vec = (bubbleHolderTransform.position - b.transform.position).normalized;
+                            var z = bubbleHolderTransform.localPosition.z;
+                            bubbleHolderTransform.position += vec * (1.1f - distance) * deltaTime;
+                            bubbleHolderTransform.SetLocalZ(z);
 
                         }
                     });
@@ -476,13 +478,14 @@ public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, De
             {
                 yield return Effects.Wait(1.5f);
                 float sat = 1f;
+                var mat = bubbleRenderer.material;
                 while (sat > 0.2f)
                 {
                     sat -= Time.deltaTime * 0.4f;
-                    bubbleRenderer.material.SetFloat("_Sat", sat);
+                    mat.SetFloat("_Sat", sat);
                     yield return null;
                 }
-                bubbleRenderer.material.SetFloat("_Sat", 0.2f);
+                mat.SetFloat("_Sat", 0.2f);
                 yield break;
             }
 
@@ -500,6 +503,6 @@ public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, De
 
     static internal void PlayFireSE()
     {
-        NebulaAsset.PlaySE(Helpers.Prob(50) ? NebulaAudioClip.Bubble1 : NebulaAudioClip.Bubble2, oneshot: true, volume: 1f);
+        NebulaAsset.PlaySE(Mathn.Prob(50) ? NebulaAudioClip.Bubble1 : NebulaAudioClip.Bubble2, oneshot: true, volume: 1f);
     }
 }

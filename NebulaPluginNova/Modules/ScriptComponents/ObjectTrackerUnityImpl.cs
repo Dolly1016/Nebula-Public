@@ -1,4 +1,5 @@
 ﻿
+using Nebula.Patches;
 using Virial;
 using Virial.Components;
 using Virial.Events.Game;
@@ -12,6 +13,7 @@ public static class HighlightHelpers
     {
         renderer.material.SetFloat("_Outline", 1f);
         renderer.material.SetColor("_OutlineColor", color);
+        HighlightManager.AddHighlightedRenderer(renderer);
     }
 
     internal static void SetHighlight(GamePlayer player, UnityEngine.Color color) => SetHighlight(player.VanillaPlayer.cosmetics.currentBodySprite.BodySprite, color);
@@ -68,7 +70,7 @@ public static class ObjectTrackers
 
     public static ObjectTracker<Vent> ForVents(ILifespan? lifespan, float? distance, GamePlayer tracker, Predicate<Vent> predicate, UnityEngine.Color color, bool ignoreColliders = false)
     {
-        return new ObjectTrackerUnityImpl<Vent, Vent>(tracker.VanillaPlayer, distance ?? AmongUsLLImpl.Instance.VanillaKillDistance, () => ShipStatus.Instance.AllVents, predicate, _ => true, v => v, v => [v.transform.position], v => v.myRend, color, ignoreColliders).Register(lifespan);
+        return new ObjectTrackerUnityImpl<Vent, Vent>(tracker.VanillaPlayer, distance ?? AmongUsLLImpl.Instance.VanillaKillDistance, () => AmongUsLLImpl.ShipStatusInstance.AllVents, predicate, _ => true, v => v, v => [v.transform.position], v => v.myRend, color, ignoreColliders).Register(lifespan);
     }
 }
 

@@ -8,13 +8,13 @@ public class NoSGUIImage : AbstractGUIWidget
 {
     protected Virial.Media.Image? Image;
     protected FuzzySize Size;
-    public Color? Color = null;
+    public Virial.Color? Color = null;
     public GUIClickableAction? OnClick;
     public GUIWidgetSupplier? Overlay;
     public bool IsMasked { get; init; }
     public Action<SpriteRenderer>? PostBuilder = null;
 
-    public NoSGUIImage(GUIAlignment alignment, Virial.Media.Image? image, FuzzySize size,Color? color = null, GUIClickableAction? onClick = null, GUIWidgetSupplier? overlay = null) : base(alignment)
+    public NoSGUIImage(GUIAlignment alignment, Virial.Media.Image? image, FuzzySize size,Virial.Color? color = null, GUIClickableAction? onClick = null, GUIWidgetSupplier? overlay = null) : base(alignment)
     {
         this.Image = image;
         this.Size = size;
@@ -45,13 +45,14 @@ public class NoSGUIImage : AbstractGUIWidget
                 );
             renderer.transform.localScale = UnityEngine.Vector3.one * scale;
 
-            if (Color != null) renderer.color = Color.Value;
+            if (Color != null) renderer.color = Color.Value.ToUnityColor();
 
             actualSize = new(spriteSize.x * scale, spriteSize.y * scale);
 
             if (OnClick != null || Overlay != null)
             {
-                var button = renderer.gameObject.SetUpButton(false, renderer, renderer.color, renderer.color * new UnityEngine.Color(0.7f, 1f, 0.7f));
+                VColor rendererColor = new(renderer.color);
+                var button = renderer.gameObject.SetUpButton(false, renderer, rendererColor, rendererColor * new VColor(0.7f, 1f, 0.7f));
                 var collider = renderer.gameObject.AddComponent<BoxCollider2D>();
                 collider.size = renderer.sprite.bounds.size;
                 collider.isTrigger = true;

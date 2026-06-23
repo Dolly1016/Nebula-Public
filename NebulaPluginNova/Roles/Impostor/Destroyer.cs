@@ -20,7 +20,7 @@ public class DestroyerAssets
     static private float[] handAnimSampleTime = [0.05f, 0.2f, 0.8f, 0.9f];
     static public Image[] HandSprite = Helpers.Sequential(4).Select(num => new WrapSpriteLoader(() => {
         if (!handAnimSprite[num]) {
-            var hand = PlayerControl.LocalPlayer.cosmetics.PettingHand;
+            var hand = AmongUsLLImpl.LocalPlayer.cosmetics.PettingHand;
             hand.PetClip.SampleAnimation(hand.gameObject, handAnimSampleTime[num]);
             handAnimSprite[num] = hand.HandSprite.sprite;
         }
@@ -37,7 +37,7 @@ public class Destroyer : DefinedSingleAbilityRoleTemplate<Destroyer.Ability>, De
     }
 
     static private readonly IRelativeCooldownConfiguration KillCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.destroyer.destroyCoolDown", CoolDownType.Immediate, (0f, 60f, 2.5f), 35f, (-30f, 30f, 2.5f), 10f, (0.5f, 5f, 0.125f), 1.5f);
-    static private readonly IntegerConfiguration PhasesOfDestroyingOption = NebulaAPI.Configurations.Configuration("options.role.destroyer.phasesOfDestroying", (1, 10), 3, decorator: val => val + ($" ({string.Format("{0:#.#}",3.2f + (2.05f * (val - 1)))}{Language.Translate("options.sec")})").Color(Color.gray));
+    static private readonly IntegerConfiguration PhasesOfDestroyingOption = NebulaAPI.Configurations.Configuration("options.role.destroyer.phasesOfDestroying", (1, 10), 3, decorator: val => val + ($" ({string.Format("{0:#.#}",3.2f + (2.05f * (val - 1)))}{Language.Translate("options.sec")})").Color(VColor.Gray));
     static private readonly FloatConfiguration KillSEStrengthOption = NebulaAPI.Configurations.Configuration("options.role.destroyer.killSEStrength", (1f,20f,0.5f),3.5f, FloatConfigurationDecorator.Ratio);
     static private readonly BoolConfiguration LeaveKillEvidenceOption = NebulaAPI.Configurations.Configuration("options.role.destroyer.leaveKillEvidence", true);
     static private readonly BoolConfiguration CanReportKillSceneOption = NebulaAPI.Configurations.Configuration("options.role.destroyer.canReportKillScene", true);
@@ -125,7 +125,7 @@ public class Destroyer : DefinedSingleAbilityRoleTemplate<Destroyer.Ability>, De
             target.moveable = false;
 
             //キルされる相手は今の操作を中断させられる。
-            if (target.AmOwner && Minigame.Instance)
+            if (target.AmOwner && Minigame.Instance.AsBoolFast())
             {
                 try
                 {
@@ -175,7 +175,7 @@ public class Destroyer : DefinedSingleAbilityRoleTemplate<Destroyer.Ability>, De
             {
                 while (true)
                 {
-                    if (MeetingHud.Instance)
+                    if (MeetingHud.Instance.AsBoolFast())
                     {
                         if (!target.Data.IsDead && myPlayer.AmOwner)
                         {
@@ -242,7 +242,7 @@ public class Destroyer : DefinedSingleAbilityRoleTemplate<Destroyer.Ability>, De
                 float randomX = 0f;
                 float randomTimer = 0f;
 
-                if (!MeetingHud.Instance) NebulaAsset.PlaySE(audioClip, target.transform.position, 0.8f, KillSEStrengthOption, 1f);
+                if (!MeetingHud.Instance.AsBoolFast()) NebulaAsset.PlaySE(audioClip, target.transform.position, 0.8f, KillSEStrengthOption, 1f);
 
                 int sePhase = 0;
                 float[] seTime = [0.45f, 0.62f, 0.98f];
@@ -260,7 +260,7 @@ public class Destroyer : DefinedSingleAbilityRoleTemplate<Destroyer.Ability>, De
                         randomTimer = 0.05f;
                     }
 
-                    if (playKillSE && !MeetingHud.Instance)
+                    if (playKillSE && !MeetingHud.Instance.AsBoolFast())
                     {
                         if (sePhase < seTime.Length && p > seTime[sePhase])
                         {
@@ -323,12 +323,12 @@ public class Destroyer : DefinedSingleAbilityRoleTemplate<Destroyer.Ability>, De
             {
                 var bloodRenderer = UnityHelper.CreateObject<SpriteRenderer>("DestroyerBlood", null, (targetPos + new Vector3(0f, 0.1f, 0f)).AsWorldPos(true));
                 bloodRenderer.sprite = spriteBloodPuddle.GetSprite();
-                bloodRenderer.color = DynamicPalette.PlayerColors[target.CurrentOutfit.ColorId];
+                bloodRenderer.color = DynamicPalette.PlayerColors[target.CurrentOutfit.ColorId].ToUnityColor();
                 bloodRenderer.transform.localScale = new(0.45f, 0.45f, 1f);
             }
 
             GameObject.Destroy(handRenderer.gameObject);
-            if (deadBodyObj) GameObject.Destroy(deadBodyObj);
+            if (deadBodyObj.AsBoolFast()) GameObject.Destroy(deadBodyObj);
 
             myPlayer.moveable = true;
 

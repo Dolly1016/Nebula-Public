@@ -136,14 +136,14 @@ public class DevStudio : MonoBehaviour
         {
             if (id.Value.Text.Length < 1 || name.Value.Text.Length < 1)
             {
-                id.Value.SetHint(Language.Translate("devStudio.ui.hint.requiredText").Color(Color.red * 0.7f));
-                name.Value.SetHint(Language.Translate("devStudio.ui.hint.requiredText").Color(Color.red * 0.7f));
+                id.Value.SetHint(Language.Translate("devStudio.ui.hint.requiredText").Color(VColor.Red * 0.7f));
+                name.Value.SetHint(Language.Translate("devStudio.ui.hint.requiredText").Color(VColor.Red * 0.7f));
                 return;
             }
             if (Directory.Exists("Addons/" + id.Value.Text))
             {
                 id.Value.SetText("");
-                id.Value.SetHint(Language.Translate("devStudio.ui.hint.duplicatedId").Color(Color.red * 0.7f));
+                id.Value.SetHint(Language.Translate("devStudio.ui.hint.duplicatedId").Color(VColor.Red * 0.7f));
                 return;
             }
 
@@ -239,7 +239,7 @@ public class DevStudio : MonoBehaviour
                              FontMaterial = VanillaAsset.StandardMaskedFontMaterial,
                              Size = new(1f, 0.2f),
                          })
-                        { Text = NebulaGUIWidgetEngine.Instance.TextComponent(Color.red.RGBMultiplied(0.7f), "devStudio.ui.common.delete"), Color = Color.red.RGBMultiplied(0.7f) }.SetAsMaskedButton()
+                        { Text = NebulaGUIWidgetEngine.Instance.TextComponent(Color.red.RGBMultiplied(0.7f), "devStudio.ui.common.delete"), Color = VColor.Red.RGBMultiplied(0.7f) }.SetAsMaskedButton()
 
                          )
                     { Alignment = IMetaWidgetOld.AlignmentOption.Left }
@@ -385,7 +385,7 @@ public class DevStudio : MonoBehaviour
         {
             MetaWidgetOld widget = new();
 
-            MetaWidgetOld.Button GetButton(Action clickAction, string rawText, bool reopenScreen = true, bool useBoldFont = false, bool asMasked = false, Color? color = null)
+            MetaWidgetOld.Button GetButton(Action clickAction, string rawText, bool reopenScreen = true, bool useBoldFont = false, bool asMasked = false, VColor? color = null)
             {
                 var attr = new TextAttributeOld(useBoldFont ? TextAttributeOld.BoldAttr : TextAttributeOld.NormalAttr) { Size = new(0.2f, 0.2f) };
                 if (asMasked) attr.FontMaterial = VanillaAsset.StandardMaskedFontMaterial;
@@ -402,7 +402,7 @@ public class DevStudio : MonoBehaviour
             void AppendMargin(bool wide = false) { if (buttons.Count > 0) buttons.Add(new MetaWidgetOld.HorizonalMargin(wide ? 0.35f : 0.2f)); }
             void AppendLocalizedButtonText(string translationKey) { buttons.Add(GetLocalizedTagContent(translationKey)); }
             void AppendRawButtonText(string rawText) { buttons.Add(GetRawTagContent(rawText)); }
-            void AppendButton(Action clickAction, string rawText, bool reopenScreen = true, bool useBoldFont = false, bool highlighted = false) => buttons.Add(GetButton(clickAction, rawText, reopenScreen, useBoldFont, color: highlighted ? UnityEngine.Color.yellow : null));
+            void AppendButton(Action clickAction, string rawText, bool reopenScreen = true, bool useBoldFont = false, bool highlighted = false) => buttons.Add(GetButton(clickAction, rawText, reopenScreen, useBoldFont, color: highlighted ? VColor.Yellow : null));
             void AppendButtonTag(string translationKey)
             {
                 AppendLocalizedButtonText(translationKey);
@@ -440,7 +440,7 @@ public class DevStudio : MonoBehaviour
                 
                 AppendMargin(true);
 
-                AppendButton(() => { parent.RemoveContent(doc); NebulaManager.Instance.HideHelpWidget(); }, "×".Color(Color.red), true, true);
+                AppendButton(() => { parent.RemoveContent(doc); NebulaManager.Instance.HideHelpWidget(); }, "×".Color(VColor.Red), true, true);
             }
 
             widget.Append(new CombinedWidgetOld(buttons.ToArray()) { Alignment = IMetaWidgetOld.AlignmentOption.Left });
@@ -595,7 +595,7 @@ public class DevStudio : MonoBehaviour
                             GetButton(() => {
                                 doc.Document.Arguments.Remove(arg.Key);
                                 NebulaManager.Instance.ScheduleDelayAction(UpdateInner);
-                            }, "×".Color(Color.red), true, true, true)
+                            }, "×".Color(VColor.Red), true, true, true)
                             )
                         { Alignment = IMetaWidgetOld.AlignmentOption.Left });
                     }
@@ -712,14 +712,14 @@ public class DevStudio : MonoBehaviour
         {
             if (id.Value.Text.Length < 1)
             {
-                id.Value.SetHint(Language.Translate("devStudio.ui.hint.requiredText").Color(Color.red * 0.7f));
+                id.Value.SetHint(Language.Translate("devStudio.ui.hint.requiredText").Color(VColor.Red * 0.7f));
                 return;
             }
 
             if (addon.ExistsFile("Documents/" + id.Value.Text + ".json"))
             {
                 id.Value.SetText("");
-                id.Value.SetHint(Language.Translate("devStudio.ui.hint.duplicatedId").Color(Color.red * 0.7f));
+                id.Value.SetHint(Language.Translate("devStudio.ui.hint.duplicatedId").Color(VColor.Red * 0.7f));
                 return;
             }
 
@@ -894,7 +894,7 @@ public class DevStudio : MonoBehaviour
     };
 
     private static MetaWidgetOld.Button GetCostumeContentButton<Costume>(Costume costume, string translationKey, string fieldName,DevAddon addon, Variable<TextField> costumeNameRef,Action? updateAction) where Costume : CustomCosmicItem {
-        Color disabledColor = Color.gray.RGBMultiplied(0.48f);
+        VColor disabledColor = VColor.Gray.RGBMultiplied(0.48f);
 
         MetaWidgetOld.Button? myButton = null;
         SpriteRenderer? myRenderer = null;
@@ -902,7 +902,7 @@ public class DevStudio : MonoBehaviour
         {
             if (costumeNameRef.Value!.Text.Length == 0)
             {
-                costumeNameRef.Value.SetHint(Language.Translate("devStudio.ui.cosmetics.hint.needToSetTitle").Color(Color.red.AlphaMultiplied(0.8f)));
+                costumeNameRef.Value.SetHint(Language.Translate("devStudio.ui.cosmetics.hint.needToSetTitle").Color(VColor.Red.AlphaMultiplied(0.8f)));
                 return;
             }
 #if ANDROID
@@ -930,7 +930,8 @@ public class DevStudio : MonoBehaviour
                         costume.MyBundle = addon.MyBundle!;
                         new StackfullCoroutine(costume.Activate(false)).Wait();
                         updateAction?.Invoke();
-                        myButton!.Color = myRenderer!.color = Color.white;
+                        myButton!.Color = VColor.White;
+                        myRenderer!.color = VColor.White.ToUnityColor();
 
                         using Stream hashStream = File.OpenRead(destPath);
                         image.Hash = CosmicImage.ComputeImageHash(hashStream);
@@ -955,7 +956,7 @@ public class DevStudio : MonoBehaviour
             });
 #endif
         }, new(TextAttributeOld.BoldAttr) { Size = new(0.85f, 0.23f) })
-        { Color = costume.GetType().GetField(fieldName)!.GetValue(costume) == null ? disabledColor : Color.white, TranslationKey = translationKey, Alignment = IMetaWidgetOld.AlignmentOption.Center, PostBuilder = (_, renderer, _) => myRenderer = renderer };
+        { Color = costume.GetType().GetField(fieldName)!.GetValue(costume) == null ? disabledColor : VColor.White, TranslationKey = translationKey, Alignment = IMetaWidgetOld.AlignmentOption.Center, PostBuilder = (_, renderer, _) => myRenderer = renderer };
         return myButton;
     }
 
@@ -968,7 +969,7 @@ public class DevStudio : MonoBehaviour
         new MetaWidgetOld.TextInput(1, 1.8f, new(3.3f, 0.28f))
         {
             TextFieldRef = textRef,
-            Hint = hint.Color(Color.gray),
+            Hint = hint.Color(VColor.Gray),
             TextPredicate = TextField.JsonStringPredicate,
             DefaultText = defaultText,
             PostBuilder = (field) => field.LostFocusAction += onEntered

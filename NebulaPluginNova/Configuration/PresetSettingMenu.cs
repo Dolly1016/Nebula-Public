@@ -83,7 +83,7 @@ public class PresetSettingMenu : MonoBehaviour
                                 var textField = new GUITextField(GUIAlignment.Center, new(3f, 0.28f))
                                 {
                                     IsSharpField = false,
-                                    HintText = "Please input new name!".Color(Color.gray),
+                                    HintText = "Please input new name!".Color(VColor.Gray),
                                     WithMaskMaterial = false
                                 };
                                 nameWindow.SetWidget(GUI.API.VerticalHolder(GUIAlignment.Left,
@@ -139,12 +139,12 @@ public class PresetSettingMenu : MonoBehaviour
                 "preset.saveAs",
                 _ =>
                 {
-                    var popup = MetaScreen.GenerateWindow(new(4f, 1.7f), HudManager.Instance.transform, Vector3.zero, true, false);
+                    var popup = MetaScreen.GenerateWindow(new(4f, 1.7f), AmongUsLLImpl.HudManagerInstance.transform, VVector3.Zero, true, false);
                     MetaWidgetOld widget = new();
                     Variable<TextField> fieldRef = new();
                     widget.Append(new MetaWidgetOld.Text(TextAttributeOld.NormalAttrLeft) { Alignment = IMetaWidgetOld.AlignmentOption.Left, TranslationKey = "preset.enterPresetName" });
                     widget.Append(new MetaWidgetOld.VerticalMargin(0.1f));
-                    widget.Append(new MetaWidgetOld.TextInput(1, 1.2f, new(3f, 0.28f)) { Hint = "Current Output".Color(Color.gray), TextFieldRef = fieldRef, Alignment = IMetaWidgetOld.AlignmentOption.Center });
+                    widget.Append(new MetaWidgetOld.TextInput(1, 1.2f, new(3f, 0.28f)) { Hint = "Current Output".Color(VColor.Gray), TextFieldRef = fieldRef, Alignment = IMetaWidgetOld.AlignmentOption.Center });
                     widget.Append(new MetaWidgetOld.VerticalMargin(0.1f));
                     widget.Append(new MetaWidgetOld.Button(() =>
                     {

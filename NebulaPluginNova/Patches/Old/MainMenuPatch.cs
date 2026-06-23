@@ -101,13 +101,13 @@ public static class MainMenuSetUpPatch
 
         foreach (var button in __instance.mainButtons.GetFastEnumerator())
         {
-            if (button.activeSprites)
+            if (button.activeSprites.AsBoolFast())
             {
                 var name = button.name;
                 bool shouldRotate = name != "NebulaButton" && name != "Inventory Button";
                 bool shouldMove = name != "NebulaButton";
                 var rendererTransform = button.activeSprites.transform.FindChild("Icon");
-                if (rendererTransform)
+                if (rendererTransform.AsBoolFast())
                 {
 
                     if (shouldRotate) rendererTransform.localEulerAngles -= new Vector3(0f, 0f, 10f);
@@ -116,7 +116,7 @@ public static class MainMenuSetUpPatch
                     if (shouldMove)
                     {
                         var aspectPos = rendererTransform.GetComponent<AspectPosition>();
-                        if (aspectPos)
+                        if (aspectPos.AsBoolFast())
                         {
                             aspectPos.DistanceFromEdge += new Vector3(-0.02f, 0.1f, 0f);
                             aspectPos.AdjustPosition();
@@ -184,7 +184,7 @@ public static class MainMenuSetUpPatch
         SetUpButton("title.buttons.addons", () =>
         {
             __instance.ResetScreen();
-            if (!AddonsScreen) CreateAddonsScreen();
+            if (!AddonsScreen.AsBoolFast()) CreateAddonsScreen();
             AddonsScreen?.SetActive(true);
             __instance.screenTint.enabled = true;
         });
@@ -307,6 +307,13 @@ public static class MainMenuSetUpPatch
                 Alignment = TMPro.TextAlignmentOptions.Left
             };
 
+            TextAttributeOld ErrorDetailAttribute = new(TextAttributeOld.BoldAttr)
+            {
+                FontMaterial = VanillaAsset.StandardMaskedFontMaterial,
+                Size = new Vector2(3f, 0.55f),
+                Alignment = TMPro.TextAlignmentOptions.Left
+            };
+
             TextAttributeOld CategoryAttribute = new(TextAttributeOld.BoldAttr)
             {
                 FontMaterial = VanillaAsset.StandardMaskedFontMaterial,
@@ -387,7 +394,8 @@ public static class MainMenuSetUpPatch
                 {
                     inner.Append(new MetaWidgetOld.VerticalMargin(0.8f));
                     inner.Append(new MetaWidgetOld.Text(new(NameAttribute) { Alignment = TMPro.TextAlignmentOptions.Center }) { RawText = Language.Translate("version.fetching.failed"), Alignment = IMetaWidgetOld.AlignmentOption.Center });
-                    inner.Append(new MetaWidgetOld.Text(new(NameAttribute) { Alignment = TMPro.TextAlignmentOptions.Center }) { RawText = Language.Translate("version.fetching.failed.detail").Sized(70), Alignment = IMetaWidgetOld.AlignmentOption.Center });
+                    inner.Append(new MetaWidgetOld.VerticalMargin(0.02f));
+                    inner.Append(new MetaWidgetOld.Text(new(ErrorDetailAttribute) { Alignment = TMPro.TextAlignmentOptions.Top }) { RawText = Language.Translate("version.fetching.failed.detail").Sized(70), Alignment = IMetaWidgetOld.AlignmentOption.Center });
                 }
                 foreach (var version in versions)
                 {
@@ -511,9 +519,9 @@ public static class MainMenuClearScreenPatch
 {
     public static void Postfix(MainMenuManager __instance)
     {
-        if (MainMenuSetUpPatch.NebulaScreen) MainMenuSetUpPatch.NebulaScreen?.SetActive(false);
-        if (MainMenuSetUpPatch.AddonsScreen) MainMenuSetUpPatch.AddonsScreen?.SetActive(false);
-        if (MainMenuSetUpPatch.VersionsScreen) MainMenuSetUpPatch.VersionsScreen?.SetActive(false);
+        if (MainMenuSetUpPatch.NebulaScreen.AsBoolFast()) MainMenuSetUpPatch.NebulaScreen?.SetActive(false);
+        if (MainMenuSetUpPatch.AddonsScreen.AsBoolFast()) MainMenuSetUpPatch.AddonsScreen?.SetActive(false);
+        if (MainMenuSetUpPatch.VersionsScreen.AsBoolFast()) MainMenuSetUpPatch.VersionsScreen?.SetActive(false);
     }
 }
 

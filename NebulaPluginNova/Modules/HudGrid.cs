@@ -19,11 +19,14 @@ public class HudGrid : MonoBehaviour
     {
         ContentsOccupyMultipleLines = [false, false];
 
-        var buttonParent = HudManager.Instance.UseButton.transform.parent;
+        var bridge = AmongUsLLImpl.HudManagerBridge;
+
+        var buttonParent = bridge.UseButtonParentTransform;
+        var buttonParentObj = bridge.UseButtonParentObj;
         buttonParent.localPosition= Vector3.zero;
         buttonParent.name = "Buttons";
-        GameObject.Destroy(buttonParent.gameObject.GetComponent<GridArrange>());
-        GameObject.Destroy(buttonParent.gameObject.GetComponent<AspectPosition>());
+        GameObject.Destroy(buttonParentObj.GetComponent<GridArrange>());
+        GameObject.Destroy(buttonParentObj.GetComponent<AspectPosition>());
         ButtonsHolder = buttonParent;
         StaticButtonsHolder = UnityHelper.CreateObject("StaticButtons", buttonParent.parent, new Vector3(0, 0, -90f)).transform;
 
@@ -37,16 +40,16 @@ public class HudGrid : MonoBehaviour
             return content;
         }
 
-        AddVanillaButtons(HudManager.Instance.UseButton.gameObject,1000);
-        AddVanillaButtons(HudManager.Instance.PetButton.gameObject,1000);
-        AddVanillaButtons(HudManager.Instance.ImpostorVentButton.gameObject,997);
-        AddVanillaButtons(HudManager.Instance.ReportButton.gameObject,999);
-        AddVanillaButtons(HudManager.Instance.SabotageButton.gameObject, 998);
-        AddVanillaButtons(HudManager.Instance.KillButton.gameObject, -1).MarkAsKillButtonContent();
+        AddVanillaButtons(bridge.UseButtonObj,1000);
+        AddVanillaButtons(bridge.PetButtonObj,1000);
+        AddVanillaButtons(bridge.ImpostorVentButtonObj,997);
+        AddVanillaButtons(bridge.ReportButtonObj,999);
+        AddVanillaButtons(bridge.SabotageButtonObj, 998);
+        AddVanillaButtons(bridge.KillButtonObj, -1).MarkAsKillButtonContent();
         
 
         //ベントボタンにクールダウンテキストを設定
-        HudManager.Instance.ImpostorVentButton.cooldownTimerText = GameObject.Instantiate(HudManager.Instance.KillButton.cooldownTimerText, HudManager.Instance.ImpostorVentButton.transform);
+        bridge.ImpostorVentButton.cooldownTimerText = GameObject.Instantiate(bridge.KillButton.cooldownTimerText, bridge.ImpostorVentButton.transform);
     }
 
     static public bool UseSmallerHud => ClientOption.GetValue(ClientOption.ClientOptionType.SmallHud) == 1;
@@ -88,7 +91,7 @@ public class HudGrid : MonoBehaviour
             bool ShouldBeShown(HudContent c)
             {
                 if (!c.IsActive) return false;
-                if (MeetingHud.Instance && !c.gameObject.active) return false; //会議中はstaticContents以外除外する
+                if (MeetingHud.Instance.AsBoolFast() && !c.gameObject.active) return false; //会議中はstaticContents以外除外する
                 return true;
             }
             for (int e = 0; e < Contents[i].Count; e++)
@@ -210,9 +213,12 @@ public class HudContent : MonoBehaviour
     {
         get
         {
+            int width = NebulaAPI.AmongUs.ScreenWidth;
+            int height = NebulaAPI.AmongUs.ScreenHeight;
+
             var edge = HudGrid.UseSmallerHud ?
-        (3.0f / 0.72f) * (float)Screen.width / (float)Screen.height - 0.67f :
-        3.0f * (float)Screen.width / (float)Screen.height - 0.8f;
+        (3.0f / 0.72f) * (float)width / (float)height - 0.67f :
+        3.0f * (float)width / (float)height - 0.8f;
             //if (Input.GetKey(KeyCode.L)) edge += 5f;
             return edge;
         }
@@ -279,7 +285,7 @@ public class HudContent : MonoBehaviour
 
     static public HudContent InstantiateContent(string name, bool isLeftSide = true, bool occupiesLine = false,bool asKillButtonContent = false, bool isStaticContent = false)
     {
-        var obj = UnityHelper.CreateObject<HudContent>(name, HudManager.Instance.KillButton.transform.parent, Vector3.zero);
+        var obj = UnityHelper.CreateObject<HudContent>(name, AmongUsLLImpl.HudManagerBridge.KillButton.transform.parent, Vector3.zero);
         obj.OccupiesLine= occupiesLine;
         obj.MarkAsKillButtonContent(asKillButtonContent);
         obj.IsStaticContent = isStaticContent;
@@ -297,7 +303,7 @@ public class HudContent : MonoBehaviour
         var adjust = UnityHelper.CreateObject<ScriptBehaviour>("Adjust", holder.transform, Vector3.zero);
         adjust.UpdateHandler += () =>
         {
-            if (MeetingHud.Instance)
+            if (MeetingHud.Instance.AsBoolFast())
             {
                 adjust.transform.localScale = new(0.65f, 0.65f, 1f);
                 adjust.transform.localPosition = new(-0.45f, -0.37f, 0f);

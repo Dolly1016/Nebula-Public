@@ -82,13 +82,13 @@ public class Morphing : DefinedSingleAbilityRoleTemplate<Morphing.Ability>, HasC
                     _ => sample != null, isToggleEffect: true).SetAsUsurpableButton(this);
                 morphButton.OnEffectStart = (button) =>
                 {
-                    PlayerModInfo.RpcAddOutfit.Invoke(new(PlayerControl.LocalPlayer.PlayerId, new(sample!, "Morphing", OutfitPriority.Morph, true)));
+                    PlayerModInfo.RpcAddOutfit.Invoke(new(AmongUsLLImpl.LocalPlayer.PlayerId, new(sample!, "Morphing", OutfitPriority.Morph, true)));
                     acTokenCommon ??= new("morphing.common1");
                     StatsMorph.Progress();
                 };
                 morphButton.OnEffectEnd = (button) =>
                 {
-                    PlayerModInfo.RpcRemoveOutfit.Invoke(new(PlayerControl.LocalPlayer.PlayerId, "Morphing"));
+                    PlayerModInfo.RpcRemoveOutfit.Invoke(new(AmongUsLLImpl.LocalPlayer.PlayerId, "Morphing"));
                     morphButton.CoolDownTimer?.Start();
                 };
                 morphButton.OnUpdate = (button) =>

@@ -130,7 +130,7 @@ file static class NoGuideHelpers
     {
         task.LocationDirty = false;
         List<Vector2> list = [];
-        Console[] allConsoles = ShipStatus.Instance.AllConsoles;
+        Console[] allConsoles = AmongUsLLImpl.ShipStatusInstance.AllConsoles;
         for (int i = 0; i < allConsoles.Length; i++)
         {
             var console = allConsoles[i];
@@ -179,7 +179,7 @@ internal static class NoGuideOverlayPatch
             var locations = NoGuideHelpers.FindFakeConsolePos(task.CastFast<NormalPlayerTask>(), type);
             for (int i = 0; i < locations.Count; i++)
             {
-                Vector3 vector = locations[i] / ShipStatus.Instance.MapScale;
+                Vector3 vector = locations[i] / AmongUsLLImpl.ShipStatusInstance.MapScale;
                 vector.z = -1f;
                 PooledMapIcon pooledMapIcon = __instance.icons.Get<PooledMapIcon>();
                 pooledMapIcon.transform.localScale = new Vector3(pooledMapIcon.NormalSize, pooledMapIcon.NormalSize, pooledMapIcon.NormalSize);
@@ -207,7 +207,7 @@ internal static class NoGuideArrowPatch
 {
     public static bool Prefix(NormalPlayerTask __instance)
     {
-        if (!__instance.Arrow) return false;
+        if (!__instance.Arrow.AsBoolFast()) return false;
         if (!__instance.Owner.AmOwner || __instance.IsComplete)
         {
             __instance.Arrow.gameObject.SetActive(false);

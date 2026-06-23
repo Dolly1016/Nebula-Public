@@ -88,8 +88,8 @@ internal class AbilityGauge : FlexibleLifespan, IGameOperator
 
     void OnUpdate(GameUpdateEvent ev)
     {
-        GaugeObject.SetActive(isActive && !AmongUsUtil.MapIsOpen && !ExileController.Instance);
-        if (MeetingHud.Instance)
+        GaugeObject.SetActive(isActive && !AmongUsUtil.MapIsOpen && !ExileController.Instance.AsBoolFast());
+        if (MeetingHud.Instance.AsBoolFast())
         {
             Adjuster.localScale = new(0.8f, 0.8f, 1f);
             Adjuster.localPosition = new(-0.3f, -0.2f);
@@ -114,7 +114,7 @@ internal class AbilityGauge : FlexibleLifespan, IGameOperator
         if (isInProgress.Invoke())
         {
             GaugeBaseRenderer.color = Color.white;
-            var sin = (float)Helpers.ScaledSin(9f) * 0.015f + 0.015f + 1f;
+            var sin = Helpers.ScaledSin(9f) * 0.015f + 0.015f + 1f;
             Scaler.transform.localScale = new(sin, sin, 1f);
         }
         else

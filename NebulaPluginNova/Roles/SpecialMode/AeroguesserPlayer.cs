@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Virial;
 using Virial.Assignable;
 
-namespace Nebula.Roles.AeroGuesser;
+namespace Nebula.Roles.SpecialMode;
 
 internal class AeroguesserPlayer : DefinedRoleTemplate, DefinedRole
 {

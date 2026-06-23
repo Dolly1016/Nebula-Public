@@ -15,7 +15,7 @@ public class ExtraPassiveBehaviour : MonoBehaviour
 
     public void Update()
     {
-        if(myElement && PassiveButtonManager.Instance.currentOver == myElement)
+        if(myElement.AsBoolFast() && PassiveButtonManager.Instance.currentOver == myElement)
         {
             OnPiled?.Invoke();
             

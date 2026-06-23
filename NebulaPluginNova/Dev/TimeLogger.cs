@@ -24,7 +24,7 @@ internal class TimeLogger
         stopwatch.Start();
     }
 
-    private void Restart()
+    public void Restart()
     {
         stopwatch.Restart();
     }
@@ -36,5 +36,16 @@ internal class TimeLogger
         Log(tag + " " + ticks + "ticks (" + millisec + "ms)");
         Restart();
     }
+
+    public void MeasureIf(string tag, long minMillisec)
+    {
+        long ticks = stopwatch.ElapsedTicks;
+        long millisec = stopwatch.ElapsedMilliseconds;
+        if (minMillisec <= millisec) {
+            Log(tag + " " + ticks + "ticks (" + millisec + "ms)");
+        }
+        Restart();
+    }
+
 
 }

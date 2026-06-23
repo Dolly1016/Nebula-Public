@@ -29,7 +29,7 @@ public class TrackerTaskMapLayer : MonoBehaviour
 
     public void Awake()
     {
-        iconPool = new(ShipStatus.Instance.MapPrefab.taskOverlay.icons.Prefab.GetComponent<PooledMapIcon>(), transform);
+        iconPool = new(AmongUsLLImpl.ShipStatusInstance.MapPrefab.taskOverlay.icons.Prefab.GetComponent<PooledMapIcon>(), transform);
         iconPool.OnInstantiated = icon =>
         {
             icon.rend.color = Color.yellow;
@@ -44,7 +44,7 @@ public class TrackerTaskMapLayer : MonoBehaviour
         foreach (var location in locations)
         {
             var icon = iconPool.Instantiate();
-            Vector3 localPos = location / ShipStatus.Instance.MapScale;
+            Vector3 localPos = location / AmongUsLLImpl.ShipStatusInstance.MapScale;
             localPos.z = -1f;
             icon.transform.localPosition = localPos;
         }
@@ -60,7 +60,7 @@ public class TrackerPlayerMapLayer : MonoBehaviour
 
     public void Awake()
     {
-        iconPool = new(ShipStatus.Instance.MapPrefab.HerePoint, transform);
+        iconPool = new(AmongUsLLImpl.ShipStatusInstance.MapPrefab.HerePoint, transform);
         iconPool.OnInstantiated = icon => PlayerMaterial.SetColors(Target?.PlayerId ?? 0, icon);
     }
 
@@ -73,8 +73,9 @@ public class TrackerPlayerMapLayer : MonoBehaviour
         if (Target == null) return;
         iconPool.RemoveAll();
 
-        var center = VanillaAsset.GetMapCenter(AmongUsUtil.CurrentMapId);
-        var scale = VanillaAsset.GetMapScale(AmongUsUtil.CurrentMapId);
+        var currentMapId = AmongUsUtil.CurrentMapId;
+        var center = VanillaAsset.GetMapCenter(currentMapId);
+        var scale = VanillaAsset.GetMapScale(currentMapId);
 
 
         if (!Target!.IsDead && !MeetingHud.Instance)
@@ -171,7 +172,7 @@ public class EvilTracker : DefinedSingleAbilityRoleTemplate<EvilTracker.Ability>
 
         private void TryRegisterArrow(GamePlayer player) {
             if (!MyPlayer.IsImpostor) return;
-            if(!impostorArrows.Any(a => a.MyPlayer == player)) impostorArrows.Add(new TrackingArrowAbility(player.Unbox(), 0f, Palette.ImpostorRed).Register(this));
+            if(!impostorArrows.Any(a => a.MyPlayer == player)) impostorArrows.Add(new TrackingArrowAbility(player.Unbox(), 0f, new(Palette.ImpostorRed)).Register(this));
         }
 
         //役職変化に応じて矢印を付ける
@@ -193,13 +194,13 @@ public class EvilTracker : DefinedSingleAbilityRoleTemplate<EvilTracker.Ability>
         {
             trackingTarget = target;
 
-            if (TrackingIcon) GameObject.Destroy(TrackingIcon?.gameObject);
+            if (TrackingIcon.AsBoolFast()) GameObject.Destroy(TrackingIcon?.gameObject);
             if (trackingTarget != null)
             {
                 TrackingIcon = trackButton!.GeneratePlayerIcon(trackingTarget);
 
                 if (arrowAbility != null) arrowAbility.Release();
-                arrowAbility = new TrackingArrowAbility(trackingTarget, UpdateArrowIntervalOption, Color.white).Register(this);
+                arrowAbility = new TrackingArrowAbility(trackingTarget, UpdateArrowIntervalOption, VColor.White).Register(this);
             }
         }
 
@@ -215,7 +216,7 @@ public class EvilTracker : DefinedSingleAbilityRoleTemplate<EvilTracker.Ability>
                     {
                         StringBuilder text = new();
 
-                        if (trackingTarget != null && !trackingTarget.IsDead) text.AppendLine((trackingTarget.Name + ": " + AmongUsUtil.GetRoomName(trackingTarget.TruePosition, true)).Color(Color.Lerp(DynamicPalette.PlayerColors[trackingTarget.PlayerId], Color.white, 0.25f)));
+                        if (trackingTarget != null && !trackingTarget.IsDead) text.AppendLine((trackingTarget.Name + ": " + AmongUsUtil.GetRoomName(trackingTarget.TruePosition, true)).Color(VColor.Lerp(DynamicPalette.PlayerColors[trackingTarget.PlayerId], VColor.White, 0.25f)));
                         if (MyPlayer.IsImpostor) foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo.Where(p => !p.AmOwner && p.IsImpostorlike && !p.IsDead)) text.AppendLine((p.Name + ": " + AmongUsUtil.GetRoomName(p.TruePosition, true)).Color(Palette.ImpostorRed));
 
                         tmPro.text = text.ToString();
@@ -301,7 +302,7 @@ public class EvilTracker : DefinedSingleAbilityRoleTemplate<EvilTracker.Ability>
         [Local]
         void OnMeetingEnd(MeetingStartEvent ev)
         {
-            if (mapLayer)
+            if (mapLayer.AsBoolFast())
             {
                 GameObject.Destroy(mapLayer!.gameObject);
                 mapLayer = null;
@@ -311,7 +312,7 @@ public class EvilTracker : DefinedSingleAbilityRoleTemplate<EvilTracker.Ability>
         [Local]
         void OnPlayerMurdered(PlayerMurderedEvent ev)
         {
-            if(ShowKillFlashOption && !ev.Murderer.AmOwner) AmongUsUtil.PlayQuickFlash(Palette.ImpostorRed);   
+            if(ShowKillFlashOption && !ev.Murderer.AmOwner) AmongUsUtil.PlayQuickFlash(new(Palette.ImpostorRed));
         }
 
 
@@ -320,21 +321,21 @@ public class EvilTracker : DefinedSingleAbilityRoleTemplate<EvilTracker.Ability>
         {
             if(ev is MapOpenAdminEvent)
             {
-                if (playerMapLayer) playerMapLayer!.gameObject.SetActive(false);
-                if (mapLayer) mapLayer!.gameObject.SetActive(false);
+                if (playerMapLayer.AsBoolFast()) playerMapLayer!.gameObject.SetActive(false);
+                if (mapLayer.AsBoolFast()) mapLayer!.gameObject.SetActive(false);
                 return;
             }
 
-            if (MeetingHud.Instance)
+            if (MeetingHud.Instance.AsBoolFast())
             {
-                if (AmOwner && mapLayer) mapLayer!.gameObject.SetActive(false);
-                if (playerMapLayer) playerMapLayer!.gameObject.SetActive(false);
+                if (AmOwner && mapLayer.AsBoolFast()) mapLayer!.gameObject.SetActive(false);
+                if (playerMapLayer.AsBoolFast()) playerMapLayer!.gameObject.SetActive(false);
             }
             else if(!IsUsurped)
             {
                 if (ShowTrackingTargetOnMapOption)
                 {
-                    if (!playerMapLayer)
+                    if (!playerMapLayer.AsBoolFast())
                     {
                         playerMapLayer = UnityHelper.CreateObject<TrackerPlayerMapLayer>("TrackerPlayerLayer", MapBehaviour.Instance.transform, new(0f, 0f, -1f));
                         this.BindGameObject(playerMapLayer.gameObject);
@@ -344,7 +345,7 @@ public class EvilTracker : DefinedSingleAbilityRoleTemplate<EvilTracker.Ability>
                     playerMapLayer!.Target = trackingTarget;
                     playerMapLayer!.gameObject.SetActive(trackingTarget != null);
                 }
-                if (mapLayer) mapLayer!.gameObject.SetActive(false);
+                if (mapLayer.AsBoolFast()) mapLayer!.gameObject.SetActive(false);
             }
         }
 
@@ -367,11 +368,11 @@ public class EvilTracker : DefinedSingleAbilityRoleTemplate<EvilTracker.Ability>
 
         static private RemoteProcess<(byte myId, byte targetId)> RpcShareTaskLoc = QueryRPC.Generate<(byte myId, byte targetId), (byte myId, byte targetId, Vector2[] vec)>(
             "ShareTaskLoc",
-            q => q.targetId == PlayerControl.LocalPlayer.PlayerId,
+            q => q.targetId == AmongUsLLImpl.LocalPlayer.PlayerId,
             q =>
             {
                 List<Vector2> list = new();
-                foreach(var t in PlayerControl.LocalPlayer.myTasks.GetFastEnumerator().Where(t => !t.IsComplete && t.HasLocation))
+                foreach(var t in AmongUsLLImpl.LocalPlayer.myTasks.GetFastEnumerator().Where(t => !t.IsComplete && t.HasLocation))
                 {
                     foreach (var l in t.Locations) list.Add(l);
                 }
@@ -379,7 +380,7 @@ public class EvilTracker : DefinedSingleAbilityRoleTemplate<EvilTracker.Ability>
             },
             (message, _) =>
             {
-                if(message.myId == PlayerControl.LocalPlayer.PlayerId)
+                if(message.myId == AmongUsLLImpl.LocalPlayer.PlayerId)
                 {
                     HudManager.Instance.InitMap();
                     if (MapBehaviour.Instance.IsOpen) MapBehaviour.Instance.Close();

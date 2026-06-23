@@ -26,7 +26,7 @@ internal class AchievementChecker : IGameOperator
     {
         int maxElseMe = 0;
         int myScore = 0;
-        var myId = PlayerControl.LocalPlayer.PlayerId;
+        var myId = AmongUsLLImpl.LocalPlayer.PlayerId;
         foreach (var status in currentStatus)
         {
             if(status.PlayerId == myId)

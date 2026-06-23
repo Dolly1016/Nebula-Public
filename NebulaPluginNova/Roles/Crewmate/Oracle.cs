@@ -95,16 +95,16 @@ public class OracleSystem : AbstractModule<Virial.Game.Game>, IGameOperator
             if (!crewFlag && !impFlag && !neuFlag)
             {
                 //3カテゴリともに対象にできる場合
-                if (Helpers.Prob(0.33f))
+                if (Mathn.Prob(0.33f))
                 {
                     return RoleCategory.CrewmateRole;
                 }
-                return Helpers.Prob(0.5f) ? RoleCategory.ImpostorRole : RoleCategory.NeutralRole;
+                return Mathn.Prob(0.5f) ? RoleCategory.ImpostorRole : RoleCategory.NeutralRole;
             }
             else if (crewFlag ^ impFlag ^ neuFlag)
             {
                 //2カテゴリだけ対象のとき
-                return Helpers.Prob(0.5f) ? (!crewFlag ? RoleCategory.CrewmateRole : RoleCategory.ImpostorRole) : (!neuFlag ? RoleCategory.NeutralRole : RoleCategory.ImpostorRole);
+                return Mathn.Prob(0.5f) ? (!crewFlag ? RoleCategory.CrewmateRole : RoleCategory.ImpostorRole) : (!neuFlag ? RoleCategory.NeutralRole : RoleCategory.ImpostorRole);
             }
             else
             {

@@ -160,9 +160,9 @@ public record PerkDefinition(string localizedName, Image? backSprite, Image? ico
         return this;
     }
 
-    public PerkDefinition CooldownText(string orig, Func<float> cooldown) => AppendReplacement(orig, () => cooldown.Invoke().ToString().Color(Color.red).Bold());
-    public PerkDefinition DurationText(string orig, Func<float> duration) => AppendReplacement(orig, () => duration.Invoke().ToString().Color(Color.yellow).Bold());
-    public PerkDefinition RateText(string orig, Func<float> rate) => AppendReplacement(orig, () => rate.Invoke().ToString().Color(Color.cyan).Bold());
+    public PerkDefinition CooldownText(string orig, Func<float> cooldown) => AppendReplacement(orig, () => cooldown.Invoke().ToString().Color(VColor.Red).Bold());
+    public PerkDefinition DurationText(string orig, Func<float> duration) => AppendReplacement(orig, () => duration.Invoke().ToString().Color(VColor.Yellow).Bold());
+    public PerkDefinition RateText(string orig, Func<float> rate) => AppendReplacement(orig, () => rate.Invoke().ToString().Color(VColor.Cyan).Bold());
 
     static public Image GetPerkIcon(int id) => SpriteLoader.FromResource("Nebula.Resources.Perks.Front" + id + ".png", 100f);
     static public Image GetPerkBackIcon(int id) => SpriteLoader.FromResource("Nebula.Resources.Perks.Back" + id + ".png", 100f);

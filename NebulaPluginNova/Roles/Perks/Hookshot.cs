@@ -12,7 +12,7 @@ namespace Nebula.Roles.Perks;
 
 internal class Hookshot : PerkFunctionalInstance
 {
-    static PerkFunctionalDefinition Def = new("hookshot", PerkFunctionalDefinition.Category.Standard, new PerkDefinition("hookshot", 8, 57, (Crewmate.Climber.MyRole as DefinedAssignable).Color), (def, instance) => new Hookshot(def, instance));
+    static PerkFunctionalDefinition Def = new("hookshot", PerkFunctionalDefinition.Category.Standard, new PerkDefinition("hookshot", 8, 57, Crewmate.Climber.MyRole.Color), (def, instance) => new Hookshot(def, instance));
 
     bool used = false;
     public Hookshot(PerkDefinition def, PerkInstance instance) : base(def, instance)

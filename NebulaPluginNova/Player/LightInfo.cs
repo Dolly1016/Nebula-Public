@@ -12,20 +12,22 @@ internal class LightInfo
     static public IEnumerable<LightInfo> AllLightInfo => allLightInfo;
 
     private SpriteRenderer lightRenderer;
+    private Transform lightTransform;
     public bool IsValid => lightRenderer;
-    public Vector2 Size => lightRenderer.transform.localScale * lightRenderer.size + new Vector2(0.8f, 0.8f);
+    public VVector2 Size => (VVector2)lightTransform.localScale * (VVector2)lightRenderer.size + new VVector2(0.8f, 0.8f);
     public LightInfo(SpriteRenderer lightRenderer)
     {
         this.lightRenderer = lightRenderer;
+        this.lightTransform = lightRenderer.transform;
         allLightInfo.Add(this);
     }
 
     public static void UpdateLightInfo() => allLightInfo.RemoveAll(info => !info.IsValid);
 
-    public bool CheckPoint(Vector2 point)
+    public bool CheckPoint(VVector2 point)
     {
-        var vec = point - (Vector2)lightRenderer.transform.position;
+        var vec = point - (VVector2)lightTransform.position;
         var size = Size;
-        return Math.Sign(vec.x) < size.x && Math.Sign(vec.y) < size.y;
+        return Mathn.Sign(vec.x) < size.x && Mathn.Sign(vec.y) < size.y;
     }
 }

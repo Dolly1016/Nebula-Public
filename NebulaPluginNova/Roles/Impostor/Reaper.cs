@@ -67,7 +67,7 @@ public class Reaper : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 
         private Vent? GetVent(string name)
         {
-            return ShipStatus.Instance.AllVents.FirstOrDefault(v=>v.name == name);
+            return AmongUsLLImpl.ShipStatusInstance.AllVents.FirstOrDefault(v=>v.name == name);
         }
 
         private void EditVentInfo(bool activate)
@@ -233,7 +233,7 @@ public class Reaper : DefinedRoleTemplate, DefinedRole, IAssignableDocument
         [OnlyMyPlayer]
         void AddChallengeTokenOnKillPlayer(PlayerKillPlayerEvent ev)
         {
-            if (acTokenChallenge != null && !MeetingHud.Instance) acTokenChallenge.Value++;
+            if (acTokenChallenge != null && !MeetingHud.Instance.AsBoolFast()) acTokenChallenge.Value++;
         }
 
         [Local]

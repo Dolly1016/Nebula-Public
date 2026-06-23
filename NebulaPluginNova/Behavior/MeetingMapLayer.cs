@@ -55,7 +55,7 @@ public class LineDrawer
     public bool Finished => true;
     void UpdateLine(IReadOnlyList<Vector2> pos)
     {
-        if (!renderer) return;
+        if (!renderer.AsBoolFast()) return;
 
         renderer.positionCount = pos.Count;
         renderer.SetPositions(pos.Select(p => p.AsVector3(0f)).ToArray());
@@ -182,15 +182,15 @@ public class DiscussionSupport : AbstractModule<Virial.Game.Game>, IGameOperator
             if (playerId == PlayerId && !dontSkip) return;
 
             PlayerId = playerId;
-            SetColor(playerId == byte.MaxValue ? Color.gray : DynamicPalette.PlayerColors[playerId]);
+            SetColor(playerId == byte.MaxValue ? VColor.Gray : DynamicPalette.PlayerColors[playerId]);
 
             //関連するアイコンに変更を波及させる
             RelatedIcons.Do(icon => icon.SetPlayer(playerId));
         }
 
-        public void SetColor(Color color)
+        public void SetColor(VColor color)
         {
-            if (Line) Line.sharedMaterial.color = color;
+            if (Line.AsBoolFast()) Line.sharedMaterial.color = color.ToUnityColor();
         }
 
         public void ResetRelation()
@@ -244,11 +244,11 @@ public class DiscussionSupport : AbstractModule<Virial.Game.Game>, IGameOperator
                         var button = renderer.GetComponent<PassiveButton>();
                         button.OnMouseOver.AddListener(() =>
                         {
-                            if (nameCandText) nameCandText.text = p.Name;
+                            if (nameCandText.AsBoolFast()) nameCandText.text = p.Name;
                         });
                         button.OnMouseOut.AddListener(() =>
                         {
-                            if (nameCandText) nameCandText.text = "";
+                            if (nameCandText.AsBoolFast()) nameCandText.text = "";
                         });
                     }
                 }), 8),
@@ -280,7 +280,7 @@ public class DiscussionSupport : AbstractModule<Virial.Game.Game>, IGameOperator
             if (usePlayerMat != IsPlayerImage)
             {
                 Renderer.material = new(IsPlayerImage ? HatManager.Instance.PlayerMaterial : HatManager.Instance.DefaultShader);
-                if (Renderer)
+                if (Renderer.AsBoolFast())
                 {
                     PlayerMaterial.SetColors(PlayerId, Renderer);
                 }
@@ -295,7 +295,7 @@ public class DiscussionSupport : AbstractModule<Virial.Game.Game>, IGameOperator
             if (playerId == PlayerId) return;
             if (playerId == byte.MaxValue) return;
 
-            if (Renderer && IsPlayerImage)
+            if (Renderer.AsBoolFast() && IsPlayerImage)
             {
                 PlayerMaterial.SetColors(playerId, Renderer);
             }
@@ -371,11 +371,11 @@ public class DiscussionSupport : AbstractModule<Virial.Game.Game>, IGameOperator
                         var button = renderer.GetComponent<PassiveButton>();
                         button.OnMouseOver.AddListener(() =>
                         {
-                            if (nameCandText) nameCandText.text = p.Name;
+                            if (nameCandText.AsBoolFast()) nameCandText.text = p.Name;
                         });
                         button.OnMouseOut.AddListener(() =>
                         {
-                            if (nameCandText) nameCandText.text = "";
+                            if (nameCandText.AsBoolFast()) nameCandText.text = "";
                         });
                     }
                     }), 8),
@@ -508,7 +508,7 @@ public class DiscussionSupport : AbstractModule<Virial.Game.Game>, IGameOperator
         else
         {
             ResetAll();
-            if(meetingLayer) GameObject.Destroy(meetingLayer);
+            if(meetingLayer.AsBoolFast()) GameObject.Destroy(meetingLayer);
         }
     }
 
@@ -517,8 +517,8 @@ public class DiscussionSupport : AbstractModule<Virial.Game.Game>, IGameOperator
         Store();
     }
 
-    Vector2 MouseWorldPos => meetingLayer ? UnityHelper.ScreenToWorldPoint(Input.mousePosition, meetingLayer.gameObject.layer) : Vector2.zero;
-    Vector2 MousePos => meetingLayer ? meetingLayer.transform.InverseTransformPoint(MouseWorldPos) : Vector2.zero;
+    Vector2 MouseWorldPos => meetingLayer.AsBoolFast() ? UnityHelper.ScreenToWorldPoint(Input.mousePosition, meetingLayer.gameObject.layer) : Vector2.zero;
+    Vector2 MousePos => meetingLayer.AsBoolFast() ? meetingLayer.transform.InverseTransformPoint(MouseWorldPos) : Vector2.zero;
     Vector2 downPos = Vector2.zero;
     bool clickBackLayer = false;
     bool dragIcon = false;
@@ -531,13 +531,13 @@ public class DiscussionSupport : AbstractModule<Virial.Game.Game>, IGameOperator
     static private readonly IDividedSpriteLoader MeetingPlayerIcons = DividedSpriteLoader.FromResource("Nebula.Resources.MeetingToolPlayerIcons.png", 100f, 80, 80, true);
     void OnUpdate(GameHudUpdateEvent ev)
     {
-        if (meetingLayer)
+        if (meetingLayer.AsBoolFast())
         {
             //マウスボタンの押下を受け付け、オーバーレイの除去かアイコン・線の描画か決める。
             bool cursorIsOnMeetingLayer = CursorIsOnMeetingLayer;
             if (Input.GetMouseButtonDown(0))
             {
-                if (closeButton && closeButton.colliders.Any(c => c.OverlapPoint(MouseWorldPos))) return; 
+                if (closeButton.AsBoolFast() && closeButton.colliders.Any(c => c.OverlapPoint(MouseWorldPos))) return; 
                 dragIcon = false;
                 isSpecialSpawning = false;
                 targetIcon = null;
@@ -563,7 +563,7 @@ public class DiscussionSupport : AbstractModule<Virial.Game.Game>, IGameOperator
             }
 
             //カーソルの動きを見てアイコンの設置か線の描画か決める。
-            if (MapBehaviour.Instance && meetingLayer)
+            if (MapBehaviour.Instance.AsBoolFast() && meetingLayer.AsBoolFast())
             {
                 //線の描画かアイコンの位置移動
                 if (Input.GetMouseButton(0) && downPos.Distance(MousePos) > 0.1f && !isSpecialSpawning)
@@ -677,7 +677,7 @@ public class DiscussionSupport : AbstractModule<Virial.Game.Game>, IGameOperator
         renderer.material = HatManager.Instance.PlayerMaterial;
         renderer.gameObject.GetOrAddComponent<MinimapScaler>();
         collider.radius = 0.3f;
-        var button = collider.gameObject.SetUpButton(true, renderer, selectedColor: Color.Lerp(Color.white, Color.green, 0.2f));
+        var button = collider.gameObject.SetUpButton(true, renderer, selectedColor: VColor.Lerp(VColor.White, VColor.Green, 0.2f));
         var exButton = collider.gameObject.AddComponent<ExtraPassiveBehaviour>();
         var iconInfo = new IconInfo(id.Value, renderer, button, collider);
         iconInfo.SetPlayer(GamePlayer.LocalPlayer!.PlayerId);

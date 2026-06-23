@@ -90,7 +90,7 @@ public abstract class NebulaSyncObject : FlexibleLifespan, IGameOperator
 
     static public NebulaSyncObjectReference RpcInstantiate(string tag, float[]? arguments)
     {
-        int id = AvailableId(PlayerControl.LocalPlayer.PlayerId);
+        int id = AvailableId(AmongUsLLImpl.LocalPlayer.PlayerId);
         int hash = tag.ComputeConstantHash();
         NebulaLogger.Instance.Message($"Try Instantiate Sync GLOBAL Object (tag: {tag}, hash: {hash})");
         
@@ -100,7 +100,7 @@ public abstract class NebulaSyncObject : FlexibleLifespan, IGameOperator
 
     static public NebulaSyncObjectReference LocalInstantiate(string tag, float[]? arguments)
     {
-        int id = AvailableId(PlayerControl.LocalPlayer.PlayerId);
+        int id = AvailableId(AmongUsLLImpl.LocalPlayer.PlayerId);
         int hash = tag.ComputeConstantHash();
         NebulaLogger.Instance.Message($"Try Instantiate Sync LOCAL Object (tag: {tag}, hash: {hash})");
         RpcInstantiateDef.LocalInvoke(new(id, hash, arguments ?? Array.Empty<float>(), false));
@@ -152,7 +152,7 @@ public class NebulaSyncStandardObject : NebulaSyncObject
 
     public SpriteRenderer MyRenderer { get; private set; }
 
-    public NebulaSyncStandardObject(Vector2 pos,ZOption zOrder,bool canSeeInShadow,Sprite sprite,Color color)
+    public NebulaSyncStandardObject(Vector2 pos,ZOption zOrder,bool canSeeInShadow,Sprite sprite,VColor color)
     {
         MyRenderer = UnityHelper.CreateObject<SpriteRenderer>("NebulaObject", null, pos, null);
         ZOrder = zOrder;
@@ -162,7 +162,7 @@ public class NebulaSyncStandardObject : NebulaSyncObject
     }
 
     public NebulaSyncStandardObject(Vector2 pos, ZOption zOrder, bool canSeeInShadow, Sprite sprite, bool semitransparent = false)
-     : this(pos, zOrder, canSeeInShadow, sprite, semitransparent ? new Color(1, 1, 1, 0.5f) : Color.white) { }
+     : this(pos, zOrder, canSeeInShadow, sprite, semitransparent ? new VColor(1f, 1f, 1f, 0.5f) : VColor.White) { }
 
     private ZOption zOrder;
     public ZOption ZOrder
@@ -174,11 +174,11 @@ public class NebulaSyncStandardObject : NebulaSyncObject
         }
     }
 
-    public Vector2 Position
+    public VVector2 Position
     {
         get => MyRenderer.transform.position; 
         set {
-            Vector3 pos = value;
+            VVector3 pos = value.AsVector3();
             
             float z = value.y / 1000f;
             switch (ZOrder)
@@ -209,16 +209,19 @@ public class NebulaSyncStandardObject : NebulaSyncObject
         set => MyRenderer.sprite = value;
     }
 
-    public Color Color
+    /// <summary>
+    /// ゲッタの使用回数はなるべく少なく抑えてください。
+    /// </summary>
+    public VColor Color
     {
-        get => MyRenderer.color;
-        set => MyRenderer.color = value;
+        get => new(MyRenderer.color);
+        set => MyRenderer.color = value.ToUnityColor();
     }
 
     public override void OnReleased()
     {
         base.OnReleased();
-        if(MyRenderer) GameObject.Destroy(MyRenderer.gameObject);
+        if(MyRenderer.AsBoolFast()) GameObject.Destroy(MyRenderer.gameObject);
     }
 
     public void SetBackRenderer(Sprite sprite)
@@ -237,14 +240,14 @@ public class NebulaSyncStandardObject : NebulaSyncObject
         console.MinigamePrefab = minigamePrefab;
         console.useIcon = image;
         
-        if (renderer != null)
+        if (renderer.AsBoolFast())
         {
-            console.Image = renderer;
+            console.Image = renderer!;
             console.Image.material = VanillaAsset.GetHighlightMaterial();
         }
 
 
-        if (!button)
+        if (!button.AsBoolFast())
         {
             button = obj.AddComponent<PassiveButton>();
             button.OnMouseOut = new UnityEngine.Events.UnityEvent();
@@ -253,7 +256,7 @@ public class NebulaSyncStandardObject : NebulaSyncObject
             button.CachedZ = 0.1f;
         }
 
-        if (!collider)
+        if (!collider.AsBoolFast())
         {
             var cCollider = obj.AddComponent<CircleCollider2D>();
             cCollider.radius = 0.4f;

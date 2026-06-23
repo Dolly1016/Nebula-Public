@@ -45,12 +45,13 @@ class VitalsMinigameUpdatePatch
 {
     public static void UpdateVitals(VitalsMinigame __instance,bool forcely = false)
     {
-        if (__instance.SabText.isActiveAndEnabled && !PlayerTask.PlayerHasTaskOfType<IHudOverrideTask>(PlayerControl.LocalPlayer))
+        bool haveCommTask = PlayerTask.PlayerHasTaskOfType<IHudOverrideTask>(AmongUsLLImpl.LocalPlayer);
+        if (__instance.SabText.isActiveAndEnabled && !haveCommTask)
         {
             __instance.SabText.gameObject.SetActive(false);
             foreach (var v in __instance.vitals)v.gameObject.SetActive(true);
         }
-        else if (!__instance.SabText.isActiveAndEnabled && PlayerTask.PlayerHasTaskOfType<IHudOverrideTask>(PlayerControl.LocalPlayer))
+        else if (!__instance.SabText.isActiveAndEnabled && haveCommTask)
         {
             __instance.SabText.gameObject.SetActive(true);
             foreach (var v in __instance.vitals) v.gameObject.SetActive(false);

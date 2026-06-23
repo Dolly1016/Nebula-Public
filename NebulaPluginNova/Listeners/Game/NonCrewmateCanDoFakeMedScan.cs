@@ -17,17 +17,17 @@ internal partial class NebulaGameEventListeners
     void SetUpFakeMedScanButton(GameStartEvent ev)
     {
         if (!GeneralConfigurations.FakeScanOption) return;
-        if (!ShipStatus.Instance.MedScanner) return;
+        var medScanner = AmongUsLLImpl.ShipStatusInstance.MedScanner;
+        if (!medScanner.AsBoolFast()) return;
 
-        var scanner = ShipStatus.Instance.MedScanner;
-        Vector2 scannerPos = scanner.Position;
+        Vector2 scannerPos = medScanner.Position;
         ModAbilityButton button = NebulaAPI.Modules.AbilityButton(NebulaAPI.CurrentGame!, GamePlayer.LocalPlayer, false, true, Virial.Compat.VirtualKeyInput.None, null,
             1f, "scan", fakeMedScanButtonImage,
             null,
             unused => !(GamePlayer.LocalPlayer?.Tasks.HasExecutableTasks ?? false) && GamePlayer.LocalPlayer!.TruePosition.Distance(scannerPos) < 1.3f && !Helpers.AnyNonTriggersBetween(scannerPos, GamePlayer.LocalPlayer!.TruePosition, out _));
         button.OnClick = _ =>
         {
-            PlayerControl.LocalPlayer.StartCoroutine(CoWalkToScan(scannerPos).WrapToIl2Cpp());
+            AmongUsLLImpl.LocalPlayer.StartCoroutine(CoWalkToScan(scannerPos).WrapToIl2Cpp());
         };
 
 

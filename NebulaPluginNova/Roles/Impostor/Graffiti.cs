@@ -88,7 +88,7 @@ internal class Graffiti : DefinedSingleAbilityRoleTemplate<Graffiti.Ability>, De
                 button.SetLabel("draw");
                 button.SetImage(buttonSprite);
                 button.Visibility = _ => !MyPlayer.IsDead && (currentCanvas == null || !currentCanvas) && !AmongUsUtil.MapIsOpen && !ExileController.Instance;
-                button.Availability = _ => (MeetingHud.Instance || MyPlayer.CanMove) && this.leftDrawing > 0;
+                button.Availability = _ => (MeetingHud.Instance.AsBoolFast() || MyPlayer.CanMove) && this.leftDrawing > 0;
                 button.OnClick = _ =>
                 {
                     NebulaManager.Instance.ScheduleDelayAction(() =>
@@ -128,7 +128,7 @@ internal class Graffiti : DefinedSingleAbilityRoleTemplate<Graffiti.Ability>, De
         {
             if (ev is MapOpenNormalEvent && !IsUsurped)
             {
-                if (!mapLayer)
+                if (!mapLayer.AsBoolFast())
                 {
                     mapLayer = UnityHelper.CreateObject<GraffitiMapLayer>("GraffitiLayer", MapBehaviour.Instance.transform, new(0, 0, -1f));
                     this.BindGameObject(mapLayer.gameObject);
@@ -138,7 +138,7 @@ internal class Graffiti : DefinedSingleAbilityRoleTemplate<Graffiti.Ability>, De
             }
             else
             {
-                if (mapLayer) mapLayer.gameObject.SetActive(false);
+                if (mapLayer.AsBoolFast()) mapLayer.gameObject.SetActive(false);
             }
         }
     }

@@ -105,7 +105,7 @@ internal class KillRequestHandler
         "RequestKill",
         (message, _) =>
         {
-            if (AmongUsClient.Instance.AmHost)
+            if (AmongUsLLImpl.AmongUsClientInstance.AmHost)
             {
                 var result = ModFlexibleKill(message.sender, message.parameter.Id, message.parameter.Killer, message.parameter.Target, message.parameter.PlayerState, message.parameter.RecordState, message.parameter.KillParam, message.parameter.KillCondition);
                 RpcSendResult.Invoke((message.sender, message.parameter.Id, result));
@@ -115,11 +115,16 @@ internal class KillRequestHandler
 
     private static KillResult ModFlexibleKill(byte sender, int id, GamePlayer killer, IPlayerlike target, CommunicableTextTag playerState, CommunicableTextTag? recordState, KillParameter killParam, KillCondition killCond)
     {
+        var meeting = MeetingHud.Instance;
+        bool inMeeting = meeting.AsBoolFast();
+        var exileScene = ExileController.Instance;
+        bool inExile = exileScene.AsBoolFast();
+
         bool CheckKill(bool isMeetingKill, out KillResult result)
         {
             result = KillResult.Kill;
 
-            if(killCond.HasFlag(KillCondition.InTaskPhase) && (MeetingHud.Instance || ExileController.Instance))
+            if(killCond.HasFlag(KillCondition.InTaskPhase) && (inMeeting || inExile))
             {
                 result = KillResult.Rejected;
                 return false;
@@ -147,13 +152,15 @@ internal class KillRequestHandler
             return result == KillResult.Kill;
         }
 
-        bool inMeetingActually = MeetingHud.Instance || ExileController.Instance;
+        bool inMeetingActually = inMeeting || inExile;
         bool isMeetingKill = inMeetingActually || !killParam.HasFlag(KillParameter.WithDeadBody);
         if (inMeetingActually)
         {
-            bool isAnimating = MeetingHud.Instance && MeetingHud.Instance.state <= MeetingHud.VoteStates.Animating;
+            bool isAnimating = inMeeting && meeting.state <= MeetingHud.VoteStates.Animating;
             if(!isAnimating) killParam |= KillParameter.WithKillSEWidely;
         }
+        if(inExile) killParam |= KillParameter.WithoutSelfSE;
+
         if (CheckKill(isMeetingKill, out var result))
         {
             bool usingUtility = target.Logic.InMovingPlat || target.Logic.OnLadder;
@@ -189,7 +196,8 @@ internal class KillRequestHandler
 
         GameOperatorManager.Instance?.Run(new PlayerGuardEvent(NebulaGameManager.Instance?.GetPlayer(message.targetId), killer));
 
-        if (message.killerId == PlayerControl.LocalPlayer.PlayerId || (message.targetCanSeeGuard && message.targetId == PlayerControl.LocalPlayer.PlayerId))
+        var localPlayerId = AmongUsLLImpl.LocalPlayer.PlayerId;
+        if (message.killerId == localPlayerId || (message.targetCanSeeGuard && message.targetId == localPlayerId))
         {
             Helpers.GetPlayer(message.targetId)?.ShowFailedMurder();
         }
@@ -230,12 +238,13 @@ internal class KillRequestHandler
                if (param.RealTarget.AmOwner)
                {
                    //StatsManager.Instance.IncrementStat(StringNames.StatsTimesMurdered);
-                   if (Minigame.Instance)
+                   var minigame = Minigame.Instance;
+                   if (minigame.AsBoolFast())
                    {
                        try
                        {
-                           Minigame.Instance.Close();
-                           Minigame.Instance.Close();
+                           minigame.Close();
+                           minigame.Close();
                        }
                        catch
                        {
@@ -368,7 +377,7 @@ internal class KillRequestHandler
               }
 
 
-              if (MeetingHud.Instance != null) MeetingHud.Instance.ResetPlayerState();
+              if (MeetingHud.Instance.AsBoolFast()) MeetingHud.Instance.ResetPlayerState();
 
 
 
@@ -393,7 +402,7 @@ internal class KillRequestHandler
               if (param.KillParam.HasFlag(KillParameter.WithAssigningGhostRole) && target.AmOwner) NebulaGameManager.RpcTryAssignGhostRole.Invoke(target);
 
 
-              if (MeetingHud.Instance) MeetingHudExtension.ExpandDiscussionTime();
+              if (MeetingHud.Instance.AsBoolFast()) MeetingHudExtension.ExpandDiscussionTime();
           }
       }
        );

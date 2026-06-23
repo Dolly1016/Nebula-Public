@@ -1,4 +1,6 @@
 ﻿
+using JetBrains.Annotations;
+using Nebula.Dev;
 using Nebula.Modules.GUIWidget;
 using Nebula.Modules.Logging;
 using Nebula.Roles;
@@ -25,6 +27,9 @@ public class NebulaImpl : INebula
     private static List<object> allModules = new();
     private static Dictionary<Type, object> moduleFastMap = new();
     private static NebulaModuleFactory factory = new();
+
+    
+
     public NebulaImpl()
     {
         Instance = this;
@@ -81,8 +86,6 @@ public class NebulaImpl : INebula
     IModuleFactory INebula.Modules => factory;
 
     bool INebula.IsAndroid =>  NebulaPlugin.IsAndroid;
-
-    ITitlesRegister INebula.Titles => TitleRegisterImpl.Instance;
 
     AmongUsLL INebula.AmongUs => AmongUsLLImpl.Instance;
 }

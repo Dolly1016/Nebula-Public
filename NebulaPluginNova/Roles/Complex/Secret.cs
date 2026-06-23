@@ -10,7 +10,7 @@ namespace Nebula.Roles.Complex;
 
 public class ShownSecret : DefinedAllocatableModifierTemplate, DefinedAllocatableModifier
 {
-    private ShownSecret() : base("secret", "SCR", new(Color.white.RGBMultiplied(0.82f)), [EvilConditionTypeOption, EvilConditionOption, NiceConditionOption], allocateToNeutral: false) { 
+    private ShownSecret() : base("secret", "SCR", VColor.White.RGBMultiplied(0.82f), [EvilConditionTypeOption, EvilConditionOption, NiceConditionOption], allocateToNeutral: false) { 
     }
 
     //割り当てる役職が変更されてしまうので、一番最後に割り当てる
@@ -161,7 +161,7 @@ public class Secret : DefinedRoleTemplate, DefinedRole
         string? RuntimeAssignable.OverrideRoleName(string lastRoleName, bool isShort, bool canSeeAllInfo)
         {
             string str = (isShort ? "?" : "???").Color(Palette.CrewmateBlue);
-            if(canSeeAllInfo) str += $" ({savedRole.DisplayColoredShort})".Color(Color.gray);
+            if(canSeeAllInfo) str += $" ({savedRole.DisplayColoredShort})".Color(VColor.Gray);
             return str;
         }
 
@@ -200,7 +200,7 @@ public class Secret : DefinedRoleTemplate, DefinedRole
         string? RuntimeAssignable.OverrideRoleName(string lastRoleName, bool isShort, bool canSeeAllInfo)
         {
             string str = (isShort ? "?" : "???").Color(Palette.ImpostorRed);
-            if (canSeeAllInfo) str += $" ({savedRole.DisplayShort.Color(savedRole.UnityColor)})".Color(Color.gray);
+            if (canSeeAllInfo) str += $" ({savedRole.DisplayShort.Color(savedRole.Color)})".Color(VColor.Gray);
             return str;
         }
 

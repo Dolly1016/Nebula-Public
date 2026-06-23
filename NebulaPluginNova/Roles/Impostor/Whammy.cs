@@ -111,7 +111,7 @@ internal class Balloon
 
     public void Update()
     {
-        if (!holder) return;
+        if (!holder.AsBoolFast()) return;
 
         bool lastActive = holder.active;
 
@@ -270,7 +270,7 @@ internal class BalloonHolder : AbstractModule<GamePlayer>, IGameOperator, IBindP
     {
         if(HasBalloon && timeLimit > 0f)
         {
-            ev.AppendText(Language.Translate("roles.whammy.taskText").Replace("%TIME%", ((int)timeLimit + 1).ToString()).Color(Mathf.Repeat(Time.time, 0.5f) < 0.25f ? Color.red : Color.yellow));
+            ev.AppendText(Language.Translate("roles.whammy.taskText").Replace("%TIME%", ((int)timeLimit + 1).ToString()).Color(Mathf.Repeat(Time.time, 0.5f) < 0.25f ? VColor.Red : VColor.Yellow));
         }
     }
 
@@ -469,7 +469,7 @@ public class BalloonConsole : NebulaSyncStandardObject{
 
     static internal Image ConsoleSprite = SpriteLoader.FromResource("Nebula.Resources.Balloon.Console.png", 100f);
     static internal Image ArrowSprite = SpriteLoader.FromResource("Nebula.Resources.Balloon.Arrow.png", 120f);
-    public BalloonConsole(Vector2 pos) : base(pos, ZOption.Back, true, ConsoleSprite.GetSprite(), Color.white)
+    public BalloonConsole(Vector2 pos) : base(pos, ZOption.Back, true, ConsoleSprite.GetSprite(), VColor.White)
     {
         ModSingleton<BalloonManager>.Instance.RegisterConsole(this);
         
@@ -486,10 +486,10 @@ public class BalloonConsole : NebulaSyncStandardObject{
             Use = CustomConsoleProperty.MinigameAction<SlingshotMinigame>(null!, (minigame, console) =>
             {
                 minigame.StonesPattern = new bool[LeftStone];
-                if (LeftStone > 0 && Helpers.Prob(0.02f)) minigame.StonesPattern[0] = true;
+                if (LeftStone > 0 && Mathn.Prob(0.02f)) minigame.StonesPattern[0] = true;
                 minigame.OnStoneUsed = () => { LeftStone--; ModSingleton<BalloonManager>.Instance.CurrentStone++; };
             }),
-            OutlineColor = Color.yellow
+            OutlineColor = UnityEngine.Color.yellow
         };
         
         var arrow = new Arrow(ArrowSprite.GetSprite(), false, true) { IsAffectedByComms = false, FixedAngle = true, TargetPos = pos, IsActive = false }.Register(this);
@@ -565,7 +565,7 @@ public class BalloonManager : AbstractModule<Virial.Game.Game>, IGameOperator
 
     public bool ConsoleHasTrap(Console console) => localTrappedConsoles.Any(c => c.Console.GetInstanceID() == console.GetInstanceID());
     public void EntrapToConsole(Console console) {
-        bool flip = console!.transform.position.x > PlayerControl.LocalPlayer.transform.position.x;
+        bool flip = console!.transform.position.x > AmongUsLLImpl.LocalPlayer.transform.position.x;
         Vector3 pos = GetConsoleBalloonPos(console, ref flip);
 
         var renderer = UnityHelper.SimpleAnimator(console!.transform, pos, 0.2f, num => BalloonManager.BalloonTrapSprite.GetSprite(num % 4));
@@ -1147,7 +1147,7 @@ internal class SlingshotMinigame : Minigame
 
         var indicatorScale = IndicatorsHolder.transform.localScale.x;
         indicatorScale += (power > 0f ? 5f : -5f) * Time.deltaTime;
-        indicatorScale = Mathf.Clamp01(indicatorScale);
+        indicatorScale = Mathn.Clamp01(indicatorScale);
         IndicatorsHolder.transform.localScale = new(indicatorScale, indicatorScale, 1f);
 
         if (power > 0f)
@@ -1165,7 +1165,7 @@ internal class SlingshotMinigame : Minigame
     public void PlayMiss()
     {
         NebulaAsset.PlaySE(NebulaAudioClip.BalloonBounce, false);
-        float angle = Helpers.Prob(0.5f) ? 12f : -12f;
+        float angle = Mathn.Prob(0.5f) ? 12f : -12f;
         StartCoroutine(ManagedEffects.Lerp(0.25f, p => Balloon.transform.localEulerAngles = new(0f, 0f, angle * (1f - p) * (1f - p))).WrapToIl2Cpp());
     }
 
@@ -1270,9 +1270,9 @@ public class Whammy : DefinedSingleAbilityRoleTemplate<Whammy.Ability>, DefinedR
                 acAnother1Token = new("whammy.another1", (false, false, false), (val, _) => val.cleared);
 
                 Virial.Components.ObjectTracker<Console> consoleTracker = new ObjectTrackerUnityImpl<Console, Console>(
-                    MyPlayer.VanillaPlayer, AmongUsLLImpl.Instance.VanillaKillDistance, () => ShipStatus.Instance.AllConsoles,
-                    c => !ModSingleton<BalloonManager>.Instance.ConsoleHasTrap(c), c => !c.TryCast<VentCleaningConsole>() && !c.TryCast<AutoTaskConsole>() && !c.TryCast<StoreArmsTaskConsole>(), c => c,
-                    c => [c.transform.position], c => c.Image, Color.yellow,
+                    MyPlayer.VanillaPlayer, AmongUsLLImpl.Instance.VanillaKillDistance, () => AmongUsLLImpl.ShipStatusInstance.AllConsoles,
+                    c => !ModSingleton<BalloonManager>.Instance.ConsoleHasTrap(c), c => !c.IsFast<VentCleaningConsole>() && !c.IsFast<AutoTaskConsole>() && !c.IsFast<StoreArmsTaskConsole>(), c => c,
+                    c => [c.transform.position], c => c.Image, UnityEngine.Color.yellow,
                     true, false).Register(this);
                 
                 

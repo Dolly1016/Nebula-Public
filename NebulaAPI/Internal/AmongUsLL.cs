@@ -10,4 +10,8 @@ internal interface AmongUsLL
 {
     float VanillaKillCooldown { get; }
     float VanillaKillDistance { get; }
+    int ScreenWidth { get; }
+    int ScreenHeight { get; }
+        
+    internal PlayerControl LocalPlayer { get; }
 }

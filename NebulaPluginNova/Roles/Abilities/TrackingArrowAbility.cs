@@ -12,10 +12,10 @@ public class TrackingArrowAbility : FlexibleLifespan, IGameOperator
     float interval;
     float timer;
     Arrow arrow = null!;
-    Color color;
+    VColor color;
     bool showPlayerIcon;
 
-    public TrackingArrowAbility(GamePlayer target, float interval, Color color, bool showPlayerIcon = true)
+    public TrackingArrowAbility(GamePlayer target, float interval, VColor color, bool showPlayerIcon = true)
     {
         this.target = target;
         this.interval = interval;
@@ -26,13 +26,13 @@ public class TrackingArrowAbility : FlexibleLifespan, IGameOperator
 
     void Update(GameUpdateEvent ev)
     {
-        if (ExileController.Instance)
+        if (ExileController.Instance.AsBoolFast())
         {
             timer = -1f;
         }
         else
         {
-            timer -= Time.deltaTime;
+            timer -= ev.DeltaTime;
 
             if (timer < 0f)
             {
@@ -57,6 +57,6 @@ public class TrackingArrowAbility : FlexibleLifespan, IGameOperator
             }
         }
 
-        if (arrow != null) arrow.IsActive = !target.IsDead && !MeetingHud.Instance && !ExileController.Instance;
+        if (arrow != null) arrow.IsActive = !target.IsDead && !MeetingHud.Instance.AsBoolFast() && !ExileController.Instance.AsBoolFast();
     }
 }

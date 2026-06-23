@@ -17,7 +17,7 @@ public class Arrow : FlexibleLifespan, IGameOperator
     private SpriteRenderer? arrowRenderer;
     private SpriteRenderer? smallRenderer = null;
     private SpriteRenderer? subRenderer = null;
-    public Vector2 TargetPos;
+    public VVector2 TargetPos;
 
     public GameObject ArrowObject => arrowRenderer!.gameObject;
 
@@ -45,7 +45,7 @@ public class Arrow : FlexibleLifespan, IGameOperator
         arrowRenderer = UnityHelper.CreateObject<SpriteRenderer>("Arrow", HudManager.Instance.transform, new Vector3(0, 0, -10f), LayerExpansion.GetArrowLayer());
         arrowRenderer.sprite = sprite ?? arrowSprite.GetSprite();
         arrowRenderer.sharedMaterial = usePlayerMaterial ? HatManager.Instance.PlayerMaterial : HatManager.Instance.DefaultShader;
-        if (usePlayerMaterial) SetColor(Color.white, Color.gray);
+        if (usePlayerMaterial) SetColor(VColor.White, VColor.Gray);
         if (withSmallArrow)
         {
             smallRenderer = UnityHelper.CreateObject<SpriteRenderer>("Arrow", arrowRenderer.transform, new Vector3(0, 0, -0.1f), LayerExpansion.GetArrowLayer());
@@ -83,17 +83,17 @@ public class Arrow : FlexibleLifespan, IGameOperator
         return SetColor(DynamicPalette.PlayerColors[outfit.ColorId], DynamicPalette.ShadowColors[outfit.ColorId]);
     }
 
-    public Arrow SetColor(Color mainColor, Color shadowColor)
+    public Arrow SetColor(VColor mainColor, VColor shadowColor)
     {
-        arrowRenderer?.material.SetColor(PlayerMaterial.BackColor, shadowColor);
-        arrowRenderer?.material.SetColor(PlayerMaterial.BodyColor, mainColor);
+        arrowRenderer?.material.SetColor(PlayerMaterial.BackColor, shadowColor.ToUnityColor());
+        arrowRenderer?.material.SetColor(PlayerMaterial.BodyColor, mainColor.ToUnityColor());
         return this;
     }
 
-    public Arrow SetColor(Color mainColor) => SetColor(mainColor, mainColor * 0.65f);
-    public Arrow SetSmallColor(Color smallColor)
+    public Arrow SetColor(VColor mainColor) => SetColor(mainColor, mainColor * 0.65f);
+    public Arrow SetSmallColor(VColor smallColor)
     {
-        if (smallRenderer) smallRenderer!.color = smallColor;
+        if (smallRenderer) smallRenderer!.color = smallColor.ToUnityColor();
         return this;
     }
     void IGameOperator.OnReleased()
@@ -113,14 +113,19 @@ public class Arrow : FlexibleLifespan, IGameOperator
 
         //表示するカメラ
         Camera main = NebulaGameManager.Instance?.WideCamera.Camera ?? UnityHelper.FindCamera(LayerExpansion.GetUILayer())!;
+        float mainOrthographicSize = main.orthographicSize;
 
         //距離を測るための表示用のカメラ
         Camera worldCam = (NebulaGameManager.Instance?.WideCamera.IsShown ?? false) ? NebulaGameManager.Instance.WideCamera.Camera : Camera.main;
+        float worldOrthographicSize = worldCam.orthographicSize;
 
-        Vector2 del = (TargetPos - (Vector2)main.transform.position);
+        float cameraMainOrthographicSize = Camera.main.orthographicSize;
+
+
+        var del = (TargetPos - (VVector2)main.transform.position);
 
         //目的地との見た目上の離れ具合
-        float num = del.magnitude / (worldCam.orthographicSize * perc);
+        float num = del.Magnitude / (worldOrthographicSize * perc);
 
         //近くの矢印を隠す
         bool flag = IsActive && (!IsSmallenNearPlayer || (double)num > 0.3);
@@ -132,7 +137,7 @@ public class Arrow : FlexibleLifespan, IGameOperator
         var arrowTransform = arrowRenderer.transform;
 
         //スクリーン上の位置
-        Vector2 viewportPoint = worldCam.WorldToViewportPoint(TargetPos);
+        VVector2 viewportPoint = worldCam.WorldToViewportPoint(TargetPos.AsUnityVector3());
 
         if (ArrowUpdatePatch.InArea(ovalMode, viewportPoint))
         {
@@ -140,28 +145,27 @@ public class Arrow : FlexibleLifespan, IGameOperator
             else
             {
                 //画面内を指す矢印
-                arrowTransform.localPosition = (del - (OnJustPoint ? Vector2.zero : del.normalized * (WithSmallArrow ? 0.9f : 0.6f) * (worldCam.orthographicSize / Camera.main.orthographicSize))).AsVector3(2f);
-                arrowTransform.localScale = IsSmallenNearPlayer ? Vector3.one * Mathn.Clamp(num, 0f, 1f) : Vector3.one;
+                arrowTransform.localPosition = (del - (OnJustPoint ? VVector2.Zero : del.Normalized * (WithSmallArrow ? 0.9f : 0.6f) * (worldOrthographicSize / cameraMainOrthographicSize))).AsUnityVector3(2f);
+                arrowTransform.localScale = IsSmallenNearPlayer ? VVector3.One * Mathn.Clamp(num, 0f, 1f) : VVector3.One;
             }
         }
         else
         {
             //画面外を指す矢印
-            Vector2 vector3 = ArrowUpdatePatch.AdjustVector(ovalMode, viewportPoint);
+            VVector2 vector3 = ArrowUpdatePatch.AdjustVector(ovalMode, viewportPoint);
             
             //UIのカメラに合わせて位置を調節する
-            float orthographicSize = main.orthographicSize;
-            float num3 = main.orthographicSize * main.aspect;
-            Vector3 vector4 = new Vector3(Mathn.LerpUnclamped(0f, num3 * (WithSmallArrow ? 0.82f : 0.88f), vector3.x), Mathn.LerpUnclamped(0f, orthographicSize * (WithSmallArrow ? 0.72f : 0.79f), vector3.y), 2f);
+            float num3 = mainOrthographicSize * main.aspect;
+            VVector3 vector4 = new VVector3(Mathn.LerpUnclamped(0f, num3 * (WithSmallArrow ? 0.82f : 0.88f), vector3.x), Mathn.LerpUnclamped(0f, mainOrthographicSize * (WithSmallArrow ? 0.72f : 0.79f), vector3.y), 2f);
             arrowTransform.localPosition = vector4;
             arrowTransform.localScale = Vector3.one;
         }
 
-        arrowTransform.localScale *= (worldCam.orthographicSize / Camera.main.orthographicSize);
+        arrowTransform.localScale *= (worldOrthographicSize / cameraMainOrthographicSize);
 
 
         //角度の計算のために正規化する(しなくてもいいのかも)
-        del.Normalize();
+        del = del.Normalized;
 
         if(FixedAngle)
             arrowTransform.eulerAngles = new Vector3(0f, 0f, 0f);
@@ -188,13 +192,14 @@ public class Arrow : FlexibleLifespan, IGameOperator
 
             if (DisappearanceEffect == DisappearanceType.FadeOut)
             {
-                disappearProgress += Time.deltaTime * 0.85f;
+                disappearProgress += ev.DeltaTime * 0.85f;
 
-                arrowRenderer.color = new Color(arrowRenderer.color.r, arrowRenderer.color.g, arrowRenderer.color.b, a);
+                var lastColor = arrowRenderer.color;
+                arrowRenderer.color = new Color(lastColor.r, lastColor.g, lastColor.b, a);
                 if (smallRenderer != null) smallRenderer.color = new(1f, 1f, 1f, a);
             }else if(DisappearanceEffect == DisappearanceType.Reduction)
             {
-                disappearProgress += Time.deltaTime * 3.2f;
+                disappearProgress += ev.DeltaTime * 3.2f;
 
                 arrowRenderer.transform.localScale *= a;
             }

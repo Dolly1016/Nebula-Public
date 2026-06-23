@@ -4,6 +4,7 @@ using System.Reflection;
 using Virial.Attributes;
 using Virial.Configuration;
 using Virial.Game;
+using Virial.Helpers;
 
 namespace Virial.Assignable;
 
@@ -225,7 +226,7 @@ public interface DefinedAssignable : IRoleID
     /// <summary>
     /// 役職の表示名です。リッチテキストタグを用いて色を付けています。
     /// </summary>
-    string DisplayColoredName => DisplayName.Color(UnityColor);
+    string DisplayColoredName => DisplayName.Color(Color);
 
     /// <summary>
     /// 一般的な二つ名テキストです。
@@ -234,7 +235,7 @@ public interface DefinedAssignable : IRoleID
     /// <summary>
     /// 一般的な二つ名テキストです。リッチテキストタグを用いて色を付けています。
     /// </summary>
-    string GeneralColoredBlurb => GeneralBlurb.Color(UnityColor);
+    string GeneralColoredBlurb => GeneralBlurb.Color(Color);
 
     /// <summary>
     /// 役職の簡単な説明です。ロールドラフトやドキュメント中で表示される、その役職をプレイする当事者に向けたテキストにしてください。
@@ -280,7 +281,7 @@ public interface DefinedCategorizedAssignable : DefinedAssignable
     /// <summary>
     /// 役職の省略名です。リッチテキストタグを用いて色を付けています。
     /// </summary>
-    string DisplayColoredShort => DisplayShort.Color(UnityColor);
+    string DisplayColoredShort => DisplayShort.Color(Color);
 }
 
 /// <summary>
@@ -374,7 +375,7 @@ public class AssignmentType
         this.canGuessAsAbility = canGuessAsAbility;
         Predicate = predicate;
         this.isActive = isActive;
-        Color = color?.ToUnityColor() ?? UnityEngine.Color.white;
+        Color = color ?? Virial.Color.White;
 
         types.Add(this);
     }
@@ -390,7 +391,7 @@ public class AssignmentType
     public string CountTranslationKey => GetTranslationKey("options.role.count");
     public string ChanceTranslationKey => GetTranslationKey("options.role.chance");
 
-    internal UnityEngine.Color Color { get; }
+    internal Virial.Color Color { get; }
     public Func<AbilityAssignmentStatus, DefinedRole, bool> Predicate { get; }
     private Func<bool> isActive { get; }
     public bool IsActive => isActive.Invoke();

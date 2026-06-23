@@ -26,7 +26,7 @@ internal class ConfigurationDocument : IDocument
         string extraText = "";
         if (CanEditNow)
         {
-            extraText = ("<br><br>" + Language.Translate("help.search.config")).Color(Color.gray);
+            extraText = ("<br><br>" + Language.Translate("help.search.config")).Color(VColor.Gray);
         }
             
         int index = 0;

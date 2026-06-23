@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using System.Linq.Expressions;
 
 namespace Nebula.Utilities;
 
@@ -6,6 +7,8 @@ namespace Nebula.Utilities;
 public static class EnumerationHelpers
 {
     public static System.Collections.Generic.IEnumerable<T> GetFastEnumerator<T>(this Il2CppSystem.Collections.Generic.List<T> list) where T : Il2CppSystem.Object => new Il2CppListEnumerable<T>(list);
+
+    public static System.Collections.Generic.IEnumerable<T> GetFastEnumerator<T>(this Il2CppReferenceArray<T> array) where T : Il2CppSystem.Object => new FastIl2CppReferenceArrayEnumerable<T>(array);
 }
 
 public unsafe class Il2CppListEnumerable<T> : System.Collections.Generic.IEnumerable<T>, System.Collections.Generic.IEnumerator<T> where T : Il2CppSystem.Object
@@ -82,40 +85,91 @@ public unsafe class Il2CppListEnumerable<T> : System.Collections.Generic.IEnumer
 
 }
 
-public sealed class ConcatReadOnlyList<T> : IReadOnlyList<T>
+public unsafe sealed class FastIl2CppReferenceArrayEnumerable<T> :
+    IEnumerable<T>,
+    IEnumerator<T>
+    where T : Il2CppSystem.Object
 {
-    private readonly IList<T> _first;
-    private readonly IList<T> _second;
+    private static readonly int ArrayDataOffset = 4 * IntPtr.Size;
+    private static readonly int ElementSize = IntPtr.Size;
 
-    public ConcatReadOnlyList(IList<T> first, IList<T> second)
+    private static readonly Func<IntPtr, T> ObjectFactory = CreateObjectFactory();
+
+    private readonly IntPtr _arrayPointer;
+    private readonly int _length;
+
+    private int _index = -1;
+
+    public FastIl2CppReferenceArrayEnumerable(Il2CppReferenceArray<T> array)
     {
-        _first = first ?? throw new ArgumentNullException(nameof(first));
-        _second = second ?? throw new ArgumentNullException(nameof(second));
+        if (array == null)
+            throw new ArgumentNullException(nameof(array));
+
+        _arrayPointer = array.Pointer;
+        _length = array.Length;
     }
 
-    public int Count => _first.Count + _second.Count;
+    public T Current { get; private set; } = null!;
 
-    public T this[int index]
+    object IEnumerator.Current => Current;
+
+    public bool MoveNext()
     {
-        get
-        {
-            if ((uint)index >= (uint)Count)
-                throw new ArgumentOutOfRangeException(nameof(index));
+        int next = _index + 1;
 
-            return index < _first.Count
-                ? _first[index]
-                : _second[index - _first.Count];
+        if (next >= _length)
+            return false;
+
+        _index = next;
+
+        IntPtr elementSlot = IntPtr.Add(
+            IntPtr.Add(_arrayPointer, ArrayDataOffset),
+            next * ElementSize);
+
+        IntPtr objectPointer = *(IntPtr*)elementSlot;
+
+        if (objectPointer == IntPtr.Zero)
+        {
+            Current = null!;
+            return true;
         }
+
+        Current = ObjectFactory(objectPointer);
+        return true;
+    }
+
+    public void Reset()
+    {
+        _index = -1;
+        Current = null!;
     }
 
     public IEnumerator<T> GetEnumerator()
     {
-        for (int i = 0; i < _first.Count; i++)
-            yield return _first[i];
-
-        for (int i = 0; i < _second.Count; i++)
-            yield return _second[i];
+        return this;
     }
 
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return this;
+    }
+
+    public void Dispose()
+    {
+    }
+
+    private static Func<IntPtr, T> CreateObjectFactory()
+    {
+        var constructor = typeof(T).GetConstructor(new[] { typeof(IntPtr) });
+
+        if (constructor == null)
+            throw new MissingMethodException(
+                typeof(T).FullName,
+                ".ctor(System.IntPtr)");
+
+        var ptr = Expression.Parameter(typeof(IntPtr), "ptr");
+        var create = Expression.New(constructor, ptr);
+
+        return Expression.Lambda<Func<IntPtr, T>>(create, ptr).Compile();
+    }
 }

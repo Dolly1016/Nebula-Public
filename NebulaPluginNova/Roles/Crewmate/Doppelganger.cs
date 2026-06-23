@@ -70,9 +70,11 @@ internal class Doppelganger : DefinedSingleAbilityRoleTemplate<Doppelganger.Abil
             doppelgangerRenderer = UnityHelper.CreateObject<SpriteRenderer>("DoppelHere", transform, new(0f, 0f, -22f));
             doppelgangerRenderer.sprite = MapBehaviour.Instance.HerePoint.sprite;
             doppelgangerRenderer.material = HatManager.Instance.PlayerMaterial;
-            doppelgangerRenderer.material.SetColor(PlayerMaterial.BackColor, DynamicPalette.ShadowColors[PlayerControl.LocalPlayer.PlayerId].RGBMultiplied(0.88f));
-            doppelgangerRenderer.material.SetColor(PlayerMaterial.BodyColor, DynamicPalette.PlayerColors[PlayerControl.LocalPlayer.PlayerId].RGBMultiplied(0.88f));
-            doppelgangerRenderer.material.SetColor(PlayerMaterial.VisorColor, DynamicPalette.VisorColors[PlayerControl.LocalPlayer.PlayerId].RGBMultiplied(0.92f));
+            var mat = doppelgangerRenderer.material;
+            var myPlayerId = AmongUsLLImpl.LocalPlayer.PlayerId;
+            mat.SetColor(PlayerMaterial.BackColor, DynamicPalette.ShadowColors[myPlayerId].RGBMultiplied(0.88f).ToUnityColor());
+            mat.SetColor(PlayerMaterial.BodyColor, DynamicPalette.PlayerColors[myPlayerId].RGBMultiplied(0.88f).ToUnityColor());
+            mat.SetColor(PlayerMaterial.VisorColor, DynamicPalette.VisorColors[myPlayerId].RGBMultiplied(0.92f).ToUnityColor());
         }
 
         protected override void OnClick(Vector2 worldPos, Vector2 minimapPos)
@@ -223,7 +225,7 @@ internal class Doppelganger : DefinedSingleAbilityRoleTemplate<Doppelganger.Abil
                         if (fakePlayer == fakePlayerCache)
                         {
                             isMoving = false;
-                            if (currentWalkCommandId == myWalkId) AmongUsUtil.PlayCustomFlash(MyRole.UnityColor, 0f, 0.5f, 0.35f, 0.25f);
+                            if (currentWalkCommandId == myWalkId) AmongUsUtil.PlayCustomFlash(MyRole.RoleColor, 0f, 0.5f, 0.35f, 0.25f);
                         }
 
                     })
@@ -265,9 +267,9 @@ internal class Doppelganger : DefinedSingleAbilityRoleTemplate<Doppelganger.Abil
         [Local]
         void OnOpenMap(AbstractMapOpenEvent ev)
         {
-            if (ev is MapOpenNormalEvent && !IsUsurped && !MeetingHud.Instance && !MyPlayer.IsDead)
+            if (ev is MapOpenNormalEvent && !IsUsurped && !MeetingHud.Instance.AsBoolFast() && !MyPlayer.IsDead)
             {
-                if (!mapLayer)
+                if (!mapLayer.AsBoolFast())
                 {
                     mapLayer = UnityHelper.CreateObject<DoppelgangerMapLayer>("DoppelLayer", MapBehaviour.Instance.transform, new(0, 0, -1f));
                     mapLayer.gameObject.AddComponent<ShowPlayersMapLayer>().SetUp(p => (fakePlayer?.IsActive ?? false) && !p.AmOwner && p.Position.Distance(fakePlayer.Position) < DecoyDetectionRadiusOption, null);
@@ -278,7 +280,7 @@ internal class Doppelganger : DefinedSingleAbilityRoleTemplate<Doppelganger.Abil
             }
             else
             {
-                if (mapLayer) mapLayer!.gameObject.SetActive(false);
+                if (mapLayer.AsBoolFast()) mapLayer!.gameObject.SetActive(false);
             }
         }
 

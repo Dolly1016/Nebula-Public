@@ -35,7 +35,7 @@ internal class Sacrifice : PerkFunctionalInstance
     {
         if (used) return;
 
-        myFakePlayer = FakePlayerController.SpawnSyncFakePlayer(MyPlayer, new(MyPlayer.Position, KillCharacteristics.KillOne, true, false, MyPlayer.VanillaCosmetics.FlipX, MyPlayer.VanillaCosmetics.GetPetPosition())).BindLifespan(NebulaAPI.CurrentGame);
+        myFakePlayer = FakePlayerController.SpawnSyncFakePlayer(MyPlayer, new(MyPlayer.Position, KillCharacteristics.Disappear, true, false, MyPlayer.VanillaCosmetics.FlipX, MyPlayer.VanillaCosmetics.GetPetPosition())).BindLifespan(NebulaAPI.CurrentGame);
         PerkInstance.MyTimer?.Start();
         used = true;
     }

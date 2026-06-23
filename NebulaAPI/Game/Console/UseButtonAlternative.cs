@@ -68,7 +68,7 @@ public class UseButtonAlternative
 
     static private bool OriginalCanUse(SystemConsole console)
     {
-        console.CanUse(PlayerControl.LocalPlayer.Data, out var canUse, out _);
+        console.CanUse(NebulaAPI.AmongUs.LocalPlayer.Data, out var canUse, out _);
         if (!canUse) return false;
         return true;
     }

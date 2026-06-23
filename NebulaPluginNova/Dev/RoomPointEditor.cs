@@ -219,7 +219,7 @@ internal class RoomPointEditor : AbstractModule<Virial.Game.Game>, IGameOperator
         if (Input.GetKeyDown(KeyCode.Y))
         {
             bool isDetail = Input.GetKey(KeyCode.LeftShift);
-            AddNode(PlayerControl.LocalPlayer.GetTruePosition(), isDetail);
+            AddNode(AmongUsLLImpl.LocalPlayer.GetTruePosition(), isDetail);
         }
 
         if (Input.GetKeyDown(KeyCode.U))
@@ -240,9 +240,9 @@ internal class RoomPointEditor : AbstractModule<Virial.Game.Game>, IGameOperator
             if (Input.GetKey(KeyCode.LeftShift))
             {
                 //var from = fromCache;
-                //var to = PlayerControl.LocalPlayer.GetTruePosition();
+                //var to = AmongUsLLImpl.LocalPlayer.GetTruePosition();
                 var to = fromCache;
-                var from = PlayerControl.LocalPlayer.GetTruePosition();
+                var from = AmongUsLLImpl.LocalPlayer.GetTruePosition();
                 var structure = OutputStructure();
 
                 int[] path = null!;
@@ -288,7 +288,7 @@ internal class RoomPointEditor : AbstractModule<Virial.Game.Game>, IGameOperator
             }
             else
             {
-                fromCache = PlayerControl.LocalPlayer.GetTruePosition();
+                fromCache = AmongUsLLImpl.LocalPlayer.GetTruePosition();
                 DebugScreen.Push("現在位置をコピーしました。", 2f);
             }
         }
@@ -302,7 +302,7 @@ internal class RoomPointEditor : AbstractModule<Virial.Game.Game>, IGameOperator
 
         if (Input.GetKey(KeyCode.LeftShift) && currentSelected != null)
         {
-            if (currentSelected.Renderer.transform.position.Distance(PlayerControl.LocalPlayer.transform.position) < 2f)
+            if (currentSelected.Renderer.transform.position.Distance(AmongUsLLImpl.LocalPlayer.transform.position) < 2f)
             {
 
                 float axis = Input.GetKeyDown(KeyCode.K) ? -0.4f : Input.GetKeyDown(KeyCode.L) ? 0.4f : 0f;

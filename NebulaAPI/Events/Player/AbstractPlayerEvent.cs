@@ -15,9 +15,14 @@ public class AbstractPlayerEvent : AbstractPlayerlikeEvent
     /// <summary>
     /// このイベントに関連するプレイヤーです。
     /// </summary>
-    public new Virial.Game.Player Player { get; private init; }
+    public new Virial.Game.Player Player { get; private set; }
 
     internal AbstractPlayerEvent(Virial.Game.Player player) : base(player)
+    {
+        this.Player = player;
+    }
+
+    internal void Recycle(Virial.Game.Player player)
     {
         this.Player = player;
     }

@@ -73,7 +73,7 @@ public class Stirrer : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 
                 var sabotageButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.SecondaryAbility,"stirrer.fakeSabo",
                     Mathf.Max(SabotageIntervalOption, SabotageCoolDownOption), "fakeSabotage", sabotageButtonImage,
-                    _ => sabotageChargeMap.Any(entry => entry.Value > 0) && PlayerControl.LocalPlayer.myTasks.Find((Il2CppSystem.Predicate<PlayerTask>)(task => task.TryCast<SabotageTask>() != null)) == null
+                    _ => sabotageChargeMap.Any(entry => entry.Value > 0) && AmongUsLLImpl.LocalPlayer.myTasks.Find((Il2CppSystem.Predicate<PlayerTask>)(task => task.TryCast<SabotageTask>() != null)) == null
                     );
                 sabotageButton.CoolDownTimer!.Start(SabotageCoolDownOption);
                 sabotageButton.OnClick = (button) => {
@@ -120,7 +120,7 @@ public class Stirrer : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             {
                 if (ev.Player.IsImpostor) return;
                 if (val <= 0) return;
-                ev.Append(StringExtensions.Color(" (" + val + ")", Color.gray));
+                ev.Append((" (" + val + ")").Color(VColor.Gray));
             }
         }
     }

@@ -1,5 +1,6 @@
 ﻿// 各種使用可能なオブジェクトに関するパッチ
 
+using System.Runtime.CompilerServices;
 using Virial;
 using Virial.Events.Player;
 using Virial.Game;
@@ -40,7 +41,7 @@ public static class VentCanUsePatch
         }
 
         ISystemType systemType;
-        if (ShipStatus.Instance.Systems.TryGetValue(SystemTypes.Ventilation, out systemType))
+        if (AmongUsLLImpl.ShipStatusInstance.Systems.TryGetValue(SystemTypes.Ventilation, out systemType))
         {
             VentilationSystem ventilationSystem = systemType.Cast<VentilationSystem>();
             if (ventilationSystem != null && ventilationSystem.IsVentCurrentlyBeingCleaned(__instance.Id)) couldUse = false;
@@ -64,10 +65,12 @@ public static class VentCanUsePatch
 public static class VentSetOutlinePatch
 {
     public static bool Prefix(Vent __instance, [HarmonyArgument(0)]bool on, [HarmonyArgument(1)]bool mainTarget) {
-        Color color = PlayerControl.LocalPlayer.GetModInfo()!.Unbox().Role.Role.Color.ToUnityColor();
-        __instance.myRend.material.SetFloat("_Outline", (float)(on ? 1 : 0));
-        __instance.myRend.material.SetColor("_OutlineColor", color);
-        __instance.myRend.material.SetColor("_AddColor", mainTarget ? color : Color.clear);
+        Color color = AmongUsLLImpl.LocalPlayer.GetModInfo()!.Unbox().Role.Role.Color.ToUnityColor();
+        var mat = __instance.myRend.material;
+        mat.SetFloat("_Outline", (float)(on ? 1 : 0));
+        mat.SetColor("_OutlineColor", color);
+        mat.SetColor("_AddColor", mainTarget ? color : Color.clear);
+        if(on) HighlightManager.AddHighlightedRenderer(__instance.myRend);
 
         return false;
     }
@@ -120,10 +123,11 @@ public static class VentUsePatch
 {
     public static bool Prefix(Vent __instance)
     {
-        __instance.CanUse(PlayerControl.LocalPlayer.Data, out var flag, out _);
+        PlayerControl localPlayer = AmongUsLLImpl.LocalPlayer;
+
+        __instance.CanUse(localPlayer.Data, out var flag, out _);
         if (!flag) return false;
 
-        PlayerControl localPlayer = PlayerControl.LocalPlayer;
         bool isNotEnter = localPlayer.inVent && !localPlayer.walkingToVent;
 
         var info = localPlayer.GetModInfo();
@@ -170,7 +174,7 @@ public static class CommonCanUsePatch
 {
     public static bool CanUse(MonoBehaviour target, NetworkedPlayerInfo pc)
     {
-        var info = NebulaGameManager.Instance?.GetPlayer(PlayerControl.LocalPlayer.PlayerId);
+        var info = GamePlayer.LocalPlayer;
         if (info == null) return true;
 
         if (info.AllAbilities.Any(a => a.BlockUsingUtility)) return false;
@@ -185,7 +189,7 @@ public static class CommonCanUsePatch
     {
         canUse = couldUse = false;
 
-        var info = NebulaGameManager.Instance?.GetPlayer(PlayerControl.LocalPlayer.PlayerId);
+        var info = GamePlayer.LocalPlayer;
         if (info == null) return true;
 
         if (!CanUse(__instance, pc))
@@ -247,7 +251,7 @@ public static class ConsoleCanUsePatch
     {
         canUse = couldUse = false;
 
-        var info = NebulaGameManager.Instance?.GetPlayer(PlayerControl.LocalPlayer.PlayerId);
+        var info = GamePlayer.LocalPlayer;
         if (info == null) return true;
 
         if (!CommonCanUsePatch.CanUse(__instance, pc))
@@ -256,7 +260,7 @@ public static class ConsoleCanUsePatch
             return false;
         }
 
-        if (ShipStatus.Instance.SpecialTasks.Any((task) => __instance.TaskTypes.Contains(task.TaskType)))
+        if (AmongUsLLImpl.ShipStatusInstance.SpecialTasks.Any((task) => __instance.TaskTypes.Contains(task.TaskType)))
         {
             if (
                 (__instance.TaskTypes.Contains(TaskTypes.FixLights) && info.AllAssigned().Any(assignable => !assignable.CanFixLight)) ||
@@ -280,12 +284,32 @@ public static class ConsoleCanUsePatch
     }
 }
 
+[HarmonyPatch(typeof(ImpostorRole), nameof(ImpostorRole.CanUse))]
+public static class ImpostorRoleCanUsePatch
+{
+    public static bool Prefix(ImpostorRole __instance, ref bool __result)
+    {
+        //CanUseはローカルプレイヤーでしか呼ばれない。
+        var localPlayer = GamePlayer.LocalPlayer;
+        if (localPlayer == null) return true;
+
+        if (localPlayer.Role.HaveNormalTask)
+        {
+            __result = true;
+            return false;
+        }
+
+        return true;
+    }
+}
+
 [HarmonyPatch(typeof(DoorConsole), nameof(DoorConsole.Use))]
 public static class DoorConsoleUsePatch
 {
     public static void Postfix(DoorConsole __instance)
     {
-        if (Minigame.Instance && Minigame.Instance.TryCast<IDoorMinigame>(out var doorMinigame))
+        var minigame = Minigame.Instance;
+        if (minigame.AsBoolFast() && minigame.IsFast<IDoorMinigame>())
         {
             GameOperatorManager.Instance?.Run(new PlayerBeginMinigameByDoorLocalEvent(GamePlayer.LocalPlayer!, __instance));
         }
@@ -297,7 +321,8 @@ public static class ConsoleUsePatch
 {
     public static void Postfix(Console __instance)
     {
-        if (Minigame.Instance && Minigame.Instance.Console && Minigame.Instance.Console.GetInstanceID() == __instance.GetInstanceID())
+        var minigame = Minigame.Instance;
+        if (minigame.AsBoolFast() && minigame.Console.AsBoolFast() && minigame.Console.GetInstanceID() == __instance.GetInstanceID())
         {
             GameOperatorManager.Instance?.Run(new PlayerBeginMinigameByConsoleLocalEvent(GamePlayer.LocalPlayer!, __instance));
         }
@@ -309,7 +334,7 @@ public static class SystemConsoleCanUsePatch
 {
     public static void Postfix(SystemConsole __instance, [HarmonyArgument(0)] NetworkedPlayerInfo pc, [HarmonyArgument(1)] ref bool canUse, [HarmonyArgument(2)] ref bool couldUse)
     {
-        var info = NebulaGameManager.Instance?.GetPlayer(PlayerControl.LocalPlayer.PlayerId);
+        var info = GamePlayer.LocalPlayer;
         if (info == null) return;
 
         if (!CommonCanUsePatch.CanUse(__instance, pc))
@@ -318,7 +343,7 @@ public static class SystemConsoleCanUsePatch
             couldUse = false;
         }
 
-        if(GamePlayer.LocalPlayer != null && !UseButtonAlternative.CheckCanUse(__instance))
+        if(info != null && !UseButtonAlternative.CheckCanUse(__instance))
         {
             canUse = false;
             couldUse = false;
@@ -326,7 +351,7 @@ public static class SystemConsoleCanUsePatch
         }
 
         //緊急会議コンソールの使用をブロック
-        if (__instance.MinigamePrefab != null && __instance.MinigamePrefab.TryCast<EmergencyMinigame>() && (info.AllAssigned().Any(a => !a.CanCallEmergencyMeeting) || info.AllAbilities.Any(a => a.BlockCallingEmergencyMeeting)))
+        if (__instance.MinigamePrefab.AsBoolFast() && __instance.MinigamePrefab.IsFast<EmergencyMinigame>() && (info.AllAssigned().Any(a => !a.CanCallEmergencyMeeting) || info.AllAbilities.Any(a => a.BlockCallingEmergencyMeeting)))
         {
             canUse = false;
             couldUse = false;
@@ -460,7 +485,7 @@ public static class ArrowUpdatePatch
             var transform = __instance.transform;
 
             __instance.gameObject.layer = LayerExpansion.GetArrowLayer();
-            if(__instance.image != null) __instance.image.sortingOrder = 10;
+            if(__instance.image.AsBoolFast()) __instance.image.sortingOrder = 10;
 
             //表示するのはUIカメラ
             Camera main = NebulaGameManager.Instance?.WideCamera.Camera ?? UnityHelper.FindCamera(LayerExpansion.GetUILayer())!;
@@ -470,7 +495,7 @@ public static class ArrowUpdatePatch
             Vector2 del = __instance.target - main.transform.position;
 
             float num = del.magnitude / (worldCam.orthographicSize * __instance.perc);
-            if (__instance.image != null) __instance.image.enabled = (num > __instance.minDistanceToShowArrow);
+            if (__instance.image.AsBoolFast()) __instance.image.enabled = (num > __instance.minDistanceToShowArrow);
 
             Vector2 vector = worldCam.WorldToViewportPoint(__instance.target);
 

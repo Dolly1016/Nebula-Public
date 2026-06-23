@@ -33,7 +33,7 @@ public class Disturber : DefinedSingleAbilityRoleTemplate<Disturber.Ability>, De
         public bool IsActivated => isActivated;
         private void Activate()
         {
-            Color = Color.white;
+            Color = VColor.White;
             isActivated = true;
 
             try
@@ -49,7 +49,7 @@ public class Disturber : DefinedSingleAbilityRoleTemplate<Disturber.Ability>, De
 
         public override void OnInstantiated()
         {
-            if (!AmOwner) Color = Color.clear;
+            if (!AmOwner) Color = VColor.Clear;
         }
 
         public override void OnReleased()
@@ -151,7 +151,7 @@ public class Disturber : DefinedSingleAbilityRoleTemplate<Disturber.Ability>, De
             circleRenderer.gameObject.SetActive(false);
             var dotRenderer = UnityHelper.CreateObject<SpriteRenderer>("DotRenderer", collider.transform, new(0f, 0f, -25f));
             dotRenderer.sprite = whiteCircleSprite.GetSprite();
-            dotRenderer.color = Color.green;
+            dotRenderer.color = UnityEngine.Color.green;
             dotRenderer.transform.localScale = Vector3.one * 0.45f;
 
             clickButton = collider.gameObject.SetUpButton(false);
@@ -193,7 +193,7 @@ public class Disturber : DefinedSingleAbilityRoleTemplate<Disturber.Ability>, De
                 if (canPlace)
                 {
                     Positions.Add((worldPosOnMinimap, worldPos.AsVector3(0f), DisturbPole.GeneratePole(worldPos)));
-                    lineRenderer.SetColors(Color.green, Color.green);
+                    lineRenderer.SetColors(UnityEngine.Color.green, UnityEngine.Color.green);
                     UpdateLine();
 
                     collider.transform.localPosition = worldPosOnMinimap;
@@ -242,7 +242,7 @@ public class Disturber : DefinedSingleAbilityRoleTemplate<Disturber.Ability>, De
             }
 
             bool canPlace = MapData.GetCurrentMapData().CheckMapArea(worldPos, 0.06f);
-            poleRenderer.color = (canPlace ? Color.Lerp(Color.cyan, Color.green, 0.3f) : Color.red).AlphaMultiplied(0.5f);
+            poleRenderer.color = (canPlace ? VColor.Lerp(VColor.Cyan, VColor.Green, 0.3f) : VColor.Red).AlphaMultiplied(0.5f).ToUnityColor();
         }
 
         public void Clear(bool destroyPoles)
@@ -259,7 +259,7 @@ public class Disturber : DefinedSingleAbilityRoleTemplate<Disturber.Ability>, De
             var renderer = UnityHelper.SetUpLineRenderer("PoleLine", transform, new(0f, 0f, -8f), LayerExpansion.GetUILayer(), width: 0.035f);
             renderer.positionCount = poles.Length;
             renderer.SetPositions(positions.Select(p => p.AsVector3(0f)).ToArray());
-            Color col = Color.green.RGBMultiplied(0.65f);
+            Color col = VColor.Green.RGBMultiplied(0.65f).ToUnityColor();
             renderer.SetColors(col, col);
 
             var collider = UnityHelper.CreateObject<EdgeCollider2D>("LineButton", renderer.transform, new(0f, 0f, -4f));
@@ -270,7 +270,7 @@ public class Disturber : DefinedSingleAbilityRoleTemplate<Disturber.Ability>, De
             collider.edgeRadius = 0.1f;
 
             var button = collider.gameObject.SetUpButton(true);
-            Color hovered = Color.Lerp(Color.green.RGBMultiplied(0.9f), Color.yellow, 0.5f);
+            Color hovered = VColor.Lerp(VColor.Green.RGBMultiplied(0.9f), VColor.Yellow, 0.5f).ToUnityColor();
             button.OnMouseOver.AddListener(() =>
             {
                 renderer.SetColors(hovered, hovered);
@@ -297,7 +297,7 @@ public class Disturber : DefinedSingleAbilityRoleTemplate<Disturber.Ability>, De
 
         void OnDestroy()
         {
-            if (camera) GameObject.Destroy(camera.gameObject);
+            if (camera.AsBoolFast()) GameObject.Destroy(camera.gameObject);
             Clear(true);
         }
 
@@ -354,8 +354,8 @@ public class Disturber : DefinedSingleAbilityRoleTemplate<Disturber.Ability>, De
                 var placeButton = NebulaAPI.Modules.AbilityButton(this, alwaysShow: true)
                     .BindKey(Virial.Compat.VirtualKeyInput.Ability, "disturber.place")
                     .SetImage(placeButtonSprite).ShowUsesIcon(0, "").SetLabel("place").SetAsUsurpableButton(this);
-                placeButton.Availability = (button) => mapLayer && mapLayer.Positions.Count >= 2;
-                placeButton.Visibility = (button) => !MyPlayer.IsDead && AmongUsUtil.MapIsOpen && mapLayer && mapLayer.gameObject.active;
+                placeButton.Availability = (button) => mapLayer.AsBoolFast() && mapLayer.Positions.Count >= 2;
+                placeButton.Visibility = (button) => !MyPlayer.IsDead && AmongUsUtil.MapIsOpen && mapLayer.AsBoolFast() && mapLayer.gameObject.active;
                 placeButton.OnClick = button => PlacePoles();
                 updatePoleTextFunc = (num) => placeButton.UpdateUsesIcon(num.ToString());
 
@@ -443,9 +443,9 @@ public class Disturber : DefinedSingleAbilityRoleTemplate<Disturber.Ability>, De
         [Local]
         void OnOpenMap(AbstractMapOpenEvent ev)
         {
-            if (ev is MapOpenNormalEvent && !IsUsurped)
+            if (ev is MapOpenNormalEvent && !IsUsurped && MyPlayer.IsActive)
             {
-                if (!mapLayer)
+                if (!mapLayer.AsBoolFast())
                 {
                     mapLayer = UnityHelper.CreateObject<DisturberMapLayer>("DisturberLayer", MapBehaviour.Instance.transform, new(0, 0, -1f));
                     this.BindGameObject(mapLayer.gameObject);
@@ -456,7 +456,7 @@ public class Disturber : DefinedSingleAbilityRoleTemplate<Disturber.Ability>, De
             }
             else
             {
-                if(mapLayer) mapLayer.gameObject.SetActive(false);
+                if(mapLayer.AsBoolFast()) mapLayer.gameObject.SetActive(false);
             }
         }
 
@@ -559,7 +559,7 @@ public class Disturber : DefinedSingleAbilityRoleTemplate<Disturber.Ability>, De
             NebulaManager.Instance.StartCoroutine(CoUpdate().WrapToIl2Cpp());
         }
 
-        static public RemoteProcess<Vector2[]> RpcDisturb = new("Disturb", (message, _) =>
+        static public RemoteProcess<VVector2[]> RpcDisturb = new("Disturb", (message, _) =>
         {
             float duration = DisturbDurationOption;
             for (int i = 0; i < message.Length - 1; i++) InstantiateCollider(message[i], message[i + 1], duration);

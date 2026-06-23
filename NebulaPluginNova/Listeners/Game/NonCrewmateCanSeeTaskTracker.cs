@@ -24,9 +24,9 @@ internal partial class NebulaGameEventListeners
     }
     void NonCrewmateCanSeeTaskTracker(GameHudUpdateEvent ev)
     {
-        if (!progressBar && HudManager.InstanceExists) {
+        if (!progressBar.AsBoolFast() && HudManager.InstanceExists) {
             progressBar = HudManager.Instance.TaskStuff.transform.GetChild(1).GetComponent<ProgressTracker>();
-            if (progressBar)
+            if (progressBar.AsBoolFast())
             {
                 progressBarText = progressBar.transform.GetChild(2).GetComponent<TextMeshPro>();
                 progressBarAspectPosition = progressBar.GetComponent<AspectPosition>();
@@ -48,11 +48,11 @@ internal partial class NebulaGameEventListeners
                     {
                         TaskBarMode.Normal => true,
                         TaskBarMode.Invisible => false,
-                        TaskBarMode.MeetingOnly => MeetingHud.Instance,
+                        TaskBarMode.MeetingOnly => MeetingHud.Instance.AsBoolFast(),
                         _ => false
                     };
 
-                    if (!shouldShow && MeetingHud.Instance)
+                    if (!shouldShow && MeetingHud.Instance.AsBoolFast())
                     {
                         shouldShow = GeneralConfigurations.NonCrewmateCanSeeTaskTrackerOption.GetValue() switch
                         {
@@ -67,7 +67,7 @@ internal partial class NebulaGameEventListeners
             }
             
             progressBar.gameObject.SetActive(shouldShow);
-            if (shouldShow && progressBarText)
+            if (shouldShow && progressBarText.AsBoolFast())
             {
                 if (asNonCrew)
                 {
@@ -81,7 +81,7 @@ internal partial class NebulaGameEventListeners
             }
             if (shouldShow)
             {
-                if (MeetingHud.Instance)
+                if (MeetingHud.Instance.AsBoolFast())
                 {
                     progressBarAspectPosition.DistanceFromEdge = new(1.81f, 0.18f, -30f);
                     progressBarAspectPosition.transform.localScale = new(0.45f, 0.45f, 1f);
@@ -102,21 +102,24 @@ public static class UpdateProgressTrackerPatch
 {
     static bool Prefix(ProgressTracker __instance)
     {
+        var tileParent = __instance.TileParent;
+
         if (AmongUsUtil.InCommSab)
         {
-            __instance.TileParent.enabled = false;
+            tileParent.enabled = false;
             return false;
         }
 
-        if (!__instance.TileParent.enabled) __instance.TileParent.enabled = true;
+        if (!tileParent.enabled) tileParent.enabled = true;
 
         CrewmateGameRule.GetCurrentTaskState(out var quota, out var completed);
         if (quota == 0) quota += 1;
 
         float num2 = (float)completed / (float)quota;
-        __instance.curValue = Mathf.Lerp(__instance.curValue, num2, Time.fixedDeltaTime * 2f);
-        __instance.TileParent.material.SetFloat("_Buckets", (float)1f);
-        __instance.TileParent.material.SetFloat("_FullBuckets", __instance.curValue);
+        float nextCurValue = Mathn.Lerp(__instance.curValue, num2, Time.fixedDeltaTime * 2f);
+        __instance.curValue = nextCurValue;
+        tileParent.material.SetFloat("_Buckets", (float)1f);
+        tileParent.material.SetFloat("_FullBuckets", nextCurValue);
 
         return false;
     }

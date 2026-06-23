@@ -74,7 +74,7 @@ internal class NiceTracker : DefinedSingleAbilityRoleTemplate<NiceTracker.Abilit
                         tmPro.text = string.Join("<br>", trackings.Where(tuple => !tuple.Lifespan.IsDeadObject).Select(tuple =>
                         {
                             var target = tuple.Player;
-                            return target.Name + ": " + AmongUsUtil.GetRoomName(target.TruePosition, true).Color(Color.Lerp(DynamicPalette.PlayerColors[target.PlayerId], Color.white, 0.25f));
+                            return target.Name + ": " + AmongUsUtil.GetRoomName(target.TruePosition, true).Color(VColor.Lerp(DynamicPalette.PlayerColors[target.PlayerId], VColor.White, 0.25f));
                         }));
                     });
                 }
@@ -102,15 +102,15 @@ internal class NiceTracker : DefinedSingleAbilityRoleTemplate<NiceTracker.Abilit
 
                     var target = trackTracker.CurrentTarget;
                     if (target == null) return;
-                    if (MeetingHud.Instance) return;
+                    if (MeetingHud.Instance.AsBoolFast()) return;
 
                     if (!(GameOperatorManager.Instance?.Run(new PlayerInteractPlayerLocalEvent(MyPlayer, target, new(RealPlayerOnly: true))).IsCanceled ?? false))
                     {
                         var icon = iconHolder.AddPlayer(target.RealPlayer);
                         var lifespan = new FlexibleLifespan(this);
                         var timer = NebulaAPI.Modules.Timer(lifespan, TrackerDurationOption);
-                        var arrow = new TrackingArrowAbility(target.RealPlayer, 0f, Color.white).Register(lifespan);
-                        timer.SetCondition(() => !MeetingHud.Instance && !ExileController.Instance);
+                        var arrow = new TrackingArrowAbility(target.RealPlayer, 0f, VColor.White).Register(lifespan);
+                        timer.SetCondition(() => !MeetingHud.Instance.AsBoolFast() && !ExileController.Instance.AsBoolFast());
                         timer.Start();
                         
                         trackings.Add(new(target.RealPlayer, icon, timer, lifespan));
@@ -123,12 +123,12 @@ internal class NiceTracker : DefinedSingleAbilityRoleTemplate<NiceTracker.Abilit
                 };
                 trackButton.SetAsUsurpableButton(this);
                 
-                (trackButton.EffectTimer as GameTimer)?.SetCondition(() => MeetingHud.Instance == null && ExileController.Instance == null);
+                (trackButton.EffectTimer as GameTimer)?.SetCondition(() => !MeetingHud.Instance.AsBoolFast() && !ExileController.Instance.AsBoolFast());
 
                 float meetingCooldown = 0f;
                 GameOperatorManager.Instance?.Subscribe<GameUpdateEvent>(ev => {
                     //meetingCooldownの更新
-                    if (MeetingHud.Instance || ExileController.Instance) meetingCooldown = 5f;
+                    if (MeetingHud.Instance.AsBoolFast() || ExileController.Instance.AsBoolFast()) meetingCooldown = 5f;
                     else meetingCooldown -= ev.DeltaTime;
 
                     //trackingsの更新

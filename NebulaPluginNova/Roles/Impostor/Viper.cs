@@ -108,7 +108,7 @@ internal class Viper : DefinedSingleAbilityRoleTemplate<Viper.Ability>, HasCitat
                         new StaticAchievementToken(ach.Id);
                         got = true;
                     }
-                }, new FunctionalLifespan(() => !MeetingHud.Instance && !got));
+                }, new FunctionalLifespan(() => !MeetingHud.Instance.AsBoolFast() && !got));
             }
         }
 

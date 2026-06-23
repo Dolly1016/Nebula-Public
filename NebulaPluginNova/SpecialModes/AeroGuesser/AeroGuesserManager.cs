@@ -73,7 +73,7 @@ internal class AeroGuesserSenario : AbstractModuleContainer, IModule, IGameModeA
             int score = entry.score;
             if (lastScore != score) rank++;
 
-            sb.Append(Language.Translate("aeroGuesser.rank." + (rank + 1)).Color(rank < RankColor.Length ? RankColor[rank].ToUnityColor() : Color.white));
+            sb.Append(Language.Translate("aeroGuesser.rank." + (rank + 1)).Color(rank < RankColor.Length ? RankColor[rank] : VColor.White));
             sb.Append("<indent=3.4em>");
             sb.Append(String.Format("{0:N0}", score) + "pt");
             sb.Append("</indent>");
@@ -118,19 +118,9 @@ internal class AeroGuesserSenario : AbstractModuleContainer, IModule, IGameModeA
     }
 
     static public IEnumerator CoIntro(bool amHost) {
-        if (amHost) RpcIntro.Invoke((MapMask, GeneralConfigurations.NumOfQuizOption, GeneralConfigurations.MonochromeModeOption)); 
-        AmongUsClient.Instance.SendClientReady();
-        HudManager.Instance.OnGameStart();
+        if (amHost) RpcIntro.Invoke((MapMask, GeneralConfigurations.NumOfQuizOption, GeneralConfigurations.MonochromeModeOption));
 
-        //フレンドボタン非表示
-        if (FriendsListManager.InstanceExists && FriendsListManager.Instance.FriendsListButton) FriendsListManager.Instance.FriendsListButton.showInScene = false;
-
-        //ボタン類非表示
-        var buttonHolder = HudManager.Instance.AbilityButton.transform.parent.gameObject;
-        buttonHolder.transform.localPosition = new(0f, 0f, 20f);
-        buttonHolder.SetActive(false);
-
-        NebulaAPI.CurrentGame?.GetModule<Synchronizer>()?.SendSync(SynchronizeTag.PreStartGame);
+        SpecialModeFunctions.IntroSetUp();
         yield break;
     }
 
@@ -543,16 +533,6 @@ internal class AeroGuesserSenario : AbstractModuleContainer, IModule, IGameModeA
     private ScoreMap scoreMap = new();
     private AchievementChecker achievementChecker = new();
 
-    static private void SetUpPlayers()
-    {
-        foreach (var p in PlayerControl.AllPlayerControls.GetFastEnumerator())
-        {
-            p.transform.position = new(0f, -10000f, 0f);
-            var player = NebulaGameManager.Instance?.RegisterPlayer(p);
-            player?.Unbox().RpcInvokerSetRole(Roles.AeroGuesser.AeroguesserPlayer.MyRole, null).InvokeLocal();
-        }
-    }
-
     private void SetUp(int mapMask, int quizNum, bool monoColor)
     {
         CurrentSetting = new(mapMask, quizNum, monoColor);
@@ -560,9 +540,7 @@ internal class AeroGuesserSenario : AbstractModuleContainer, IModule, IGameModeA
 
     static private readonly RemoteProcess<(int mapMask, int quizNum, bool monoColor)> RpcIntro = new("AeroGuesser.Intro", (message, _) =>
     {
-        SetUpPlayers();
-        NebulaGameManager.Instance?.CheckGameState(false);
-        NebulaGameManager.Instance?.SetGameModeModule(); //ここでPlaySenarioが開始する
+        SpecialModeFunctions.InRpcSetUp();
         ModSingleton<AeroGuesserSenario>.Instance!.SetUp(message.mapMask, message.quizNum, message.monoColor);
     });
 

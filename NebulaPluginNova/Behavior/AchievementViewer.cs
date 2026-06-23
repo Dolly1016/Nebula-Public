@@ -167,7 +167,7 @@ internal class AchievementViewer : MonoBehaviour
 #if PC
                     new NoSGUIText(GUIAlignment.Left, AttributeAsset.OverlayContent, new LazyTextComponent(() =>
                         NebulaAchievementManager.AmEquipping(a) ?
-                        (Language.Translate("achievement.ui.equipped").Color(Color.green).Bold() + "<br>" + Language.Translate("achievement.ui.unsetTitle")) :
+                        (Language.Translate("achievement.ui.equipped").Color(VColor.Green).Bold() + "<br>" + Language.Translate("achievement.ui.unsetTitle")) :
                         Language.Translate("achievement.ui.setTitle")))
 #elif ANDROID
                     GUI.API.Button(GUIAlignment.Left, AttributeAsset.SmallWideButton, 
@@ -186,7 +186,7 @@ internal class AchievementViewer : MonoBehaviour
                 List<GUIWidget> widgets = [
                 new NoSGUIMargin(GUIAlignment.Left, new(0f, 0.02f)),
                 isAvailable ?
-                new NoSGUIText(GUIAlignment.Left, attr, GUI.API.RawTextComponent(isEmpty ? Language.Translate("achievement.title.custom.empty").Color(Color.gray) : a.LocalizedTitle)) { 
+                new NoSGUIText(GUIAlignment.Left, attr, GUI.API.RawTextComponent(isEmpty ? Language.Translate("achievement.title.custom.empty").Color(Virial.Color.Gray) : a.LocalizedTitle)) { 
                     OverlayWidget = isEmpty ? GUI.API.LocalizedText(GUIAlignment.Left, AttributeAsset.OverlayContent, "achievement.ui.suggestToEdit") : GUI.API.VerticalHolder(GUIAlignment.Left, a.Achievements.Select(a => a.GetOverlayWidget(true, false, false, false,a.IsCleared)).Join(GUI.API.VerticalMargin(0.08f)).Concat(equipOverlay)),
 #if PC
                     OnClickText = ((Action)(() => { NebulaAchievementManager.SetCustomTitle(a); VanillaAsset.PlaySelectSE(); onClicked?.Invoke(); }), true), 
@@ -201,7 +201,7 @@ internal class AchievementViewer : MonoBehaviour
                 var achievementContent = new VerticalWidgetsHolder(GUIAlignment.Center, widgets);
                 GUIWidget aContenxt = new HorizontalWidgetsHolder(GUIAlignment.Left,
                     new VerticalWidgetsHolder(GUIAlignment.Top, GUI.API.VerticalMargin(0.05f),
-                        new NoSGUIImage(GUIAlignment.Left, new WrapSpriteLoader(() => AbstractAchievement.TrophySprite.GetSprite(4)), new(0.38f, 0.38f), isAvailable ? Color.white : new UnityEngine.Color(0.2f, 0.2f, 0.2f)) { IsMasked = true }
+                        new NoSGUIImage(GUIAlignment.Left, new WrapSpriteLoader(() => AbstractAchievement.TrophySprite.GetSprite(4)), new(0.38f, 0.38f), isAvailable ? VColor.White : new VColor(0.2f, 0.2f, 0.2f)) { IsMasked = true }
                         ),
                     new NoSGUIMargin(GUIAlignment.Left, new(0.15f, 0.1f)),
                     achievementContent
@@ -227,14 +227,14 @@ internal class AchievementViewer : MonoBehaviour
                             if (minAchievements > gainedAchievements) return;
                             if(requiredAchievements > gainedAchievements)
                             {
-                                header.Add(new GUIButton(GUIAlignment.Center, HeaderAttr, GUI.API.RawTextComponent(Language.Translate("achievement.ui.craft.unavailable").Replace("%NUM%", requiredAchievements.ToString()))) { Color = Color.gray, TextMargin = 0.15f });
+                                header.Add(new GUIButton(GUIAlignment.Center, HeaderAttr, GUI.API.RawTextComponent(Language.Translate("achievement.ui.craft.unavailable").Replace("%NUM%", requiredAchievements.ToString()))) { Color = VColor.Gray, TextMargin = 0.15f });
                             }
                             else
                             {
-                                header.Add(new GUIButton(GUIAlignment.Center, HeaderAttr, GUI.API.RawTextComponent(Language.TranslateIfNotNull(crafting.GetTranslationKey(myIndex), null!) ?? Language.Translate("achievement.ui.craft.empty").Color(Color.gray))){ OnClick = _ =>
+                                header.Add(new GUIButton(GUIAlignment.Center, HeaderAttr, GUI.API.RawTextComponent(Language.TranslateIfNotNull(crafting.GetTranslationKey(myIndex), null!) ?? Language.Translate("achievement.ui.craft.empty").Color(VColor.Gray))){ OnClick = _ =>
                                 {
                                     SetWidget(myIndex);
-                                }, Color = myIndex == index ? Color.yellow : null, PostBuilder = myIndex == index ? t => headText = t : null, TextMargin = 0.15f });
+                                }, Color = myIndex == index ? VColor.Yellow : null, PostBuilder = myIndex == index ? t => headText = t : null, TextMargin = 0.15f });
                             }
                         }
                         AddHeader(0, 0, -10);
@@ -263,7 +263,7 @@ internal class AchievementViewer : MonoBehaviour
                             _ => null
                         };
 
-                        var unsetText = Language.Translate("achievement.ui.unset").Color(Color.gray);
+                        var unsetText = Language.Translate("achievement.ui.unset").Color(VColor.Gray);
                         var selector = GUI.API.ScrollView(GUIAlignment.Center, new(8.4f, 3f), null, new GUIButtonGroup(GUI.API.Arrange(GUIAlignment.Center, NebulaAchievementManager.AllAchievements.Where(IsAvailableAchievement).Prepend(null).Select(a =>
                         {
                             return new GUIModernButton(GUIAlignment.Center, ButtonAttr, GUI.API.RawTextComponent(Language.TranslateIfNotNull(ConvertToTranslationKey(a), unsetText)))
@@ -285,7 +285,7 @@ internal class AchievementViewer : MonoBehaviour
                                             crafting.Suffix = a;
                                             break;
                                     }
-                                    if (headText) headText.text = Language.TranslateIfNotNull(ConvertToTranslationKey.Invoke(a), null) ?? Language.Translate("achievement.ui.craft.empty").Color(Color.gray);
+                                    if (headText) headText.text = Language.TranslateIfNotNull(ConvertToTranslationKey.Invoke(a), null) ?? Language.Translate("achievement.ui.craft.empty").Color(VColor.Gray);
                                 },
                                 SelectedDefault = a == firstSelected
                             };
@@ -356,7 +356,7 @@ internal class AchievementViewer : MonoBehaviour
 
                 GUIWidget aContenxt = new HorizontalWidgetsHolder(GUIAlignment.Left,
                     new VerticalWidgetsHolder(GUIAlignment.Center, GUI.API.VerticalMargin(0.05f),
-                        new NoSGUIImage(GUIAlignment.Left, new WrapSpriteLoader(() => AbstractAchievement.TrophySprite.GetSprite(a.Trophy)), new(0.38f, 0.38f), a.IsCleared ? Color.white : new UnityEngine.Color(0.2f, 0.2f, 0.2f)) { IsMasked = true }
+                        new NoSGUIImage(GUIAlignment.Left, new WrapSpriteLoader(() => AbstractAchievement.TrophySprite.GetSprite(a.Trophy)), new(0.38f, 0.38f), a.IsCleared ? VColor.White : new VColor(0.2f, 0.2f, 0.2f)) { IsMasked = true }
                         ),
                     new NoSGUIMargin(GUIAlignment.Left, new(0.15f, 0.1f)),
                     achievementContent
@@ -401,7 +401,7 @@ internal class AchievementViewer : MonoBehaviour
                 if (footerList.Count != 0) footerList.Add(new NoSGUIMargin(GUIAlignment.Center, new(0.2f, 0f)));
 
                 footerList.Add(new NoSGUIImage(GUIAlignment.Left, new WrapSpriteLoader(() => AbstractAchievement.TrophySprite.GetSprite(copiedIndex)), new(0.5f, 0.5f),
-                    ((1 << i) & argument.TrophyMask) != 0 ? Color.white : new(0.25f,0.25f,0.25f,0.95f), _ =>
+                    ((1 << i) & argument.TrophyMask) != 0 ? VColor.White : new(0.25f,0.25f,0.25f,0.95f), _ =>
                     {
                         if (argument.TrophyMask != 1 << copiedIndex)
                             argument.TrophyMask = 1 << copiedIndex;

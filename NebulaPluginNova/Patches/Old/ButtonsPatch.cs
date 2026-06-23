@@ -13,7 +13,7 @@ public static class SabotageButtonPatch
     {
         try
         {
-            if (!PlayerControl.LocalPlayer || PlayerControl.LocalPlayer.inVent || !GameManager.Instance.SabotagesEnabled() || PlayerControl.LocalPlayer.petting)
+            if (!AmongUsLLImpl.TryGetLocalPlayer(out var localPlayer) || localPlayer.inVent || !AmongUsLLImpl.GameManagerInstance.SabotagesEnabled() || localPlayer.petting)
                 __instance.SetDisabled();
             else
                 __instance.SetEnabled();
@@ -25,6 +25,8 @@ public static class SabotageButtonPatch
     }
 }
 
+// HnS無効にしているので不要？
+/*
 [HarmonyPatch(typeof(AdminButton), nameof(AdminButton.Refresh))]
 public static class AdminButtonPatch
 {
@@ -37,7 +39,7 @@ public static class AdminButtonPatch
                 LogicGameFlowHnS logicGameFlowHnS = GameManager.Instance.LogicFlow.TryCast<LogicGameFlowHnS>()!;
                 if (logicGameFlowHnS != null)
                 {
-                    __instance.useable = logicGameFlowHnS.SeekerAdminMapEnabled(PlayerControl.LocalPlayer);
+                    __instance.useable = logicGameFlowHnS.SeekerAdminMapEnabled(AmongUsLLImpl.LocalPlayer);
                     if (!__instance.useable || AmongUsUtil.MapIsOpen)
                         __instance.SetDisabled();
                     else
@@ -51,6 +53,7 @@ public static class AdminButtonPatch
         return false;
     }
 }
+*/
 
 [HarmonyPatch(typeof(HudManager), nameof(HudManager.SetHudActive), typeof(PlayerControl), typeof(RoleBehaviour), typeof(bool))]
 public static class HudActivePatch
@@ -64,9 +67,10 @@ public static class HudActivePatch
     {
         __instance.UpdateHudContent();
 
-        __instance.UseButton.transform.parent.gameObject.SetActive((NebulaGameManager.Instance?.GameMode?.ShowButtons ?? true) && isActive && !MeetingHud.Instance);
-        __instance.TaskPanel.gameObject.SetActive(isActive);
-        __instance.roomTracker.gameObject.SetActive(isActive);
+        var bridge = AmongUsLLImpl.HudManagerBridge;
+        bridge.UseButtonParentObj.SetActive((NebulaGameManager.Instance?.GameMode?.ShowButtons ?? true) && isActive && !MeetingHud.Instance.AsBoolFast());
+        bridge.TaskPanelObj.SetActive(isActive);
+        bridge.RoomTrackerObj.SetActive(isActive);
         __instance.joystick?.ToggleVisuals(isActive);
         __instance.ToggleRightJoystick(isActive);
 
@@ -88,11 +92,13 @@ public static class RevivePatch
         __instance.cosmetics.SetNameMask(true);
         if (__instance.AmOwner)
         {
-            var hudManager = HudManager.Instance;
-            hudManager.ShadowQuad.gameObject.SetActive(true);
-            hudManager.SetHudActive(true);
-            hudManager.Chat.ForceClosed();
-            hudManager.Chat.SetVisible(false);
+            if (AmongUsLLImpl.TryGetHudManager(out var hudManager, out var bridge))
+            {
+                bridge.ShadowQuadObj.SetActive(true);
+                hudManager.SetHudActive(true);
+                bridge.Chat.ForceClosed();
+                bridge.Chat.SetVisible(false);
+            }
         }
 
         return false;
@@ -105,7 +111,7 @@ public static class VentClickPatch
 {
     static bool Prefix(VentButton __instance)
     {
-        if ((!PlayerControl.LocalPlayer.inVent) && (GamePlayer.LocalPlayer?.Unbox().Role?.VentCoolDown?.IsProgressing ?? false))
+        if ((!AmongUsLLImpl.LocalPlayer.inVent) && (GamePlayer.LocalPlayer?.Unbox().Role?.VentCoolDown?.IsProgressing ?? false))
             return false;
 
         if (__instance.currentTarget != null)
@@ -122,7 +128,7 @@ public static class KillButtonClickPatch
 {
     static bool Prefix(KillButton __instance)
     {
-        if (__instance.enabled && NebulaGameManager.Instance?.KillButtonTracker?.CurrentTarget != null && !__instance.isCoolingDown && __instance.graphic.color.a > 0.9f && !PlayerControl.LocalPlayer.Data.IsDead && PlayerControl.LocalPlayer.CanMove)
+        if (__instance.enabled && NebulaGameManager.Instance?.KillButtonTracker?.CurrentTarget != null && !__instance.isCoolingDown && __instance.graphic.color.a > 0.9f && !AmongUsLLImpl.LocalPlayer.Data.IsDead && AmongUsLLImpl.LocalPlayer.CanMove)
         {
             var target = NebulaGameManager.Instance?.KillButtonTracker?.CurrentTarget!;
             var cancelable = GameOperatorManager.Instance?.Run(new PlayerTryVanillaKillLocalEventAbstractPlayerEvent(GamePlayer.LocalPlayer!, target));
@@ -169,18 +175,20 @@ class BlockInitializePatch
         __instance.Player = player;
         if (!player.AmOwner) return false;
 
-        var hudManager = HudManager.Instance;
-        if (__instance.IsImpostor)
+        if (AmongUsLLImpl.TryGetHudManager(out var hudManager, out var bridge))
         {
-            if (__instance.CanUseKillButton)
+            if (__instance.IsImpostor)
             {
-                hudManager.KillButton.Show();
-                if(player.killTimer < 10f) player.SetKillTimer(10f);
+                if (__instance.CanUseKillButton)
+                {
+                    bridge.KillButton.Show();
+                    if (player.killTimer < 10f) player.SetKillTimer(10f);
+                }
+                bridge.SabotageButton.Show();
+                bridge.ImpostorVentButton.Show();
             }
-            hudManager.SabotageButton.Show();
-            hudManager.ImpostorVentButton.Show();
+            hudManager.SetHudActive(player, __instance, true);
         }
-        hudManager.SetHudActive(player, __instance, true);
         PlayerNameColor.SetForRoleDirectly(player, __instance);
         __instance.InitializeAbilityButton();
 

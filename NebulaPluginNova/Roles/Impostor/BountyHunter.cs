@@ -99,9 +99,9 @@ public class BountyHunter : DefinedSingleAbilityRoleTemplate<BountyHunter.Abilit
                 this.BindGameObject(iconHolder.gameObject);
                 bountyIcon = AmongUsUtil.GetPlayerIcon(MyPlayer.Unbox().DefaultOutfit.Outfit.outfit, iconHolder.transform, Vector3.zero, Vector3.one * 0.5f);
                 bountyIcon.ToggleName(true);
-                bountyIcon.SetName("", Vector3.one * 4f, Color.white, -1f);
+                bountyIcon.SetName("", Vector3.one * 4f, UnityEngine.Color.white, -1f);
 
-                if (ShowBountyArrowOption) bountyArrow = new Arrow().SetColor(Palette.ImpostorRed).Register(this);
+                if (ShowBountyArrowOption) bountyArrow = new Arrow().SetColor(new(Palette.ImpostorRed)).Register(this);
 
                 ChangeBounty();
             }

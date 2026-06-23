@@ -89,7 +89,7 @@ public static class HelpScreen
 
     public record HelpTabInfo(HelpTab Tab,string TranslateKey)
     {
-        public MetaWidgetOld.Button GetButton(MetaScreen screen, HelpTab currentTab, HelpTab validTabs) => new(() => ShowScreen(screen, HelpArgument.Default, Tab, validTabs), TabButtonAttr) { Color = currentTab == Tab ? Color.white : Color.gray, TranslationKey = TranslateKey };
+        public MetaWidgetOld.Button GetButton(MetaScreen screen, HelpTab currentTab, HelpTab validTabs) => new(() => ShowScreen(screen, HelpArgument.Default, Tab, validTabs), TabButtonAttr) { Color = currentTab == Tab ? VColor.White : VColor.Gray, TranslationKey = TranslateKey };
         
     }
 
@@ -237,7 +237,7 @@ public static class HelpScreen
         inner = scrollView.Artifact;
         Variable<MetaWidgetOld.ScrollView.InnerScreen> innerRef = new();
 
-        var screen = MetaScreen.GenerateWindow(new(width, height), HudManager.Instance.transform, Vector3.zero, true, true, background: BackgroundSetting.Modern);
+        var screen = MetaScreen.GenerateWindow(new(width, height), AmongUsLLImpl.HudManagerInstance.transform, Vector3.zero, true, true, background: BackgroundSetting.Modern);
         screen.SetWidget(scrollView, doc.Illustlation, out _);
         return screen;
     }
@@ -577,9 +577,9 @@ public static class HelpScreen
                 if ((f & AssignmentFlag.ModImpostorPrb) != 0) text += "<br>" + Language.Translate("help.rolePreview.modImpostor.random").Color(Palette.ImpostorRed);
                 if ((f & AssignmentFlag.ModImpostorAdd) != 0) text += "<br>" + Language.Translate("help.rolePreview.modImpostor.additional").Color(Palette.ImpostorRed);
                 if ((f & AssignmentFlag.VanillaImpostor) != 0) text += "<br>" + Language.Translate("help.rolePreview.vanillaImpostor").Color(Palette.ImpostorRed);
-                if ((f & AssignmentFlag.ModNeutral100) != 0) text += "<br>" + Language.Translate("help.rolePreview.modNeutral.100").Color(Color.yellow);
-                if ((f & AssignmentFlag.ModNeutralPrb) != 0) text += "<br>" + Language.Translate("help.rolePreview.modNeutral.random").Color(Color.yellow);
-                if ((f & AssignmentFlag.ModNeutralAdd) != 0) text += "<br>" + Language.Translate("help.rolePreview.modNeutral.additional").Color(Color.yellow);
+                if ((f & AssignmentFlag.ModNeutral100) != 0) text += "<br>" + Language.Translate("help.rolePreview.modNeutral.100").Color(VColor.Yellow);
+                if ((f & AssignmentFlag.ModNeutralPrb) != 0) text += "<br>" + Language.Translate("help.rolePreview.modNeutral.random").Color(VColor.Yellow);
+                if ((f & AssignmentFlag.ModNeutralAdd) != 0) text += "<br>" + Language.Translate("help.rolePreview.modNeutral.additional").Color(VColor.Yellow);
                 if ((f & AssignmentFlag.ModCrewmate100) != 0) text += "<br>" + Language.Translate("help.rolePreview.modCrewmate.100").Color(Palette.CrewmateBlue);
                 if ((f & AssignmentFlag.ModCrewmatePrb) != 0) text += "<br>" + Language.Translate("help.rolePreview.modCrewmate.random").Color(Palette.CrewmateBlue);
                 if ((f & AssignmentFlag.ModCrewmateAdd) != 0) text += "<br>" + Language.Translate("help.rolePreview.modCrewmate.additional").Color(Palette.CrewmateBlue);
@@ -635,7 +635,7 @@ public static class HelpScreen
                     ShowInnerWidget(true);
                 }
 
-                var textField = new GUITextField(GUIAlignment.Left, new(4.3f,0.4f)){ HintText = Language.Translate("ui.dialog.keyword").Color(Color.gray), IsSharpField = false, WithMaskMaterial = true, EnterAction = (rawKeyword) => {ShowResult(rawKeyword); return true; } };
+                var textField = new GUITextField(GUIAlignment.Left, new(4.3f,0.4f)){ HintText = Language.Translate("ui.dialog.keyword").Color(VColor.Gray), IsSharpField = false, WithMaskMaterial = true, EnterAction = (rawKeyword) => {ShowResult(rawKeyword); return true; } };
                 var button = new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.CenteredBoldFixed), new TranslateTextComponent("ui.dialog.search")){OnClick = _ =>ShowResult(textField.Artifact.FirstOrDefault()?.Text ?? "")};
                 searchWindow.SetWidget(GUI.API.HorizontalHolder(GUIAlignment.Center, textField, button), new Vector2(0.5f,0.5f), out var size);
                 textField.Artifact.Do(field => field.GainFocus());
@@ -735,7 +735,7 @@ public static class HelpScreen
             }
         }
 
-        IEnumerable<Virial.Media.GUIWidget> GetRolesWidget(IEnumerable<ProbabilityAssignment> assignments, UnityEngine.Color? color)
+        IEnumerable<Virial.Media.GUIWidget> GetRolesWidget(IEnumerable<ProbabilityAssignment> assignments, VColor? color)
         {
             foreach (var assignment in assignments)
             {
@@ -859,7 +859,7 @@ public static class HelpScreen
     {
         List<Virial.Media.GUIWidget> widgets = [GUI.API.HorizontalMargin(7.4f)];
 
-        UnityEngine.Color selectedColor = new(1f, 0.22f, 0.22f);
+        VColor selectedColor = new(1f, 0.22f, 0.22f);
         string? selectedTableStamp = null;
         (string prodId, SpriteRenderer backRenderer)? selectedInList = null;
         List<(string prodId, SpriteRenderer backRenderer)> activeStamps = [];
@@ -876,7 +876,7 @@ public static class HelpScreen
             }).Select(entry =>
             {
                 (var id, var stamp) = entry;
-                return new NoSGUIFramed(GUIAlignment.Center, stamp.GetStampWidget(id, PlayerControl.LocalPlayer.PlayerId, GUIAlignment.Center, false, 0.55f, _ =>
+                return new NoSGUIFramed(GUIAlignment.Center, stamp.GetStampWidget(id, AmongUsLLImpl.LocalPlayer.PlayerId, GUIAlignment.Center, false, 0.55f, _ =>
                 {
                     //OnClicked
                     if (selectedInList == null)
@@ -897,7 +897,7 @@ public static class HelpScreen
                     UpdateUpperScreen();
                 },
                 () => stamp.GetStampLabelWidget(id, Language.Translate(selectedInList == null ? "ui.stamp.click.top.1" : "ui.stamp.click.top.2"))
-                ), new(0.05f, 0.05f), (id == selectedTableStamp) ? selectedColor : Color.clear);
+                ), new(0.05f, 0.05f), (id == selectedTableStamp) ? selectedColor : VColor.Clear);
             })));
         upperView = new GUIFixedView(GUIAlignment.Center, new(7.8f, 0.8f), GetUpperScreen);
 
@@ -935,7 +935,7 @@ public static class HelpScreen
                     group.Select(s =>
                     {
                         SpriteRenderer backRenderer = null!;
-                        return new NoSGUIFramed(GUIAlignment.Center, s.GetStampWidget(s.ProductId, PlayerControl.LocalPlayer.PlayerId, GUIAlignment.Center, true, 0.6f, _ => {
+                        return new NoSGUIFramed(GUIAlignment.Center, s.GetStampWidget(s.ProductId, AmongUsLLImpl.LocalPlayer.PlayerId, GUIAlignment.Center, true, 0.6f, _ => {
                             var currentTable = StampManager.CurrentTable;
                             bool isActive = currentTable.Contains(s.ProductId);
 
@@ -987,9 +987,9 @@ public static class HelpScreen
                         () =>
                         {
                             //カーソルが外された要素
-                            backRenderer.color = selectedInList?.prodId == s.ProductId ? selectedColor : activeStamps.Any(a => a.prodId == s.ProductId) ? Color.gray : Color.clear;
+                            backRenderer.color = (selectedInList?.prodId == s.ProductId ? selectedColor : activeStamps.Any(a => a.prodId == s.ProductId) ? VColor.Gray : VColor.Clear).ToUnityColor();
                         }
-                        ), new Vector2(0.05f, 0.05f), Color.clear)
+                        ), new Vector2(0.05f, 0.05f), VColor.Clear)
                         { 
                             PostBuilder = renderer =>
                             {
@@ -1026,7 +1026,7 @@ public static class HelpScreen
     {
         GUITextField textField = null!;
         GUIScrollView scrollView = null!;
-        textField = new GUITextField(GUIAlignment.Center, new(5f, 0.38f)) { HintText = Language.Translate("help.search.hint").Color(Color.gray), WithMaskMaterial = false, IsSharpField = false, MaxLines = 1, EnterAction = text => { OnSearch(); return true; }, GainFocus = true };
+        textField = new GUITextField(GUIAlignment.Center, new(5f, 0.38f)) { HintText = Language.Translate("help.search.hint").Color(VColor.Gray), WithMaskMaterial = false, IsSharpField = false, MaxLines = 1, EnterAction = text => { OnSearch(); return true; }, GainFocus = true };
         scrollView = new GUIScrollView(GUIAlignment.Center, new(7.4f, HelpHeight - 0.9f), null);
         
         void OnSearch() {
@@ -1130,7 +1130,7 @@ public class HintManager
         holder.transform.SetParent(overlay.transform);
         var anim = GameObject.Instantiate(AccountManager.Instance.waitingText.transform.GetChild(2).gameObject, holder.transform);
         var animRenderer = anim.GetComponent<SpriteRenderer>();
-        AmongUsUtil.SetPlayerMaterial(animRenderer, DynamicPalette.MyColor.MainColor, DynamicPalette.MyColor.ShadowColor, DynamicPalette.MyVisorColor.ToColor(Palette.VisorColor));
+        AmongUsUtil.SetPlayerMaterial(animRenderer, DynamicPalette.MyColor.MainColor, DynamicPalette.MyColor.ShadowColor, DynamicPalette.MyVisorColor.ToColor(DynamicPalette.VanillaVisorColor));
         animRenderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
         var scale = holder.transform.localScale;
         scale.x = -scale.x;
@@ -1142,7 +1142,7 @@ public class HintManager
         
         var hint = AllHints[System.Random.Shared.Next(AllHints.Count)].GUI.Invoke().Instantiate(new(new(0.5f, 0.5f), new(0f, 0f, 0f)), new(6f, 4f), out _);
         hint?.transform.SetParent(overlay.transform);
-        if(hint) hint!.transform.localPosition = new(0f, 0f, 10f);
+        if(hint.AsBoolFast()) hint!.transform.localPosition = new(0f, 0f, 10f);
 
         yield return Effects.ColorFade(overlay, Color.black, Color.clear, 0.5f);
 

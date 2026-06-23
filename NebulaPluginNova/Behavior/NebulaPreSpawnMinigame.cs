@@ -193,14 +193,14 @@ public class NebulaPreSpawnMinigame : Minigame
         var gathering = NebulaGameManager.Instance!.GameStatistics.Gathering[GameStatisticsGatherTag.Spawn];
         NebulaAPI.CurrentGame?.GetModule<Synchronizer>()?.ResetSyncOnlyHistory(SynchronizeTag.PreSpawnMinigame);
 
-        foreach (var p in PlayerControl.AllPlayerControls)
+        foreach (var p in PlayerControl.AllPlayerControls.GetFastEnumerator())
         {
             if (p.Data.IsDead) continue;
             if (!gathering.ContainsKey(p.PlayerId)) continue;
 
             p.NetTransform.SnapTo(gathering[p.PlayerId]);
         }
-        PlayerControl.LocalPlayer.NetTransform.RpcSnapTo(spawnAt);
+        AmongUsLLImpl.LocalPlayer.NetTransform.RpcSnapTo(spawnAt);
 
         for (float timer = 0f; timer < 0.25f; timer += Time.deltaTime)
         {
@@ -219,7 +219,7 @@ public class NebulaPreSpawnMinigame : Minigame
         this.amOpening = true;
         this.amClosing = Minigame.CloseState.None;
 
-        if (PlayerControl.LocalPlayer) PlayerControl.LocalPlayer.NetTransform.Halt();
+        if (AmongUsLLImpl.LocalPlayer.AsBoolFast()) AmongUsLLImpl.LocalPlayer.NetTransform.Halt();
         
         byte mapId = AmongUsUtil.CurrentMapId;
 
@@ -227,7 +227,7 @@ public class NebulaPreSpawnMinigame : Minigame
         var rand = Helpers.GetRandomArray(cand.Length);
 
         SpawnInMinigame? minigamePrefab = null;
-        if (mapId == 4) minigamePrefab = ShipStatus.Instance.Cast<AirshipStatus>().SpawnInGame;
+        if (mapId == 4) minigamePrefab = AmongUsLLImpl.ShipStatusInstance.Cast<AirshipStatus>().SpawnInGame;
 
         UnderText = GameObject.Instantiate(VanillaAsset.StandardTextPrefab,transform);
         UnderText.transform.localPosition = new Vector3(0,-1.18f,0f);

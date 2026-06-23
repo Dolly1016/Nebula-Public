@@ -85,11 +85,11 @@ internal class BoolConfigurationImpl : Virial.Configuration.BoolConfiguration
             ConfigurationAssets.GetOptionTitle(Title, id),
             ConfigurationAssets.Semicolon,
             new NoSGUIMargin(GUIAlignment.Center, new(0.1f, 0f)),
-            new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButtonMedium), new LazyTextComponent(() => ValueAsDisplayString)) { OnClick = _ => { UpdateValue(!GetValue()); NebulaAPI.Configurations.RequireUpdateSettingScreen();}, Color = Color.Lerp(Color.white, GetValue() ? Color.cyan : Color.red ,0.65f) }
+            new GUIButton(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsButtonMedium), new LazyTextComponent(() => ValueAsDisplayString)) { OnClick = _ => { UpdateValue(!GetValue()); NebulaAPI.Configurations.RequireUpdateSettingScreen();}, Color = VColor.Lerp(VColor.White, GetValue() ? VColor.Cyan : VColor.Red ,0.65f) }
             );
     }
 
-    internal static string GetDisplayValue(bool val) => Language.Translate(val ? "options.switch.on" : "options.switch.off").Color(Color.Lerp(Color.white, val ? Color.cyan : Color.red, 0.65f));
+    internal static string GetDisplayValue(bool val) => Language.Translate(val ? "options.switch.on" : "options.switch.off").Color(VColor.Lerp(VColor.White, val ? VColor.Cyan : VColor.Red, 0.65f));
     private string ValueAsDisplayString => GetDisplayValue(val.CurrentValue);
     internal override string? GetDisplayText() => Title.GetString() + ": " + ValueAsDisplayString;
 

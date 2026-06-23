@@ -30,7 +30,7 @@ public static class CountOverlayUpdatePatch
         if (!ConsoleTimer.IsOpenedByAvailableWay())
         {
             __instance.BackgroundColor.SetColor(Palette.DisabledGrey);
-            if (!notAvailableText) {
+            if (!notAvailableText.AsBoolFast()) {
                 notAvailableText = GameObject.Instantiate(__instance.SabotageText, __instance.SabotageText.transform.parent);
                 notAvailableText.text = Language.Translate("console.notAvailable");
                 notAvailableText.GetComponent<AlphaBlink>().enabled = true;
@@ -42,20 +42,21 @@ public static class CountOverlayUpdatePatch
             return false;
         }
 
-        if(notAvailableText) notAvailableText.gameObject.SetActive(false);
+        if(notAvailableText.AsBoolFast()) notAvailableText.gameObject.SetActive(false);
 
         __instance.timer += Time.deltaTime;
         if (__instance.timer < 0.1f) return false;
         
         __instance.timer = 0f;
-        
-        if (!__instance.isSab && MapBehaviourExtension.AffectedByCommSab && PlayerTask.PlayerHasTaskOfType<IHudOverrideTask>(PlayerControl.LocalPlayer))
+
+        bool hasCommSab = PlayerTask.PlayerHasTaskOfType<IHudOverrideTask>(AmongUsLLImpl.LocalPlayer);
+        if (!__instance.isSab && MapBehaviourExtension.AffectedByCommSab && hasCommSab)
         {
             __instance.isSab = true;
             __instance.BackgroundColor.SetColor(Palette.DisabledGrey);
             __instance.SabotageText.gameObject.SetActive(true);
         }
-        if (__instance.isSab && (!MapBehaviourExtension.AffectedByCommSab || !PlayerTask.PlayerHasTaskOfType<IHudOverrideTask>(PlayerControl.LocalPlayer)))
+        if (__instance.isSab && (!MapBehaviourExtension.AffectedByCommSab || !hasCommSab))
         {
             __instance.isSab = false;
             __instance.BackgroundColor.SetColor(MapBehaviourExtension.MapColor ?? Color.green);
@@ -74,6 +75,9 @@ public static class CountOverlayUpdatePatch
 
         FakeAdmin admin = MapBehaviourExtension.AffectedByFakeAdmin ? FakeInformation.Instance!.CurrentAdmin : FakeInformation.AdminFromActuals;
         var roomFlags = MapData.GetCurrentMapData().AdminRooms;
+        var fastRooms = AmongUsLLImpl.ShipStatusInstance.FastRooms;
+        var inMeeting = MeetingHud.Instance.AsBoolFast();
+
         foreach (var counterArea in __instance.CountAreas)
         {
             var index = roomFlags.FindIndex(e => e.room == counterArea.RoomType);
@@ -83,12 +87,12 @@ public static class CountOverlayUpdatePatch
             }
             else
             {
-                if (ShipStatus.Instance.FastRooms.TryGetValue(counterArea.RoomType, out var plainShipRoom) && plainShipRoom.roomArea)
+                if (fastRooms.TryGetValue(counterArea.RoomType, out var plainShipRoom) && plainShipRoom.roomArea.AsBoolFast())
                 {
                     int counter = 0;
                     int deadBodies = 0, impostors = 0;
 
-                    if (MeetingHud.Instance)
+                    if (inMeeting)
                     {
                         //会議中のアドミン (PreMeetingPointを参照する)
                         foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
@@ -146,11 +150,11 @@ public static class OpenNormalMapPatch
             return false;
         }
         
-        PlayerControl.LocalPlayer.SetPlayerMaterialColors(__instance.HerePoint);
+        AmongUsLLImpl.LocalPlayer.SetPlayerMaterialColors(__instance.HerePoint);
         __instance.GenericShow();
         __instance.ColorControl.SetColor(new Color(0.05f, 0.2f, 1f, 1f));
         __instance.taskOverlay.Show();
-        DestroyableSingleton<HudManager>.Instance.SetHudActive(false);
+        AmongUsLLImpl.HudManagerInstance.SetHudActive(false);
 
         GameOperatorManager.Instance?.Run(new MapOpenNormalEvent(), true);
         return false;
@@ -169,13 +173,13 @@ public static class OpenSabotageMapPatch
             return false;
         }
         if (__instance.specialInputHandler != null) __instance.specialInputHandler.disableVirtualCursor = true;
-        
-        PlayerControl.LocalPlayer.SetPlayerMaterialColors(__instance.HerePoint);
+
+        AmongUsLLImpl.LocalPlayer.SetPlayerMaterialColors(__instance.HerePoint);
         __instance.GenericShow();
         __instance.ColorControl.SetColor(Palette.ImpostorRed);
         __instance.infectedOverlay.gameObject.SetActive(true);
         __instance.taskOverlay.Show();
-        DestroyableSingleton<HudManager>.Instance.SetHudActive(false);
+        AmongUsLLImpl.HudManagerInstance.SetHudActive(false);
         ConsoleJoystick.SetMode_Sabotage();
 
         GameOperatorManager.Instance?.Run(new MapOpenSabotageEvent(), true);
@@ -232,16 +236,16 @@ class MapBehaviourShowNormalMapPatch
             return false;
         }
 
-        if (ExileController.Instance || Minigame.Instance) return false;
+        if (ExileController.Instance.AsBoolFast() || Minigame.Instance.AsBoolFast()) return false;
 
-
-        if (!PlayerControl.LocalPlayer.CanMove && !MeetingHud.Instance) {
+        var localPlayer = AmongUsLLImpl.LocalPlayer;
+        if (!localPlayer.CanMove && !MeetingHud.Instance.AsBoolFast()) {
             //会議中でなく動けないとき
 
             int val = GeneralConfigurations.CanOpenMapWhileUsingUtilityOption.GetValue();
             if (val == 2 || (val == 1 && !(GamePlayer.LocalPlayer?.IsTrueCrewmate ?? true))) {
                 //何れかのユーティリティを使用してなければ開けない
-                if(!PlayerControl.LocalPlayer.inVent && !PlayerControl.LocalPlayer.inMovingPlat && !PlayerControl.LocalPlayer.walkingToVent && !PlayerControl.LocalPlayer.onLadder) return false; 
+                if(!localPlayer.inVent && !localPlayer.inMovingPlat && !localPlayer.walkingToVent && !localPlayer.onLadder) return false; 
             }
             else
             {

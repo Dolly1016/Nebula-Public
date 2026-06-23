@@ -287,9 +287,9 @@ public class Berserker : DefinedSingleAbilityRoleTemplate<Berserker.Ability>, De
 
             //SetMaterialColor
             var playerId = message.player.PlayerId;
-            chargeAnim.Renderer.material.SetColor("_BackColor", DynamicPalette.ShadowColors[playerId]);
-            chargeAnim.Renderer.material.SetColor("_BodyColor", DynamicPalette.PlayerColors[playerId]);
-            chargeAnim.Renderer.material.SetColor("_VisorColor", DynamicPalette.VisorColors[playerId]);
+            chargeAnim.Renderer.material.SetColor("_BackColor", DynamicPalette.ShadowColors[playerId].ToUnityColor());
+            chargeAnim.Renderer.material.SetColor("_BodyColor", DynamicPalette.PlayerColors[playerId].ToUnityColor());
+            chargeAnim.Renderer.material.SetColor("_VisorColor", DynamicPalette.VisorColors[playerId].ToUnityColor());
 
 
             AmongUsUtil.GetRolePrefab<PhantomRole>()?.PlayPhantomAppearSound();
@@ -302,9 +302,9 @@ public class Berserker : DefinedSingleAbilityRoleTemplate<Berserker.Ability>, De
                     RoleEffectAnimation poofAnim = GameObject.Instantiate<RoleEffectAnimation>(DestroyableSingleton<RoleManager>.Instance.vanish_PoofAnim, message.player.VanillaPlayer.transform);
                     
                     //SetMaterialColor
-                    poofAnim.Renderer.material.SetColor("_BackColor", DynamicPalette.ShadowColors[playerId]);
-                    poofAnim.Renderer.material.SetColor("_BodyColor", DynamicPalette.PlayerColors[playerId]);
-                    poofAnim.Renderer.material.SetColor("_VisorColor", DynamicPalette.VisorColors[playerId]);
+                    poofAnim.Renderer.material.SetColor("_BackColor", DynamicPalette.ShadowColors[playerId].ToUnityColor());
+                    poofAnim.Renderer.material.SetColor("_BodyColor", DynamicPalette.PlayerColors[playerId].ToUnityColor());
+                    poofAnim.Renderer.material.SetColor("_VisorColor", DynamicPalette.VisorColors[playerId].ToUnityColor());
 
                     poofAnim.Play(message.player.VanillaPlayer, (Il2CppSystem.Action)(() => { }), message.player.VanillaPlayer.cosmetics.FlipX, RoleEffectAnimation.SoundType.Local, 0f, true, 0f);
                 }

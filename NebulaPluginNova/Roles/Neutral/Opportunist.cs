@@ -71,7 +71,7 @@ internal class Opportunist : DefinedRoleTemplate, HasCitation, DefinedRole
 
                 myArrow = new Arrow().Register(this);
                 myArrow.IsActive = false;
-                myArrow.SetColor(MyRole.UnityColor);
+                myArrow.SetColor(MyRole.RoleColor);
             }
         }
 
@@ -98,7 +98,7 @@ internal class Opportunist : DefinedRoleTemplate, HasCitation, DefinedRole
         void OnUpdate(GameHudUpdateEvent ev)
         {
             if (MyPlayer.IsDead) return;
-            if (MeetingHud.Instance || ExileController.Instance) return;
+            if (MeetingHud.Instance.AsBoolFast() || ExileController.Instance.AsBoolFast()) return;
 
             bool hasTask = false;
             foreach (var task in myTasks)
@@ -169,7 +169,7 @@ internal class Opportunist : DefinedRoleTemplate, HasCitation, DefinedRole
             if (!IsUnveiled)
             {
                 notActiveStrCache ??= Language.Translate("role.opportunist.task.veiled");
-                return notActiveStrCache.Color(new UnityEngine.Color(0.5f,0.5f,0.5f));
+                return notActiveStrCache.Color(new VColor(0.5f,0.5f,0.5f));
             }
             if(taskStrCache == null)
             {

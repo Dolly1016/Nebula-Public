@@ -10,7 +10,7 @@ namespace Virial.Events.Player;
 
 /// <summary>
 /// キルによってプレイヤーが死亡する際に発火します。プレイヤーが実際に死亡しない場合(偽物が死亡する場合など)は呼び出されません。
-/// このイベントはキラーのクライアント上でのみ発火します。
+/// このイベントはホストのクライアント上でのみ発火します。
 /// 計算のために必要な値はあらかじめ共有しておく必要があり、値の更新がある場合は更新も共有する必要があります。
 /// </summary>
 public class PlayerCheckKilledEvent : AbstractPlayerEvent

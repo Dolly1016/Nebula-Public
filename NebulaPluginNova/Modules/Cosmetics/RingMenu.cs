@@ -19,7 +19,7 @@ internal class RingMenu
     PassiveButton button = null!;
     Func<bool> showWhile = null!;
     RingMenuElement[] elements = null!;
-    (GameObject obj, Vector2 origScale)[] generated = null!;
+    (GameObject obj, VVector2 origScale)[] generated = null!;
     int currentSelection = -1;
 
     public RingMenu()
@@ -30,14 +30,14 @@ internal class RingMenu
     static private Image backgroundSprite = SpriteLoader.FromResource("Nebula.Resources.RingMenu.png", 100f);
 
 
-    public void Show(RingMenuElement[] elements, Func<bool> showWhile, Vector2? menuPosition)
+    public void Show(RingMenuElement[] elements, Func<bool> showWhile, VVector2? menuPosition)
     {
-        if (obj) UnityEngine.Object.Destroy(obj);
+        if (obj.AsBoolFast()) UnityEngine.Object.Destroy(obj);
 
-        obj = UnityHelper.CreateObject("RingMenu", HudManager.Instance.transform, menuPosition ?? Vector2.zero);
+        obj = UnityHelper.CreateObject("RingMenu", HudManager.Instance.transform, menuPosition?.AsUnityVector3() ?? Vector3.zero);
         obj.transform.SetLocalZ(-780f);
 
-        generated = new (GameObject obj, Vector2 origScale)[elements.Length];
+        generated = new (GameObject obj, VVector2 origScale)[elements.Length];
         for (int i = 0; i < elements.Length; i++)
         {
             var element = elements[i];
@@ -83,7 +83,7 @@ internal class RingMenu
 
     public void Update()
     {
-        if (obj)
+        if (obj.AsBoolFast())
         {
             if (!(showWhile?.Invoke() ?? true))
             {
@@ -104,7 +104,7 @@ internal class RingMenu
                 if (pos.magnitude > 0.3f && PassiveButtonManager.Instance.currentOver && PassiveButtonManager.Instance.currentOver.GetInstanceID() == button.GetInstanceID())
                 {
                     int length = elements.Length;
-                    var nextSelection = (int)((float)(Math.Atan2(pos.y, pos.x) + Math.PI) / (Math.PI * 2.0) * length);
+                    var nextSelection = (int)((float)(Mathn.Atan2(pos.y, pos.x) + Mathn.PI) / (Mathn.PI * 2.0) * length);
                     if (nextSelection != currentSelection)
                     {
                         var overlay = elements.Get(nextSelection, null)?.Overlay;

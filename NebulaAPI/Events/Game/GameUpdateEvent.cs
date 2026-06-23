@@ -3,76 +3,87 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial.Attributes;
 
 namespace Virial.Events.Game;
 
 /// <summary>
 /// ゲーム中に毎ティック発火します。
 /// </summary>
+[RecyclableEvent]
 public class GameUpdateEvent : AbstractGameEvent
 {
-    public float DeltaTime { get; }
-    public float GameTime { get; }
-    public float ProcessTime { get; }
+    public float DeltaTime { get; private set; }
+    public float GameTime { get; private set; }
+    public float ProcessTime { get; private set; }
     
-    internal GameUpdateEvent(Virial.Game.Game game, float deltaTime, float gameTime, float processTime) : base(game) {
-        this.DeltaTime = deltaTime;
-        this.GameTime = gameTime;
-        this.ProcessTime = processTime;
+    private GameUpdateEvent() : base(null!) {
+    }
+
+    static GameUpdateEvent ev = new();
+    static internal GameUpdateEvent Get(Virial.Game.Game game, float deltaTime, float gameTime, float processTime)
+    {
+        ev.Recycle(game);
+        ev.DeltaTime = deltaTime;
+        ev.GameTime = gameTime;
+        ev.ProcessTime = processTime;
+        return ev;
     }
 }
 
 /// <summary>
 /// 毎ティック発火します。
 /// </summary>
+[RecyclableEvent]
 
 public class UpdateEvent : Event
 {
-    internal UpdateEvent() { }
+    private UpdateEvent() { }
+
+    public float DeltaTime { get; private set; }
+
+    static private UpdateEvent ev = new();
+    static internal UpdateEvent Get(float fixedDeltaTime)
+    {
+        ev.DeltaTime = fixedDeltaTime;
+        return ev;
+    }
 }
 
 /// <summary>
 /// ゲームのHUDを更新する際に発火します。
 /// ここでプレイヤーの輪郭を変更すると、変更が画面に正しく反映されます。
 /// </summary>
+[RecyclableEvent]
 public class GameHudUpdateEvent : AbstractGameEvent
 {
-    public float DeltaTime { get; }
-    public float GameTime { get; }
-    public float ProcessTime { get; }
+    public float DeltaTime { get; private set; }
+    public float GameTime { get; private set; }
+    public float ProcessTime { get; private set; }
 
-    internal GameHudUpdateEvent(Virial.Game.Game game, float deltaTime, float gameTime, float processTime) : base(game)
+    private GameHudUpdateEvent() : base(null) { }
+    static private GameHudUpdateEvent ev = new();
+    static internal GameHudUpdateEvent Get(Virial.Game.Game game, float deltaTime, float gameTime, float processTime)
     {
-        this.DeltaTime = deltaTime;
-        this.GameTime = gameTime;
-        this.ProcessTime = processTime;
+        ev.Recycle(game);
+        ev.DeltaTime = deltaTime;
+        ev.GameTime = gameTime;
+        ev.ProcessTime = processTime;
+        return ev;
     }
-}
-
-/// <summary>
-/// このイベントの使用は推奨されません。
-/// <see cref="GameHudUpdateEvent"/>を使用し、<see cref="Attributes.EventPriority"/>属性でより高い優先度を設定してください。
-/// </summary>
-[Obsolete("EventPriority属性の使用を検討してください。")]
-public class GameHudUpdateFasterEvent : AbstractGameEvent
-{
-    internal GameHudUpdateFasterEvent(Virial.Game.Game game) : base(game) { }
-}
-
-/// <summary>
-/// このイベントの使用は推奨されません。
-/// <see cref="GameHudUpdateEvent"/>を使用し、<see cref="Attributes.EventPriority"/>属性でより低い優先度を設定してください。
-/// </summary>
-[Obsolete("EventPriority属性の使用を検討してください。")]
-public class GameHudUpdateLaterEvent : AbstractGameEvent
-{
-    internal GameHudUpdateLaterEvent(Virial.Game.Game game) : base(game) { }
 }
 
 /// <summary>
 /// LateUpdateのタイミングで発火します。
 /// </summary>
+[RecyclableEvent]
 public class GameLateUpdateEvent : AbstractGameEvent
 {
-    internal GameLateUpdateEvent(Virial.Game.Game game) : base(game) { }
+    private GameLateUpdateEvent(): base(null!) { }
+    static private GameLateUpdateEvent ev = new();
+    static internal GameLateUpdateEvent Get(Virial.Game.Game game)
+    {
+        ev.Recycle(game);
+        return ev;
+    }
 }

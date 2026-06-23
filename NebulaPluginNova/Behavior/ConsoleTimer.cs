@@ -19,19 +19,19 @@ public class ConsoleTimer : MonoBehaviour
 
         timerText.text = "";
 
-        if (Instance) GameObject.Destroy(Instance.gameObject);
+        if (Instance.AsBoolFast()) GameObject.Destroy(Instance.gameObject);
         Instance = this;
     }
 
     static public void MarkAsNonConsoleMinigame()
     {
-        if (Instance) GameObject.Destroy(Instance.gameObject);
+        if (Instance.AsBoolFast()) GameObject.Destroy(Instance.gameObject);
         Instance = null!;
     }
 
     static public bool IsOpenedByAvailableWay()
     {
-        if (!Instance) return true;
+        if (!Instance.AsBoolFast()) return true;
         if(!Instance.gameObject.activeSelf) return true;
         if (Instance.Type == null) return true;
         return NebulaGameManager.Instance?.ConsoleRestriction?.CanUse(Instance.Type.Value) ?? true;
@@ -49,7 +49,7 @@ public class ConsoleTimer : MonoBehaviour
 
         if (!(NebulaGameManager.Instance?.ConsoleRestriction?.ShouldShowTimer(Type.Value) ?? false)) return;
 
-        if (!AmongUsUtil.InCommSab && !PlayerControl.LocalPlayer.Data.IsDead) storedUsed += Time.deltaTime;
+        if (!AmongUsUtil.InCommSab && !(GamePlayer.LocalPlayer?.IsDead ?? false)) storedUsed += Time.deltaTime;
         if(storedUsed > 0.1f)
         {
             NebulaGameManager.Instance?.ConsoleRestriction?.Use(Type.Value, storedUsed);

@@ -33,9 +33,9 @@ internal class MapObjectSpawner : AbstractModule<Virial.Game.Game>, IMapObjectSp
     static MapObjectSpawner() => DIManager.Instance.RegisterModule(() => new MapObjectSpawner());
 
     List<MapObjectPoint>? unusedPoints;
-    Dictionary<string, List<Virial.Compat.Vector2>> usedPoints = [];
+    Dictionary<string, List<VVector2>> usedPoints = [];
 
-    bool TryGetPoint(string tag, string? objectTag, float distance, MapObjectType type, out Virial.Compat.Vector2 point, out NebulaSyncObjectReference? reference, MapObjectCondition[] conditions)
+    bool TryGetPoint(string tag, string? objectTag, float distance, MapObjectType type, out VVector2 point, out NebulaSyncObjectReference? reference, MapObjectCondition[] conditions)
     {
         reference = null;
 
@@ -51,7 +51,7 @@ internal class MapObjectSpawner : AbstractModule<Virial.Game.Game>, IMapObjectSp
             usedPoints[tag] = used;
         }
 
-        bool Met(MapObjectCondition condition, Vector2 point)
+        bool Met(MapObjectCondition condition, VVector2 point)
         {
             return !usedPoints.TryGetValue(condition.Tag, out var used) || used.All(u => u.SquaredDistance(point) > condition.Distance * condition.Distance);
         }
@@ -90,7 +90,7 @@ internal class MapObjectSpawner : AbstractModule<Virial.Game.Game>, IMapObjectSp
 
     void TryInitialize()
     {
-        if (!ShipStatus.Instance) return;
+        if (!AmongUsLLImpl.ShipStatusInstance.AsBoolFast()) return;
 
         if (unusedPoints == null)
         {
@@ -104,7 +104,7 @@ internal class MapObjectSpawner : AbstractModule<Virial.Game.Game>, IMapObjectSp
     {
         IEnumerable<Virial.Compat.Vector2> subroutineSpawn()
         {
-            if (!ShipStatus.Instance) yield break;
+            if (!AmongUsLLImpl.ShipStatusInstance.AsBoolFast()) yield break;
 
             TryInitialize();
 
@@ -161,8 +161,8 @@ public abstract class MapData
     }
     abstract public int Id { get; }
 
-    abstract public IReadOnlyList<Vector2> MapArea { get; }
-    abstract public IReadOnlyList<Vector2> NonMapArea { get; }
+    abstract public IReadOnlyList<VVector2> MapArea { get; }
+    abstract public IReadOnlyList<VVector2> NonMapArea { get; }
     abstract protected (AdditionalRoomArea area, string key, bool detailRoom)[] AdditionalRooms { get; }
     abstract protected (SystemTypes room, AdditionalRoomArea area, string key)[] OverrideRooms { get; }
     abstract public (SystemTypes room, Vector2 pos)[] AdminRooms { get; } //DivMapと同じ順序で並べること。(Outsideを除いた順序)
@@ -196,7 +196,7 @@ public abstract class MapData
     virtual public Vector3 GetDoorSealingPos(OpenableDoor door, bool isVert) => isVert ? new(-0.024f,0.52f,-0.01f) : new(0f, -0.1f, -0.01f);
     virtual public bool IsSealableDoor(OpenableDoor door) => true;
     public SystemTypes[] GetSabotageSystemTypes() => SabotageTypes;
-    public bool CheckMapArea(Vector2 position, float radius = 0.1f)
+    public bool CheckMapArea(VVector2 position, float radius = 0.1f)
     {
         if (radius > 0f)
         {
@@ -207,24 +207,24 @@ public abstract class MapData
         return CheckMapAreaInternal(position);
     }
 
-    public bool CheckMapAreaInternal(Vector2 position)
+    public bool CheckMapAreaInternal(VVector2 position)
     {
-        Vector2 vector;
+        VVector2 vector;
         float magnitude;
 
-        foreach (Vector2 p in NonMapArea)
+        foreach (VVector2 p in NonMapArea)
         {
             vector = p - position;
-            magnitude = vector.magnitude;
+            magnitude = vector.Magnitude;
             if (magnitude > 6.0f) continue;
 
-            if (!PhysicsHelpers.AnyNonTriggersBetween(position, vector.normalized, magnitude, Constants.ShipAndAllObjectsMask)) return false;
+            if (!PhysicsHelpers.AnyNonTriggersBetween(position, vector.Normalized, magnitude, Constants.ShipAndAllObjectsMask)) return false;
         }
 
-        foreach (Vector2 p in MapArea)
+        foreach (VVector2 p in MapArea)
         {
             vector = p - position;
-            magnitude = vector.magnitude;
+            magnitude = vector.Magnitude;
             if (magnitude > 12.0f) continue;
 
             if (!Helpers.AnyCustomNonTriggersBetween(position, p, collider => collider.name != NonMapColliderName, Constants.ShipAndAllObjectsMask)) return true;
@@ -235,28 +235,30 @@ public abstract class MapData
     }
 
     public static string NonMapColliderName { get; } = "NonMap";
-    public int CheckMapAreaDebug(Vector2 position)
+    public int CheckMapAreaDebug(VVector2 position)
     {
-        Vector2 vector;
+        VVector2 vector;
         float magnitude;
         int count = 0;
 
-        foreach (Vector2 p in NonMapArea)
+        UnityEngine.Vector2 unityPosition = position;
+
+        foreach (VVector2 p in NonMapArea)
         {
             vector = p - position;
-            magnitude = vector.magnitude;
+            magnitude = vector.Magnitude;
             if (magnitude > 6.0f) continue;
 
-            if (!PhysicsHelpers.AnyNonTriggersBetween(position, vector.normalized, magnitude, Constants.ShipAndAllObjectsMask)) return 0;
+            if (!PhysicsHelpers.AnyNonTriggersBetween(unityPosition, vector.Normalized, magnitude, Constants.ShipAndAllObjectsMask)) return 0;
         }
 
-        foreach (Vector2 p in MapArea)
+        foreach (VVector2 p in MapArea)
         {
             vector = p - position;
-            magnitude = vector.magnitude;
+            magnitude = vector.Magnitude;
             if (magnitude > 12.0f) continue;
 
-            if (!PhysicsHelpers.AnyNonTriggersBetween(position, vector.normalized, magnitude, Constants.ShipAndAllObjectsMask)) count++;
+            if (!PhysicsHelpers.AnyNonTriggersBetween(unityPosition, vector.Normalized, magnitude, Constants.ShipAndAllObjectsMask)) count++;
         }
 
         return count;

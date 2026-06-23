@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEngine.Video;
+using Virial;
 using Virial.Events.Player;
 using Virial.Media;
 
@@ -14,6 +15,15 @@ public static class ModSingleton<T> where T : class
 
 public static class UnityHelper
 {
+    static readonly public Vector3 ZeroVec3 = new(0f, 0f, 0f);
+    static readonly public Vector3 OneVec3 = new(1f, 1f, 1f);
+    static readonly public Vector2 ZeroVec2 = new(0f, 0f);
+    static readonly public Vector2 OneVec2 = new(1f, 1f);
+
+    static readonly public Vector2 UpVec2 = new(0f, 1f);
+    static readonly public Vector2 DownVec2 = new(0f, -1f);
+    static readonly public Vector2 RightVec2 = new(1f, 0f);
+    static readonly public Vector2 LeftVec2 = new(-1f, 0f);
 
     public static GameObject CreateObject(string objName, Transform? parent, Vector3 localPosition,int? layer = null)
     {
@@ -120,7 +130,7 @@ public static class UnityHelper
         return player;
     }
 
-    public static MeshFilter CreateRectMesh(this MeshFilter filter, Vector2 size, Vector3? center = null)
+    public static MeshFilter CreateRectMesh(this MeshFilter filter, Vector2 size, Vector3? center = null, float minU = 0f, float maxU = 1f, float minV = 0f, float maxV = 1f)
     {
         center ??= Vector3.zero;
 
@@ -135,7 +145,7 @@ public static class UnityHelper
             new Vector3(-x, y) + center.Value,
             new Vector3(x, y) + center.Value]);
         mesh.SetTriangles((int[])[0, 2, 1, 2, 3, 1], 0);
-        mesh.SetUVs(0, (Vector2[])[new(0, 0), new(1, 0), new(0, 1), new(1, 1)]);
+        mesh.SetUVs(0, (Vector2[])[new(minU, minV), new(maxU, minV), new(minU, maxV), new(maxU, maxV)]);
         var color = new Color32(255, 255, 255, 255);
         mesh.SetColors((Color32[])[color, color, color, color]);
 
@@ -274,10 +284,10 @@ public static class UnityHelper
         button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
     }
 
-    public static PassiveButton SetUpButton(this GameObject gameObject, bool withSound = false, SpriteRenderer? buttonRenderer = null, Color? defaultColor = null, Color? selectedColor = null)
+    public static PassiveButton SetUpButton(this GameObject gameObject, bool withSound = false, SpriteRenderer? buttonRenderer = null, Virial.Color? defaultColor = null, Virial.Color? selectedColor = null)
         => SetUpButton(gameObject, withSound, buttonRenderer != null ? [buttonRenderer] : [], defaultColor, selectedColor);
 
-    public static PassiveButton SetUpButton(this GameObject gameObject, bool withSound, SpriteRenderer[] buttonRenderers, Color? defaultColor = null, Color? selectedColor = null) {
+    public static PassiveButton SetUpButton(this GameObject gameObject, bool withSound, SpriteRenderer[] buttonRenderers, Virial.Color? defaultColor = null, Virial.Color? selectedColor = null) {
         var button = gameObject.AddComponent<PassiveButton>();
         button.OnClick = new UnityEngine.UI.Button.ButtonClickedEvent();
         button.OnMouseOut = new UnityEngine.Events.UnityEvent();
@@ -290,11 +300,11 @@ public static class UnityHelper
         }
         if (buttonRenderers.Length > 0)
         {
-            button.OnMouseOut.AddListener(() => { foreach (var r in buttonRenderers) r.color = defaultColor ?? Color.white; });
-            button.OnMouseOver.AddListener(() => { foreach (var r in buttonRenderers) r.color = selectedColor ?? Color.green; });
+            button.OnMouseOut.AddListener(() => { foreach (var r in buttonRenderers) r.color = defaultColor?.ToUnityColor() ?? Color.white; });
+            button.OnMouseOver.AddListener(() => { foreach (var r in buttonRenderers) r.color = selectedColor?.ToUnityColor() ?? Color.green; });
         }
 
-        if (buttonRenderers.Length > 0) foreach(var r in buttonRenderers)r.color = defaultColor ?? Color.white;
+        if (buttonRenderers.Length > 0) foreach(var r in buttonRenderers)r.color = defaultColor?.ToUnityColor() ?? Color.white;
         
         return button;
     }
@@ -491,8 +501,8 @@ public static class UnityHelper
     public static bool MouseCursorIsInWindow(int xMargin = 0, int yMargin = 0)
     {
         Vector3 mousePos = Input.mousePosition;
-        bool inWidth = mousePos.x >= xMargin && mousePos.x <= Screen.width - xMargin;
-        bool inHeight = mousePos.y >= yMargin && mousePos.y <= Screen.height - yMargin;
+        bool inWidth = mousePos.x >= xMargin && mousePos.x <= NebulaAPI.AmongUs.ScreenWidth - xMargin;
+        bool inHeight = mousePos.y >= yMargin && mousePos.y <= NebulaAPI.AmongUs.ScreenHeight - yMargin;
         return inWidth && inHeight;
     }
 }

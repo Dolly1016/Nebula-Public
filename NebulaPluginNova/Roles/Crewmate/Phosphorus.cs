@@ -96,7 +96,7 @@ public class Phosphorus : DefinedSingleAbilityRoleTemplate<Phosphorus.Ability>, 
                     PlaceCoolDownOption, "place", placeButtonSprite, null, _ => globalLanterns == null && left > 0)
                     .SetAsUsurpableButton(this);
                 placeButton.OnClick = (button) => {
-                    var pos = PlayerControl.LocalPlayer.GetTruePosition();
+                    var pos = AmongUsLLImpl.LocalPlayer.GetTruePosition();
                     
                     NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, pos, GameActionTypes.LanternPlacementAction);
 
@@ -202,7 +202,7 @@ public class Phosphorus : DefinedSingleAbilityRoleTemplate<Phosphorus.Ability>, 
                       yield return null;
                   }
 
-                  lightRenderer.material.color = Color.white;
+                  lightRenderer.material.color = UnityEngine.Color.white;
               }
 
               NebulaManager.Instance.StartCoroutine(CoLight());

@@ -183,7 +183,7 @@ internal class Amalgam : DefinedRoleTemplate, DefinedRole, DefinedSingleAbilityR
         IEnumerable<DefinedAssignable> RuntimeAssignable.AssignableOnHelp => [MyRole, ..(MyAbility as IPlayerAbility).SubAssignableOnHelp];
 
         string RuntimeAssignable.DisplayName => (MyRole as DefinedRole).GetDisplayName(MyAbility);
-        string RuntimeAssignable.DisplayColoredName => (this as RuntimeAssignable).DisplayName.Color((MyRole as DefinedRole).UnityColor);
+        string RuntimeAssignable.DisplayColoredName => (this as RuntimeAssignable).DisplayName.Color(MyRole.Color);
 
         bool RuntimeRole.CheckGuessAbility(DefinedRole abilityRole)
         {

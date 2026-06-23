@@ -27,7 +27,7 @@ public class GUIFixedView : AbstractGUIWidget
 
         public void SetWidget(Virial.Media.GUIWidget? widget, out Size actualSize)
         {
-            if (!screen)
+            if (!screen.AsBoolFast())
             {
                 actualSize = new(0f, 0f);
                 return;
@@ -47,7 +47,7 @@ public class GUIFixedView : AbstractGUIWidget
         }
     }
 
-    public UnityEngine.Vector2 Size { get; init; }
+    public Virial.Compat.Vector2 Size { get; init; }
     public bool WithMask { get; init; } = true;
 
     internal ListArtifact<InnerScreen> InnerArtifact { get; private init; }
@@ -55,7 +55,7 @@ public class GUIFixedView : AbstractGUIWidget
 
     public GUIWidgetSupplier? Inner { get; init; } = null;
 
-    public GUIFixedView(Virial.Media.GUIAlignment alignment, UnityEngine.Vector2 size, GUIWidgetSupplier? inner) : base(alignment)
+    public GUIFixedView(Virial.Media.GUIAlignment alignment, Virial.Compat.Vector2 size, GUIWidgetSupplier? inner) : base(alignment)
     {
         this.Size = size;
 
@@ -69,14 +69,14 @@ public class GUIFixedView : AbstractGUIWidget
     {
         var view = UnityHelper.CreateObject("FixedView", null, new UnityEngine.Vector3(0f, 0f, 0f), LayerExpansion.GetUILayer());
         var inner = UnityHelper.CreateObject("Inner", view.transform, new UnityEngine.Vector3(-0.2f, 0f, -0.1f));
-        var innerSize = Size - new UnityEngine.Vector2(0.4f, 0f);
+        var innerSize = Size - new Virial.Compat.Vector2(0.4f, 0f);
 
         if (WithMask)
         {
             view.AddComponent<SortingGroup>();
             var mask = UnityHelper.CreateObject<SpriteMask>("Mask", view.transform, new UnityEngine.Vector3(-0.2f, 0, 0));
             mask.sprite = VanillaAsset.FullScreenSprite;
-            mask.transform.localScale = innerSize;
+            mask.transform.localScale = innerSize.AsUnityVector3(1f);
         }
 
         var innerScreen = new InnerScreen(inner, new(innerSize));

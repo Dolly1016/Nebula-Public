@@ -114,8 +114,9 @@ public class WideCamera : ICustomWideCamera
     /// <param name="v"></param>
     public void UpdateRect(float u, float v)
     {
-        meshRenderer.material.SetFloat("_ClipU", u);
-        meshRenderer.material.SetFloat("_ClipV", v);
+        var mat = meshRenderer.material;
+        mat.SetFloat("_ClipU", u);
+        mat.SetFloat("_ClipV", v);
     }
 
     public Transform ViewerTransform => meshRenderer.transform;
@@ -153,19 +154,20 @@ public class WideCamera : ICustomWideCamera
         collider.isTrigger = true;
         collider.gameObject.layer = LayerExpansion.GetShipLayer();
         var button = collider.gameObject.SetUpButton();
-        button.OnClick.AddListener(() => {
+        button.OnClick.AddListener(() =>
+        {
             var cameraPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            var worldPos = ConvertToWorldPos(cameraPos);
+            UnityEngine.Vector2 worldPos = ConvertToWorldPos(cameraPos); //OverlapPointの引数で使用
             int layer = (1 << LayerExpansion.GetShortObjectsLayer()) | (1 << LayerExpansion.GetObjectsLayer());
 
             PassiveUiElement? passiveButton = null;
-            foreach (var button in PassiveButtonManager.Instance.Buttons)
+            foreach (var button in PassiveButtonManager.Instance.Buttons.GetFastEnumerator())
             {
                 //船およびオブジェクトレイヤーのボタンが対象
                 if (((1 << button.gameObject.layer) & layer) == 0) continue;
                 if (!button.Colliders.Any(c => c && c.OverlapPoint(worldPos))) continue;
                 if (passiveButton != null && passiveButton.transform.position.z < button.transform.position.z) continue;
-                
+
                 //Debug.Log("Button");
                 passiveButton = button;
             }
@@ -177,10 +179,17 @@ public class WideCamera : ICustomWideCamera
 
         (meshRenderer, meshFilter) = UnityHelper.CreateMeshRenderer("mesh", myHolder.transform, new(0f, 0f, 10f), LayerExpansion.GetUILayer());
         meshRenderer.material = new Material(NebulaAsset.HSVNAShader);
+        rendererSharedMaterial = meshRenderer.sharedMaterial;
+
+        hueVal = new ValueObserver<float>(0f, val => meshRenderer.sharedMaterial.SetFloat("_Hue", val));
+        saturationVal = new ValueObserver<float>(1f, val => meshRenderer.sharedMaterial.SetFloat("_Sat", val));
+        brightnessVal = new ValueObserver<float>(1f, val => meshRenderer.sharedMaterial.SetFloat("_Val", val));
 
         SetUp();
         SetUpShadowCam();
     }
+
+    private Material rendererSharedMaterial;
 
     public bool DrawShadow => drawShadow && !(NebulaGameManager.Instance?.IgnoreWalls ?? false);
     private bool drawShadow = false;
@@ -228,7 +237,7 @@ public class WideCamera : ICustomWideCamera
 
     public void ReflectShipColor()
     {
-        myCamera.backgroundColor = ShipStatus.Instance.CameraColor;
+        myCamera.backgroundColor = AmongUsLLImpl.ShipStatusInstance.CameraColor;
     }
     private static int gcd(int n1, int n2)
     {
@@ -241,17 +250,17 @@ public class WideCamera : ICustomWideCamera
     public int Roughness { get => roughness * (int)((AmongUsUtil.CurrentCamTarget as INoisedCamera)?.CameraRoughness ?? 1f); set
         {
 
-            int max = gcd(Screen.height, Screen.width);
+            int max = gcd(NebulaAPI.AmongUs.ScreenHeight, NebulaAPI.AmongUs.ScreenWidth);
             if (max < value) roughness = value;
 
             int temp = value;
-            while (temp < max && (Screen.height % temp != 0 || Screen.width % temp != 0)) temp++;
+            while (temp < max && (NebulaAPI.AmongUs.ScreenHeight % temp != 0 || NebulaAPI.AmongUs.ScreenWidth % temp != 0)) temp++;
             roughness = temp;
         }
     } 
 
-    private int consideredWidth => (Screen.width / Roughness);
-    private int consideredHeight => (Screen.height / Roughness);
+    private int consideredWidth => (NebulaAPI.AmongUs.ScreenWidth / Roughness);
+    private int consideredHeight => (NebulaAPI.AmongUs.ScreenHeight / Roughness);
 
     public bool HasAttention => attention != null;
 
@@ -272,7 +281,7 @@ public class WideCamera : ICustomWideCamera
     }
 
     //カメラ上の位置を表すワールド座標を計算します。
-    public Vector3 ConvertToWideCameraPos(Vector3 worldPosition)
+    public VVector3 ConvertToWideCameraPos(Vector3 worldPosition)
     {
         var localPos = (worldPosition - Camera.transform.position);
         //カメラの拡大縮小
@@ -283,9 +292,10 @@ public class WideCamera : ICustomWideCamera
         return Camera.transform.position + localPos.RotateZ(ViewerTransform.localEulerAngles.z);
     }
 
-    public Vector2 ConvertToWorldPos(Vector2 cameraWorldPosition)
+    public VVector2 ConvertToWorldPos(VVector2 cameraWorldPosition)
     {
-        var localPos = cameraWorldPosition - (Vector2)Camera.transform.position;
+        VVector2 cameraPos = Camera.transform.position;
+        var localPos = cameraWorldPosition - cameraPos;
         localPos = localPos.Rotate(-ViewerTransform.localEulerAngles.z);
         try
         {
@@ -304,17 +314,17 @@ public class WideCamera : ICustomWideCamera
             localPos.y = 0f;
         }
         localPos *= myCamera.orthographicSize / 3f;
-        return (Vector2)Camera.transform.position + localPos;
+        return cameraPos + localPos;
     }
 
     private void FixVentArrow()
     {
-        if (PlayerControl.LocalPlayer && ShipStatus.Instance)
+        if (AmongUsLLImpl.TryGetLocalPlayer(out var localPlayer) && AmongUsLLImpl.TryGetShipStatus(out var ship))
         {
-            var playerPos = PlayerControl.LocalPlayer.transform.position;
-            if (ShipStatus.Instance.AllVents.Count > 0)
+            var playerPos = localPlayer.transform.position;
+            if (ship.AllVents.Count > 0)
             {
-                var vent = ShipStatus.Instance.AllVents.MinBy(v => v.transform.position.Distance(playerPos));
+                var vent = ship.AllVents.MinBy(v => v.transform.position.Distance(playerPos));
                 if (vent)
                 {
                     var myVentPos = NebulaGameManager.Instance!.WideCamera.ConvertToWideCameraPos(vent!.transform.position);
@@ -327,9 +337,9 @@ public class WideCamera : ICustomWideCamera
                         {
                             var targetVentPos = NebulaGameManager.Instance!.WideCamera.ConvertToWideCameraPos(targetVent.transform.position);
 
-                            var diff = (targetVentPos - myVentPos).normalized;
+                            var diff = (targetVentPos - myVentPos).AsVector2().Normalized;
                             diff *= 0.7f + vent.spreadShift;
-                            var pos = (myVentPos + diff);
+                            var pos = (myVentPos + diff.AsVector3());
                             pos.z = -10f;
                             var transform = vent.Buttons[i].transform;
                             transform.position = pos;
@@ -386,14 +396,14 @@ public class WideCamera : ICustomWideCamera
             }
 
             //
-            if (!myCamera.targetTexture || myCamera.targetTexture.width != consideredWidth || myCamera.targetTexture.height != consideredHeight)
+            if (!myCamera.targetTexture.AsBoolFast() || myCamera.targetTexture.width != consideredWidth || myCamera.targetTexture.height != consideredHeight)
             {
                 //割り切れないときは再設定
-                if(Screen.width % roughness != 0 || Screen.height % roughness != 0) Roughness = roughness;
+                if(NebulaAPI.AmongUs.ScreenWidth % roughness != 0 || NebulaAPI.AmongUs.ScreenHeight % roughness != 0) Roughness = roughness;
 
                 meshRenderer.sharedMaterial.mainTexture = myCamera.SetCameraRenderTexture(consideredWidth, consideredHeight);
 
-                meshFilter.CreateRectMesh(new(Camera.main.orthographicSize / Screen.height * Screen.width * 2f, Camera.main.orthographicSize * 2f));
+                meshFilter.CreateRectMesh(new(Camera.main.orthographicSize / NebulaAPI.AmongUs.ScreenHeight * NebulaAPI.AmongUs.ScreenWidth * 2f, Camera.main.orthographicSize * 2f));
             }
 
             CheckPlayerState(out var goalScale, out var goalRotate);
@@ -434,11 +444,11 @@ public class WideCamera : ICustomWideCamera
                 Roughness = lastCommandRoughness;
             }
 
-            var camUpdateEv = GameOperatorManager.Instance?.Run<CameraUpdateEvent>(new CameraUpdateEvent());
+            var camUpdateEv = GameOperatorManager.Instance?.Run<CameraUpdateEvent>(CameraUpdateEvent.Get());
             SetSaturation(camUpdateEv?.GetSaturation() ?? 1f);
             SetHue(camUpdateEv?.GetHue() ?? 0f);
             SetBrightness(camUpdateEv?.GetBrightness() ?? 1f);
-            meshRenderer.sharedMaterial.color = camUpdateEv?.Color ?? Color.white;
+            meshRenderer.sharedMaterial.color = camUpdateEv?.Color.ToUnityColor() ?? UnityEngine.Color.white;
 
             FixVentArrow();
         }
@@ -449,9 +459,12 @@ public class WideCamera : ICustomWideCamera
         meshRenderer.gameObject.SetActive(active);
     }
 
-    private void SetHue(float hue) => meshRenderer.sharedMaterial.SetFloat("_Hue", hue);
-    private void SetSaturation(float saturation) => meshRenderer.sharedMaterial.SetFloat("_Sat", saturation);
-    private void SetBrightness(float brightness) => meshRenderer.sharedMaterial.SetFloat("_Val", brightness);
+    private readonly ValueObserver<float> hueVal;
+    private readonly ValueObserver<float> saturationVal;
+    private readonly ValueObserver<float> brightnessVal;
+    private void SetHue(float hue) => hueVal.Set(hue);
+    private void SetSaturation(float saturation) => saturationVal.Set(saturation);
+    private void SetBrightness(float brightness) => brightnessVal.Set(brightness);
     void ICustomWideCamera.SetHue(float hue) => SetHue(hue);
     void ICustomWideCamera.SetSaturation(float saturation) => SetSaturation(saturation);
     void ICustomWideCamera.SetBrightness(float brightness) => SetBrightness(brightness);

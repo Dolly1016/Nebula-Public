@@ -15,7 +15,7 @@ internal class SortingGroupOrderFixer : MonoBehaviour
     private int groupOrder;
     public void LateUpdate()
     {
-        if (renderer)
+        if (renderer.AsBoolFast())
         {
             if (renderer.sortingGroupOrder != groupOrder) renderer.sortingGroupOrder = groupOrder;
         }

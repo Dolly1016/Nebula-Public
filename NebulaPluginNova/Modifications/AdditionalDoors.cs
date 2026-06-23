@@ -19,7 +19,7 @@ internal static class AdditionalDoors
         if(systemType != SystemTypes.Doors) return true;
         if ((amount & 64) == 0) return true;
         var doorId = amount & 63;
-        OpenableDoor openableDoor = ShipStatus.Instance.AllDoors.First(d => d.Id == doorId);
+        OpenableDoor openableDoor = AmongUsLLImpl.ShipStatusInstance.AllDoors.First(d => d.Id == doorId);
         var ev = GameOperatorManager.Instance?.Run(new PlayerTryOpenDoorLocalEvent(GamePlayer.LocalPlayer!, openableDoor));
         if (ev?.IsCanceled ?? false) return false;
         return true;
@@ -27,8 +27,8 @@ internal static class AdditionalDoors
 
     internal static void UpdateDoorSystem(DoorsSystemType doorSystem, PlayerControl player, byte doorId)
     {
-        OpenableDoor openableDoor = ShipStatus.Instance.AllDoors.First(d => d.Id == doorId);
-        if (openableDoor != null)
+        OpenableDoor openableDoor = AmongUsLLImpl.ShipStatusInstance.AllDoors.First(d => d.Id == doorId);
+        if ((object)openableDoor != null)
         {
             if (openableDoor.IsOpen) return;
             var modPlayer = GamePlayer.GetPlayer(player.PlayerId)!;
@@ -42,7 +42,7 @@ internal static class AdditionalDoors
 
     private static readonly RemoteProcess<(GamePlayer player, byte doorId)> RpcNoticeDoorOpen = new("noticeDoorOpen", (message, _) =>
     {
-        var door = ShipStatus.Instance.AllDoors.First(d => d.Id == message.doorId);
+        var door = AmongUsLLImpl.ShipStatusInstance.AllDoors.First(d => d.Id == message.doorId);
         GameOperatorManager.Instance?.Run(new PlayerOpenDoorEvent(message.player, door));
     }, true);
 }

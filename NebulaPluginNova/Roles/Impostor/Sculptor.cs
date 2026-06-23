@@ -177,9 +177,9 @@ internal class Sculptor : DefinedSingleAbilityRoleTemplate<Sculptor.Ability>, De
         [Local]
         void OnOpenMap(AbstractMapOpenEvent ev)
         {
-            if (ev is MapOpenNormalEvent && !IsUsurped && !MeetingHud.Instance && !MyPlayer.IsDead)
+            if (ev is MapOpenNormalEvent && !IsUsurped && !MeetingHud.Instance.AsBoolFast() && !MyPlayer.IsDead)
             {
-                if (!mapLayer)
+                if (!mapLayer.AsBoolFast())
                 {
                     mapLayer = UnityHelper.CreateObject<SculptorMapLayer>("SculptorLayer", MapBehaviour.Instance.transform, new(0, 0, -1f));
                     this.BindGameObject(mapLayer.gameObject);
@@ -189,12 +189,12 @@ internal class Sculptor : DefinedSingleAbilityRoleTemplate<Sculptor.Ability>, De
             }
             else
             {
-                if (mapLayer) mapLayer!.gameObject.SetActive(false);
+                if (mapLayer.AsBoolFast()) mapLayer!.gameObject.SetActive(false);
             }
 
-            if (ev is not MapOpenAdminEvent && !IsUsurped && !MeetingHud.Instance && !MyPlayer.IsDead)
+            if (ev is not MapOpenAdminEvent && !IsUsurped && !MeetingHud.Instance.AsBoolFast() && !MyPlayer.IsDead)
             {
-                if (!mapCountLayer)
+                if (!mapCountLayer.AsBoolFast())
                 {
                     mapCountLayer = UnityHelper.CreateObject<ShowPlayersMapLayer>("SculptorCountLayer", MapBehaviour.Instance.transform, new(0, 0, -1f));
                     this.BindGameObject(mapCountLayer.gameObject);
@@ -204,7 +204,7 @@ internal class Sculptor : DefinedSingleAbilityRoleTemplate<Sculptor.Ability>, De
             }
             else
             {
-                if (mapCountLayer) mapCountLayer!.gameObject.SetActive(false);
+                if (mapCountLayer.AsBoolFast()) mapCountLayer!.gameObject.SetActive(false);
             }
         }
 

@@ -90,7 +90,7 @@ internal class Zeal : DefinedSingleAbilityRoleTemplate<Zeal.Ability>, DefinedRol
 
                 void UpdateIcons()
                 {
-                    bool inMeeting = MeetingHud.Instance || ExileController.Instance;
+                    bool inMeeting = MeetingHud.Instance.AsBoolFast() || ExileController.Instance.AsBoolFast();
                     RemoveIcons(icon =>
                     {
                         if (!inMeeting)
@@ -131,7 +131,7 @@ internal class Zeal : DefinedSingleAbilityRoleTemplate<Zeal.Ability>, DefinedRol
                 {
                     interactTracker.KeepAsLongAsPossible = false;
                     if (interactTracker.CurrentTarget == null) return;
-                    if (MeetingHud.Instance) return;
+                    if (MeetingHud.Instance.AsBoolFast()) return;
 
                     if (!button.EffectTimer!.IsProgressing)
                     {

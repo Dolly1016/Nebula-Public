@@ -64,8 +64,9 @@ public static class ShipExtension
 
     public static void PatchEarlierModification(byte mapId)
     {
-        var obj = UnityHelper.CreateObject(ReverseScalerObjName, ShipStatus.Instance.transform, Vector3.zero);
-        obj.transform.localScale = new(1f / ShipStatus.Instance.transform.localScale.x, 1f / ShipStatus.Instance.transform.localScale.y, 1f);
+        var shipTransform = AmongUsLLImpl.ShipStatusInstance.transform;
+        var obj = UnityHelper.CreateObject(ReverseScalerObjName, shipTransform, Vector3.zero);
+        obj.transform.localScale = new(1f / shipTransform.localScale.x, 1f /shipTransform.localScale.y, 1f);
         ReverseScaler = obj.transform;
 
         switch (mapId)
@@ -104,10 +105,12 @@ public static class ShipExtension
     private static void ModifyEarlierSkeld() { }
     private static void ModifySkeld()
     {
+        var ship = AmongUsLLImpl.ShipStatusInstance;
+
         if (GeneralConfigurations.SkeldShadowOption.CurrentValue)
         {
-            var mat = ShipStatus.Instance.FastRooms[SystemTypes.Nav].transform.parent.GetChild(0).GetComponent<Renderer>().material;
-            var renderer = ShipStatus.Instance.transform.GetChild(0).GetComponent<Renderer>();
+            var mat = ship.FastRooms[SystemTypes.Nav].transform.parent.GetChild(0).GetComponent<Renderer>().material;
+            var renderer = ship.transform.GetChild(0).GetComponent<Renderer>();
             renderer.material = mat;
             renderer.gameObject.layer = LayerExpansion.GetShipLayer();
 
@@ -121,19 +124,19 @@ public static class ShipExtension
 
         if (!GeneralConfigurations.SkeldAdminOption.CurrentValue)
         {
-            var obj = ShipStatus.Instance.FastRooms[SystemTypes.Admin].gameObject.transform.parent.GetChild(0).GetChild(3).gameObject;
+            var obj = ship.FastRooms[SystemTypes.Admin].gameObject.transform.parent.GetChild(0).GetChild(3).gameObject;
             GameObject.Destroy(obj.transform.GetChild(1).GetComponent<CircleCollider2D>());
         }
 
-        ShipStatus.Instance.Systems[SystemTypes.LifeSupp].Cast<LifeSuppSystemType>().LifeSuppDuration = GeneralConfigurations.SkeldO2DurationOption.CurrentValue;
-        ShipStatus.Instance.Systems[SystemTypes.Reactor].Cast<ReactorSystemType>().ReactorDuration = GeneralConfigurations.SkeldReactorDurationOption.CurrentValue;
+        ship.Systems[SystemTypes.LifeSupp].Cast<LifeSuppSystemType>().LifeSuppDuration = GeneralConfigurations.SkeldO2DurationOption.CurrentValue;
+        ship.Systems[SystemTypes.Reactor].Cast<ReactorSystemType>().ReactorDuration = GeneralConfigurations.SkeldReactorDurationOption.CurrentValue;
 
         //ファンが隠れる問題を修正
-        var fan = ShipStatus.Instance.FastRooms[SystemTypes.LifeSupp].transform.parent.GetChild(0).GetChild(3);
+        var fan = ship.FastRooms[SystemTypes.LifeSupp].transform.parent.GetChild(0).GetChild(3);
         fan.SetLocalZ(-0.09f);
         fan.gameObject.layer = LayerExpansion.GetShipLayer();
 
-        for (int i = 0; i < ShipStatus.Instance.AllDoors.Count; i++) ShipStatus.Instance.AllDoors[i].Id = i;
+        for (int i = 0; i < ship.AllDoors.Count; i++) ship.AllDoors[i].Id = i;
 
         if (GeneralConfigurations.UseVoiceChatOption)
         {
@@ -144,20 +147,23 @@ public static class ShipExtension
     private static void ModifyEarierMira() { }
     private static void ModifyMira()
     {
+        var ship = AmongUsLLImpl.ShipStatusInstance;
+
         if (!GeneralConfigurations.MiraAdminOption.CurrentValue)
         {
-            var obj = ShipStatus.Instance.FastRooms[SystemTypes.Admin].gameObject.transform.FindChild("MapTable").gameObject;
+            var obj = ship.FastRooms[SystemTypes.Admin].gameObject.transform.FindChild("MapTable").gameObject;
             GameObject.Destroy(obj.transform.GetChild(0).gameObject);
         }
 
-        ShipStatus.Instance.Systems[SystemTypes.LifeSupp].Cast<LifeSuppSystemType>().LifeSuppDuration = GeneralConfigurations.MiraO2DurationOption.CurrentValue;
-        ShipStatus.Instance.Systems[SystemTypes.Reactor].Cast<ReactorSystemType>().ReactorDuration = GeneralConfigurations.MiraReactorDurationOption.CurrentValue;
+        ship.Systems[SystemTypes.LifeSupp].Cast<LifeSuppSystemType>().LifeSuppDuration = GeneralConfigurations.MiraO2DurationOption.CurrentValue;
+        ship.Systems[SystemTypes.Reactor].Cast<ReactorSystemType>().ReactorDuration = GeneralConfigurations.MiraReactorDurationOption.CurrentValue;
     }
 
     private static void ModifyEarlierPolus() { }
     private static void ModifyPolus()
     {
-        var ship = ShipStatus.Instance;
+        var ship = AmongUsLLImpl.ShipStatusInstance;
+
         {
             var mat = ship.FastRooms[SystemTypes.Weapons].transform.GetChild(0).GetComponent<Renderer>().material;
             var parallaxBg = ship.transform.GetChild(2);
@@ -179,7 +185,7 @@ public static class ShipExtension
         }
 
 
-        var commRoom = ShipStatus.Instance.FastRooms[SystemTypes.Comms];
+        var commRoom = ship.FastRooms[SystemTypes.Comms];
         var commPos = commRoom.transform.localPosition;
         commPos.z = 0.0001f;
         commRoom.transform.localPosition = commPos;
@@ -188,16 +194,16 @@ public static class ShipExtension
 
         if (!GeneralConfigurations.PolusAdminOption.CurrentValue)
         {
-            var obj = ShipStatus.Instance.FastRooms[SystemTypes.Admin].gameObject.transform.FindChild("mapTable").gameObject;
+            var obj = ship.FastRooms[SystemTypes.Admin].gameObject.transform.FindChild("mapTable").gameObject;
             GameObject.Destroy(obj.transform.GetChild(0).GetComponent<BoxCollider2D>());
             GameObject.Destroy(obj.transform.GetChild(1).GetComponent<BoxCollider2D>());
             GameObject.Destroy(obj.transform.GetChild(2).gameObject);
         }
 
-        ShipStatus.Instance.Systems[SystemTypes.Laboratory].Cast<ReactorSystemType>().ReactorDuration = GeneralConfigurations.PolusReactorDurationOption.CurrentValue;
+        ship.Systems[SystemTypes.Laboratory].Cast<ReactorSystemType>().ReactorDuration = GeneralConfigurations.PolusReactorDurationOption.CurrentValue;
 
         //崩壊したオブジェクトの前後関係を修正
-        ShipStatus.Instance.FastRooms[SystemTypes.Electrical].transform.FindChild("fencebot").SetLocalZ(-1.0136f);
+        ship.FastRooms[SystemTypes.Electrical].transform.FindChild("fencebot").SetLocalZ(-1.0136f);
 
         if (GeneralConfigurations.UseVoiceChatOption)
         {
@@ -225,9 +231,11 @@ public static class ShipExtension
     }
     private static void ModifyAirship()
     {
+        var ship = AmongUsLLImpl.ShipStatusInstance;
+
         //船体左下がやけに黒い問題を修正
         {
-            var exterior = ShipStatus.Instance.transform.GetChild(23);
+            var exterior = ship.transform.GetChild(23);
             var hull = exterior.GetChild(0);
             var mat = hull.GetChild(9).GetComponent<Renderer>().material;
             var itahull = hull.GetChild(14);
@@ -237,7 +245,7 @@ public static class ShipExtension
 
         //メインの写真が明るすぎる問題を修正
         {
-            var mainHall = ShipStatus.Instance.FastRooms[SystemTypes.MainHall];
+            var mainHall = ship.FastRooms[SystemTypes.MainHall];
             mainHall.transform.GetChild(2).SetLocalZ(-3f);
         }
 
@@ -257,15 +265,15 @@ public static class ShipExtension
         //ラウンジゴミ箱タスク
         EditConsole(SystemTypes.Lounge, "task_garbage5", (c) => c.checkWalls = true);
 
-        ShipStatus.Instance.FastRooms[SystemTypes.HallOfPortraits].transform.GetChild(3).gameObject.layer = LayerExpansion.GetShipLayer();
+        ship.FastRooms[SystemTypes.HallOfPortraits].transform.GetChild(3).gameObject.layer = LayerExpansion.GetShipLayer();
 
-        var ventilation = ShipStatus.Instance.FastRooms[SystemTypes.Ventilation].transform;
+        var ventilation = ship.FastRooms[SystemTypes.Ventilation].transform;
         ventilation.GetChild(5).gameObject.layer = LayerExpansion.GetShortObjectsLayer();
         ventilation.GetChild(6).gameObject.layer = LayerExpansion.GetShortObjectsLayer();
 
         //メイン暗室
         {
-            var obj = ShipStatus.Instance.FastRooms[SystemTypes.MainHall].gameObject;
+            var obj = ship.FastRooms[SystemTypes.MainHall].gameObject;
             var collider = obj.transform.GetChild(0).GetComponent<BoxCollider2D>();
             var size = collider.size;
             size.y = 4.399f;
@@ -277,7 +285,7 @@ public static class ShipExtension
         {
             if(ev.Task.TaskType == TaskTypes.PickUpTowels)
             {
-                foreach(var c in ShipStatus.Instance.AllConsoles)
+                foreach(var c in ship.AllConsoles.GetFastEnumerator())
                 {
                     if (!c.TaskTypes.Contains(TaskTypes.PickUpTowels)) continue;
                     var ttc = c.CastFast<TowelTaskConsole>();
@@ -294,26 +302,26 @@ public static class ShipExtension
 
         if (!GeneralConfigurations.AirshipCockpitAdminOption.CurrentValue)
         {
-            var obj = ShipStatus.Instance.FastRooms[SystemTypes.Cockpit].gameObject;
+            var obj = ship.FastRooms[SystemTypes.Cockpit].gameObject;
             GameObject.Destroy(obj.transform.FindChild("cockpit_mapfloating").gameObject);
             GameObject.Destroy(obj.transform.FindChild("panel_cockpit_map").GetComponent<BoxCollider2D>());
         }
         if (!GeneralConfigurations.AirshipRecordAdminOption.CurrentValue)
         {
-            var obj = ShipStatus.Instance.FastRooms[SystemTypes.Records].gameObject;
+            var obj = ship.FastRooms[SystemTypes.Records].gameObject;
             GameObject.Destroy(obj.transform.FindChild("records_admin_map").gameObject);
         }
 
         if (GeneralConfigurations.AirshipHarderDownloadOption.CurrentValue)
         {
-            var obj = ShipStatus.Instance.FastRooms[SystemTypes.GapRoom].gameObject;
+            var obj = ship.FastRooms[SystemTypes.GapRoom].gameObject;
             var panel = obj.transform.FindChild("panel_data");
             panel.localPosition = new Vector3(4.52f, -3.95f, 0.1f);
         }
 
         if (GeneralConfigurations.AirshipBetterImpostorVisonOption.CurrentValue || GeneralConfigurations.AirshipShadedLowerFloorOption.CurrentValue)
         {
-            var obj = ShipStatus.Instance.FastRooms[SystemTypes.GapRoom].gameObject;
+            var obj = ship.FastRooms[SystemTypes.GapRoom].gameObject;
 
             var ledgeShadow = obj.transform.FindChild("Shadow").FindChild("LedgeShadow").GetComponent<OneWayShadows>();
             //インポスターについてのみ影を無効化
@@ -323,7 +331,7 @@ public static class ShipExtension
         }
 
         //エンジンの影を無視したオブジェクトを修正
-        ShipStatus.Instance.FastRooms[SystemTypes.Engine].transform.FindChild("engine_pipewheel").SetLocalZ(-2f);
+        ship.FastRooms[SystemTypes.Engine].transform.FindChild("engine_pipewheel").SetLocalZ(-2f);
 
         //壁のすり抜け対策
         CreateAxeWall("DeckWall", [new(-12.45f, -13.6f), new(6.0f, -13.6f)]);
@@ -391,8 +399,10 @@ public static class ShipExtension
     //Vert->左右通行のドア
     static private PlainDoor GenerateExtraDoorInAirship(bool isVert, Vector3 position, Vector3 scale, SystemTypes room, int id)
     {
-        var orig = ShipStatus.Instance.FastRooms[SystemTypes.Brig].transform.GetChild(isVert ? 5 : 3);
-        var door = GameObject.Instantiate(orig, ShipStatus.Instance.transform).GetComponent<PlainDoor>();
+        var ship = AmongUsLLImpl.ShipStatusInstance;
+
+        var orig = ship.FastRooms[SystemTypes.Brig].transform.GetChild(isVert ? 5 : 3);
+        var door = GameObject.Instantiate(orig, ship.transform).GetComponent<PlainDoor>();
         door.transform.localScale = scale;
         door.transform.position = position;
         door.Room = room;
@@ -432,8 +442,10 @@ public static class ShipExtension
     private static bool FungleHasLightSabotage => GeneralConfigurations.FungleLightJungleOption.Value || GeneralConfigurations.FungleLightDropshipOption.Value || GeneralConfigurations.FungleLightMiningPitOption.Value;
     private static void ModifyFungle()
     {
+        var ship = AmongUsLLImpl.ShipStatusInstance;
+
         //しばらくの措置として見た目チェンジサボ廃止
-        ShipStatus.Instance.MapPrefab.infectedOverlay.transform.GetChild(6).GetChild(0).gameObject.SetActive(false);
+        ship.MapPrefab.infectedOverlay.transform.GetChild(6).GetChild(0).gameObject.SetActive(false);
 
         //停電サボタージュ
         if(FungleHasLightSabotage)
@@ -451,7 +463,7 @@ public static class ShipExtension
                 button.OnClick.AddListener(() =>
                 {
                     if (!infected.CanUseSabotage) return;
-                    ShipStatus.Instance.RpcUpdateSystem(SystemTypes.Sabotage, (byte)SystemTypes.Electrical);
+                    ship.RpcUpdateSystem(SystemTypes.Sabotage, (byte)SystemTypes.Electrical);
                 });
                 var allButtons = infected.allButtons.ToList();
                 allButtons.Add(button);
@@ -462,17 +474,17 @@ public static class ShipExtension
                     if (infected.sabSystem != null)
                     {
                         var perc = infected.DoorsPreventingSabotage ? 1f : infected.sabSystem.PercentCool;
-                        if (renderer) renderer.material.SetFloat("_Percent", perc);
+                        if (renderer.AsBoolFast()) renderer.material.SetFloat("_Percent", perc);
                     }
 
                 }, new GameObjectLifespan(MapBehaviour.Instance.gameObject));
             }, Virial.NebulaAPI.CurrentGame!);
             var switchSystem = new SwitchSystem();
-            ShipStatus.Instance.Systems[SystemTypes.Electrical] = switchSystem.CastFast<ISystemType>();
-            ShipStatus.Instance.Systems[SystemTypes.Sabotage].CastFast<SabotageSystemType>().specials.Add(switchSystem.CastFast<IActivatable>());
-            var specialTasks = ShipStatus.Instance.SpecialTasks.ToList();
+            ship.Systems[SystemTypes.Electrical] = switchSystem.CastFast<ISystemType>();
+            ship.Systems[SystemTypes.Sabotage].CastFast<SabotageSystemType>().specials.Add(switchSystem.CastFast<IActivatable>());
+            var specialTasks = ship.SpecialTasks.ToList();
             specialTasks.Add(VanillaAsset.MapAsset[0].SpecialTasks[1]);
-            ShipStatus.Instance.SpecialTasks = specialTasks.ToArray();
+            ship.SpecialTasks = specialTasks.ToArray();
         }
 
         if (GeneralConfigurations.FungleSimpleLaboratoryOption.CurrentValue) ModifyLaboratory();
@@ -487,7 +499,7 @@ public static class ShipExtension
 
         if (GeneralConfigurations.FungleThinFogOption.CurrentValue)
         {
-            var renderer = ShipStatus.Instance.transform.FindChild("FungleJungleShadow").GetChild(0).GetComponent<MeshRenderer>();
+            var renderer = ship.transform.FindChild("FungleJungleShadow").GetChild(0).GetComponent<MeshRenderer>();
             var color = renderer.material.color;
             color.a = 0.35f;
             renderer.material.color = color;
@@ -517,17 +529,17 @@ public static class ShipExtension
                 light.transform.localScale = Vector3.one * 1.9f;
                 light.transform.localPosition = new Vector3(0f, 0f, -15f);
             }
-            ShipStatus.Instance.transform.FindChild("Outside").GetChild(0).GetChild(5).gameObject.ForEachChild((Il2CppSystem.Action<GameObject>)SetUpGlowingMush);
-            SetUpGlowingMush(ShipStatus.Instance.FastRooms[SystemTypes.Reactor].transform.FindChild("GlowingMushroom").gameObject);
+            ship.transform.FindChild("Outside").GetChild(0).GetChild(5).gameObject.ForEachChild((Il2CppSystem.Action<GameObject>)SetUpGlowingMush);
+            SetUpGlowingMush(ship.FastRooms[SystemTypes.Reactor].transform.FindChild("GlowingMushroom").gameObject);
         }
 
-        ShipStatus.Instance.Systems[SystemTypes.Reactor].Cast<ReactorSystemType>().ReactorDuration = GeneralConfigurations.FungleReactorDurationOption.CurrentValue;
+        ship.Systems[SystemTypes.Reactor].Cast<ReactorSystemType>().ReactorDuration = GeneralConfigurations.FungleReactorDurationOption.CurrentValue;
 
-        if (ShipStatus.Instance.AllVents.Find(v => v.gameObject.name == "NorthWestJungleVent", out var vent)) vent.transform.SetLocalZ(-0.2f);
+        if (ship.AllVents.Find(v => v.gameObject.name == "NorthWestJungleVent", out var vent)) vent.transform.SetLocalZ(-0.2f);
 
         //Storageの見た目がおかしい問題を修正
         {
-            var storageBarrels = ShipStatus.Instance.FastRooms[SystemTypes.Storage].transform.GetChild(0).GetChild(3);
+            var storageBarrels = ship.FastRooms[SystemTypes.Storage].transform.GetChild(0).GetChild(3);
             var localPos = storageBarrels.localPosition;
             localPos.z = -1.095f;
             storageBarrels.localPosition = localPos;
@@ -535,10 +547,10 @@ public static class ShipExtension
 
         //Storageの影を調整
         {
-            var outsideShadows = ShipStatus.Instance.transform.TryDig("Outside", "OutsideHighlands", "Shadows");
+            var outsideShadows = ship.transform.TryDig("Outside", "OutsideHighlands", "Shadows");
             outsideShadows?.TryDig("OnewayShadow-Top")?.gameObject.SetActive(false);
             outsideShadows?.TryDig("OnewayShadow-Top+Ledge")?.gameObject.SetActive(false);
-            var collider = ShipStatus.Instance.FastRooms[SystemTypes.Storage].transform.GetChild(1).GetComponent<EdgeCollider2D>();
+            var collider = ship.FastRooms[SystemTypes.Storage].transform.GetChild(1).GetComponent<EdgeCollider2D>();
             Vector2[] points = collider.points;
             var subArray1 = points.SubArray(0, 5);
             var subArray2 = points.SubArray(20, 27);
@@ -565,31 +577,33 @@ public static class ShipExtension
    
     private static Vent CreateVent(SystemTypes room, string ventName, Vector2 position)
     {
-        var referenceVent = ShipStatus.Instance.AllVents[0];
-        Vent vent = UnityEngine.Object.Instantiate<Vent>(referenceVent, ShipStatus.Instance.FastRooms[room].transform);
+        var ship = AmongUsLLImpl.ShipStatusInstance;
+
+        var referenceVent = ship.AllVents[0];
+        Vent vent = UnityEngine.Object.Instantiate<Vent>(referenceVent, ship.FastRooms[room].transform);
         vent.transform.localPosition = new Vector3(position.x, position.y, -1);
         vent.Left = null;
         vent.Right = null;
         vent.Center = null;
-        vent.Id = ShipStatus.Instance.AllVents.Select(x => x.Id).Max() + 1; // Make sure we have a unique id
+        vent.Id = ship.AllVents.Select(x => x.Id).Max() + 1; // Make sure we have a unique id
 
-        var allVentsList = ShipStatus.Instance.AllVents.ToList();
+        var allVentsList = ship.AllVents.ToList();
         allVentsList.Add(vent);
-        ShipStatus.Instance.AllVents = allVentsList.ToArray();
+        ship.AllVents = allVentsList.ToArray();
 
         vent.gameObject.SetActive(true);
         vent.name = ventName;
         vent.gameObject.name = ventName;
 
         var console = vent.GetComponent<VentCleaningConsole>();
-        if (console)
+        if (console.AsBoolFast())
         {
             console.Room = room;
-            console.ConsoleId = ShipStatus.Instance.AllVents.Length;
+            console.ConsoleId = ship.AllVents.Length;
 
-            var allConsolesList = ShipStatus.Instance.AllConsoles.ToList();
+            var allConsolesList = ship.AllConsoles.ToList();
             allConsolesList.Add(console);
-            ShipStatus.Instance.AllConsoles = allConsolesList.ToArray();
+            ship.AllConsoles = allConsolesList.ToArray();
         }
 
         return vent;
@@ -597,15 +611,17 @@ public static class ShipExtension
 
     private static void EditConsole(SystemTypes room, string objectName, Action<Console> action)
     {
-        if (!ShipStatus.Instance.FastRooms.ContainsKey(room)) return;
-        PlainShipRoom shipRoom = ShipStatus.Instance.FastRooms[room];
+        var ship = AmongUsLLImpl.ShipStatusInstance;
+
+        if (!ship.FastRooms.ContainsKey(room)) return;
+        PlainShipRoom shipRoom = ship.FastRooms[room];
         Transform transform = shipRoom.transform.FindChild(objectName);
-        if (!transform) return;
+        if (!transform.AsBoolFast()) return;
         GameObject obj = transform.gameObject;
-        if (!obj) return;
+        if (!obj.AsBoolFast()) return;
 
         Console c = obj.GetComponent<Console>();
-        if (c) action.Invoke(c);
+        if (c.AsBoolFast()) action.Invoke(c);
     }
 
     private static Console ActivateWiring(string consoleName, int consoleId)
@@ -624,8 +640,10 @@ public static class ShipExtension
 
     private static Console CreateConsole(SystemTypes room, string objectName, Sprite sprite, Vector2 pos, float z = 0f)
     {
+        var ship = AmongUsLLImpl.ShipStatusInstance;
+
         GameObject obj = new GameObject(objectName);
-        obj.transform.SetParent(ShipStatus.Instance.FastRooms.TryGetValue(room, out var roomObj) ? roomObj.transform : ShipStatus.Instance.transform);
+        obj.transform.SetParent(ship.FastRooms.TryGetValue(room, out var roomObj) ? roomObj.transform : ship.transform);
         obj.transform.localPosition = pos.AsVector3(z);
         SpriteRenderer renderer = obj.AddComponent<SpriteRenderer>();
         renderer.sprite = sprite;
@@ -659,20 +677,22 @@ public static class ShipExtension
 
     private static Console Consolize<C>(GameObject obj, SpriteRenderer? renderer = null) where C : Console
     {
+        var ship = AmongUsLLImpl.ShipStatusInstance;
+
         obj.layer = LayerMask.NameToLayer("ShortObjects");
         Console console = obj.GetComponent<Console>();
         PassiveButton button = obj.GetComponent<PassiveButton>();
         Collider2D collider = obj.GetComponent<Collider2D>();
-        if (!console)
+        if (!console.AsBoolFast())
         {
             console = obj.AddComponent<C>();
             console.checkWalls = true;
             console.usableDistance = 0.7f;
             console.TaskTypes = new TaskTypes[0];
             console.ValidTasks = new Il2CppReferenceArray<TaskSet>(0);
-            var list = ShipStatus.Instance.AllConsoles.ToList();
+            var list = ship.AllConsoles.ToList();
             list.Add(console);
-            ShipStatus.Instance.AllConsoles = new Il2CppReferenceArray<Console>(list.ToArray());
+            ship.AllConsoles = new Il2CppReferenceArray<Console>(list.ToArray());
         }
         if (console.Image == null)
         {
@@ -686,7 +706,7 @@ public static class ShipExtension
                 console.Image.material = GetHighlightMaterial();
             }
         }
-        if (!button)
+        if (!button.AsBoolFast())
         {
             button = obj.AddComponent<PassiveButton>();
             button.OnMouseOut = new UnityEngine.Events.UnityEvent();
@@ -695,7 +715,7 @@ public static class ShipExtension
             button.CachedZ = 0.1f;
         }
 
-        if (!collider)
+        if (!collider.AsBoolFast())
         {
             var cCollider = obj.AddComponent<CircleCollider2D>();
             cCollider.radius = 0.4f;
@@ -709,8 +729,10 @@ public static class ShipExtension
     static private SpriteLoader customMeetingLadderSprite = SpriteLoader.FromResource("Nebula.Resources.AirshipCustomMeetingLadder.png", 100f);
     static private void ModifyMeetingRoom()
     {
-        Transform meetingRoom = ShipStatus.Instance.FastRooms[SystemTypes.MeetingRoom].transform;
-        Transform gapRoom = ShipStatus.Instance.FastRooms[SystemTypes.GapRoom].transform;
+        var ship = AmongUsLLImpl.ShipStatusInstance;
+
+        Transform meetingRoom = ship.FastRooms[SystemTypes.MeetingRoom].transform;
+        Transform gapRoom = ship.FastRooms[SystemTypes.GapRoom].transform;
 
         float diffX = (meetingRoom.position.x - gapRoom.transform.position.x) / 0.7f;
         float[] shadowX = new float[2] { 0f, 0f };
@@ -729,7 +751,7 @@ public static class ShipExtension
         ladderObj.name = "ladder_meeting_custom";
         ladderObj.transform.position += new Vector3(10.9f, 0);
         ladderObj.GetComponent<SpriteRenderer>().sprite = customMeetingLadderSprite.GetSprite();
-        ladderObj.GetComponentsInChildren<Ladder>().Do(l => { l.Id = (byte)(l.Id + 8); ShipStatus.Instance.Ladders = new Il2CppReferenceArray<Ladder>(ShipStatus.Instance.Ladders.Append(l).ToArray()); }) ;
+        ladderObj.GetComponentsInChildren<Ladder>().Do(l => { l.Id = (byte)(l.Id + 8); ship.Ladders = new Il2CppReferenceArray<Ladder>(ship.Ladders.Append(l).ToArray()); }) ;
 
         //MeetingRoomの当たり判定に手を加える
         var collider = meetingRoom.FindChild("Walls").GetComponents<EdgeCollider2D>().Where((c) => c.pointCount == 43).FirstOrDefault();
@@ -805,7 +827,7 @@ public static class ShipExtension
         }
         collider.SetPoints(colliderPosList);
 
-        AirshipStatus airship = ShipStatus.Instance.Cast<AirshipStatus>();
+        AirshipStatus airship = ship.Cast<AirshipStatus>();
         airship.Ladders = new Il2CppReferenceArray<Ladder>(airship.GetComponentsInChildren<Ladder>());
 
         originalLadderObj.transform.GetChild(0).gameObject.SetActive(false);
@@ -824,7 +846,9 @@ public static class ShipExtension
     static private SpriteLoader customLaboratoryWallSprite = SpriteLoader.FromResource("Nebula.Resources.FungleCustomLaboratoryWall.png", 100f);
     static private void ModifyLaboratory()
     {
-        Transform laboratory = ShipStatus.Instance.FastRooms[SystemTypes.Laboratory].transform;
+        var ship = AmongUsLLImpl.ShipStatusInstance;
+
+        Transform laboratory = ship.FastRooms[SystemTypes.Laboratory].transform;
 
         //画像を更新する
         laboratory.GetChild(0).GetChild(0).GetChild(0).GetComponent<SpriteRenderer>().sprite = customLaboratorySprite.GetSprite();
@@ -857,14 +881,14 @@ public static class ShipExtension
         newCollider.SetPath(0, ToList(polygon2.ToArray()));
 
         //ラボ上部にサンプル採取タスクを追加
-        GameObject collectSampleConsole = ShipStatus.Instance.transform.GetChild(5).GetChild(0).GetChild(2).GetChild(0).gameObject;
+        GameObject collectSampleConsole = ship.transform.GetChild(5).GetChild(0).GetChild(2).GetChild(0).gameObject;
         var labSample = GameObject.Instantiate(collectSampleConsole, collectSampleConsole.transform.parent);
         labSample.name = "CollectSamples (Lab)";
         labSample.transform.GetChild(0).GetComponent<Console>().ConsoleId = 8;
         labSample.transform.localPosition = new(-8.393f, -2.4575f, 0.05f);
 
         //行き止まりを作成
-        var jungleOutside = ShipStatus.Instance.transform.GetChild(5).GetChild(0);
+        var jungleOutside = ship.transform.GetChild(5).GetChild(0);
         var obstacle = jungleOutside.GetChild(6).GetChild(2);
         var crystal = GameObject.Instantiate(obstacle.GetChild(0), ReverseScaler);
         crystal.localPosition = new(-6.2764f, -11.9491f, -1.0115f);

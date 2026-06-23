@@ -34,7 +34,7 @@ public class Hallucination : DefinedGhostRoleTemplate, DefinedGhostRole
 
         void IGameOperator.OnReleased()
         {
-            if (display) GameObject.Destroy(display.gameObject);
+            if (display.AsBoolFast()) GameObject.Destroy(display.gameObject);
         }
 
         public void Disappear()
@@ -61,7 +61,7 @@ public class Hallucination : DefinedGhostRoleTemplate, DefinedGhostRole
             UpdateOutfit(originalPlayer.CurrentOutfit.outfit);
 
             allRenderers = display.gameObject.GetComponentsInChildren<SpriteRenderer>();
-            allRenderers.Do(r => r.color = Color.clear);
+            allRenderers.Do(r => r.color = UnityEngine.Color.clear);
         }
 
         private void UpdateOutfit(NetworkedPlayerInfo.PlayerOutfit outfit)

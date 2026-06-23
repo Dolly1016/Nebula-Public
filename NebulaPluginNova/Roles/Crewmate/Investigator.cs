@@ -35,7 +35,7 @@ public static class FootprintHelpers
         }
     }
 }
-internal class Investigator : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignableDocument
+internal class Investigator : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 {
     internal record KillData(GamePlayer Killer, GamePlayer Dead, float Time)
     {
@@ -69,7 +69,7 @@ internal class Investigator : DefinedRoleTemplate, HasCitation, DefinedRole, IAs
                     foundTimeText = Language.Translate("role.investigator.overlay.elapsed").Replace("%ELAPSED%", Helpers.Round((int)ElapsedTime, 5).ToString());
                 }
             }
-            discoveredText = foundTimeText + "<br>" + Language.Translate("role.investigator.overlay.killer").Replace("%TEAM%", Language.Translate(killerTeam.TranslationKey).Color(killerTeam.UnityColor));
+            discoveredText = foundTimeText + "<br>" + Language.Translate("role.investigator.overlay.killer").Replace("%TEAM%", Language.Translate(killerTeam.TranslationKey).Color(killerTeam.Color));
 
             NebulaAPI.CurrentGame?.GetModule<MeetingOverlayHolder>()?.RegisterOverlay(InvestigatorManager.GetWidget(this), MeetingOverlayHolder.IconsSprite[6], MyRole.RoleColor);
 
@@ -82,24 +82,24 @@ internal class Investigator : DefinedRoleTemplate, HasCitation, DefinedRole, IAs
         }
     }
 
-    private record FootprintInfo(UnityEngine.Vector2 Position, float Magnitude, KillData Info) { 
+    private record FootprintInfo(VVector2 Position, float Magnitude, KillData Info) { 
         public SpriteRenderer? Renderer = null;
         private bool spawned = false;
         public bool IsSpawned => spawned;
-        public void TrySpawn(Vector2 cameraPos)
+        public void TrySpawn(VVector2 cameraPos)
         {
             if (spawned) return;
             if (Mathn.Abs(cameraPos.x - Position.x) > 10f || Mathn.Abs(cameraPos.y - Position.y) > 10f) return;
 
-            Renderer = AmongUsUtil.GenerateFootprint(Position, Color.black.AlphaMultiplied(Mathn.Pow(Magnitude, 0.5f)), null, null, 0);
+            Renderer = AmongUsUtil.GenerateFootprint(Position, VColor.Black.AlphaMultiplied(Mathn.Pow(Magnitude, 0.5f)), null, null, 0);
             spawned = true;
         }
 
-        public void Update(Vector2 cameraPos, bool canSeeFootprint)
+        public void Update(VVector2 cameraPos, bool canSeeFootprint)
         {
             if (!spawned && canSeeFootprint) TrySpawn(cameraPos);
 
-            if (spawned && Renderer) Renderer!.enabled = canSeeFootprint;
+            if (spawned && Renderer.AsBoolFast()) Renderer!.enabled = canSeeFootprint;
             
         }
     }
@@ -164,11 +164,11 @@ internal class Investigator : DefinedRoleTemplate, HasCitation, DefinedRole, IAs
 
             if (selected != null) {
                 Vector2 targetPos = selected.Position;
-                UnityEngine.Vector2 GetScreenPos()
+                VVector2 GetScreenPos()
                 {
                     Vector2 pos = (lastFootprint ?? selected).Position;
                     targetPos += (pos - targetPos).Delta(2f, 0.005f);
-                    return UnityHelper.WorldToScreenPoint(NebulaGameManager.Instance!.WideCamera.ConvertToWorldPos(targetPos), LayerExpansion.GetDefaultLayer());
+                    return UnityHelper.WorldToScreenPoint(NebulaGameManager.Instance!.WideCamera.ConvertToWorldPos(targetPos).AsUnityVector3(), LayerExpansion.GetDefaultLayer());
                 }
 
                 void ShowDiscoveredPopup()
@@ -217,7 +217,7 @@ internal class Investigator : DefinedRoleTemplate, HasCitation, DefinedRole, IAs
         {
             var localPlayer = GamePlayer.LocalPlayer;
             if (localPlayer == null) return;
-            var pos = localPlayer.VanillaPlayer.transform.position;
+            var pos = localPlayer.Position;
             var canSeeFootprints = CanSeeFootprints;
 
             allFootprints.Do(chunk => chunk.Update(pos, canSeeFootprints));
@@ -272,7 +272,6 @@ internal class Investigator : DefinedRoleTemplate, HasCitation, DefinedRole, IAs
     {
     }
 
-    Citation? HasCitation.Citation => Citations.TheOtherRoles;
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     static private readonly FloatConfiguration InvestigateCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.investigator.investigateCooldown", (2.5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
@@ -290,7 +289,7 @@ internal class Investigator : DefinedRoleTemplate, HasCitation, DefinedRole, IAs
         float t = 0f;
         bool gainEffect = false;
         bool removeEffect = false;
-        static private UnityEngine.Color blacklightColor = new(0.24f, 0.5f, 0.12f, 1f);
+        static private VColor blacklightColor = new(0.24f, 0.5f, 0.12f, 1f);
 
         public NightVision()
         {
@@ -327,10 +326,10 @@ internal class Investigator : DefinedRoleTemplate, HasCitation, DefinedRole, IAs
                 if (t < 0.4f)
                 {
                     var num = 1f - (t / 0.4f);
-                    ev.Color = Color.white * num;
+                    ev.Color = VColor.White * num;
                 }else if(t < 0.6f)
                 {
-                    ev.Color = Color.black;
+                    ev.Color = VColor.Black;
                 }else if(t < 1f)
                 {
                     var num = (t - 0.6f) / 0.4f;
@@ -351,13 +350,13 @@ internal class Investigator : DefinedRoleTemplate, HasCitation, DefinedRole, IAs
                 }
                 else if (t < 0.6f)
                 {
-                    ev.Color = Color.black;
+                    ev.Color = VColor.Black;
                     if (!removeEffect) RemoveEffect();
                 }
                 else if (t < 1f)
                 {
                     var num = (t - 0.6f) / 0.4f;
-                    ev.Color = Color.white * num;
+                    ev.Color = VColor.White * num;
                 }
                 else if(!IsDeadObject)
                 {

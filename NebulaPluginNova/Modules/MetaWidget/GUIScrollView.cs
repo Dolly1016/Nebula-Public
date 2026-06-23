@@ -42,7 +42,7 @@ public class GUIScrollView : AbstractGUIWidget
 
         public void SetWidget(Virial.Media.GUIWidget? widget, out Size actualSize)
         {
-            if (!screen)
+            if (!screen.AsBoolFast())
             {
                 actualSize = new(0f, 0f);
                 return;
@@ -81,9 +81,9 @@ public class GUIScrollView : AbstractGUIWidget
                 anchoredPos.y *= innerSize.Height;
 
                 var obj = widget.Instantiate(new(anchor, anchoredPos), innerSize, out actualSize);
-                if (obj != null)
+                if (obj.AsBoolFast())
                 {
-                    obj.transform.SetParent(screen.transform, false);
+                    obj!.transform.SetParent(screen.transform, false);
 
                     scroller.SetBounds(new FloatRange(0, 0), null);
                     scroller.ScrollRelative(UnityEngine.Vector2.zero);
@@ -99,7 +99,7 @@ public class GUIScrollView : AbstractGUIWidget
     }
 
     public string? ScrollerTag { get; init; } = null;
-    public UnityEngine.Vector2 Size { get; init; }
+    public Virial.Compat.Vector2 Size { get; init; }
     public bool WithMask { get; init; } = true;
     
     internal ListArtifact<InnerScreen> InnerArtifact { get; private init; }
@@ -107,7 +107,7 @@ public class GUIScrollView : AbstractGUIWidget
 
     public GUIWidgetSupplier? Inner { get; init; } = null;
 
-    public GUIScrollView(Virial.Media.GUIAlignment alignment, UnityEngine.Vector2 size, GUIWidgetSupplier? inner) : base(alignment) {
+    public GUIScrollView(Virial.Media.GUIAlignment alignment, Virial.Compat.Vector2 size, GUIWidgetSupplier? inner) : base(alignment) {
         this.Size = size;
 
         this.InnerArtifact = new();
@@ -118,16 +118,16 @@ public class GUIScrollView : AbstractGUIWidget
 
     internal override GameObject? Instantiate(Size size, out Size actualSize)
     {
-        var view = UnityHelper.CreateObject("ScrollView", null, new UnityEngine.Vector3(0f, 0f, 0f),LayerExpansion.GetUILayer());
-        var inner = UnityHelper.CreateObject("Inner", view.transform, new UnityEngine.Vector3(-0.2f, 0f, -0.1f));
-        var innerSize = Size - new UnityEngine.Vector2(0.4f, 0f);
+        var view = UnityHelper.CreateObject("ScrollView", null, new Virial.Compat.Vector3(0f, 0f, 0f),LayerExpansion.GetUILayer());
+        var inner = UnityHelper.CreateObject("Inner", view.transform, new Virial.Compat.Vector3(-0.2f, 0f, -0.1f));
+        var innerSize = Size - new Virial.Compat.Vector2(0.4f, 0f);
 
         if (WithMask)
         {
             view.AddComponent<SortingGroup>();
-            var mask = UnityHelper.CreateObject<SpriteMask>("Mask", view.transform, new UnityEngine.Vector3(-0.2f, 0, 0));
+            var mask = UnityHelper.CreateObject<SpriteMask>("Mask", view.transform, new Virial.Compat.Vector3(-0.2f, 0, 0));
             mask.sprite = VanillaAsset.FullScreenSprite;
-            mask.transform.localScale = innerSize;
+            mask.transform.localScale = innerSize.AsUnityVector3(1f);
         }
 
         var scroller = VanillaAsset.GenerateScroller(Size, view.transform, new UnityEngine.Vector2(Size.x / 2 - 0.15f, 0f), inner.transform, new FloatRange(0, Size.y), Size.y);
@@ -138,7 +138,7 @@ public class GUIScrollView : AbstractGUIWidget
         innerScreen.SetWidget(Inner?.Invoke(), out var innerActualSize);
         float height = innerActualSize.Height;
 
-        scroller.SetBounds(new FloatRange(0, Math.Max(0f,height - Size.y)), null);
+        scroller.SetBounds(new FloatRange(0, Mathn.Max(0f,height - Size.y)), null);
 
         if (ScrollerTag != null && distDic.TryGetValue(ScrollerTag, out var val))
             scroller.Inner.transform.localPosition = scroller.Inner.transform.localPosition +
@@ -196,7 +196,7 @@ internal class ScrollViewInitializer
     {
         while (true)
         {
-            if (!targetObject) yield break;
+            if (!targetObject.AsBoolFast()) yield break;
             if (LookUpScroller(out var info))
             {
                 var scroller = info.Scroller;
@@ -208,7 +208,7 @@ internal class ScrollViewInitializer
 
                 //スクロール実行ここから
                 scroller.velocity = UnityEngine.Vector2.zero;
-                UnityEngine.Vector3 localPosition = scroller.Inner.transform.localPosition;
+                Virial.Compat.Vector3 localPosition = scroller.Inner.transform.localPosition;
                 localPosition.y = final_scroll_y;
                 info.InnerParent.localPosition = localPosition;
                 scroller.UpdateScrollBars();
@@ -225,10 +225,10 @@ internal class ScrollViewInitializer
                 effectRenderer.SetBothOrder(0);
                 yield return ManagedEffects.Lerp(1.5f, p =>
                 {
-                    if(effectRenderer) effectRenderer.color = new UnityEngine.Color(1f, 1f, 0f, Easing.OutQuad(1f - p) * 0.3f);
+                    if(effectRenderer.AsBoolFast()) effectRenderer.color = new UnityEngine.Color(1f, 1f, 0f, Easing.OutQuad(1f - p) * 0.3f);
                 });
 
-                if (effectRenderer) GameObject.Destroy(effectRenderer.gameObject);
+                if (effectRenderer.AsBoolFast()) GameObject.Destroy(effectRenderer.gameObject);
                 //強調表示ここまで
 
                 yield break;

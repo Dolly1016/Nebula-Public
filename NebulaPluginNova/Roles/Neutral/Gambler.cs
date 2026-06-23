@@ -58,7 +58,7 @@ internal class Gambler : DefinedRoleTemplate, DefinedRole, IAssignableDocument
         static private readonly Dictionary<int, List<SpriteRenderer>> renderers = [];
         static public void Push(GamePlayer gambler, int to, int num)
         {
-            Color color = DynamicPalette.PlayerColors[gambler.PlayerId];
+            VColor color = DynamicPalette.PlayerColors[gambler.PlayerId];
             color.ToHSV(out var h, out var s, out _);
             h = 360f - h;
 
@@ -253,7 +253,7 @@ internal class Gambler : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             {
                 var highlight = GameObject.Instantiate(pva.HighlightedFX, pva.transform);
                 highlight.enabled = false;
-                highlight.color = Color.red;
+                highlight.color = UnityEngine.Color.red;
                 highlight.transform.localPosition = new(-0.0155f, 0.0127f, -2.8f);
                 highlights[pva.TargetPlayerId] = highlight;
             }
@@ -277,7 +277,7 @@ internal class Gambler : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             numText!.transform.SetParent(footer.transform);
             numText.transform.localPosition = new(0.2f, -0.15f, 0f);
 
-            var arrowText = new NoSGUIText(GUIAlignment.Left, Virial.Text.AttributeAsset.OverlayContent, new RawTextComponent("➡")) { PostBuilder = text => text.outlineColor = Color.clear }.Instantiate(new(10f, 10f), out _);
+            var arrowText = new NoSGUIText(GUIAlignment.Left, Virial.Text.AttributeAsset.OverlayContent, new RawTextComponent("➡")) { PostBuilder = text => text.outlineColor = UnityEngine.Color.clear }.Instantiate(new(10f, 10f), out _);
             arrowText!.transform.SetParent(footer.transform);
             arrowText.transform.localPosition = new(0.6f, 0f, 0f);
 
@@ -383,7 +383,7 @@ internal class Gambler : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             }
             void RemoveBetting(Betting betting)
             {
-                if (betting.BettingShower) GameObject.Destroy(betting.BettingShower);
+                if (betting.BettingShower.AsBoolFast()) GameObject.Destroy(betting.BettingShower);
                 hueStack.Push(betting.Hue);
                 bettings.Remove(betting);
                 betting.TargetRenderers.Do(r => { if (r) GameObject.Destroy(r); });
@@ -418,22 +418,23 @@ internal class Gambler : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             }, "gambler.ui.help.add");
             checkButtonObj = GenerateMeetingButton(1, () =>
             {
-                if (MeetingHud.Instance.state == MeetingHud.VoteStates.NotVoted)
+                var meetingHud = MeetingHud.Instance;
+                if (meetingHud.state == MeetingHud.VoteStates.NotVoted)
                 {
                     if (CanVoteOption)
                     {
                         if (bettings.Find(b => b.IsMaxVoteBetting, out var mvb) && GamePlayer.AllPlayers.Find(p => (mvb.PlayerMask & (1 << p.PlayerId)) != 0, out var p))
                         {
-                            MeetingHud.Instance.ModCastVote(PlayerControl.LocalPlayer.PlayerId, p.PlayerId, 1);
+                            meetingHud.ModCastVote(AmongUsLLImpl.LocalPlayer.PlayerId, p.PlayerId, 1);
                         }
                         else
                         {
-                            MeetingHud.Instance.ModCastVote(PlayerControl.LocalPlayer.PlayerId, 253, 1);
+                            meetingHud.ModCastVote(AmongUsLLImpl.LocalPlayer.PlayerId, 253, 1);
                         }
                     }
                     else
                     {
-                        MeetingHud.Instance.ModCastVote(PlayerControl.LocalPlayer.PlayerId, 253, 0);
+                        meetingHud.ModCastVote(AmongUsLLImpl.LocalPlayer.PlayerId, 253, 0);
                     }
                     ArrangeBeddings();
                     List<(int to, int num)> list = [];
@@ -578,8 +579,8 @@ internal class Gambler : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                 var parentScale = ExileController.Instance.transform.localScale;
                 holder.transform.localScale = new(1f / parentScale.x, 1f / parentScale.y, 1f);
 
-                var arrowTextWidget = new NoSGUIText(GUIAlignment.Left, Virial.Text.AttributeAsset.OverlayContent, new RawTextComponent("➡")) { PostBuilder = text => text.outlineColor = Color.clear };
-                var failedTextWidget = new NoSGUIText(GUIAlignment.Left, Virial.Text.AttributeAsset.OverlayContent, new RawTextComponent("×")) { PostBuilder = text => text.outlineColor = Color.clear };
+                var arrowTextWidget = new NoSGUIText(GUIAlignment.Left, Virial.Text.AttributeAsset.OverlayContent, new RawTextComponent("➡")) { PostBuilder = text => text.outlineColor = UnityEngine.Color.clear };
+                var failedTextWidget = new NoSGUIText(GUIAlignment.Left, Virial.Text.AttributeAsset.OverlayContent, new RawTextComponent("×")) { PostBuilder = text => text.outlineColor = UnityEngine.Color.clear };
                 (GameObject holder, IEnumerator coroutine)[] results = bettings.Select(betting =>
                 {
                     var bHolder = UnityHelper.CreateObject("BettingResult", holder.transform, new(0f, 0f, 0));

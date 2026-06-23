@@ -17,7 +17,7 @@ class PlayerIsKillTimerEnabledPatch
         //地下にダイブ中、あるいは停電スイッチを直している間はキルクールは進まない
         if (
             (__instance.GetModInfo()?.IsDived ?? false) ||
-            (Minigame.Instance && Minigame.Instance.TryCast<SwitchMinigame>()))
+            (Minigame.Instance.AsBoolFast() && Minigame.Instance.IsFast<SwitchMinigame>()))
         {
             __result = false;
         }
@@ -94,7 +94,7 @@ public class TimerImpl : FlexibleLifespan, GameTimer, IGameOperator
     {
         if (isActive && (predicate?.Invoke() ?? true))
         {
-            float deltaTime = Time.fixedDeltaTime;
+            float deltaTime = ev.DeltaTime;
             if (AffectedByCooldownEffect)
             {
                 float coeff = GamePlayer.LocalPlayer?.Unbox().CalcAttributeVal(PlayerAttributes.CooldownSpeed, true) ?? 1f;
@@ -129,7 +129,7 @@ public class TimerImpl : FlexibleLifespan, GameTimer, IGameOperator
     public TimerImpl SetAsKillCoolDown()
     {
         AffectedByCooldownEffect = true;
-        return SetPredicate(() => PlayerControl.LocalPlayer.IsKillTimerEnabled || PlayerControl.LocalPlayer.ForceKillTimerContinue);
+        return SetPredicate(() => AmongUsLLImpl.LocalPlayer.IsKillTimerEnabled || AmongUsLLImpl.LocalPlayer.ForceKillTimerContinue);
     }
 
     public TimerImpl SetAsAbilityCoolDown()
@@ -137,16 +137,19 @@ public class TimerImpl : FlexibleLifespan, GameTimer, IGameOperator
         AffectedByCooldownEffect = true;
         return SetPredicate(() =>
         {
-            if (PlayerControl.LocalPlayer.CanMove) return true;
-            if (PlayerControl.LocalPlayer.inMovingPlat || PlayerControl.LocalPlayer.onLadder) return true;
+            var localPlayer = AmongUsLLImpl.LocalPlayer;
+            if (localPlayer.CanMove) return true;
+            if (localPlayer.inMovingPlat || localPlayer.onLadder) return true;
 
-            if (Minigame.Instance && 
-            ((bool)Minigame.Instance.MyNormTask
-            || Minigame.Instance.TryCast<SwitchMinigame>() != null
-            || Minigame.Instance.TryCast<IDoorMinigame>() != null
-            || Minigame.Instance.TryCast<VitalsMinigame>() != null
-            || Minigame.Instance.TryCast<MultistageMinigame>() != null
-            || Minigame.Instance.TryCast<AutoMultistageMinigame>() != null
+            var minigame = Minigame.Instance;
+            
+            if (minigame && 
+            ((bool)minigame.MyNormTask
+            || minigame.IsFast<SwitchMinigame>()
+            || minigame.IsFast<IDoorMinigame>()
+            || minigame.IsFast<VitalsMinigame>()
+            || minigame.IsFast<MultistageMinigame>()
+            || minigame.IsFast<AutoMultistageMinigame>()
             )) return true;
             return false;
         });
@@ -241,21 +244,21 @@ internal class VanillaKillTimer : IVisualTimer
     }
 
 
-    string? IVisualTimer.TimerText => Mathn.CeilToInt(PlayerControl.LocalPlayer.killTimer).ToString();
+    string? IVisualTimer.TimerText => Mathn.CeilToInt(AmongUsLLImpl.LocalPlayer.killTimer).ToString();
 
     float IVisualTimer.Percentage
     {
         get
         {
-            var timer = PlayerControl.LocalPlayer.killTimer;
-            var maxTimer = GameOptionsManager.Instance.CurrentGameOptions.GetFloat(FloatOptionNames.KillCooldown);
+            var timer = AmongUsLLImpl.LocalPlayer.killTimer;
+            var maxTimer = NebulaAPI.AmongUs.VanillaKillCooldown;
             if (maxTimer > 0f) return timer / maxTimer;
             return 0f;
         }
     }
 
-    bool IVisualTimer.IsProgressing => PlayerControl.LocalPlayer.killTimer > 0f;
-    float IVisualTimer.CurrentTime => PlayerControl.LocalPlayer.killTimer;
+    bool IVisualTimer.IsProgressing => AmongUsLLImpl.LocalPlayer.killTimer > 0f;
+    float IVisualTimer.CurrentTime => AmongUsLLImpl.LocalPlayer.killTimer;
     bool ILifespan.IsDeadObject => false;
     void IReleasable.Release() {}
     IVisualTimer IVisualTimer.Start(float? time) => this;
@@ -291,7 +294,7 @@ internal class CurrentKillTimer : IVisualTimer
         get
         {
             float cooldown = GetKillButton()?.Cooldown ?? 0f;
-            var maxTimer = GameOptionsManager.Instance.CurrentGameOptions.GetFloat(FloatOptionNames.KillCooldown); //TODO: 実際の最大クールダウンを取得する。
+            var maxTimer = NebulaAPI.AmongUs.VanillaKillCooldown; //TODO: 実際の最大クールダウンを取得する。
             if (maxTimer > 0f) return cooldown / maxTimer;
             return 0f;
         }

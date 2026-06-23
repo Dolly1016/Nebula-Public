@@ -16,40 +16,40 @@ namespace Nebula.Game;
 [NebulaPreprocess(PreprocessPhase.PostRoles)]
 public class NebulaGameEnd
 {
-    static private Color InvalidColor = new Color(72f / 255f, 78f / 255f, 84f / 255f);
-    static public readonly GameEnd CrewmateWin = new(16, "crewmate", Palette.CrewmateBlue, 16);
-    static public readonly GameEnd ImpostorWin = new(17, "impostor", Palette.ImpostorRed, 16);
-    static public readonly GameEnd JackalWin = new(26, "jackal", Roles.Neutral.Jackal.MyRole.UnityColor, 18);
-    static public readonly GameEnd VultureWin = new(24, "vulture", Roles.Neutral.Vulture.MyRole.UnityColor, 32);
-    static public readonly GameEnd JesterWin = new(25, "jester", Roles.Neutral.Jester.MyRole.UnityColor, 32);
-    static public readonly GameEnd ArsonistWin = new(27, "arsonist", Roles.Neutral.Arsonist.MyRole.UnityColor, 32);
-    static public readonly GameEnd LoversWin = new(28, "lover", Roles.Modifier.Lover.MyRole.UnityColor, 19);
-    static public readonly GameEnd PaparazzoWin = new(29, "paparazzo", Roles.Neutral.Paparazzo.MyRole.UnityColor, 31);
-    static public readonly GameEnd AvengerWin = new(30, "avenger", Roles.Neutral.Avenger.MyRole.UnityColor, 62);
-    static public readonly GameEnd DancerWin = new(31, "dancer", Roles.Neutral.Dancer.MyRole.UnityColor, 30);
-    static public readonly GameEnd ScarletWin = new(32, "scarlet", Roles.Neutral.Scarlet.MyRole.UnityColor, 64);
-    static public readonly GameEnd SpectreWin = new(33, "spectre", Roles.Neutral.Spectre.MyRole.UnityColor, 63);
-    static public readonly GameEnd TrilemmaWin = new(34, "trilemma", Roles.Modifier.Trilemma.MyRole.UnityColor, 61);
-    static public readonly GameEnd GamblerWin = new(35, "gambler", Roles.Neutral.Gambler.MyRole.UnityColor, 29);
-    static public readonly GameEnd TyrantWin = new(36, "tyrant", Roles.Neutral.Tyrant.MyRole.UnityColor, 32);
-    static public readonly GameEnd VanityWin = new(37, "vanity", Roles.Neutral.Vanity.MyRole.UnityColor, 18);
-    static public readonly GameEnd PlagueWin = new(38, "plague", Roles.Neutral.Plague.MyRole.UnityColor, 32);
-    static public readonly GameEnd GameEnd = new(62, "gameEnd", Palette.CrewmateBlue, 128) { AlternativeClip = () => NebulaAsset.GetAudioClip(NebulaAudioClip.AeroGuesserGameEnd)};
+    static private VColor InvalidColor = new VColor(72f / 255f, 78f / 255f, 84f / 255f);
+    static public readonly GameEnd CrewmateWin = new(16, "crewmate", new(Palette.CrewmateBlue), 16);
+    static public readonly GameEnd ImpostorWin = new(17, "impostor", new(Palette.ImpostorRed), 16);
+    static public readonly GameEnd JackalWin = new(26, "jackal", Roles.Neutral.Jackal.MyRole.Color, 18);
+    static public readonly GameEnd VultureWin = new(24, "vulture", Roles.Neutral.Vulture.MyRole.Color, 32);
+    static public readonly GameEnd JesterWin = new(25, "jester", Roles.Neutral.Jester.MyRole.Color, 32);
+    static public readonly GameEnd ArsonistWin = new(27, "arsonist", Roles.Neutral.Arsonist.MyRole.Color, 32);
+    static public readonly GameEnd LoversWin = new(28, "lover", Roles.Modifier.Lover.MyRole.Color, 19);
+    static public readonly GameEnd PaparazzoWin = new(29, "paparazzo", Roles.Neutral.Paparazzo.MyRole.Color, 31);
+    static public readonly GameEnd AvengerWin = new(30, "avenger", Roles.Neutral.Avenger.MyRole.Color, 62);
+    static public readonly GameEnd DancerWin = new(31, "dancer", Roles.Neutral.Dancer.MyRole.Color, 30);
+    static public readonly GameEnd ScarletWin = new(32, "scarlet", Roles.Neutral.Scarlet.MyRole.Color, 64);
+    static public readonly GameEnd SpectreWin = new(33, "spectre", Roles.Neutral.Spectre.MyRole.Color, 63);
+    static public readonly GameEnd TrilemmaWin = new(34, "trilemma", Roles.Modifier.Trilemma.MyRole.Color, 61);
+    static public readonly GameEnd GamblerWin = new(35, "gambler", Roles.Neutral.Gambler.MyRole.Color, 29);
+    static public readonly GameEnd TyrantWin = new(36, "tyrant", Roles.Neutral.Tyrant.MyRole.Color, 32);
+    static public readonly GameEnd VanityWin = new(37, "vanity", Roles.Neutral.Vanity.MyRole.Color, 18);
+    static public readonly GameEnd PlagueWin = new(38, "plague", Roles.Neutral.Plague.MyRole.Color, 32);
+    static public readonly GameEnd GameEnd = new(62, "gameEnd", new(Palette.CrewmateBlue), 128) { AlternativeClip = () => NebulaAsset.GetAudioClip(NebulaAudioClip.AeroGuesserGameEnd)};
     static public readonly GameEnd NoGame = new(63, "nogame", InvalidColor, 128) { AllowWin = false };
 
-    static public readonly ExtraWin ExtraLoversWin = new(0, "lover", (Roles.Modifier.Lover.MyRole as DefinedAssignable).Color);
-    static public readonly ExtraWin ExtraObsessionalWin = new(1, "obsessional", (Roles.Modifier.Obsessional.MyRole as DefinedAssignable).Color);
-    static public readonly ExtraWin ExtraGrudgeWin = new(2, "grudge", (Roles.Ghost.Neutral.Grudge.MyRole as DefinedAssignable).Color);
-    static public readonly ExtraWin ExtraTrilemmaWin = new(3, "trilemma", (Roles.Modifier.Trilemma.MyRole as DefinedAssignable).Color);
-    static public readonly ExtraWin ExtraVanityWin = new(4, "vanity", (Roles.Neutral.Vanity.MyRole as DefinedAssignable).Color);
-    static public readonly ExtraWin ExtraOpportunistWin = new(5, "opportunist", (Roles.Neutral.Opportunist.MyRole as DefinedAssignable).Color);
+    static public readonly ExtraWin ExtraLoversWin = new(0, "lover", Roles.Modifier.Lover.MyRole.Color);
+    static public readonly ExtraWin ExtraObsessionalWin = new(1, "obsessional", Roles.Modifier.Obsessional.MyRole.Color);
+    static public readonly ExtraWin ExtraGrudgeWin = new(2, "grudge", Roles.Ghost.Neutral.Grudge.MyRole.Color);
+    static public readonly ExtraWin ExtraTrilemmaWin = new(3, "trilemma", Roles.Modifier.Trilemma.MyRole.Color);
+    static public readonly ExtraWin ExtraVanityWin = new(4, "vanity", Roles.Neutral.Vanity.MyRole.Color);
+    static public readonly ExtraWin ExtraOpportunistWin = new(5, "opportunist", Roles.Neutral.Opportunist.MyRole.Color);
 
     static void Preprocess(NebulaPreprocessor preprocessor)
     {
         //Tipsの追加
-        string ImpostorTeam(string text) => text.Replace("%IMPOSTOR%", Language.Translate("document.tip.winCond.teams.impostor").Color(Roles.Impostor.Impostor.MyTeam.UnityColor));
-        string JackalTeam(string text) => text.Replace("%JACKAL%", Language.Translate("document.tip.winCond.teams.jackal").Color(Roles.Neutral.Jackal.MyTeam.UnityColor));
-        string LoverTeam(string text) => text.Replace("%LOVER%", Language.Translate("document.tip.winCond.teams.lover").Color(Roles.Modifier.Lover.MyRole.UnityColor));
+        string ImpostorTeam(string text) => text.Replace("%IMPOSTOR%", Language.Translate("document.tip.winCond.teams.impostor").Color(Roles.Impostor.Impostor.MyTeam.Color));
+        string JackalTeam(string text) => text.Replace("%JACKAL%", Language.Translate("document.tip.winCond.teams.jackal").Color(Roles.Neutral.Jackal.MyTeam.Color));
+        string LoverTeam(string text) => text.Replace("%LOVER%", Language.Translate("document.tip.winCond.teams.lover").Color((Roles.Modifier.Lover.MyRole as DefinedAssignable).Color));
         RegisterWinCondTip(CrewmateWin, () => true, "crewmate.task");
         RegisterWinCondTip(CrewmateWin, () => true, "crewmate.exile", text => ImpostorTeam(JackalTeam(text)));
         RegisterWinCondTip(ImpostorWin, () => true, "impostor.kill", text => ImpostorTeam(JackalTeam(LoverTeam(text))));
@@ -235,9 +235,9 @@ public class EndGameManagerSetUpPatch
         foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo)
         {
             //Name Text
-            string nameText = p.Name.Color(NebulaGameManager.Instance.EndState!.Winners.Test(p) ? Color.yellow : Color.white);
-            if (p.TryGetModifier<ExtraMission.Instance>(out var mission)) nameText += (" <size=60%>(" + (mission.target?.Name ?? "ERROR") + ")</size>").Color(ExtraMission.MyRole.UnityColor);
-            if (p.TryGetModifier<Obsessional.Instance>(out var obsessional)) nameText += (" <size=60%>(" + (obsessional.Obsession?.Name ?? "ERROR") + ")</size>").Color(Obsessional.MyRole.UnityColor);
+            string nameText = p.Name.Color(NebulaGameManager.Instance.EndState!.Winners.Test(p) ? VColor.Yellow : VColor.White);
+            if (p.TryGetModifier<ExtraMission.Instance>(out var mission)) nameText += (" <size=60%>(" + (mission.target?.Name ?? "ERROR") + ")</size>").Color(ExtraMission.MyRole.Color);
+            if (p.TryGetModifier<Obsessional.Instance>(out var obsessional)) nameText += (" <size=60%>(" + (obsessional.Obsession?.Name ?? "ERROR") + ")</size>").Color(Obsessional.MyRole.Color);
 
             string stateText = p.Unbox().GetStateText();
             
@@ -393,9 +393,9 @@ public class EndGameManagerSetUpPatch
         var wins = NebulaGameManager.Instance.EndState!.ExtraWins;
         ExtraWin.AllExtraWins.Where(e => wins.Test(e)).Do(e => extraText += e.DisplayText.GetString());
         textRenderer.text = endCondition?.DisplayText.GetString().Replace("%EXTRA%", extraText) ?? "Error";
-        textRenderer.color = endCondition?.Color ?? Color.white;
+        textRenderer.color = (endCondition?.Color ?? VColor.White).ToUnityColor();
 
-        __instance.BackgroundBar.material.SetColor("_Color", endCondition?.Color ?? new Color(1f, 1f, 1f));
+        __instance.BackgroundBar.material.SetColor("_Color", (endCondition?.Color ?? VColor.White).ToUnityColor());
 
         var customWinText = NebulaGameManager.Instance?.GameMode?.GetAlternativeWinOrLoseText();
         if (customWinText == null)
@@ -409,7 +409,7 @@ public class EndGameManagerSetUpPatch
             __instance.WinText.color = Color.white;
         }
 
-            LastGameHistory.SetHistory(__instance.WinText.font, GetRoleContent(__instance.WinText.font), textRenderer.text.Color(endCondition?.Color ?? Color.white));
+            LastGameHistory.SetHistory(__instance.WinText.font, GetRoleContent(__instance.WinText.font), textRenderer.text.Color(endCondition?.Color ?? VColor.White));
 
 #if PC
         GameStatisticsViewer? viewer;
@@ -435,7 +435,7 @@ public class EndGameManagerSetUpPatch
 #if PC
         if (NebulaPlugin.AllowHttpCommunication)
         {
-            if (!AmongUsClient.Instance.AmHost || ClientOption.WebhookOption.urlEntry.Value.Length == 0 || !ClientOption.WebhookOption.autoSendEntry.Value)
+            if (!AmongUsLLImpl.AmongUsClientInstance.AmHost || ClientOption.WebhookOption.urlEntry.Value.Length == 0 || !ClientOption.WebhookOption.autoSendEntry.Value)
             {
                 var discordButtonRenderer = UnityHelper.CreateObject<SpriteRenderer>("WebhookButton", __instance.transform, new Vector3(-3.4f, 2.5f, -50f), LayerExpansion.GetUILayer());
                 discordButtonRenderer.sprite = DiscordButtonSprite.GetSprite();

@@ -251,12 +251,12 @@ public class CriticalPoint : MonoBehaviour
     {
         var renderer = gameObject.AddComponent<SpriteRenderer>();
         renderer.sprite = momentSprite.GetSprite();
-        renderer.color = GameStatisticsViewer.MainColor;
+        renderer.color = GameStatisticsViewer.MainColor.ToUnityColor();
         renderer.transform.localScale = new Vector3(0.65f, 0.65f, 1f);
 
         var ringRenderer = UnityHelper.CreateObject<SpriteRenderer>("Ring", transform, Vector3.zero);
         ringRenderer.sprite = momentRingSprite.GetSprite();
-        ringRenderer.color = GameStatisticsViewer.MainColor;
+        ringRenderer.color = GameStatisticsViewer.MainColor.ToUnityColor();
         ringRenderer.gameObject.SetActive(false);
         ring = ringRenderer.gameObject;
 
@@ -341,7 +341,7 @@ public class GameStatisticsViewer : MonoBehaviour
         minimapRenderer.transform.localScale = new Vector3(1f, 1f, 1f);
         minimapRenderer.transform.localPosition = Vector3.zero;
         mapColor = minimapRenderer.GetComponent<AlphaPulse>();
-        mapColor.SetColor(MainColor);
+        mapColor.SetColor(MainColor.ToUnityColor());
         NebulaAsset.CreateSharpBackground(new Vector2(4.6f, 2.8f), MainColor, minimap.transform);
         baseOnMinimap = UnityHelper.CreateObject("Scaler", scaledMinimap.transform, mapPrefab.HerePoint.transform.parent.localPosition);
         detailHolder = UnityHelper.CreateObject("Detail", transform, new Vector3(0, -3.5f, 0));
@@ -366,7 +366,7 @@ public class GameStatisticsViewer : MonoBehaviour
     }
 
     private const float LineHalfWidth = 2.5f;
-    public static readonly Color MainColor = new Color(0f, 242f / 255f, 156f / 255f);
+    public static readonly Virial.Color MainColor = new(0, 242, 156);
     private const float BackColorRate = 0.4f;
 
     private IEnumerator CoShowCriticalMoment(float p, int indexMin, int indexMax)
@@ -407,7 +407,7 @@ public class GameStatisticsViewer : MonoBehaviour
 
         timelineFront.SetPosition(0, new Vector3(-LineHalfWidth, 0));
         timelineFront.SetPosition(1, new Vector3(-LineHalfWidth, 0));
-        timelineFront.SetColors(MainColor, MainColor);
+        timelineFront.SetColors(MainColor.ToUnityColor(), MainColor.ToUnityColor());
 
         float p = 0f;
 
@@ -435,7 +435,7 @@ public class GameStatisticsViewer : MonoBehaviour
         float t = 0f;
 
         timelineBack.SetPosition(0, new Vector3(-LineHalfWidth, 0));
-        timelineBack.SetColors(MainColor * BackColorRate, MainColor.AlphaMultiplied(0));
+        timelineBack.SetColors((MainColor * BackColorRate).ToUnityColor(), MainColor.AlphaMultiplied(0).ToUnityColor());
 
         while (true)
         {
@@ -446,7 +446,7 @@ public class GameStatisticsViewer : MonoBehaviour
             timelineBack.SetPosition(1, new Vector3(log < 1 ? log * LineHalfWidth : LineHalfWidth, 0));
             float a = exp;
             if (log > 1) a += (log - 1) / log * 0.3f * LineHalfWidth;
-            timelineBack.endColor = MainColor.AlphaMultiplied(a > 1f ? 1f : a) * BackColorRate;
+            timelineBack.endColor = (MainColor.AlphaMultiplied(a > 1f ? 1f : a) * BackColorRate).ToUnityColor();
 
             if (log > 1f && a > 1f) break;
 
@@ -454,7 +454,7 @@ public class GameStatisticsViewer : MonoBehaviour
         }
 
         timelineBack.SetPosition(1, new Vector3(LineHalfWidth, 0));
-        timelineBack.endColor = MainColor * BackColorRate;
+        timelineBack.endColor = (MainColor * BackColorRate).ToUnityColor();
     }
 
     public void ClearDetail(bool onlyMinimap)
@@ -544,12 +544,12 @@ public class GameStatisticsViewer : MonoBehaviour
             button.OnMouseOver.AddListener(() =>
             {
                 OnMouseOver(eventIndex);
-                backGround.color = Color.Lerp(MainColor, Color.white, 0.5f);
+                backGround.color = Virial.Color.Lerp(MainColor, Virial.Color.White, 0.5f).ToUnityColor();
             });
             button.OnMouseOut.AddListener(() =>
             {
                 OnMouseOver(eventIndex);
-                backGround.color = MainColor;
+                backGround.color = MainColor.ToUnityColor();
             });
 
             List<GameObject> objects = [];
@@ -567,7 +567,7 @@ public class GameStatisticsViewer : MonoBehaviour
                     outfit.ColorId = NebulaPlayerTab.ArchiveColorId;
                     player.UpdateFromPlayerOutfit(outfit, PlayerMaterial.MaskType.None, false, true, (Il2CppSystem.Action)(() =>
                     {
-                        if (player.cosmetics.skin.skin && player.cosmetics.skin.skin.MatchPlayerColor)
+                        if (player.cosmetics.skin.skin.AsBoolFast() && player.cosmetics.skin.skin.MatchPlayerColor)
                         {
                             //スキンの色を参照するタイミングがずれているので同じ色IDをとっかえひっかえで使うとおかしな色が参照される。ここで設定しなおす。
                             archivedGame!.GetColor(aPlayer.PlayerId).ReflectToArchivedPalette();

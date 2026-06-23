@@ -1,6 +1,6 @@
 ﻿using Il2CppSystem.Net;
-using Nebula.AeroGuesser;
 using Nebula.Map;
+using Nebula.SpecialModes.AeroGuesser;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -56,33 +56,33 @@ internal class DevCommand : ICommand
     {
         string kind = parsedArgs.Count > 1 ? parsedArgs[1].ToLower() : "maparea";
         Color color = parsedArgs.Count > 2 ? (ColorUtility.TryParseHtmlString(parsedArgs[2], out var c) ? c : Color.white) : Color.white;
-        IEnumerable<(UnityEngine.Vector2 point, string text, UnityEngine.Vector2 size)>? points = null;
+        IEnumerable<(VVector2 point, string text, VVector2 size)>? points = null;
         switch (kind)
         {
             case "maparea":
-                points = MapData.GetCurrentMapData().MapArea.Select(p => (p, "", UnityEngine.Vector2.zero));
+                points = MapData.GetCurrentMapData().MapArea.Select(p => (p, "", VVector2.Zero));
                 break;
             case "nonmaparea":
-                points = MapData.GetCurrentMapData().NonMapArea.Select(p => (p, "", UnityEngine.Vector2.zero));
+                points = MapData.GetCurrentMapData().NonMapArea.Select(p => (p, "", VVector2.Zero));
                 break;
             case "objpos":
             case "objects":
             case "objectpos":
             case "mapobjectpoints":
-                points = MapData.GetCurrentMapData().MapObjectPoints.Select(p => (p.Point.ToUnityVector(), string.Join('\n', Enum.GetValues<Virial.Game.MapObjectType>().Where(type => ((int)p.Type & (int)type) != 0).Select(type => type.ToString())), UnityEngine.Vector2.zero));
+                points = MapData.GetCurrentMapData().MapObjectPoints.Select(p => (p.Point, string.Join('\n', Enum.GetValues<Virial.Game.MapObjectType>().Where(type => ((int)p.Type & (int)type) != 0).Select(type => type.ToString())), VVector2.Zero));
                 break;
             case "aeroguessereasy":
             case "aeroeasy":
             case "aeroguessernormal":
             case "aeronormal":
-                points = AeroGuesserQuizData.GetAllEntry(AmongUsUtil.CurrentMapId, 0).Select(p => (p.position, p.comment, p.viewport));
+                points = AeroGuesserQuizData.GetAllEntry(AmongUsUtil.CurrentMapId, 0).Select(p => ((VVector2)p.position, p.comment, (VVector2)p.viewport));
                 break;
             case "aeroguesserhard":
             case "aerohard":
-                points = AeroGuesserQuizData.GetAllEntry(AmongUsUtil.CurrentMapId, 1).Select(p => (p.position, p.comment, p.viewport));
+                points = AeroGuesserQuizData.GetAllEntry(AmongUsUtil.CurrentMapId, 1).Select(p => ((VVector2)p.position, p.comment, (VVector2)p.viewport));
                 break;
             case "opportunist":
-                points = Roles.Neutral.Opportunist.GetTaskPositions().Select(p => (p.center, "", p.size));
+                points = Roles.Neutral.Opportunist.GetTaskPositions().Select(p => ((VVector2)p.center, "", (VVector2)p.size));
                 break;
             case "temp":
                 if (parsedArgs.Count < 7) return new CoImmediateErrorTask<ICommandToken>(null, $"7 arguments required for \"{kind}\" option in displaydot command.");

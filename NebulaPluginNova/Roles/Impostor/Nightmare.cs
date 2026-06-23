@@ -78,9 +78,9 @@ internal class Nightmare : DefinedSingleAbilityRoleTemplate<Nightmare.Ability>, 
         {
             if(nightmareRole != null)
             {
-                if (nightmareRole.EffectIsActive && Color.a > 0.8f)
+                if (nightmareRole.EffectIsActive && Color.A > 0.8f)
                 {
-                    Sprite = skullSprite.GetSprite(1 + (int)((Time.time / 0.2f) + (ObjectId % 10)) % 4);
+                    Sprite = skullSprite.GetSprite(1 + (int)((ev.ProcessTime / 0.2f) + (ObjectId % 10)) % 4);
                 }
                 else
                 {
@@ -118,7 +118,7 @@ internal class Nightmare : DefinedSingleAbilityRoleTemplate<Nightmare.Ability>, 
                 if (seed != null)
                 {
                     seed.WillDespawn = true;
-                    seed.Color = Color.white;
+                    seed.Color = VColor.White;
                 }
             }
             else if (!Shared)
@@ -127,7 +127,7 @@ internal class Nightmare : DefinedSingleAbilityRoleTemplate<Nightmare.Ability>, 
                 if (MySeed.SyncObject != null)
                 {
                     MySeed.SyncObject.ReflectInstantiationGlobally();
-                    (MySeed.SyncObject as NebulaSyncStandardObject)!.Color = Color.white;
+                    (MySeed.SyncObject as NebulaSyncStandardObject)!.Color = VColor.White;
                 }
 
             }
@@ -207,7 +207,7 @@ internal class Nightmare : DefinedSingleAbilityRoleTemplate<Nightmare.Ability>, 
             }
             float t = 0f;
             float additional = 0f;
-            while (shadow)
+            while (shadow.AsBoolFast())
             {
                 float p = baseScale + (float)Math.Sin(t * 7.7f) * 0.03f;
                 if (isDisappearing) additional += Time.deltaTime / 0.8f;
@@ -292,7 +292,7 @@ internal class Nightmare : DefinedSingleAbilityRoleTemplate<Nightmare.Ability>, 
 
         void IGameOperator.OnReleased()
         {
-            if (Light) GameObject.Destroy(Light.gameObject);
+            if (Light.AsBoolFast()) GameObject.Destroy(Light.gameObject);
         }
     }
     static private RemoteProcess<(GamePlayer nightmare, Vector2[] pos)> RpcNight = new("Nightmare", (message, calledByMe) => {

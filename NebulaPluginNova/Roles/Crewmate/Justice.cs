@@ -156,18 +156,18 @@ public class JusticeMeetingHud : MonoBehaviour
 
     SpriteRenderer Background1, Background2, BackView;
     
-    public GameObject InstantiateCircleGraph(Transform parent, Vector3 localPos, Color color)
+    public GameObject InstantiateCircleGraph(Transform parent, VVector3 localPos, VColor color)
     {
         var circleBack = UnityHelper.CreateSpriteRenderer("CircleGraph", parent, localPos);
         circleBack.gameObject.AddComponent<SortingGroup>();
         circleBack.sprite = circleGraphBackSprite.GetSprite();
-        circleBack.color = color;
+        circleBack.color = color.ToUnityColor();
         circleBack.sortingGroupOrder = 35;
         var circleFront = UnityHelper.CreateSpriteRenderer("Front", circleBack.transform, new(0f, 0f, -0.05f));
         circleFront.sprite = circleGraphSprite.GetSprite();
         var material = new Material(NebulaAsset.GuageShader);
         material.SetFloat("_Guage", 0.5f);
-        material.SetColor("_Color", Color.Lerp(color, Color.white, 0.5f));
+        material.SetColor("_Color", VColor.Lerp(color, VColor.White, 0.5f).ToUnityColor());
         circleFront.material = material;
         circleFront.transform.localScale = new(-1f, 1f, 1f);
         circleFront.sortingGroupOrder = 36;
@@ -181,19 +181,21 @@ public class JusticeMeetingHud : MonoBehaviour
             float current = 0f;
             float t = 1f;
             float slightT = 0.2f;
-            while (circleFront)
+            while (circleFront.AsBoolFast())
             {
+                var deltaTime = Time.deltaTime;
+
                 current -= (current - goal).Delta(0.8f, 0.001f);
-                t -= Time.deltaTime;
-                slightT -= Time.deltaTime;
+                t -= deltaTime;
+                slightT -= deltaTime;
                 if(t < 0f)
                 {
-                    goal = Math.Clamp(goal + (System.Random.Shared.NextSingle() - 0.5f) * 0.35f, 0f, 1f);
+                    goal = Mathn.Clamp(goal + (System.Random.Shared.NextSingle() - 0.5f) * 0.35f, 0f, 1f);
                     t = 1.4f + System.Random.Shared.NextSingle() * 6f;
                 }
                 if(slightT < 0f)
                 {
-                    goal = Math.Clamp(goal + (System.Random.Shared.NextSingle() - 0.5f) * 0.15f, 0f, 1f);
+                    goal = Mathn.Clamp(goal + (System.Random.Shared.NextSingle() - 0.5f) * 0.15f, 0f, 1f);
                     slightT = 0.2f;
                 }
 
@@ -207,7 +209,7 @@ public class JusticeMeetingHud : MonoBehaviour
         return circleBack.gameObject;
     }
 
-    public void InstantiateBandGraph(int num, Transform parent, Vector3 center, Color color)
+    public void InstantiateBandGraph(int num, Transform parent, VVector3 center, VColor color)
     {
         var bandHolder = UnityHelper.CreateObject<SortingGroup>("BandHolder", parent, center);
 
@@ -217,7 +219,7 @@ public class JusticeMeetingHud : MonoBehaviour
         {
             renderers[i] = UnityHelper.CreateSpriteRenderer("Graph", bandHolder.transform, new Vector3((i / (float)(num - 1) - 0.5f) * 1.8f, 0f, 0f));
             renderers[i].transform.localScale = new(1f, 0f, 1f);
-            renderers[i].color = color;
+            renderers[i].color = color.ToUnityColor();
             renderers[i].sprite = bandGraphSprite.GetSprite();
             filter[i] = 0.5f + Math.Clamp(0.2f * Math.Min(i, num - 1 - i), 0f, 0.5f);
         }
@@ -237,19 +239,19 @@ public class JusticeMeetingHud : MonoBehaviour
         StartCoroutine(CoUpdate().WrapToIl2Cpp());
     }
 
-    private IEnumerator CoAnimColor(SpriteRenderer renderer, Color color1, Color color2, float duration)
+    private IEnumerator CoAnimColor(SpriteRenderer renderer, VColor color1, VColor color2, float duration)
     {
         float t = 0f;
         while(t <  duration)
         {
             t += Time.deltaTime;
-            renderer.color = Color.Lerp(color1, color2, t / duration);
+            renderer.color = VColor.Lerp(color1, color2, t / duration).ToUnityColor();
             yield return null;
         }
-        renderer.color = color2;
+        renderer.color = color2.ToUnityColor();
     }
 
-    private IEnumerator CoAnimColorRepeat(SpriteRenderer renderer, Color color1, Color color2, float duration)
+    private IEnumerator CoAnimColorRepeat(SpriteRenderer renderer, VColor color1, VColor color2, float duration)
     {
         while (true)
         {
@@ -285,7 +287,7 @@ public class JusticeMeetingHud : MonoBehaviour
         yield return Effects.Wait(0.15f);
         for(int i = 0; i < 3; i++)
         {
-            AmongUsUtil.PlayCustomFlash(Color.red, 0.2f, 0.2f, 0.3f, 0.6f);
+            AmongUsUtil.PlayCustomFlash(VColor.Red, 0.2f, 0.2f, 0.3f, 0.6f);
             yield return Effects.Wait(1.0f + 0.3f);
         }
     }
@@ -312,8 +314,8 @@ public class JusticeMeetingHud : MonoBehaviour
 
         yield return Effects.Wait(2.5f);
         NebulaManager.Instance.StartDelayAction(0.2f, () => NebulaAsset.PlaySE(NebulaAudioClip.Justice2));
-        yield return CoAnimColor(black, new(0f, 0f, 0f, 0f), Color.black, 1.2f);
-        StartCoroutine(ManagedEffects.Sequence(Effects.Wait(1f).WrapToManaged(), CoAnimColor(black, Color.black, new(0f, 0f, 0f, 0f), 1f), ManagedEffects.Action(()=>GameObject.Destroy(black.gameObject))).WrapToIl2Cpp());
+        yield return CoAnimColor(black, new(0f, 0f, 0f, 0f), VColor.Black, 1.2f);
+        StartCoroutine(ManagedEffects.Sequence(Effects.Wait(1f).WrapToManaged(), CoAnimColor(black, VColor.Black, new(0f, 0f, 0f, 0f), 1f), ManagedEffects.Action(()=>GameObject.Destroy(black.gameObject))).WrapToIl2Cpp());
         GameObject.Destroy(introObj);
         meetingHud.TimerText.gameObject.SetActive(true);
 
@@ -498,9 +500,9 @@ public class JusticeMeetingHud : MonoBehaviour
                 maskRenderer.sprite = votingHolderMaskSprite.GetSprite();
 
                 var playerColor = DynamicPalette.PlayerColors[player.PlayerId];
-                var textColor = Color.Lerp(playerColor, ColorHelper.IsLightColor(playerColor) ? new(0.18f, 0.18f, 0.18f, 1f) : new(1f, 1f, 1f, 1f), 0.4f);
+                var textColor = VColor.Lerp(playerColor, ColorHelper.IsLightColor(playerColor) ? new(0.18f, 0.18f, 0.18f, 1f) : new(1f, 1f, 1f, 1f), 0.4f);
 
-                var graphColor = Color.Lerp(Color.Lerp(DynamicPalette.PlayerColors[player.PlayerId], DynamicPalette.ShadowColors[player.PlayerId], 0.25f), Color.white, 0.28f);
+                var graphColor = VColor.Lerp(VColor.Lerp(DynamicPalette.PlayerColors[player.PlayerId], DynamicPalette.ShadowColors[player.PlayerId], 0.25f), VColor.White, 0.28f);
                 for (int x = 0; x < 3; x++) InstantiateCircleGraph(back.transform, new(-0.6f + (0.28f * x), -0.5f, -0.2f), graphColor);
                 InstantiateBandGraph(24, back.transform, new(0.65f, -0.13f, -0.2f), graphColor);
 
@@ -538,7 +540,7 @@ public class JusticeMeetingHud : MonoBehaviour
                 numberText.Pivot = new(0.5f, 0.5f);
                 numberText.Text = ((char)('0' + lastNumberIndex)).ToString();
                 numberText.Material = UnityHelper.GetMeshRendererMaskedMaterial();
-                numberText.Color = textColor;
+                numberText.Color = textColor.ToUnityColor();
 
 
                 //重複した画像を回避する
@@ -549,7 +551,7 @@ public class JusticeMeetingHud : MonoBehaviour
                 PlayerMaterial.SetColors(player.PlayerId, photo.material);
 
                 var playerState = meetingHud.GetPlayer(player.PlayerId);
-                if (playerState != null)
+                if (playerState.AsBoolFast())
                 {
                     playerState.gameObject.SetActive(true);
                     playerState.gameObject.transform.localPosition = localPos + new Vector3(0.11f, -1.08f, -0.9f);

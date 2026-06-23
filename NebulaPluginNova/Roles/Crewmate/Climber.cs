@@ -305,8 +305,8 @@ internal class Climber : DefinedSingleAbilityRoleTemplate<Climber.Ability>, Defi
 
         void IGameOperator.OnReleased()
         {
-            if (ropeRenderer) GameObject.Destroy(ropeRenderer.gameObject);
-            if(hookRenderer) GameObject.Destroy(hookRenderer.gameObject);
+            if (ropeRenderer.AsBoolFast()) GameObject.Destroy(ropeRenderer.gameObject);
+            if(hookRenderer.AsBoolFast()) GameObject.Destroy(hookRenderer.gameObject);
         }
     }
 }

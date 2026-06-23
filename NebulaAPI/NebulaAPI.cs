@@ -68,8 +68,6 @@ internal interface INebula
 
     IModuleFactory Modules { get; }
 
-    ITitlesRegister Titles { get; }
-
     IDisposable CreateRPCSection(string? label);
 
     bool IsAndroid { get; }
@@ -179,7 +177,6 @@ public static class NebulaAPI
     /// モジュールを生成するファクトリメソッド群です。
     /// </summary>
     static public IModuleFactory Modules => instance.Modules;
-    static public ITitlesRegister Titles => instance.Titles;
 
     static internal AmongUsLL AmongUs => instance.AmongUs;
 

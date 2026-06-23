@@ -8,33 +8,52 @@ public static class HudManagerExtension
 {
     static public void UpdateHudContent(this HudManager manager)
     {
-        manager.UseButton.Refresh();
+        var bridge = AmongUsLLImpl.HudManagerBridge;
 
-        if (!PlayerControl.LocalPlayer) return;
+        NebulaProfiler.LapTimer("Before UpdateHudContent");
+        bridge.UseButton.Refresh();
+        NebulaProfiler.LapTimer("UseButton.Refresh");
+
+        var localPlayer = AmongUsLLImpl.LocalPlayer;
+        if (!localPlayer.AsBoolFast()) return;
 
         if(NebulaGameManager.Instance?.GameState == NebulaGameStates.NotStarted)
         {
-            manager.ReportButton.ToggleVisible(false);
-            manager.KillButton.ToggleVisible(false);
-            manager.SabotageButton.ToggleVisible(false);
-            manager.ImpostorVentButton.ToggleVisible(false);
+            bridge.ReportButton.ToggleVisible(false);
+            bridge.KillButton.ToggleVisible(false);
+            bridge.SabotageButton.ToggleVisible(false);
+            bridge.ImpostorVentButton.ToggleVisible(false);
             return;
         }
 
-        bool flag = PlayerControl.LocalPlayer.Data != null && PlayerControl.LocalPlayer.Data.IsDead;
+        NebulaProfiler.LapTimer("UpdateHudContent.1");
+
+        var localData = localPlayer.Data;
+        bool flag = localData != null && localData.IsDead;
         GamePlayer? modPlayer = GamePlayer.LocalPlayer;
         RuntimeRole? modRole = modPlayer?.Role;
 
-        manager.ReportButton.ToggleVisible(!flag && (modRole?.CanReport ?? false) && ShipStatus.Instance != null);
-        manager.KillButton.ToggleVisible((modPlayer?.ShowKillButton ?? true) && !flag);
-        manager.SabotageButton.ToggleVisible((modRole?.CanInvokeSabotage ?? false));
+        NebulaProfiler.LapTimer("UpdateHudContent.2");
+
+        bridge.ReportButton.ToggleVisible(!flag && (modRole?.CanReport ?? false) && AmongUsLLImpl.ShipStatusInstance.AsBoolFast());
+        bridge.KillButton.ToggleVisible((modPlayer?.ShowKillButton ?? true) && !flag);
+        bridge.SabotageButton.ToggleVisible((modRole?.CanInvokeSabotage ?? false));
+
+        NebulaProfiler.LapTimer("UpdateHudContent.3");
+
         var ventState = GameOperatorManager.Instance?.Run(new Virial.Events.Player.PlayerUpdateVentStateLocalEvent(modPlayer));
-        manager.ImpostorVentButton.ToggleVisible(!flag && ((ventState?.ShouldShowVentButton ?? false) || PlayerControl.LocalPlayer.walkingToVent || PlayerControl.LocalPlayer.inVent));
-        manager.MapButton.gameObject.SetActive(NebulaGameManager.Instance.GameMode?.ShowMap ?? true);
+
+        NebulaProfiler.LapTimer("UpdateHudContent.4");
+
+        bridge.ImpostorVentButton.ToggleVisible(!flag && ((ventState?.ShouldShowVentButton ?? false) || localPlayer.walkingToVent || localPlayer.inVent));
+        bridge.MapButtonObj.SetActive(NebulaGameManager.Instance.GameMode?.ShowMap ?? true);
+
+        NebulaProfiler.LapTimer("UpdateHudContent.5");
     }
 
     static public void ShowVanillaKeyGuide(this HudManager manager)
     {
+        var bridge = AmongUsLLImpl.HudManagerBridge;
 #if PC
         //ボタンのガイドを表示
         var keyboardMap = Rewired.ReInput.mapping.GetKeyboardMapInstanceSavedOrDefault(0, 0, 0);
@@ -46,11 +65,11 @@ public static class HudManagerExtension
         if (actionArray.Count > 0)
         {
             actionMap = actionArray[0];
-            ButtonEffect.SetKeyGuideOnVanillaSmallButton(HudManager.Instance.MapButton.gameObject, actionMap.keyCode);
-            ButtonEffect.SetKeyGuideForVanillaButton(HudManager.Instance.SabotageButton.gameObject, actionMap.keyCode);
+            ButtonEffect.SetKeyGuideOnVanillaSmallButton(bridge.MapButtonObj, actionMap.keyCode);
+            ButtonEffect.SetKeyGuideForVanillaButton(bridge.SabotageButtonObj, actionMap.keyCode);
         }
-        HudManager.Instance.MapButton.transform.SetLocalZ(-60f);
-        if(HudManager.Instance.MapButton.gameObject.TryGetComponent<AspectPosition>(out var aspectPosition))
+        bridge.MapButtonTransform.SetLocalZ(-60f);
+        if(bridge.MapButtonObj.TryGetComponent<AspectPosition>(out var aspectPosition))
         {
             var distance = aspectPosition.DistanceFromEdge;
             distance.z = -60f;
@@ -62,8 +81,8 @@ public static class HudManagerExtension
         if (actionArray.Count > 0)
         {
             actionMap = actionArray[0];
-            ButtonEffect.SetKeyGuideForVanillaButton(HudManager.Instance.UseButton.gameObject, actionMap.keyCode);
-            ButtonEffect.SetKeyGuideForVanillaButton(HudManager.Instance.PetButton.gameObject, actionMap.keyCode);
+            ButtonEffect.SetKeyGuideForVanillaButton(bridge.UseButtonObj, actionMap.keyCode);
+            ButtonEffect.SetKeyGuideForVanillaButton(bridge.PetButtonObj, actionMap.keyCode);
         }
 
         //レポート
@@ -71,7 +90,7 @@ public static class HudManagerExtension
         if (actionArray.Count > 0)
         {
             actionMap = actionArray[0];
-            ButtonEffect.SetKeyGuideForVanillaButton(HudManager.Instance.ReportButton.gameObject, actionMap.keyCode);
+            ButtonEffect.SetKeyGuideForVanillaButton(bridge.ReportButtonObj, actionMap.keyCode);
         }
 
         //キル
@@ -79,7 +98,7 @@ public static class HudManagerExtension
         if (actionArray.Count > 0)
         {
             actionMap = actionArray[0];
-            ButtonEffect.SetKeyGuideForVanillaButton(HudManager.Instance.KillButton.gameObject, actionMap.keyCode);
+            ButtonEffect.SetKeyGuideForVanillaButton(bridge.KillButtonObj, actionMap.keyCode);
         }
 
         //ベント
@@ -87,7 +106,7 @@ public static class HudManagerExtension
         if (actionArray.Count > 0)
         {
             actionMap = actionArray[0];
-            ButtonEffect.SetKeyGuideForVanillaButton(HudManager.Instance.ImpostorVentButton.gameObject, actionMap.keyCode);
+            ButtonEffect.SetKeyGuideForVanillaButton(bridge.ImpostorVentButtonObj, actionMap.keyCode);
         }
 #endif
     }

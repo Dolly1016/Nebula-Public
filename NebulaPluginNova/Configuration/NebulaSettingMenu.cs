@@ -223,11 +223,11 @@ public class NebulaSettingMenu : MonoBehaviour
         widget.Append(new MetaWidgetOld.VerticalMargin(0.12f));
 
         IEnumerable<IConfigurationHolder> holders = ConfigurationHolder.AllHolders.Where(h => h.IsShown && h.Tabs.Test(CurrentTab) && h.GameModes.Test(GeneralConfigurations.CurrentGameMode));
-        UnityEngine.Color HolderToColor(IConfigurationHolder h) => h.DisplayOption switch
+        VColor HolderToColor(IConfigurationHolder h) => h.DisplayOption switch
         {
             ConfigurationHolderState.Inactivated => new(0.2f, 0.2f, 0.2f),
-            ConfigurationHolderState.Emphasized => Color.yellow,
-            _ => UnityEngine.Color.white
+            ConfigurationHolderState.Emphasized => VColor.Yellow,
+            _ => VColor.White
         };
 
         IConfigurationHolder? lastRight = null;

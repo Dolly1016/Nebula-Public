@@ -83,7 +83,8 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
     private HudContent gridContent;
     public ModAbilityButtonImpl(bool isLeftSideButton = false, bool isArrangedAsKillButton = false,int priority = 0, bool alwaysShow = false)
     {
-        VanillaButton = UnityEngine.Object.Instantiate(HudManager.Instance.KillButton, HudManager.Instance.KillButton.transform.parent);
+        var vanillaKillButton = HudManager.Instance.KillButton;
+        VanillaButton = UnityEngine.Object.Instantiate(vanillaKillButton, vanillaKillButton.transform.parent);
         VanillaButton.gameObject.ForEachChild((Il2CppSystem.Action<GameObject>)((c) => { if (c.name.Equals("HotKeyGuide")) GameObject.Destroy(c); }));
         VanillaButton.cooldownTimerText.gameObject.SetActive(true);
         VanillaButton.buttonLabelText.transform.SetLocalZ(-0.001f);
@@ -125,7 +126,7 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
     }
     void IGameOperator.OnReleased()
     {
-        if (VanillaButton)
+        if (VanillaButton.AsBoolFast())
         {
             OnReleased?.Invoke(this);
             UnityEngine.Object.Destroy(VanillaButton.gameObject);
@@ -138,8 +139,8 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
         {
             if (NebulaInput.SomeUiIsActive || AmongUsUtil.MapIsOpen) return false;
 
-            var dis = (UnityEngine.Vector2)Input.mousePosition - new UnityEngine.Vector2(Screen.width, Screen.height) * 0.5f;
-            return dis.magnitude < 280f;
+            var dis = (VVector2)Input.mousePosition - new VVector2(NebulaAPI.AmongUs.ScreenWidth, NebulaAPI.AmongUs.ScreenHeight) * 0.5f;
+            return dis.Magnitude < 280f;
         }
         return false;
     }
@@ -210,7 +211,7 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
             VanillaButton.gameObject.SetActive(isVisible);
             if (isVisible) {
                 if (IsBroken) TryGenerateBrokenAlternative();
-                if(brokenAlternative) brokenAlternative!.gameObject.SetActive(IsBroken);
+                if(brokenAlternative.AsBoolFast()) brokenAlternative!.gameObject.SetActive(IsBroken);
                 VanillaButton.graphic.enabled = !IsBroken;
             }
 
@@ -378,10 +379,10 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
         switch (labelType)
         {
             case ModAbilityButton.LabelType.Standard:
-                material = HudManager.Instance.UseButton.fastUseSettings[ImageNames.UseButton].FontMaterial;
+                material = AmongUsLLImpl.HudManagerBridge.UseButtonVanillaSettings[ImageNames.UseButton].FontMaterial;
                 break;
             case ModAbilityButton.LabelType.Utility:
-                material = HudManager.Instance.UseButton.fastUseSettings[ImageNames.PolusAdminButton].FontMaterial;
+                material = AmongUsLLImpl.HudManagerBridge.UseButtonVanillaSettings[ImageNames.PolusAdminButton].FontMaterial;
                 break;
             case ModAbilityButton.LabelType.Impostor:
                 material = RoleManager.Instance.GetRole(RoleTypes.Shapeshifter).Ability.FontMaterial;
@@ -451,7 +452,7 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
         this.keyCode = keyCode;
 
         var obj = ButtonEffect.SetKeyGuide(VanillaButton.gameObject, keyCode.TypicalKey, action: action, backVariation: holdingDown ? 1 : 0);
-        if (obj) obj!.transform.localScale = new(1f / 0.7f, 1f / 0.7f, 1f);
+        if (obj.AsBoolFast()) obj!.transform.localScale = new(1f / 0.7f, 1f / 0.7f, 1f);
 
         return this;
     }
@@ -469,16 +470,16 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
 
         var guideObj = ButtonEffect.SetSubKeyGuide(VanillaButton.gameObject, keyCode.TypicalKey, false, action);
 
-        if (guideObj != null)
+        if (guideObj.AsBoolFast())
         {
-            if (guideObj) guideObj!.transform.localScale = new(1f / 0.7f, 1f / 0.7f, 1f);
+            guideObj!.transform.localScale = new(1f / 0.7f, 1f / 0.7f, 1f);
 
             var renderer = UnityHelper.CreateObject<SpriteRenderer>("HotKeyOption", guideObj.transform, new UnityEngine.Vector3(0.12f, 0.07f, -2f));
             renderer.sprite = aidActionSprite.GetSprite();
 
             if (isCriticalSubAction)
             {
-                Tutorial.WaitAndShowTutorial(() => !VanillaButton.gameObject.activeSelf || !PlayerControl.LocalPlayer.CanMove,
+                Tutorial.WaitAndShowTutorial(() => !VanillaButton.gameObject.activeSelf || !AmongUsLLImpl.LocalPlayer.CanMove,
                     new TutorialBuilder(() => renderer.transform.position, true)
                     .ShowWhile(() => VanillaButton && renderer)
                     .BindHistory("subaction")
@@ -504,7 +505,7 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
     public ModAbilityButtonImpl SetInfoIcon(string action, bool atBottom = false)
     {
         var obj = ButtonEffect.SetMouseActionIcon(VanillaButton.gameObject, true, ButtonEffect.ActionIconType.Info, action, atBottom);
-        if (obj) obj!.transform.localScale = new(1f / 0.7f, 1f / 0.7f, 1f);
+        if (obj.AsBoolFast()) obj!.transform.localScale = new(1f / 0.7f, 1f / 0.7f, 1f);
         return this;
     }
 

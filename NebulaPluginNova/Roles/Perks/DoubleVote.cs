@@ -12,7 +12,7 @@ namespace Nebula.Roles.Perks;
 internal class DoubleVote : PerkFunctionalInstance
 {
     bool used = false;
-    static PerkFunctionalDefinition Def = new("doubleVote", PerkFunctionalDefinition.Category.Standard, new PerkDefinition("doubleVote", 2, 32, (Crewmate.Mayor.MyRole as DefinedAssignable).Color), (def, instance) => new DoubleVote(def, instance));
+    static PerkFunctionalDefinition Def = new("doubleVote", PerkFunctionalDefinition.Category.Standard, new PerkDefinition("doubleVote", 2, 32, Crewmate.Mayor.MyRole.Color), (def, instance) => new DoubleVote(def, instance));
 
 
     private DoubleVote(PerkDefinition def, PerkInstance instance) : base(def, instance)

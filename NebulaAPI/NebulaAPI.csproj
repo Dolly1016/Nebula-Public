@@ -20,6 +20,7 @@
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
 	<DebugType>embedded</DebugType>
 	<WarningLevel>7</WarningLevel>
+	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>

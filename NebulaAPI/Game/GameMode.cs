@@ -60,6 +60,12 @@ public interface IGameModeAeroGuesser : IGameModeModule
 {
 }
 
+/// <summary>
+/// ペイントクイズモードのゲームで生成されるモジュールです。
+/// </summary>
+public interface IGameModePaintQuiz : IGameModeModule
+{
+}
 
 public static class GameModes
 {
@@ -69,4 +75,5 @@ public static class GameModes
     public static GameModeDefinition Standard { get; internal set; } = null!;
     public static GameModeDefinition FreePlay { get; internal set; } = null!;
     public static GameModeDefinition AeroGuesser { get; internal set; } = null!;
+    public static GameModeDefinition PaintQuiz { get; internal set; } = null!;
 }

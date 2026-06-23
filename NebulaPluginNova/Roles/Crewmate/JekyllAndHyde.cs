@@ -131,10 +131,11 @@ internal class JekyllAndHyde : DefinedRoleTemplate, DefinedRole, IAssignableDocu
             using (RPCRouter.CreateSection("JAHTask"))
             {
                 TaskConfiguration.GetTasks(out var s, out var l, out var c);
-                MyPlayer.Tasks.Unbox().ReplaceTasksAndRecompute(s, l, c);
-                MyPlayer.Tasks.Unbox().BecomeToOutsider();
+                var tasks = MyPlayer.Tasks.Unbox();
+                tasks.ReplaceTasksAndRecompute(s, l, c);
+                tasks.BecomeToOutsider();
 
-                if (Helpers.Prob(0.5f)) RpcDetermineState.Invoke((MyPlayer, false));
+                if (Mathn.Prob(0.5f)) RpcDetermineState.Invoke((MyPlayer, false));
             }
         }
 

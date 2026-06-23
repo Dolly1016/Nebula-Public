@@ -99,14 +99,14 @@ public class Illusioner : DefinedSingleAbilityRoleTemplate<Illusioner.Ability>, 
                 };
                 morphButton.OnEffectStart = (button) =>
                 {
-                    PlayerModInfo.RpcAddOutfit.Invoke(new(PlayerControl.LocalPlayer.PlayerId, new(sample!, "Morphing", OutfitPriority.Morph, true)));
+                    PlayerModInfo.RpcAddOutfit.Invoke(new(AmongUsLLImpl.LocalPlayer.PlayerId, new(sample!, "Morphing", OutfitPriority.Morph, true)));
                     acTokenMorphingCommon ??= new("morphing.common1");
                     if (acTokenPainterCommon != null) acTokenCommon ??= new("illusioner.common1");
                     StatsMorph.Progress();
                 };
                 morphButton.OnEffectEnd = (button) =>
                 {
-                    PlayerModInfo.RpcRemoveOutfit.Invoke(new(PlayerControl.LocalPlayer.PlayerId, "Morphing"));
+                    PlayerModInfo.RpcRemoveOutfit.Invoke(new(AmongUsLLImpl.LocalPlayer.PlayerId, "Morphing"));
                     morphButton.CoolDownTimer?.Start();
                 };
                 

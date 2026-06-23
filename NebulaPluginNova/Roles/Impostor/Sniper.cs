@@ -22,9 +22,9 @@ public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitat
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny, ConfigurationTags.TagDifficult);
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Sniper.png");
 
-        MetaAbility.RegisterCircle(new("role.sniper.shotRange", () => ShotEffectiveRangeOption, () => null, UnityColor));
-        MetaAbility.RegisterCircle(new("role.sniper.soundRange", () => ShotNoticeRangeOption, () => null, UnityColor));
-        MetaAbility.RegisterCircle(new("role.sniper.shotSize", () => ShotSizeOption * 0.25f, () => null, UnityColor));
+        MetaAbility.RegisterCircle(new("role.sniper.shotRange", () => ShotEffectiveRangeOption, () => null, RoleColor));
+        MetaAbility.RegisterCircle(new("role.sniper.soundRange", () => ShotNoticeRangeOption, () => null, RoleColor));
+        MetaAbility.RegisterCircle(new("role.sniper.shotSize", () => ShotSizeOption * 0.25f, () => null, RoleColor));
 
         GameActionTypes.SniperEquippingAction = new("sniper.equip", this, isEquippingAction: true);
     }
@@ -160,7 +160,7 @@ public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitat
 
                     if(MyRifle != null)
                     {
-                        var circle = EffectCircle.SpawnEffectCircle(PlayerControl.LocalPlayer.transform, Vector3.zero, Palette.ImpostorRed, ShotNoticeRangeOption, null, true);
+                        var circle = EffectCircle.SpawnEffectCircle(AmongUsLLImpl.LocalPlayer.transform, VVector3.Zero, new(Palette.ImpostorRed), ShotNoticeRangeOption, null, true);
                         var script = circle.gameObject.AddComponent<ScriptBehaviour>();
                         script.UpdateHandler += () =>
                         {
@@ -255,33 +255,33 @@ public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitat
             IEnumerator CoUpdateAimAssistArrow(PlayerControl player)
             {
                 DeadBody? deadBody = null;
-                Vector2 pos = Vector2.zero;
-                Vector2 dir = Vector2.zero;
-                Vector2 tempDir = Vector2.zero;
+                VVector2 pos = VVector2.Zero;
+                VVector2 dir = VVector2.Zero;
+                VVector2 tempDir = VVector2.Zero;
                 bool isFirst = true;
 
-                Color targetColor = new Color(55f / 225f, 1f, 0f);
+                VColor targetColor = new VColor(55f / 225f, 1f, 0f);
                 float t = 0f;
 
                 SpriteRenderer? renderer = null;
 
                 while (true)
                 {
-                    if (MeetingHud.Instance || MyPlayer.IsDead || MyRifle == null || IsDeadObject) break;
+                    if (MeetingHud.Instance.AsBoolFast() || MyPlayer.IsDead || MyRifle == null || IsDeadObject) break;
 
-                    if (player.Data.IsDead && !deadBody) deadBody = Helpers.GetDeadBody(player.PlayerId);
+                    if (player.Data.IsDead && !deadBody.AsBoolFast()) deadBody = Helpers.GetDeadBody(player.PlayerId);
 
                     //死亡して、死体も存在しなければ追跡を終了
-                    if (player.Data.IsDead && !deadBody) break;
+                    if (player.Data.IsDead && !deadBody.AsBoolFast()) break;
 
-                    if(renderer == null)
+                    if(!renderer.AsBoolFast())
                     {
                         renderer = UnityHelper.CreateObject<SpriteRenderer>("AimAssist", HudManager.Instance.transform, Vector3.zero);
                         renderer.sprite = aimAssistSprite.GetSprite();
                     }
 
                     pos = player.Data.IsDead ? deadBody!.transform.position : player.transform.position;
-                    tempDir = (pos - (Vector2)PlayerControl.LocalPlayer.transform.position).normalized;
+                    tempDir = (pos - (VVector2)AmongUsLLImpl.LocalPlayer.transform.position).Normalized;
 
                     NebulaGameManager.Instance!.WideCamera.CheckPlayerState(out var localScale, out var localRotateZ);
                     tempDir.x *= localScale.x;
@@ -294,16 +294,16 @@ public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitat
                     }
                     else
                     {
-                        dir = (tempDir + dir).normalized;
+                        dir = (tempDir + dir).Normalized;
                     }
 
-                    float angle = Mathf.Atan2(dir.y, dir.x) + localRotateZ.DegToRad();
+                    float angle = Mathn.Atan2(dir.y, dir.x) + localRotateZ.DegToRad();
                     renderer.transform.eulerAngles = new Vector3(0, 0, angle.RadToDeg());
-                    renderer.transform.localPosition = new Vector3(Mathf.Cos(angle) * 2f, Mathf.Sin(angle) * 2f, -30f);
+                    renderer.transform.localPosition = new Vector3(Mathn.Cos(angle) * 2f, Mathn.Sin(angle) * 2f, -30f);
 
                     t += Time.deltaTime / 0.8f;
                     if (t > 1f) t = 1f;
-                    renderer.color = Color.Lerp(Color.white, targetColor, t).AlphaMultiplied(0.6f);
+                    renderer.color = VColor.Lerp(VColor.White, targetColor, t).AlphaMultiplied(0.6f).ToUnityColor();
 
                     yield return null;
                 }
@@ -366,7 +366,7 @@ public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitat
         "ShowSnipeNotice",
         (message, _) =>
         {
-            if ((message - (Vector2)PlayerControl.LocalPlayer.transform.position).magnitude < ShotNoticeRangeOption)
+            if ((message - (Vector2)AmongUsLLImpl.LocalPlayer.transform.position).magnitude < ShotNoticeRangeOption)
             {
                 var arrow = new Arrow(snipeNoticeSprite.GetSprite(), false) { IsSmallenNearPlayer = false, IsAffectedByComms = false, FixedAngle = true, OnJustPoint = true };
                 arrow.Register(arrow);

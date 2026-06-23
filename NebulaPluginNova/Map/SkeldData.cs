@@ -5,8 +5,7 @@ namespace Nebula.Map;
 public class SkeldData : MapData
 {
     override public int Id => 0;
-    static private Vector2[] MapPositions = new Vector2[]
-    {
+    static private VVector2[] MapPositions = [
         //カフェ
         new(0f, 5.3f), new(-5.2f, 1.2f), new(-0.9f, -3.1f), new(4.6f, 1.2f),
         //ウェポン
@@ -39,15 +38,14 @@ public class SkeldData : MapData
         new(-7.3f, -4.6f), new(-9.2f, -2.1f),
         //アドミン
         new(2.6f, -7.1f), new(6.3f, -9.5f)
-    };
+    ];
 
-    static private Vector2[] NonMapPositions = new Vector2[]
-    {
+    static private VVector2[] NonMapPositions = [
         //ナビ左上
         new(13.55f, -3.5f),
         //リアクター右上方
         new(-18.45f, -2.65f)
-    };
+    ];
 
     static private (AdditionalRoomArea area, string key, bool detailRoom)[] additionalRooms = [
         (new(-16.54f, -5.24f, 3.38f, 4.26f), "reactorAccess", false),
@@ -114,8 +112,8 @@ public class SkeldData : MapData
         new(5.6f, -16.8f, MapObjectType.SmallInCorner | MapObjectType.SmallOrTabletopOutOfSight), //コミュ右下
         ];
     public override MapObjectPoint[] MapObjectPoints => mapObjectPoints;
-    public override IReadOnlyList<Vector2> MapArea => MapPositions;
-    public override IReadOnlyList<Vector2> NonMapArea => NonMapPositions;
+    public override IReadOnlyList<VVector2> MapArea => MapPositions;
+    public override IReadOnlyList<VVector2> NonMapArea => NonMapPositions;
     protected override (AdditionalRoomArea area, string key, bool detailRoom)[] AdditionalRooms => additionalRooms;
     protected override (SystemTypes room, AdditionalRoomArea area, string key)[] OverrideRooms => overrideRooms;
     protected override SystemTypes[] SabotageTypes => new SystemTypes[] { SystemTypes.Reactor, SystemTypes.Comms, SystemTypes.Electrical, SystemTypes.LifeSupp };

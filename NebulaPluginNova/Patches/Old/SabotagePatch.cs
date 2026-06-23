@@ -238,11 +238,11 @@ public static class SwitchSabotagePatch
 {
     static bool Prefix(SabotageSystemType __instance, [HarmonyArgument(1)] MessageReader msgReader)
     {
-        if (!(__instance.Timer > 0f) && !MeetingHud.Instance && (SystemTypes)msgReader.PeekByte() == SystemTypes.Electrical && AmongUsClient.Instance.AmHost)
+        if (!(__instance.Timer > 0f) && !MeetingHud.Instance.AsBoolFast() && (SystemTypes)msgReader.PeekByte() == SystemTypes.Electrical && AmongUsClient.Instance.AmHost)
         {
             __instance.IsDirty = true;
             byte b = (byte)(System.Random.Shared.Next((1 << 6) - 1) + 1);
-            ShipStatus.Instance.RpcUpdateSystem(SystemTypes.Electrical, (byte)(b | 128));
+            AmongUsLLImpl.ShipStatusInstance.RpcUpdateSystem(SystemTypes.Electrical, (byte)(b | 128));
             __instance.Timer = 30f;
             __instance.IsDirty = true;
             return false;

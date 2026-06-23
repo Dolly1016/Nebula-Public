@@ -97,7 +97,7 @@ public class Painter : DefinedSingleAbilityRoleTemplate<Painter.Ability>, Define
                 {
                     if (LoseSampleOnMeetingOption)
                     {
-                        if (sampleIcon != null) GameObject.Destroy(sampleIcon.gameObject);
+                        if (sampleIcon.AsBoolFast()) GameObject.Destroy(sampleIcon!.gameObject);
                         sampleIcon = null;
                         sample = null;
                     }

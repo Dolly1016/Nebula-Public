@@ -31,16 +31,8 @@ public static class Helpers
         return urlConverter.Invoke(url);
     }
 
-    public static bool AmHost(this PlayerControl player) => AmongUsClient.Instance.HostId == player.OwnerId;
+    public static bool AmHost(this PlayerControl player) => AmongUsLLImpl.AmongUsClientInstance.HostId == player.OwnerId;
 
-    /// <summary>
-    /// 確率で真偽値を返します。
-    /// </summary>
-    /// <param name="prob">0から1までの確率</param>
-    /// <returns></returns>
-    public static bool Prob(float prob) => System.Random.Shared.NextSingle() < prob;
-    public static float DegToRad(this float deg) => deg * (float)Math.PI / 180f;
-    public static float RadToDeg(this float rad) => rad * 180f / (float)Math.PI;
     public static float MountainCurve(float p, float max)
     {
         float x = p - 0.5f;
@@ -49,12 +41,12 @@ public static class Helpers
 
     public static float Delta(this float val, float speed, float threshold)
     {
-        var smooth = val* Mathf.Clamp01(Time.deltaTime * speed);
+        var smooth = val* Mathn.Clamp01(Time.deltaTime * speed);
 
         if (val < 0f)
-            return smooth < -threshold ? smooth : Mathf.Max(val, -threshold);
+            return smooth < -threshold ? smooth : Mathn.Max(val, -threshold);
         else
-            return smooth > threshold ? smooth : Mathf.Min(val, threshold);
+            return smooth > threshold ? smooth : Mathn.Min(val, threshold);
     }
 
     public static Vector2 Delta(this Vector2 vec, float speed, float threshold)
@@ -358,7 +350,8 @@ public static class Helpers
         bool result = false;
         for (int i = 0; i < num; i++)
         {
-            if (!PhysicsHelpers.castHits[i].collider.isTrigger && predicate.Invoke(PhysicsHelpers.castHits[i].collider))
+            var collider = PhysicsHelpers.castHits[i].collider;
+            if (!collider.isTrigger && predicate.Invoke(collider))
             {
                 result = true;
                 break;
@@ -561,29 +554,29 @@ public static class Helpers
         return readableTextur2D;
     }
 
-    static public float Diff(Color color1, Color color2)
+    static public float Diff(VColor color1, VColor color2)
     {
-        return Math.Max(Math.Max(Math.Abs(color1.r - color2.r), Math.Abs(color1.g - color2.g)), Math.Abs(color1.b - color2.b));
+        return Mathn.Max(Mathn.Max(Mathn.Abs(color1.R - color2.R), Mathn.Abs(color1.G - color2.G)), Mathn.Abs(color1.B - color2.B));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    static public double ScaledRepeatTime(float speed)
+    static public float ScaledRepeatTime(float speed)
     {
-        if(speed > 0f) return Math.IEEERemainder(Time.time, Math.PI * 2f / speed) * speed;
+        if(speed > 0f) return MathF.IEEERemainder(Time.time, Mathn.PI * 2f / speed) * speed;
         return 0f;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    static public double ScaledSin(float speed)
+    static public float ScaledSin(float speed)
     {
         
-        return Math.Sin(ScaledRepeatTime(speed));
+        return Mathn.Sin(ScaledRepeatTime(speed));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    static public double ScaledCos(float speed)
+    static public float ScaledCos(float speed)
     {
-        return Math.Cos(ScaledRepeatTime(speed));
+        return Mathn.Cos(ScaledRepeatTime(speed));
     }
 
     static private readonly Image whiteCircleSprite = SpriteLoader.FromResource("Nebula.Resources.WhiteCircle.png", 100f);

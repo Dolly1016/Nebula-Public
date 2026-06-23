@@ -188,7 +188,7 @@ public class ItemSupplier : NebulaSyncStandardObject
     public bool NoncrewmateOnly { get; private set; }
     private int age;
 
-    public ItemSupplier(UnityEngine.Vector2 pos, bool noncrewmateOnly) : base(pos, ZOption.Just, true, sprite.GetSprite((noncrewmateOnly ? 4 : 0) + 1), Color.white)
+    public ItemSupplier(UnityEngine.Vector2 pos, bool noncrewmateOnly) : base(pos, ZOption.Just, true, sprite.GetSprite((noncrewmateOnly ? 4 : 0) + 1), VColor.White)
     {
         this.NoncrewmateOnly = noncrewmateOnly;
         this.age = 1;
@@ -201,8 +201,8 @@ public class ItemSupplier : NebulaSyncStandardObject
         {
             if (holdingPerk == null) return false;
             if (NebulaInput.SomeUiIsActive) return false;
-            if (MeetingHud.Instance || ExileController.Instance) return false;
-            return Position.Distance(PlayerControl.LocalPlayer.transform.position) < 1f;
+            if (MeetingHud.Instance.AsBoolFast() || ExileController.Instance.AsBoolFast()) return false;
+            return Position.Distance(GamePlayer.LocalPlayer?.Position ?? VVector2.Zero) < 1f;
         }, () =>
         {
             var supplierManager = ModSingleton<ItemSupplierManager>.Instance!;
@@ -259,8 +259,8 @@ public class ItemSupplier : NebulaSyncStandardObject
         int speed = GeneralConfigurations.GrowSpeedOption;
         float[] firstSpeed = [0.5f, 0.5f, 0.65f, 0.8f, 0.8f, 0.8f, 0.9f, 0.9f, 1f];
         float[] secondSpeed = [0f, 0f, 0f, 0f, 0.15f, 0.35f, 0.5f, 0.7f, 0.85f];
-        if (nextAge < 3 && Helpers.Prob(firstSpeed[speed])) nextAge++;
-        if (nextAge < 3 && Helpers.Prob(secondSpeed[speed])) nextAge++;
+        if (nextAge < 3 && Mathn.Prob(firstSpeed[speed])) nextAge++;
+        if (nextAge < 3 && Mathn.Prob(secondSpeed[speed])) nextAge++;
 
 
         if (age != nextAge) {
@@ -317,7 +317,7 @@ public class ItemSupplier : NebulaSyncStandardObject
     private static RemoteProcess<(int objectId, GamePlayer player)> RpcRequestGainPerk = new("requestGainPerk",
         (message, _) =>
         {
-            if (!AmongUsClient.Instance.AmHost) return;
+            if (!AmongUsLLImpl.AmongUsClientInstance.AmHost) return;
             var supplier = NebulaSyncObject.GetObject<ItemSupplier>(message.objectId);
             if (supplier?.holdingPerk == null) return;
 
@@ -335,7 +335,7 @@ public class ItemSupplierMinigame : Minigame
 
     public override void Begin(PlayerTask task)
     {
-        var supplier = ModSingleton<ItemSupplierManager>.Instance?.GetNearbySupplier(PlayerControl.LocalPlayer.transform.position);
+        var supplier = ModSingleton<ItemSupplierManager>.Instance?.GetNearbySupplier(AmongUsLLImpl.LocalPlayer.transform.position);
         supplier?.TryGainPerk();
 
         this.ForceClose();

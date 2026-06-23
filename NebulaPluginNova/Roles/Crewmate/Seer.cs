@@ -45,7 +45,7 @@ public class Ghost : FlexibleLifespan, IGameOperator
     {
         if (commonToken != null && !commonToken.Value && !commonToken.Achievement.IsCleared)
         {
-            if (!Helpers.AnyNonTriggersBetween(PlayerControl.LocalPlayer.GetTruePosition(), renderer.transform.localPosition, out var vec) && vec.magnitude < 1f)
+            if (!Helpers.AnyNonTriggersBetween(AmongUsLLImpl.LocalPlayer.GetTruePosition(), renderer.transform.localPosition, out var vec) && vec.magnitude < 1f)
                 commonToken.Value = true;
         }
 
@@ -64,20 +64,20 @@ public class Ghost : FlexibleLifespan, IGameOperator
 
     void IGameOperator.OnReleased()
     {
-        if (renderer) GameObject.Destroy(renderer.gameObject);
+        if (renderer.AsBoolFast()) GameObject.Destroy(renderer.gameObject);
     }
 }
 
 public class GhostAndFlashAbility : IGameOperator
 {
     public bool CanSeeGhostInShadow { get; set; } = true;
-    public Color FlashColor { get; set; } = Color.white;
+    public VColor FlashColor { get; set; } = VColor.White;
     public AchievementToken<bool>? CommonToken;
     public float GhostDuration { get; set; } = 60f;
 
     void OnPlayerMurdered(PlayerMurderedEvent ev)
     {
-        if (MeetingHud.Instance || ExileController.Instance) return;
+        if (MeetingHud.Instance.AsBoolFast() || ExileController.Instance.AsBoolFast()) return;
 
         if (ev.Player.AmOwner) return;
         if (!ev.Dead.HasAttribute(PlayerAttributes.BuskerEffect))
@@ -115,7 +115,7 @@ public class Seer : DefinedSingleAbilityRoleTemplate<Seer.Ability>, HasCitation,
                 AchievementToken<bool> acTokenCommon = new("seer.common1", false, (val, _) => val);
                 acTokenChallenge = new AchievementToken<(bool noMissFlag, int meetings)>("seer.challenge2", (true, 0), (val, _) => val.noMissFlag && val.meetings >= 3);
 
-                new GhostAndFlashAbility() { CanSeeGhostInShadow = CanSeeGhostsInShadowOption, FlashColor = MyRole.UnityColor, GhostDuration = GhostDurationOption, CommonToken = acTokenCommon }.Register(new FunctionalLifespan(() => !this.IsDeadObject && !this.IsUsurped));
+                new GhostAndFlashAbility() { CanSeeGhostInShadow = CanSeeGhostsInShadowOption, FlashColor = MyRole.RoleColor, GhostDuration = GhostDurationOption, CommonToken = acTokenCommon }.Register(new FunctionalLifespan(() => !this.IsDeadObject && !this.IsUsurped));
             }
         }
 

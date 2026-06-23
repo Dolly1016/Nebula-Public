@@ -91,7 +91,7 @@ public class ModTitleShower : MonoBehaviour
             }
         });
 
-        if (poolablePlayer)
+        if (poolablePlayer.AsBoolFast())
         {
             if (NebulaGameManager.Instance?.TitleMap.TryGetValue((byte)poolablePlayer.ColorId, out var title) ?? false)
                 SetTitle(title);
@@ -164,12 +164,12 @@ public class ModTitleShower : MonoBehaviour
             time -= Time.deltaTime;
             if (time < 0f)
             {
-                text.color = Color.Lerp(Color.white, DynamicPalette.PlayerColors[PlayerId], 0.25f);
+                text.color = VColor.Lerp(VColor.White, DynamicPalette.PlayerColors[PlayerId], 0.25f).ToUnityColor();
                 time = 1f;
             }
         }
 
-        if (player && ShipStatus.Instance)
+        if (player.AsBoolFast() && AmongUsLLImpl.ShipStatusInstance.AsBoolFast())
         {
             GameObject.Destroy(text.gameObject);
             GameObject.Destroy(this);

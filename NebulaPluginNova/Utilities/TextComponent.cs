@@ -49,10 +49,10 @@ public class LazyTextComponent : TextComponent
 
 public class ColorTextComponent : TextComponent
 {
-    public Color Color { get; set; }
+    public Virial.Color Color { get; set; }
     TextComponent Inner { get; set; }
     public string GetString() => Inner.GetString().Color(Color);
-    public ColorTextComponent(Color color, TextComponent inner)
+    public ColorTextComponent(Virial.Color color, TextComponent inner)
     {
         Color = color;
         Inner = inner;

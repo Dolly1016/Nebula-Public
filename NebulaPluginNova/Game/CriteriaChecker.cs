@@ -31,7 +31,7 @@ public class CriteriaManager
 
     public void CheckAndTriggerGameEnd()
     {
-        if (!AmongUsClient.Instance.AmHost) return;
+        if (!AmongUsLLImpl.AmongUsClientInstance.AmHost) return;
 
         //終了条件が確定済みなら何もしない
         if (NebulaGameManager.Instance?.EndState != null) return;
@@ -39,7 +39,7 @@ public class CriteriaManager
         //ゲーム終了が許可されていなければ何もしない
         if (!(NebulaAPI.CurrentGame?.GameMode?.AllowSpecialGameEnd ?? true)) return;
 
-        if ((ExileController.Instance) && !Minigame.Instance)
+        if ((ExileController.Instance.AsBoolFast()) && !Minigame.Instance.AsBoolFast())
         {
             triggeredGameEnds.RemoveAll(t => t.reason is GameEndReason.Situation or GameEndReason.SpecialSituation);
             return; //追放中はゲーム終了条件の判定をスキップする。

@@ -99,7 +99,7 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignable
 
     static public bool ShouldShowTeamId(int id, bool canSeeAllInfo)
     {
-        canSeeAllInfo |= !AmongUsClient.Instance || AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Ended;
+        canSeeAllInfo |= !AmongUsClient.Instance.AsBoolFast() || AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Ended;
         if (!canSeeAllInfo) return false;
         if (id > 0) return true;
         bool moreThanOne = ((Jackal.MyRole as DefinedSingleAssignable)?.AllocationParameters?.RoleCountSum ?? 0) > 1;
@@ -297,7 +297,7 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignable
 
                 if (GeneralConfigurations.JackalRadioOption)
                 {
-                    ModSingleton<NoSVCRoom>.Instance?.RegisterRadioChannel(Language.Translate("voiceChat.info.jackalRadio"), 1, IsMySidekick, this, MyRole.UnityColor);
+                    ModSingleton<NoSVCRoom>.Instance?.RegisterRadioChannel(Language.Translate("voiceChat.info.jackalRadio"), 1, IsMySidekick, this, MyRole.Color);
                 }
             }
 
@@ -323,7 +323,7 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignable
                 return name;
             }
         }
-        string RuntimeAssignable.DisplayColoredName => (this as RuntimeAssignable).DisplayName.Color(MyTeam.UnityColor);
+        string RuntimeAssignable.DisplayColoredName => (this as RuntimeAssignable).DisplayName.Color(MyTeam.Color);
         string RuntimeRole.DisplayShort => Jackal.AppendTeamIdIfNecessary(MyJackalized?.GetDisplayShort(JackalizedAbility!) ?? (MyRole as DefinedRole).DisplayShort, JackalTeamId, NebulaGameManager.Instance?.CanSeeAllInfo ?? false, true);
 
         void PromoteSidekick(bool isExileEvent)
@@ -497,7 +497,7 @@ public class Sidekick : DefinedRoleTemplate, HasCitation, DefinedRole
             }
             if (AmOwner)
             {
-                AmongUsUtil.PlayCustomFlash(Jackal.MyRole.UnityColor, 0f, 0.25f, 0.45f);
+                AmongUsUtil.PlayCustomFlash(Jackal.MyRole.Color, 0f, 0.25f, 0.45f);
                 SidekickAchievementChecker.TriggerSidekickChallenge(MyPlayer);
 
                 if (SidekickCanKillOption)
@@ -522,7 +522,7 @@ public class Sidekick : DefinedRoleTemplate, HasCitation, DefinedRole
 
                 if (GeneralConfigurations.JackalRadioOption)
                 {
-                    ModSingleton<NoSVCRoom>.Instance?.RegisterRadioChannel(Language.Translate("voiceChat.info.jackalRadio"), 1, p=> p.Role is Jackal.Instance jackal && jackal.JackalTeamId == JackalTeamId, this, MyRole.UnityColor);
+                    ModSingleton<NoSVCRoom>.Instance?.RegisterRadioChannel(Language.Translate("voiceChat.info.jackalRadio"), 1, p=> p.Role is Jackal.Instance jackal && jackal.JackalTeamId == JackalTeamId, this, MyRole.Color);
                 }
             }
         }
@@ -587,7 +587,7 @@ public class SidekickModifier : DefinedModifierTemplate, HasCitation, DefinedMod
                 name += MyRole.GetRoleIconTagSmall();
                 string teamId = "";
                 teamId = Jackal.AppendTeamIdIfNecessary(teamId, JackalTeamId, canSeeAllInfo, true );
-                name += teamId.Color(Jackal.MyRole.UnityColor);
+                name += teamId.Color(Jackal.MyRole.Color);
             }
         }
 
@@ -600,12 +600,12 @@ public class SidekickModifier : DefinedModifierTemplate, HasCitation, DefinedMod
             }
             if (AmOwner)
             {
-                AmongUsUtil.PlayCustomFlash(Jackal.MyRole.UnityColor, 0f, 0.25f, 0.4f);
+                AmongUsUtil.PlayCustomFlash(Jackal.MyRole.Color, 0f, 0.25f, 0.4f);
                 SidekickAchievementChecker.TriggerSidekickChallenge(MyPlayer);
 
                 if (GeneralConfigurations.JackalRadioOption)
                 {
-                    ModSingleton<NoSVCRoom>.Instance?.RegisterRadioChannel(Language.Translate("voiceChat.info.jackalRadio"), 1, p => p.Role is Jackal.Instance jackal && jackal.JackalTeamId == JackalTeamId, this, MyRole.UnityColor);
+                    ModSingleton<NoSVCRoom>.Instance?.RegisterRadioChannel(Language.Translate("voiceChat.info.jackalRadio"), 1, p => p.Role is Jackal.Instance jackal && jackal.JackalTeamId == JackalTeamId, this, MyRole.Color);
                 }
 
                 if (MyPlayer.Role.Role.Category == RoleCategory.ImpostorRole && MyPlayer.TryGetModifier<Lover.Instance>(out _))

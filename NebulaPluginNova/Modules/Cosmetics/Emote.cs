@@ -22,7 +22,7 @@ internal abstract class AbstractEmote : IEmote
     {
         PostBuilder = renderer =>
         {
-            renderer.material = PlayerControl.LocalPlayer.cosmetics.currentBodySprite.BodySprite.material;
+            renderer.material = AmongUsLLImpl.LocalPlayer.cosmetics.currentBodySprite.BodySprite.material;
         }
     };
 }
@@ -59,7 +59,7 @@ static internal class EmoteManager
         }
         else
         {
-            RpcShowEmote.Invoke((PlayerControl.LocalPlayer.PlayerId, emoteId));
+            RpcShowEmote.Invoke((AmongUsLLImpl.LocalPlayer.PlayerId, emoteId));
             lastSend = Time.time;
         }
     }

@@ -1,6 +1,9 @@
 ﻿using Il2CppInterop.Runtime.InteropTypes;
+using MS.Internal.Xml.XPath;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace Nebula.Utilities;
 
@@ -52,6 +55,18 @@ public static class Il2CppHelpers
         return value != null;
     }
 
+
+    unsafe public static int GetCurrentPtr()
+    {
+        var methodPtr = (IntPtr)typeof(UnityEngine.Object).GetField("NativeMethodInfoPtr_op_Implicit_Public_Static_Boolean_Object_0", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
+        System.IntPtr* ptr = stackalloc System.IntPtr[1]; 
+        *ptr = IL2CPP.Il2CppObjectBaseToPtr(null); 
+        System.Runtime.CompilerServices.Unsafe.SkipInit(out System.IntPtr exc); 
+        System.IntPtr obj = IL2CPP.il2cpp_runtime_invoke(methodPtr, (System.IntPtr)0, (void**)ptr, ref exc); 
+        Il2CppInterop.Runtime.Il2CppException.RaiseExceptionIfNecessary(exc); 
+        bool val = *(bool*)IL2CPP.il2cpp_object_unbox(obj);
+        return (int)obj;
+    }
     public static Il2CppSystem.Collections.Generic.List<T> ToIl2CppList<T>(this System.Collections.Generic.IReadOnlyList<T> list)
     {
         Il2CppSystem.Collections.Generic.List<T> result = new(list.Count);

@@ -23,9 +23,9 @@ internal class EmergencyButton : PerkFunctionalInstance
     {
         if (!MyPlayer.VanillaPlayer.CanMove) return;
 
-        var prefab = ShipStatus.Instance.EmergencyButton.MinigamePrefab;
+        var prefab = AmongUsLLImpl.ShipStatusInstance.EmergencyButton.MinigamePrefab;
 
-        PlayerControl.LocalPlayer.NetTransform.Halt();
+        AmongUsLLImpl.LocalPlayer.NetTransform.Halt();
         Minigame minigame = GameObject.Instantiate<Minigame>(prefab);
         minigame.transform.SetParent(Camera.main.transform, false);
         minigame.transform.localPosition = new Vector3(0f, 0f, -50f);

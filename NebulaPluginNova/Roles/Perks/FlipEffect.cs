@@ -20,7 +20,7 @@ internal class FlipEffect : PerkFunctionalInstance, IGameOperator
     {
         MyDuplicateCounter = DuplicateCounter++;
 
-        Vector2 normVec = Vector2.one;
+        VVector2 normVec = VVector2.One;
         if (flip == PlayerAttributes.FlipX)
             normVec = new(-1f, 1f);
         else if (flip == PlayerAttributes.FlipY)

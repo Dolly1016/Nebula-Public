@@ -57,7 +57,7 @@ internal class Nighty : DefinedAllocatableModifierTemplate, DefinedAllocatableMo
                 placeButton.OnClick = (button) =>
                 {
                     new StaticAchievementToken("nighty.common1");
-                    var pos = PlayerControl.LocalPlayer.GetTruePosition();
+                    var pos = AmongUsLLImpl.LocalPlayer.GetTruePosition();
                     NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, pos, GameActionTypes.BlindTrapPlaceAction);
                     var objRef = NebulaSyncObject.RpcInstantiate(NightyBomb.MyTag, new float[] { pos.x, pos.y });
                     NebulaManager.Instance.StartDelayAction(MineDurationOption, () =>
@@ -109,12 +109,12 @@ internal class Nighty : DefinedAllocatableModifierTemplate, DefinedAllocatableMo
         public override void OnInstantiated()
         {
             base.OnInstantiated();
-            if (!Owner.AmOwner && !(NebulaGameManager.Instance?.CanSeeAllInfo ?? false) && !(GamePlayer.LocalPlayer?.IsImpostor ?? false)) Color = Color.clear;
+            if (!Owner.AmOwner && !(NebulaGameManager.Instance?.CanSeeAllInfo ?? false) && !(GamePlayer.LocalPlayer?.IsImpostor ?? false)) Color = VColor.Clear;
         }
 
         void OnUpdate(GameUpdateEvent ev)
         {
-            if (MeetingHud.Instance || ExileController.Instance) return;
+            if (MeetingHud.Instance.AsBoolFast() || ExileController.Instance.AsBoolFast()) return;
             if (Owner.AmOwner) return;
             if (GamePlayer.LocalPlayer?.IsDead ?? true) return;
             if (GamePlayer.LocalPlayer.IsImpostor) return;

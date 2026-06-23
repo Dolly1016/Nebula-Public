@@ -31,52 +31,58 @@ public class GameStartManagerUpdatePatch
     public static float ShareOnLobbyTimer = 10f;
     public static bool Prefix(GameStartManager __instance)
     {
-        if (GameData.Instance == null || !GameData.Instance) return false;
-        if (!GameManager.Instance) return false;
+        if (!GameData.Instance.AsBoolFast(out var gameData)) return false;
+        if (!GameManager.Instance.AsBoolFast(out var gameManager)) return false;
+
+        var auClient = AmongUsLLImpl.AmongUsClientInstance;
+        bool isGamePublic = auClient.IsGamePublic;
 
 #if PC
         //公開ルームではスライド使用不可 (不特定多数への画像配信を禁止)
-        if (AmongUsClient.Instance.IsGamePublic) NebulaGameManager.Instance?.LobbySlideManager.Abandon();
+        if (isGamePublic) NebulaGameManager.Instance?.LobbySlideManager.Abandon();
 #endif
 
         __instance.MinPlayers = GeneralConfigurations.CurrentGameMode.MinPlayers;
 
+
+        TranslationController translation = DestroyableSingleton<TranslationController>.Instance;
+
         try
         {
-            __instance.UpdateMapImage((MapNames)GameManager.Instance.LogicOptions.MapId);
+            __instance.UpdateMapImage((MapNames)gameManager.LogicOptions.MapId);
             __instance.CheckSettingsDiffs();
             if (ConfigurationValues.CurrentPresetName.Length > 0)
                 __instance.RulesPresetText.text = ConfigurationValues.CurrentPresetName;
             else
-                __instance.RulesPresetText.text = DestroyableSingleton<TranslationController>.Instance.GetString(GameOptionsManager.Instance.CurrentGameOptions.GetRulesPresetTitle());
+                __instance.RulesPresetText.text = translation.GetString(GameOptionsManager.Instance.CurrentGameOptions.GetRulesPresetTitle());
         }
         catch { }
 
-        if (GameCode.IntToGameName(AmongUsClient.Instance.GameId) == null) __instance.privatePublicPanelText.text = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.LocalButton);
-        else if (AmongUsClient.Instance.IsGamePublic) __instance.privatePublicPanelText.text = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.PublicHeader);
-        else __instance.privatePublicPanelText.text = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.PrivateHeader);
+        if (GameCode.IntToGameName(auClient.GameId) == null) __instance.privatePublicPanelText.text = translation.GetString(StringNames.LocalButton);
+        else if (isGamePublic) __instance.privatePublicPanelText.text = translation.GetString(StringNames.PublicHeader);
+        else __instance.privatePublicPanelText.text = translation.GetString(StringNames.PrivateHeader);
         
-        __instance.HostPrivateButton.gameObject.SetActive(!AmongUsClient.Instance.IsGamePublic);
-        __instance.HostPublicButton.gameObject.SetActive(AmongUsClient.Instance.IsGamePublic);
+        __instance.HostPrivateButton.gameObject.SetActive(!isGamePublic);
+        __instance.HostPublicButton.gameObject.SetActive(isGamePublic);
 
         if ((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) && Input.GetKeyDown(KeyCode.C))
-            ClipboardHelper.PutClipboardString(GameCode.IntToGameName(AmongUsClient.Instance.GameId));
+            ClipboardHelper.PutClipboardString(GameCode.IntToGameName(auClient.GameId));
 
         if (DestroyableSingleton<DiscordManager>.InstanceExists)
         {
-            bool active = AmongUsClient.Instance.AmHost && AmongUsClient.Instance.NetworkMode == NetworkModes.OnlineGame && DestroyableSingleton<DiscordManager>.Instance.CanShareGameOnDiscord() && DestroyableSingleton<DiscordManager>.Instance.HasValidPartyID();
+            bool active = auClient.AmHost && auClient.NetworkMode == NetworkModes.OnlineGame && DestroyableSingleton<DiscordManager>.Instance.CanShareGameOnDiscord() && DestroyableSingleton<DiscordManager>.Instance.HasValidPartyID();
             __instance.ShareOnDiscordButton.gameObject.SetActive(active);
         }
 
 
         //人数の調整
-        __instance.LastPlayerCount = GameData.Instance.PlayerCount;
+        __instance.LastPlayerCount = gameData.PlayerCount;
         string arg = "<color=#FF0000FF>";
         if (__instance.LastPlayerCount > __instance.MinPlayers) arg = "<color=#00FF00FF>";
         if (__instance.LastPlayerCount == __instance.MinPlayers) arg = "<color=#FFFF00FF>";
 
         int max = 24;
-        if (AmongUsClient.Instance.NetworkMode != NetworkModes.LocalGame) max = GameManager.Instance.LogicOptions.MaxPlayers;    
+        if (auClient.NetworkMode != NetworkModes.LocalGame) max = GameManager.Instance.LogicOptions.MaxPlayers;    
         var text = string.Format("{0}{1}/{2}", arg, __instance.LastPlayerCount, max);
 
         if (__instance.LastPlayerCount < __instance.MinPlayers) text += $" ({__instance.MinPlayers}↑)";
@@ -96,24 +102,24 @@ public class GameStartManagerUpdatePatch
 
         if (canStart)
         {
-            __instance.StartButton.ChangeButtonText(DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.StartLabel));
-            __instance.GameStartTextClient.text = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.WaitingForHost);
+            __instance.StartButton.ChangeButtonText(translation.GetString(StringNames.StartLabel));
+            __instance.GameStartTextClient.text = translation.GetString(StringNames.WaitingForHost);
         }
         else
         {
-            __instance.StartButton.ChangeButtonText(DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.WaitingForPlayers));
-            __instance.GameStartTextClient.text = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.WaitingForPlayers);
+            __instance.StartButton.ChangeButtonText(translation.GetString(StringNames.WaitingForPlayers));
+            __instance.GameStartTextClient.text = translation.GetString(StringNames.WaitingForPlayers);
         }
 
         if (DestroyableSingleton<DiscordManager>.InstanceExists)
         {
-            if (AmongUsClient.Instance.AmHost && AmongUsClient.Instance.NetworkMode == NetworkModes.OnlineGame)
-                DestroyableSingleton<DiscordManager>.Instance.SetInLobbyHost(__instance.LastPlayerCount, GameManager.Instance.LogicOptions.MaxPlayers, AmongUsClient.Instance.GameId);
+            if (auClient.AmHost && auClient.NetworkMode == NetworkModes.OnlineGame)
+                DestroyableSingleton<DiscordManager>.Instance.SetInLobbyHost(__instance.LastPlayerCount, gameManager.LogicOptions.MaxPlayers, auClient.GameId);
             else
-                DestroyableSingleton<DiscordManager>.Instance.SetInLobbyClient(__instance.LastPlayerCount, GameManager.Instance.LogicOptions.MaxPlayers, AmongUsClient.Instance.GameId);
+                DestroyableSingleton<DiscordManager>.Instance.SetInLobbyClient(__instance.LastPlayerCount, gameManager.LogicOptions.MaxPlayers, auClient.GameId);
         }
     
-        if (AmongUsClient.Instance.AmHost)
+        if (auClient.AmHost)
         {
             if (__instance.startState == GameStartManager.StartingStates.Countdown)
             {
@@ -123,10 +129,10 @@ public class GameStartManagerUpdatePatch
                 if (!__instance.GameStartTextParent.activeSelf) SoundManager.Instance.PlaySound(__instance.gameStartSound, false, 1f, null);
 
                 __instance.GameStartTextParent.SetActive(true);
-                __instance.GameStartText.text = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.GameStarting, num2);
+                __instance.GameStartText.text = translation.GetString(StringNames.GameStarting, num2);
                 if (num != num2)
                 {
-                    PlayerControl.LocalPlayer.RpcSetStartCounter(num2);
+                    AmongUsLLImpl.LocalPlayer.RpcSetStartCounter(num2);
                     if(num2 == 3) ConfigurationValues.ShareAll(); //設定を共有
                 }
                 if (num2 <= 0) __instance.FinallyBegin();
@@ -138,8 +144,10 @@ public class GameStartManagerUpdatePatch
             }
         }
 
-        if (__instance.LobbyInfoPane.gameObject.activeSelf && HudManager.Instance.Chat.IsOpenOrOpening) __instance.LobbyInfoPane.DeactivatePane();
-        __instance.LobbyInfoPane.gameObject.SetActive(!ModSingleton<ShowUp>.Instance.AnyoneShowedUp && !HudManager.Instance.Chat.IsOpenOrOpening);
+        var chatOpen = AmongUsLLImpl.HudManagerInstance.Chat.IsOpenOrOpening;
+
+        if (__instance.LobbyInfoPane.gameObject.activeSelf && chatOpen) __instance.LobbyInfoPane.DeactivatePane();
+        __instance.LobbyInfoPane.gameObject.SetActive(!ModSingleton<ShowUp>.Instance.AnyoneShowedUp && !chatOpen);
         __instance.HostInfoPanel.transform.parent.gameObject.SetActive(!ModSingleton<ShowUp>.Instance.AnyoneShowedUp);
         __instance.HostInfoPanel.playerHolder.transform.GetChild(1).gameObject.SetActive(!NebulaInput.SomeUiIsActive);
         return false;
@@ -163,7 +171,7 @@ public class GameStartManagerBeginGame
     {
         if (!GameStartManagerUpdatePatch.LastChecked) return false;
 
-        if (AmongUsClient.Instance.AmHost)
+        if (AmongUsLLImpl.AmongUsClientInstance.AmHost)
         {
 
             if (GeneralConfigurations.CurrentGameMode == GameModes.FreePlay && PlayerControl.AllPlayerControls.Count == 1)
@@ -215,7 +223,7 @@ public class SetUpCertificationPatch
     public static void Postfix(PlayerControl __instance)
     {
         //ゲーム中であればなにもしない
-        if (AmongUsClient.Instance && AmongUsClient.Instance.GameState == InnerNetClient.GameStates.Started) return;
+        if (AmongUsLLImpl.TryGetAmongUsClientInstance(out var auClient) && auClient.GameState == InnerNetClient.GameStates.Started) return;
         __instance.gameObject.AddComponent<UncertifiedPlayer>().MyControl = __instance;
 
         PlayerExtension.SetUpScaler(__instance.gameObject);
@@ -379,12 +387,13 @@ public class MarketplaceConsolePatch
     public static void Postfix(LobbyBehaviour __instance)
     {
         var leftBox = __instance.transform.FindChild("Leftbox");
-        if (leftBox)
+        if (leftBox.AsBoolFast())
         {
-            leftBox.transform.localPosition = new(-1.51f, 0.2336f, 0f);
-            var pos = leftBox.transform.position;
+            var transform = leftBox.transform;
+            transform.localPosition = new(-1.51f, 0.2336f, 0f);
+            var pos = transform.position;
             pos.z = pos.y / 1000f;
-            leftBox.transform.position = pos;
+            transform.position = pos;
         }
 
         var wardrobe = __instance.transform.FindChild("panel_Wardrobe").GetChild(0);
@@ -403,10 +412,11 @@ public class MarketplaceConsolePatch
             renderer.transform.localScale = new(0.7f, 0.7f, 1f);
             System.Collections.IEnumerator CoAnim()
             {
+                var rendererTransform = renderer.transform;
                 while (true)
                 {
-                    renderer.transform.localEulerAngles = new(0, 0, System.Random.Shared.NextSingle() * 360f);
-                    renderer.sprite = lobbyConsoleSprite.GetSprite(Helpers.Prob(0.15f) ? 2 : Helpers.Prob(0.2f) ? 3 : Helpers.Prob(0.5f) ? 0 : 1);
+                    rendererTransform.localEulerAngles = new(0, 0, System.Random.Shared.NextSingle() * 360f);
+                    renderer.sprite = lobbyConsoleSprite.GetSprite(Mathn.Prob(0.15f) ? 2 : Mathn.Prob(0.2f) ? 3 : Mathn.Prob(0.5f) ? 0 : 1);
 
                     yield return Effects.Wait(0.2f);
                 }
@@ -418,7 +428,9 @@ public class MarketplaceConsolePatch
                 if (ModSingleton<Marketplace>.Instance) ModSingleton<Marketplace>.Instance.Close();
             }, new GameObjectLifespan(__instance.gameObject));
 
-            var origSettings = HudManager.Instance.UseButton.fastUseSettings[ImageNames.WardrobeButton];
+            var settingsMap = AmongUsLLImpl.HudManagerBridge.UseButtonVanillaSettings;
+            var origSettings = settingsMap[ImageNames.WardrobeButton];
+            //新しい要素の追加なのでLLは使用しない。
             HudManager.Instance.UseButton.fastUseSettings[(ImageNames)ModImageNames.Marketplace] = new() { ButtonType = origSettings.ButtonType, FontMaterial = origSettings.FontMaterial, Image = origSettings.Image, Text = (StringNames)ModStringNames.Marketplace };
             marketPlace.CustomUseIcon = (ImageNames)ModImageNames.Marketplace;
 
@@ -458,10 +470,10 @@ public class OptionsConsoleUsePatch
     {
         if (__instance.MenuPrefab != null && !__instance.MenuPrefab.TryGetComponent<GameSettingMenu>(out _)) return true;
 
-        __instance.CanUse(PlayerControl.LocalPlayer.Data, out var flag, out _);
+        __instance.CanUse(AmongUsLLImpl.LocalPlayer.Data, out var flag, out _);
         if (!flag) return false;
 
-        PlayerControl.LocalPlayer.NetTransform.Halt();
+        AmongUsLLImpl.LocalPlayer.NetTransform.Halt();
 
         if (__instance.MenuPrefab == null)
         {
@@ -469,12 +481,12 @@ public class OptionsConsoleUsePatch
             return false;
         }
 
-        if (AmongUsClient.Instance.AmHost)
+        if (AmongUsLLImpl.AmongUsClientInstance.AmHost)
         {
             GameObject gameObject = GameObject.Instantiate<GameObject>(__instance.MenuPrefab);
             gameObject.transform.SetParent(Camera.main.transform, false);
             gameObject.transform.localPosition = __instance.CustomPosition;
-            DestroyableSingleton<TransitionFade>.Instance.DoTransitionFade(null, gameObject.gameObject, null);
+            DestroyableSingleton<TransitionFade>.Instance.DoTransitionFade(null, gameObject, null);
         }
         else
         {
@@ -499,10 +511,12 @@ public class GlobalCosMismatchShowerPatch
         MoreCosmic.UnacquiredItems.Clear();
 
         var renderer = UnityHelper.CreateObject<SpriteRenderer>("UnacquiredItemsIcon", __instance.LobbyInfoPane.transform, new(-3.7f, -7f, -1f));
-        renderer.transform.localScale = new(1.2f, 1.2f, 1.2f);
+        var rendererObj = renderer.gameObject;
+        var rendererTransform = renderer.transform;
+        rendererTransform.localScale = new(1.2f, 1.2f, 1.2f);
         renderer.sprite = icons.GetSprite(0);
 
-        var animRenderer = UnityHelper.CreateObject<SpriteRenderer>("Anim", renderer.transform, new(0.2f, 0.2f, -0.1f));
+        var animRenderer = UnityHelper.CreateObject<SpriteRenderer>("Anim", rendererTransform, new(0.2f, 0.2f, -0.1f));
         animRenderer.transform.localScale = Vector3.one;
         animRenderer.sprite = icons.GetSprite(1);
 
@@ -548,15 +562,15 @@ public class GlobalCosMismatchShowerPatch
         }).WrapToIl2Cpp());
         
 
-        var button = renderer.gameObject.SetUpButton(true, renderer);
+        var button = rendererObj.SetUpButton(true, renderer);
         button.OnClick.AddListener(OpenScreen);
         button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, Language.Translate("ui.costume.missedCostume")));
         button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
-        var collider = renderer.gameObject.AddComponent<CircleCollider2D>();
+        var collider = rendererObj.AddComponent<CircleCollider2D>();
         collider.isTrigger = true;
         collider.radius = 0.3f;
-        
-        renderer.gameObject.SetActive(false);
+
+        rendererObj.SetActive(false);
 
         System.Collections.IEnumerator CoUpdate()
         {
@@ -564,7 +578,7 @@ public class GlobalCosMismatchShowerPatch
             {
                 UpdateUnacquiredItems();
                 bool show = MoreCosmic.UnacquiredItems.Count > 0;
-                renderer.gameObject.SetActive(show);
+                rendererObj.SetActive(show);
                 
                 //たまに大きくなるアニメーション
                 var t = Mathf.Repeat(Time.time, 2.4f);
@@ -591,8 +605,8 @@ public class HostInfoPanelUpdatePatch
     {
         NetworkedPlayerInfo host = GameData.Instance.GetHost();
         if (host == null || host.IsIncomplete) return;
-        string text = ColorUtility.ToHtmlStringRGB(DynamicPalette.PlayerColors[__instance.player.ColorId]);
-        if (AmongUsClient.Instance.AmHost)
+        string text = ColorUtility.ToHtmlStringRGB(DynamicPalette.PlayerColors[__instance.player.ColorId].ToUnityColor());
+        if (AmongUsLLImpl.AmongUsClientInstance.AmHost)
         {
             __instance.playerName.text = string.IsNullOrEmpty(host.PlayerName) ? "..." : string.Concat("<color=#", text, ">", host.PlayerName, "</color>" ) + "  <size=90%><b><font=\"Barlow-BoldItalic SDF\" material=\"Barlow-BoldItalic SDF Outline\">" + DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.HostYouLabel);
         }

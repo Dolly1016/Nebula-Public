@@ -108,7 +108,7 @@ public interface IPlayerlike : IModuleContainer, IGameObject
     /// </summary>
     bool AmOwner { get; }
 
-    internal void UpdateVisibility(bool update, bool ignoreShadow, bool showNameText = true);
+    internal void UpdateVisibility(float? deltaTime, bool update, bool ignoreShadow, bool showNameText = true);
 
     internal CosmeticsLayer VanillaCosmetics { get; }
 

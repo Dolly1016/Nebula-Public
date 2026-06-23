@@ -113,12 +113,12 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole, IAssignableDocument
         {
             if (CanLocateLovers)
             {
-                UnityEngine.Color arrowColor = isFavorite ? MyRole.UnityColor : Color.white;
+                VColor arrowColor = isFavorite ? MyRole.Color : VColor.White;
                 var arrow = new TrackingArrowAbility(player, 0f, arrowColor).Register(this);
             }
             if (GeneralConfigurations.ScarletRadioOption)
             {
-                ModSingleton<NoSVCRoom>.Instance?.RegisterRadioChannel(player.Name, 3, p => p == player, this, MyRole.UnityColor);
+                ModSingleton<NoSVCRoom>.Instance?.RegisterRadioChannel(player.Name, 3, p => p == player, this, MyRole.Color);
             }
         }
 
@@ -139,7 +139,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                 SuicideTimer = new TimerImpl(GraceOnAssignment).Register(this);
                 float afterMeeting = 5f;
                 SuicideTimer.SetPredicate(() => {
-                    if (MeetingHud.Instance || ExileController.Instance) return false;
+                    if (MeetingHud.Instance.AsBoolFast() || ExileController.Instance.AsBoolFast()) return false;
                     if(afterMeeting > 0f)
                     {
                         afterMeeting -= Time.deltaTime;
@@ -212,8 +212,8 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                 bool usedInTheMeeting = true;
                 var meetingButton = new Modules.ScriptComponents.ModAbilityButtonImpl(alwaysShow: true).Register(this);
                 meetingButton.SetSprite(meetingButtonSprite.GetSprite());
-                meetingButton.Availability = (button) => MeetingHud.Instance && MeetingHud.Instance.CurrentState == MeetingHud.VoteStates.NotVoted;
-                meetingButton.Visibility = (button) => !MyPlayer.IsDead && LeftMeeting > 0 && MeetingHud.Instance && (MeetingHud.Instance.CurrentState == MeetingHud.VoteStates.NotVoted || MeetingHud.Instance.CurrentState == MeetingHud.VoteStates.Discussion) && !usedInTheMeeting;
+                meetingButton.Availability = (button) => MeetingHud.Instance.AsBoolFast(out var meeting) && meeting.CurrentState == MeetingHud.VoteStates.NotVoted;
+                meetingButton.Visibility = (button) => !MyPlayer.IsDead && LeftMeeting > 0 && MeetingHud.Instance.AsBoolFast(out var meeting) && (meeting.CurrentState == MeetingHud.VoteStates.NotVoted || meeting.CurrentState == MeetingHud.VoteStates.Discussion) && !usedInTheMeeting;
                 var meetingIcon = meetingButton.ShowUsesIcon(4);
                 meetingButton.OnClick = (button) =>
                 {
@@ -254,6 +254,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             }
         }
 
+        bool FavoriteGaugeMeetCondition => !(FavoriteGauge < FavoriteGaugeThreshold);
 
         [OnlyMyPlayer, OnlyHost]
         void OnDead(PlayerDieOrDisconnectEvent ev)
@@ -267,6 +268,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                 }
                 else if(ev is PlayerExiledEvent pee)
                 {
+                    if (myLover.Role.Role == Jester.MyRole && FavoriteGaugeMeetCondition) return;
                     myLover.VanillaPlayer.ModMarkAsExtraVictim(myLover.VanillaPlayer, PlayerState.Suicide, PlayerState.Suicide);
                 }
                 else {
@@ -280,7 +282,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole, IAssignableDocument
         {
             var favorite = GetMyFavorite();
             if (favorite == null) return;
-            if (WithFavoriteGauge && FavoriteGauge < FavoriteGaugeThreshold) return; //ゲージがたまりきっていなければ乗っ取らない。
+            if (WithFavoriteGauge && !FavoriteGaugeMeetCondition) return; //ゲージがたまりきっていなければ乗っ取らない。
             if (!CanOverrideTaskWin && ev.EndReason == GameEndReason.Task) return;//タスク勝利の乗っ取り
             if (ev.OverwrittenGameEnd == NebulaGameEnd.AvengerWin && (favorite.Role != Avenger.MyRole || !ev.Winners.Test(favorite))) return; //Avenger勝利は本命がAvengerで勝利していない限り乗っ取らない。
             if (!MyPlayer.IsDead && !favorite.IsDead && ev.Winners.Test(favorite)) ev.TryOverwriteEnd(NebulaGameEnd.ScarletWin, GameEndReason.Special);
@@ -345,7 +347,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 
         void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo, bool inEndScene)
         {
-            Color loverColor = Scarlet.MyRole.UnityColor;
+            VColor loverColor = Scarlet.MyRole.Color;
 
             if (IsMyLover(GamePlayer.LocalPlayer)) name += "♡".Color(loverColor);
         }
@@ -366,7 +368,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             if(lastVisualCommand != null && lastVisualCommand) GameObject.Destroy(lastVisualCommand);
 
             var pva = MeetingHud.Instance.GetPlayer(targetId);
-            if (!pva) return;
+            if (!pva.AsBoolFast()) return;
             lastVisualCommand = UnityHelper.SimpleAnimator(pva.transform, new(0f, 0.005f, -0.5f), 0.25f, i => NameplateDecoImages.GetSprite(i % 2)).gameObject;
             lastVisualCommand.transform.localScale = new(1.02f, 1.06f, 1f);
         }
@@ -405,7 +407,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             GaugeIsInProgress = false;
                  
             //会議中はゲージを進行しない
-            if (MeetingHud.Instance || ExileController.Instance)
+            if (MeetingHud.Instance.AsBoolFast() || ExileController.Instance.AsBoolFast())
             {
                 if (!(progressGrace > 0f))
                 {
@@ -491,13 +493,13 @@ public class ScarletLover : DefinedModifierTemplate, DefinedModifier
         void RuntimeAssignable.OnActivated() {
             if (AmOwner && GeneralConfigurations.ScarletRadioOption)
             {
-                ModSingleton<NoSVCRoom>.Instance?.RegisterRadioChannel(Language.Translate("voiceChat.info.scarletRadio"), 3, IsMyScarlet, this, MyRole.UnityColor);
+                ModSingleton<NoSVCRoom>.Instance?.RegisterRadioChannel(Language.Translate("voiceChat.info.scarletRadio"), 3, IsMyScarlet, this, MyRole.Color);
             }
         }
 
         void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo, bool inEndScene)
         {
-            Color loverColor = Scarlet.MyRole.UnityColor;
+            VColor loverColor = Scarlet.MyRole.Color;
             
             var myFlirtatious = MyScarlet;
             RuntimeRole? myFlirtatiousRuntimeRole = myFlirtatious;

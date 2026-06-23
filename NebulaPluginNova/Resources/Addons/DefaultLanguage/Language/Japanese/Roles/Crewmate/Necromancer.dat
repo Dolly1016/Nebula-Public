@@ -30,7 +30,8 @@
 # Game
 
 "role.necromancer.phantomMessage" : "%ROOM%に連れて行って..."
-"role.necromancer.reviveRange" : "ネクロマンサー<color=white>: 死体通知範囲</color>"
+"role.necromancer.detectRange" : "ネクロマンサー<color=white>: 死体通知範囲</color>"
+"role.necromancer.reviveRange" : "ネクロマンサー<color=white>: 復活部屋範囲</color>"
 "gameAction.necromancer.revive" : "復活"
 
 # UI

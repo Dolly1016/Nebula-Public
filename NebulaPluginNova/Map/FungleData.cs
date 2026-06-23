@@ -8,7 +8,7 @@ namespace Nebula.Map;
 public class FungleData : MapData
 {
     override public int Id => 5;
-    static private readonly Vector2[] MapPositions = [
+    static private readonly VVector2[] MapPositions = [
         //ドロップシップ
         new(-9.2f,13.4f),
         //カフェテリア
@@ -58,15 +58,15 @@ public class FungleData : MapData
         //コミュ
         new(20.9f,10.8f),new(24.1f,13.2f),new(17.9f,12.7f),
         ];
-    static private readonly Vector2[] nonClassicMapPos = [
+    static private readonly VVector2[] nonClassicMapPos = [
         new(3.8f,-12.5f),new(7.08f,-15.3f),
         ];
-    static private readonly Vector2[] classicMapPos = [
+    static private readonly VVector2[] classicMapPos = [
         new(0.35f, -10.8f), new(12.65f, 4.00f),
         ];
 
-    static private readonly Vector2[] combinedNonClassicMapPos = [.. MapPositions, .. nonClassicMapPos];
-    static private readonly Vector2[] combinedClassicMapPos = [.. MapPositions, .. classicMapPos];
+    static private readonly VVector2[] combinedNonClassicMapPos = [.. MapPositions, .. nonClassicMapPos];
+    static private readonly VVector2[] combinedClassicMapPos = [.. MapPositions, .. classicMapPos];
 
     //先頭の部屋ほど優先される
     static private readonly (AdditionalRoomArea area, string key, bool detailRoom)[] additionalRooms = [
@@ -181,8 +181,8 @@ public class FungleData : MapData
         ];
 
     public override MapObjectPoint[] MapObjectPoints => GeneralConfigurations.FungleForClassicGameOption.Value ? [..mapObjectPoints, ..classicObjectPoints] : [..mapObjectPoints, ..nonClassicObjectPoints];
-    public override IReadOnlyList<Vector2> MapArea => GeneralConfigurations.FungleForClassicGameOption.Value ? combinedClassicMapPos : combinedNonClassicMapPos;
-    public override IReadOnlyList<Vector2> NonMapArea => [];
+    public override IReadOnlyList<VVector2> MapArea => GeneralConfigurations.FungleForClassicGameOption.Value ? combinedClassicMapPos : combinedNonClassicMapPos;
+    public override IReadOnlyList<VVector2> NonMapArea => [];
     protected override (AdditionalRoomArea area, string key, bool detailRoom)[] AdditionalRooms => additionalRooms;
     protected override (SystemTypes room, AdditionalRoomArea area, string key)[] OverrideRooms => overrideRooms;
     protected override SystemTypes[] SabotageTypes => [SystemTypes.Reactor, SystemTypes.Comms];
@@ -208,9 +208,9 @@ public class FungleData : MapData
     protected override IDividedSpriteLoader GetSealedDoorSprite(bool isVert) => isVert ? SealedDoorSpriteFungleV : SealedDoorSpriteFungleH;
     override public Vector3 GetDoorSealingPos(OpenableDoor door, bool isVert) => isVert ? new(-0.07f, -0.4f, -0.01f) : new(-0.02f, -0.4f, -0.01f);
 
-    private readonly Virial.Utilities.ComponentCache<AmbientSoundPlayer> beachFar = new(() => ShipStatus.Instance.transform.TryDig("Outside", "OutsideBeach", "SFX", "AMB_Beach_Far")?.GetComponent<AmbientSoundPlayer>()!);
-    private readonly Virial.Utilities.ComponentCache<AmbientSoundPlayer> beachClose = new(() => ShipStatus.Instance.transform.TryDig("Outside", "OutsideBeach", "SFX", "AMB_Beach_Close")?.GetComponent<AmbientSoundPlayer>()!);
-    private readonly Virial.Utilities.ComponentCache<AmbientSoundPlayer> highlands = new(() => ShipStatus.Instance.transform.TryDig("Outside", "OutsideHighlands", "SFX", "AMB_Outside")?.GetComponent<AmbientSoundPlayer>()!);
+    private readonly Virial.Utilities.ComponentCache<AmbientSoundPlayer> beachFar = new(() => AmongUsLLImpl.ShipStatusInstance.transform.TryDig("Outside", "OutsideBeach", "SFX", "AMB_Beach_Far")?.GetComponent<AmbientSoundPlayer>()!);
+    private readonly Virial.Utilities.ComponentCache<AmbientSoundPlayer> beachClose = new(() => AmongUsLLImpl.ShipStatusInstance.transform.TryDig("Outside", "OutsideBeach", "SFX", "AMB_Beach_Close")?.GetComponent<AmbientSoundPlayer>()!);
+    private readonly Virial.Utilities.ComponentCache<AmbientSoundPlayer> highlands = new(() => AmongUsLLImpl.ShipStatusInstance.transform.TryDig("Outside", "OutsideHighlands", "SFX", "AMB_Outside")?.GetComponent<AmbientSoundPlayer>()!);
     public override WindType GetWindType(Vector2 position)
     {
         if (

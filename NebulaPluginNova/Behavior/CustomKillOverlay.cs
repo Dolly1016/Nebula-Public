@@ -31,7 +31,7 @@ public class CustomKillOverlayData
     
     public void Initialize(CustomKillOverlay overlay)
     {
-        if (myPrefab) GameObject.Destroy(myPrefab);
+        if (myPrefab.AsBoolFast()) GameObject.Destroy(myPrefab);
         Remove();
     }
 

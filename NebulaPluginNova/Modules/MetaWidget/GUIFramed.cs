@@ -8,13 +8,13 @@ namespace Nebula.Modules.GUIWidget;
 
 public class NoSGUIFramed : AbstractGUIWidget
 {
-    public UnityEngine.Vector2 Margin { get; }
-    public Color? Color = null;
+    public VVector2 Margin { get; }
+    public Virial.Color? Color = null;
     public GUIWidgetSupplier? Inner { get; }
     public Action<SpriteRenderer>? PostBuilder { get; set; }
     public Action? OnClicked { get; init; }
 
-    public NoSGUIFramed(GUIAlignment alignment, GUIWidgetSupplier? inner, UnityEngine.Vector2 margin, Color? color = null) : base(alignment)
+    public NoSGUIFramed(GUIAlignment alignment, GUIWidgetSupplier? inner, VVector2 margin, Virial.Color? color = null) : base(alignment)
     {
         this.Inner = inner;
         this.Margin = margin;
@@ -25,7 +25,7 @@ public class NoSGUIFramed : AbstractGUIWidget
     {
         renderer.transform.localPosition = new(0, 0, 0.1f);
         renderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
-        var button = renderer.gameObject.SetUpButton(true, renderer, Color, UnityEngine.Color.Lerp(UnityEngine.Color.cyan, UnityEngine.Color.green, 0.4f).AlphaMultiplied(0.3f));
+        var button = renderer.gameObject.SetUpButton(true, renderer, Color, Virial.Color.Lerp(Virial.Color.Cyan, Virial.Color.Green, 0.4f).AlphaMultiplied(0.3f));
         var collider = renderer.gameObject.AddComponent<BoxCollider2D>();
         collider.size = renderer.size;
         collider.isTrigger = true;
@@ -44,7 +44,7 @@ public class NoSGUIFramed : AbstractGUIWidget
             if (innerObj != null) innerObj.transform.localPosition = new(0f, 0f, -0.1f);
         }
 
-        var renderer = NebulaAsset.CreateSharpBackground(new(actualSize.Width + Margin.x * 1.8f, actualSize.Height + Margin.y * 1.8f), Color ?? UnityEngine.Color.white, frame.transform);
+        var renderer = NebulaAsset.CreateSharpBackground(new(actualSize.Width + Margin.x * 1.8f, actualSize.Height + Margin.y * 1.8f), Color ?? Virial.Color.White, frame.transform);
         renderer.gameObject.layer = LayerExpansion.GetUILayer();
 
         actualSize.Width += Margin.x * 2f;
@@ -101,7 +101,7 @@ public class NoSGUIFramedConfiguration : AbstractGUIWidget
         var left = -renderer.size.x * 0.5f;
         var top = renderer.size.y * 0.5f + innerOffsetY;
         var instantiatedText = text.Instantiate(new Anchor(new(0f,0.5f), new(left, top)), new Size(actualSize.Width - 0.5f, 3f), out var textSize);
-        if (instantiatedText) {
+        if (instantiatedText.AsBoolFast()) {
             instantiatedText!.transform.SetParent(frame.transform, false);
             instantiatedText.transform.localPosition += new UnityEngine.Vector3(0.1f,0f,-0.5f);
 

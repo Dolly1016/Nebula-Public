@@ -141,7 +141,7 @@ public static class NavVerticesHelpers
                 }
                 ElectricalDoors GetElecDoors()
                 {
-                    if (!electricalDoors) electricalDoors = ShipStatus.Instance.GetComponentInChildren<ElectricalDoors>();
+                    if (!electricalDoors) electricalDoors = AmongUsLLImpl.ShipStatusInstance.GetComponentInChildren<ElectricalDoors>();
                     return electricalDoors;
                 }
                 switch (edge.Tag)
@@ -170,7 +170,7 @@ public static class NavVerticesHelpers
                         var fromNodeR = structure.MainNodes[edge.From];
                         if (from.Distance(new Vector2(fromNodeR.X, fromNodeR.Y)) < 5f)
                         {
-                            var airshipR = ShipStatus.Instance.TryCast<AirshipStatus>();
+                            var airshipR = AmongUsLLImpl.ShipStatusInstance.TryCast<AirshipStatus>();
                             if (airshipR && !airshipR!.GapPlatform.Target && !airshipR.GapPlatform.IsLeft)
                             {
                                 AddSingleEdge();
@@ -182,7 +182,7 @@ public static class NavVerticesHelpers
                         var fromNodeL = structure.MainNodes[edge.From];
                         if (from.Distance(new Vector2(fromNodeL.X, fromNodeL.Y)) < 5f)
                         {
-                            var airshipL = ShipStatus.Instance.TryCast<AirshipStatus>();
+                            var airshipL = AmongUsLLImpl.ShipStatusInstance.TryCast<AirshipStatus>();
                             if (airshipL && !airshipL!.GapPlatform.Target && airshipL.GapPlatform.IsLeft)
                             {
                                 AddSingleEdge();
@@ -218,7 +218,7 @@ public static class NavVerticesHelpers
 
     internal static IEnumerator CoInteractManualDoor(IPlayerLogics player, ManualDoor door)
     {
-        var decon = ShipStatus.Instance.Systems[SystemTypes.Decontamination].CastFast<DeconSystem>();
+        var decon = AmongUsLLImpl.ShipStatusInstance.Systems[SystemTypes.Decontamination].CastFast<DeconSystem>();
         while (decon.CurState != DeconSystem.States.Idle && !door.Opening) yield return null;
         if (door.Opening) yield break;
 
@@ -243,23 +243,23 @@ public static class NavVerticesHelpers
     }
     internal static IEnumerator CoInteractDoor(IPlayerLogics player, OpenableDoor door)
     {
-        if (door.TryCast<AutoOpenDoor>())
+        if (door.IsFast<AutoOpenDoor>())
         {
             while (!door.IsOpen) yield return null;
             yield return Effects.Wait(0.4f);
             yield break;
         }
-        if (door.TryCast<AutoCloseDoor>())
+        if (door.IsFast<AutoCloseDoor>())
         {
             if (!door.IsOpen)
             {
-                ShipStatus.Instance.RpcUpdateSystem(SystemTypes.Doors, (byte)(door.Id | 64));
+                AmongUsLLImpl.ShipStatusInstance.RpcUpdateSystem(SystemTypes.Doors, (byte)(door.Id | 64));
                 door.SetDoorway(true);
             }
             yield return Effects.Wait(0.4f);
             yield break;
         }
-        if (door.TryCast<PlainDoor>())
+        if (door.IsFast<PlainDoor>())
         {
             var inner = door.transform.FindChild("InnerConsole");
             var outer = door.transform.FindChild("OuterConsole");
@@ -281,17 +281,17 @@ public static class NavVerticesHelpers
             yield return Effects.Wait(3.8f);
             if (!door.IsOpen)
             {
-                ShipStatus.Instance.RpcUpdateSystem(SystemTypes.Doors, (byte)(door.Id | 64));
+                AmongUsLLImpl.ShipStatusInstance.RpcUpdateSystem(SystemTypes.Doors, (byte)(door.Id | 64));
                 door.SetDoorway(true);
             }
             yield break;
         }
-        if (door.TryCast<MushroomWallDoor>())
+        if (door.IsFast<MushroomWallDoor>())
         {
             yield return Effects.Wait(5.2f);
             if (!door.IsOpen)
             {
-                ShipStatus.Instance.RpcUpdateSystem(SystemTypes.Doors, (byte)(door.Id | 64));
+                AmongUsLLImpl.ShipStatusInstance.RpcUpdateSystem(SystemTypes.Doors, (byte)(door.Id | 64));
                 door.SetDoorway(true);
             }
             yield return Effects.Wait(0.4f);
@@ -319,21 +319,21 @@ public static class NavVerticesHelpers
 
         {
             //MIRA HQ
-            var miraShipStatus = ShipStatus.Instance.TryCast<MiraShipStatus>();
+            var miraShipStatus = AmongUsLLImpl.ShipStatusInstance.TryCast<MiraShipStatus>();
             if (miraShipStatus)
             {
                 manualDoors = miraShipStatus!.FastRooms[SystemTypes.Decontamination].gameObject.GetComponentsInChildren<ManualDoor>();
             }
 
             //the Fungle
-            var fungleShipStatus = ShipStatus.Instance.TryCast<FungleShipStatus>();
+            var fungleShipStatus = AmongUsLLImpl.ShipStatusInstance.TryCast<FungleShipStatus>();
             if (fungleShipStatus)
             {
                 ziplineConsoles = fungleShipStatus!.Zipline.GetComponentsInChildren<ZiplineConsole>();
             }
 
             //the Airship
-            var airshipStatus = ShipStatus.Instance.TryCast<AirshipStatus>();
+            var airshipStatus = AmongUsLLImpl.ShipStatusInstance.TryCast<AirshipStatus>();
             if (airshipStatus)
             {
                 movingPlatform = airshipStatus!.GapPlatform;
@@ -435,7 +435,9 @@ public static class NavVerticesHelpers
                 }
             }
 
-            foreach (var door in ShipStatus.Instance.AllDoors)
+            var ship = AmongUsLLImpl.ShipStatusInstance;
+
+            foreach (var door in ship.AllDoors)
             {
                 if (door.IsOpen) continue;
                 var doorPos = door.transform.position;
@@ -450,7 +452,7 @@ public static class NavVerticesHelpers
                 }
             }
 
-            foreach (var ladder in ShipStatus.Instance.Ladders)
+            foreach (var ladder in ship.Ladders)
             {
                 var ladderPos = ladder.transform.position;
                 var distance = ladderPos.Distance(currentPos);

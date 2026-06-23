@@ -17,4 +17,9 @@ public class AbstractGameEvent : Event
     {
         this.Game = game;
     }
+
+    protected void Recycle(Virial.Game.Game game)
+    {
+        this.Game = game;
+    }
 }

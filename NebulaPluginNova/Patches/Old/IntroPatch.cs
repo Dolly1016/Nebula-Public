@@ -57,7 +57,7 @@ public static class ShowIntroPatch
 
         if(GeneralConfigurations.MapFlipXOption || GeneralConfigurations.MapFlipYOption)
         {
-            Vector2 vec = new(1f, 1f);
+            VVector2 vec = new(1f, 1f);
             if (GeneralConfigurations.MapFlipXOption) {
                 PlayerModInfo.RpcAttrModulator.LocalInvoke((myInfo!.PlayerId, new AttributeModulator(PlayerAttributes.FlipX, 100000f, true, 0, null, false), true));
                 vec.x = -1f;
@@ -72,7 +72,7 @@ public static class ShowIntroPatch
 
         yield return CoShowTeam(__instance,myInfo!,shownPlayers.ToArray(), 3f, introInfo);
         yield return CoShowRole(__instance,myInfo!, introInfo);
-        ShipStatus.Instance.StartSFX();
+        AmongUsLLImpl.ShipStatusInstance.StartSFX();
         OnDestroy();
         GameObject.Destroy(__instance.gameObject);
     }
@@ -85,7 +85,7 @@ public static class ShowIntroPatch
             __instance.overlayHandle = DestroyableSingleton<DualshockLightManager>.Instance.AllocateLight();
         }
 #endif
-        yield return ShipStatus.Instance.CosmeticsCache.PopulateFromPlayers();
+        yield return AmongUsLLImpl.ShipStatusInstance.CosmeticsCache.PopulateFromPlayers();
 
         Color fromC = introInfo.TeamColor.ToUnityColor();
         Color toC = introInfo.TeamFadeColor?.ToUnityColor() ?? fromC;
@@ -100,13 +100,13 @@ public static class ShowIntroPatch
         for (int i = 0; i < shownPlayers.Length; i++)
         {
             PlayerControl playerControl = shownPlayers[i];
-            if (playerControl)
+            if (playerControl.AsBoolFast())
             {
                 NetworkedPlayerInfo data = playerControl.Data;
                 if (data != null)
                 {
                     PoolablePlayer poolablePlayer = __instance.CreatePlayer(i, maxDepth, data, false);
-                    if (i == 0 && data.PlayerId == PlayerControl.LocalPlayer.PlayerId)
+                    if (i == 0 && data.PlayerId == AmongUsLLImpl.LocalPlayer.PlayerId)
                     {
                         __instance.ourCrewmate = poolablePlayer;
                     }
@@ -168,34 +168,37 @@ public static class ShowIntroPatch
     {
         var role = myInfo.Role;
         __instance.RoleText.text = introInfo.RoleName;
-        __instance.RoleBlurbText.text = introInfo.RoleBlurb;
-        __instance.RoleBlurbText.transform.localPosition = new(0.0965f, -2.12f, -36f);
-        __instance.RoleBlurbText.rectTransform.sizeDelta = new(12.8673f, 0.7f);
-        __instance.RoleBlurbText.alignment = TMPro.TextAlignmentOptions.Top;
+        var roleBlurbText = __instance.RoleBlurbText;
+        roleBlurbText.text = introInfo.RoleBlurb;
+        roleBlurbText.transform.localPosition = new(0.0965f, -2.12f, -36f);
+        roleBlurbText.rectTransform.sizeDelta = new(12.8673f, 0.7f);
+        roleBlurbText.alignment = TMPro.TextAlignmentOptions.Top;
 
         foreach(var m in myInfo.Modifiers)
         {
             string? mBlurb = m.DisplayIntroBlurb;
-            if (mBlurb != null) __instance.RoleBlurbText.text += "\n" + mBlurb;
+            if (mBlurb != null) roleBlurbText.text += "\n" + mBlurb;
         }
 
         var unityColor = introInfo.RoleColor.ToUnityColor();
         __instance.RoleText.color = unityColor;
         __instance.YouAreText.color = unityColor;
-        __instance.RoleBlurbText.color = unityColor;
-        SoundManager.Instance.PlaySound(PlayerControl.LocalPlayer.Data.Role.IntroSound, false, 1f, null);
+        roleBlurbText.color = unityColor;
+        SoundManager.Instance.PlaySound(AmongUsLLImpl.LocalPlayer.Data.Role.IntroSound, false, 1f, null);
         __instance.YouAreText.gameObject.SetActive(true);
         __instance.RoleText.gameObject.SetActive(true);
-        __instance.RoleBlurbText.gameObject.SetActive(true);
+        roleBlurbText.gameObject.SetActive(true);
         if (__instance.ourCrewmate == null)
         {
-            __instance.ourCrewmate = __instance.CreatePlayer(0, 1, PlayerControl.LocalPlayer.Data, false);
-            __instance.ourCrewmate.gameObject.SetActive(false);
+            var newOurCrewmate = __instance.CreatePlayer(0, 1, AmongUsLLImpl.LocalPlayer.Data, false);
+            newOurCrewmate.gameObject.SetActive(false);
+            __instance.ourCrewmate = newOurCrewmate;
         }
-        __instance.ourCrewmate.gameObject.SetActive(true);
-        __instance.ourCrewmate.transform.localPosition = new Vector3(0f, -1.05f, -18f);
-        __instance.ourCrewmate.transform.localScale = new Vector3(1f, 1f, 1f);
-        __instance.ourCrewmate.ToggleName(false);
+        var ourCrewmate = __instance.ourCrewmate;
+        ourCrewmate.gameObject.SetActive(true);
+        ourCrewmate.transform.localPosition = new Vector3(0f, -1.05f, -18f);
+        ourCrewmate.transform.localScale = new Vector3(1f, 1f, 1f);
+        ourCrewmate.ToggleName(false);
         yield return new WaitForSeconds(2.5f);
         __instance.YouAreText.gameObject.SetActive(false);
         __instance.RoleText.gameObject.SetActive(false);

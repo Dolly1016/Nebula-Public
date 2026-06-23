@@ -83,9 +83,9 @@ public class Jailer : DefinedSingleAbilityRoleTemplate<Jailer.Ability>, DefinedR
 
             if (acTokenChallenge != null)
             {
-                var pos = PlayerControl.LocalPlayer.GetTruePosition();
+                var pos = AmongUsLLImpl.LocalPlayer.GetTruePosition();
                 Collider2D? room = null;
-                foreach (var entry in ShipStatus.Instance.FastRooms)
+                foreach (var entry in AmongUsLLImpl.ShipStatusInstance.FastRooms)
                 {
                     if (entry.value.roomArea.OverlapPoint(pos))
                     {
@@ -102,7 +102,7 @@ public class Jailer : DefinedSingleAbilityRoleTemplate<Jailer.Ability>, DefinedR
         [Local]
         void Update(GameUpdateEvent ev)
         {
-            if(acTokenCommon2 != null && !MeetingHud.Instance && !ExileController.Instance)
+            if(acTokenCommon2 != null && !MeetingHud.Instance.AsBoolFast() && !ExileController.Instance.AsBoolFast())
             {
                 if(Helpers.AllDeadBodies().Any(d => d.transform.position.Distance(MyPlayer.VanillaPlayer.transform.position) < 5f))
                     acTokenCommon2.Value += Time.deltaTime;

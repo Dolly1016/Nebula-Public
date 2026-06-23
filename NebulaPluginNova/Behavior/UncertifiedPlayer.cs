@@ -56,13 +56,13 @@ namespace Nebula.Behavior
 
         private static void Handshake()
         {
-            byte id = PlayerControl.LocalPlayer.PlayerId;
-            RpcHandshake.Invoke((PlayerControl.LocalPlayer.PlayerId, NebulaPlugin.PluginEpoch, NebulaPlugin.PluginBuildNum, NebulaAddon.AddonHandshakeHash));
-            RpcShareAchievement.Invoke((PlayerControl.LocalPlayer.PlayerId, NebulaAchievementManager.MyTitleData));
+            byte id = AmongUsLLImpl.LocalPlayer.PlayerId;
+            RpcHandshake.Invoke((id, NebulaPlugin.PluginEpoch, NebulaPlugin.PluginBuildNum, NebulaAddon.AddonHandshakeHash));
+            RpcShareAchievement.Invoke((id, NebulaAchievementManager.MyTitleData));
             ModSingleton<ShowUp>.Instance?.ShareLocalAfk();
             DynamicPalette.RpcShareMyColor();
             NebulaAchievementManager.SendLastClearedAchievements();
-            if (AmongUsClient.Instance.AmHost)
+            if (AmongUsLLImpl.AmongUsClientInstance.AmHost)
             {
                 ModSingleton<ShowUp>.Instance?.ShareSocialSettingsAsHost();
                 ConfigurationValues.ShareAll();
@@ -77,7 +77,7 @@ namespace Nebula.Behavior
                 RpcRequireHandshake.Invoke();
             }
 
-            AmongUsClient.Instance.StartCoroutine(CoWaitAndRequireHandshake().WrapToIl2Cpp());
+            AmongUsLLImpl.AmongUsClientInstance.StartCoroutine(CoWaitAndRequireHandshake().WrapToIl2Cpp());
         }
 
     }

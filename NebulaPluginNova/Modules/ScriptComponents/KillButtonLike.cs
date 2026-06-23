@@ -17,21 +17,21 @@ internal class VanillaKillButtonHandler : IKillButtonLike
         this.killButton = killButton;
     }
 
-    float IKillButtonLike.Cooldown => PlayerControl.LocalPlayer.killTimer;
+    float IKillButtonLike.Cooldown => AmongUsLLImpl.LocalPlayer.killTimer;
 
     bool ILifespan.IsDeadObject => false;
 
     void IKillButtonLike.SetCooldown(float cooldown)
     {
         Patches.PlayerUpdatePatch.EditLocalKillTimer(cooldown);
-        PlayerControl.LocalPlayer.killTimer = cooldown;
+        AmongUsLLImpl.LocalPlayer.killTimer = cooldown;
     }
 
     void IKillButtonLike.StartCooldown(float ratio = 1f)
     {
         var cooldown = AmongUsLLImpl.Instance.VanillaKillCooldown * ratio;
         Patches.PlayerUpdatePatch.EditLocalKillTimer(cooldown);
-        PlayerControl.LocalPlayer.killTimer = cooldown;
+        AmongUsLLImpl.LocalPlayer.killTimer = cooldown;
     }
     bool IKillButtonLike.IsShown => GamePlayer.LocalPlayer?.ShowKillButton ?? false;
 }

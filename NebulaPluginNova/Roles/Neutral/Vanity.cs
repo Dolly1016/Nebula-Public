@@ -125,7 +125,7 @@ internal class Vanity : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 
                 GameOperatorManager.Instance?.Subscribe<MeetingStartEvent>(ev =>
                 {
-                    if (lockSprite && NebulaGameManager.Instance!.AllPlayerInfo.Any(p => p.IsDead))
+                    if (lockSprite.AsBoolFast() && NebulaGameManager.Instance!.AllPlayerInfo.Any(p => p.IsDead))
                     {
                         GameObject.Destroy(lockSprite);
                         lockSprite = null;

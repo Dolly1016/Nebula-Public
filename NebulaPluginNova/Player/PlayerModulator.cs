@@ -30,9 +30,9 @@ public abstract class TimeLimitedModulator
     /// <returns></returns>
     virtual public bool HasCategorizedAttribute(IPlayerAttribute attribute, GamePlayer watcher) => CanBeAware && HasAttribute(attribute);
 
-    public void Update()
+    public void Update(float deltaTime)
     {
-        if (Timer < 9999f) Timer -= Time.deltaTime;
+        if (Timer < 9999f) Timer -= deltaTime;
     }
 
     public void OnMeetingStart()
@@ -69,10 +69,10 @@ public class AttributeModulator : TimeLimitedModulator
 
 public class SizeModulator : AttributeModulator
 {
-    public Vector2 Size;
+    public VVector2 Size;
     public bool Smooth;
 
-    public SizeModulator(Vector2 size, float timer, bool canPassMeeting, int priority, string? duplicateTag = null, bool canBeAware = true, bool smooth = true) : base(PlayerAttributes.Size, timer, canPassMeeting, priority, duplicateTag, canBeAware)
+    public SizeModulator(VVector2 size, float timer, bool canPassMeeting, int priority, string? duplicateTag = null, bool canBeAware = true, bool smooth = true) : base(PlayerAttributes.Size, timer, canPassMeeting, priority, duplicateTag, canBeAware)
     {
         Size = size;
         Smooth = smooth;
@@ -102,14 +102,14 @@ public class SpeedModulator : TimeLimitedModulator
         public void SetDirection(Vector4 dir)
         {
             Modulator.DirectionalNum = dir;
-            Modulator.AbsDirectionalNum = new(new Vector2(dir.x, dir.y).magnitude, new Vector2(dir.z, dir.w).magnitude);
+            Modulator.AbsDirectionalNum = new(new VVector2(dir.x, dir.y).Magnitude, new VVector2(dir.z, dir.w).Magnitude);
         }
     }
 
     public float Num { get; private set; }
     public float AbsNum { get; private set; }
     public Vector4 DirectionalNum { get; private set; }
-    public Vector2 AbsDirectionalNum { get; private set; }
+    public VVector2 AbsDirectionalNum { get; private set; }
     public bool IsMultiplier { get; private set; }
     public override bool CanBeAware => canBeAware;
     private bool canBeAware = true;
@@ -141,14 +141,14 @@ public class SpeedModulator : TimeLimitedModulator
     }
 
 
-    public SpeedModulator(float? num, Vector2 dirNum, bool isMultiplier, float timer, bool canPassMeeting, int priority, string? duplicateTag = null, bool canBeAware = true) : this(num, new Vector4(dirNum.x, 0f, 0f, dirNum.y), isMultiplier, timer, canPassMeeting, priority, duplicateTag, canBeAware) { }
+    public SpeedModulator(float? num, VVector2 dirNum, bool isMultiplier, float timer, bool canPassMeeting, int priority, string? duplicateTag = null, bool canBeAware = true) : this(num, new Vector4(dirNum.x, 0f, 0f, dirNum.y), isMultiplier, timer, canPassMeeting, priority, duplicateTag, canBeAware) { }
 
     public SpeedModulator(float? num, Vector4 dirNum, bool isMultiplier, float timer, bool canPassMeeting, int priority, string? duplicateTag = null, bool canBeAware = true) : base(timer, canPassMeeting, priority, duplicateTag)
     {
         this.Num = num ?? 10000f;
-        this.AbsNum = Mathf.Abs(this.Num);
+        this.AbsNum = Mathn.Abs(this.Num);
         this.DirectionalNum = dirNum;
-        this.AbsDirectionalNum = new(new Vector2(dirNum.x, dirNum.y).magnitude, new Vector2(dirNum.z, dirNum.w).magnitude);
+        this.AbsDirectionalNum = new(new VVector2(dirNum.x, dirNum.y).Magnitude, new VVector2(dirNum.z, dirNum.w).Magnitude);
         this.IsMultiplier = isMultiplier;
         this.canBeAware = canBeAware;
     }

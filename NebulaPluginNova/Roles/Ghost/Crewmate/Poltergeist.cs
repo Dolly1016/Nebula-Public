@@ -52,12 +52,12 @@ public class Poltergeist : DefinedGhostRoleTemplate, DefinedGhostRole
 
     static private IEnumerator CoMoveDeadBody(DeadBody? deadBody, Vector2 pos)
     {
-        if (deadBody == null) yield break;
+        if (!deadBody.AsBoolFast()) yield break;
 
         float p = 0f;
         Vector2 beginPos = deadBody.transform.position;
 
-        while (deadBody)
+        while (deadBody.AsBoolFast())
         {
             p += Time.deltaTime * 0.85f;
             if (!(p < 1f)) break;
@@ -70,7 +70,7 @@ public class Poltergeist : DefinedGhostRoleTemplate, DefinedGhostRole
             yield return null;
         }
 
-        if(deadBody) deadBody.transform.position = pos.AsVector3(pos.y / 1000f);
+        if(deadBody.AsBoolFast()) deadBody.transform.position = pos.AsVector3(pos.y / 1000f);
 
         yield break;
     }

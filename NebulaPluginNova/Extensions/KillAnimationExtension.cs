@@ -39,7 +39,7 @@ public static class KillAnimationExtension
             }
             deadBody.enabled = false;
             deadBody.ParentId = realTarget.PlayerId;
-            foreach (var r in deadBody.bodyRenderers) realTarget.VanillaPlayer.SetPlayerMaterialColors(r);
+            foreach (var r in deadBody.bodyRenderers.GetFastEnumerator()) realTarget.VanillaPlayer.SetPlayerMaterialColors(r);
             deadBody.gameObject.ForEachAllChildren(c => c.layer = LayerExpansion.GetPlayersLayer());
 
             realTarget.VanillaPlayer.SetPlayerMaterialColors(deadBody.bloodSplatter);
@@ -99,7 +99,6 @@ public static class KillAnimationExtension
             if (killCharacteristics.HasFlag(KillCharacteristics.FlagLeftDeadBody))
             {
                 targetDeadBody = GenerateDisableDeadBody(1, pos);
-                ManagedEffects.RpcDisappearEffect.LocalInvoke((realTarget.Position.AsVector3(-1f), LayerExpansion.GetPlayersLayer()));
             }
             else
             {
@@ -119,9 +118,9 @@ public static class KillAnimationExtension
         {
             cam.Locked = true;
             ConsoleJoystick.SetMode_Task();
-            if (PlayerControl.LocalPlayer.AmOwner)
+            if (AmongUsLLImpl.LocalPlayer.AmOwner) //恒真では？
             {
-                PlayerControl.LocalPlayer.MyPhysics.inputHandler.enabled = true;
+                AmongUsLLImpl.LocalPlayer.MyPhysics.inputHandler.enabled = true;
             }
         }
 

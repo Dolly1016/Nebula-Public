@@ -31,7 +31,7 @@ public static class PlayerParticleUpdatePatch
             __instance.velocity = __instance.velocity.Rotate(angle * Time.deltaTime);
         }
 
-        if (MainMenuManagerInstance.MainMenu)
+        if (MainMenuManagerInstance.MainMenu.AsBoolFast())
         {
             var transform = MainMenuManagerInstance.MainMenu!.screenMask.transform;
             var xScale = transform.lossyScale.x * 0.5f + 1.6f;
@@ -65,7 +65,7 @@ public static class PlayerParticlesPlacePatch
         curveDic[part.transform.GetSiblingIndex()] = GetRandomAccelAngle();
         //ランダムに一人の向きを変える
         curveDic[System.Random.Shared.Next(__instance.transform.childCount)] = GetRandomAccelAngle();
-        if (MainMenuManagerInstance.MainMenu && !initial)
+        if (MainMenuManagerInstance.MainMenu.AsBoolFast() && !initial)
         {
             var transform = MainMenuManagerInstance.MainMenu!.screenMask.transform;
             var xScale = transform.lossyScale.x * 0.5f + 1.6f;

@@ -103,7 +103,7 @@ public static class MeetingHudExtension
 
     public static void ReflectVotingMask()
     {
-        foreach (var p in MeetingHud.Instance.playerStates)
+        foreach (var p in MeetingHud.Instance.playerStates.GetFastEnumerator())
         {
             if (((1 << p.TargetPlayerId) & VoteForMask) != 0)
                 p.SetEnabled();
@@ -119,7 +119,7 @@ public static class MeetingHudExtension
 
     public static void UpdatePlayerState(this MeetingHud meetingHud)
     {
-        foreach (PlayerVoteArea pva in meetingHud.playerStates)
+        foreach (PlayerVoteArea pva in meetingHud.playerStates.GetFastEnumerator())
         {
             var p = NebulaGameManager.Instance?.GetPlayer(pva.TargetPlayerId);
             bool isDead = p == null || p.IsDead || p.WillDie;
@@ -146,7 +146,7 @@ public static class MeetingHudExtension
         meetingHud.ClearVote();
 
         meetingHud.UpdatePlayerState();
-        foreach (PlayerVoteArea voter in meetingHud.playerStates)
+        foreach (PlayerVoteArea voter in meetingHud.playerStates.GetFastEnumerator())
         {
             voter.ThumbsDown.enabled = false;
             voter.UnsetVote();
@@ -156,7 +156,7 @@ public static class MeetingHudExtension
 
         GameOperatorManager.Instance?.Run(new MeetingResetEvent());
 
-        if (AmongUsClient.Instance.AmHost) meetingHud.CheckForEndVoting();
+        if (AmongUsLLImpl.AmongUsClientInstance.AmHost) meetingHud.CheckForEndVoting();
     }
 
     public static Dictionary<byte, int> WeightMap= new();
@@ -242,25 +242,27 @@ public static class MeetingHudExtension
         "CaseVote",
         (message, _) =>
         {
+            MeetingHud hud = MeetingHud.Instance;
+
             WeightMap[message.source] = message.weight;
-            if (PlayerControl.LocalPlayer.PlayerId == message.source) MeetingHud.Instance.state = MeetingHud.VoteStates.Voted;
+            if (AmongUsLLImpl.LocalPlayer.PlayerId == message.source) hud.state = MeetingHud.VoteStates.Voted;
 
             GameOperatorManager.Instance?.Run(new PlayerVoteCastEvent(GamePlayer.GetPlayer(message.source)!, GamePlayer.GetPlayer(message.target), message.weight));
 
-            if (AmongUsClient.Instance.AmHost)
+            if (AmongUsLLImpl.AmongUsClientInstance.AmHost)
             {
                 //MeetingHud.CastVote
                 NetworkedPlayerInfo playerById = GameData.Instance.GetPlayerById(message.source);
-                var playerVoteArea = MeetingHud.Instance.GetPlayer(message.source);
+                var playerVoteArea = hud.GetPlayer(message.source);
                 
                 if (playerVoteArea != null && !playerVoteArea.AmDead && !playerVoteArea.DidVote)
                 {
-                    if (playerById.AmOwner || AmongUsClient.Instance.NetworkMode != NetworkModes.LocalGame) SoundManager.Instance.PlaySound(MeetingHud.Instance.VoteLockinSound, false, 1f, null);
+                    if (playerById.AmOwner || AmongUsClient.Instance.NetworkMode != NetworkModes.LocalGame) SoundManager.Instance.PlaySound(hud.VoteLockinSound, false, 1f, null);
                     
                     playerVoteArea.SetVote(message.target);
-                    MeetingHud.Instance.SetDirtyBit(1U);
-                    MeetingHud.Instance.CheckForEndVoting();
-                    if(GeneralConfigurations.ShowVoteStateOption) PlayerControl.LocalPlayer.RpcSendChatNote(message.source, ChatNoteTypes.DidVote);
+                    hud.SetDirtyBit(1U);
+                    hud.CheckForEndVoting();
+                    if(GeneralConfigurations.ShowVoteStateOption) AmongUsLLImpl.LocalPlayer.RpcSendChatNote(message.source, ChatNoteTypes.DidVote);
                 }
             }
 
@@ -287,7 +289,7 @@ public static class MeetingHudExtension
     }
     private static readonly RemoteProcess<(GamePlayer player, GamePlayer? deadBody, ReportType reportType, bool canInvokeInSabo, bool consumeEmergencyButton)> RpcModCmdReportDeadBody = new("ReportDissolvedDeadBody", (message, _) =>
     {
-        if (AmongUsClient.Instance.AmHost) ModReportDeadBody(message.player.VanillaPlayer, GameData.Instance.GetPlayerById(message.deadBody?.PlayerId ?? 255), message.reportType, message.canInvokeInSabo, message.consumeEmergencyButton);
+        if (AmongUsLLImpl.AmongUsClientInstance.AmHost) ModReportDeadBody(message.player.VanillaPlayer, GameData.Instance.GetPlayerById(message.deadBody?.PlayerId ?? 255), message.reportType, message.canInvokeInSabo, message.consumeEmergencyButton);
     });
 
     private static readonly RemoteProcess<(GamePlayer reporter, GamePlayer? dead, ReportType reportType)> RpcStartMeeting = new("ReportDeadBody", (message, _) =>
@@ -299,17 +301,17 @@ public static class MeetingHudExtension
     internal static void ModReportDeadBody(PlayerControl reporter, NetworkedPlayerInfo? deadBody, ReportType reportType, bool canInvokeInSabo, bool consumeEmergencyButton)
     {
         //会議室が開くか否かのチェック
-        if (AmongUsClient.Instance.IsGameOver || MeetingHud.Instance) return;
+        if (AmongUsLLImpl.AmongUsClientInstance.IsGameOver || MeetingHud.Instance.AsBoolFast()) return;
 
         //フェイクタスクでない緊急タスクがある場合ボタンは押せない
         if (!canInvokeInSabo &&
-            PlayerControl.LocalPlayer.myTasks.Find((Il2CppSystem.Predicate<PlayerTask>)
+            AmongUsLLImpl.LocalPlayer.myTasks.Find((Il2CppSystem.Predicate<PlayerTask>)
             (task => PlayerTask.TaskIsEmergency(task) &&
                 (NebulaGameManager.Instance?.LocalFakeSabotage?.MyFakeTasks.All(
-                    type => ShipStatus.Instance.GetSabotageTask(type)?.TaskType != task.TaskType) ?? true))) != null) return;
+                    type => AmongUsLLImpl.ShipStatusInstance.GetSabotageTask(type)?.TaskType != task.TaskType) ?? true))) != null) return;
 
         if (reporter.Data.IsDead) return;
-        if (!AmongUsClient.Instance.AmHost) return;
+        if (!AmongUsLLImpl.AmongUsClientInstance.AmHost) return;
 
         HudManager.Instance.OpenMeetingRoom(reporter);
 
@@ -326,19 +328,22 @@ public static class MeetingHudExtension
 
     private static IEnumerator ModCoStartMeeting(PlayerControl reporter, NetworkedPlayerInfo? deadBody, ReportType reportType)
     {
-        while (!MeetingHud.Instance) yield return null;
+        while (!MeetingHud.Instance.AsBoolFast()) yield return null;
         
         MeetingRoomManager.Instance.RemoveSelf();
         DestroyableSingleton<HudManager>.Instance.InitMap();
-        MapBehaviour.Instance.SetPreMeetingPosition(PlayerControl.LocalPlayer.transform.position, false);
+        MapBehaviour.Instance.SetPreMeetingPosition(AmongUsLLImpl.LocalPlayer.transform.position, false);
         foreach(var player in GamePlayer.AllPlayers)
         {
-            if (player.VanillaPlayer) player.VanillaPlayer.ResetForMeeting();
+            if (player.VanillaPlayer.AsBoolFast()) player.VanillaPlayer.ResetForMeeting();
         }
 
-        if (MapBehaviour.Instance) MapBehaviour.Instance.Close();
-        if (Minigame.Instance) Minigame.Instance.ForceClose();
-        ShipStatus.Instance.OnMeetingCalled();
+        var map = MapBehaviour.Instance;
+        if (map.AsBoolFast()) map.Close();
+
+        var minigame = Minigame.Instance;
+        if (minigame.AsBoolFast()) minigame.ForceClose();
+        AmongUsLLImpl.ShipStatusInstance.OnMeetingCalled();
         KillAnimation.SetMovement(reporter, true);
         GameData.TimeLastMeetingStarted = Time.realtimeSinceStartup;
 
@@ -363,7 +368,7 @@ public static class MeetingHudExtension
         var reporterData = reporter.Data;
 
         bool isEmergencyMeeting = reportType == ReportType.EmergencyMeeting;
-        MeetingCalledAnimation meetingCalledAnimation = isEmergencyMeeting ? ShipStatus.Instance.EmergencyOverlay : ShipStatus.Instance.ReportOverlay;
+        MeetingCalledAnimation meetingCalledAnimation = isEmergencyMeeting ? AmongUsLLImpl.ShipStatusInstance.EmergencyOverlay : AmongUsLLImpl.ShipStatusInstance.ReportOverlay;
         NetworkedPlayerInfo? networkedPlayerInfo = isEmergencyMeeting ? reporterData : deadBody;
         NetworkedPlayerInfo.PlayerOutfit outfit = NebulaGameManager.Instance!.UnknownOutfit.outfit;
         if (reportType != ReportType.ReportDissolvedBody && networkedPlayerInfo != null) outfit = networkedPlayerInfo.DefaultOutfit;
@@ -396,7 +401,7 @@ public static class MeetingHudExtension
             if(cosmetics != null)pva.SetCosmetics(cosmetics);
             else
             {
-                pva.Background.sprite = ShipStatus.Instance.CosmeticsCache.GetNameplate("nameplate_NoPlate").Image;
+                pva.Background.sprite = AmongUsLLImpl.ShipStatusInstance.CosmeticsCache.GetNameplate("nameplate_NoPlate").Image;
 
                 pva.PlayerIcon.UpdateFromPlayerOutfit(NebulaGameManager.Instance!.UnknownOutfit.outfit, PlayerMaterial.MaskType.ComplexUI, false, false);
                 pva.PlayerIcon.ToggleName(false);
@@ -439,10 +444,10 @@ public static class MeetingHudExtension
     internal static void ModStartMeeting(PlayerControl reporter, NetworkedPlayerInfo? deadBody, ReportType reportType)
     {
         //会議前の位置を共有する
-        PlayerModInfo.RpcSharePreMeetingPoint.Invoke((PlayerControl.LocalPlayer.PlayerId, PlayerControl.LocalPlayer.transform.position));
+        PlayerModInfo.RpcSharePreMeetingPoint.Invoke((AmongUsLLImpl.LocalPlayer.PlayerId, AmongUsLLImpl.LocalPlayer.transform.position));
 
         //ShipStatus.StartMeeting ここから
-        ShipStatus.Instance.StartCoroutine(ModCoStartMeeting(reporter, deadBody, reportType).WrapToIl2Cpp());
+        AmongUsLLImpl.ShipStatusInstance.StartCoroutine(ModCoStartMeeting(reporter, deadBody, reportType).WrapToIl2Cpp());
         //ShipStatus.StartMeeting ここまで
         if (reporter.AmOwner)
         {
@@ -458,8 +463,8 @@ public static class MeetingHudExtension
 
     internal static RemoteProcess<int> RequestEditDiscussionTime = new("RequestEditDiscussionTime", (sec, _) =>
     {
-        if (!AmongUsClient.Instance.AmHost) return;
-        if(MeetingHud.Instance && MeetingHudExtension.LeftTime > 0f) EditDiscussionTime!.Invoke((sec, MeetingHudExtension.DiscussionTimer > 0f));
+        if (!AmongUsLLImpl.AmongUsClientInstance.AmHost) return;
+        if(MeetingHud.Instance.AsBoolFast() && MeetingHudExtension.LeftTime > 0f) EditDiscussionTime!.Invoke((sec, MeetingHudExtension.DiscussionTimer > 0f));
     });
 
     private static RemoteProcess<(int sec, bool discussion)> EditDiscussionTime = new("EditDiscussionTime", (message, _) =>
@@ -495,9 +500,9 @@ public static class MeetingHudExtension
     internal static void RequestForceSkip(bool keepCurrentVoting) => RpcRequestForceSkip.Invoke(keepCurrentVoting);
     private static RemoteProcess<bool> RpcRequestForceSkip = new("RequestForceSkip", (keepCurrentVoting, _) =>
     {
-        if (!AmongUsClient.Instance.AmHost) return;
+        if (!AmongUsLLImpl.AmongUsClientInstance.AmHost) return;
         var meetingHud = MeetingHud.Instance;
-        if (!meetingHud) return;
+        if (!meetingHud.AsBoolFast()) return;
         var state = meetingHud.state;
         if (state == MeetingHud.VoteStates.Voted || state == MeetingHud.VoteStates.NotVoted)
         {

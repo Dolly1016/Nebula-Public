@@ -14,7 +14,7 @@ internal class MeetingOverlayHolder : AbstractModule<Virial.Game.Game>, OverlayH
     static Image NotificationSprite = SpriteLoader.FromResource("Nebula.Resources.MeetingNotificationDot.png", 135f);
     static public Image[] IconsSprite = Helpers.Sequential(IconSprite.Length).Select(num => new WrapSpriteLoader(()=>IconSprite.GetSprite(num))).ToArray();
 
-    List<(GUIWidgetSupplier overlay, Image icon, UnityEngine.Color color,Variable<bool> isNew)> icons = new();
+    List<(GUIWidgetSupplier overlay, Image icon, Virial.Color color,Variable<bool> isNew)> icons = new();
     Transform? shower;
 
     //常駐エンティティ
@@ -29,11 +29,11 @@ internal class MeetingOverlayHolder : AbstractModule<Virial.Game.Game>, OverlayH
     {
         if (once)
         {
-            Generate(overlay, icon, color.ToUnityColor(), null);
+            Generate(overlay, icon, color, null);
         }
         else
         {
-            icons.Add((overlay, icon, color.ToUnityColor(), new Variable<bool>() { Value = true }));
+            icons.Add((overlay, icon, color, new Variable<bool>() { Value = true }));
             Generate(icons.Count - 1);
         }
     }
@@ -48,7 +48,7 @@ internal class MeetingOverlayHolder : AbstractModule<Virial.Game.Game>, OverlayH
         Generate(icon.overlay, icon.icon, icon.color, icon.isNew);
     }
     
-    void Generate(GUIWidgetSupplier overlay, Image icon, UnityEngine.Color color, Variable<bool>? isNew)
+    void Generate(GUIWidgetSupplier overlay, Image icon, Virial.Color color, Variable<bool>? isNew)
     { 
         if (!shower) return;
 
@@ -56,7 +56,7 @@ internal class MeetingOverlayHolder : AbstractModule<Virial.Game.Game>, OverlayH
 
         var renderer = UnityHelper.CreateObject<SpriteRenderer>("Icon", shower, new(-3.6f + showIndex * 0.48f, 0f, 0f));
         renderer.sprite = IconSprite.GetSprite(0);
-        renderer.color = Color.Lerp(color,Color.white,0.3f);
+        renderer.color = Virial.Color.Lerp(color, Virial.Color.White, 0.3f).ToUnityColor();
 
         var iconInner = UnityHelper.CreateObject<SpriteRenderer>("Inner", renderer.transform, new(0f, 0f, -1f));
         iconInner.sprite = icon.GetSprite();

@@ -13,12 +13,17 @@ global using UnityEngine;
 global using Virial.Attributes;
 global using Virial.Helpers;
 global using Virial.Utilities;
+global using Nebula.Dev;
 global using Color = UnityEngine.Color;
 global using GamePlayer = Virial.Game.Player;
 global using GUI = Nebula.Modules.GUIWidget.NebulaGUIWidgetEngine;
 global using GUIWidget = Virial.Media.GUIWidget;
 global using Image = Virial.Media.Image;
 global using Timer = Nebula.Modules.ScriptComponents.TimerImpl;
+global using VVector2 = Virial.Compat.Vector2;
+global using VVector3 = Virial.Compat.Vector3;
+global using VVector4 = Virial.Compat.Vector4;
+global using VColor = Virial.Color;
 using AmongUs.Data.Player;
 using BepInEx;
 using BepInEx.Configuration;
@@ -26,6 +31,7 @@ using BepInEx.Unity.IL2CPP;
 using Cpp2IL.Core.Extensions;
 using Hazel.Udp;
 using Interstellar;
+using Nebula.Dev;
 using Nebula.Modules.CustomMap;
 using Nebula.VisualProgramming;
 using System.IO.Compression;
@@ -55,12 +61,12 @@ public class NebulaPlugin
     public const string PluginName = "NebulaOnTheShip";
     public const string PluginVersion = "3.3.0.0";
 
-    public const string VisualVersion = "v3.3";
+    public const string VisualVersion = "v3.3.0.3";
     //public const string VisualVersion = "Snapshot 26.06.07a";
     //public const string VisualVersion = "Addon Loading DEMO 2";
 
     public const string PluginEpochStr = "108";
-    public const string PluginBuildNumStr = "1598";
+    public const string PluginBuildNumStr = "1601";
     public static readonly int PluginEpoch = int.Parse(PluginEpochStr);
     public static readonly int PluginBuildNum = int.Parse(PluginBuildNumStr);
     public const bool GuardVanillaLangData = false;
@@ -207,6 +213,7 @@ public class NebulaPlugin
                 residentObj.AddComponent<ResidentBehaviour>().MarkDontUnload();
                 residentObj.MarkDontUnload();
             }
+            AmongUsLLImpl.Instance?.OnSceneChanged();
         });
 
         SetUpNebulaImpl();
@@ -216,9 +223,7 @@ public class NebulaPlugin
     {
         NebulaAPI.instance = new NebulaImpl();
 
-        LogUtils.WriteToConsole($"Incremental GC: {GarbageCollector.isIncremental}");
-        LogUtils.WriteToConsole($"GC time slice: {GarbageCollector.incrementalTimeSliceNanoseconds} ns");
-        LogUtils.WriteToConsole($"GC time slice: {GarbageCollector.incrementalTimeSliceNanoseconds / 1_000_000.0} ms");
+        NebulaProfiler.InstallDefault();
     }
 }
 

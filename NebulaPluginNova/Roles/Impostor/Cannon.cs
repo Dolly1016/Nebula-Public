@@ -115,12 +115,13 @@ public class Cannon : DefinedSingleAbilityRoleTemplate<Cannon.Ability>, DefinedR
                 {
                     NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, GameActionTypes.CannonMarkPlacementAction);
 
+                    var localPos = AmongUsLLImpl.LocalPlayer.transform.localPosition;
                     var mark = NebulaSyncObject.LocalInstantiate(CannonMark.MyTag, [
-                                PlayerControl.LocalPlayer.transform.localPosition.x,
-                                PlayerControl.LocalPlayer.transform.localPosition.y - 0.25f
+                                localPos.x,
+                                localPos.y - 0.25f
                             ]).SyncObject! as NebulaSyncStandardObject;
                     Marks.Add(mark!);
-                    if (mapLayer) mapLayer.AddMark(mark!, () => Marks.Remove(mark!));
+                    if (mapLayer.AsBoolFast()) mapLayer.AddMark(mark!, () => Marks.Remove(mark!));
                     markButton.StartCoolDown();
                 };
                 markButton.ShowUsesIcon(0, " ");
@@ -157,9 +158,9 @@ public class Cannon : DefinedSingleAbilityRoleTemplate<Cannon.Ability>, DefinedR
         [Local]
         void OnOpenMap(AbstractMapOpenEvent ev)
         {
-            if (!MeetingHud.Instance && ev is MapOpenNormalEvent && !IsUsurped)
+            if (!MeetingHud.Instance.AsBoolFast() && ev is MapOpenNormalEvent && !IsUsurped)
             {
-                if (!mapLayer)
+                if (!mapLayer.AsBoolFast())
                 {
                     mapLayer = UnityHelper.CreateObject<CannonMapLayer>("CannonLayer", MapBehaviour.Instance.transform, new(0, 0, -1f));
                     mapLayer.MyCannon = this;
@@ -170,7 +171,7 @@ public class Cannon : DefinedSingleAbilityRoleTemplate<Cannon.Ability>, DefinedR
             }
             else
             {
-                if (mapLayer) mapLayer.gameObject.SetActive(false);
+                if (mapLayer.AsBoolFast()) mapLayer.gameObject.SetActive(false);
             }
         }
 
@@ -376,7 +377,7 @@ public class Cannon : DefinedSingleAbilityRoleTemplate<Cannon.Ability>, DefinedR
         }
         NebulaManager.Instance.StartCoroutine(CoShowSmoke().WrapToIl2Cpp());
 
-        var myPlayer = PlayerControl.LocalPlayer;
+        var myPlayer = AmongUsLLImpl.LocalPlayer;
         var modPlayer = myPlayer.GetModInfo()!;
 
         //空気砲の対象外
@@ -389,10 +390,11 @@ public class Cannon : DefinedSingleAbilityRoleTemplate<Cannon.Ability>, DefinedR
 
         //ミニゲームを開いている場合は閉じてから考える
         bool isPlayerTask = false;
-        if (Minigame.Instance)
+        var minigame = Minigame.Instance;
+        if (minigame.AsBoolFast())
         {
-            if (Minigame.Instance.MyNormTask) isPlayerTask = true;
-            Minigame.Instance.ForceClose();
+            if (minigame.MyNormTask.AsBoolFast()) isPlayerTask = true;
+            minigame.ForceClose();
             if(CanBlowPlayerUsingConsoleOption) Minigame.Instance = null;
         }
         if (myPlayer.CanMove)

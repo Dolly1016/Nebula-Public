@@ -27,10 +27,12 @@ public class ShowPlayersMapLayer : MonoBehaviour
 
     public void Awake()
     {
-        darkIconPool = new(ShipStatus.Instance.MapPrefab.HerePoint, transform);
+        var herePoint = AmongUsLLImpl.ShipStatusInstance.MapPrefab.HerePoint;
+
+        darkIconPool = new(herePoint, transform);
         darkIconPool.OnInstantiated = icon => PlayerMaterial.SetColors(new Color(0.3f, 0.3f, 0.3f), icon);
 
-        lightIconPool = new(ShipStatus.Instance.MapPrefab.HerePoint, transform);
+        lightIconPool = new(herePoint, transform);
         lightIconPool.OnInstantiated = icon => PlayerMaterial.SetColors(new Color(1f, 1f, 1f), icon);
     }
 

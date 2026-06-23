@@ -17,11 +17,12 @@ public class EastAsianFontChanger
         var fonts = UnityEngine.Object.FindObjectsOfTypeIncludingAssets(Il2CppType.Of<TMPro.TMP_FontAsset>());
         foreach (var font in fonts)
         {
-            if (font.name == "NotoSansJP-Regular SDF")
+            var fontName = font.name;
+            if (fontName == "NotoSansJP-Regular SDF")
                 FontJP = font.CastFast<TMPro.TMP_FontAsset>();
-            if (font.name == "NotoSansSC-Regular SDF")
+            if (fontName == "NotoSansSC-Regular SDF")
                 FontSC = font.CastFast<TMPro.TMP_FontAsset>();
-            if (font.name == "NotoSansKR-Regular SDF")
+            if (fontName == "NotoSansKR-Regular SDF")
                 FontKR = font.CastFast<TMPro.TMP_FontAsset>();
         }
     }

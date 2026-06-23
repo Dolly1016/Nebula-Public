@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using Virial.Achievements;
 using Virial.Assignable;
 using Virial.Attributes;
 using Virial.DI;
@@ -99,6 +100,11 @@ public interface NebulaPreprocessor
     /// </summary>
     /// <returns></returns>
     UseButtonAlternative RegisterUseButtonAlternative(Virial.Media.Image buttonImage, Action onUsed);
+
+    /// <summary>
+    /// 称号を登録するAPI群を返します。
+    /// </summary>
+    ITitlesRegister Titles { get; }
 
     public bool FinishPreprocess { get; }
 }

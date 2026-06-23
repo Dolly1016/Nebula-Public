@@ -77,7 +77,7 @@ public class Collator : DefinedSingleAbilityRoleTemplate<Collator.Ability>, HasC
                 if (player != null)
                 {
                     allSamples[i].sample.gameObject.SetActive(true);
-                    allSamples[i].sample.color = DynamicPalette.PlayerColors[player.PlayerId];
+                    allSamples[i].sample.color = DynamicPalette.PlayerColors[player.PlayerId].ToUnityColor();
                 }
                 else allSamples[i].sample.gameObject.SetActive(false);
             }
@@ -88,7 +88,7 @@ public class Collator : DefinedSingleAbilityRoleTemplate<Collator.Ability>, HasC
                 (sharedResults.Count == 0 ? 
                     ProgressGUI.OneLineText(Language.Translate("role.collator.gui.results.zero")) : 
                     ProgressGUI.Holder(
-                    sharedResults.Select(result => ProgressGUI.OneLineText(result.player1.ColoredName + ", " + result.player2.ColoredName + " ⇒" + (result.matched ? Language.Translate("role.collator.ui.matched").Color(Color.green) : Language.Translate("role.collator.ui.unmatched").Color(Color.red))))
+                    sharedResults.Select(result => ProgressGUI.OneLineText(result.player1.ColoredName + ", " + result.player2.ColoredName + " ⇒" + (result.matched ? Language.Translate("role.collator.ui.matched").Color(VColor.Green) : Language.Translate("role.collator.ui.unmatched").Color(VColor.Red))))
                 )).Move(new(0.1f, 0f))
             );
 
@@ -119,7 +119,7 @@ public class Collator : DefinedSingleAbilityRoleTemplate<Collator.Ability>, HasC
                     + "  " + player1.player.ColoredName + "<br>"
                     + "  " + player2.player.ColoredName + "<br>"
                     + "<br>"
-                    + Language.Translate("role.collator.ui.result") + ": " + (matched ? Language.Translate("role.collator.ui.matched").Color(Color.green) : Language.Translate("role.collator.ui.unmatched").Color(Color.red)).Bold()
+                    + Language.Translate("role.collator.ui.result") + ": " + (matched ? Language.Translate("role.collator.ui.matched").Color(VColor.Green) : Language.Translate("role.collator.ui.unmatched").Color(VColor.Red)).Bold()
                 )
             ), MeetingOverlayHolder.IconsSprite[2], MyRole.RoleColor);
             ShareResult.Invoke((MyPlayer, player1.player, player2.player, matched));

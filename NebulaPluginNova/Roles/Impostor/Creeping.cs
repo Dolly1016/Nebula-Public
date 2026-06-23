@@ -152,7 +152,7 @@ internal class Creeping : DefinedSingleAbilityRoleTemplate<Creeping.Ability>, Ha
                     depoisonGame.Console = null;
                     depoisonGame.Begin(null!);
                 },
-                OutlineColor = Color.yellow
+                OutlineColor = UnityEngine.Color.yellow
             };
 
         }
@@ -230,8 +230,8 @@ internal class Creeping : DefinedSingleAbilityRoleTemplate<Creeping.Ability>, Ha
         {
             if (MyCreeping != null)
             {
-                if (ExileController.Instance) return;
-                if (MeetingHud.Instance && MeetingHud.Instance.state >= MeetingHud.VoteStates.Results) return;
+                if (ExileController.Instance.AsBoolFast()) return;
+                if (MeetingHud.Instance.AsBoolFast() && MeetingHud.Instance.state >= MeetingHud.VoteStates.Results) return;
 
                 timer -= ev.DeltaTime;
                 if (timer < 0f)
@@ -257,7 +257,7 @@ internal class Creeping : DefinedSingleAbilityRoleTemplate<Creeping.Ability>, Ha
             {
                 var found = myPoisonedPlayers[i];
                 var left = PoisonDelayOption - ((NebulaGameManager.Instance?.CurrentTime ?? 0f) - found.time);
-                if (left > 0f) ev.Append(StringExtensions.Color(" (" + left.ToString("F1") + "s)", Color.gray));
+                if (left > 0f) ev.Append((" (" + left.ToString("F1") + "s)").Color(VColor.Gray));
             }
         }
     }

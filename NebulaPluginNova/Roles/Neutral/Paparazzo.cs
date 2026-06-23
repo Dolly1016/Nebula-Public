@@ -59,7 +59,7 @@ public class PaparazzoShot : MonoBehaviour
         {
             var mouseInfo = PlayerModInfo.LocalMouseInfo;
             var dis = Mathf.Min(mouseInfo.distance, 2.4f + Mathf.Abs(Mathf.Cos(mouseInfo.angle)) * 1.7f);
-            var targetPos = PlayerControl.LocalPlayer.transform.localPosition + new Vector3(Mathf.Cos(mouseInfo.angle), Mathf.Sin(mouseInfo.angle)) * dis;
+            var targetPos = AmongUsLLImpl.LocalPlayer.transform.localPosition + new Vector3(Mathf.Cos(mouseInfo.angle), Mathf.Sin(mouseInfo.angle)) * dis;
             targetPos.z = -10f;
 
             transform.localPosition -= (transform.localPosition - targetPos) * Time.deltaTime * 8.6f;
@@ -112,7 +112,7 @@ public class PaparazzoShot : MonoBehaviour
         rt.Create();
         cam.targetTexture = rt;
 
-        foreach (var usable in ShipStatus.Instance.GetComponentsInChildren<IUsable>()) usable.SetOutline(false, false);
+        foreach (var usable in AmongUsLLImpl.ShipStatusInstance.GetComponentsInChildren<IUsable>()) usable.SetOutline(false, false);
 
         //一時的に影を無視して描画させる
         using(var ignoreShadow = AmongUsUtil.IgnoreShadow(false)) cam.Render();
@@ -222,7 +222,7 @@ public class PaparazzoShot : MonoBehaviour
             }
             flashRenderer.gameObject.SetActive(false);
 
-            if ((playerMask & ((~(PlayerControl.LocalPlayer.GetModInfo()?.Role as Paparazzo.Instance)?.DisclosedMask) ?? 0)) == 0)
+            if ((playerMask & ((~(GamePlayer.LocalPlayer?.Role as Paparazzo.Instance)?.DisclosedMask) ?? 0)) == 0)
             {
                 //失敗時
                 callback?.Invoke(false);
@@ -251,7 +251,7 @@ public class PaparazzoShot : MonoBehaviour
                 players.transform.localEulerAngles = Vector3.zero;
                 players.transform.localPosition = new(0, 0, -15f);
 
-                var paparazzo = (PlayerControl.LocalPlayer.GetModInfo()!.Role as Paparazzo.Instance)!;
+                var paparazzo = (GamePlayer.LocalPlayer!.Role as Paparazzo.Instance)!;
 
                 int num = 0;
                 foreach (var p in PlayerControl.AllPlayerControls.GetFastEnumerator()) {
@@ -400,7 +400,7 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 
                 void DestroyFinder()
                 {
-                    if (lastFinder) GameObject.Destroy(lastFinder!.gameObject);
+                    if (lastFinder.AsBoolFast()) GameObject.Destroy(lastFinder!.gameObject);
                     lastFinder = null;
                 }
 
@@ -418,7 +418,7 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                         //shot.SetUpButton(() => shotButton.DoClick());
                     }
 
-                    if (lastFinder != null && (MeetingHud.Instance || ExileController.Instance || MyPlayer.IsDead)) DestroyFinder();
+                    if (lastFinder != null && (MeetingHud.Instance.AsBoolFast() || ExileController.Instance.AsBoolFast() || MyPlayer.IsDead)) DestroyFinder();
                 }, this);
             }
         }
@@ -518,7 +518,7 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                         if (shot.shot.gameObject.TryGetComponent<PassiveButton>(out var button)) GameObject.Destroy(button);
                     }
 
-                    if (hourglass) GameObject.Destroy(hourglass.gameObject);
+                    if (hourglass.AsBoolFast()) GameObject.Destroy(hourglass.gameObject);
                 }
 
                 NebulaManager.Instance.StartCoroutine(CoWaitSharing().WrapToIl2Cpp());
@@ -595,7 +595,7 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole, IAssignableDocument
         [OnlyHost]
         void CheckWin(GameUpdateEvent ev)
         {
-            if(CheckPaparazzoWin() && !MeetingHud.Instance) NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.PaparazzoWin, GameEndReason.SpecialSituation);
+            if(CheckPaparazzoWin() && !MeetingHud.Instance.AsBoolFast()) NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.PaparazzoWin, GameEndReason.SpecialSituation);
         }
 
         
@@ -610,7 +610,7 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole, IAssignableDocument
     public static readonly RemoteProcess<int> RpcShareDisclosedPlayers = new("ShareDisclosed",
         (message, _) =>
         {
-            bool takenSelf = (message & (1 << PlayerControl.LocalPlayer.PlayerId)) != 0;
+            bool takenSelf = (message & (1 << AmongUsLLImpl.LocalPlayer.PlayerId)) != 0;
             if (takenSelf && (GamePlayer.LocalPlayer?.IsImpostor ?? false)) new StaticAchievementToken("paparazzo.another1");
         });
     public static readonly DivisibleRemoteProcess<(float, float, byte[]), (int id, float scale, float angle, int length, int index, byte[] bytes)> RpcSharePicture = new("SharePicture",
@@ -678,7 +678,7 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 
                 NebulaManager.Instance.StartCoroutine(CoShow().WrapToIl2Cpp());
 
-                if (MeetingHud.Instance != null) MeetingHud.Instance.ResetPlayerState();
+                if (MeetingHud.Instance.AsBoolFast()) MeetingHud.Instance.ResetPlayerState();
             }
         }
         );

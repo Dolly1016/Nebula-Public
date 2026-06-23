@@ -15,7 +15,8 @@ public class Necromancer : DefinedSingleAbilityRoleTemplate<Necromancer.Ability>
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny, ConfigurationTags.TagDifficult);
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Necromancer.png");
 
-        MetaAbility.RegisterCircle(new("role.necromancer.reviveRange", () => DetectedRangeOption, () => null, UnityColor));
+        MetaAbility.RegisterCircle(new("role.necromancer.reviveRange", () => ReviveMaxRangeOption, () => ReviveMinRangeOption, this.RoleColor));
+        MetaAbility.RegisterCircle(new("role.necromancer.detectRange", () => DetectedRangeOption, () => null, this.RoleColor));
 
         GameActionTypes.NecromancerRevivingAction = new("necromancer.revive", this, isPhysicalAction: true);
     }
@@ -64,12 +65,14 @@ public class Necromancer : DefinedSingleAbilityRoleTemplate<Necromancer.Ability>
             {
                 fullScreen = GameObject.Instantiate(HudManager.Instance.FullScreen, HudManager.Instance.transform);
                 this.BindGameObject(fullScreen.gameObject);
-                fullScreen.color = MyRole.UnityColor.AlphaMultiplied(0f);
+                fullScreen.color = MyRole.RoleColor.AlphaMultiplied(0f).ToUnityColor();
                 fullScreen.gameObject.SetActive(true);
             }
 
             if (AmOwner)
             {
+                var fastRooms = AmongUsLLImpl.ShipStatusInstance.FastRooms;
+
                 message = GameObject.Instantiate(VanillaAsset.StandardTextPrefab, HudManager.Instance.transform);
                 new TextAttributeOld(TextAttributeOld.NormalAttr) { Size = new Vector2(5f, 0.9f) }.EditFontSize(2.7f, 2.7f, 2.7f).Reflect(message);
                 message.transform.localPosition = new Vector3(0, -1.2f, -4f);
@@ -79,18 +82,18 @@ public class Necromancer : DefinedSingleAbilityRoleTemplate<Necromancer.Ability>
 
                 bool canReviveHere()
                 {
-                    return currentTargetRoom.HasValue && MyPlayer.VanillaPlayer.moveable && MyPlayer.HoldingAnyDeadBody && ShipStatus.Instance.FastRooms[currentTargetRoom.Value].roomArea.OverlapPoint(MyPlayer.TruePosition);
+                    return currentTargetRoom.HasValue && MyPlayer.VanillaPlayer.moveable && MyPlayer.HoldingAnyDeadBody && fastRooms[currentTargetRoom.Value].roomArea.OverlapPoint(MyPlayer.TruePosition);
                 }
 
                 myArrow = new Arrow().Register(this);
                 myArrow.IsActive = false;
-                myArrow.SetColor(MyRole.UnityColor);
+                myArrow.SetColor(MyRole.RoleColor);
 
                 GameOperatorManager.Instance?.Subscribe<GameUpdateEvent>((ev) => {
                     if (MyPlayer.HoldingAnyDeadBody && currentTargetRoom.HasValue && !canReviveHere())
                     {
                         myArrow.IsActive = true;
-                        myArrow.TargetPos = ShipStatus.Instance.FastRooms[currentTargetRoom.Value].roomArea.ClosestPoint(MyPlayer.VanillaPlayer.transform.position);
+                        myArrow.TargetPos = fastRooms[currentTargetRoom.Value].roomArea.ClosestPoint(MyPlayer.VanillaPlayer.transform.position);
                     }
                     else
                     {
@@ -104,11 +107,12 @@ public class Necromancer : DefinedSingleAbilityRoleTemplate<Necromancer.Ability>
                     {
                         //復活部屋を計算
                         List<Tuple<float, PlainShipRoom>> cand = new();
-                        foreach (var entry in ShipStatus.Instance.FastRooms)
+                        foreach (var entry in fastRooms)
                         {
                             if (entry.Key == SystemTypes.Ventilation) continue;
 
-                            float d = Physics2D.ClosestPoint_Collider(MyPlayer.VanillaPlayer.transform.position, entry.Value.roomArea).magnitude;
+                            var pos = MyPlayer.Position;
+                            float d = Vector2.Distance(pos, Physics2D.ClosestPoint_Collider(pos, entry.Value.roomArea));
                             if (d < ReviveMinRangeOption) continue;
 
                             cand.Add(new(d, entry.Value));
@@ -124,7 +128,7 @@ public class Necromancer : DefinedSingleAbilityRoleTemplate<Necromancer.Ability>
                     }
 
                     currentTargetRoom = resurrectionRoom[deadBody.Player.PlayerId];
-                    //myArrow.TargetPos = ShipStatus.Instance.FastRooms[currentTargetRoom.Value].roomArea.bounds.center;
+                    //myArrow.TargetPos = fastRooms[currentTargetRoom.Value].roomArea.bounds.center;
                     message.text = Language.Translate("role.necromancer.phantomMessage").Replace("%ROOM%", AmongUsUtil.ToDisplayString(currentTargetRoom.Value));
                 };
 
@@ -137,7 +141,7 @@ public class Necromancer : DefinedSingleAbilityRoleTemplate<Necromancer.Ability>
                 reviveButton.OnClick = (button) => button.StartEffect();
                 reviveButton.OnEffectEnd = (button) =>
                 {
-                    if (!button.EffectTimer!.IsProgressing && !MeetingHud.Instance)
+                    if (!button.EffectTimer!.IsProgressing && !MeetingHud.Instance.AsBoolFast())
                     {
                         var currentHolding = MyPlayer.HoldingDeadBody!;
 
@@ -178,7 +182,7 @@ public class Necromancer : DefinedSingleAbilityRoleTemplate<Necromancer.Ability>
             bool flag = MyPlayer.HoldingAnyDeadBody;
             
             message.gameObject.SetActive(flag);
-            if (flag) message.color = MyRole.UnityColor.AlphaMultiplied(Mathn.Sin(Time.time * 2.4f) * 0.2f + 0.8f);
+            if (flag) message.color = MyRole.RoleColor.AlphaMultiplied(Mathn.Sin(Time.time * 2.4f) * 0.2f + 0.8f).ToUnityColor();
 
             if (fullScreen)
             {
@@ -201,7 +205,7 @@ public class Necromancer : DefinedSingleAbilityRoleTemplate<Necromancer.Ability>
 
                 float a = fullScreen!.color.a;
                 a += ((detected ? 0.32f : 0) - a) * Time.deltaTime * 1.8f;
-                fullScreen!.color = MyRole.UnityColor.AlphaMultiplied(a);
+                fullScreen!.color = MyRole.RoleColor.AlphaMultiplied(a).ToUnityColor();
             }
         }
 

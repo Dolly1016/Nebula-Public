@@ -317,7 +317,7 @@ internal static class RoleOptionHelper
                 var invalid = isInvalid.Invoke();
                 shortcutButtons.Add(new GUIButton(Virial.Media.GUIAlignment.Center, RelatedOutsideButtonAttr, GUI.API.LocalizedTextComponent(translationKey))
                 {
-                    Color = invalid ? Color.gray : Color.white,
+                    Color = invalid ? VColor.Gray : VColor.White,
                     OnClick = _ =>
                     {
                         {
@@ -366,7 +366,7 @@ internal static class RoleOptionHelper
                         tuple.tag != null ? GUI.API.RawText(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OptionsValue), tuple.tag) : null,
                         GUI.API.Arrange(Virial.Media.GUIAlignment.Center, tuple.roles.Select(r => new GUIButton(Virial.Media.GUIAlignment.Center, RelatedInsideButtonAttr, GUI.API.RawTextComponent(r.DisplayColoredName)) {
                             OnClick = _ => { toggleAndShare(r); OpenFilterScreen(scrollerTag, allRoles, test, setAndShare, toggleAndShare, screen, canFilterSpawnable); },
-                            Color = test(r) ? Color.white : new Color(0.14f, 0.14f, 0.14f),
+                            Color = test(r) ? VColor.White : new(0.14f, 0.14f, 0.14f),
                             AsMaskedButton = true,
                         })
                         , 4)

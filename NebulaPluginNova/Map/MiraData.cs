@@ -6,7 +6,7 @@ namespace Nebula.Map;
 public class MiraData : MapData
 {
     override public int Id => 1;
-    static private Vector2[] MapPositions = new Vector2[]
+    static private VVector2[] MapPositions = new VVector2[]
     {
         //ラウンチパッド
         new(-4.4f, 3.3f),
@@ -100,8 +100,8 @@ public class MiraData : MapData
         new(18.6f, 5.65f, MapObjectType.DepoisonBox), //ストレージ最奥
         ];
     public override MapObjectPoint[] MapObjectPoints => mapObjectPoints;
-    public override IReadOnlyList<Vector2> MapArea => MapPositions;
-    public override IReadOnlyList<Vector2> NonMapArea => [];
+    public override IReadOnlyList<VVector2> MapArea => MapPositions;
+    public override IReadOnlyList<VVector2> NonMapArea => [];
     protected override (AdditionalRoomArea area, string key, bool detailRoom)[] AdditionalRooms => additionalRooms;
     protected override (SystemTypes room, AdditionalRoomArea area, string key)[] OverrideRooms => overrideRooms;
     protected override SystemTypes[] SabotageTypes => new SystemTypes[] { SystemTypes.Reactor, SystemTypes.Comms, SystemTypes.Electrical, SystemTypes.LifeSupp };

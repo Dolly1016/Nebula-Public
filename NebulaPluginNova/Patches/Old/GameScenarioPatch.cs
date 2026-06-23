@@ -10,7 +10,7 @@ public static class AdjustedNumImpostorsModded
 {
     public static int GetAdjustedNumImpostorsModded(this AmongUs.GameOptions.IGameOptions options, int players)
     {
-        int numImpostors = GameOptionsManager.Instance.CurrentGameOptions.NumImpostors;
+        int numImpostors = AmongUsLLImpl.CurrentGameOptionsInstance.NumImpostors;
         int num = 3;
         int[] intArray = ModdedOptionValues.MaxImpostors;
         if (intArray != null && players < intArray.Length)
@@ -28,7 +28,7 @@ public static class GameStartHostPatch {
         var alternativeRoutine = GeneralConfigurations.CurrentGameMode.GetAlternativeRoutine(true);
         if (alternativeRoutine == null) return true;
 
-        if (LobbyBehaviour.Instance) LobbyBehaviour.Instance.Despawn();
+        if (AmongUsLLImpl.LobbyInstance.AsBoolFast()) AmongUsLLImpl.LobbyInstance.Despawn();
         
         __result = alternativeRoutine.WrapToIl2Cpp();
         return false;
@@ -48,7 +48,7 @@ public static class GameStartClientPatch
             alternativeCoroutine = GeneralConfigurations.CurrentGameMode.GetAlternativeRoutine(false)?.WrapToIl2Cpp();
 
             //ロビーの削除だけはやる
-            if(alternativeCoroutine != null && LobbyBehaviour.Instance) LobbyBehaviour.Instance.Despawn();
+            if(alternativeCoroutine != null && AmongUsLLImpl.LobbyInstance.AsBoolFast()) AmongUsLLImpl.LobbyInstance.Despawn();
         }
 
         if(alternativeCoroutine != null)

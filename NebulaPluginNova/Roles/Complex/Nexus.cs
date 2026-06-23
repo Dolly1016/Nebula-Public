@@ -147,7 +147,7 @@ public class Nexus : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Define
             yield return ManagedEffects.Wait(0.6f);
             teleportEffect.objectBreaker.Invoke();
             lifespan.Release();
-            if (!MeetingHud.Instance)
+            if (!MeetingHud.Instance.AsBoolFast())
             {
                 Vector2 diff = HudManager.Instance.PlayerCam.transform.position - player.VanillaPlayer.transform.position;
                 player.VanillaPlayer.transform.position = TeleportTo.AsVector3(TeleportTo.y / 1000f); //ベントアニメーション中なのでSnapToが使えない
@@ -194,7 +194,7 @@ public class Nexus : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Define
 
             return (ManagedEffects.Lerp(1f, p =>
             {
-                if (material) material.SetFloat("_Threshold", p);
+                if (material.AsBoolFast()) material.SetFloat("_Threshold", p);
             }), ()=>
             {
                 GameObject.Destroy(group.gameObject);

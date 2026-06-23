@@ -86,15 +86,15 @@ public class Echo : DefinedSingleAbilityRoleTemplate<Echo.Ability>, DefinedRole,
         {
             EditableBitMask<GamePlayer> pMask = BitMasks.AsPlayer();
             float radious = 0f;
-            var circle = EffectCircle.SpawnEffectCircle(null, MyPlayer.Position.ToUnityVector(), MyRole.UnityColor, 0f, null, true);
+            var circle = EffectCircle.SpawnEffectCircle(null, MyPlayer.Position.AsVector3(), MyRole.RoleColor, 0f, null, true);
             this.BindGameObject(circle.gameObject);
             circle.OuterRadius = () => radious;
 
-            MyRole.UnityColor.ToHSV(out var hue, out _, out _);
+            MyRole.RoleColor.ToHSV(out var hue, out _, out _);
             bool isFirst = true;
             while (radious < EchoRangeOption)
             {
-                if (MeetingHud.Instance) break;
+                if (MeetingHud.Instance.AsBoolFast()) break;
 
                 radious += Time.deltaTime * 5f;
                 foreach(var p in NebulaGameManager.Instance?.AllPlayerInfo ?? [])

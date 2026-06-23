@@ -18,7 +18,7 @@ namespace Nebula.Roles.Ghost.Impostor;
 public class Clog : DefinedGhostRoleTemplate, DefinedGhostRole
 {
     public Clog() : base("clog", new(Palette.ImpostorRed), RoleCategory.ImpostorRole, [GhostDurationOption, NumOfGhostsOption, GhostSizeOption]) {
-        MetaAbility.RegisterCircle(new("role.clog.ghostSize", () => GhostSizeOption, () => null, UnityColor));
+        MetaAbility.RegisterCircle(new("role.clog.ghostSize", () => GhostSizeOption, () => null, RoleColor));
 
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Clog.png");
 

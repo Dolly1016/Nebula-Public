@@ -61,7 +61,7 @@ internal class MapViewer : CustomCameraBehaviour
         {
             if (lastMapId == mapId) yield break;
             //Ship以降の全てのオブジェクトを消す
-            if (ShipStatus.Instance)
+            if (ShipStatus.Instance.AsBoolFast())
             {
                 GameObject.Destroy(ShipStatus.Instance.gameObject);
             }

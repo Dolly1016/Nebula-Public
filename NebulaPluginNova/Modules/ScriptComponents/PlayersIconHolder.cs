@@ -75,12 +75,12 @@ internal class PlayersIconHolder : FlexibleLifespan, IGameOperator
 
     void IGameOperator.OnReleased()
     {
-        if(myContent) GameObject.Destroy(myContent.gameObject);
+        if(myContent.AsBoolFast()) GameObject.Destroy(myContent.gameObject);
     }
 
     void OnUpdate(GameUpdateEvent ev)
     {
-        if (myContent.IsStaticContent && MeetingHud.Instance)
+        if (myContent.IsStaticContent && MeetingHud.Instance.AsBoolFast())
         {
             adjuster.transform.localScale = new(0.65f, 0.65f, 1f);
             adjuster.transform.localPosition = new(-0.45f, -0.37f, 0f);

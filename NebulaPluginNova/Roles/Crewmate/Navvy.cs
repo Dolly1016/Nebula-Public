@@ -83,14 +83,16 @@ internal class Navvy : DefinedSingleAbilityRoleTemplate<Navvy.Ability>, DefinedR
                 //近くの塞げるドアを探す
                 sealButton.OnUpdate = (button) =>
                 {
-                    if (ShipStatus.Instance.AllDoors.Count == 0) return;
+                    var doors = AmongUsLLImpl.ShipStatusInstance.AllDoors;
+
+                    if (doors.Count == 0) return;
                     currentTargetDoor = null;
 
                     if (leftTapes < CostForDoorSealingOption) return;
 
                     float min = 10f;
                     var playerPos = MyPlayer.VanillaPlayer.transform.position;
-                    var nearbyDoor = ShipStatus.Instance.AllDoors.MinBy(d =>
+                    var nearbyDoor = doors.MinBy(d =>
                     {
                         if (!d.IsOpen) return 100f;
                         if (nextSealedDoors.Contains(d.Id)) return 100f;
@@ -106,7 +108,7 @@ internal class Navvy : DefinedSingleAbilityRoleTemplate<Navvy.Ability>, DefinedR
                 sealButton.OnClick = (button) =>
                 {
                     SpriteRenderer sealRenderer = null!;
-                    if (tracker.CurrentTarget != null)
+                    if (tracker.CurrentTarget.AsBoolFast())
                     {
                         UpdateState.RpcSync(MyPlayer, leftTapes - CostForVentSealingOption);
                         nextSealedVents.Add(tracker.CurrentTarget!.Id);
@@ -124,14 +126,14 @@ internal class Navvy : DefinedSingleAbilityRoleTemplate<Navvy.Ability>, DefinedR
 
                         StatsSealVent.Progress();
                     }
-                    else if(currentTargetDoor != null)
+                    else if(currentTargetDoor.AsBoolFast())
                     {
                         UpdateState.RpcSync(MyPlayer, leftTapes - CostForDoorSealingOption);
                         nextSealedDoors.Add(currentTargetDoor!.Id);
 
                         //テープを設置
                         var isVert = InvalidDoor.IsVertDoor(currentTargetDoor);
-                        sealRenderer = UnityHelper.CreateObject<SpriteRenderer>("Seal", ShipStatus.Instance.transform, Vector3.zero, LayerExpansion.GetShipLayer());
+                        sealRenderer = UnityHelper.CreateObject<SpriteRenderer>("Seal", AmongUsLLImpl.ShipStatusInstance.transform, Vector3.zero, LayerExpansion.GetShipLayer());
                         sealRenderer.transform.position = currentTargetDoor.transform.position + AmongUsUtil.CurrentMapId switch
                         {
                             5 => isVert ? new(0.25f, -1.0f, -0.001f) : new(0.35f, -0.6f, -0.001f),
@@ -145,7 +147,7 @@ internal class Navvy : DefinedSingleAbilityRoleTemplate<Navvy.Ability>, DefinedR
                         StatsSealDoor.Progress();
                     }
 
-                    if (sealRenderer != null)
+                    if (sealRenderer.AsBoolFast())
                     {
                         //テープの共通処理
                         sealRenderer.sprite = sealImage.GetSprite();

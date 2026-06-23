@@ -99,7 +99,7 @@ public class Grudge : DefinedGhostRoleTemplate, DefinedGhostRole
         {
             if (standingCoolDown > 0f)
             {
-                if (!MeetingHud.Instance && !ExileController.Instance)
+                if (!MeetingHud.Instance.AsBoolFast() && !ExileController.Instance.AsBoolFast())
                 {
                     standingCoolDown -= Time.deltaTime;
                 }
@@ -107,7 +107,7 @@ public class Grudge : DefinedGhostRoleTemplate, DefinedGhostRole
             }
             else
             {
-                if (MyPlayer.IsDead && !MeetingHud.Instance && !ExileController.Instance && MyPlayer.VanillaPlayer.MyPhysics.Velocity.magnitude < 0.001f)
+                if (MyPlayer.IsDead && !MeetingHud.Instance.AsBoolFast() && !ExileController.Instance.AsBoolFast() && MyPlayer.VanillaPlayer.MyPhysics.Velocity.magnitude < 0.001f)
                 {
                     standingTime += Time.deltaTime;
                 }
@@ -163,12 +163,12 @@ public class Grudge : DefinedGhostRoleTemplate, DefinedGhostRole
             string text = Language.Translate("role.grudge.taskText");
             if (canWin)
             {
-                text = text.Color(Color.green);
+                text = text.Color(VColor.Green);
             }
             else
             {
                 text += string.Format(" {0:0.#}", progress) + "s/" + TotalStandingTimeToWin.GetValue() + "s";
-                Color color = progress > 0f ? Color.yellow : Color.white;
+                VColor color = progress > 0f ? VColor.Yellow : VColor.White;
                 if (standingTime < 0.8f) color = color.RGBMultiplied(0.5f);
                 text = text.Color(color);
             }

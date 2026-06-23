@@ -69,10 +69,10 @@ internal class VentRelocate : PerkFunctionalInstance
         }
 
         public bool AnyoneHolds(Vent vent) => VentHolders.ContainsKey(vent.Id);
-        static private bool TryGetVent(int id, [MaybeNullWhen(false)] out Vent vent) => ShipStatus.Instance.AllVents.Find(v => v.Id == id, out vent);
+        static private bool TryGetVent(int id, [MaybeNullWhen(false)] out Vent vent) => AmongUsLLImpl.ShipStatusInstance.AllVents.Find(v => v.Id == id, out vent);
         static private RemoteProcess<(GamePlayer player, int ventId)> RpcCheckHoldVent = new("PlumberCheckHoldVent", (message, _) =>
         {
-            if (Helpers.AmHost(PlayerControl.LocalPlayer) && TryGetVent(message.ventId, out var vent)) ModSingleton<VentHolderManager>.Instance.CheckHoldVent(message.player, vent);
+            if (Helpers.AmHost(AmongUsLLImpl.LocalPlayer) && TryGetVent(message.ventId, out var vent)) ModSingleton<VentHolderManager>.Instance.CheckHoldVent(message.player, vent);
         });
 
         static private RemoteProcess<(GamePlayer player, int ventId)> RpcHoldVent = new("PlumberHoldVent", (message, _) =>

@@ -6,6 +6,7 @@ using Nebula.Game.Statistics;
 using Nebula.Modules.Cosmetics;
 using PowerTools;
 using UnityEngine;
+using Virial;
 using Virial.Events.Player;
 using Virial.Game;
 using static DynamicSound;
@@ -22,14 +23,14 @@ public static class PlayerStartPatch
     static void Postfix(PlayerControl __instance, ref Il2CppSystem.Collections.IEnumerator __result)
     {
         //フックショットや斧用の壁と当たらないようにする
-        if (__instance.rigidbody2D) __instance.rigidbody2D.excludeLayers |= 1 << LayerExpansion.GetHookshotWallLayer();
+        if (__instance.rigidbody2D.AsBoolFast(out var rigidBody)) rigidBody.excludeLayers |= 1 << LayerExpansion.GetHookshotWallLayer();
 
         __result = Effects.Sequence(
             __result,
             Effects.Action((Il2CppSystem.Action)(()=>
             {
                 __instance.SetColor(__instance.PlayerId);
-                if (PlayerControl.LocalPlayer) DynamicPalette.RpcShareMyColor();
+                if (AmongUsLLImpl.LocalPlayer) DynamicPalette.RpcShareMyColor();
                 if (__instance.AmOwner)
                 {
                     __instance.lightSource.lightChild.layer = LayerExpansion.GetVanillaShadowLightLayer();
@@ -83,20 +84,30 @@ public static class PlayerColorPatch
 }
 
 
+internal static class HighlightManager
+{
+    static private List<Renderer> lastHighlightRenderers = [];
+    static public void AddHighlightedRenderer(Renderer renderer) => lastHighlightRenderers.Add(renderer);
+    static public IEnumerable<Renderer> HighlightedRenderers => lastHighlightRenderers;
+    static public void Reset() => lastHighlightRenderers.Clear();
+}
+
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.FixedUpdate))]
 public static class PlayerUpdatePatch
 {
+    /*
     static IEnumerable<SpriteRenderer> AllHighlightable()
     {
         foreach (var p in NebulaGameManager.Instance?.AllPlayerlike ?? []) if(p.IsActive) yield return p.VanillaCosmetics.currentBodySprite.BodySprite;
         foreach (var d in Helpers.AllDeadBodies()) if(d) foreach (var r in d.bodyRenderers) if(r) yield return r;
         if (ShipStatus.Instance)
         {
-            foreach (var v in ShipStatus.Instance.AllVents) yield return v.myRend;
-            foreach (var c in ShipStatus.Instance.AllConsoles) if(c.Image) yield return c.Image;
+            foreach (var v in ShipStatus.Instance.AllVents.GetFastEnumerator()) yield return v.myRend;
+            foreach (var c in ShipStatus.Instance.AllConsoles.GetFastEnumerator()) if(c.Image) yield return c.Image;
         }
         foreach (var cc in ModSingleton<CustomConsoleManager>.Instance.AllCustomConsoles) yield return cc.Renderer;
     }
+    */
 
     static private float lastKillTimer = 0f;
     static internal void EditLocalKillTimer(float timer)
@@ -106,39 +117,57 @@ public static class PlayerUpdatePatch
 
     static void Prefix(PlayerControl __instance)
     {
+        NebulaProfiler.LapTimer("Before Prefix-PlayerControl.FixedUpdate");
         lastKillTimer = __instance.killTimer;
 
         if (__instance.AmOwner)
         {
-            foreach(var r in AllHighlightable()) if(r) r.material.SetFloat("_Outline", 0f);
+            foreach(var r in HighlightManager.HighlightedRenderers) if(r.AsBoolFast()) r.material.SetFloat("_Outline", 0f);
+            HighlightManager.Reset();
         }
+
+        NebulaProfiler.LapTimer("Prefix-PlayerControl.FixedUpdate");
     }
 
     
     static void Postfix(PlayerControl __instance)
     {
         if (NebulaGameManager.Instance == null) return;
-        if (__instance.AmOwner) NebulaGameManager.Instance.OnFixedAlwaysUpdate();
+
+        var deltaTime = Time.fixedDeltaTime;
+
+        NebulaProfiler.LapTimer("Before Postfix-PlayerControl.FixedUpdate", 150);
+
+        if (__instance.AmOwner) NebulaGameManager.Instance.OnFixedAlwaysUpdate(deltaTime);
+
+        NebulaProfiler.LapTimer("OnFixedAlwaysUpdate");
 
         if (NebulaGameManager.Instance.GameState == NebulaGameStates.NotStarted)
         {
             bool showVanillaColor = ClientOption.GetValue(ClientOption.ClientOptionType.ShowVanillaColor) == 1;
             try
             {
-                if (showVanillaColor) __instance.cosmetics.nameText.text = __instance.Data.PlayerName + " ■".Color(DynamicPalette.VanillaColorsPalette[__instance.PlayerId]);
-                else __instance.cosmetics.nameText.text = __instance.Data.PlayerName;
+                var nameText = __instance.cosmetics.nameText;
+                if (showVanillaColor) nameText.text = __instance.Data.PlayerName + " ■".Color(DynamicPalette.VanillaColorsPalette[__instance.PlayerId]);
+                else nameText.text = __instance.Data.PlayerName;
 
-                __instance.cosmetics.nameText.transform.parent.gameObject.SetActive(!ModSingleton<ShowUp>.Instance.AnyoneShowedUp);
+                nameText.transform.parent.gameObject.SetActive(!ModSingleton<ShowUp>.Instance.AnyoneShowedUp);
             }
             catch { }
             return;
         }
 
-        NebulaGameManager.Instance.GetPlayer(__instance.PlayerId)?.Unbox().Update();
+        NebulaProfiler.LapTimer("ExternalColorSupport");
+
+        NebulaGameManager.Instance.GetPlayer(__instance.PlayerId)?.Unbox().Update(deltaTime);
+
+        NebulaProfiler.LapTimer("GamePlayer.Update");
 
         if (__instance.AmOwner)
         {
-            NebulaGameManager.Instance.OnFixedUpdate();
+            NebulaGameManager.Instance.OnFixedUpdate(deltaTime);
+
+            NebulaProfiler.LapTimer("NebulaGameManager.OnFixedUpdate");
 
             //ペット・レポートボタンの使用可否
             if (HudManager.InstanceExists && GamePlayer.LocalPlayer.IsDived)
@@ -147,7 +176,9 @@ public static class PlayerUpdatePatch
                 HudManager.Instance.PetButton.SetDisabled();
             }
 
-            if (__instance.inVent && Vent.currentVent)
+            NebulaProfiler.LapTimer("Check Report/Pet Button");
+
+            if (__instance.inVent && Vent.currentVent.AsBoolFast())
             {
                 Vector2 vector = Vent.currentVent.transform.position;
                 vector -= __instance.Collider.offset;
@@ -155,26 +186,32 @@ public static class PlayerUpdatePatch
                 if (__instance.MyPhysics.body.transform.position.Distance(vector) > 0.001f) __instance.NetTransform.RpcSnapTo(vector);
             }
 
+            NebulaProfiler.LapTimer("VentCheck");
+
             //キルボタンのクールダウン進行
             {
                 var data = __instance.Data;
                 bool flag = data.Role.CanUseKillButton && !data.IsDead;
                 if ((__instance.IsKillTimerEnabled || __instance.ForceKillTimerContinue) && flag)
                 {
-                    float deltaTime = Time.fixedDeltaTime;
                     float coeff = GamePlayer.LocalPlayer?.Unbox().CalcAttributeVal(PlayerAttributes.CooldownSpeed, true) ?? 1f;
                     deltaTime *= coeff;
                     __instance.SetKillTimer(lastKillTimer - deltaTime);
                 }
             }
+
+            NebulaProfiler.LapTimer("ProcessKillButton");
         }
 
-        if(__instance.cosmetics.transform.localScale.z < 100f)
+        var transform = __instance.cosmetics.transform;
+        if (transform.localScale.z < 100f)
         {
-            var scale = __instance.cosmetics.transform.localScale;
+            var scale = transform.localScale;
             scale.z = 100f;
-            __instance.cosmetics.transform.localScale = scale;
+            transform.localScale = scale;
         }
+
+        NebulaProfiler.LapTimer("UpdateCosmeticsZ");
     }
 }
 
@@ -183,10 +220,16 @@ public class PlayerControlSetAlphaPatch
 {
     public static void Postfix(PlayerControl __instance)
     {
+        NebulaProfiler.LapTimer("Before SetHatAndVisorAlpha");
+
         if (NebulaGameManager.Instance == null) return;
         if (NebulaGameManager.Instance.GameState == NebulaGameStates.NotStarted) return;
 
-        NebulaGameManager.Instance.GetPlayer(__instance.PlayerId)?.Unbox().UpdateVisibility(false);
+        NebulaProfiler.LapTimer("SetHatAndVisorAlpha.1");
+
+        NebulaGameManager.Instance.GetPlayer(__instance.PlayerId)?.Unbox().UpdateVisibility(null, false);
+
+        NebulaProfiler.LapTimer("SetHatAndVisorAlpha.2");
     }
 }
 
@@ -264,27 +307,27 @@ class OverlayKillAnimationPatch
 {
     public static bool Prefix(OverlayKillAnimation __instance, [HarmonyArgument(0)] KillOverlayInitData initData)
     {
-        if (__instance.killerParts)
+        if (__instance.killerParts.AsBoolFast(out var killerParts))
         {
             NetworkedPlayerInfo.PlayerOutfit? currentOutfit = initData.killerOutfit;
             if (currentOutfit != null)
             {
-                __instance.killerParts.SetBodyType(initData.killerBodyType);
-                __instance.killerParts.UpdateFromPlayerOutfit(currentOutfit, PlayerMaterial.MaskType.None, false, false);
-                __instance.killerParts.ToggleName(false);
+                killerParts.SetBodyType(initData.killerBodyType);
+                killerParts.UpdateFromPlayerOutfit(currentOutfit, PlayerMaterial.MaskType.None, false, false);
+                killerParts.ToggleName(false);
                 __instance.LoadKillerSkin(currentOutfit);
                 __instance.LoadKillerPet(currentOutfit);
             }
         }
-        if (__instance.victimParts)
+        if (__instance.victimParts.AsBoolFast(out var victimParts))
         {
             NetworkedPlayerInfo.PlayerOutfit? defaultOutfit = initData.victimOutfit;
             if (defaultOutfit != null)
             {
                 __instance.victimHat = defaultOutfit.HatId;
-                __instance.victimParts.SetBodyType(PlayerBodyTypes.Normal);
-                __instance.victimParts.UpdateFromPlayerOutfit(defaultOutfit, PlayerMaterial.MaskType.None, false, false);
-                __instance.victimParts.ToggleName(false);
+                victimParts.SetBodyType(PlayerBodyTypes.Normal);
+                victimParts.UpdateFromPlayerOutfit(defaultOutfit, PlayerMaterial.MaskType.None, false, false);
+                victimParts.ToggleName(false);
                 __instance.LoadVictimSkin(defaultOutfit);
                 __instance.LoadVictimPet(defaultOutfit);
             }
@@ -313,7 +356,7 @@ class SetTaskPAtch
 
         IEnumerator CoSetTasks()
         {
-            while (!ShipStatus.Instance) yield return null;
+            while (!AmongUsLLImpl.ShipStatusInstance.AsBoolFast()) yield return null;
 
             HudManager.Instance.TaskStuff.SetActive(true);
 
@@ -324,7 +367,7 @@ class SetTaskPAtch
             for (int i = 0; i < tasksList.Length; i++)
             {
                 NetworkedPlayerInfo.TaskInfo taskInfo = tasksList[i];
-                NormalPlayerTask normalPlayerTask = GameObject.Instantiate<NormalPlayerTask>(ShipStatus.Instance.GetTaskById(taskInfo.TypeId), __instance.transform);
+                NormalPlayerTask normalPlayerTask = GameObject.Instantiate<NormalPlayerTask>(AmongUsLLImpl.ShipStatusInstance.GetTaskById(taskInfo.TypeId), __instance.transform);
                 normalPlayerTask.Id = taskInfo.Id;
                 normalPlayerTask.Owner = __instance;
                 normalPlayerTask.Initialize();
@@ -364,19 +407,29 @@ class PlayerCanMovePatch
     }
     private static bool CameraAllowMoving()
     {
-        var currentTarget = HudManager.Instance.PlayerCam.Target;
-        if (currentTarget == PlayerControl.LocalPlayer) return true;
+        NebulaProfiler.LapTimer("BeforeCameraAllowMoving (Maybe After PlayerControl.CanMove.2)");
+        var currentTarget = AmongUsLLImpl.HudManagerInstance.PlayerCam.Target;
+        if (currentTarget == AmongUsLLImpl.LocalPlayer) return true;
         if (currentTarget && currentTarget.GetInstanceID() == canMoveCameraId) return true;
+        NebulaProfiler.LapTimer("CameraAllowMoving");
         return false;
     }
 
     public static void Postfix(PlayerControl __instance, ref bool __result)
     {
-        if (__instance != PlayerControl.LocalPlayer) return;
+        NebulaProfiler.LapTimer("Before PlayerControl.CanMove");
+
+        if (__instance != AmongUsLLImpl.LocalPlayer) return;
+
+        NebulaProfiler.LapTimer("PlayerControl.CanMove.1");
 
         var modPlayer = __instance.GetModInfo();
 
+        NebulaProfiler.LapTimer("PlayerControl.CanMove.2");
+
         __result &= !TextField.AnyoneValid && CameraAllowMoving() && !ModSingleton<Marketplace>.Instance && !(modPlayer?.IsTeleporting ?? false);
+
+        NebulaProfiler.LapTimer("PlayerControl.CanMove.3");
     }
 }
 
@@ -442,7 +495,7 @@ class PlayerPhysicsFixedUpdatePatch
         __instance.HandleAnimation(amDead);
         if (__instance.AmOwner)
         {
-            if (__instance.myPlayer.CanMove && GameData.Instance && DestroyableSingleton<HudManager>.InstanceExists && DestroyableSingleton<HudManager>.Instance.joystick != null)
+            if (__instance.myPlayer.CanMove && GameData.Instance.AsBoolFast() && DestroyableSingleton<HudManager>.InstanceExists && DestroyableSingleton<HudManager>.Instance.joystick != null)
             {
                 __instance.SetNormalizedVelocity(DestroyableSingleton<HudManager>.Instance.joystick.DeltaL);
             }
@@ -525,7 +578,7 @@ public static class LoadVictimSkinPatch
     public static bool Prefix(OverlayKillAnimation __instance, [HarmonyArgument(0)] NetworkedPlayerInfo.PlayerOutfit victimOutfit)
     {
         var script = __instance.victimParts.gameObject.AddComponent<ScriptBehaviour>();
-        SkinViewData skin = ShipStatus.Instance.CosmeticsCache.GetSkin(victimOutfit.SkinId);
+        SkinViewData skin = AmongUsLLImpl.ShipStatusInstance.CosmeticsCache.GetSkin(victimOutfit.SkinId);
         SpriteAnim skinSpriteAnim = __instance.victimParts.GetSkinSpriteAnim();
 
         script.ActiveHandler += () =>
@@ -563,7 +616,7 @@ public static class LoadKillerSkinPatch
     public static bool Prefix(OverlayKillAnimation __instance, [HarmonyArgument(0)] NetworkedPlayerInfo.PlayerOutfit killerOutfit)
     {
         var script = __instance.killerParts.gameObject.AddComponent<ScriptBehaviour>();
-        SkinViewData skin = ShipStatus.Instance.CosmeticsCache.GetSkin(killerOutfit.SkinId);
+        SkinViewData skin = AmongUsLLImpl.ShipStatusInstance.CosmeticsCache.GetSkin(killerOutfit.SkinId);
         SpriteAnim skinSpriteAnim = __instance.killerParts.GetSkinSpriteAnim();
 
         script.ActiveHandler += () =>
@@ -708,6 +761,8 @@ internal class NetworkedPlayerInfoPatch
 {
     static bool Prefix(NetworkedPlayerInfo __instance, [HarmonyArgument(0)] MessageReader reader, [HarmonyArgument(1)] bool initialState)
     {
+        NebulaProfiler.LapTimer("Before NetworkedPlayerInfo.Deserialize");
+
         __instance.PlayerId = reader.ReadByte();
         __instance.ClientId = reader.ReadPackedInt32();
         byte b = reader.ReadByte();
@@ -747,6 +802,8 @@ internal class NetworkedPlayerInfoPatch
             __instance.Object.MyPhysics.ResetAnimState();
         }
         //GameData.Instance.RecomputeTaskCounts();
+
+        NebulaProfiler.LapTimer("NetworkedPlayerInfo.Deserialize");
 
         return false;
     }
@@ -801,15 +858,16 @@ public static class PlayerFootstepPatch
     static bool Prefix(PlayerControl __instance)
     {
         if (!Constants.ShouldPlaySfx()) return false;
-        
-        if (LobbyBehaviour.Instance)
+
+        var lobby = AmongUsLLImpl.LobbyInstance;
+        if (lobby.AsBoolFast())
         {
             if (__instance.AmOwner)
             {
-                for (int i = 0; i < LobbyBehaviour.Instance.AllRooms.Length; i++)
+                for (int i = 0; i < lobby.AllRooms.Length; i++)
                 {
-                    SoundGroup soundGroup = LobbyBehaviour.Instance.AllRooms[i].MakeFootstep(__instance);
-                    if (soundGroup)
+                    SoundGroup soundGroup = lobby.AllRooms[i].MakeFootstep(__instance);
+                    if (soundGroup.AsBoolFast())
                     {
                         AudioClip clip = soundGroup.Random();
                         __instance.FootSteps.clip = clip;
@@ -820,7 +878,10 @@ public static class PlayerFootstepPatch
             }
             return false;
         }
-        if (!ShipStatus.Instance) return false;
+
+        var ship = AmongUsLLImpl.ShipStatusInstance;
+
+        if (!ship.AsBoolFast()) return false;
 
         bool canHear = __instance.AmOwner;
         if (!canHear && GeneralConfigurations.CanHearOthersFootstepOption)
@@ -834,9 +895,12 @@ public static class PlayerFootstepPatch
         {
             if (GameOperatorManager.Instance?.Run(new PlayerCheckPlayFootSoundEvent(__instance.GetModInfo()!)).PlayFootSound ?? true)
             {
-                for (int j = 0; j < ShipStatus.Instance.AllStepWatchers.Length; j++)
+                var watchers = ship.AllStepWatchers;
+                var watchersLength = watchers.Length;
+
+                for (int j = 0; j < watchersLength; j++)
                 {
-                    SoundGroup soundGroup2 = ShipStatus.Instance.AllStepWatchers[j].MakeFootstep(__instance);
+                    SoundGroup soundGroup2 = watchers[j].MakeFootstep(__instance);
                     if (soundGroup2)
                     {
                         AudioClip clip2 = soundGroup2.Random();
@@ -870,7 +934,7 @@ public class PetBehaviourStartPatch
     public static void Postfix(PetBehaviour __instance)
     {
         var parent = __instance.transform.parent;
-        if (parent != null && parent.gameObject.layer == LayerExpansion.GetUILayer())
+        if (parent.AsBoolFast() && parent.gameObject.layer == LayerExpansion.GetUILayer())
         {
             __instance.gameObject.layer = LayerExpansion.GetUILayer();
             __instance.gameObject.ForEachAllChildren(obj => obj.layer = LayerExpansion.GetUILayer());
@@ -932,7 +996,7 @@ public class DissolvedDeadBodyClickPatch
         {
             if (__instance.Reported) return false;
 
-            var localPlayer = PlayerControl.LocalPlayer;
+            var localPlayer = AmongUsLLImpl.LocalPlayer;
             Vector2 truePosition = localPlayer.GetTruePosition();
             Vector2 truePosition2 = __instance.TruePosition;
             if (Vector2.Distance(truePosition2, truePosition) <= localPlayer.MaxReportDistance && localPlayer.CanMove && !PhysicsHelpers.AnythingBetween(truePosition, truePosition2, Constants.ShipAndObjectsMask, false))

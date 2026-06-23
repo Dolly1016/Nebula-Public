@@ -76,7 +76,7 @@ internal class Disclosure : DefinedAllocatableModifierTemplate, DefinedAllocatab
             if (AmOwner || canSeeAllInfo) name += MyRole.GetRoleIconTagSmall();
         }
 
-        Vector2 MouseToHudPos(Vector2 mousePos) => (mousePos - (new Vector2(Screen.width, Screen.height) * 0.5f)) / Screen.height * 2f * HudManager.Instance.UICamera.orthographicSize;
+        VVector2 MouseToHudPos(VVector2 mousePos) => (mousePos - (new VVector2(NebulaAPI.AmongUs.ScreenWidth, NebulaAPI.AmongUs.ScreenHeight) * 0.5f)) / NebulaAPI.AmongUs.ScreenHeight * 2f * HudManager.Instance.UICamera.orthographicSize;
         void OnMeetingStart(MeetingStartEvent ev)
         {
             if(MyPlayer.AmOwner) ShareMousePoint.Invoke((MyPlayer.PlayerId, MouseToHudPos(Input.mousePosition), 0f, ++sentSequentialId));
@@ -85,7 +85,7 @@ internal class Disclosure : DefinedAllocatableModifierTemplate, DefinedAllocatab
 
             var renderer = UnityHelper.CreateObject<SpriteRenderer>("DisclosurePointer", HudManager.Instance.transform, Vector3.zero);
             renderer.sprite = IconSprite.GetSprite();
-            renderer.color = DynamicPalette.PlayerColors[(AnonymousCursorOption && !MyPlayer.AmOwner) ? NebulaPlayerTab.CamouflageColorId : MyPlayer.PlayerId];
+            renderer.color = DynamicPalette.PlayerColors[(AnonymousCursorOption && !MyPlayer.AmOwner) ? NebulaPlayerTab.CamouflageColorId : MyPlayer.PlayerId].ToUnityColor();
             renderer.enabled = false;
 
             var pointerLifespan = new FunctionalLifespan(() => !this.IsDeadObject && MeetingHud.Instance);
@@ -106,18 +106,18 @@ internal class Disclosure : DefinedAllocatableModifierTemplate, DefinedAllocatab
                         {
                             if (lastPoint!.Value.speed > 0f)
                             {
-                                Vector2 currentPos = renderer.transform.localPosition;
-                                var diff = currentPos - lastPoint.Value.pos;
-                                if (diff.magnitude < 0.04f)
+                                VVector2 currentPos = renderer.transform.localPosition;
+                                VVector2 diff = currentPos - (VVector2)lastPoint.Value.pos;
+                                if (diff.Magnitude < 0.04f)
                                 {
                                     currentPos = lastPoint.Value.pos;
                                 }
                                 else
                                 {
-                                    currentPos -= diff.normalized * Mathf.Min(diff.magnitude, lastPoint.Value.speed * Time.deltaTime);
+                                    currentPos -= diff.Normalized * Mathn.Min(diff.Magnitude, lastPoint.Value.speed * ev.DeltaTime);
                                 }
 
-                                renderer.transform.localPosition = currentPos.AsVector3(-50f);
+                                renderer.transform.localPosition = currentPos.AsUnityVector3(-50f);
                             }
                             else
                             {
@@ -135,13 +135,13 @@ internal class Disclosure : DefinedAllocatableModifierTemplate, DefinedAllocatab
         {
             if (AmOwner)
             {
-                if (MeetingHud.Instance && lastPoint != null)
+                if (MeetingHud.Instance.AsBoolFast() && lastPoint != null)
                 {
                     if (NebulaGameManager.Instance!.CurrentTime - lastSent > 0.05f)
                     {
                         float timeDiff = NebulaGameManager.Instance!.CurrentTime - lastSent;
                         var nextPos = MouseToHudPos(Input.mousePosition);
-                        var mag = (nextPos - lastPoint!.Value.pos).magnitude;
+                        var mag = (nextPos - lastPoint!.Value.pos).Magnitude;
                         ShareMousePoint.Invoke((MyPlayer.PlayerId, nextPos, mag / timeDiff, ++sentSequentialId));
                     }
                 }
@@ -149,7 +149,7 @@ internal class Disclosure : DefinedAllocatableModifierTemplate, DefinedAllocatab
             }
         }
 
-        static private RemoteProcess<(byte playerId, Vector2 pos, float speed, int sequentialId)> ShareMousePoint = new("DisclosurePoint",
+        static private RemoteProcess<(byte playerId, VVector2 pos, float speed, int sequentialId)> ShareMousePoint = new("DisclosurePoint",
             (message, _) =>
             {
                 if(NebulaGameManager.Instance!.GetPlayer(message.playerId)?.TryGetModifier<Instance>(out var modifier) ?? false)
@@ -161,7 +161,7 @@ internal class Disclosure : DefinedAllocatableModifierTemplate, DefinedAllocatab
                 }
             }, false);
 
-        private (Vector2 pos, float speed)? lastPoint = null;
+        private (VVector2 pos, float speed)? lastPoint = null;
     }
 }
 

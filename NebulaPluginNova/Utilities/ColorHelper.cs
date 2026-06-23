@@ -16,19 +16,19 @@ public static class ColorHelper
     /// <param name="h">0～360の範囲で色相を求めます</param>
     /// <param name="s">0～1の範囲で彩度を求めます</param>
     /// <param name="v">0～1の範囲で明度を求めます</param>
-    static public void ToHSV(this Color color, out float h, out float s, out float v)
+    static public void ToHSV(this VColor color, out float h, out float s, out float v)
     {
-        float max = Mathf.Max(color.r, color.g, color.b);
-        float min = Mathf.Min(color.r, color.g, color.b);
+        float max = Mathn.Max(color.R, color.G, color.B);
+        float min = Mathn.Min(color.R, color.G, color.B);
 
         if (max == min)
             h = 0f;
-        else if (max == color.r)
-            h = 60f * ((color.g - color.b) / (max - min));
-        else if (max == color.g)
-            h = 60f * ((color.b - color.r) / (max - min)) + 120f;
-        else if (max == color.b)
-            h = 60f * ((color.r - color.g) / (max - min)) + 240f;
+        else if (max == color.R)
+            h = 60f * ((color.G - color.B) / (max - min));
+        else if (max == color.G)
+            h = 60f * ((color.B - color.R) / (max - min)) + 120f;
+        else if (max == color.B)
+            h = 60f * ((color.R - color.G) / (max - min)) + 240f;
         else
             h = 0f;//Error
 
@@ -39,39 +39,39 @@ public static class ColorHelper
         v = max;
     }
 
-    static public bool IsPink(Color color)
+    static public bool IsPink(VColor color)
     {
         color.ToHSV(out var h, out var s, out var v);
         return 309f < h && h < 340f && v > 0.6f;
     }
 
-    static public bool IsLightGreen(Color color)
+    static public bool IsLightGreen(VColor color)
     {
         color.ToHSV(out var h, out var s, out var v);
         return 68f < h && h < 147f && v > 0.75f;
     }
 
-    static public bool IsGreenOrBlack(Color color)
+    static public bool IsGreenOrBlack(VColor color)
     {
         color.ToHSV(out var h, out var s, out var v);
         return (98f < h && h < 146f && v < 0.8f && s > 0.56f) || (v < 0.22f && s < 0.08f);
     }
 
-    static public bool IsVividColor(Color color)
+    static public bool IsVividColor(VColor color)
     {
         color.ToHSV(out _, out var s, out _);
         return s > 0.85f;
     }
 
-    static public float GetLuminance(Color color)
+    static public float GetLuminance(VColor color)
     {
-        return color.r * 0.299f + color.g * 0.587f + color.b * 0.114f;
+        return color.R * 0.299f + color.G * 0.587f + color.B * 0.114f;
     }
 
-    public static bool IsLightColor(Color color)
+    public static bool IsLightColor(VColor color)
     {
-        var max = Mathn.Max(color.r, color.g, color.b);
-        var sum = color.r + color.g + color.b;
+        var max = Mathn.Max(color.R, color.G, color.B);
+        var sum = color.R + color.G + color.B;
         return max > 0.8f || sum > 2.1f;
     }
 }
@@ -89,7 +89,7 @@ public class BalancedColorManager : AbstractModule<Virial.Game.Game>, IGameOpera
 
     float middleLuminance = 0.5f;
     public float MiddleLuminance => middleLuminance;
-    public bool IsLightColor(Color color) => ColorHelper.GetLuminance(color) > middleLuminance;
+    public bool IsLightColor(VColor color) => ColorHelper.GetLuminance(color) > middleLuminance;
     void OnGameStarted(GameStartEvent _)
     {
         if (GamePlayer.AllPlayers.Count() == 1)

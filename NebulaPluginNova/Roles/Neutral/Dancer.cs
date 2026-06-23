@@ -103,7 +103,7 @@ public class DanceModule : AbstractModule<GamePlayer>, IGameOperator
                 RpcDance.Invoke((MyContainer, DanceStartPos, playerMask, corpseMask));
                 if((Dancer.MyRole as ISpawnable).CanSpawnInCurrentGame || NebulaGameManager.Instance.AllPlayerInfo.Any(p => p.Role.Role == Dancer.MyRole))
                 {
-                    AmongUsUtil.PlayQuickFlash(Dancer.MyRole.UnityColor.RGBMultiplied(0.5f));
+                    AmongUsUtil.PlayQuickFlash(Dancer.MyRole.Color.RGBMultiplied(0.5f));
                 }
                 ResetState();
             }
@@ -264,7 +264,7 @@ public class Dancer : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                 danceButton.Visibility = (button) => !MyPlayer.IsDead;
                 danceButton.CoolDownTimer = new ScriptVisualTimer(
                     () => danceCoolDownTimer.IsProgressing ? danceCoolDownTimer.Percentage : dancerDanceChecker.Percentage,
-                    () => danceCoolDownTimer.IsProgressing ? danceCoolDownTimer.TimerText : dancerDanceChecker.DancingProgress > 0 ? Mathf.CeilToInt(DanceDuration - dancerDanceChecker.DancingProgress).ToString().Color(Color.cyan) : ""
+                    () => danceCoolDownTimer.IsProgressing ? danceCoolDownTimer.TimerText : dancerDanceChecker.DancingProgress > 0 ? Mathn.CeilToInt(DanceDuration - dancerDanceChecker.DancingProgress).ToString().Color(VColor.Cyan) : ""
                     );
                 danceButton.SetLabel("dance");
                 (danceButton as ModAbilityButtonImpl)?.SetCanUseByMouseClick(true, ButtonEffect.ActionIconType.NonclickAction, "danceAction", false);
@@ -292,7 +292,7 @@ public class Dancer : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 
             if(dancerDanceChecker.DancingProgress > 0f && circleEffect == null)
             {
-                circleEffect = EffectCircle.SpawnEffectCircle(null, MyPlayer.Position.ToUnityVector(), Dancer.MyRole.UnityColor, DanceRangeOption, null, true);
+                circleEffect = EffectCircle.SpawnEffectCircle(null, MyPlayer.Position.ToUnityVector(), Dancer.MyRole.Color, DanceRangeOption, null, true);
             }
             if(!(dancerDanceChecker.DancingProgress > 0f) && circleEffect != null)
             {
@@ -338,8 +338,6 @@ public class Dancer : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             var allPlayers = NebulaGameManager.Instance!.AllPlayerInfo;
             var players = allPlayers.Where(ev.Players.Test);
             var corpses = allPlayers.Where(ev.Corpses.Test);
-
-            Debug.Log("Dance:" + string.Join(",", players.Select(p => p.Name)));
 
             //ダンスをしたのがDancer、自分自身がダンスの目撃者である
             if (!AmOwner && ev.Player == MyPlayer && players.Any(p => p.AmOwner)) new StaticAchievementToken("dancer.common3");
@@ -443,7 +441,7 @@ public class Dancer : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             }
 
             //死の預言の有効時間を減少させる
-            if (AmOwner && !MeetingHud.Instance && !ExileController.Instance)
+            if (AmOwner && !MeetingHud.Instance.AsBoolFast() && !ExileController.Instance.AsBoolFast())
             {
                 for (int i = 0; i < danceLookedTimer.Length; i++) danceLookedTimer[i] -= Time.deltaTime;
                 if (activeDanceLooked.RemoveAll(p => !(danceLookedTimer[p.PlayerId] > 0f)) > 0)
@@ -458,7 +456,7 @@ public class Dancer : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                 //ダンサー本人が死亡した場合
                 if(ev is PlayerExiledEvent)
                     activeDanceLooked.Where(p => !p.IsDead).Do(p => p.VanillaPlayer.ModMarkAsExtraVictim(null, PlayerState.Suicide, PlayerState.Suicide));
-                else if(MeetingHud.Instance || ExileController.Instance)
+                else if(MeetingHud.Instance.AsBoolFast() || ExileController.Instance.AsBoolFast())
                     activeDanceLooked.Where(p => !p.IsDead).Do(p => p.Suicide(PlayerState.Suicide, null, KillParameter.MeetingKill));
                 else
                     activeDanceLooked.Where(p => !p.IsDead).Do(p => p.Suicide(PlayerState.Suicide, PlayerState.Suicide, KillParameter.RemoteKill));
@@ -493,7 +491,7 @@ public class Dancer : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             }
             
             //会議以外、自分以外のキルをDancerに通知する
-            if(AmOwner && ShowDeahNotificationOption && !ev.Player.AmOwner && !MeetingHud.Instance && !ExileController.Instance && !(ev.Player.MyKiller?.AmOwner ?? false))
+            if(AmOwner && ShowDeahNotificationOption && !ev.Player.AmOwner && !MeetingHud.Instance.AsBoolFast() && !ExileController.Instance.AsBoolFast() && !(ev.Player.MyKiller?.AmOwner ?? false))
             {
                 AmongUsUtil.InstantiateNoisemakerArrow(ev.Player.VanillaPlayer.transform.position, false, 314f);
             }
@@ -526,14 +524,14 @@ public class Dancer : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             bool isCompleted = completedDanceLooked.Count >= (int)NumOfSuccessfulForecastToWinOption;
             var text = Language.Translate("role.dancer.taskDanceText");
             if(!isCompleted) text += $" ({completedDanceLooked.Count}/{(int)NumOfSuccessfulForecastToWinOption})";
-            text = text.Color(isCompleted ? Color.green : completedDanceLooked.Count > 0 ? Color.yellow : Color.white);
+            text = text.Color(isCompleted ? VColor.Green : completedDanceLooked.Count > 0 ? VColor.Yellow : VColor.White);
 
             ev.AppendText(text);
 
             if (FinalDanceOption)
             {
                 var finalText = Language.Translate("role.dancer.taskFinalText");
-                if (nextIsFinalDance) finalText = finalText.Color(Color.yellow);
+                if (nextIsFinalDance) finalText = finalText.Color(VColor.Yellow);
             }
         }
 

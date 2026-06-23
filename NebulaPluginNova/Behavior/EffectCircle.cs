@@ -10,8 +10,8 @@ public class EffectCircle : MonoBehaviour
     private Color color;
     public Color Color { get => color; set
         {
-            if (outerCircle) outerCircle!.color = value;
-            if (innerCircle) innerCircle!.color = value;
+            if (outerCircle.AsBoolFast()) outerCircle!.color = value;
+            if (innerCircle.AsBoolFast()) innerCircle!.color = value;
             color = value;
         }
     }
@@ -34,7 +34,7 @@ public class EffectCircle : MonoBehaviour
 
             if (OuterRadius == null)
             {
-                if (outerCircle)
+                if (outerCircle.AsBoolFast())
                 {
                     GameObject.Destroy(outerCircle!.gameObject);
                     outerCircle = null;
@@ -42,7 +42,7 @@ public class EffectCircle : MonoBehaviour
             }
             else
             {
-                if (outerCircle == null)
+                if (!outerCircle.AsBoolFast())
                 {
                     outerCircle = UnityHelper.CreateObject<SpriteRenderer>("OuterCircle", transform, new Vector3(0, 0, -10f), LayerExpansion.GetDefaultLayer());
                     outerCircle.sprite = outerCircleSprite.GetSprite();
@@ -50,14 +50,14 @@ public class EffectCircle : MonoBehaviour
                     outerCircle.transform.localScale = Vector3.zero;
                 }
 
-                var scale = outerCircle.transform.localScale.x;
+                var scale = outerCircle!.transform.localScale.x;
                 scale -= (scale - OuterRadius.Invoke()) * Time.deltaTime * 3.6f;
                 outerCircle.transform.localScale = Vector3.one * scale;
             }
 
             if (InnerRadius == null)
             {
-                if (innerCircle)
+                if (innerCircle.AsBoolFast())
                 {
                     GameObject.Destroy(innerCircle!.gameObject);
                     innerCircle = null;
@@ -65,7 +65,7 @@ public class EffectCircle : MonoBehaviour
             }
             else
             {
-                if (innerCircle == null)
+                if (!innerCircle.AsBoolFast())
                 {
                     innerCircle = UnityHelper.CreateObject<SpriteRenderer>("InnerCircle", transform, new Vector3(0, 0, -10f), LayerExpansion.GetDefaultLayer());
                     innerCircle.sprite = innerCircleSprite.GetSprite();
@@ -73,7 +73,7 @@ public class EffectCircle : MonoBehaviour
                     innerCircle.transform.localScale = Vector3.zero;
                 }
 
-                var scale = innerCircle.transform.localScale.x;
+                var scale = innerCircle!.transform.localScale.x;
                 scale -= (scale - InnerRadius.Invoke()) * Time.deltaTime * 3.6f;
                 innerCircle.transform.localScale = Vector3.one * scale;
             }
@@ -99,8 +99,8 @@ public class EffectCircle : MonoBehaviour
             while (p > 0f)
             {
                 c.a = origAlpha * p;
-                if (innerCircle) innerCircle!.color = c;
-                if (outerCircle) outerCircle!.color = c;
+                if (innerCircle.AsBoolFast()) innerCircle!.color = c;
+                if (outerCircle.AsBoolFast()) outerCircle!.color = c;
                 p -= Time.deltaTime * 1.4f;
                 yield return null;
             }
@@ -111,10 +111,10 @@ public class EffectCircle : MonoBehaviour
         StartCoroutine(CoDisappear().WrapToIl2Cpp());
     }
 
-    static public EffectCircle SpawnEffectCircle(Transform? parent, Vector3 localPos, Color color, float? outerRadious, float? innerRadious, bool ignoreShadow)
+    static public EffectCircle SpawnEffectCircle(Transform? parent, VVector3 localPos, VColor color, float? outerRadious, float? innerRadious, bool ignoreShadow)
     {
         var circle = UnityHelper.CreateObject<EffectCircle>("Circle", parent, localPos, ignoreShadow ? LayerExpansion.GetDefaultLayer() : LayerExpansion.GetDefaultLayer());
-        circle.Color = color;
+        circle.Color = color.ToUnityColor();
         if(outerRadious != null) circle.OuterRadius = () => outerRadious.Value;
         if (innerRadious != null) circle.InnerRadius = () => innerRadious.Value;
         var script = circle.gameObject.AddComponent<ScriptBehaviour>();

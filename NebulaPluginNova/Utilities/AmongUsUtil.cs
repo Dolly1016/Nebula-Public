@@ -16,12 +16,16 @@ file static class IgnoreShadowHelpers
 {
     static public void SetIgnoreShadow(bool ignore = true, bool showNameText = true)
     {
-        foreach (var p in NebulaGameManager.Instance!.AllPlayerlike) p.UpdateVisibility(false, ignore, showNameText);
+        NebulaProfiler.LapTimer("Before SetIgnoreShadow");
+        foreach (var p in NebulaGameManager.Instance!.AllPlayerlike) p.UpdateVisibility(null, false, ignore, showNameText);
+        NebulaProfiler.LapTimer("SetIgnoreShadow");
     }
 
     static public void ResetIgnoreShadow()
     {
-        foreach (var p in NebulaGameManager.Instance!.AllPlayerlike) p.UpdateVisibility(false, !NebulaGameManager.Instance.WideCamera.DrawShadow);
+        NebulaProfiler.LapTimer("Before ResetIgnoreShadow");
+        foreach (var p in NebulaGameManager.Instance!.AllPlayerlike) p.UpdateVisibility(null, false, !NebulaGameManager.Instance.WideCamera.DrawShadow);
+        NebulaProfiler.LapTimer("ResetIgnoreShadow");
     }
 }
 file class IgnoreShadowScope : IDisposable
@@ -69,7 +73,7 @@ public static class AmongUsUtil
     public static bool IsPiled(this PassiveUiElement uiElem)
     {
         var currentOver = PassiveButtonManager.Instance.currentOver;
-        if (!currentOver || !uiElem) return false;
+        if (!currentOver.AsBoolFast() || !uiElem.AsBoolFast()) return false;
         return currentOver.GetInstanceID() == uiElem.GetInstanceID();
     }
 
@@ -82,7 +86,7 @@ public static class AmongUsUtil
     public static bool GetRoomName(UnityEngine.Vector2 position, out string roomName, bool detail = false, bool shortName = false, bool onlyVanillaRoom = false)
     {
         var mapData = MapData.GetCurrentMapData();
-        foreach (var entry in ShipStatus.Instance.FastRooms)
+        foreach (var entry in AmongUsLLImpl.ShipStatusInstance.FastRooms)
         {
             if (entry.value.roomArea.OverlapPoint(position))
             {
@@ -117,17 +121,19 @@ public static class AmongUsUtil
     public static void SetHighlight(Renderer renderer, bool on, Color? color = null) => SetHighlight(renderer, on, true, color);
     public static void SetHighlight(Renderer renderer, bool on, bool mainTarget, Color? color = null)
     {
+        var mat = renderer.material;
         if (on)
         {
-            renderer.material.SetFloat("_Outline", 1f);
-            renderer.material.SetColor("_OutlineColor", color ?? Color.yellow);
-            renderer.material.SetColor("_AddColor", color ?? Color.yellow);
+            mat.SetFloat("_Outline", 1f);
+            mat.SetColor("_OutlineColor", color ?? Color.yellow);
+            mat.SetColor("_AddColor", color ?? Color.yellow);
+            HighlightManager.AddHighlightedRenderer(renderer);
         }
         else
         {
-            renderer.material.SetFloat("_Outline", 0f);
-            renderer.material.SetColor("_OutlineColor", Color.clear);
-            renderer.material.SetColor("_AddColor", Color.clear);
+            mat.SetFloat("_Outline", 0f);
+            mat.SetColor("_OutlineColor", Color.clear);
+            mat.SetColor("_AddColor", Color.clear);
         }
     }
 
@@ -137,15 +143,17 @@ public static class AmongUsUtil
     public static MonoBehaviour CurrentCamTarget => HudManager.Instance.PlayerCam.Target;
     public static void SetCamTarget(MonoBehaviour? target = null, bool allowMoving = false)
     {
-        if(CurrentCamTarget == PlayerControl.LocalPlayer) PlayerControl.LocalPlayer.NetTransform.Halt();
+        var localPlayer = AmongUsLLImpl.LocalPlayer;
 
-        HudManager.Instance.PlayerCam.Target = target ?? PlayerControl.LocalPlayer;
-        if (allowMoving && target) Patches.PlayerCanMovePatch.SetMovableCamera(target!);
+        if(CurrentCamTarget == localPlayer) localPlayer.NetTransform.Halt();
+
+        HudManager.Instance.PlayerCam.Target = target ?? localPlayer;
+        if (allowMoving && target.AsBoolFast()) Patches.PlayerCanMovePatch.SetMovableCamera(target!);
     }
     public static void ToggleCamTarget(MonoBehaviour? target1 = null, MonoBehaviour? target2 = null)
     {
-        target1 ??= PlayerControl.LocalPlayer;
-        target2 ??= PlayerControl.LocalPlayer;
+        target1 ??= AmongUsLLImpl.LocalPlayer;
+        target2 ??= AmongUsLLImpl.LocalPlayer;
         SetCamTarget(CurrentCamTarget == target1 ? target2 : target1);
     }
 
@@ -162,8 +170,8 @@ public static class AmongUsUtil
     }
 
     public static UiElement CurrentUiElement => ControllerManager.Instance.CurrentUiState.CurrentSelection;
-    public static bool InMeeting => MeetingHud.Instance && ExileController.Instance == null;
-    public static byte CurrentMapId => GameOptionsManager.Instance.CurrentGameOptions.MapId;
+    public static bool InMeeting => MeetingHud.Instance.AsBoolFast() && !ExileController.Instance.AsBoolFast();
+    public static byte CurrentMapId => AmongUsLLImpl.CurrentGameOptionsInstance.MapId;
     private static string[] mapName = new string[] { "skeld", "mira", "polus", "undefined", "airship", "fungle" };
     public static string ToMapName(byte mapId) => mapName[mapId];
     public static string ToLocalizedMapName(byte mapId) => Language.Translate("map." + mapName[mapId].HeadLower());
@@ -178,9 +186,9 @@ public static class AmongUsUtil
         return Language.Translate(key);
     }
     public static string ToDisplayString(SystemTypes room, byte? mapId = null, bool shortName = false) => ToDisplayLocationString(Enum.GetName(typeof(SystemTypes), room)!.HeadLower(), mapId, shortName);
-    public static bool InCommSab => PlayerTask.PlayerHasTaskOfType<IHudOverrideTask>(PlayerControl.LocalPlayer);
-    public static bool InElecSab => PlayerTask.PlayerHasTaskOfType<ElectricTask>(PlayerControl.LocalPlayer);
-    public static bool InAnySab => PlayerTask.PlayerHasTaskOfType<SabotageTask>(PlayerControl.LocalPlayer);
+    public static bool InCommSab => PlayerTask.PlayerHasTaskOfType<IHudOverrideTask>(AmongUsLLImpl.LocalPlayer);
+    public static bool InElecSab => PlayerTask.PlayerHasTaskOfType<ElectricTask>(AmongUsLLImpl.LocalPlayer);
+    public static bool InAnySab => PlayerTask.PlayerHasTaskOfType<SabotageTask>(AmongUsLLImpl.LocalPlayer);
     public static PoolablePlayer PoolablePrefab => HudManager.Instance.IntroPrefab.PlayerPrefab;
     public static PoolablePlayer GetPlayerIcon(OutfitCandidate outfit, Transform? parent, Vector3 position, Vector3 scale, bool flip = false, bool includePet = true)
         => GetPlayerIcon(outfit.Outfit.outfit, parent, position, scale, flip, includePet);
@@ -235,20 +243,20 @@ public static class AmongUsUtil
         return player;
     }
 
-    public static SpriteRenderer GenerateFullscreen(Color color)
+    public static SpriteRenderer GenerateFullscreen(VColor color)
     {
         var flash = GameObject.Instantiate(HudManager.Instance.FullScreen, HudManager.Instance.transform);
-        flash.color = color;
+        flash.color = color.ToUnityColor();
         flash.enabled = true;
         flash.gameObject.active = true;
         return flash;
     }
 
-    public static void PlayCustomFlash(Color color, float fadeIn, float fadeOut, float maxAlpha = 0.5f, float maxDuration = 0f)
+    public static void PlayCustomFlash(VColor color, float fadeIn, float fadeOut, float maxAlpha = 0.5f, float maxDuration = 0f)
     {
         float duration = fadeIn + fadeOut;
 
-        var flash = GenerateFullscreen(color.AlphaMultiplied(Mathf.Clamp01(maxAlpha)));
+        var flash = GenerateFullscreen(color.AlphaMultiplied(Mathn.Clamp01(maxAlpha)));
 
         IEnumerator CoPlayFlash()
         {
@@ -257,18 +265,18 @@ public static class AmongUsUtil
             t = 0f;
             while(t < fadeIn)
             {
-                flash.color = color.AlphaMultiplied(Mathf.Clamp01(maxAlpha * t / fadeIn));
+                flash.color = color.AlphaMultiplied(Mathn.Clamp01(maxAlpha * t / fadeIn)).ToUnityColor();
                 t += Time.deltaTime;
                 yield return null;
             }
-            flash.color = color.AlphaMultiplied(Mathf.Clamp01(maxAlpha));
+            flash.color = color.AlphaMultiplied(Mathn.Clamp01(maxAlpha)).ToUnityColor();
 
             yield return Effects.Wait(maxDuration);
 
             t = 0f;
             while (t < fadeOut)
             {
-                flash.color = color.AlphaMultiplied(Mathf.Clamp01(maxAlpha * (1f - t / fadeOut)));
+                flash.color = color.AlphaMultiplied(Mathn.Clamp01(maxAlpha * (1f - t / fadeOut))).ToUnityColor();
                 t += Time.deltaTime;
                 yield return null;
             }
@@ -280,12 +288,12 @@ public static class AmongUsUtil
         NebulaManager.Instance.StartCoroutine(CoPlayFlash().WrapToIl2Cpp());
     }
 
-    public static void PlayFlash(Color color)
+    public static void PlayFlash(VColor color)
     {
         PlayCustomFlash(color, 0.375f, 0.375f);
     }
 
-    public static void PlayQuickFlash(Color color)
+    public static void PlayQuickFlash(VColor color)
     {
         PlayCustomFlash(color, 0.1f, 0.4f);
     }
@@ -367,13 +375,13 @@ public static class AmongUsUtil
     }
 
     private static DividedSpriteLoader footprintSprite = DividedSpriteLoader.FromResource("Nebula.Resources.Footprint.png", 100f, 2, 1);
-    public static SpriteRenderer GenerateFootprint(Vector2 pos,Color color, float? angle, float? duration, int type, Func<bool>? canSeeIn = null)
+    public static SpriteRenderer GenerateFootprint(VVector2 pos, VColor color, float? angle, float? duration, int type, Func<bool>? canSeeIn = null)
     {
         if (type == 1 && !angle.HasValue) return null!;//Type1の足跡は歩いているときだけ発生
 
         var renderer = UnityHelper.CreateObject<SpriteRenderer>("Footprint", null, new Vector3(pos.x, pos.y, pos.y / 1000f + 0.001f), LayerExpansion.GetPlayersLayer());
         renderer.sprite = footprintSprite.GetSprite(type);
-        renderer.color = color;
+        renderer.color = color.ToUnityColor();
         float footAngle = type switch
         {
             1 => angle!.Value + (System.Random.Shared.NextSingle() - 0.5f) * 4f,
@@ -399,7 +407,7 @@ public static class AmongUsUtil
             while (renderer.color.a > 0f)
             {
                 Color col = renderer.color;
-                col.a = Mathf.Clamp01(col.a - Time.deltaTime * 0.8f);
+                col.a = Mathn.Clamp01(col.a - Time.deltaTime * 0.8f);
                 renderer.color = col;
 
                 renderer.enabled = canSeeIn?.Invoke() ?? true;
@@ -425,7 +433,7 @@ public static class AmongUsUtil
 
         var playerInfo = GameData.Instance.AddDummy(playerControl);
         
-        playerControl.transform.position = PlayerControl.LocalPlayer.transform.position;
+        playerControl.transform.position = AmongUsLLImpl.LocalPlayer.transform.position;
         playerControl.GetComponent<DummyBehaviour>().enabled = true;
         playerControl.isDummy = true;
         playerControl.SetName(AccountManager.Instance.GetRandomName());
@@ -556,10 +564,7 @@ public static class AmongUsUtil
         foreach (RoleBehaviour role in RoleManager.Instance.AllRoles)
         {
             R? r = role.TryCast<R>();
-            if (r != null)
-            {
-                return r;
-            }
+            if (r.AsBoolFast()) return r;
         }
         return null;
     }
@@ -571,7 +576,7 @@ public static class AmongUsUtil
         if (addExtraCoolDown && GeneralConfigurations.IsInEarlyPhase)
             coolDown += GeneralConfigurations.EarlyExtraEmergencyCoolDownOption;
 
-        ShipStatus.Instance.EmergencyCooldown = coolDown;
+        AmongUsLLImpl.ShipStatusInstance.EmergencyCooldown = coolDown;
     }
 
     public static void AddLobbyNotification(string message,UnityEngine.Color? color, Sprite? sprite = null,bool playSound = true)
@@ -599,22 +604,22 @@ public static class AmongUsUtil
     public static (GameObject obj, NoisemakerArrow arrow) InstantiateNoisemakerArrow(Vector2 targetPos, bool withSound = false, float? hue = null)
     {
         var noisemaker = AmongUsUtil.GetRolePrefab<NoisemakerRole>();
-        if (noisemaker != null)
+        if (noisemaker.AsBoolFast())
         {
             if (withSound && Constants.ShouldPlaySfx())
             {
                 SoundManager.Instance.PlayDynamicSound("NoisemakerAlert", noisemaker.deathSound, false, (DynamicSound.GetDynamicsFunction)((source, dt) =>
                 {
-                    if (!PlayerControl.LocalPlayer)
+                    if (!AmongUsLLImpl.LocalPlayer)
                     {
                         source.volume = 0f;
                         return;
                     }
                     source.volume = 1f;
-                    Vector2 truePosition = PlayerControl.LocalPlayer.GetTruePosition();
+                    Vector2 truePosition = AmongUsLLImpl.LocalPlayer.GetTruePosition();
                     source.volume = SoundManager.GetSoundVolume(targetPos, truePosition, 7f, 50f, 0.5f);
                 }), SoundManager.Instance.SfxChannel);
-                VibrationManager.Vibrate(1f, PlayerControl.LocalPlayer.GetTruePosition(), 7f, 1.2f, VibrationManager.VibrationFalloff.None, null, false);
+                VibrationManager.Vibrate(1f, AmongUsLLImpl.LocalPlayer.GetTruePosition(), 7f, 1.2f, VibrationManager.VibrationFalloff.None, null, false);
             }
             GameObject gameObject = GameObject.Instantiate<GameObject>(noisemaker.deathArrowPrefab, Vector3.zero, Quaternion.identity);
             var deathArrow = gameObject.GetComponent<NoisemakerArrow>();
@@ -679,16 +684,16 @@ public static class AmongUsUtil
         return AmongUsClient.Instance.NetworkMode == NetworkModes.OnlineGame;
     }
 
-    public static void SetPlayerMaterial(Renderer renderer, Color mainColor, Color shadowColor, Color visorColor)
+    public static void SetPlayerMaterial(Renderer renderer, VColor mainColor, VColor shadowColor, VColor visorColor)
     {
-        renderer.material.SetColor(PlayerMaterial.BackColor, shadowColor);
-        renderer.material.SetColor(PlayerMaterial.BodyColor, mainColor);
-        renderer.material.SetColor(PlayerMaterial.VisorColor, visorColor);
+        renderer.material.SetColor(PlayerMaterial.BackColor, shadowColor.ToUnityColor());
+        renderer.material.SetColor(PlayerMaterial.BodyColor, mainColor.ToUnityColor());
+        renderer.material.SetColor(PlayerMaterial.VisorColor, visorColor.ToUnityColor());
     }
 
     public static Vector2 GetCorner(float xCoeff, float yCoeff, Vector2 offset, Camera camera)
     {
-        return new((camera.orthographicSize / (float)Screen.height * (float)Screen.width - -offset.x) * xCoeff, (camera.orthographicSize - offset.y) * yCoeff);
+        return new((camera.orthographicSize / (float)NebulaAPI.AmongUs.ScreenHeight * (float)NebulaAPI.AmongUs.ScreenWidth - -offset.x) * xCoeff, (camera.orthographicSize - offset.y) * yCoeff);
     }
 
     public static Vector2 GetCorner(float xCoeff, float yCoeff) => GetCorner(xCoeff, yCoeff, Vector2.zero, Camera.main);
@@ -701,7 +706,7 @@ public static class AmongUsUtil
         player.VanillaPlayer.moveable = false;
         player.Unbox().WillDie = true;
         NebulaManager.Instance.StartDelayAction(1.3f + delay, () => player.VanillaPlayer.moveable = true);
-        if (player.AmOwner && Minigame.Instance) Minigame.Instance.ForceClose();
+        if (player.AmOwner && Minigame.Instance.AsBoolFast()) Minigame.Instance.ForceClose();
 
         (var position, var showUpObj) = setUp.Invoke();
 
@@ -713,7 +718,7 @@ public static class AmongUsUtil
                 while (t > 0f)
                 {
                     //会議が始まったらそのタイミングで死亡
-                    if (MeetingHud.Instance)
+                    if (MeetingHud.Instance.AsBoolFast())
                     {
                         killer.MurderPlayer(player, playerState, eventState, KillParameter.WithAssigningGhostRole | KillParameter.WithOverlay, KillCondition.TargetAlive);
                         yield break;
@@ -777,7 +782,7 @@ public static class AmongUsUtil
 
     public static NormalGameOptionsV10 GetCurrentNormalOption() => GameOptionsManager.Instance.currentNormalGameOptions; //GameOptionsManager.Instance.CurrentGameOptions.CastFast<NormalGameOptionsV10>();
 
-    public static bool MapIsOpen => MapBehaviour.Instance && MapBehaviour.Instance.IsOpen;
+    public static bool MapIsOpen => MapBehaviour.Instance.AsBoolFast() && MapBehaviour.Instance.IsOpen;
 
     public static bool UsingMouseMovement
     {

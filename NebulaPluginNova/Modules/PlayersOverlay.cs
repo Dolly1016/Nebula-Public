@@ -9,7 +9,7 @@ using Virial.Game;
 
 namespace Nebula.Modules;
 
-public record PlayerIcon(byte playerId, GameObject iconObj, PoolablePlayer display, PlayerControl relatedControl) { public Outfit? LastOutfit; public Color32 LastColor; }
+public record PlayerIcon(byte playerId, GameObject iconObj, PoolablePlayer display, PlayerControl relatedControl) { public Outfit? LastOutfit; public VColor LastColor; }
 
 public class PlayersOverlay : IGameOperator
 {
@@ -32,7 +32,7 @@ public class PlayersOverlay : IGameOperator
 
     void HudUpdate(GameHudUpdateEvent ev)
     {
-        if((MeetingHud.Instance && !ExileController.Instance) || PlayerCustomizationMenu.Instance || GameSettingMenu.Instance)
+        if((MeetingHud.Instance.AsBoolFast() && !ExileController.Instance.AsBoolFast()) || PlayerCustomizationMenu.Instance.AsBoolFast() || GameSettingMenu.Instance.AsBoolFast())
         {
             IconHolder.gameObject.SetActive(false);
             return;

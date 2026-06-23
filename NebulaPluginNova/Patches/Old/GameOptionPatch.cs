@@ -134,7 +134,7 @@ class CreateGameOptionsNoSBehaviour : MonoBehaviour
         MyPicker.transform.FindChild("Game Mode").gameObject.SetActive(false);
 
         var impostorsRoot = MyPicker.transform.FindChild("Impostors");
-        if (impostorsRoot)
+        if (impostorsRoot.AsBoolFast())
         {
             impostorsRoot.transform.localPosition = new(-1.955f, -0.44f, 0f);
 
@@ -160,11 +160,11 @@ class CreateGameOptionsNoSBehaviour : MonoBehaviour
 
     void OnEnable()
     {
-        if (!MyPicker) return;
+        if (!MyPicker.AsBoolFast()) return;
 
         bool isCustomServer = AmongUsUtil.IsCustomServer();
 
-        if (MyPicker.MaxPlayersRoot)
+        if (MyPicker.MaxPlayersRoot.AsBoolFast())
         {
             //以前のボタンを削除する
             MyPicker.optionsMenu.ControllerSelectable.Clear();
@@ -278,12 +278,10 @@ class CreateGameOptionsStartPatch
     public static void Prefix(CreateOptionsPicker __instance)
     {
         impostors = AmongUsUtil.NumOfImpostors;
-        Debug.Log("Impostors(A): " + impostors);
     }
     public static void Postfix(CreateOptionsPicker __instance)
     {
         impostors = Math.Min(impostors, AmongUsUtil.IsCustomServer() ? 6 : 3);
         __instance.SetImpostorButtons(impostors);
-        Debug.Log("Impostors(B): " + impostors);
     }
 }

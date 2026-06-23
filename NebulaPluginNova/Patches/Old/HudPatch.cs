@@ -37,8 +37,8 @@ public static class HudManagerStartPatch
             }
             while (true)
             {
-                if (LobbyBehaviour.Instance) UpdateZ(-34f);
-                if (ShipStatus.Instance) UpdateZ(-800f);
+                if (AmongUsLLImpl.LobbyInstance.AsBoolFast()) UpdateZ(-34f);
+                if (AmongUsLLImpl.ShipStatusInstance.AsBoolFast()) UpdateZ(-800f);
                 yield return null;
             }
         }
@@ -89,14 +89,20 @@ public static class HudManagerUpdatePatch
 {
     static void Postfix(HudManager __instance)
     {
+        NebulaProfiler.LapTimer("Before HudManager.FixedUpdate", 150);
         __instance.UpdateHudContent();
+        NebulaProfiler.LapTimer("UpdateHudContent");
         NebulaGameManager.Instance?.OnUpdate();
+        NebulaProfiler.LapTimer("NebulaGameManager.OnUpdate");
         NebulaGameManager.Instance?.AllPlayerInfo.Do(p => p.Unbox().HudUpdate());
+        NebulaProfiler.LapTimer("NebulaGameManager.OnHudUpdate");
 
         if (!TextField.AnyoneValid &&  NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Help).KeyDownForAction && !IntroCutscene.Instance && !Minigame.Instance && !ExileController.Instance)
         {
             HelpScreen.TryOpenHelpScreen(0);
         }
+        NebulaProfiler.LapTimer("NebulaGameManager.HelpScreen");
+
     }
 }
 
@@ -110,37 +116,39 @@ public static class HudManagerCoStartGamePatch
             //UIを閉じる
             NebulaManager.Instance.CloseAllUI();
 
-            while (!ShipStatus.Instance)
+            while (!ShipStatus.Instance.AsBoolFast())
             {
                 yield return null;
             }
             __instance.IsIntroDisplayed = true;
-            DestroyableSingleton<HudManager>.Instance.FullScreen.transform.localPosition = new Vector3(0f, 0f, -250f);
+            __instance.FullScreen.transform.localPosition = new Vector3(0f, 0f, -250f);
 
+            var gameManager = AmongUsLLImpl.GameManagerInstance;
             //スタンプの位置を変更
-            StampHelpers.SetStampShowerToUnderHud(() => !GameManager.Instance.GameHasStarted);
+            StampHelpers.SetStampShowerToUnderHud(() => !gameManager.GameHasStarted);
 
-            yield return DestroyableSingleton<HudManager>.Instance.ShowEmblem(true);
+            yield return __instance.ShowEmblem(true);
             IntroCutscene introCutscene = GameObject.Instantiate<IntroCutscene>(__instance.IntroPrefab, __instance.transform);
             yield return introCutscene.CoBegin();
 
             yield return ModPreSpawnInPatch.ModPreSpawnIn(__instance.transform, GameStatistics.EventVariation.GameStart, EventDetail.GameStart);
 
             float killCooldown = GeneralConfigurations.UseShortenCooldownAtGameStartOption ? ModAbilityButtonImpl.CoolDownOnGameStart : AmongUsLLImpl.Instance.VanillaKillCooldown;
-            PlayerControl.LocalPlayer.killTimer = killCooldown;
+            AmongUsLLImpl.LocalPlayer.killTimer = killCooldown;
             if (GeneralConfigurations.EmergencyCooldownAtGameStart) AmongUsUtil.SetEmergencyCoolDown(10f, false, false);
 
-            HudManager.Instance.KillButton.SetCoolDown(killCooldown, AmongUsLLImpl.Instance.VanillaKillCooldown);
+            __instance.KillButton.SetCoolDown(killCooldown, AmongUsLLImpl.Instance.VanillaKillCooldown);
 
-            if (ShipStatus.Instance.Systems.TryGetValue(SystemTypes.Sabotage, out var sabo)) sabo.TryCast<SabotageSystemType>()?.SetInitialSabotageCooldown();
-            if (ShipStatus.Instance.Systems.TryGetValue(SystemTypes.Doors, out var door)) door.TryCast<IDoorSystem>()?.SetInitialSabotageCooldown();
+            var systems = AmongUsLLImpl.ShipStatusInstance.Systems;
+            if (systems.TryGetValue(SystemTypes.Sabotage, out var sabo)) sabo.TryCast<SabotageSystemType>()?.SetInitialSabotageCooldown();
+            if (systems.TryGetValue(SystemTypes.Doors, out var door)) door.TryCast<IDoorSystem>()?.SetInitialSabotageCooldown();
 
-            PlayerControl.LocalPlayer.AdjustLighting();
+            AmongUsLLImpl.LocalPlayer.AdjustLighting();
             yield return __instance.CoFadeFullScreen(Color.black, Color.clear, 0.2f, false);
             __instance.FullScreen.transform.localPosition = new Vector3(0f, 0f, -500f);
             __instance.IsIntroDisplayed = false;
-            __instance.CrewmatesKilled.gameObject.SetActive(GameManager.Instance.ShowCrewmatesKilled());
-            GameManager.Instance.StartGame();
+            __instance.CrewmatesKilled.gameObject.SetActive(gameManager.ShowCrewmatesKilled());
+            gameManager.StartGame();
         }
         __result = GetEnumerator().WrapToIl2Cpp();
 

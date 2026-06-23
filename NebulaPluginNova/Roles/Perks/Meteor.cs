@@ -77,14 +77,14 @@ internal class Meteor : PerkFunctionalInstance
             GameOperatorManager.Instance?.Subscribe<PlayerTaskTextLocalEvent>(ev => {
                 even = !even;
                 slowEven = (slowEven + 1) % 6;
-                ev.AppendText(Language.Translate("perk.meteor.sabotageText").Color(even ? Color.red : Color.yellow));
+                ev.AppendText(Language.Translate("perk.meteor.sabotageText").Color(even ? VColor.Red : VColor.Yellow));
             }, FunctionalLifespan.GetTimeLifespan(duration + AfterFireDuration));
             GameOperatorManager.Instance?.Subscribe<CheckCanPushEmergencyButtonEvent>(ev => ev.DenyButton("perk.meteor.meetingButtonText"), FunctionalLifespan.GetTimeLifespan(duration + AfterFireDuration));
 
             var player = GamePlayer.LocalPlayer;
             float alertTime = 0f;
 
-            var fullscreen = AmongUsUtil.GenerateFullscreen(Palette.ImpostorRed.AlphaMultiplied(0.5f));
+            var fullscreen = AmongUsUtil.GenerateFullscreen(new VColor(Palette.ImpostorRed).AlphaMultiplied(0.5f));
             fullscreen.gameObject.SetActive(false);
 
             float addition = 3f;
@@ -124,7 +124,7 @@ internal class Meteor : PerkFunctionalInstance
             {
                 while (delay > 0.8f)
                 {
-                    var circle = EffectCircle.SpawnEffectCircle(null, pos.AsVector3(-10f), Palette.ImpostorRed, ExplosionSize, null, true);
+                    var circle = EffectCircle.SpawnEffectCircle(null, pos.AsVector3(-10f), new(Palette.ImpostorRed), ExplosionSize, null, true);
                     yield return Effects.Wait(0.8f);
                     circle.Disappear();
                     delay -= 0.8f;

@@ -59,7 +59,7 @@ public class Obsessional : DefinedAllocatableModifierTemplate, DefinedAllocatabl
         void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo, bool inEndScene)
         {
             if (inEndScene || (canSeeAllInfo && !AmOwner))
-                name += $" ({(obsession?.Name ?? "Undefined")})".Color(MyRole.UnityColor).Sized(60);
+                name += $" ({(obsession?.Name ?? "Undefined")})".Color(MyRole.RoleColor).Sized(60);
             else if (AmOwner)
                 name += MyRole.GetRoleIconTagSmall();
         }
@@ -138,10 +138,10 @@ public class Obsessional : DefinedAllocatableModifierTemplate, DefinedAllocatabl
         [Local]
         void AppendExtraTaskText(PlayerTaskTextLocalEvent ev)
         {
-            ev.AppendText(Language.Translate("role.obsessional.taskText").Replace("%PLAYER%", obsession?.Name ?? "ERROR").Color(MyRole.UnityColor));
+            ev.AppendText(Language.Translate("role.obsessional.taskText").Replace("%PLAYER%", obsession?.Name ?? "ERROR").Color(MyRole.RoleColor));
         }
 
-        string? RuntimeModifier.DisplayIntroBlurb => Language.Translate("role.obsessional.blurb").Replace("%NAME%", (obsession?.Name ?? "ERROR").Color(MyRole.UnityColor));
+        string? RuntimeModifier.DisplayIntroBlurb => Language.Translate("role.obsessional.blurb").Replace("%NAME%", (obsession?.Name ?? "ERROR").Color(MyRole.RoleColor));
 
         static RemoteProcess<(byte playerId, byte targetId)> RpcSetObsessionalTarget = new("SetObsessionalTarget",
         (message, _) =>

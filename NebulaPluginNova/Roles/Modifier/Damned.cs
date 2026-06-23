@@ -131,7 +131,7 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
                 NebulaManager.Instance.StartCoroutine(CoDelayKill().WrapToIl2Cpp());
             }
 
-            if(AmOwner) AmongUsUtil.PlayQuickFlash(Palette.ImpostorRed);
+            if(AmOwner) AmongUsUtil.PlayQuickFlash(new(Palette.ImpostorRed));
         }
 
         [OnlyHost, OnlyMyPlayer]
@@ -213,7 +213,7 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
                     animator.transform.localScale = new(1.6f, 1.6f, 1f);
                     animator.color = new(1f, 1f, 1f, 0.75f);
                     GameOperatorManager.Instance?.RegisterReleasedAction(() => {
-                        if (animator) GameObject.Destroy(animator.gameObject);
+                        if (animator.AsBoolFast()) GameObject.Destroy(animator.gameObject);
                     }, this);
                 }
             }
@@ -239,7 +239,7 @@ public class Damned : DefinedAllocatableModifierTemplate, DefinedAllocatableModi
         "NoticeCurse",
         (param, _) =>
         {
-            if(PlayerControl.LocalPlayer.PlayerId == param.playerId)
+            if(AmongUsLLImpl.LocalPlayer.PlayerId == param.playerId)
             {
                 if (param.type == 0) new StaticAchievementToken("damned.common1");
                 if (param.type == 1) new StaticAchievementToken("damned.common3");

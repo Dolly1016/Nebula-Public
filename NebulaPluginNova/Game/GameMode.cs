@@ -1,5 +1,6 @@
-﻿using Nebula.AeroGuesser;
-using Nebula.Roles.Assignment;
+﻿using Nebula.Roles.Assignment;
+using Nebula.SpecialModes.AeroGuesser;
+using Nebula.SpecialModes.PaintQuiz;
 using Virial.Assignable;
 using Virial.DI;
 using Virial.Game;
@@ -16,9 +17,10 @@ internal class GameModeDefinitionImpl : GameModeDefinition
         GameModes.Standard = new GameModeDefinitionImpl("gamemode.standard", 4, typeof(IGameModeStandard), () => new StandardRoleAllocator());
         GameModes.FreePlay = new GameModeDefinitionImpl("gamemode.freeplay", 0, typeof(IGameModeFreePlay), () => new FreePlayRoleAllocator());
         GameModes.AeroGuesser = new GameModeDefinitionImpl("gamemode.aeroguesser", 1, typeof(IGameModeAeroGuesser), amHost => AeroGuesserSenario.CoIntro(amHost), false);
+        GameModes.PaintQuiz = new GameModeDefinitionImpl("gamemode.paintquiz", 1, typeof(IGameModePaintQuiz), amHost => PaintQuizSenario.CoIntro(amHost), false, true);
     }
 
-    private GameModeDefinitionImpl(string translationKey, int minPlayers, Type gameModeType, Func<IRoleAllocator> roleAllocator, Func<bool, IEnumerator>? alternativeRoutine, bool withRoleSettings)
+    private GameModeDefinitionImpl(string translationKey, int minPlayers, Type gameModeType, Func<IRoleAllocator> roleAllocator, Func<bool, IEnumerator>? alternativeRoutine, bool withRoleSettings, bool shouldNotAdd = false)
     {
         this.display = new TranslateTextComponent(translationKey);
         this.bit = 1u << GameModes.allGameModes.Count;
@@ -27,11 +29,11 @@ internal class GameModeDefinitionImpl : GameModeDefinition
         this.minPlayers = minPlayers;
         this.alternativeRoutine = alternativeRoutine;
         this.withRoleSettings = withRoleSettings;
-        GameModes.allGameModes.Add(this);
+        if (!shouldNotAdd) GameModes.allGameModes.Add(this);
     }
 
     public GameModeDefinitionImpl(string translationKey, int minPlayers, Type gameModeType, Func<IRoleAllocator> roleAllocator) : this(translationKey, minPlayers, gameModeType, roleAllocator, null, true) { }
-    public GameModeDefinitionImpl(string translationKey, int minPlayers, Type gameModeType, Func<bool, IEnumerator> alternativeRoutine, bool withRoleSettings = true) : this(translationKey, minPlayers, gameModeType, null!, alternativeRoutine, withRoleSettings) { }
+    public GameModeDefinitionImpl(string translationKey, int minPlayers, Type gameModeType, Func<bool, IEnumerator> alternativeRoutine, bool withRoleSettings = true, bool shouldNotAdd = false) : this(translationKey, minPlayers, gameModeType, null!, alternativeRoutine, withRoleSettings, shouldNotAdd) { }
 
     private bool withRoleSettings;
     public override bool WithRoleSettings => withRoleSettings;

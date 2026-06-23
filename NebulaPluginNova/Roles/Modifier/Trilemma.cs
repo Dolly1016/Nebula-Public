@@ -23,9 +23,9 @@ internal class Trilemma : DefinedModifierTemplate, DefinedAllocatableModifier, R
         ConfigurationHolder?.SetDisplayState(() => NumOfTrilemmaOption == 0 ? ConfigurationHolderState.Inactivated : RoleChanceOption == 100 ? ConfigurationHolderState.Emphasized : ConfigurationHolderState.Activated);
         Language.Register("role.trilemma.winCond", () => WinConditionOption.GetValue() switch
         {
-            0 => Language.Translate("role.trilemma.winCond.block").Color(Color.cyan).Bold(),
-            1 => Language.Translate("role.trilemma.winCond.additional").Color(Color.cyan).Bold(),
-            2 => Language.Translate("role.trilemma.winCond.overwrite").Color(Color.cyan).Bold(),
+            0 => Language.Translate("role.trilemma.winCond.block").Color(VColor.Cyan).Bold(),
+            1 => Language.Translate("role.trilemma.winCond.additional").Color(VColor.Cyan).Bold(),
+            2 => Language.Translate("role.trilemma.winCond.overwrite").Color(VColor.Cyan).Bold(),
             _ => "Error case!"
         });
     }
@@ -156,15 +156,17 @@ internal class Trilemma : DefinedModifierTemplate, DefinedAllocatableModifier, R
         assignChance = 0;
     }
 
-    static public Color[] Colors => colors;
-    static private Color[] colors = new Color[] { MyRole.UnityColor,
-        (Color)new Color32(178, 147, 69, 255),
-        (Color)new Color32(184, 87, 159, 255),
-        (Color)new Color32(164, 96, 203, 255),
-        (Color)new Color32(93, 164, 96, 255),
-        (Color)new Color32(207, 98, 98, 255) ,
-        (Color)new Color32(163, 181, 203, 255),
-        (Color)new Color32(223,164,116, 255),};
+    static public VColor[] Colors => colors;
+    static private VColor[] colors = [
+        MyRole.RoleColor,
+        new(178, 147, 69, 255),
+        new(184, 87, 159, 255),
+        new(164, 96, 203, 255),
+        new(93, 164, 96, 255),
+        new(207, 98, 98, 255) ,
+        new(163, 181, 203, 255),
+        new(223,164,116, 255)
+        ];
 
     public class Instance : RuntimeAssignableTemplate, RuntimeModifier
     {
@@ -216,7 +218,7 @@ internal class Trilemma : DefinedModifierTemplate, DefinedAllocatableModifier, R
 
         void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo, bool inEndScene)
         {
-            Color trilemmaColor = colors[canSeeAllInfo ? trilemmaId : 0];
+            VColor trilemmaColor = colors[canSeeAllInfo ? trilemmaId : 0];
             
             bool canSee = false;
 
@@ -229,12 +231,12 @@ internal class Trilemma : DefinedModifierTemplate, DefinedAllocatableModifier, R
         }
 
 
-        string? RuntimeModifier.DisplayIntroBlurb => Language.Translate("role.trilemma.blurb").Color(MyRole.UnityColor);
+        string? RuntimeModifier.DisplayIntroBlurb => Language.Translate("role.trilemma.blurb").Color(MyRole.Color);
 
         [Local]
         void AppendExtraTaskText(PlayerTaskTextLocalEvent ev)
         {
-            ev.AppendText(Language.Translate("role.trilemma.taskText").Replace("%PLAYERS%", string.Join(", ", MyTrilemmas.Where(p => !p.AmOwner).Select(p => p.PlayerName)) ?? "Undefined").Color(MyRole.UnityColor));
+            ev.AppendText(Language.Translate("role.trilemma.taskText").Replace("%PLAYERS%", string.Join(", ", MyTrilemmas.Where(p => !p.AmOwner).Select(p => p.PlayerName)) ?? "Undefined").Color(MyRole.RoleColor));
         }
 
         #region Titles

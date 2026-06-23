@@ -63,7 +63,17 @@ internal class GameOperatorBuilder
             var lastProcedure = myProcedure;
             myProcedure = e =>
             {
-                if (AmongUsClient.Instance.AmHost) lastProcedure.Invoke(e);
+                if (AmongUsLLImpl.AmongUsClientInstance.AmHost) lastProcedure.Invoke(e);
+            };
+        }
+
+        {
+            var lastProcedure = myProcedure;
+            myProcedure = e =>
+            {
+                NebulaProfiler.LapTimer("Before Event: " + e.GetType().Name);
+                lastProcedure.Invoke(e);
+                NebulaProfiler.LapTimer($"Event: {e.GetType().Name}, Type: {instance.GetType().FullName}");
             };
         }
         return myProcedure;
@@ -418,7 +428,7 @@ public static class GameOperatorHelpers
 {
     static public GameObject BindGameObject(this ILifespan lifespan, GameObject obj)
     {
-        GameOperatorManager.Instance?.RegisterOnReleased(() => { if (obj) GameObject.Destroy(obj); }, lifespan, null);
+        GameOperatorManager.Instance?.RegisterOnReleased(() => { if (obj.AsBoolFast()) GameObject.Destroy(obj); }, lifespan, null);
         return obj;
     }
 }

@@ -30,8 +30,8 @@ public static class CommandHelper
 }
 public class CommandLogText : ICommandLogText
 {
-    readonly static public Color InvalidColor = Color.Lerp(Color.red, Color.white, 0.4f);
-    readonly static public Color WarningColor = Color.Lerp(new(1f,0.75f,0f), Color.white, 0.4f);
+    readonly static public VColor InvalidColor = VColor.Lerp(VColor.Red, VColor.White, 0.4f);
+    readonly static public VColor WarningColor = VColor.Lerp(new(1f,0.75f,0f), VColor.White, 0.4f);
 
     public bool IsDirty{ get; set; }
 
@@ -40,7 +40,7 @@ public class CommandLogText : ICommandLogText
             {
                 CommandLogLevel.Error => InvalidColor,
                 CommandLogLevel.Warning => InvalidColor,
-                _ => Color.white
+                _ => VColor.White
             });
     }
 
@@ -448,7 +448,7 @@ public class ConsoleShower : MonoBehaviour
             var logger = bubble.Logger;
             if (logger.IsDirty)
             {
-                bubble.Text.text = "<size=80%>" + logger.Executed.Color(Color.white.RGBMultiplied(0.78f)) + "</size>" + ("\n" + logger.ToLogString(CommandLogLevel.AllLevel)).Replace("\n", "\n ");
+                bubble.Text.text = "<size=80%>" + logger.Executed.Color(VColor.White.RGBMultiplied(0.78f)) + "</size>" + ("\n" + logger.ToLogString(CommandLogLevel.AllLevel)).Replace("\n", "\n ");
 
                 bubble.Text.ForceMeshUpdate();
 

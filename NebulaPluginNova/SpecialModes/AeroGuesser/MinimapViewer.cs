@@ -80,7 +80,7 @@ internal class MinimapViewer : AbstractMinimapViewer
         collider.isTrigger = true;
         collider.size = new(8.6f, 6f);
 
-        myPinRenderer = CreatePin(Vector2.zero, PlayerControl.LocalPlayer.PlayerId);
+        myPinRenderer = CreatePin(Vector2.zero, AmongUsLLImpl.LocalPlayer.PlayerId);
         myPinRenderer.gameObject.SetActive(false);
     }
 

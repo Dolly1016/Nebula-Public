@@ -16,7 +16,7 @@ namespace Nebula.Roles.Modifier;
 
 public class DyingMessage : DefinedAllocatableModifierTemplate, DefinedAllocatableModifier, IAssignableDocument
 {
-    private DyingMessage() : base("dyingMessage", "DYM", new(DyingMessageCanvas.BloodColor), [MessageDurationOption])
+    private DyingMessage() : base("dyingMessage", "DYM", DyingMessages.BloodColor, [MessageDurationOption])
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny);
     }
@@ -54,7 +54,7 @@ public class DyingMessage : DefinedAllocatableModifierTemplate, DefinedAllocatab
 
                 NebulaManager.Instance.StartDelayAction(1f, () => DyingMessages.GenerateCanvas(pos, MessageDuration, MyRole, _ => { 
                     new StaticAchievementToken("dyingMessage.common1"); 
-                    if(ShipStatus.Instance.AllRooms.Find(room => room.roomArea.OverlapPoint(pos), out var found) && (found.RoomId == SystemTypes.Cafeteria || found.RoomId == SystemTypes.Kitchen))
+                    if(AmongUsLLImpl.ShipStatusInstance.AllRooms.Find(room => room.roomArea.OverlapPoint(pos), out var found) && (found.RoomId == SystemTypes.Cafeteria || found.RoomId == SystemTypes.Kitchen))
                     {
                         new StaticAchievementToken("dyingMessage.common2");
                     }

@@ -192,7 +192,7 @@ internal class Cupid : DefinedSingleAbilityRoleTemplate<Cupid.Ability>, DefinedR
 
                 loversIconAction = (player) =>
                 {
-                    if (playerIcon) GameObject.Destroy(playerIcon!.gameObject);
+                    if (playerIcon.AsBoolFast()) GameObject.Destroy(playerIcon!.gameObject);
                     if (player == null)
                         playerIcon = null;
                     else
@@ -337,7 +337,7 @@ internal class Cupid : DefinedSingleAbilityRoleTemplate<Cupid.Ability>, DefinedR
         bool CheckLocalKill()
         {
             if (player1.AmOwner || player2.AmOwner) return false;
-            if (MeetingHud.Instance) return false;
+            if (MeetingHud.Instance.AsBoolFast()) return false;
 
             var myPos = GamePlayer.LocalPlayer!.Position;
             UnityEngine.Vector2 vec = player2.Position - player1.Position;
@@ -519,7 +519,7 @@ internal class Cupid : DefinedSingleAbilityRoleTemplate<Cupid.Ability>, DefinedR
             mesh.SetTriangles(triangleList.ToArray(), 0);
 
             //効果音の位置調整
-            if (soundSource)
+            if (soundSource.AsBoolFast())
             {
                 Vector2 localPos = (Vector2)HudManager.Instance.transform.position - (Vector2)player1.Position;
                 dir = player2.Position - player1.Position;
@@ -533,11 +533,11 @@ internal class Cupid : DefinedSingleAbilityRoleTemplate<Cupid.Ability>, DefinedR
 
         public void Inactivate()
         {
-            if (node1Renderer) GameObject.Destroy(node1Renderer.gameObject);
-            if (node2Renderer) GameObject.Destroy(node2Renderer.gameObject);
-            if (edgeFrontRenderer) GameObject.Destroy(edgeFrontRenderer.gameObject);
-            if (edgeLightRenderer) GameObject.Destroy(edgeLightRenderer.gameObject);
-            if (soundSource)
+            if (node1Renderer.AsBoolFast()) GameObject.Destroy(node1Renderer.gameObject);
+            if (node2Renderer.AsBoolFast()) GameObject.Destroy(node2Renderer.gameObject);
+            if (edgeFrontRenderer.AsBoolFast()) GameObject.Destroy(edgeFrontRenderer.gameObject);
+            if (edgeLightRenderer.AsBoolFast()) GameObject.Destroy(edgeLightRenderer.gameObject);
+            if (soundSource.AsBoolFast())
             {
                 soundSource.loop = false;
                 NebulaManager.Instance.StartCoroutine(CoFadeout().WrapToIl2Cpp());
@@ -547,12 +547,12 @@ internal class Cupid : DefinedSingleAbilityRoleTemplate<Cupid.Ability>, DefinedR
         void IGameOperator.OnReleased()
         {
             Inactivate();
-            if (meshRenderer) GameObject.Destroy(meshRenderer.gameObject);
+            if (meshRenderer.AsBoolFast()) GameObject.Destroy(meshRenderer.gameObject);
         }
 
         IEnumerator CoFadeout()
         {
-            while(soundSource && soundSource.volume > 0f)
+            while(soundSource.AsBoolFast() && soundSource.volume > 0f)
             {
                 soundSource.volume -= Time.deltaTime * 3f;
                 yield return null;
@@ -577,11 +577,11 @@ internal class Cupid : DefinedSingleAbilityRoleTemplate<Cupid.Ability>, DefinedR
         }
         if(message.player1.AmOwner || message.player2.AmOwner)
         {
-            AmongUsUtil.PlayQuickFlash(Color.red.AlphaMultiplied(0.7f));
+            AmongUsUtil.PlayQuickFlash(VColor.Red.AlphaMultiplied(0.7f));
         }
         NebulaManager.Instance.StartDelayAction(preDuration, () =>
         {
-            if (MeetingHud.Instance) return;
+            if (MeetingHud.Instance.AsBoolFast()) return;
             if (message.invoker.AmOwner && message.player1.Position.Distance(message.player2.Position) > 30f) new StaticAchievementToken("cupid.common1");
             var redStr = new RedString(message.invoker,message.player1, message.player2).RegisterSelf();
             NebulaManager.Instance.StartDelayAction(LaserDurationOption, () => redStr.Inactivate());

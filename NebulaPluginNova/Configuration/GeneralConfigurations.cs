@@ -96,7 +96,7 @@ public static class GeneralConfigurations
                         .Replace("%RIMP%", modImpostors.ToString())
                         .Replace("%NEU%", AssignmentNeutralOption.GetValue().ToString())
                         .Replace("%CREW%", modCrewmates.ToString())
-                        + "<br>" + Language.Translate("options.assignment.preview.hint").Sized(80).Color(new UnityEngine.Color(0.8f,0.8f,0.8f));
+                        + "<br>" + Language.Translate("options.assignment.preview.hint").Sized(80).Color(new VColor(0.8f,0.8f,0.8f));
                 })
             )))],GroupConfigurationColor.Gray
         ),

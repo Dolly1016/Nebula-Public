@@ -55,7 +55,7 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
         public bool IsActive => !calmDownInvoked;
         public Vector3 GetHeadPos()
         {
-            if (HeadTracker) return HeadTracker.transform.position;
+            if (HeadTracker.AsBoolFast()) return HeadTracker.transform.position;
             return myPlayer.VanillaPlayer.transform.position;
         }
 
@@ -78,10 +78,10 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
             CamTarget = HeadTracker.AddComponent<EmptyBehaviour>();
             MoreCosmic.LongNeckHooks.Get(LongBoi.gameObject).AddAction(() =>
             {
-                if (HeadTracker)
+                if (HeadTracker.AsBoolFast())
                 {
                     float neckAngle = myAbility.NeckAngle;
-                    var pos = (myAbility.CalcBaseNeckEndPos(neckAngle, LongBoi.GetBaseSumNeckRate(), out _) + Vector2.up.Rotate(-neckAngle) * LongBoi.foregroundNeckSprite.size.y).AsVector3(-3f);
+                    VVector3 pos = (myAbility.CalcBaseNeckEndPos(neckAngle, LongBoi.GetBaseSumNeckRate(), out _) + VVector2.Up.Rotate(-neckAngle) * LongBoi.foregroundNeckSprite.size.y).AsVector3(-3f);
                     var scale = LongBoi.transform.lossyScale;
                     pos.x *= scale.x;
                     pos.y *= scale.y;
@@ -102,8 +102,8 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
         void ResetCamTarget()
         {
             var target = AmongUsUtil.CurrentCamTarget;
-            if (!target) return;
-            if (!HeadTracker) return;
+            if (!target.AsBoolFast()) return;
+            if (!HeadTracker.AsBoolFast()) return;
             if (target.transform.IsChildOf(HeadTracker.transform))
             {
                 AmongUsUtil.SetCamTarget();
@@ -219,7 +219,7 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
         static private RemoteProcess<(GamePlayer player, float goal)> RpcUpdateLongNeck = new("updateLongNeck", (message, _) =>
         {
             var longBoiBody = GetLongBody(message.player);
-            if (longBoiBody && longBoiBody.targetHeight > 0f) longBoiBody.targetHeight = message.goal < 0f ? Ability.NeckMaxLength : Mathf.Max(0.1f, message.goal);
+            if (longBoiBody.AsBoolFast() && longBoiBody.targetHeight > 0f) longBoiBody.targetHeight = message.goal < 0f ? Ability.NeckMaxLength : Mathf.Max(0.1f, message.goal);
         });
 
         static private RemoteProcess<(GamePlayer player, float angleDeg)> RpcStartLongNeck = new("longNeck", (message, _) =>
@@ -228,7 +228,7 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
             message.player.ChangeBodyTypeAndWrapUp(PlayerBodyTypes.Long);
 
             var longBoiBody = GetLongBody(message.player);
-            if (longBoiBody)
+            if (longBoiBody.AsBoolFast())
             {
                 longBoiBody.growSpeed = CraneNeckSpeed;
                 longBoiBody.skipNeckAnim = false;
@@ -282,7 +282,7 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
         static private void ResetBody(GamePlayer player)
         {
             var longBoiBody = GetLongBody(player);
-            if (longBoiBody)
+            if (longBoiBody.AsBoolFast())
             {
                 longBoiBody.ShouldLongAround = false;
             }
@@ -299,7 +299,7 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
             {
                 var longBoi = GetLongBody(message.player);
                 ResetBody(message.player);
-                if (longBoi) message.player.Unbox().RemovePlayerColorRenderers(longBoi.headSprite, longBoi.foregroundNeckSprite);
+                if (longBoi.AsBoolFast()) message.player.Unbox().RemovePlayerColorRenderers(longBoi.headSprite, longBoi.foregroundNeckSprite);
             }
             else
             {
@@ -392,7 +392,7 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
                 calmButton.BindSubKey(Virial.Compat.VirtualKeyInput.AidAction, "rokurokubi.pause");
 
                 var killAchToken = new AchievementToken<int>("rokurokubi.common1", 0, (val, _) => val >= 2);
-                var tracker = ObjectTrackers.ForPlayerlike(this, AmongUsLLImpl.Instance.VanillaKillDistance + (AutoKillOption ? 0.2f : 0.5f), () => CurrentLongNeckMode?.GetHeadPos() ?? MyPlayer.VanillaPlayer.transform.position, ObjectTrackers.PlayerlikeLocalKillablePredicate, null, Color.red, false, true);
+                var tracker = ObjectTrackers.ForPlayerlike(this, AmongUsLLImpl.Instance.VanillaKillDistance + (AutoKillOption ? 0.2f : 0.5f), () => CurrentLongNeckMode?.GetHeadPos() ?? MyPlayer.VanillaPlayer.transform.position, ObjectTrackers.PlayerlikeLocalKillablePredicate, null, UnityEngine.Color.red, false, true);
                 var killButton = NebulaAPI.Modules.PlayerlikeKillButton(this, MyPlayer, new Virial.Events.Player.PlayerInteractParameter(IsKillInteraction: true), true, Virial.Compat.VirtualKeyInput.Kill, null, 1f, "kill", ModAbilityButton.LabelType.Impostor, null,
                     (target, button) => {
                         var myPos = MyPlayer.Position;
@@ -447,9 +447,9 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
         }
 
         internal float CalcBaseNeckRadius(float absAngle) => NeckBaseCurveLength * 180 / absAngle / Mathn.PI;
-        internal Vector2 CalcBaseNeckEndPos(float neckAngle, float neckSumP, out bool containsCurvePart)
+        internal VVector2 CalcBaseNeckEndPos(float neckAngle, float neckSumP, out bool containsCurvePart)
         {
-            float absAngle = Math.Abs(neckAngle);
+            float absAngle = Mathn.Abs(neckAngle);
             if (absAngle > 0f && neckSumP > NeckBaseStraightLength / NeckBaseSumLength)
             {
                 float curveP = (NeckBaseSumLength * neckSumP - NeckBaseStraightLength) / NeckBaseCurveLength;
@@ -497,7 +497,7 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
                 //スポーンアニメーション中は首は不要
                 neckRenderer.size = new Vector2(neckRenderer.size.x, 0f);
                 foregroundNeck.size = new Vector2(foregroundNeck.size.x, 0f);
-                if (meshRenderer) meshRenderer.enabled = false;
+                if (meshRenderer.AsBoolFast()) meshRenderer!.enabled = false;
                 inSpawnAnim = true;
             }
 
@@ -515,17 +515,17 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
             foregroundNeck.transform.localPosition = endPos.AsVector3(num);
             foregroundNeck.transform.localEulerAngles = new(0f, 0f, -neckAngle * curveP);
 
-            var neckBasePos = new Vector2(0f, neckRenderer.transform.localPosition.y);
+            var neckBasePos = new VVector2(0f, neckRenderer.transform.localPosition.y);
 
 
-            Vector2 neckDir = Vector2.up.Rotate(-neckAngle * curveP);
+            VVector2 neckDir = VVector2.Up.Rotate(-neckAngle * curveP);
 
             //頭は首からみて伸ばした分の長さだけ延長した先に置けばよい。長さを0.01fだけ減じているのに注意。
             longBoi.headSprite.transform.localPosition =
                 (neckBasePos + endPos + neckDir * (foregroundNeck.size.y - 0.01f)).AsVector3(num);
             longBoi.headSprite.transform.localEulerAngles = new(0f, 0f, inSpawnAnim ? 0f : -neckAngle * curveP);
 
-            Vector3 offset = neckBasePos + endPos + (neckDir * foregroundNeck.size.y);
+            VVector2 offset = neckBasePos + endPos + (neckDir * foregroundNeck.size.y);
 
             //曲がる部分
             if (!inSpawnAnim && (Mathn.Abs(LastNeckAngle - neckAngle) > 0f || Mathn.Abs(LastNeckCurveP - curveP) > 0f || Mathn.Abs(LastCurveNeckWidth - neckRenderer.size.x) > 0f || LastFlipX != longBoi.cosmeticLayer.FlipX))
@@ -535,15 +535,15 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
                 LastFlipX = longBoi.cosmeticLayer.FlipX;
                 LastCurveNeckWidth = neckRenderer.size.x;
 
-                if (!meshRenderer || !meshFilter)
+                if (!meshRenderer.AsBoolFast() || !meshFilter.AsBoolFast())
                 {
                     Transform meshTransform = neckRenderer.transform.FindChild(MeshRendererObjName);
-                    if (meshTransform)
+                    if (meshTransform.AsBoolFast())
                     {
                         meshRenderer = meshTransform.GetComponent<MeshRenderer>();
                         meshFilter = meshTransform.GetComponent<MeshFilter>();
                     }
-                    if (!meshRenderer || !meshFilter)
+                    if (!meshRenderer.AsBoolFast() || !meshFilter.AsBoolFast())
                     {
                         var pair = UnityHelper.CreateMeshRenderer(MeshRendererObjName, neckRenderer.transform, Vector3.zero, null, null, longBoi.cosmeticLayer.currentBodySprite.BodySprite.sharedMaterial);
                         MyPlayer.Unbox().AddPlayerColorRenderers((pair.renderer, null));
@@ -626,7 +626,7 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
 
             void UpdateColors(MeshFilter meshFilter)
             {
-                if (meshFilter != null && meshFilter)
+                if (meshFilter.AsBoolFast())
                 {
                     var colors = new Color[meshFilter.mesh.vertices.Count];
                     var color = longBoi.cosmeticLayer.currentBodySprite.BodySprite.color;
@@ -635,7 +635,7 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
                 }
             }
 
-            if (meshRenderer != null && meshRenderer)
+            if (meshRenderer.AsBoolFast())
             {
                 //テクスチャを更新
                 UnityHelper.ReflectSpriteST(meshRenderer!.material, neckRenderer.sprite);
@@ -643,12 +643,13 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
                 meshRenderer.SetBothOrder(1008);
                 meshRenderer.enabled = longBoi.foregroundNeckSprite.enabled;
             }
-        
+
 
             //コスチュームの位置を調整する。
-            longBoi.cosmeticLayer.NormalCosmeticOffset = offset;
-            longBoi.cosmeticLayer.FlippedCosmeticOffset = offset;
-            longBoi.myPlayerControl.MyPhysics.Animations.UpdateCosmeticOffset(offset, offset);
+            var unityOffset = offset.AsUnityVector3();
+            longBoi.cosmeticLayer.NormalCosmeticOffset = unityOffset;
+            longBoi.cosmeticLayer.FlippedCosmeticOffset = unityOffset;
+            longBoi.myPlayerControl.MyPhysics.Animations.UpdateCosmeticOffset(unityOffset, unityOffset);
             longBoi.cosmeticLayer.UpdateCosmeticOffset(num, false);
 
             lastHeadY = longBoi.headSprite.transform.position.y;
@@ -662,7 +663,7 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
             if(ev.Player.VanillaCosmetics.bodyType == PlayerBodyTypes.Long)
             {
                 var longBoi = GetLongBody(MyPlayer);
-                if (longBoi)
+                if (longBoi.AsBoolFast())
                 {
                     var y = lastHeadY;
                     if (ev.Y > y)
@@ -679,7 +680,7 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
             if (ev.Player.VanillaCosmetics.bodyType == PlayerBodyTypes.Long)
             {
                 var longBoi = GetLongBody(MyPlayer);
-                if (longBoi)
+                if (longBoi.AsBoolFast())
                 {
                     ev.Position = longBoi.headSprite.transform.position;
                 }

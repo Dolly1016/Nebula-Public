@@ -49,9 +49,9 @@ internal class Plague : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                 {
                     if ((GamePlayer.LocalPlayer?.TryGetRole<Instance>(out var plague) ?? false) && plague.TryGainPoison()) pod.Use();
                 }
-            }, false, Color.yellow);
+            }, false, UnityEngine.Color.yellow);
         }
-        public PoisonPod(Vector2 pos) : base(pos, ZOption.Just, image.GetSprite(1), Color.white)
+        public PoisonPod(Vector2 pos) : base(pos, ZOption.Just, image.GetSprite(1), UnityEngine.Color.white)
         {
             SetBackRenderer(image.GetSprite(0));
             ModSingleton<PoisonPodManager>.Instance.RegisterPod(this);
@@ -159,7 +159,7 @@ internal class Plague : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             if (!IsAvailable) return;
 
             //ホストがポッドを生成する
-            if (AmongUsClient.Instance.AmHost)
+            if (AmongUsLLImpl.AmongUsClientInstance.AmHost)
             {
                 var spawner = NebulaAPI.CurrentGame?.GetModule<IMapObjectSpawner>();
                 spawner?.Spawn(NumOfPodsOption, 7.5f, "plaguePod", PoisonPod.MyTag, MapObjectType.SmallInCorner);
@@ -380,7 +380,7 @@ internal class Plague : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                     bottleRenderers[i].enabled = true;
                     int stage = bottles.GetStageAt(i);
                     bottleRenderers[i].sprite = bottleImage.GetSprite(SpriteIndex[MaxPoisonLevel][stage]);
-                    bottleRenderers[i].color = stage == MaxPoisonLevel ? Color.white : new(0.8f, 0.8f, 0.8f);
+                    bottleRenderers[i].color = stage == MaxPoisonLevel ? UnityEngine.Color.white : new(0.8f, 0.8f, 0.8f);
                     ManagedEffects.Smooth(bottleRenderers[i].transform, GetLocalPos(displayed), 1f).StartOnScene();
                     if(gained.HasValue && gained == i) ManagedEffects.CoShakeTubelike(bottleRenderers[i].transform, UnreadiedBottleScale, bottles.GetStageAt(i) == MaxPoisonLevel ? 1f : UnreadiedBottleScale).StartOnScene();
                     displayed++;
@@ -554,7 +554,7 @@ internal class Plague : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             float maxSpreadDistance = InfectDistanceOption;
             float requiredTimeToInfect = InfectDurationOption;
 
-            if (!MeetingHud.Instance && !ExileController.Instance)
+            if (!MeetingHud.Instance.AsBoolFast() && !ExileController.Instance.AsBoolFast())
             {
                 if (afterMeetingCooldown > 0f)
                 {
@@ -628,7 +628,7 @@ internal class Plague : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             {
                 var nameText = ProgressGUI.OneLineText("-" + p.ColoredName, 0.7f);
                 nameText.PostponesConsideringSize = true;
-                return (IEnumerable<GUIWidget>)[nameText, ProgressGUI.RawText(progress.IsInfectedFully(p) ? Language.Translate("role.plague.gui.infected").Color(MyRole.UnityColor) : (progress.GetProgress(p) * 100f).ToString("F1") + "%", GUIAlignment.Right)];
+                return (IEnumerable<GUIWidget>)[nameText, ProgressGUI.RawText(progress.IsInfectedFully(p) ? Language.Translate("role.plague.gui.infected").Color(MyRole.Color) : (progress.GetProgress(p) * 100f).ToString("F1") + "%", GUIAlignment.Right)];
             })
             )).Move(new(0.04f, 0f))
             );

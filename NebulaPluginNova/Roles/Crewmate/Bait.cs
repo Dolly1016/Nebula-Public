@@ -35,11 +35,11 @@ public class Bait : DefinedSingleAbilityRoleTemplate<Bait.Ability>, HasCitation,
         AchievementToken<(bool cleared, bool triggered)>? acTokenChallenge;
         private IEnumerator CoReport(PlayerControl murderer)
         {
-            if(ShowKillFlashOption) AmongUsUtil.PlayQuickFlash(MyRole.UnityColor);
+            if(ShowKillFlashOption) AmongUsUtil.PlayQuickFlash(MyRole.RoleColor);
 
             float t = Mathn.Max(0.1f, ReportDelayOption) + ReportDelayDispersionOption * (float)System.Random.Shared.NextDouble();
             yield return new WaitForSeconds(t);
-            if (MeetingHud.Instance) yield break;
+            if (MeetingHud.Instance.AsBoolFast()) yield break;
             
             murderer.CmdReportDeadBody(MyPlayer.VanillaPlayer.Data);
             StatsKiller.Progress();
@@ -71,7 +71,7 @@ public class Bait : DefinedSingleAbilityRoleTemplate<Bait.Ability>, HasCitation,
         [Local]
         void OnEnterVent(PlayerVentEnterEvent ev)
         {
-            if (CanSeeVentFlashOption && !IsUsurped) AmongUsUtil.PlayQuickFlash(MyRole.UnityColor.AlphaMultiplied(0.3f));
+            if (CanSeeVentFlashOption && !IsUsurped) AmongUsUtil.PlayQuickFlash(MyRole.RoleColor.AlphaMultiplied(0.3f));
         }
 
         void OnMeetingEnd(MeetingEndEvent ev)

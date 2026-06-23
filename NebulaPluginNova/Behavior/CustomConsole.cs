@@ -1,4 +1,5 @@
 ﻿using Il2CppInterop.Runtime.Injection;
+using Nebula.Patches;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace Nebula.Behavior;
 public class CustomConsoleProperty
 {
     public float UsableDistance { get; set; } = 0.8f;
-    public Func<Vector2, bool>? CanUse { get; set; } = null;
+    public Func<VVector2, bool>? CanUse { get; set; } = null;
     public Action<CustomConsole>? Use { get; set; } = null;
     public UnityEngine.Color OutlineColor { get; set; } = Color.white;
 
@@ -20,7 +21,7 @@ public class CustomConsoleProperty
     {
         return console =>
         {
-            GameObject instantiated = prefab ? GameObject.Instantiate(prefab) : UnityHelper.CreateObject("Minigame", null, Vector3.zero);
+            GameObject instantiated = prefab.AsBoolFast() ? GameObject.Instantiate(prefab) : UnityHelper.CreateObject("Minigame", null, Vector3.zero);
             instantiated.layer = LayerExpansion.GetUILayer();
             T minigame = instantiated.AddComponent<T>();
             minigame.transform.SetParent(Camera.main.transform, false);
@@ -39,13 +40,13 @@ public static class MinigameHelper
         minigame.MyTask = task;
         if (task && task.TryGetComponent<NormalPlayerTask>(out var normalTask)) minigame.MyNormTask = normalTask;
         minigame.timeOpened = Time.realtimeSinceStartup;
-        if (PlayerControl.LocalPlayer)
+        if (AmongUsLLImpl.LocalPlayer.AsBoolFast())
         {
-            if (MapBehaviour.Instance) MapBehaviour.Instance.Close();
-            PlayerControl.LocalPlayer.MyPhysics.SetNormalizedVelocity(Vector2.zero);
+            if (MapBehaviour.Instance.AsBoolFast()) MapBehaviour.Instance.Close();
+            AmongUsLLImpl.LocalPlayer.MyPhysics.SetNormalizedVelocity(Vector2.zero);
         }
         minigame.StartCoroutine(minigame.CoAnimateOpen());
-        minigame.CloseSound = ShipStatus.Instance.ShortTasks.First().MinigamePrefab.CloseSound;
+        minigame.CloseSound = AmongUsLLImpl.ShipStatusInstance.ShortTasks.First().MinigamePrefab.CloseSound;
         minigame.TransType = TransitionType.SlideBottom;
     }
 
@@ -54,7 +55,7 @@ public static class MinigameHelper
         if (minigame.amClosing != Minigame.CloseState.Closing)
         {
             if (minigame.CloseSound && Constants.ShouldPlaySfx()) SoundManager.Instance.PlaySound(minigame.CloseSound, false, 1f, null);
-            if (PlayerControl.LocalPlayer) PlayerControl.HideCursorTemporarily();
+            if (AmongUsLLImpl.LocalPlayer.AsBoolFast()) PlayerControl.HideCursorTemporarily();
 
             minigame.amClosing = Minigame.CloseState.Closing;
             minigame.StartCoroutine(minigame.CoDestroySelf());
@@ -101,11 +102,13 @@ public class CustomConsole : MonoBehaviour
 
     public void SetOutline(bool on, bool mainTarget)
     {
-        if (this.Renderer)
+        if (this.Renderer.AsBoolFast())
         {
-            this.Renderer.material.SetFloat("_Outline", (float)(on ? 1 : 0));
-            this.Renderer.material.SetColor("_OutlineColor", Property?.OutlineColor ?? Color.white);
-            this.Renderer.material.SetColor("_AddColor", mainTarget ? (Property?.OutlineColor ?? Color.white) : Color.clear);
+            var mat = this.Renderer.material;
+            mat.SetFloat("_Outline", (float)(on ? 1 : 0));
+            mat.SetColor("_OutlineColor", Property?.OutlineColor ?? Color.white);
+            mat.SetColor("_AddColor", mainTarget ? (Property?.OutlineColor ?? Color.white) : Color.clear);
+            if(on) HighlightManager.AddHighlightedRenderer(this.Renderer);
         }
     }
 
@@ -114,8 +117,8 @@ public class CustomConsole : MonoBehaviour
     {
         float num = float.MaxValue;
         PlayerControl @object = pc.Object;
-        Vector2 truePosition = @object.GetTruePosition();
-        Vector3 position = base.transform.position;
+        VVector2 truePosition = @object.GetTruePosition();
+        VVector2 position = base.transform.position;
         couldUse = Property?.CanUse?.Invoke(position) ?? true && !GamePlayer.LocalPlayer!.AllAbilities.All(a => a.BlockUsingUtility);
         canUse = couldUse;
         if (canUse)
@@ -130,7 +133,7 @@ public class CustomConsole : MonoBehaviour
 
     public void Use()
     {
-        this.CanUse(PlayerControl.LocalPlayer.Data, out var flag, out var flag2);
+        this.CanUse(AmongUsLLImpl.LocalPlayer.Data, out var flag, out var flag2);
         if (!flag)
         {
             return;

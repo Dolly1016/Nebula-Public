@@ -30,7 +30,8 @@
 # Game
 
 "role.necromancer.phantomMessage" : "Please take me to %ROOM%..."
-"role.necromancer.reviveRange" : "Necromancer<color=white>: Detected Range</color>"
+"role.necromancer.detectRange" : "Necromancer<color=white>: Detected Range</color>"
+"role.necromancer.reviveRange" : "Necromancer<color=white>: Room Range</color>"
 "gameAction.necromancer.revive" : "Revive"
 
 # UI

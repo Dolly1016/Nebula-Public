@@ -90,13 +90,13 @@ static public class MeetingRoleSelectWindow
 
         IEnumerator CoCloseOnResult()
         {
-            if (MeetingHud.Instance)
+            if (MeetingHud.Instance.AsBoolFast())
             {
                 while (MeetingHud.Instance.state != MeetingHud.VoteStates.Results) yield return null;
             }
             else
             {
-                while (!MeetingHud.Instance) yield return null;
+                while (!MeetingHud.Instance.AsBoolFast()) yield return null;
             }
             window.CloseScreen();
         }
@@ -144,7 +144,7 @@ static file class GuesserSystem
                 var p = state.MyPlayer;
                 LastGuesserWindow = OpenGuessWindow(leftGuessPerMeeting, leftGuess, (r) =>
                 {
-                    if (PlayerControl.LocalPlayer.Data.IsDead) return;
+                    if (AmongUsLLImpl.LocalPlayer.Data.IsDead) return;
                     if (!(MeetingHud.Instance.state == MeetingHud.VoteStates.Voted || MeetingHud.Instance.state == MeetingHud.VoteStates.NotVoted)) return;
                     if (!MeetingHudExtension.CanUseAbilityFor(p, true)) return;
 
@@ -173,11 +173,11 @@ static file class GuesserSystem
                     leftGuess--;
                     leftGuessPerMeeting--;
 
-                    if (LastGuesserWindow) LastGuesserWindow.CloseScreen();
+                    if (LastGuesserWindow.AsBoolFast()) LastGuesserWindow.CloseScreen();
                     LastGuesserWindow = null!;
                 });
             },
-            p => !awareOfUsurpation && !p.MyPlayer.IsDead && !p.MyPlayer.AmOwner && leftGuess > 0 && leftGuessPerMeeting > 0 && !PlayerControl.LocalPlayer.Data.IsDead && GameOperatorManager.Instance!.Run(new PlayerCanGuessPlayerLocalEvent(NebulaAPI.CurrentGame!.LocalPlayer, p.MyPlayer, true)).CanGuess
+            p => !awareOfUsurpation && !p.MyPlayer.IsDead && !p.MyPlayer.AmOwner && leftGuess > 0 && leftGuessPerMeeting > 0 && !AmongUsLLImpl.LocalPlayer.Data.IsDead && GameOperatorManager.Instance!.Run(new PlayerCanGuessPlayerLocalEvent(NebulaAPI.CurrentGame!.LocalPlayer, p.MyPlayer, true)).CanGuess
             ));
         
         /*
@@ -232,7 +232,7 @@ static file class GuesserSystem
 
     static public void OnDead()
     {
-        if (LastGuesserWindow) LastGuesserWindow.CloseScreen();
+        if (LastGuesserWindow.AsBoolFast()) LastGuesserWindow.CloseScreen();
         LastGuesserWindow = null!;
     }
 

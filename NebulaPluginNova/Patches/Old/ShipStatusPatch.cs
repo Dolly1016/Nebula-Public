@@ -15,15 +15,15 @@ public class ShipStatusPatch
 
         //マップIDが正しく設定されていなかったときのための救済措置 (ちゃんとオプションが更新されるようにする方がよさそう)
         byte mapId = 0;
-        if (__instance.TryCast<SkeldShipStatus>())
+        if (__instance.IsFast<SkeldShipStatus>())
             mapId = 0;
-        else if (__instance.TryCast<MiraShipStatus>())
+        else if (__instance.IsFast<MiraShipStatus>())
             mapId = 1;
-        else if (__instance.TryCast<PolusShipStatus>())
+        else if (__instance.IsFast<PolusShipStatus>())
             mapId = 2;
-        else if (__instance.TryCast<AirshipStatus>())
+        else if (__instance.IsFast<AirshipStatus>())
             mapId = 4;
-        else if (__instance.TryCast<FungleShipStatus>())
+        else if (__instance.IsFast<FungleShipStatus>())
             mapId = 5;
         cachedMapId = mapId;
         if (GeneralConfigurations.CurrentGameMode != GameModes.AeroGuesser) AmongUsUtil.GetCurrentNormalOption().MapId = mapId;
@@ -51,7 +51,7 @@ public class ShipStatusPatch
         if (GeneralConfigurations.SilentVentOption)
         {
             //ベントを見えなくする
-            foreach (var vent in ShipStatus.Instance.AllVents)
+            foreach (var vent in AmongUsLLImpl.ShipStatusInstance.AllVents)
             {
                 GameObject shadowObj = new GameObject("ShadowVent");
                 shadowObj.transform.SetParent(vent.transform);

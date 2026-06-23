@@ -29,7 +29,7 @@ internal class PositionAdjuster : AbstractModule<Virial.Game.Game>, IGameOperato
     protected override void OnInjected(Virial.Game.Game container) => this.Register(container);
     static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.FixPositionButton.png", 115f);
 
-    private UnityEngine.Vector2? FixedPosition = null;
+    private VVector2? FixedPosition = null;
     private bool CanFixPosition => FixedPosition != null;
     private float OutsideTimer = 0f;
     void OnGameStart(GameStartEvent ev)
@@ -45,14 +45,14 @@ internal class PositionAdjuster : AbstractModule<Virial.Game.Game>, IGameOperato
         fixButton.Availability = (button) => true;
         fixButton.Visibility = (button) => !player.IsDead && player.CanMove && CanFixPosition;
         fixButton.OnClick = (button) => {
-            player.VanillaPlayer.NetTransform.RpcSnapTo(FixedPosition!.Value - PlayerControl.LocalPlayer.Collider.offset);
+            player.VanillaPlayer.NetTransform.RpcSnapTo(FixedPosition!.Value - (VVector2)AmongUsLLImpl.LocalPlayer.Collider.offset);
             FixedPosition = null;
         };
         fixButton.SetLabel("fixPos");
     }
 
 
-    static private UnityEngine.Vector2[] SearchCand = [new(-0.4f, 0f), new(0.4f, 0f), new(0f, -0.4f), new(0f, 0.4f)];
+    static private VVector2[] SearchCand = [new(-0.4f, 0f), new(0.4f, 0f), new(0f, -0.4f), new(0f, 0.4f)];
     void OnUpdate(GameUpdateEvent ev)
     {
         var player = MyContainer.LocalPlayer;
@@ -64,19 +64,19 @@ internal class PositionAdjuster : AbstractModule<Virial.Game.Game>, IGameOperato
             return;
         }
 
+        var truePos = player.TruePosition;
+
         var mapData = MapData.GetCurrentMapData();
-        if (mapData.CheckMapArea(player.TruePosition, 0f))
+        if (mapData.CheckMapArea(truePos, 0f))
         {
             FixedPosition = null;
             OutsideTimer = 0f;
             return;
         }
 
-        OutsideTimer += Time.deltaTime;
+        OutsideTimer += ev.DeltaTime;
         if(OutsideTimer > 2f)
         {
-            var truePos = player.VanillaPlayer.GetTruePosition();
-
             if (!FixedPosition.HasValue || FixedPosition.Value.Distance(truePos) > 0.6f)
             {
                 FixedPosition = null;

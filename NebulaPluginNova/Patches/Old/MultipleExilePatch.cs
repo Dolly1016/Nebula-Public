@@ -17,10 +17,10 @@ file static class MultipleExileHelper
         var result = GameObject.Instantiate(__instance.Player, __instance.Player.transform.parent);
         result.UpdateFromEitherPlayerDataOrCache(exiled, PlayerOutfitType.Default, PlayerMaterial.MaskType.Exile, false, (Il2CppSystem.Action)(()=>
         {
-            SkinViewData skin = ShipStatus.Instance.CosmeticsCache.GetSkin(exiled.Outfits[PlayerOutfitType.Default].SkinId);
+            SkinViewData skin = AmongUsLLImpl.ShipStatusInstance.CosmeticsCache.GetSkin(exiled.Outfits[PlayerOutfitType.Default].SkinId);
             if (!DestroyableSingleton<HatManager>.Instance.CheckLongModeValidCosmetic(exiled.Outfits[PlayerOutfitType.Default].SkinId, result.GetIgnoreLongMode()))
             {
-                skin = ShipStatus.Instance.CosmeticsCache.GetSkin("skin_None");
+                skin = AmongUsLLImpl.ShipStatusInstance.CosmeticsCache.GetSkin("skin_None");
             }
             result.FixSkinSprite(__instance.useIdleAnim ? skin.IdleFrame : skin.EjectFrame);
         }));
@@ -53,7 +53,7 @@ file static class MultipleExileHelper
         }
     }
 
-    public static IEnumerator CoSpin(PoolablePlayer p, int i, Vector2 from, Vector2 to, Vector2 diffVectorNorm, float duration, AnimationCurve curve, float rotateSpeed, Action<Vector2>? callback = null)
+    public static IEnumerator CoSpin(PoolablePlayer p, int i, VVector2 from, VVector2 to, VVector2 diffVectorNorm, float duration, AnimationCurve curve, float rotateSpeed, Action<VVector2>? callback = null)
     {
         float random = System.Random.Shared.NextSingle() * Math.Max(5f, rotateSpeed * 0.5f);
         float randomVec = 0.3f + System.Random.Shared.NextSingle() * 0.8f;
@@ -62,20 +62,20 @@ file static class MultipleExileHelper
         to += diffVectorNorm * randomVec;
         callback?.Invoke(diffVectorNorm * randomVec);
 
-        p.transform.localScale *= 0.75f;
+        var pTransform = p.transform;
 
-        for (float t = 0f; t <= duration; t += Time.deltaTime)
+        pTransform.localScale *= 0.75f;
+
+        yield return ManagedEffects.Lerp(duration, num =>
         {
-            float num = t / duration;
-            p.transform.localPosition = Vector2.Lerp(from, to, curve.Evaluate(num));
+            float t = num * duration;
+            pTransform.localPosition = VVector2.Lerp(from, to, curve.Evaluate(num)).AsUnityVector3(0f);
             float num2 = (t + 0.75f) * 25f / Mathn.Exp(t * 0.75f + 1f);
-            p.transform.Rotate(new Vector3(0f, 0f, num2 * Time.deltaTime * (rotateSpeed + random)));
-            yield return null;
-        }
-
+            pTransform.Rotate(new Vector3(0f, 0f, num2 * Time.deltaTime * (rotateSpeed + random)));
+        });
     }
 
-    public static void SetExiledStampShower(PoolablePlayer p, bool vertical, Vector2 diff)
+    public static void SetExiledStampShower(PoolablePlayer p, bool vertical, VVector2 diff)
     {
         var modPlayer = GamePlayer.GetPlayer((byte)p.ColorId);
         if (modPlayer == null) return;
@@ -95,7 +95,7 @@ internal class SkeldMultipleExilePatch
             p.gameObject.SetActive(true);
 
             float l = Camera.main.orthographicSize * Camera.main.aspect + 1f;
-            yield return MultipleExileHelper.CoSpin(p, i, Vector2.left * l, Vector2.right * l, Vector2.up, __instance.Duration, __instance.LerpCurve, 30f);
+            yield return MultipleExileHelper.CoSpin(p, i, VVector2.Left * l, VVector2.Right * l, VVector2.Up, __instance.Duration, __instance.LerpCurve, 30f);
         }
         MultipleExileHelper.SpawnMultiplePlayers(__instance, (p, i) => {
 
@@ -120,7 +120,7 @@ internal class MiraMultipleExilePatch
             p.gameObject.SetActive(true);
 
             float l = Camera.main.orthographicSize + 1f;
-            yield return MultipleExileHelper.CoSpin(p, i, Vector2.up * l, Vector2.down * l, Vector2.left, __instance.Duration, __instance.LerpCurve, 5f);
+            yield return MultipleExileHelper.CoSpin(p, i, VVector2.Up * l, VVector2.Down * l, VVector2.Left, __instance.Duration, __instance.LerpCurve, 5f);
         }
         MultipleExileHelper.SpawnMultiplePlayers(__instance, (p, i) => {
 
@@ -138,12 +138,12 @@ internal class PbMultipleExilePatch
 {
     public static void Postfix(PbExileController __instance)
     {
-        IEnumerator CoWaitAndPlaySplash(PoolablePlayer p, Vector2 vec)
+        IEnumerator CoWaitAndPlaySplash(PoolablePlayer p, VVector2 vec)
         {
             var sploosher = GameObject.Instantiate(__instance.Sploosher, __instance.Sploosher.transform.parent);
             
             sploosher.gameObject.SetActive(false);
-            sploosher.transform.localPosition += (Vector3)vec;
+            sploosher.transform.localPosition += vec.AsUnityVector3();
 
             while(p.transform.localPosition.y > -1.7f) yield return null;
             
@@ -158,7 +158,7 @@ internal class PbMultipleExilePatch
             p.gameObject.SetActive(true);
 
             float l = Camera.main.orthographicSize + 1f;
-            yield return MultipleExileHelper.CoSpin(p, i, Vector2.up * l, Vector2.down * 2.81f, Vector2.left, __instance.Duration / 1.4f, __instance.LerpCurve, 5f, (vec) => __instance.StartCoroutine(CoWaitAndPlaySplash(p, vec).WrapToIl2Cpp()));
+            yield return MultipleExileHelper.CoSpin(p, i, VVector2.Up * l, VVector2.Down * 2.81f, VVector2.Left, __instance.Duration / 1.4f, __instance.LerpCurve, 5f, (vec) => __instance.StartCoroutine(CoWaitAndPlaySplash(p, vec).WrapToIl2Cpp()));
         }
 
         var mask = __instance.transform.FindChild("New Sprite Mask").GetComponent<SpriteMask>();
@@ -185,31 +185,33 @@ internal class AirshipMultipleExilePatch
         {
             yield return Effects.Wait(1.9f);
 
+            var pTransform = p.transform;
+
             p.gameObject.SetActive(true);
-            PlayerMaterial.SetColors(p.ColorId, p.transform.GetChild(3).GetComponent<SpriteRenderer>());
-            p.transform.localScale *= 0.76f;
+            PlayerMaterial.SetColors(p.ColorId, pTransform.GetChild(3).GetComponent<SpriteRenderer>());
+            pTransform.localScale *= 0.76f;
 
             Camera main = Camera.main;
             float num = main.orthographicSize + 1.5f;
             float num2 = main.orthographicSize * main.aspect;
-            Vector2 sourcePos = Vector2.up * num + Vector2.right * num2 / 4f;
-            Vector2 targetPos = Vector2.down * num + Vector2.left * num2 / 4f;
+            VVector2 sourcePos = VVector2.Up * num + VVector2.Right * num2 / 4f;
+            VVector2 targetPos = VVector2.Down * num + VVector2.Left * num2 / 4f;
 
             float randomVec = 0.3f + System.Random.Shared.NextSingle() * 0.8f;
             if (i % 2 == 0) randomVec *= -1f;
-            sourcePos += Vector2.right * randomVec;
-            targetPos += Vector2.right * randomVec;
+            sourcePos += VVector2.Right * randomVec;
+            targetPos += VVector2.Right * randomVec;
 
-            Vector2 vector = (targetPos - sourcePos) / 2f;
-            Vector2 anchor = sourcePos + vector + vector.Rotate(-90f).normalized * 0.5f;
+            VVector2 vector = (targetPos - sourcePos) / 2f;
+            VVector2 anchor = sourcePos + vector + vector.Rotate(-90f).Normalized * 0.5f;
             float d = __instance.Duration;
             for (float t = 0f; t <= d; t += Time.deltaTime * 1.05f)
             {
                 float num3 = t / d;
                 Vector2 vector2 = Effects.Bezier(num3, sourcePos, targetPos, anchor);
-                p.transform.localPosition = vector2.AsVector3(i * 0.5f);
+                pTransform.localPosition = vector2.AsVector3(i * 0.5f);
                 float num4 = Mathn.Lerp(0f, 80f, num3);
-                p.transform.localEulerAngles = new Vector3(0f, 0f, num4);
+                pTransform.localEulerAngles = new Vector3(0f, 0f, num4);
                 yield return null;
             }
             yield break;

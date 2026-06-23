@@ -11,7 +11,7 @@ static public class GlobalProperties
         {
             try
             {
-                return PlayerControl.LocalPlayer.Data.Puid;
+                return AmongUsLLImpl.LocalPlayer.Data.Puid;
             }
             catch
             {

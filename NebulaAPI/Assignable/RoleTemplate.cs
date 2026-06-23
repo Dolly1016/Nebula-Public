@@ -31,6 +31,7 @@ public class DefinedAssignableTemplate : DefinedAssignable
 
     protected Virial.Color RoleColor { get; private init; }
     internal UnityEngine.Color UnityColor { get; private init; }
+    public Virial.Color Color => RoleColor;
 
     Color DefinedAssignable.Color => RoleColor;
     UnityEngine.Color DefinedAssignable.UnityColor => UnityColor;
@@ -68,9 +69,9 @@ public class DefinedSingleAssignableTemplate : DefinedAssignableTemplate, Define
 
             string countKey = assignmentType?.CountTranslationKey ?? "options.role.count";
             string chanceKey = assignmentType?.ChanceTranslationKey ?? "options.role.chance";
-            UnityEngine.Color color = assignmentType?.Color ?? UnityEngine.Color.white;
+            Virial.Color color = assignmentType?.Color ?? Virial.Color.White;
 
-            roleCountOption = NebulaAPI.Configurations.Configuration(id + ".count", (0, isImpostor ? 6 : 24), 0, title: NebulaAPI.GUI.TextComponent(new(color), countKey), predicate: ()=> assignmentType?.IsActive ?? true);
+            roleCountOption = NebulaAPI.Configurations.Configuration(id + ".count", (0, isImpostor ? 6 : 24), 0, title: NebulaAPI.GUI.TextComponent(color, countKey), predicate: ()=> assignmentType?.IsActive ?? true);
 
             roleChanceEntry = NebulaAPI.Configurations.SharableVariable(id + ".chance", (10, 100, 10), 100);
             roleSecondaryChanceEntry = NebulaAPI.Configurations.SharableVariable(id + ".secondaryChance", (0, 100, 10), 0);
@@ -79,7 +80,7 @@ public class DefinedSingleAssignableTemplate : DefinedAssignableTemplate, Define
                 () =>
                 {
                     string str = NebulaAPI.Language.Translate(chanceKey).Color(color) + ": " + roleChanceEntry.CurrentValue + NebulaAPI.Language.Translate("options.percentage");
-                    if (roleCountOption.GetValue() > 1 && roleSecondaryChanceEntry.CurrentValue > 0) str += (" (" + roleSecondaryChanceEntry.CurrentValue + NebulaAPI.Language.Translate("options.percentage") + ")").Color(UnityEngine.Color.gray);
+                    if (roleCountOption.GetValue() > 1 && roleSecondaryChanceEntry.CurrentValue > 0) str += (" (" + roleSecondaryChanceEntry.CurrentValue + NebulaAPI.Language.Translate("options.percentage") + ")").Color(Virial.Color.Gray);
                     return str;
                 },
                 () => {
@@ -87,7 +88,7 @@ public class DefinedSingleAssignableTemplate : DefinedAssignableTemplate, Define
                     if (roleCountOption.GetValue() <= 1)
                     {
                         return gui.HorizontalHolder(Media.GUIAlignment.Left,
-                        gui.Text(Media.GUIAlignment.Center, gui.GetAttribute(Text.AttributeAsset.OptionsTitleHalf), gui.TextComponent(new(assignmentType?.Color ?? UnityEngine.Color.white), chanceKey)),
+                        gui.Text(Media.GUIAlignment.Center, gui.GetAttribute(Text.AttributeAsset.OptionsTitleHalf), gui.TextComponent(assignmentType?.Color ?? Virial.Color.White, chanceKey)),
                         gui.HorizontalMargin(0.1f),
                         gui.RawText(GUIAlignment.Center, gui.GetAttribute(Text.AttributeAsset.OptionsFlexible), ":"),
                         gui.HorizontalMargin(0.1f),
@@ -98,7 +99,7 @@ public class DefinedSingleAssignableTemplate : DefinedAssignableTemplate, Define
                     else
                     {
                         return gui.HorizontalHolder(Media.GUIAlignment.Left,
-                        gui.Text(Media.GUIAlignment.Center, gui.GetAttribute(Text.AttributeAsset.OptionsTitleHalf), gui.TextComponent(new(color), chanceKey)),
+                        gui.Text(Media.GUIAlignment.Center, gui.GetAttribute(Text.AttributeAsset.OptionsTitleHalf), gui.TextComponent(color, chanceKey)),
                         gui.HorizontalMargin(0.1f),
                         gui.RawText(GUIAlignment.Center, gui.GetAttribute(Text.AttributeAsset.OptionsFlexible), ":"),
                         gui.HorizontalMargin(0.1f),
@@ -653,7 +654,7 @@ public class RuntimeSingleAbilityAssignable<Ability> : RuntimeAssignableTemplate
     IEnumerable<IPlayerAbility> RuntimeAssignable.MyAbilities => GetAbilities();
 
     string RuntimeAssignable.DisplayName => role.GetDisplayName(MyAbility);
-    string RuntimeAssignable.DisplayColoredName => (this as RuntimeAssignable).DisplayName.Color(role.UnityColor);
+    string RuntimeAssignable.DisplayColoredName => (this as RuntimeAssignable).DisplayName.Color(role.Color);
 
     IEnumerable<DefinedAssignable> RuntimeAssignable.AssignableOnHelp => [role, ..MyAbility.SubAssignableOnHelp];
 }

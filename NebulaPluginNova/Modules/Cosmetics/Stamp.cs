@@ -26,11 +26,11 @@ public static class StampHelpers
             instantiated.transform.localScale = lastScale;
         }
 
-        holder.transform.localScale = Vector3.one * 0f;
+        holder.transform.localScale = Vector3.zero;
         float p = 0f;
         IEnumerator CoUpdate()
         {
-            while (holder)
+            while (holder.AsBoolFast())
             {
                 holder.gameObject.SetActive(!NebulaGameManager.Instance!.WideCamera.HasAttention);
                 yield return null;
@@ -39,23 +39,23 @@ public static class StampHelpers
 
         IEnumerator CoShowStamp()
         {
-            while (p < 1f && holder)
+            while (p < 1f && holder.AsBoolFast())
             {
-                holder.transform.localScale = Vector3.one * p;
+                holder.transform.localScale = new(p, p, 1f);
                 yield return null;
                 p += Time.deltaTime * 6.4f;
             }
             p = 1f;
-            if (!holder) yield break;
+            if (!holder.AsBoolFast()) yield break;
             holder.transform.localScale = Vector3.one;
             yield return Effects.Wait(duration);
-            while (p > 0f && holder)
+            while (p > 0f && holder.AsBoolFast())
             {
-                holder.transform.localScale = Vector3.one * p;
+                holder.transform.localScale = new(p, p, 1f);
                 yield return null;
                 p -= Time.deltaTime * 3.2f;
             }
-            if (holder) UnityEngine.Object.Destroy(holder);
+            if (holder.AsBoolFast()) UnityEngine.Object.Destroy(holder);
             yield break;
         }
         NebulaManager.Instance.StartCoroutine(CoShowStamp().WrapToIl2Cpp());
@@ -118,14 +118,14 @@ public static class StampHelpers
                 int index = 0;
                 IEnumerator CoUpdate()
                 {
-                    while (renderer)
+                    while (renderer.AsBoolFast())
                     {
                         time += Time.deltaTime;
                         if (time > 1f / stamp!.GetFPS(index, stamp.Image))
                         {
                             index = (index + 1) % (stamp.Image!.Length ?? 1);
                             renderer.sprite = stamp.Image!.GetSprite(index);
-                            if (exRenderer) exRenderer.sprite = stamp.Image!.GetExSprite(index);
+                            if (exRenderer.AsBoolFast()) exRenderer.sprite = stamp.Image!.GetExSprite(index);
                         }
                         yield return null;
                     }
@@ -137,11 +137,12 @@ public static class StampHelpers
 
     public static void TryShowStampRingMenu(Func<bool> showWhile)
     {
+        var existsLocalPlayer = AmongUsLLImpl.TryGetLocalPlayer(out var localPlayer);
 
-        bool gameIsNotStated = !GameManager.Instance || !GameManager.Instance.GameHasStarted;
-        bool gameIsEnd = !HudManager.InstanceExists || !PlayerControl.LocalPlayer;
-        bool inMeeting = MeetingHud.Instance || ExileController.Instance || IntroCutscene.Instance || NebulaPreSpawnMinigame.PreSpawnMinigame;
-        bool isDead = PlayerControl.LocalPlayer && PlayerControl.LocalPlayer.Data != null && PlayerControl.LocalPlayer.Data.IsDead;
+        bool gameIsNotStated = !GameManager.Instance.AsBoolFast() || !GameManager.Instance.GameHasStarted;
+        bool gameIsEnd = !HudManager.InstanceExists || !existsLocalPlayer;
+        bool inMeeting = MeetingHud.Instance.AsBoolFast() || ExileController.Instance.AsBoolFast() || IntroCutscene.Instance.AsBoolFast() || NebulaPreSpawnMinigame.PreSpawnMinigame.AsBoolFast();
+        bool isDead = existsLocalPlayer && localPlayer.Data != null && localPlayer.Data.IsDead;
         bool canSeeSomeStamps = inMeeting || (isDead && NebulaGameManager.Instance!.CanSeeAllInfo);
         bool stampOnlyMode = NebulaGameManager.Instance?.GameMode?.CanUseStampOnly ?? false;
 
@@ -152,7 +153,7 @@ public static class StampHelpers
         {
             if (ModSingleton<ShowUp>.Instance.CanUseStamps && !gameIsEnd && (gameIsNotStated || ModSingleton<ShowUp>.Instance.CanUseEmotes))
             {
-                var emotes = EmoteManager.AllEmotes.Where(e => !LobbyBehaviour.Instance || e.Value.CanPlayInLobby);
+                var emotes = EmoteManager.AllEmotes.Where(e => !LobbyBehaviour.Instance.AsBoolFast() || e.Value.CanPlayInLobby);
                 NebulaManager.Instance.ShowRingMenu(emotes.Select(emote => new RingMenu.RingMenuElement(emote.Value.LocalIconSupplier, () =>
                 {
                     EmoteManager.SendLocalEmote(emote.Key);
@@ -317,7 +318,7 @@ internal class PopupStampShower : IStampShower
     }
 
     static public PopupStampShower GetMeetingShower(PlayerVoteArea voteArea) => new(MeetingBack, new(-0.7f, 0.11f), voteArea.transform, new(-0.7f, 0.15f, -5f), null, false);
-    static public PopupStampShower GetExiledShower(PoolablePlayer player, Vector2 diff, Func<bool>? aliveWhile, bool vertical) => new(vertical ? ExileBack : MeetingBack, vertical ? new(-0.25f, -0.55f) : new(-0.7f, 0.11f), HudManager.Instance.transform, Vector3.zero, aliveWhile != null ? () => player && aliveWhile.Invoke() : () => (bool)player, false) { localAnimatedPos = () => player.transform.TransformPointLocalToLocal(Vector3.zero, HudManager.Instance.transform) + diff.AsVector3(-5f) };
+    static public PopupStampShower GetExiledShower(PoolablePlayer player, VVector2 diff, Func<bool>? aliveWhile, bool vertical) => new(vertical ? ExileBack : MeetingBack, vertical ? new(-0.25f, -0.55f) : new(-0.7f, 0.11f), HudManager.Instance.transform, Vector3.zero, aliveWhile != null ? () => player && aliveWhile.Invoke() : () => (bool)player, false) { localAnimatedPos = () => player.transform.TransformPointLocalToLocal(Vector3.zero, HudManager.Instance.transform) + diff.AsUnityVector3(-5f) };
     static public PopupStampShower GetHudShower(byte playerId, Transform hud, float z, Func<bool>? aliveWhile) => new(ExileBack, new(-0.25f, -0.55f), hud.transform, new(-4f + 8f * playerId / GamePlayer.AllOrderedPlayers.Count, -3f, z), aliveWhile, true);
 
     public void Show(CosmicStamp stamp, int colorId)
@@ -412,7 +413,7 @@ internal class ArrowStampShower : IStampShower
         this.player = player;
     }
 
-    static internal Vector3 ArrowDiff = new(0.24f, 0.2f, -5f);
+    static internal VVector3 ArrowDiff = new(0.24f, 0.2f, -5f);
     public void Show(CosmicStamp stamp, int colorId)
     {
         if (lastArrow != null) lastArrow.Release();
@@ -453,12 +454,13 @@ internal class ArrowStampShower : IStampShower
         IEnumerator CoUpdate()
         {
             myArrow.IsActive = true;
-            while (myShown)
+            while (myShown.AsBoolFast())
             {
-                var pos = NebulaGameManager.Instance!.WideCamera.ConvertToWideCameraPos(player.Position.ToUnityVector());
+                var playerPos = player.Position;
+                var pos = NebulaGameManager.Instance!.WideCamera.ConvertToWideCameraPos(playerPos.ToUnityVector());
                 myShown.transform.localPosition = pos + ArrowDiff;
                 myShown.transform.SetLocalZ(-5f);
-                myArrow.TargetPos = player.Position;
+                myArrow.TargetPos = playerPos;
                 yield return null;
             }
         }

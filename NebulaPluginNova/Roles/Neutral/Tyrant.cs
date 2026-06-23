@@ -192,7 +192,7 @@ internal class Tyrant : DefinedRoleTemplate, DefinedRole
         }
 
         string RuntimeAssignable.DisplayName => MyImpAbilityRole?.GetDisplayName(ImpAbility!) ?? (MyRole as DefinedRole).DisplayName;
-        string RuntimeAssignable.DisplayColoredName => (this as RuntimeAssignable).DisplayName.Color(MyTeam.UnityColor);
+        string RuntimeAssignable.DisplayColoredName => (this as RuntimeAssignable).DisplayName.Color(MyTeam.Color);
         string RuntimeRole.DisplayShort => MyImpAbilityRole?.GetDisplayShort(ImpAbility!) ?? (MyRole as DefinedRole).DisplayShort;
 
         bool RuntimeRole.HasImpostorVision => true;

@@ -55,4 +55,23 @@ public interface GameMap : ILifespan
     /// 緊急招集ボタンの位置を返します。
     /// </summary>
     Virial.Compat.Vector2 EmergencyButtonPosition { get; }
+
+    /// <summary>
+    /// 現在のマップでの視野の最小広さを返します。
+    /// </summary>
+    float ShipMinLightRadius { get; }
+
+    /// <summary>
+    /// 現在のマップでの視野の最大広さを返します。
+    /// </summary>
+    float ShipMaxLightRadius { get; }
+
+    /// <summary>
+    /// クルーメイトの視界倍率を返します。
+    /// </summary>
+    float CrewmateLightMod { get; }
+    /// <summary>
+    /// インポスターの視界倍率を返します。
+    /// </summary>
+    float ImpostorLightMod { get; }
 }

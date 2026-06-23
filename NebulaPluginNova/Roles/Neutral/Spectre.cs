@@ -46,7 +46,7 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             {
                 1 => [new((_, playerId) => (SpectreFollower.MyRole, [playerId]), RoleCategory.NeutralRole)],
                 2 => [new((_, playerId) => (SpectreImmoralist.MyRole, [playerId]), RoleCategory.NeutralRole)],
-                3 => [new((_, playerId) => (Helpers.Prob(SpectreFollowerChanceOption / 100f) ? SpectreFollower.MyRole : SpectreImmoralist.MyRole, [playerId]), RoleCategory.NeutralRole)],
+                3 => [new((_, playerId) => (Mathn.Prob(SpectreFollowerChanceOption / 100f) ? SpectreFollower.MyRole : SpectreImmoralist.MyRole, [playerId]), RoleCategory.NeutralRole)],
                 4 => [new((_, playerId) => {
                             alternateFlag = !alternateFlag;
                             return (alternateFlag ? SpectreImmoralist.MyRole : SpectreFollower.MyRole, [playerId]);
@@ -104,7 +104,7 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole, IAssignableDocument
     {
         static internal IDividedSpriteLoader DishSprite = DividedSpriteLoader.FromResource("Nebula.Resources.SpectreDish.png", 100f, 2, 1);
         static float[] InitialRespawnCoeff = [1.0f, 0.6f, 0.2f, 0.5f, 0.8f, 0.3f, 0.7f, 0.4f, 0.9f, 1.0f, 1.0f, 1.0f, 1.0f];
-        public Dish(Vector2 pos) : base(pos, ZOption.Back, DishSprite.GetSprite(0), Color.white)
+        public Dish(Vector2 pos) : base(pos, ZOption.Back, DishSprite.GetSprite(0), UnityEngine.Color.white)
         {
             ModSingleton<FriesDishManager>.Instance.RegisterDish(this);
             if (DishId % 2 == 0)
@@ -142,7 +142,7 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             RespawnCooldown = FriesReplenishmentCooldownOption;
             MyRenderer.sprite = DishSprite.GetSprite(ate ? 0 : 1);
 
-            if (ate && Minigame.Instance)
+            if (ate && Minigame.Instance.AsBoolFast())
             {
                 var minigame = Minigame.Instance.TryCast<FriesMinigame>();
                 if (minigame && minigame!.MyDish.DishId == DishId) minigame.Close();
@@ -153,10 +153,10 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 
         void OnUpdate(GameUpdateEvent ev)
         {
-            if (Ate && !MeetingHud.Instance && !ExileController.Instance)
+            if (Ate && !MeetingHud.Instance.AsBoolFast() && !ExileController.Instance.AsBoolFast())
             {
-                RespawnCooldown -= Time.deltaTime;
-                if (RespawnCooldown < 0f && Helpers.AmHost(PlayerControl.LocalPlayer)) FriesDishManager.RpcUpdateFries.Invoke((DishId, false, null));
+                RespawnCooldown -= ev.DeltaTime;
+                if (RespawnCooldown < 0f && Helpers.AmHost(AmongUsLLImpl.LocalPlayer)) FriesDishManager.RpcUpdateFries.Invoke((DishId, false, null));
             }
         }
     }
@@ -287,8 +287,9 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                 Update(InitialSatietyOption);
             }
 
+            //これらは直接colorプロパティに代入するため、UnityEngine.Colorの方がコストが低い。
             private static Color GuagePurpleColor = new(202f / 255f, 148f / 255f, 221f / 255f);
-            private static Color GuageGrayColor = Color.white.RGBMultiplied(0.2f);
+            private static Color GuageGrayColor = UnityEngine.Color.white.RGBMultiplied(0.2f);
             public void Update(float currentFoodlevel)
             {
                 if ((float)(index + 1) > currentFoodlevel)
@@ -315,7 +316,7 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                                     active = Mathf.Repeat(Time.time, 0.8f) < 0.5f;
                                 else
                                     active = Mathf.Repeat(Time.time, 0.9f) < 0.65f;
-                                guageRenderer[i].color = active ? GuageGrayColor : (level < 0.5f ? Color.red : GuagePurpleColor);
+                                guageRenderer[i].color = (active ? GuageGrayColor : (level < 0.5f ? UnityEngine.Color.red : GuagePurpleColor));
                             }
                             else
                             {
@@ -382,7 +383,7 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             Color redColor = new(1f, 0.7f, 0.7f);
             GameOperatorManager.Instance?.Subscribe<GameHudUpdateEvent>((ev) => {
                 gauge.gameObject.SetActive(!player.IsDead && !AmongUsUtil.MapIsOpen && !ExileController.Instance);
-                if (MeetingHud.Instance)
+                if (MeetingHud.Instance.AsBoolFast())
                 {
                     adjuster.localScale = new(0.8f, 0.8f, 1f);
                     adjuster.localPosition = new(-0.35f, -0.25f);
@@ -404,7 +405,7 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                     }
                     else
                     {
-                        gaugeRenderer.color = Color.white;
+                        gaugeRenderer.color = UnityEngine.Color.white;
                     }
                 }
             }, this);
@@ -511,7 +512,7 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole, IAssignableDocument
         [Local]
         void OnUpdate(GameUpdateEvent ev)
         {
-            if (!MeetingHud.Instance && !ExileController.Instance)
+            if (!MeetingHud.Instance.AsBoolFast() && !ExileController.Instance.AsBoolFast())
             {
                 if (AdrenalineOption && ThereIsKillerNearbyMe()){
                     leftAliveTime -= Time.deltaTime * AdrenalineRateOption;
@@ -566,30 +567,30 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             if (ShowWhereKillersAreOption) CheckAndTrackKiller(ev.Player);
         }
 
-        private bool IsKiller(GamePlayer player, out Color color)
+        private bool IsKiller(GamePlayer player, out VColor color)
         {
             if (player.IsImpostor)
             {
-                color = Palette.ImpostorRed;
+                color = new(Palette.ImpostorRed);
                 return true;
             }
             if (player.Role.Role is Sheriff)
             {
-                color = Color.white;
+                color = VColor.White;
                 return true;
             }
             if (player.IsKiller)
             {
-                color = player.Role.Role.UnityColor;
+                color = player.Role.Role.Color;
                 return true;
             }
-            color = Color.white;
+            color = VColor.White;
             return false;
         }
 
         private void CheckAndTrackKiller(GamePlayer player)
         {
-            void RegisterArrow(GamePlayer player, Color color) => killerArrows.Add(new TrackingArrowAbility(player.Unbox(), 0f, color, false).Register(this));
+            void RegisterArrow(GamePlayer player, VColor color) => killerArrows.Add(new TrackingArrowAbility(player.Unbox(), 0f, color, false).Register(this));
 
             killerArrows.RemoveAll(a => { if (a.MyPlayer == player) { a.Release(); return true; } else return false; });
             if (player.AmOwner) return;

@@ -102,8 +102,8 @@ public static class PlayerExtension
     {
         try
         {
-            if (layer.skin.animator) layer.skin.animator.Stop();
-            if (layer.currentPet.animator) layer.currentPet.animator.Stop();
+            if (layer.skin.animator.AsBoolFast()) layer.skin.animator.Stop();
+            if (layer.currentPet.animator.AsBoolFast()) layer.currentPet.animator.Stop();
         }
         catch { }
     }
@@ -129,7 +129,7 @@ public static class PlayerExtension
         (message, calledByMe) =>
         {
             var player = Helpers.GetPlayer(message.targetId);
-            if (!player) return;
+            if (!player.AsBoolFast()) return;
 
             player!.Revive();
             player.NetTransform.SnapTo(message.revivePos);
@@ -151,7 +151,7 @@ public static class PlayerExtension
         (message, _) =>
         {
             var player = Helpers.GetPlayer(message.playerId);
-            if (!player) return;
+            if (!player.AsBoolFast()) return;
             player?.StartCoroutine(message.isDive ? player.CoDive(message.playAnim) : player.CoGush(message.playAnim));
         }
         );

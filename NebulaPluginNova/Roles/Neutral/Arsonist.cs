@@ -75,7 +75,7 @@ public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignab
         GUIWidget RuntimeAssignable.ProgressWidget => ProgressGUI.Holder(
             ProgressGUI.OneLineText(Language.Translate("role.arsonist.gui.left")),
             ProgressGUI.Holder(GamePlayer.AllOrderedPlayers.Where(p => p != MyPlayer && !dousedPlayers.Contains(p)).Select(p => 
-                ProgressGUI.OneLineText("-" + p.ColoredName + (p.IsDead ? ("(" + Language.Translate("role.arsonist.gui.left.dead") + ")").Color(Color.gray) : ""))
+                ProgressGUI.OneLineText("-" + p.ColoredName + (p.IsDead ? ("(" + Language.Translate("role.arsonist.gui.left.dead") + ")").Color(VColor.Gray) : ""))
             )).Move(new(0.04f, 0f))
             );
 
@@ -142,7 +142,7 @@ public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignab
                 {
                     douseTracker.KeepAsLongAsPossible = false;
                     if (douseTracker.CurrentTarget == null) return;
-                    if (MeetingHud.Instance) return;
+                    if (MeetingHud.Instance.AsBoolFast()) return;
 
                     if (!button.EffectTimer!.IsProgressing)
                     {

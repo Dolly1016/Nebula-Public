@@ -110,7 +110,7 @@ public class VerticalWidgetsHolder : WidgetsHolder {
         var results = widgets.Select(c => (c.Instantiate(size, out var acSize), acSize, c)).ToArray();
         (float maxWidth, float sumHeight, float? temp) = results.Aggregate((0f, 0f, (float?)null), (r, current) =>
         {
-            float maxWidth = Math.Max(r.Item1, current.acSize.Width);
+            float maxWidth = Mathn.Max(r.Item1, current.acSize.Width);
             float height = r.Item2;
             float? tempHeight = r.Item3;
             if (current.c.PostponesConsideringSize)
@@ -229,9 +229,9 @@ public class GUIEmptyWidget : AbstractGUIWidget
 
 public class NoSGUIMargin : AbstractGUIWidget
 {
-    protected UnityEngine.Vector2 margin;
+    protected VVector2 margin;
 
-    public NoSGUIMargin(GUIAlignment alignment, UnityEngine.Vector2 margin) : base(alignment)
+    public NoSGUIMargin(GUIAlignment alignment, VVector2 margin) : base(alignment)
     {
         this.margin = margin;
     }
@@ -264,7 +264,7 @@ public class NoSGameObjectGUIWrapper : AbstractGUIWidget
         this.generator = () =>
         {
             var holder = UnityHelper.CreateObject("Holder", null, UnityEngine.Vector3.zero, LayerExpansion.GetUILayer());
-            var height = widget.Generate(holder, UnityEngine.Vector3.zero, out var width);
+            var height = widget.Generate(holder, VVector2.Zero, out var width);
             return (holder, new(width * 2f, height));
         };
     }
@@ -457,7 +457,7 @@ public class NebulaGUIWidgetEngine : Virial.Media.GUI
     }
 
     public Virial.Media.GUIWidget Button(GUIAlignment alignment, Virial.Text.TextAttribute attribute, TextComponent text, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Virial.Color? color = null, Virial.Color? selectedColor = null, float? margin = null)
-        => new GUIButton(alignment, attribute, text) { OnClick = onClick, OnMouseOver = onMouseOver, OnMouseOut = onMouseOut, OnRightClick = onRightClick, Color = color?.ToUnityColor(), SelectedColor = selectedColor?.ToUnityColor(), TextMargin = margin ?? 0.26f };
+        => new GUIButton(alignment, attribute, text) { OnClick = onClick, OnMouseOver = onMouseOver, OnMouseOut = onMouseOut, OnRightClick = onRightClick, Color = color, SelectedColor = selectedColor, TextMargin = margin ?? 0.26f };
 
     public Virial.Media.GUIWidget ModernButton(GUIAlignment alignment, Virial.Text.TextAttribute attribute, TextComponent text, GUIClickableAction onClick, GUIClickableAction? onMouseOver = null, GUIClickableAction? onMouseOut = null, GUIClickableAction? onRightClick = null, Virial.Color? color = null, Virial.Color? selectedColor = null, float? margin = null, bool withCheckMark = false, bool selectedDefault = false) 
         => new GUIModernButton(alignment, attribute, text) { OnClick = onClick, OnMouseOver = onMouseOver, OnMouseOut = onMouseOut, OnRightClick = onRightClick, TextMargin = margin ?? 0.26f, WithCheckMark = withCheckMark, SelectedDefault = selectedDefault };
@@ -482,11 +482,11 @@ public class NebulaGUIWidgetEngine : Virial.Media.GUI
 
     public Virial.Media.GUIWidget Margin(FuzzySize margin) => new NoSGUIMargin(GUIAlignment.Center, new(margin.Width ?? 0f, margin.Height ?? 0f));
 
-    public TextComponent TextComponent(Virial.Color color, string transrationKey) => TextComponent(color.ToUnityColor(), transrationKey);
-    public TextComponent TextComponent(Color color, string transrationKey) => new ColorTextComponent(color, new TranslateTextComponent(transrationKey));
+    public TextComponent TextComponent(Virial.Color color, string transrationKey) => new ColorTextComponent(color, new TranslateTextComponent(transrationKey)); 
+    public TextComponent TextComponent(Color color, string transrationKey) => TextComponent(new Virial.Color(color), transrationKey);
     public TextComponent RawTextComponent(string rawText) => new RawTextComponent(rawText);
     public TextComponent LocalizedTextComponent(string translationKey) => new TranslateTextComponent(translationKey);
-    public TextComponent ColorTextComponent(Virial.Color color, TextComponent component) => new ColorTextComponent(color.ToUnityColor(), component);
+    public TextComponent ColorTextComponent(Virial.Color color, TextComponent component) => new ColorTextComponent(color, component);
     public TextComponent SizedTextComponent(float size, TextComponent component) => new SizedTextComponent((int)(size * 100f), component);
     public TextComponent BoldTextComponent(TextComponent component) => new LazyTextComponent(() => component.GetString().Bold());
     public TextComponent ItalicTextComponent(TextComponent component) => new LazyTextComponent(()=> component.GetString().Italic());
@@ -506,7 +506,7 @@ public class NebulaGUIWidgetEngine : Virial.Media.GUI
 
     private UnityEngine.Vector2 WorldToScreenPos(Virial.Compat.Vector2 worldPos)
     {
-        return UnityHelper.WorldToScreenPoint(NebulaGameManager.Instance!.WideCamera.ConvertToWorldPos(worldPos), LayerExpansion.GetDefaultLayer());
+        return UnityHelper.WorldToScreenPoint(NebulaGameManager.Instance!.WideCamera.ConvertToWorldPos(worldPos).AsUnityVector3(), LayerExpansion.GetDefaultLayer());
     }
     public void ShowStickerOverlay(Virial.Media.GUIWidget widget, float duration, Virial.Compat.Vector2 stuckPosition)
     {

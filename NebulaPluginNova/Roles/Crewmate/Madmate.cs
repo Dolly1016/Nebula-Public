@@ -58,12 +58,12 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignabl
         NebulaAPI.Configurations.SharableVariable("numOfTasksToIdentifyImpostors2",(0,10),6)
         ];
     static private IConfiguration CanIdentifyImpostorsOptionEditor = NebulaAPI.Configurations.Configuration(
-        () => CanIdentifyImpostorsOption.GetDisplayText() + StringExtensions.Color(
+        () => CanIdentifyImpostorsOption.GetDisplayText() + (
             " (" +
             NumOfTasksToIdentifyImpostorsOptions
                 .Take(CanIdentifyImpostorsOption)
                 .Join(option => option.Value.ToString(), ", ")
-            + ")", Color.gray),
+            + ")").Color(VColor.Gray),
         () =>
         {
             List<GUIWidget> widgets = new([CanIdentifyImpostorsOption.GetEditor().Invoke()]);
@@ -128,7 +128,7 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignabl
                 return MaddenAbility != null ? Language.Translate("role.madmate.prefix") + MyMadden!.GetDisplayName(MaddenAbility) : (MyRole as DefinedAssignable).DisplayName;
             }
         }
-        string RuntimeAssignable.DisplayColoredName => (this as RuntimeAssignable).DisplayName.Color(MyRole.UnityColor);
+        string RuntimeAssignable.DisplayColoredName => (this as RuntimeAssignable).DisplayName.Color(MyRole.RoleColor);    
         string RuntimeRole.DisplayShort => MaddenAbility != null ? Language.Translate("role.madmate.prefix") + MyMadden!.GetDisplayShort(MaddenAbility) : (MyRole as DefinedRole).DisplayShort;
         string RuntimeRole.DisplayIntroBlurb =>  MyMadden?.DisplayIntroBlurb ?? (MyRole as DefinedRole).DisplayIntroBlurb;
         string RuntimeRole.DisplayIntroRoleName => (this as RuntimeAssignable).DisplayName;

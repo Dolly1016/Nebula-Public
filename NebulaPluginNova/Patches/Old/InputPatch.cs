@@ -17,17 +17,17 @@ public static class KeyboardInputPatch
 {
     public static bool Prefix(KeyboardJoystick __instance)
     {
-        if (!DestroyableSingleton<HudManager>.InstanceExists) return false;
+        if (!AmongUsLLImpl.TryGetHudManager(out var hud, out var bridge)) return false;
 
-        if (KeyboardJoystick.player.GetButtonDown(7)) HudManager.Instance.ReportButton.DoClick();
+        if (KeyboardJoystick.player.GetButtonDown(7)) bridge.ReportButton.DoClick();
 
-        if (KeyboardJoystick.player.GetButtonDown(6)) HudManager.Instance.UseButton.DoClick();
+        if (KeyboardJoystick.player.GetButtonDown(6)) bridge.UseButton.DoClick();
 
-        if (KeyboardJoystick.player.GetButtonDown(4) && !HudManager.Instance.Chat.IsOpenOrOpening && (NebulaGameManager.Instance?.GameMode?.ShowMap ?? true))
-            HudManager.Instance.ToggleMapVisible(GameManager.Instance.GetMapOptions());
+        if (KeyboardJoystick.player.GetButtonDown(4) && !bridge.Chat.IsOpenOrOpening && (NebulaGameManager.Instance?.GameMode?.ShowMap ?? true))
+            hud.ToggleMapVisible(GameManager.Instance.GetMapOptions());
 
-        if (NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Kill).KeyDown && AdditionalConditions.CanKill) HudManager.Instance.KillButton.DoClick();
-        if (KeyboardJoystick.player.GetButtonDown(50) && HudManager.Instance.ImpostorVentButton.gameObject.active) HudManager.Instance.ImpostorVentButton.DoClick();
+        if (NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Kill).KeyDown && AdditionalConditions.CanKill) bridge.KillButton.DoClick();
+        if (KeyboardJoystick.player.GetButtonDown(50) && bridge.ImpostorVentButtonObj.active) bridge.ImpostorVentButton.DoClick();
 
         return false;
     }
@@ -48,9 +48,10 @@ public static class ConsoleInputPatch
                     if (!(__instance.delta.sqrMagnitude > 0.25f))
                     {
                         //インポスターでない場合、入力を無視してしまうため、追加
-                        if (PlayerControl.LocalPlayer.Data != null && PlayerControl.LocalPlayer.Data.Role != null && !PlayerControl.LocalPlayer.Data.Role.IsImpostor && ConsoleJoystick.player.GetButtonDown(50) && AdditionalConditions.CanUseVent)
+                        var data = AmongUsLLImpl.LocalPlayer.Data;
+                        if (data != null && data.Role != null && !data.Role.IsImpostor && ConsoleJoystick.player.GetButtonDown(50) && AdditionalConditions.CanUseVent)
                         {
-                            DestroyableSingleton<HudManager>.Instance.ImpostorVentButton.DoClick();
+                            AmongUsLLImpl.HudManagerBridge.ImpostorVentButton.DoClick();
                         }
                     }
                 }
@@ -58,16 +59,17 @@ public static class ConsoleInputPatch
         }
         else
         {
+            var data = AmongUsLLImpl.LocalPlayer.Data;
             //インポスターでない場合、入力を無視してしまうため、追加
-            if (PlayerControl.LocalPlayer.Data != null && PlayerControl.LocalPlayer.Data.Role != null && !PlayerControl.LocalPlayer.Data.Role.IsImpostor)
+            if (data != null && data.Role != null && !data.Role.IsImpostor)
             {
                 if (ConsoleJoystick.player.GetButtonDown(8) && AdditionalConditions.CanKill)
                 {
-                    DestroyableSingleton<HudManager>.Instance.KillButton.DoClick();
+                    AmongUsLLImpl.HudManagerBridge.KillButton.DoClick();
                 }
                 if (ConsoleJoystick.player.GetButtonDown(50) && AdditionalConditions.CanUseVent)
                 {
-                    DestroyableSingleton<HudManager>.Instance.ImpostorVentButton.DoClick();
+                    AmongUsLLImpl.HudManagerBridge.ImpostorVentButton.DoClick();
                 }
             }
         }

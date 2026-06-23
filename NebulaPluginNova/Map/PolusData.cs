@@ -5,7 +5,7 @@ namespace Nebula.Map;
 public class PolusData : MapData
 {
     override public int Id => 2;
-    static private Vector2[] MapPositions = [
+    static private VVector2[] MapPositions = [
         //ドロップシップ
         new(16.7f, -2.6f),
         //ドロップシップ下
@@ -135,8 +135,8 @@ public class PolusData : MapData
         new(40.6f, -10.4f, MapObjectType.SmallOpened | MapObjectType.SmallOrTabletopOutOfSight), //上除染
     ];
     public override MapObjectPoint[] MapObjectPoints => mapObjectPoints;
-    public override IReadOnlyList<Vector2> MapArea => MapPositions;
-    public override IReadOnlyList<Vector2> NonMapArea => [];
+    public override IReadOnlyList<VVector2> MapArea => MapPositions;
+    public override IReadOnlyList<VVector2> NonMapArea => [];
     protected override (AdditionalRoomArea area, string key, bool detailRoom)[] AdditionalRooms => additionalRooms;
     protected override (SystemTypes room, AdditionalRoomArea area, string key)[] OverrideRooms => overrideRooms;
     protected override SystemTypes[] SabotageTypes => new SystemTypes[] { SystemTypes.Laboratory, SystemTypes.Comms, SystemTypes.Electrical };

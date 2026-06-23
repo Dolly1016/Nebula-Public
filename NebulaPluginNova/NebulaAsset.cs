@@ -289,18 +289,18 @@ public static class NebulaAsset
     static public GameObject SlingshotInMinigame { get; private set; } = null!;
 
 
-    static public SpriteRenderer CreateSharpBackground(Vector2 size, Color color, Transform transform)
+    static public SpriteRenderer CreateSharpBackground(VVector2 size, Virial.Color color, Transform transform)
     {
         var renderer = UnityHelper.CreateObject<SpriteRenderer>("Background", transform, new Vector3(0, 0, 0.25f));
         return CreateSharpBackground(renderer, color, size);
     }
 
-    static public SpriteRenderer CreateSharpBackground(SpriteRenderer renderer, Color color, Vector2 size)
+    static public SpriteRenderer CreateSharpBackground(SpriteRenderer renderer, Virial.Color color, VVector2 size)
     {
         renderer.sprite = NebulaAsset.SharpWindowBackgroundSprite.GetSprite();
         renderer.drawMode = SpriteDrawMode.Sliced;
         renderer.tileMode = SpriteTileMode.Continuous;
-        renderer.color = color;
+        renderer.color = color.ToUnityColor();
         renderer.size = size;
         return renderer;
     }

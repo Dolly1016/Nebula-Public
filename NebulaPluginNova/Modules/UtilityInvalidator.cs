@@ -225,7 +225,7 @@ public class UtilityInvalidationSystem : AbstractModule<Virial.Game.Game>, IGame
             if (message.level < 0) return;
 
 
-            var vent = ShipStatus.Instance.AllVents.FirstOrDefault(v => v.Id == message.ventId);
+            var vent = AmongUsLLImpl.ShipStatusInstance.AllVents.FirstOrDefault(v => v.Id == message.ventId);
             if (vent == null) return;
 
             Instance.InvalidateVent(vent, message.level, message.graphic);
@@ -255,10 +255,10 @@ public class UtilityInvalidationSystem : AbstractModule<Virial.Game.Game>, IGame
             //無効化したいかつ無効化されていない
             if (message.level < 0) return;
 
-            var door = ShipStatus.Instance.AllDoors.FirstOrDefault(v => v.Id == message.doorId);
-            if (door == null) return;
+            var door = AmongUsLLImpl.ShipStatusInstance.AllDoors.FirstOrDefault(v => v.Id == message.doorId);
+            if (!door.AsBoolFast()) return;
 
-            Instance.InvalidateDoor(door, message.level, message.graphic);
+            Instance.InvalidateDoor(door!, message.level, message.graphic);
         }
         else
         {

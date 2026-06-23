@@ -208,7 +208,7 @@ public class MeetingPlayerButtonManager : AbstractModule<Virial.Game.Game>, IGam
 
     void Update(GameUpdateEvent ev)
     {
-        if (!MeetingHud.Instance) return;
+        if (!MeetingHud.Instance.AsBoolFast()) return;
 
         CheckCurrentAction();
         UpdatePlayerState();
