@@ -33,6 +33,7 @@ public struct Color
         A = color.a;
     }
 
+    public static implicit operator UnityEngine.Color(Color color) => color.ToUnityColor();
     internal UnityEngine.Color ToUnityColor() => new UnityEngine.Color(R, G, B, A);
 
     static public Color ImpostorColor { get; internal set; } = new(global::Palette.ImpostorRed);

@@ -41,6 +41,7 @@ public class MessageReader
         this.length = message.Length;
         this.position = 0;
         this.readHead = 0;
+        this.message = message;
     }
 
     static internal MessageReader Get(Hazel.MessageReader orig)
@@ -62,7 +63,10 @@ public class MessageReader
         reader.position = orig._position;
         reader.readHead = orig.readHead;
 
-        orig.Buffer.AsSpan().CopyTo(reader.message);
+        int bufferLength = orig.Buffer.Length;
+        if (bufferLength > reader.message.Length) reader.message = new byte[bufferLength];
+
+        orig.Buffer.AsSpan().Slice(reader.offset, reader.length).CopyTo(reader.message.AsSpan().Slice(reader.offset));
         return reader;
     }
 

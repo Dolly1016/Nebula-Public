@@ -61,6 +61,7 @@ public class MessageWriter
 
         message.AsSpan(0, position).CopyTo(span);
         if (position + lastPos > lastLength) writeTo.Length = position + lastPos;
+        writeTo.Position += position;
 
         unused.Add(this);
     }

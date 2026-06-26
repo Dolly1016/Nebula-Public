@@ -1110,7 +1110,7 @@ class NebulaRPCInGameHandlerPatch
     static public void ReceiveMessage(Hazel.MessageReader reader)
     {
         var virialReadaer= MessageReader.Get(reader);
-        int id = reader.ReadInt32();
+        int id = virialReadaer.ReadInt32();
         try
         {
             if (RemoteProcessBase.AllNebulaProcess.TryGetValue(id, out var rpc))

@@ -146,7 +146,7 @@ internal class AmongUsLLImpl : AmongUsLL
             return (val, shipStatus.HasBeenInitialized);
         });
         mapId = new(() => {
-            var val = currentGameOptions.Get(out var instance) ? instance.MapId : byte.MaxValue;
+            var val = currentGameOptions.Get().MapId;
             return (val, shipStatus.HasBeenInitialized);
         });
         localPlayer = new(() => { var instance = PlayerControl.LocalPlayer; return (instance, instance); });
