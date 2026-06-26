@@ -413,13 +413,13 @@ public class NebulaGUIWidgetEngine : Virial.Media.GUI
     {
         return font switch
         {
-            FontAsset.Prespawn => new StaticFont(null, VanillaAsset.PreSpawnFont),
-            FontAsset.Barlow => new StaticFont(null, VanillaAsset.VersionFont),
-            FontAsset.Gothic => new DynamicFont(() => null, () => VanillaAsset.StandardTextPrefab.font),
-            FontAsset.GothicMasked => new DynamicFont(() => VanillaAsset.StandardMaskedFontMaterial, () => VanillaAsset.StandardTextPrefab.font),
-            FontAsset.Oblong => new StaticFont(null, VanillaAsset.BrookFont),
-            FontAsset.OblongMasked => new StaticFont(VanillaAsset.OblongMaskedFontMaterial, VanillaAsset.BrookFont),
-            _ => new DynamicFont(() => null, () => VanillaAsset.StandardTextPrefab.font),
+            FontAsset.Prespawn => new StaticFont(null, VanillaAsset.PreSpawnFont, false),
+            FontAsset.Barlow => new StaticFont(null, VanillaAsset.VersionFont, false),
+            FontAsset.Gothic => new DynamicFont(() => null, () => VanillaAsset.StandardTextPrefab.font, false),
+            FontAsset.GothicMasked => new DynamicFont(() => VanillaAsset.StandardMaskedFontMaterial, () => VanillaAsset.StandardTextPrefab.font, true),
+            FontAsset.Oblong => new StaticFont(null, VanillaAsset.BrookFont, false),
+            FontAsset.OblongMasked => new StaticFont(VanillaAsset.OblongMaskedFontMaterial, VanillaAsset.BrookFont, true),
+            _ => new DynamicFont(() => null, () => VanillaAsset.StandardTextPrefab.font, false),
         };
     }
 

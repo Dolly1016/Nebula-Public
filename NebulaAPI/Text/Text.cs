@@ -281,6 +281,7 @@ public interface Font
 {
     internal Material? FontMaterial { get; }
     internal TMPro.TMP_FontAsset Font { get; }
+    bool IsMasked { get; }
 }
 
 internal class StaticFont : Font
@@ -288,11 +289,12 @@ internal class StaticFont : Font
     public Material? FontMaterial { get; init; }
 
     public TMP_FontAsset Font { get; init; }
-
-    public StaticFont(Material? material, TMP_FontAsset font)
+    public bool IsMasked { get; }
+    public StaticFont(Material? material, TMP_FontAsset font, bool isMasked)
     {
         FontMaterial = material;
         Font = font;
+        this.IsMasked = isMasked;
     }
 }
 
@@ -304,11 +306,13 @@ internal class DynamicFont : Font
 
     public Func<Material?> FontMaterialSupplier { get; init; }
     public Func<TMP_FontAsset> FontSupplier { get; init; }
+    public bool IsMasked { get; }
 
-    public DynamicFont(Func<Material?> material, Func<TMP_FontAsset> font)
+    public DynamicFont(Func<Material?> material, Func<TMP_FontAsset> font, bool isMasked)
     {
         FontMaterialSupplier = material;
         FontSupplier = font;
+        this.IsMasked = isMasked;
     }
 }
 

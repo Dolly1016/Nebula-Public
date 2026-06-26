@@ -93,7 +93,7 @@ public class JailerAbility : IGameOperator, ILifespan
     void OnMapInstantiated(MapInstantiateEvent ev)
     {
         Transform roomNames;
-        if (AmongUsUtil.CurrentMapId == 0) roomNames = MapBehaviour.Instance.transform.FindChild("RoomNames (1)");
+        if (NebulaAPI.AmongUs.MapId == 0) roomNames = MapBehaviour.Instance.transform.FindChild("RoomNames (1)");
         else roomNames = MapBehaviour.Instance.transform.FindChild("RoomNames");
 
         OptimizeMap(roomNames, MapBehaviour.Instance.countOverlay, MapBehaviour.Instance.infectedOverlay);
@@ -104,7 +104,7 @@ public class JailerAbility : IGameOperator, ILifespan
         for (int i = 0; i < infectedOverlay.transform.childCount; i++) infectedOverlay.transform.GetChild(i).transform.localScale *= 0.8f;
         foreach (var c in countOverlay.CountAreas) c.YOffset *= -1f;
 
-        switch (AmongUsUtil.CurrentMapId)
+        switch (NebulaAPI.AmongUs.MapId)
         {
             case 0:
                 OptimizeMapSkeld(roomNames, countOverlay, infectedOverlay);

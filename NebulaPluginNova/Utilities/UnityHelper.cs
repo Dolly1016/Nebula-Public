@@ -15,31 +15,38 @@ public static class ModSingleton<T> where T : class
 
 public static class UnityHelper
 {
-    static readonly public Vector3 ZeroVec3 = new(0f, 0f, 0f);
-    static readonly public Vector3 OneVec3 = new(1f, 1f, 1f);
-    static readonly public Vector2 ZeroVec2 = new(0f, 0f);
-    static readonly public Vector2 OneVec2 = new(1f, 1f);
 
-    static readonly public Vector2 UpVec2 = new(0f, 1f);
-    static readonly public Vector2 DownVec2 = new(0f, -1f);
-    static readonly public Vector2 RightVec2 = new(1f, 0f);
-    static readonly public Vector2 LeftVec2 = new(-1f, 0f);
-
-    public static GameObject CreateObject(string objName, Transform? parent, Vector3 localPosition,int? layer = null)
+    public static GameObject CreateObject(string objName, Transform? parent, VVector3 localPosition, out Transform transform, int? layer = null)
     {
         var obj = new GameObject(objName);
-        obj.transform.SetParent(parent);
-        obj.transform.localPosition = localPosition;
-        obj.transform.localScale = new Vector3(1f, 1f, 1f);
+        transform = obj.transform;
+        transform.SetParent(parent);
+        transform.localPosition = localPosition;
+        transform.localScale = new Vector3(1f, 1f, 1f);
         if (layer.HasValue) obj.layer = layer.Value;
         
         else if (parent != null) obj.layer = parent.gameObject.layer;
         return obj;
     }
 
-    public static T CreateObject<T>(string objName, Transform? parent, Vector3 localPosition,int? layer = null) where T : Component
+    public static GameObject CreateObject(string objName, Transform? parent, VVector3 localPosition, int? layer = null) => CreateObject(objName, parent, localPosition, out var _, layer);
+    
+
+    public static T CreateObject<T>(string objName, Transform? parent, VVector3 localPosition,int? layer = null) where T : Component
     {
-        return CreateObject(objName, parent, localPosition, layer).AddComponent<T>();
+        return CreateObject(objName, parent, localPosition, out _, layer).AddComponent<T>();
+    }
+
+    public static T CreateObject<T>(string objName, Transform? parent, VVector3 localPosition, out GameObject obj, int? layer = null) where T : Component
+    {
+        obj = CreateObject(objName, parent, localPosition, out _, layer);
+        return obj.AddComponent<T>();
+    }
+
+    public static T CreateObject<T>(string objName, Transform? parent, VVector3 localPosition, out GameObject obj, out Transform transform, int? layer = null) where T : Component
+    {
+        obj = CreateObject(objName, parent, localPosition, out transform, layer);
+        return obj.AddComponent<T>();
     }
 
     //SortingGroupOrderを10に固定します。

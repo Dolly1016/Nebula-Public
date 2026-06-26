@@ -126,13 +126,13 @@ public class LastGameHistory
 
     public static Texture2D GenerateTexture()
     {
-        var gameObject = UnityHelper.CreateObject("History", null, Vector3.zero, 30);
+        var gameObject = UnityHelper.CreateObject("History", null, VVector3.Zero, 30);
 
-        float height = LastWidget!.Generate(gameObject, new Vector2(0,0),new Vector2(10f,10f),out var width);
+        float height = LastWidget!.Generate(gameObject, VVector2.Zero,new VVector2(10f,10f),out var width);
 
         gameObject.ForEachAllChildren(obj => obj.layer = 30);
 
-        var camObject = UnityHelper.CreateObject("Cam", null, new Vector3((width.min + width.max) * 0.5f, -height * 0.5f, -10f));
+        var camObject = UnityHelper.CreateObject("Cam", null, new((width.min + width.max) * 0.5f, -height * 0.5f, -10f));
 
         Camera cam = camObject.AddComponent<Camera>();
         cam.orthographic = true;
@@ -175,22 +175,22 @@ public class LastGameHistory
         if (ArchivedGame == null) return;
 
         HudManager hud = HudManager.Instance;
-        var window = MetaScreen.GenerateWindow(new(6.7f, 4.2f), hud.transform, Vector3.zero, true, false, false, false);
+        var window = MetaScreen.GenerateWindow(new(6.7f, 4.2f), hud.transform, VVector3.Zero, true, false, false, false);
         window.GetComponent<SortingGroup>().enabled = false;
         lastStatisticsScreen = window;
 
-        var viewer = UnityHelper.CreateObject<GameStatisticsViewer>("Statistics", window.transform, new Vector3(0f, 2.5f, -20f), LayerExpansion.GetUILayer());
+        var viewer = UnityHelper.CreateObject<GameStatisticsViewer>("Statistics", window.transform, new(0f, 2.5f, -20f), LayerExpansion.GetUILayer());
         var mapAsset = VanillaAsset.MapAsset[ArchivedGame.MapId];
         viewer.Initialize(ArchivedGame, hud.IntroPrefab.PlayerPrefab, mapAsset.MapPrefab, mapAsset.MapScale, hud.IntroPrefab.TeamTitle, true, 0f);
 
         if (LastWidget != null)
         {
-            var buttonRenderer = UnityHelper.CreateObject<SpriteRenderer>("InfoButton", window.transform, new Vector3(-2.9f, 2.5f, -50f), LayerExpansion.GetUILayer());
+            var buttonRenderer = UnityHelper.CreateObject<SpriteRenderer>("InfoButton", window.transform, new(-2.9f, 2.5f, -50f), out var buttonRendererObj, LayerExpansion.GetUILayer());
             buttonRenderer.sprite = EndGameManagerSetUpPatch.InfoButtonSprite.GetSprite();
-            var button = buttonRenderer.gameObject.SetUpButton(false, buttonRenderer);
+            var button = buttonRendererObj.SetUpButton(false, buttonRenderer);
             button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, LastWidget));
             button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
-            button.gameObject.AddComponent<BoxCollider2D>().size = new(0.3f, 0.3f);
+            buttonRendererObj.AddComponent<BoxCollider2D>().size = new(0.3f, 0.3f);
         }
     }
 }
@@ -285,10 +285,10 @@ public class EndGameManagerSetUpPatch
             float coeff = t.fontSize / t.font.faceInfo.pointSize * t.font.faceInfo.scale * 10f;
             foreach (var p in players)
             {
-                nameMax = Math.Max(t.GetPreferredValues(p.name).x / coeff, nameMax);
-                stateMax = Math.Max(t.GetPreferredValues(p.state).x / coeff, stateMax);
-                taskMax = Math.Max(t.GetPreferredValues(p.task).x / coeff, taskMax);
-                roleMax = Math.Max(t.GetPreferredValues(p.role).x / coeff, roleMax);
+                nameMax = Mathn.Max(t.GetPreferredValues(p.name).x / coeff, nameMax);
+                stateMax = Mathn.Max(t.GetPreferredValues(p.state).x / coeff, stateMax);
+                taskMax = Mathn.Max(t.GetPreferredValues(p.task).x / coeff, taskMax);
+                roleMax = Mathn.Max(t.GetPreferredValues(p.role).x / coeff, roleMax);
             }
 
             float indent = 0;
@@ -317,7 +317,7 @@ public class EndGameManagerSetUpPatch
         if (endState == null) return;
 
         var altAudio = endState.EndCondition.AlternativeClip?.Invoke();
-        if (altAudio != null) SoundManager.Instance.PlayDynamicSound("Stinger", altAudio, false, (DynamicSound.GetDynamicsFunction)((v1, v2) => __instance.GetStingerVol(v1, v2)), SoundManager.Instance.MusicChannel);
+        if (altAudio != null) AmongUsLLImpl.SoundManagerInstance.PlayDynamicSound("Stinger", altAudio, false, (DynamicSound.GetDynamicsFunction)((v1, v2) => __instance.GetStingerVol(v1, v2)), AmongUsLLImpl.SoundManagerInstance.MusicChannel);
 
         /*
         foreach(var h in NebulaGameManager.Instance.RoleHistory)
@@ -360,7 +360,7 @@ public class EndGameManagerSetUpPatch
             PoolablePlayer poolablePlayer = UnityEngine.Object.Instantiate<PoolablePlayer>(__instance.PlayerPrefab, __instance.transform);
             poolablePlayer.transform.localPosition = new Vector3(1f * (float)num2 * (float)num3 * num5, FloatRange.SpreadToEdges(-1.125f, 0f, num3, num), num6 + (float)num3 * 0.01f) * 0.9f;
             float num7 = Mathn.Lerp(1f, 0.65f, num4) * 0.9f;
-            Vector3 vector = new Vector3(num7, num7, 1f);
+            VVector3 vector = new(num7, num7, 1f);
             poolablePlayer.transform.localScale = vector;
 
             var player = NebulaGameManager.Instance.GetPlayer(winners[i])!;
@@ -385,17 +385,21 @@ public class EndGameManagerSetUpPatch
         // テキストを追加する
         GameObject bonusText = UnityEngine.Object.Instantiate(__instance.WinText.gameObject);
         bonusText.transform.SetParent(null);
-        bonusText.transform.position = new Vector3(__instance.WinText.transform.position.x, __instance.WinText.transform.position.y - 0.5f, __instance.WinText.transform.position.z);
+        var winTextPos = __instance.WinText.transform.position;
+        bonusText.transform.position = new Vector3(winTextPos.x, winTextPos.y - 0.5f, winTextPos.z);
         bonusText.transform.localScale = new Vector3(0.7f, 0.7f, 1f);
         TMPro.TMP_Text textRenderer = bonusText.GetComponent<TMPro.TMP_Text>();
+
+        var endColor = (endCondition?.Color ?? VColor.White);
+        var endUnityColor = (endCondition?.Color ?? VColor.White).ToUnityColor();
 
         string extraText = "";
         var wins = NebulaGameManager.Instance.EndState!.ExtraWins;
         ExtraWin.AllExtraWins.Where(e => wins.Test(e)).Do(e => extraText += e.DisplayText.GetString());
         textRenderer.text = endCondition?.DisplayText.GetString().Replace("%EXTRA%", extraText) ?? "Error";
-        textRenderer.color = (endCondition?.Color ?? VColor.White).ToUnityColor();
+        textRenderer.color = endUnityColor;
 
-        __instance.BackgroundBar.material.SetColor("_Color", (endCondition?.Color ?? VColor.White).ToUnityColor());
+        __instance.BackgroundBar.material.SetColor("_Color", endUnityColor);
 
         var customWinText = NebulaGameManager.Instance?.GameMode?.GetAlternativeWinOrLoseText();
         if (customWinText == null)
@@ -409,7 +413,7 @@ public class EndGameManagerSetUpPatch
             __instance.WinText.color = Color.white;
         }
 
-            LastGameHistory.SetHistory(__instance.WinText.font, GetRoleContent(__instance.WinText.font), textRenderer.text.Color(endCondition?.Color ?? VColor.White));
+            LastGameHistory.SetHistory(__instance.WinText.font, GetRoleContent(__instance.WinText.font), textRenderer.text.Color(endColor));
 
 #if PC
         GameStatisticsViewer? viewer;
@@ -417,19 +421,19 @@ public class EndGameManagerSetUpPatch
         IEnumerator CoShowStatistics()
         {
             yield return new WaitForSeconds(0.4f);
-            viewer = UnityHelper.CreateObject<GameStatisticsViewer>("Statistics", __instance.transform, new Vector3(0f, 2.5f, -20f), LayerExpansion.GetUILayer());
+            viewer = UnityHelper.CreateObject<GameStatisticsViewer>("Statistics", __instance.transform, new(0f, 2.5f, -20f), LayerExpansion.GetUILayer());
             viewer.Initialize(NebulaGameManager.Instance!, __instance.PlayerPrefab, NebulaGameManager.Instance!.RuntimeAsset.MinimapPrefab, NebulaGameManager.Instance!.RuntimeAsset.MapScale,__instance.WinText, false);
         }
 
         if(NebulaGameManager.Instance?.GameMode?.ShowStatistics ?? false) __instance.StartCoroutine(CoShowStatistics().WrapToIl2Cpp());
 #endif
 
-        var buttonRenderer = UnityHelper.CreateObject<SpriteRenderer>("InfoButton", __instance.transform, new Vector3(-2.9f, 2.5f, -50f), LayerExpansion.GetUILayer());
+        var buttonRenderer = UnityHelper.CreateObject<SpriteRenderer>("InfoButton", __instance.transform, new(-2.9f, 2.5f, -50f), out var buttonObj, LayerExpansion.GetUILayer());
         buttonRenderer.sprite = InfoButtonSprite.GetSprite();
         var button = buttonRenderer.gameObject.SetUpButton(false, buttonRenderer);
         button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, GetRoleContent(__instance.WinText.font)));
         button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
-        button.gameObject.AddComponent<BoxCollider2D>().size = new(0.3f, 0.3f);
+        buttonObj.AddComponent<BoxCollider2D>().size = new(0.3f, 0.3f);
 
 
 #if PC
@@ -437,17 +441,17 @@ public class EndGameManagerSetUpPatch
         {
             if (!AmongUsLLImpl.AmongUsClientInstance.AmHost || ClientOption.WebhookOption.urlEntry.Value.Length == 0 || !ClientOption.WebhookOption.autoSendEntry.Value)
             {
-                var discordButtonRenderer = UnityHelper.CreateObject<SpriteRenderer>("WebhookButton", __instance.transform, new Vector3(-3.4f, 2.5f, -50f), LayerExpansion.GetUILayer());
+                var discordButtonRenderer = UnityHelper.CreateObject<SpriteRenderer>("WebhookButton", __instance.transform, new Vector3(-3.4f, 2.5f, -50f), out var discordButtonObj, LayerExpansion.GetUILayer());
                 discordButtonRenderer.sprite = DiscordButtonSprite.GetSprite();
-                var discordButton = discordButtonRenderer.gameObject.SetUpButton(true, discordButtonRenderer);
+                var discordButton = discordButtonObj.SetUpButton(true, discordButtonRenderer);
                 discordButton.OnClick.AddListener(() =>
                 {
                     var data = LastGameHistory.GenerateTexture().EncodeToPNG();
                     if (ClientOption.WebhookOption.urlEntry.Value.Length == 0 || !SendDiscordWebhook(data))
                         ClientOption.ShowWebhookSetting(() => SendDiscordWebhook(data));
                 });
-                discordButton.gameObject.AddComponent<ExtraPassiveBehaviour>().OnRightClicked = () => ClientOption.ShowWebhookSetting(() => SendDiscordWebhook(LastGameHistory.GenerateTexture().EncodeToPNG()));
-                discordButton.gameObject.AddComponent<BoxCollider2D>().size = new(0.3f, 0.3f);
+                discordButtonObj.AddComponent<ExtraPassiveBehaviour>().OnRightClicked = () => ClientOption.ShowWebhookSetting(() => SendDiscordWebhook(LastGameHistory.GenerateTexture().EncodeToPNG()));
+                discordButtonObj.AddComponent<BoxCollider2D>().size = new(0.3f, 0.3f);
             }
             else
             {

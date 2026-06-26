@@ -312,19 +312,19 @@ public static class NebulaAsset
 
     public static void PlayNamedSE(NebulaAudioClip clip, string name, bool loop, float volume = 0.8f, float pitch = 1.0f)
     {
-        var source = SoundManager.Instance.PlayNamedSound(name, audioMap[clip], loop, SoundManager.Instance.SfxChannel);
+        var source = AmongUsLLImpl.SoundManagerInstance.PlayNamedSound(name, audioMap[clip], loop, AmongUsLLImpl.SoundManagerInstance.SfxChannel);
         source.volume = volume;
         source.pitch = pitch;
     }
 
-    public static void StopNamedSE(string name) => SoundManager.Instance.StopNamedSound(name);
+    public static void StopNamedSE(string name) => AmongUsLLImpl.SoundManagerInstance.StopNamedSound(name);
 
     public static void PlaySE(NebulaAudioClip clip, bool oneshot = false, float volume = 0.8f, float pitch = 1.0f)
     {
         if (oneshot)
-            SoundManager.Instance.PlayOneShot(audioMap[clip], false, volume).pitch = pitch;
+            AmongUsLLImpl.SoundManagerInstance.PlayOneShot(audioMap[clip], false, volume).pitch = pitch;
         else
-            SoundManager.Instance.PlaySound(audioMap[clip],false,volume).pitch = pitch;
+            AmongUsLLImpl.SoundManagerInstance.PlaySound(audioMap[clip],false,volume).pitch = pitch;
     }
 
     public static AudioClip GetAudioClip(NebulaAudioClip clip) => audioMap[clip];
@@ -346,7 +346,7 @@ public static class NebulaAsset
         audioSource.maxDistance = maxDistance;
         audioSource.minDistance = minDistance;
         audioSource.rolloffMode = UnityEngine.AudioRolloffMode.Linear;
-        audioSource.outputAudioMixerGroup = SoundManager.Instance.SfxChannel;
+        audioSource.outputAudioMixerGroup = AmongUsLLImpl.SoundManagerInstance.SfxChannel;
         audioSource.Play();
 
         IEnumerator CoPlay()

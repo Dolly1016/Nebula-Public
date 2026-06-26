@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial;
 using Virial.Assignable;
 using Virial.Game;
 using Virial.Media;
@@ -180,7 +181,7 @@ internal class AssignmentPreview
         int modCrewmates = GeneralConfigurations.AssignmentCrewmateOption;
         if (modCrewmates < 0) modCrewmates = 99;
 
-        GameParameters copiedGameParameter = new(AmongUsUtil.CurrentMapId, impostors, players);
+        GameParameters copiedGameParameter = new(NebulaAPI.AmongUs.MapId, impostors, players);
         gameParameter = copiedGameParameter;
 
         var exOptions = IExclusiveAssignmentRule.AllRules.ToArray();

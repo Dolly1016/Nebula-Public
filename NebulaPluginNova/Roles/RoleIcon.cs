@@ -76,6 +76,7 @@ static public class RoleIcon
     static public string GetRoleIconTagSmall(this DefinedAssignable assignable, bool masked = false) => GetRoleIconTag(assignable, masked, 70);
 
     static public void UseRoleIcon(this TMPro.TextMeshPro text) => text.spriteAsset = RuntimeSpriteGenerator.SpriteAsset;
+    static public void UseMaskedRoleIcon(this TMPro.TextMeshPro text) => text.spriteAsset = RuntimeSpriteGenerator.MaskedAsset;
 
     [NebulaPreprocess(PreprocessPhase.PostFixStructure)]
     public static class RuntimeSpriteGenerator

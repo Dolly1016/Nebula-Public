@@ -326,7 +326,7 @@ public abstract class MapData
     }
 
     static private readonly MapData[] AllMapData = [new SkeldData(), new MiraData(), new PolusData(), null!, new AirshipData(), new FungleData()];
-    static public MapData GetCurrentMapData() => AllMapData[AmongUsUtil.CurrentMapId];
+    static public MapData GetCurrentMapData() => AllMapData[NebulaAPI.AmongUs.MapId];
     static public MapData GetMapData(int mapId) => AllMapData[mapId];
 
     public string? GetOverrideMapRooms(SystemTypes room, UnityEngine.Vector2 pos)
@@ -351,29 +351,29 @@ public abstract class MapData
 
     public virtual WindType GetWindType(Vector2 position) => WindType.NoWind;
 
-    static public Vector2 CalcWind(Vector2 position, WindType wind, float time)
+    static public VVector2 CalcWind(VVector2 position, WindType wind, float time)
     {
         switch (wind)
         {
             case WindType.AirshipOutside:
-                return new Vector2(6f + Mathn.Cos(time * 5f) * 0.7f, Mathn.Cos(time * 17f) * 1.5f);
+                return new(6f + Mathn.Cos(time * 5f) * 0.7f, Mathn.Cos(time * 17f) * 1.5f);
             case WindType.AirshipVentilation:
                 if(position.x < 27.5f)
-                    return new Vector2(4f + Mathn.Cos(time * 11f) * 0.7f, 3f + Mathn.Cos(time * 24.3f) * 2.1f);
+                    return new(4f + Mathn.Cos(time * 11f) * 0.7f, 3f + Mathn.Cos(time * 24.3f) * 2.1f);
                 else
-                    return new Vector2(-4f + Mathn.Cos(time * 11f) * 0.7f, 3f + Mathn.Cos(time * 24.3f) * 2.1f);
+                    return new(-4f + Mathn.Cos(time * 11f) * 0.7f, 3f + Mathn.Cos(time * 24.3f) * 2.1f);
             case WindType.AirshipGapRoom:
                 position.x -= 7.8f; position.y -= 4.3f;
-                var mag = Mathn.Max(0f, 4.2f - Mathf.Abs(position.x));
-                return position.normalized * mag * (1.4f + Mathn.Cos(time * 21f) * 1.2f);
+                var mag = Mathn.Max(0f, 4.2f - Mathn.Abs(position.x));
+                return position.Normalized * mag * (1.4f + Mathn.Cos(time * 21f) * 1.2f);
 
             case WindType.FungleBeach:
-                return new Vector2(2.6f + Mathn.Cos(time * 6.1f) * 1.1f, 1f + Mathn.Cos(time * 15.3f) * 0.8f);
+                return new(2.6f + Mathn.Cos(time * 6.1f) * 1.1f, 1f + Mathn.Cos(time * 15.3f) * 0.8f);
             case WindType.FungleHighlands:
                 bool high = position.y > 8f;
-                return new Vector2((high ? 11f : 5f) + Mathn.Cos(time * 5f) * 0.7f, Mathn.Cos(time * 17f) * (high ? 3.5f : 1.5f));
+                return new((high ? 11f : 5f) + Mathn.Cos(time * 5f) * 0.7f, Mathn.Cos(time * 17f) * (high ? 3.5f : 1.5f));
             default:
-                return Vector2.zero;
+                return VVector2.Zero;
         }
     }
 }

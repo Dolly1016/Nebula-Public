@@ -57,7 +57,7 @@ public interface CustomCameraBehaviour
 {
     void OnSet(ICustomWideCamera camera);
     float OrthographicSize { get; }
-    void UpdateCamera(ICustomWideCamera camera, out Vector3 localPosition, out Vector2 localScale, out float localAngle);
+    void UpdateCamera(ICustomWideCamera camera, out VVector3 localPosition, out VVector2 localScale, out float localAngle);
 }
 
 public interface ICustomWideCamera
@@ -376,7 +376,7 @@ public class WideCamera : ICustomWideCamera
 
                 meshTransform.localEulerAngles = new(0f, 0f, localAngle);
                 meshTransform.localPosition = localPos;
-                meshTransform.localScale = localScale;
+                meshTransform.localScale = localScale.AsUnityVector3(1f);
                 return;
             }
 

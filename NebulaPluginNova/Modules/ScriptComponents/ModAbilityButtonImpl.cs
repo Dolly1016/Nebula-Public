@@ -184,7 +184,7 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
         {
             if (PlayFlashWhile?.Invoke(this) ?? false)
             {
-                playFlashTimer -= Time.deltaTime;
+                playFlashTimer -= ev.DeltaTime;
                 if(playFlashTimer < 0f)
                 {
                     playFlashTimer = 0.9f;

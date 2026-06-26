@@ -78,10 +78,11 @@ public class Destroyer : DefinedSingleAbilityRoleTemplate<Destroyer.Ability>, De
                    null, (player, _) =>
                    {
                        //左右どちらでキルすればよいか考える
-                       var targetTruePos = player.RealPlayer.TruePosition.ToUnityVector();
-                       var targetPos = player.Position.ToUnityVector();
-                       var canMoveToLeft = CheckCanMove(MyPlayer.VanillaPlayer, GetDestroyKillPosition(targetPos, true), out var leftDis);
-                       var canMoveToRight = CheckCanMove(MyPlayer.VanillaPlayer, GetDestroyKillPosition(targetPos, false), out var rightDis);
+                       var targetTruePos = player.RealPlayer.TruePosition;
+                       var targetPos = player.Position;
+                       var myPos = MyPlayer.Position;
+                       var canMoveToLeft = CheckCanMove(MyPlayer.VanillaPlayer, myPos, GetDestroyKillPosition(targetPos, true), out var leftDis);
+                       var canMoveToRight = CheckCanMove(MyPlayer.VanillaPlayer, myPos, GetDestroyKillPosition(targetPos, false), out var rightDis);
                        bool moveToLeft = false;
                        if (canMoveToLeft && canMoveToRight && leftDis < rightDis) moveToLeft = true;
                        else if (!canMoveToRight) moveToLeft = true;
@@ -95,7 +96,7 @@ public class Destroyer : DefinedSingleAbilityRoleTemplate<Destroyer.Ability>, De
                        achChallengeToken.Value++;
 
                        NebulaAPI.CurrentGame?.KillButtonLikeHandler.StartCooldown();
-                   }, filterHeavier: p => CheckDestroyKill(MyPlayer.VanillaPlayer, p.RealPlayer.VanillaPlayer.transform.position))
+                   }, filterHeavier: p => CheckDestroyKill(MyPlayer.VanillaPlayer, MyPlayer.Position, p.RealPlayer.VanillaPlayer.transform.position))
                     .SetAsUsurpableButton(this);
                 destroyButton.OnBroken = _ => Snatcher.RewindKillCooldown();
                 NebulaAPI.CurrentGame?.KillButtonLikeHandler.Register(destroyButton.GetKillButtonLike());
@@ -103,34 +104,34 @@ public class Destroyer : DefinedSingleAbilityRoleTemplate<Destroyer.Ability>, De
         }
         bool IPlayerAbility.HideKillButton => !(destroyButton?.IsBroken ?? false); 
 
-        static private bool CheckCanMove(PlayerControl myPlayer, Vector3 position, out float distance)
+        static private bool CheckCanMove(PlayerControl myPlayer, VVector2 myPlayerPosition, VVector2 position, out float distance)
         {
-            distance = myPlayer.transform.position.Distance(position);
+            distance = myPlayerPosition.Distance(position);
             return !PhysicsHelpers.AnythingBetween(myPlayer.Collider, myPlayer.Collider.transform.position, position, Constants.ShipAndAllObjectsMask, false);
         }
-        static private Vector3 GetDestroyKillPosition(Vector3 target, bool left)
+        static private VVector2 GetDestroyKillPosition(VVector2 target, bool left)
         {
-            return target + new Vector3(left ? -DestroyKillDistance : DestroyKillDistance, 0f, 0f);
+            return target + new VVector2(left ? -DestroyKillDistance : DestroyKillDistance, 0f);
         }
-        static private bool CheckDestroyKill(PlayerControl myPlayer, Vector3 target)
+        static private bool CheckDestroyKill(PlayerControl myPlayer, VVector2 myPos, VVector2 target)
         {
-            return CheckCanMove(myPlayer, GetDestroyKillPosition(target, true), out _) || CheckCanMove(myPlayer, GetDestroyKillPosition(target, false), out _);
+            return CheckCanMove(myPlayer, myPos, GetDestroyKillPosition(target, true), out _) || CheckCanMove(myPlayer, myPos, GetDestroyKillPosition(target, false), out _);
         }
 
         static private IDividedSpriteLoader spriteModBlood = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.DestroyerBlood.png", 136f, 6);
         private const string destroyerAttrTag = "nebula::destroyer";
-        static private IEnumerator CoDestroyKill(PlayerControl myPlayer, PlayerControl target, Vector3 targetPos, bool moveToLeft)
+        static private IEnumerator CoDestroyKill(PlayerControl myPlayer, PlayerControl target, VVector2 targetPos, bool moveToLeft)
         {
             myPlayer.moveable = false;
             target.moveable = false;
 
             //キルされる相手は今の操作を中断させられる。
-            if (target.AmOwner && Minigame.Instance.AsBoolFast())
+            if (target.AmOwner && Minigame.Instance.AsBoolFast(out var minigame))
             {
                 try
                 {
-                    Minigame.Instance.Close();
-                    Minigame.Instance.Close();
+                    minigame.Close();
+                    minigame.Close();
                 }
                 catch
                 {
@@ -202,7 +203,7 @@ public class Destroyer : DefinedSingleAbilityRoleTemplate<Destroyer.Ability>, De
             handRenderer.sprite = DestroyerAssets.HandSprite[1].GetSprite();
             handRenderer.flipX = !moveToLeft;
             handRenderer.transform.localScale = new(0.5f, 0.5f, 1f);
-            handRenderer.transform.localPosition = targetPos + new Vector3(moveToLeft ? -0.2f : 0.2f, 0.9f, -1f);
+            handRenderer.transform.localPosition = (targetPos + new VVector2(moveToLeft ? -0.2f : 0.2f, 0.9f)).AsUnityVector3(-1f);
 
             yield return new WaitForSeconds(0.15f);
 
@@ -230,7 +231,7 @@ public class Destroyer : DefinedSingleAbilityRoleTemplate<Destroyer.Ability>, De
 
             IEnumerator CoScale(float startScale, float goalScale, float duration, NebulaAudioClip audioClip, bool playKillSE = false)
             {
-                handRenderer.transform.localPosition = targetPos + new Vector3(moveToLeft ? -0.1f : 0.1f, startScale * 0.55f + 0.44f, -1f);
+                handRenderer.transform.localPosition = (targetPos + new VVector2(moveToLeft ? -0.1f : 0.1f, startScale * 0.55f + 0.44f)).AsUnityVector3(-1f);
                 handRenderer.sprite = DestroyerAssets.HandSprite[2].GetSprite();
                 yield return new WaitForSeconds(0.15f);
 
@@ -250,7 +251,7 @@ public class Destroyer : DefinedSingleAbilityRoleTemplate<Destroyer.Ability>, De
                 while (p < 1f)
                 {
                     scale = startScale + (goalScale - startScale) * p;
-                    handRenderer.transform.localPosition = targetPos + new Vector3(randomX + (moveToLeft ? -0.15f : 0.15f), scale * 0.55f + 0.4f, -1f);
+                    handRenderer.transform.localPosition = (targetPos + new VVector2(randomX + (moveToLeft ? -0.15f : 0.15f), scale * 0.55f + 0.4f)).AsUnityVector3(-1f);
                     if (!targetModInfo.IsDead) sizeModulator.Size.y = scale;
 
                     randomTimer -= Time.deltaTime;
@@ -287,7 +288,7 @@ public class Destroyer : DefinedSingleAbilityRoleTemplate<Destroyer.Ability>, De
                 }
 
                 sizeModulator.Size.y = goalScale;
-                handRenderer.transform.localPosition = targetPos + new Vector3(moveToLeft ? -0.12f : 0.12f, startScale * 0.55f + 0.21f, -1f);
+                handRenderer.transform.localPosition = (targetPos + new VVector2(moveToLeft ? -0.12f : 0.12f, startScale * 0.55f + 0.21f)).AsUnityVector3(-1f);
                 handRenderer.sprite = DestroyerAssets.HandSprite[2].GetSprite();
 
             }
@@ -321,7 +322,7 @@ public class Destroyer : DefinedSingleAbilityRoleTemplate<Destroyer.Ability>, De
 
             if (LeaveKillEvidenceOption)
             {
-                var bloodRenderer = UnityHelper.CreateObject<SpriteRenderer>("DestroyerBlood", null, (targetPos + new Vector3(0f, 0.1f, 0f)).AsWorldPos(true));
+                var bloodRenderer = UnityHelper.CreateObject<SpriteRenderer>("DestroyerBlood", null, (targetPos + new VVector2(0f, 0.1f)).AsWorldPos(true));
                 bloodRenderer.sprite = spriteBloodPuddle.GetSprite();
                 bloodRenderer.color = DynamicPalette.PlayerColors[target.CurrentOutfit.ColorId].ToUnityColor();
                 bloodRenderer.transform.localScale = new(0.45f, 0.45f, 1f);
@@ -361,7 +362,7 @@ public class Destroyer : DefinedSingleAbilityRoleTemplate<Destroyer.Ability>, De
             }
         }
 
-        static internal readonly RemoteProcess<(GamePlayer player, GamePlayer target, Vector2 targetPosition, bool moveToLeft)> RpcCoDestroyKill = new(
+        static internal readonly RemoteProcess<(GamePlayer player, GamePlayer target, VVector2 targetPosition, bool moveToLeft)> RpcCoDestroyKill = new(
             "DestroyerKill",
             (message, _) =>
             {

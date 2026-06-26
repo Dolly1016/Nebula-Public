@@ -169,9 +169,21 @@ public abstract class CustomCosmicItem : CustomItemGrouped
 
         foreach (var image in AllImage())
         {
-            if (image.Address != null) yield return CheckAndDownload(image.Hash, image.Address);
-            if (image.ExAddress != null) yield return CheckAndDownload(image.ExHash, image.ExAddress);
-            if (image.MaskAddress != null) yield return CheckAndDownload(image.MaskHash, image.MaskAddress);
+            if (image.Address != null)
+            {
+                if (image.Address.Length == 0) image.Address = null!;
+                else yield return CheckAndDownload(image.Hash, image.Address);
+            }
+            if (image.ExAddress != null)
+            {
+                if (image.ExAddress.Length == 0) image.Address = null!;
+                else yield return CheckAndDownload(image.ExHash, image.ExAddress);
+            }
+            if (image.MaskAddress != null)
+            {
+                if (image.MaskAddress.Length == 0) image.Address = null!;
+                else yield return CheckAndDownload(image.MaskHash, image.MaskAddress);
+            }
 
             image.MyItem = this;
         }

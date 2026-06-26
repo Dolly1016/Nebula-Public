@@ -24,7 +24,7 @@ public class NebulaProfiler
         return new("Time", text => logger.Message(text));
     });
     public static void ResetTimer() => timer.Get().Restart();
-    public static void LapTimer(string tag, long milliSec = 50) => timer.Get().MeasureIf(tag, milliSec);
+    public static bool LapTimer(string tag, long milliSec = 50) => timer.Get().MeasureIf(tag, milliSec);
 
 
     private static readonly Stopwatch Stopwatch = Stopwatch.StartNew();

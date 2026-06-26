@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial;
 using Virial.Game;
 
 namespace Nebula.Roles.MapLayer;
@@ -41,8 +42,9 @@ public class ShowPlayersMapLayer : MonoBehaviour
         darkIconPool.RemoveAll();
         lightIconPool.RemoveAll();
 
-        var center = VanillaAsset.GetMapCenter(AmongUsUtil.CurrentMapId);
-        var scale = VanillaAsset.GetMapScale(AmongUsUtil.CurrentMapId);
+        var mapId = NebulaAPI.AmongUs.MapId;
+        var center = VanillaAsset.GetMapCenter(mapId);
+        var scale = VanillaAsset.GetMapScale(mapId);
 
         int alive = 0, shown = 0;
 
@@ -59,7 +61,7 @@ public class ShowPlayersMapLayer : MonoBehaviour
             if (showPredicate.Invoke(p))
             {
                 var icon = (ModSingleton<BalancedColorManager>.Instance.IsLightColor(DynamicPalette.PlayerColors[p.CurrentOutfit.outfit.ColorId]) ? lightIconPool : darkIconPool).Instantiate();
-                icon.transform.localPosition = VanillaAsset.ConvertToMinimapPos(p.Position.ToUnityVector().AsVector3(p.Position.y / 1000f), center, scale);
+                icon.transform.localPosition = VanillaAsset.ConvertToMinimapPos(p.Position, center, scale).AsUnityVector3(p.Position.y / 1000f);
                 shown++;
             }
         }

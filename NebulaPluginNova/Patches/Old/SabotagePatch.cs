@@ -146,7 +146,7 @@ public static class ReactorUpdateSystemPatch
 [HarmonyPatch(typeof(LifeSuppSystemType), nameof(LifeSuppSystemType.UpdateSystem))]
 public static class LifeSuppUpdateSystemPatch
 {
-    static bool Prefix(LifeSuppSystemType __instance, [HarmonyArgument(1)] MessageReader msgReader)
+    static bool Prefix(LifeSuppSystemType __instance, [HarmonyArgument(1)] Hazel.MessageReader msgReader)
     {
         msgReader.PeekByte();
         FakeSabotageStatus.RpcRemoveMyFakeSabotage(SystemTypes.LifeSupp);
@@ -182,7 +182,7 @@ public static class SwitchSystemPatch
 [HarmonyPatch(typeof(SwitchSystem), nameof(SwitchSystem.Deserialize))]
 public static class SwitchSystemDeserializePatch
 {
-    static bool Prefix(SwitchSystem __instance, [HarmonyArgument(0)]MessageReader reader)
+    static bool Prefix(SwitchSystem __instance, [HarmonyArgument(0)] Hazel.MessageReader reader)
     {
         __instance.ExpectedSwitches = reader.ReadByte();
         __instance.ActualSwitches = reader.ReadByte();
@@ -236,7 +236,7 @@ public static class HeliSystemTypeDeterioratePatch
 [HarmonyPatch(typeof(SabotageSystemType), nameof(SabotageSystemType.UpdateSystem))]
 public static class SwitchSabotagePatch
 {
-    static bool Prefix(SabotageSystemType __instance, [HarmonyArgument(1)] MessageReader msgReader)
+    static bool Prefix(SabotageSystemType __instance, [HarmonyArgument(1)] Hazel.MessageReader msgReader)
     {
         if (!(__instance.Timer > 0f) && !MeetingHud.Instance.AsBoolFast() && (SystemTypes)msgReader.PeekByte() == SystemTypes.Electrical && AmongUsClient.Instance.AmHost)
         {

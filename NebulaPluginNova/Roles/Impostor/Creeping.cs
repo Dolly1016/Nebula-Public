@@ -69,7 +69,7 @@ internal class Creeping : DefinedSingleAbilityRoleTemplate<Creeping.Ability>, Ha
                         StatsPoison.Progress();
                         if (ModSingleton<DepoisonBoxManager>.Instance?.AmPoisoned ?? false) poisonedInPoison.Add(target.RealPlayer);
                         DepoisonBoxManager.RpcPoison.Invoke((MyPlayer, target.RealPlayer));
-                        if (Constants.ShouldPlaySfx()) SoundManager.Instance.PlaySoundImmediate(ViperAudio, false);
+                        if (Constants.ShouldPlaySfx()) AmongUsLLImpl.SoundManagerInstance.PlaySoundImmediate(ViperAudio, false);
                         MyPlayer.VanillaPlayer.NetTransform.RpcSnapTo(target.RealPlayer.VanillaPlayer.transform.position);
                         NebulaAPI.CurrentGame?.KillButtonLikeHandler.StartCooldown();
                     }).SetAsUsurpableButton(this);
@@ -307,7 +307,7 @@ internal class Creeping : DefinedSingleAbilityRoleTemplate<Creeping.Ability>, Ha
                 if (Constants.ShouldPlaySfx())
                 {
                     var doneSfx = VanillaAsset.MapAsset[5].CommonTasks[3].MinigamePrefab.CastFast<MultistageMinigame>().Stages[1].CastFast<RoastMarshmallowFireMinigame>().sfxMarshmallowDone;
-                    SoundManager.Instance.PlaySoundImmediate(doneSfx, false, 1.5f, 1f, null);
+                    AmongUsLLImpl.SoundManagerInstance.PlaySoundImmediate(doneSfx, false, 1.5f, 1f, null);
                 }
                 StatsDepoison.Progress();
                 DepoisonBoxManager.RpcDepoison.Invoke(GamePlayer.LocalPlayer!);

@@ -96,9 +96,16 @@ internal class AmongUsLLImpl : AmongUsLL
     static public ShipStatus ShipStatusInstance => Instance.shipStatus.Get();
     static public bool TryGetShipStatus(out ShipStatus val) => Instance.shipStatus.Get(out val);
 
+    
     private LLCache<AmongUsClient> amongUsClient;
     static public AmongUsClient AmongUsClientInstance => Instance.amongUsClient.Get();
     static public bool TryGetAmongUsClientInstance(out AmongUsClient val) => Instance.amongUsClient.Get(out val);
+
+
+    private LLCache<SoundManager> soundManager;
+    static public SoundManager SoundManagerInstance => Instance.soundManager.Get();
+    static public bool TryGetSoundManager(out SoundManager val) => Instance.soundManager.Get(out val);
+
 
     private LLCache<LobbyBehaviour> lobbyBehaviour;
     static public LobbyBehaviour LobbyInstance => Instance.lobbyBehaviour.Get();
@@ -106,6 +113,7 @@ internal class AmongUsLLImpl : AmongUsLL
 
     private LLCache<float> killCooldown;
     private LLCache<float> killDistance;
+    private LLCache<byte> mapId;
     private LLCache<PlayerControl> localPlayer;
 
     private LLCache<int> screenWidth;
@@ -117,6 +125,7 @@ internal class AmongUsLLImpl : AmongUsLL
     private AmongUsLLImpl()
     {
         amongUsClient = new(() => { var instance = AmongUsClient.Instance; return (instance, instance != null); }, false);
+        soundManager = new(() => { var instance = SoundManager.Instance; return (instance, instance != null); }, false);
         gameOptionsManager = new(() => { var instance = GameOptionsManager.Instance; return (instance, instance != null); });
         gameManager = new(() => { var instance = GameManager.Instance; return (instance, instance != null); });
         shipStatus = new(() => { var instance = ShipStatus.Instance; return (instance, instance); });
@@ -136,6 +145,10 @@ internal class AmongUsLLImpl : AmongUsLL
             var val = gameManager.Get(out var instance) ? instance.LogicOptions.GetKillDistance() : 1f;
             return (val, shipStatus.HasBeenInitialized);
         });
+        mapId = new(() => {
+            var val = currentGameOptions.Get(out var instance) ? instance.MapId : byte.MaxValue;
+            return (val, shipStatus.HasBeenInitialized);
+        });
         localPlayer = new(() => { var instance = PlayerControl.LocalPlayer; return (instance, instance); });
 
         screenWidth = new(() => (Screen.width, true), false);
@@ -144,6 +157,7 @@ internal class AmongUsLLImpl : AmongUsLL
 
     public float VanillaKillCooldown => killCooldown.Get();
     public float VanillaKillDistance => killDistance.Get();
+    public byte MapId => mapId.Get();
     public int ScreenWidth => screenWidth.Get();
     public int ScreenHeight => screenHeight.Get();
     internal void OnSceneChanged() => LLCacheBase.OnSceneChanged();

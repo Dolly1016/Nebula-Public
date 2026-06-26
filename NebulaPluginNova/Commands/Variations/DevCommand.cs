@@ -75,11 +75,11 @@ internal class DevCommand : ICommand
             case "aeroeasy":
             case "aeroguessernormal":
             case "aeronormal":
-                points = AeroGuesserQuizData.GetAllEntry(AmongUsUtil.CurrentMapId, 0).Select(p => ((VVector2)p.position, p.comment, (VVector2)p.viewport));
+                points = AeroGuesserQuizData.GetAllEntry(NebulaAPI.AmongUs.MapId, 0).Select(p => (p.position, p.comment, p.viewport));
                 break;
             case "aeroguesserhard":
             case "aerohard":
-                points = AeroGuesserQuizData.GetAllEntry(AmongUsUtil.CurrentMapId, 1).Select(p => ((VVector2)p.position, p.comment, (VVector2)p.viewport));
+                points = AeroGuesserQuizData.GetAllEntry(NebulaAPI.AmongUs.MapId, 1).Select(p => (p.position, p.comment, p.viewport));
                 break;
             case "opportunist":
                 points = Roles.Neutral.Opportunist.GetTaskPositions().Select(p => ((VVector2)p.center, "", (VVector2)p.size));

@@ -252,19 +252,19 @@ public class Berserker : DefinedSingleAbilityRoleTemplate<Berserker.Ability>, De
     {
         player.VanillaPlayer.NetTransform.Halt();
         player.ChangeBodyType(PlayerBodyTypes.Seeker);
-        player.VanillaPlayer.AnimateCustom(HudManager.Instance.IntroPrefab.HnSSeekerSpawnAnim);
+        player.VanillaPlayer.AnimateCustom(AmongUsLLImpl.HudManagerInstance.IntroPrefab.HnSSeekerSpawnAnim);
 
-        player.VanillaPlayer.MyPhysics.Animations.Animator.SetTime(7.4f);//Coroutineは最初のyieldまで実行したのちに脱出することに留意
+        player.VanillaAnimations.Animator.SetTime(7.4f);//Coroutineは最初のyieldまで実行したのちに脱出することに留意
         NebulaAsset.PlaySE(VanillaAsset.HnSTransformClip.Clip, player.VanillaPlayer.transform.position, 0.8f, berserkSEStrengthOption, 0.8f);
-        player.VanillaPlayer.cosmetics.SetBodyCosmeticsVisible(false);
+        player.VanillaCosmetics.SetBodyCosmeticsVisible(false);
     });
 
     static private void ResetBody(GamePlayer player)
     {
-        if(player.VanillaPlayer.MyPhysics.Animations.Animator.m_currAnim == HudManager.Instance.IntroPrefab.HnSSeekerSpawnAnim)
+        if(player.VanillaPlayer.MyPhysics.Animations.Animator.m_currAnim == AmongUsLLImpl.HudManagerInstance.IntroPrefab.HnSSeekerSpawnAnim)
         {
             player.VanillaPlayer.moveable = true;
-            player.VanillaPlayer.MyPhysics.DoingCustomAnimation = false;
+            player.VanillaPhysics.DoingCustomAnimation = false;
         }
 
         player.ChangeBodyTypeAndWrapUp(PlayerBodyTypes.Normal);
@@ -287,10 +287,10 @@ public class Berserker : DefinedSingleAbilityRoleTemplate<Berserker.Ability>, De
 
             //SetMaterialColor
             var playerId = message.player.PlayerId;
-            chargeAnim.Renderer.material.SetColor("_BackColor", DynamicPalette.ShadowColors[playerId].ToUnityColor());
-            chargeAnim.Renderer.material.SetColor("_BodyColor", DynamicPalette.PlayerColors[playerId].ToUnityColor());
-            chargeAnim.Renderer.material.SetColor("_VisorColor", DynamicPalette.VisorColors[playerId].ToUnityColor());
-
+            var mat = chargeAnim.Renderer.material;
+            mat.SetColor("_BackColor", DynamicPalette.ShadowColors[playerId].ToUnityColor());
+            mat.SetColor("_BodyColor", DynamicPalette.PlayerColors[playerId].ToUnityColor());
+            mat.SetColor("_VisorColor", DynamicPalette.VisorColors[playerId].ToUnityColor());
 
             AmongUsUtil.GetRolePrefab<PhantomRole>()?.PlayPhantomAppearSound();
             chargeAnim.Play(message.player.VanillaPlayer, (Il2CppSystem.Action)(() =>
@@ -300,16 +300,17 @@ public class Berserker : DefinedSingleAbilityRoleTemplate<Berserker.Ability>, De
                 if (!message.player.IsDead && !message.player.VanillaPlayer.inVent)
                 {
                     RoleEffectAnimation poofAnim = GameObject.Instantiate<RoleEffectAnimation>(DestroyableSingleton<RoleManager>.Instance.vanish_PoofAnim, message.player.VanillaPlayer.transform);
-                    
-                    //SetMaterialColor
-                    poofAnim.Renderer.material.SetColor("_BackColor", DynamicPalette.ShadowColors[playerId].ToUnityColor());
-                    poofAnim.Renderer.material.SetColor("_BodyColor", DynamicPalette.PlayerColors[playerId].ToUnityColor());
-                    poofAnim.Renderer.material.SetColor("_VisorColor", DynamicPalette.VisorColors[playerId].ToUnityColor());
 
-                    poofAnim.Play(message.player.VanillaPlayer, (Il2CppSystem.Action)(() => { }), message.player.VanillaPlayer.cosmetics.FlipX, RoleEffectAnimation.SoundType.Local, 0f, true, 0f);
+                    //SetMaterialColor
+                    var mat = poofAnim.Renderer.material;
+                    mat.SetColor("_BackColor", DynamicPalette.ShadowColors[playerId].ToUnityColor());
+                    mat.SetColor("_BodyColor", DynamicPalette.PlayerColors[playerId].ToUnityColor());
+                    mat.SetColor("_VisorColor", DynamicPalette.VisorColors[playerId].ToUnityColor());
+
+                    poofAnim.Play(message.player.VanillaPlayer, (Il2CppSystem.Action)(() => { }), message.player.VanillaCosmetics.FlipX, RoleEffectAnimation.SoundType.Local, 0f, true, 0f);
                 }
 
-            }), message.player.VanillaPlayer.cosmetics.FlipX, RoleEffectAnimation.SoundType.Local, 1f, true, -0.05f);
+            }), message.player.VanillaCosmetics.FlipX, RoleEffectAnimation.SoundType.Local, 1f, true, -0.05f);
         }
     });
 }

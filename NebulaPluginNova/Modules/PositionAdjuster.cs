@@ -34,6 +34,8 @@ internal class PositionAdjuster : AbstractModule<Virial.Game.Game>, IGameOperato
     private float OutsideTimer = 0f;
     void OnGameStart(GameStartEvent ev)
     {
+        if (!(ev.Game.GameMode?.ShowMap ?? true)) return;
+
         //ボタンを追加する
 
         Modules.ScriptComponents.ModAbilityButtonImpl fixButton = null!;
@@ -53,8 +55,11 @@ internal class PositionAdjuster : AbstractModule<Virial.Game.Game>, IGameOperato
 
 
     static private VVector2[] SearchCand = [new(-0.4f, 0f), new(0.4f, 0f), new(0f, -0.4f), new(0f, 0.4f)];
+    int mask = Constants.ShipAndAllObjectsMask;
     void OnUpdate(GameUpdateEvent ev)
     {
+        if (!(ev.Game.GameMode?.ShowMap ?? true)) return;
+
         var player = MyContainer.LocalPlayer;
 
         if (!player.CanMove || player.IsDead)
@@ -64,7 +69,8 @@ internal class PositionAdjuster : AbstractModule<Virial.Game.Game>, IGameOperato
             return;
         }
 
-        var truePos = player.TruePosition;
+        var unityTruePos = player.UnityTruePosition;
+        var truePos = new VVector2(unityTruePos);
 
         var mapData = MapData.GetCurrentMapData();
         if (mapData.CheckMapArea(truePos, 0f))
@@ -80,7 +86,7 @@ internal class PositionAdjuster : AbstractModule<Virial.Game.Game>, IGameOperato
             if (!FixedPosition.HasValue || FixedPosition.Value.Distance(truePos) > 0.6f)
             {
                 FixedPosition = null;
-                int index = SearchCand.FindIndex(v => mapData.CheckMapArea(truePos + v, 0f) && Helpers.AnyNonTriggersBetween(truePos, truePos + v, out _, Constants.ShipAndAllObjectsMask));
+                int index = SearchCand.FindIndex(v => mapData.CheckMapArea(truePos + v, 0f) && Helpers.AnyNonTriggersBetween(unityTruePos, truePos + v, out _, mask));
                 if(index >= 0){
                     FixedPosition = truePos + SearchCand[index];
                 }

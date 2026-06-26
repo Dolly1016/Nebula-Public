@@ -54,7 +54,7 @@ public static class MinigameHelper
     {
         if (minigame.amClosing != Minigame.CloseState.Closing)
         {
-            if (minigame.CloseSound && Constants.ShouldPlaySfx()) SoundManager.Instance.PlaySound(minigame.CloseSound, false, 1f, null);
+            if (minigame.CloseSound && Constants.ShouldPlaySfx()) AmongUsLLImpl.SoundManagerInstance.PlaySound(minigame.CloseSound, false, 1f, null);
             if (AmongUsLLImpl.LocalPlayer.AsBoolFast()) PlayerControl.HideCursorTemporarily();
 
             minigame.amClosing = Minigame.CloseState.Closing;

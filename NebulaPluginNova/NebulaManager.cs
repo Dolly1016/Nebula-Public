@@ -159,7 +159,7 @@ public class MouseOverPopup : MonoBehaviour
             VVector2 upper = UnityHelper.ScreenToWorldPoint(new(NebulaAPI.AmongUs.ScreenWidth - 10f, NebulaAPI.AmongUs.ScreenHeight - 10f), LayerExpansion.GetUILayer());
             float diff;
 
-            VVector3 adjustedPos = pos;
+            VVector3 adjustedPos = transform.position;
 
             diff = (adjustedPos.x + xRange[0]) - lower.x;
             if (diff < 0f) adjustedPos.x -= diff;
@@ -213,7 +213,7 @@ public class MouseOverPopup : MonoBehaviour
         Parameters.RelatedButton = related;
         transform.SetParent(UnityHelper.FindCamera(LayerExpansion.GetUILayer())!.transform);
 
-        myScreen.SetWidget(widget, new Vector2(0.5f, 0.5f), out var size);
+        myScreen.SetWidget(widget, new VVector2(0.5f, 0.5f), out var size);
 
         this.followMouseCursor = followMouseCursor;
         this.lastSize = size;
@@ -579,18 +579,83 @@ public class NebulaManager : MonoBehaviour
                 if (Input.GetKeyDown(KeyCode.K))
                 {
                     /*
-                    var window = MetaScreen.GenerateWindow(new(8.6f, 5.02f), HudManager.Instance.transform, new Vector3(0f, 0f, -400f), true, false, false, BackgroundSetting.Modern);
-
-                    window.SetWidget(new NoSGameObjectGUIWrapper(GUIAlignment.Center, () =>
+                    IEnumerator CoCheck()
                     {
-                        var renderer = UnityHelper.CreateSpriteRenderer("Renderer", null, Vector3.zero, LayerExpansion.GetUILayer());
-                        renderer.sprite = SpriteLoader.FromResource("Nebula.Resources.composite_shader_test.png", 120f).GetSprite();
-                        renderer.material = new(NebulaAsset.TransColorGameShader);
-                        renderer.material.SetColor(PlayerMaterial.BackColor, Color.green);
-                        renderer.material.SetColor(PlayerMaterial.BodyColor, Color.blue);
-                        renderer.material.SetColor(PlayerMaterial.VisorColor, Color.red);
-                        return (renderer.gameObject, new(8f, 5f));
-                    }), new Vector2(0.5f, 0.5f), out _);
+                        List<(long, long, long, long, long, long, long)> vals = new(1000);
+                        var address = (IntPtr)typeof(HudManager).GetField("NativeMethodInfoPtr_get_IsIntroDisplayed_Public_get_Boolean_0", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static).GetValue(null);
+                        for (int n = 0; n < 1000; n++)
+                        {
+                            TimeLogger tl = new();
+                            List<bool> list1 = new(100000);
+                            List<float> list3 = new(100000);
+                            List<HudManager> list2 = new(100000);
+                            List<HudManager> list4 = new(100000);
+                            var hudManager = HudManager.Instance;
+
+                            List<IntPtr> list5 = new(100000);
+                            List<bool> list6 = new(100000);
+                            System.Runtime.CompilerServices.Unsafe.SkipInit(out System.IntPtr exc);
+
+                            NebulaProfiler.LapTimer("Before NebulaManager.K");
+
+                            for (int i = 0; i < 100000; i++)
+                            {
+                                unsafe
+                                {
+                                    System.IntPtr* param = null;
+                                    System.IntPtr obj = IL2CPP.il2cpp_runtime_invoke(address, this.Pointer, (void**)param, ref exc);
+                                    list5.Add(obj);
+                                }
+                            }
+                            var v6 = tl.Measure($"GetPrimitiveProperty1({list5.Count})");
+                            
+                            for (int i = 0; i < 100000; i++)
+                            {
+                                unsafe
+                                {
+                                    bool val = *(bool*)IL2CPP.il2cpp_object_unbox(list5[i]);
+                                    list6.Add(val);
+                                }
+                            }
+                            var v7 = tl.Measure($"GetPrimitiveProperty2({list6.Count})");
+                            
+                            for (int i = 0; i < 100000; i++)
+                            {
+                                var val = hudManager.IsIntroDisplayed;
+                                list1.Add(val);
+                            }
+
+                            var v1 = tl.Measure($"GetPrimitiveProperty({list1.Count})");
+                            for (int i = 0; i < 100000; i++)
+                            {
+                                var val = hudManager.taskDirtyTimer;
+                                list3.Add(val);
+                            }
+                            var v2 = tl.Measure($"GetPrimitiveField({list1.Count})");
+                            for (int i = 0; i < 100000; i++)
+                            {
+                                var val = HudManager.Instance;
+                                list2.Add(val);
+                            }
+                            var v3 = tl.Measure($"GetExistingValue({list1.Count})");
+                            for (int i = 0; i < 100000; i++)
+                            {
+                                var val = AmongUsLLImpl.HudManagerInstance;
+                                list2.Add(val);
+                            }
+                            var v4 = tl.Measure($"GetExistingCache({list1.Count})");
+                            for (int i = 0; i < 100000; i++)
+                            {
+                                hudManager.StopOxyFlash();
+                            }
+                            var v5 = tl.Measure($"InvokeVoidFunc");
+                            vals.Add((v1, v2, v3, v4, v5, v6, v7));
+                            yield return null;
+                        }
+                        System.IO.File.WriteAllText("data.json", "[" + string.Join(", ", vals.Select(entry => $"[{entry.Item1},{entry.Item2},{entry.Item3},{entry.Item4},{entry.Item5}]")) + "]");
+                        LogUtils.WriteToConsole("Finished!");
+                    }
+                    CoCheck().StartOnScene();
                     */
 
                     /*

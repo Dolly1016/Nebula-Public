@@ -364,7 +364,7 @@ class MovingPlatformBehaviourMeetingCalledPatch
 {
     static bool Prefix(MovingPlatformBehaviour __instance)
     {
-        if (AmongUsUtil.CurrentMapId != 4) return true;
+        if (NebulaAPI.AmongUs.MapId != 4) return true;
         return !GeneralConfigurations.AirshipOneWayMeetingRoomOption.CurrentValue;
     }
 }
@@ -375,7 +375,7 @@ class CanUseMovingPlayformPatch
     static bool Prefix(MovingPlatformBehaviour __instance, out bool __result)
     {
         __result = false;
-        if (AmongUsUtil.CurrentMapId != 4) return true;
+        if (NebulaAPI.AmongUs.MapId != 4) return true;
         else {
             return !GeneralConfigurations.AirshipOneWayMeetingRoomOption.CurrentValue;
         }
@@ -689,7 +689,7 @@ public static class MapConsoleUsePatch
 {
     public static void Postfix(MapConsole __instance)
     {
-        int mapId = AmongUsUtil.CurrentMapId;
+        int mapId = NebulaAPI.AmongUs.MapId;
         int consoleId = 0;
         if (mapId == 4 && __instance.transform.position.x > 10f) consoleId = 1;
         MapBehaviourExtension.RestrictRoom(MapBehaviour.Instance, GeneralConfigurations.AdminRoomOptions[mapId][consoleId].Value << 1);

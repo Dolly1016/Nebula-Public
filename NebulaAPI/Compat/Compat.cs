@@ -289,6 +289,8 @@ public struct Vector3
     public static readonly Vector3 Zero = new(0f, 0f, 0f);
     public static readonly Vector3 One = new(1f, 1f, 1f);
 
+    public const float Epsilon = 1e-6f;
+
     public Vector3()
     {
         this.x = 0f;
@@ -317,12 +319,25 @@ public struct Vector3
     static public implicit operator UnityEngine.Vector3(Vector3 v) => v.ToUnityVector();
     static public implicit operator Vector3(UnityEngine.Vector2 v) => new(v);
     static public implicit operator Vector3(UnityEngine.Vector3 v) => new(v);
+    public Vector3 Normalized => Normalize(this);
     static public Compat.Vector3 operator +(Vector3 v) => v;
     static public Compat.Vector3 operator -(Vector3 v) => new(-v.x, -v.y, -v.z);
     static public Compat.Vector3 operator +(Vector3 v1, Vector3 v2) => new(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
     static public Compat.Vector3 operator -(Vector3 v1, Vector3 v2) => new(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
     static public Compat.Vector3 operator *(Vector3 v, float a) => new(v.x * a, v.y * a, v.z * a);
     static public Compat.Vector3 operator /(Vector3 v, float a) => new(v.x / a, v.y / a, v.z / a);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Vector3 Normalize(Vector3 v)
+    {
+        float sqr = v.x * v.x + v.y * v.y + v.z * v.z;
+        if (sqr <= Epsilon * Epsilon)
+            return Zero;
+
+        float inv = 1f / MathF.Sqrt(sqr);
+        return new Vector3(v.x * inv, v.y * inv, v.z * inv);
+    }
+
 }
 
 public struct Vector4

@@ -72,7 +72,7 @@ public class Reaper : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 
         private void EditVentInfo(bool activate)
         {
-            switch (AmongUsUtil.CurrentMapId)
+            switch (NebulaAPI.AmongUs.MapId)
             {
                 case 0:
                     //Skeld

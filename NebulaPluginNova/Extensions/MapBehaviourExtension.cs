@@ -1,4 +1,5 @@
 ﻿using Nebula.Behavior;
+using Virial;
 using Virial.Game;
 
 namespace Nebula.Extensions;
@@ -40,7 +41,7 @@ public static class MapBehaviourExtension
     public static void RestrictRoom(this MapBehaviour map, int roomFlag)
     {
         RoomFlag = roomFlag;
-        map.ColorControl.GetComponent<SpriteRenderer>().sprite = NebulaAsset.GetMapSprite(AmongUsUtil.CurrentMapId, roomFlag);
+        map.ColorControl.GetComponent<SpriteRenderer>().sprite = NebulaAsset.GetMapSprite(NebulaAPI.AmongUs.MapId, roomFlag);
     }
 
     public static void UpdateCount(this CounterArea counterArea, int cnt, int impostors, int deadBodies)

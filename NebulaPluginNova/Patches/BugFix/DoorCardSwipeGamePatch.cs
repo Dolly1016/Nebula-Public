@@ -50,7 +50,7 @@ internal static class DoorCardSwipeGameUpdatePatch
                     __instance.moving = true;
                     if (Constants.ShouldPlaySfx())
                     {
-                        SoundManager.Instance.PlaySound(__instance.CardMove.ToArray().Random(), false, 1f, null);
+                        AmongUsLLImpl.SoundManagerInstance.PlaySound(__instance.CardMove.ToArray().Random(), false, 1f, null);
                     }
                 }
             }

@@ -26,7 +26,7 @@ internal class Balloon
     public const float DefaultStringLength = 0.97f;
     static private (float Min, float Max) StringRange = (0.61f, DefaultStringLength);
     static private float[] Variation = [0.95f, 0.90f, 0.84f, 0.79f, 0.75f, 0.72f, 0.67f, 0.63f, -100f];
-    static private Vector2 HandDiff = new Vector2(0.1f, -0.05f);
+    static private VVector2 HandDiff = new VVector2(0.1f, -0.05f);
 
     private SpriteRenderer balloonRenderer;
     private SpriteRenderer highlightRenderer;
@@ -36,12 +36,12 @@ internal class Balloon
 
     public const float DefaultBalloonSize = 0.74f;
 
-    private Vector2 HandCenter = Vector2.zero;
+    private VVector2 HandCenter = VVector2.Zero;
     public Balloon(GamePlayer target)
     {
         this.target = target;
 
-        holder = UnityHelper.CreateObject("BalloonHolder", null, Vector3.zero, LayerExpansion.GetDefaultLayer());
+        holder = UnityHelper.CreateObject("BalloonHolder", null, VVector3.Zero, LayerExpansion.GetDefaultLayer());
         balloonRenderer = UnityHelper.CreateSpriteRenderer("Balloon", holder.transform, Vector3.zero);
         balloonRenderer.transform.localScale = new(DefaultBalloonSize, DefaultBalloonSize, 1f);
         balloonRenderer.gameObject.AddComponent<SortingGroup>();
@@ -53,7 +53,7 @@ internal class Balloon
         diff.x /= lossyScale;
         diff.y /= lossyScale;
         HandCenter = diff;
-        stringRenderer = UnityHelper.CreateSpriteRenderer("String", target.VanillaPlayer.cosmetics.transform, HandCenter);
+        stringRenderer = UnityHelper.CreateSpriteRenderer("String", target.VanillaPlayer.cosmetics.transform, HandCenter.AsUnityVector3());
         stringRenderer.transform.localScale = new(1f / lossyScale, 1f / lossyScale, 1f);
         balloonRenderer.sprite = BalloonSprite.GetSprite();
         highlightRenderer.sprite = HighlightSprite.GetSprite();
@@ -63,8 +63,8 @@ internal class Balloon
         UpdateBalloonColor();
     }
 
-    public Vector2 HandPos => stringRenderer.transform.position;
-    public Vector2 CenterPos => HandPos + new Vector2(0f, DefaultStringLength);
+    public VVector2 HandPos => stringRenderer.transform.position;
+    public VVector2 CenterPos => HandPos + new VVector2(0f, DefaultStringLength);
     
     /// <summary>
     /// 風船を初期位置に戻します。糸を再調整する必要があります。
@@ -79,28 +79,28 @@ internal class Balloon
     /// </summary>
     private void ReflectString()
     {
-        Vector2 diff = balloonRenderer.transform.position - stringRenderer.transform.position;
-        stringRenderer.transform.localEulerAngles = new(0f, 0f, Mathf.Atan2(diff.y, diff.x).RadToDeg() - 90f);
-        var mag = diff.magnitude;
+        VVector2 diff = balloonRenderer.transform.position - stringRenderer.transform.position;
+        stringRenderer.transform.localEulerAngles = new(0f, 0f, Mathn.Atan2(diff.y, diff.x).RadToDeg() - 90f);
+        var mag = diff.Magnitude;
         stringRenderer.sprite = BalloonStringSprite.GetSprite(Variation.FindIndex(num => num < mag));
     }
 
-    private void UpdateAngle(Vector2 lastPos, Vector2 currentPos, Vector2 targetPos)
+    private void UpdateAngle(float deltaTime, VVector2 lastPos, VVector2 currentPos, VVector2 targetPos)
     {
-        if (!(Time.deltaTime > 0f)) return;
+        if (!(deltaTime > 0f)) return;
 
-        var num = Math.Clamp((currentPos.x - targetPos.x) / 0.8f, -1f, 1f);
+        var num = Mathn.Clamp((currentPos.x - targetPos.x) / 0.8f, -1f, 1f);
         var baseAngle = num * 75f;
 
-        var adjustedP = (1.9f + Mathf.Max(windP, speedP) * -2.4f); //low 1.9 <-> -0.5 high で係数を調整
+        var adjustedP = (1.9f + Mathn.Max(windP, speedP) * -2.4f); //low 1.9 <-> -0.5 high で係数を調整
         var angle = baseAngle * adjustedP;
         balloonRenderer.transform.localEulerAngles = new(0f, 0f, angle);
         highlightRenderer.transform.localEulerAngles = new(0f, 0f, -angle);
     }
 
     //糸先の速度
-    private Vector2 lastPlayerPos = Vector2.zero;
-    private Vector2 posSpeed = Vector2.zero;
+    private VVector2 lastPlayerPos = VVector2.Zero;
+    private VVector2 posSpeed = VVector2.Zero;
     private float speedP = 0f;
     private float windP = 0f;
     public void SetVisible(bool visible)
@@ -125,25 +125,27 @@ internal class Balloon
 
         //手元の位置を更新する
         var yDiff = (target.VanillaPlayer.cosmetics.hat.SpriteSyncNode?.Parent.GetLocalPosition(0).y ?? 0f) * 0.7f;
-        stringRenderer.transform.localPosition = ((Vector2)HandCenter + new Vector2(0f, yDiff));
+        stringRenderer.transform.localPosition = (HandCenter + new VVector2(0f, yDiff)).AsUnityVector3(0f);
 
 
-        Vector2 lastPos = balloonRenderer.transform.position;
+        VVector2 lastPos = balloonRenderer.transform.position;
         var targetPos = CenterPos;
         var diff = lastPos - targetPos;
-        var lastDistance = diff.magnitude;
+        var lastDistance = diff.Magnitude;
 
-        Vector2 currentPlayerPos = target.Position;
+        var currentPlayerPos = target.Position;
         var isMoving = lastPlayerPos.Distance(currentPlayerPos) > 0.005f;
         lastPlayerPos = currentPlayerPos;
+
+        var deltaTime = Time.deltaTime;
 
         if (!lastActive || lastDistance > 3f) ResetToDefaultPos();
         else
         {
 
             //弾性力と移動への追従の割合, 0に近いほど弾性力の寄与が大きい
-            speedP += (isMoving ? 4f : -2.8f) * Time.deltaTime;
-            speedP = Mathf.Clamp01(speedP);
+            speedP += (isMoving ? 4f : -2.8f) * deltaTime;
+            speedP = Mathn.Clamp01(speedP);
 
             var elastic = -diff * 10.8f * (1f - speedP); //弾性力
             var resistance = -posSpeed * 1.6f; //粘性抵抗
@@ -151,40 +153,42 @@ internal class Balloon
             var windType = MapData.GetCurrentMapData().GetWindType(currentPlayerPos);
             var wind = MapData.CalcWind(currentPlayerPos, windType, NebulaGameManager.Instance?.CurrentTime ?? 0f); //風が風船に及ぼす力
 
-            windP += (wind.magnitude > 1.5f ? 4f : -0.5f) * Time.deltaTime;
-            windP = Mathf.Clamp01(windP);
+            windP += (wind.Magnitude > 1.5f ? 4f : -0.5f) * deltaTime;
+            windP = Mathn.Clamp01(windP);
 
-            posSpeed += (elastic + resistance + wind) * Time.deltaTime;
+            posSpeed += (elastic + resistance + wind) * deltaTime;
             if(speedP > 0.5f) posSpeed *= 0.95f; //弾性力の寄与が小さいとき、より早く速度が失われる。
-            balloonRenderer.transform.position += (Vector3)posSpeed * Time.deltaTime;
-            balloonRenderer.transform.position -= (Vector3)diff.Delta(4.4f, 0f) * speedP;
+            balloonRenderer.transform.position += (posSpeed * deltaTime).AsUnityVector3();
+            balloonRenderer.transform.position -= (diff.Delta(4.4f, 0f) * speedP).AsUnityVector3();
 
             //範囲外の位置を調整
-            Vector2 currentPos = balloonRenderer.transform.position;
-            Vector2 handPos = HandPos;
-            Vector2 currentDiff = currentPos - handPos;
-            float currentDistance = currentDiff.magnitude;
+            VVector2 currentPos = balloonRenderer.transform.position;
+            VVector2 handPos = HandPos;
+            VVector2 currentDiff = currentPos - handPos;
+            float currentDistance = currentDiff.Magnitude;
 
             if (currentDistance > StringRange.Max)
-                balloonRenderer.transform.position -= (Vector3)currentDiff.normalized * (currentDistance - StringRange.Max);
+                balloonRenderer.transform.position -= (currentDiff.Normalized * (currentDistance - StringRange.Max)).AsUnityVector3();
             else if (currentDistance < StringRange.Min)
-                balloonRenderer.transform.position += (Vector3)currentDiff.normalized * (StringRange.Min - currentDistance);
+                balloonRenderer.transform.position += (currentDiff.Normalized * (StringRange.Min - currentDistance)).AsUnityVector3();
             
 
             balloonRenderer.transform.SetWorldZ(BalloonZ);
         }
 
         ReflectString();
-        UpdateAngle(lastPos, balloonRenderer.transform.position, CenterPos);
+        UpdateAngle(deltaTime, lastPos, balloonRenderer.transform.position, CenterPos);
     }
 
-    public Vector2 BalloonPos => balloonRenderer.transform.position;
+    public VVector2 BalloonPos => balloonRenderer.transform.position;
     public float Scale => balloonRenderer.transform.localScale.x;
     public void UpdateAlpha(float alpha)
     {
-        balloonRenderer.color = Color.white.AlphaMultiplied(alpha);
-        stringRenderer.color = Color.white.AlphaMultiplied(alpha);
-        highlightRenderer.color = Color.white.AlphaMultiplied(alpha * 0.35f);
+        var white = Color.white;
+        var multiplied = white.AlphaMultiplied(alpha);
+        balloonRenderer.color = multiplied;
+        stringRenderer.color = multiplied;
+        highlightRenderer.color = white.AlphaMultiplied(alpha * 0.35f);
     }
 
     public void UpdateBalloonColor()
@@ -237,7 +241,7 @@ internal class BalloonHolder : AbstractModule<GamePlayer>, IGameOperator, IBindP
         if (HasBalloon)
         {
             balloon?.Update();
-            if (MyPlayer.AmOwner && !MeetingHud.Instance && !ExileController.Instance && !MyPlayer.IsDead)
+            if (MyPlayer.AmOwner && !MeetingHud.Instance.AsBoolFast() && !ExileController.Instance.AsBoolFast() && !MyPlayer.IsDead)
             {
                 timeLimit -= Time.deltaTime;
                 if(timeLimit < 0f)
@@ -274,7 +278,7 @@ internal class BalloonHolder : AbstractModule<GamePlayer>, IGameOperator, IBindP
         }
     }
 
-    private static Vector2[] VisibilityCheckVectors = [new(-0.68f, 0.45f), new(0.68f, 0.45f), new(0f, 0f), new(0f, 0.9f)];
+    private static VVector2[] VisibilityCheckVectors = [new(-0.68f, 0.45f), new(0.68f, 0.45f), new(0f, 0f), new(0f, 0.9f)];
 
     [OnlyMyPlayer]
     void OnAlphaChanged(PlayerAlphaUpdateEvent ev)
@@ -289,7 +293,7 @@ internal class BalloonHolder : AbstractModule<GamePlayer>, IGameOperator, IBindP
             if(ev.AlphaIgnoresWall > ev.Alpha)
             {
                 int objectMask = Constants.ShipAndAllObjectsMask;
-                Vector2 cameraPos = GamePlayer.LocalPlayer!.Position;
+                VVector2 cameraPos = GamePlayer.LocalPlayer!.Position;
 
                 if (Helpers.AnyNonTriggersBetween(ev.Player.Position, balloon.BalloonPos, out _, objectMask))
                 {
@@ -357,12 +361,12 @@ internal class BalloonHolder : AbstractModule<GamePlayer>, IGameOperator, IBindP
         holder.sentDieRpc = false;
     });
 
-    static private readonly RemoteProcess<(GamePlayer player, GamePlayer whammy, Vector2 position)> RpcBalloonKill = new("BalloonKill", (message, _) =>
+    static private readonly RemoteProcess<(GamePlayer player, GamePlayer whammy, VVector2 position)> RpcBalloonKill = new("BalloonKill", (message, _) =>
     {
         PlayBalloonKill(message.whammy, message.player, message.position);
     });
 
-    static private void PlayBalloonKill(GamePlayer whammy, GamePlayer dead, Vector2 position)
+    static private void PlayBalloonKill(GamePlayer whammy, GamePlayer dead, VVector2 position)
     {
         AmongUsUtil.PlayCinematicKill(whammy, dead, 1.8f, 0.6f, PlayerState.Balloon, EventDetail.Balloon, () => {
             var balloonHolder = UnityHelper.CreateObject("BalloonDeadBody", null, position.AsVector3(-1f), LayerExpansion.GetDefaultLayer());
@@ -442,22 +446,23 @@ internal class BalloonHolder : AbstractModule<GamePlayer>, IGameOperator, IBindP
                 float p = 0f;
                 while (true)
                 {
-                    if (h < 0.4f) h += Time.deltaTime * 0.3f; 
+                    var deltaTime = Time.deltaTime;
+                    if (h < 0.4f) h += deltaTime * 0.3f; 
                     else h = 0.4f;
 
-                    if (p < 1f) p += Time.deltaTime * 0.5f; 
+                    if (p < 1f) p += deltaTime * 0.5f; 
                     else p = 1f;
 
                     float scale = Balloon.DefaultBalloonSize + h * 1.4f;
                     balloonRenderer.transform.localScale = new(scale, scale, 1f);
 
                     var z = balloonHolder.transform.position.z;
-                    balloonHolder.transform.position = (position + new Vector2(0f, h + p * 0.12f * Mathf.Sin(Time.time * 0.92f))).AsVector3(z);
+                    balloonHolder.transform.position = (position + new VVector2(0f, h + p * 0.12f * Mathn.Sin(Time.time * 0.92f))).AsVector3(z);
                     yield return null;
                 }
             }
 
-            return ((position + new Vector2(0f, 1.3f)).AsVector3(-1f), balloonHolder);
+            return ((position + new VVector2(0f, 1.3f)).AsVector3(-1f), balloonHolder);
         });
     }
 }
@@ -489,7 +494,8 @@ public class BalloonConsole : NebulaSyncStandardObject{
                 if (LeftStone > 0 && Mathn.Prob(0.02f)) minigame.StonesPattern[0] = true;
                 minigame.OnStoneUsed = () => { LeftStone--; ModSingleton<BalloonManager>.Instance.CurrentStone++; };
             }),
-            OutlineColor = UnityEngine.Color.yellow
+            OutlineColor = UnityEngine.Color.yellow,
+            UsableDistance = 0.9f
         };
         
         var arrow = new Arrow(ArrowSprite.GetSprite(), false, true) { IsAffectedByComms = false, FixedAngle = true, TargetPos = pos, IsActive = false }.Register(this);
@@ -550,8 +556,8 @@ public class BalloonManager : AbstractModule<Virial.Game.Game>, IGameOperator
     {
         int maxStonesByConsole = Whammy.StoneAssignmentOption;
         AllConsoles.Do(c => c.LeftStone = maxStonesByConsole);
-        var max = Math.Min(AllConsoles.Count, Whammy.NumOfMaxMinigameToBreakBalloonOption) * maxStonesByConsole;
-        var min = Math.Clamp(maxStonesByConsole - 1, 1, max);
+        var max = Mathn.Min(AllConsoles.Count, Whammy.NumOfMaxMinigameToBreakBalloonOption) * maxStonesByConsole;
+        var min = Mathn.Clamp(maxStonesByConsole - 1, 1, max);
         var rand = System.Random.Shared.NextSingle();
         
         CurrentStone = 0;
@@ -566,7 +572,7 @@ public class BalloonManager : AbstractModule<Virial.Game.Game>, IGameOperator
     public bool ConsoleHasTrap(Console console) => localTrappedConsoles.Any(c => c.Console.GetInstanceID() == console.GetInstanceID());
     public void EntrapToConsole(Console console) {
         bool flip = console!.transform.position.x > AmongUsLLImpl.LocalPlayer.transform.position.x;
-        Vector3 pos = GetConsoleBalloonPos(console, ref flip);
+        VVector3 pos = GetConsoleBalloonPos(console, ref flip);
 
         var renderer = UnityHelper.SimpleAnimator(console!.transform, pos, 0.2f, num => BalloonManager.BalloonTrapSprite.GetSprite(num % 4));
         var scale = renderer.transform.lossyScale;
@@ -608,10 +614,10 @@ public class BalloonManager : AbstractModule<Virial.Game.Game>, IGameOperator
     /// </summary>
     /// <param name="flip"></param>
     /// <returns></returns>
-    static private Vector3 GetConsoleBalloonPos(Console console, ref bool flip)
+    static private VVector3 GetConsoleBalloonPos(Console console, ref bool flip)
     {
-        Vector3 pos = new(0f, 0f, 0.000001f);
-        var mapId = AmongUsUtil.CurrentMapId;
+        VVector3 pos = new(0f, 0f, 0.000001f);
+        var mapId = NebulaAPI.AmongUs.MapId;
         if(mapId == 2)
         {
             //Polus
@@ -708,9 +714,9 @@ internal class Slingshot : MonoBehaviour
 
     private bool isDown = false;
     private float diff = 0f, holderVelocity = 0f;
-    private Vector2 downPos;
-    private Vector2 dir = Vector2.right.Rotate(-44f);
-    private Vector2 dirNeg = Vector2.right.Rotate(-72f);
+    private VVector2 downPos;
+    private VVector2 dir = VVector2.Right.Rotate(-44f);
+    private VVector2 dirNeg = VVector2.Right.Rotate(-72f);
     private PassiveButton slingshotButton = null!;
     private float power = 0f;
     public float Power => power;
@@ -748,7 +754,7 @@ internal class Slingshot : MonoBehaviour
             ManagedEffects.Wait(0.35f),
                     ManagedEffects.Lerp(0.4f, p =>
                     {
-                        grabbedStoneRenderer.color = Color.white.AlphaMultiplied(p);
+                        grabbedStoneRenderer.color = new(1f, 1f, 1f, p);
                     }),
                     ManagedEffects.Action(() => { })).WrapToIl2Cpp());
 
@@ -780,13 +786,15 @@ internal class Slingshot : MonoBehaviour
         renderers = transform.GetComponentsInChildren<SpriteRenderer>().ToArray();
 
         (var bmr, LeftMesh) = UnityHelper.CreateMeshRenderer("LeftBand", transform, new(0f, 0f, -0.28f), LayerExpansion.GetUILayer(), bandColor);
-        (_, RightMesh) = UnityHelper.CreateMeshRenderer("RightBand", transform, new(0f, 0f, -0.08f), LayerExpansion.GetUILayer(), bandColor, bmr.sharedMaterial);
+        var bmrMat = bmr.sharedMaterial;
+        (_, RightMesh) = UnityHelper.CreateMeshRenderer("RightBand", transform, new(0f, 0f, -0.08f), LayerExpansion.GetUILayer(), bandColor, bmrMat);
         (var emr, LeftEdgeLowerMesh) = UnityHelper.CreateMeshRenderer("LeftBandE1", transform, new(0f, 0f, -0.3f), LayerExpansion.GetUILayer(), edgeColor);
-        (_, LeftEdgeUpperMesh) = UnityHelper.CreateMeshRenderer("LeftBandE2", transform, new(0f, 0f, -0.3f), LayerExpansion.GetUILayer(), edgeColor, emr.sharedMaterial);
-        (_, RightEdgeLowerMesh) = UnityHelper.CreateMeshRenderer("RightBandE1", transform, new(0f, 0f, -0.1f), LayerExpansion.GetUILayer(), edgeColor, emr.sharedMaterial);
-        (_, RightEdgeUpperMesh) = UnityHelper.CreateMeshRenderer("RightBandE2", transform, new(0f, 0f, -0.1f), LayerExpansion.GetUILayer(), edgeColor, emr.sharedMaterial);
-        bandMat = bmr.sharedMaterial;
-        edgeMat = emr.sharedMaterial;
+        var emtMat = emr.sharedMaterial;
+        (_, LeftEdgeUpperMesh) = UnityHelper.CreateMeshRenderer("LeftBandE2", transform, new(0f, 0f, -0.3f), LayerExpansion.GetUILayer(), edgeColor, emtMat);
+        (_, RightEdgeLowerMesh) = UnityHelper.CreateMeshRenderer("RightBandE1", transform, new(0f, 0f, -0.1f), LayerExpansion.GetUILayer(), edgeColor, emtMat);
+        (_, RightEdgeUpperMesh) = UnityHelper.CreateMeshRenderer("RightBandE2", transform, new(0f, 0f, -0.1f), LayerExpansion.GetUILayer(), edgeColor, emtMat);
+        bandMat = bmrMat;
+        edgeMat = emtMat;
 
         LeftMesh.CreateRectMesh(new(1f, 1f), new(0.35f, 0f, 0f));
         RightMesh.CreateRectMesh(new(1f, 1f), new(0.35f, 0f, 0f));
@@ -812,7 +820,7 @@ internal class Slingshot : MonoBehaviour
         grabbedStoneRenderer.sprite = null;
         normalMat = grabbedStoneRenderer.sharedMaterial;
 
-        SetColor(Color.white.RGBMultiplied(0.6f));
+        SetColor(new(0.6f, 0.6f, 0.6f));
     }
 
     bool playedSECache = false;
@@ -846,11 +854,11 @@ internal class Slingshot : MonoBehaviour
             }
             else
             {
-                var diffVec = (Vector2)Input.mousePosition - downPos;
-                diff = Mathf.Clamp(Vector2.Dot(diffVec, dir) / 150f, 0f, 1.4f);
+                var diffVec = (VVector2)Input.mousePosition - downPos;
+                diff = Mathn.Clamp(VVector2.Dot(diffVec, dir) / 150f, 0f, 1.4f);
                 var p = diff / 1.4f;
-                var max = Mathf.Clamp01(p * 1.25f);
-                var speed = Mathf.Clamp(p * 2f, 0f, 0.78f);
+                var max = Mathn.Clamp01(p * 1.25f);
+                var speed = Mathn.Clamp(p * 2f, 0f, 0.78f);
                 if (p > 0.2f)
                 {
                     if (!playedSECache)
@@ -871,93 +879,95 @@ internal class Slingshot : MonoBehaviour
         }
         else
         {
-            holderVelocity -= diff * 200f * Time.deltaTime;
+            var deltaTime = Time.deltaTime;
+            holderVelocity -= diff * 200f * deltaTime;
             holderVelocity *= 0.86f;
-            diff += holderVelocity * Time.deltaTime;
+            diff += holderVelocity * deltaTime;
         }
 
-        var z = StoneHolder.transform.localPosition.z;
-        StoneHolder.transform.localPosition = ((diff < 0f ? dirNeg : dir) * diff + new Vector2(-0.3f, 0.5f)).AsVector3(z);
+        var holderTransform = StoneHolder.transform;
+        var z = holderTransform.localPosition.z;
+        holderTransform.localPosition = ((diff < 0f ? dirNeg : dir) * diff + new VVector2(-0.3f, 0.5f)).AsUnityVector3(z);
 
-        UpdateMesh();
+        UpdateMesh(holderTransform);
     }
-    void UpdateMesh()
+    void UpdateMesh(Transform holderTransform)
     {
-        Vector2 leftEdgeStoneUpper = StoneHolder.transform.TransformPointLocalToLocal(new Vector3(0.37f, -0.56f), transform);
-        Vector2 leftEdgeStoneLower = StoneHolder.transform.TransformPointLocalToLocal(new Vector3(0.35f, -0.76f), transform);
-        Vector2 leftEdgeShotUpper = new(-0.44f, 0.44f);
-        Vector2 leftEdgeShotLower = new(-0.44f, 0.25f);
+        VVector2 leftEdgeStoneUpper = holderTransform.TransformPointLocalToLocal(new Vector3(0.37f, -0.56f), transform);
+        VVector2 leftEdgeStoneLower = holderTransform.TransformPointLocalToLocal(new Vector3(0.35f, -0.76f), transform);
+        VVector2 leftEdgeShotUpper = new(-0.44f, 0.44f);
+        VVector2 leftEdgeShotLower = new(-0.44f, 0.25f);
 
-        Vector2 rightEdgeStoneUpper = StoneHolder.transform.TransformPointLocalToLocal(new Vector3(0.84f, -0.43f), transform);
-        Vector2 rightEdgeStoneLower = StoneHolder.transform.TransformPointLocalToLocal(new Vector3(0.83f, -0.66f), transform);
-        Vector2 rightEdgeShotUpper = new(0.45f, 0.15f);
-        Vector2 rightEdgeShotLower = new(0.45f, 0.01f);
+        VVector2 rightEdgeStoneUpper = holderTransform.TransformPointLocalToLocal(new Vector3(0.84f, -0.43f), transform);
+        VVector2 rightEdgeStoneLower = holderTransform.TransformPointLocalToLocal(new Vector3(0.83f, -0.66f), transform);
+        VVector2 rightEdgeShotUpper = new(0.45f, 0.15f);
+        VVector2 rightEdgeShotLower = new(0.45f, 0.01f);
 
-        Vector2 leftDir = leftEdgeShotUpper - leftEdgeStoneUpper;
-        Vector2 leftNorm = new Vector2(leftDir.y, -leftDir.x).normalized;
-        Vector2 rightDir = rightEdgeShotUpper - rightEdgeStoneUpper;
-        Vector2 rightNorm = new Vector2(rightDir.y, -rightDir.x).normalized;
+        VVector2 leftDir = leftEdgeShotUpper - leftEdgeStoneUpper;
+        VVector2 leftNorm = new VVector2(leftDir.y, -leftDir.x).Normalized;
+        VVector2 rightDir = rightEdgeShotUpper - rightEdgeStoneUpper;
+        VVector2 rightNorm = new VVector2(rightDir.y, -rightDir.x).Normalized;
 
         LeftEdgeLowerMesh.mesh.SetVertices((Vector3[])[
-            leftEdgeStoneLower + leftNorm * -0.015f,
-            leftEdgeStoneLower + leftNorm * 0.015f,
-            leftEdgeShotLower + leftNorm * -0.015f,
-            leftEdgeShotLower + leftNorm * 0.015f
+            (leftEdgeStoneLower + leftNorm * -0.015f).AsUnityVector3(),
+            (leftEdgeStoneLower + leftNorm * 0.015f).AsUnityVector3(),
+            (leftEdgeShotLower + leftNorm * -0.015f).AsUnityVector3(),
+            (leftEdgeShotLower + leftNorm * 0.015f).AsUnityVector3()
             ]);
         LeftEdgeUpperMesh.mesh.SetVertices((Vector3[])[
-            leftEdgeStoneUpper + leftNorm * -0.015f,
-            leftEdgeStoneUpper + leftNorm * 0.015f,
-            leftEdgeShotUpper + leftNorm * -0.015f,
-            leftEdgeShotUpper + leftNorm * 0.015f
+            (leftEdgeStoneUpper + leftNorm * -0.015f).AsUnityVector3(),
+            (leftEdgeStoneUpper + leftNorm * 0.015f).AsUnityVector3(),
+            (leftEdgeShotUpper + leftNorm * -0.015f).AsUnityVector3(),
+            (leftEdgeShotUpper + leftNorm * 0.015f).AsUnityVector3()
             ]);
         RightEdgeLowerMesh.mesh.SetVertices((Vector3[])[
-            rightEdgeStoneLower + rightNorm * -0.015f,
-            rightEdgeStoneLower + rightNorm * 0.015f,
-            rightEdgeShotLower + rightNorm * -0.015f,
-            rightEdgeShotLower + rightNorm * 0.015f
+            (rightEdgeStoneLower + rightNorm * -0.015f).AsUnityVector3(),
+            (rightEdgeStoneLower + rightNorm * 0.015f).AsUnityVector3(),
+            (rightEdgeShotLower + rightNorm * -0.015f).AsUnityVector3(),
+            (rightEdgeShotLower + rightNorm * 0.015f).AsUnityVector3()
             ]);
         RightEdgeUpperMesh.mesh.SetVertices((Vector3[])[
-            rightEdgeStoneUpper + rightNorm * -0.015f,
-            rightEdgeStoneUpper + rightNorm * 0.015f,
-            rightEdgeShotUpper + rightNorm * -0.015f,
-            rightEdgeShotUpper + rightNorm * 0.015f
+            (rightEdgeStoneUpper + rightNorm * -0.015f).AsUnityVector3(),
+            (rightEdgeStoneUpper + rightNorm * 0.015f).AsUnityVector3(),
+            (rightEdgeShotUpper + rightNorm * -0.015f).AsUnityVector3(),
+            (rightEdgeShotUpper + rightNorm * 0.015f).AsUnityVector3()
             ]);
 
         if (leftEdgeShotLower.x < leftEdgeStoneLower.x)
         {
             LeftMesh.mesh.SetVertices((Vector3[])[
-                leftEdgeStoneLower,
-                leftEdgeStoneUpper,
-                leftEdgeShotLower,
-                leftEdgeShotUpper
+                leftEdgeStoneLower.AsUnityVector3(),
+                leftEdgeStoneUpper.AsUnityVector3(),
+                leftEdgeShotLower.AsUnityVector3(),
+                leftEdgeShotUpper.AsUnityVector3()  
             ]);
         }
         else
         {
             LeftMesh.mesh.SetVertices((Vector3[])[
-                leftEdgeStoneUpper,
-                leftEdgeStoneLower,
-                leftEdgeShotUpper,
-                leftEdgeShotLower
+                leftEdgeStoneUpper.AsUnityVector3(),
+                leftEdgeStoneLower.AsUnityVector3(),
+                leftEdgeShotUpper.AsUnityVector3(),
+                leftEdgeShotLower.AsUnityVector3()
             ]);
         }
 
         if (rightEdgeShotLower.x < rightEdgeStoneLower.x)
         {
             RightMesh.mesh.SetVertices((Vector3[])[
-                rightEdgeStoneLower,
-                rightEdgeStoneUpper,
-                rightEdgeShotLower,
-                rightEdgeShotUpper
+                rightEdgeStoneLower.AsUnityVector3(),
+                rightEdgeStoneUpper.AsUnityVector3(),
+                rightEdgeShotLower.AsUnityVector3(),
+                rightEdgeShotUpper.AsUnityVector3()
             ]);
         }
         else
         {
             RightMesh.mesh.SetVertices((Vector3[])[
-                rightEdgeStoneUpper,
-                rightEdgeStoneLower,
-                rightEdgeShotUpper,
-                rightEdgeShotLower
+                rightEdgeStoneUpper.AsUnityVector3(),
+                rightEdgeStoneLower.AsUnityVector3(),
+                rightEdgeShotUpper.AsUnityVector3(),
+                rightEdgeShotLower.AsUnityVector3()
             ]);
         }
     }
@@ -1052,7 +1062,7 @@ internal class SlingshotMinigame : Minigame
         {
             float yRandom = System.Random.Shared.NextSingle();
             var stone = UnityHelper.CreateObject<SpriteRenderer>("Stone", transform,
-                new Vector3(
+                new(
                     2.3f + System.Random.Shared.NextSingle() * 1.2f,
                     -0.95f - yRandom * 0.55f,
                     -3.5f - yRandom));
@@ -1132,7 +1142,7 @@ internal class SlingshotMinigame : Minigame
 
     public void Update()
     {
-        Background.color = Color.Lerp(Color.white, Color.Lerp(Color.blue, Color.cyan, Mathf.Sin(Time.time * 0.6f)), 0.3f);
+        Background.color = VColor.Lerp(VColor.White, VColor.Lerp(VColor.Blue, VColor.Cyan, Mathn.Sin(Time.time * 0.6f)), 0.3f).ToUnityColor();
 
         var power = Slingshot.Value.Power;
         if (power > 0.3f)
@@ -1199,7 +1209,7 @@ internal class SlingshotMinigame : Minigame
                     ManagedEffects.Action(() =>
                     {
                         if (isSuccess)
-                            SoundManager.Instance.PlaySound(HudManager.Instance.TaskCompleteSound, false, 1f, null);
+                            AmongUsLLImpl.SoundManagerInstance.PlaySound(HudManager.Instance.TaskCompleteSound, false, 1f, null);
                         else
                             NebulaAsset.PlaySE(NebulaAudioClip.BalloonFailed, false);
                         

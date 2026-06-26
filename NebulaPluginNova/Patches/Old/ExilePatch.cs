@@ -85,7 +85,7 @@ public static class NebulaExileWrapUp
             {
                 num++;
                 additionalText.text = str.Substring(0, num);
-                SoundManager.Instance.PlaySoundImmediate(__instance.TextSound, false, 0.8f, 0.92f);
+                AmongUsLLImpl.SoundManagerInstance.PlaySoundImmediate(__instance.TextSound, false, 0.8f, 0.92f);
                 yield return new WaitForSeconds(Mathn.Min(2.8f / str.Length, 0.28f));
             }
             yield return new WaitForSeconds(1.9f);

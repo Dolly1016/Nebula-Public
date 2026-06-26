@@ -197,7 +197,7 @@ public static class TaskStepPatch
 {
     public static void Prefix(NormalPlayerTask __instance)
     {
-        if (__instance.TaskType == TaskTypes.FixWiring && AmongUsUtil.CurrentMapId != 5) __instance.MaxStep = GeneralConfigurations.StepsOfWiringGameOption;
+        if (__instance.TaskType == TaskTypes.FixWiring && NebulaAPI.AmongUs.MapId != 5) __instance.MaxStep = GeneralConfigurations.StepsOfWiringGameOption;
     }
 }
 

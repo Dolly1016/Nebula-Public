@@ -167,7 +167,7 @@ public class TeleportationSystem : AbstractModule<Virial.Game.Game>, IGameOperat
     static private IEnumerator CoTeleport(GamePlayer player, Vector2 to)
     {
         player.Unbox().IsTeleporting = true;
-        SizeModulator sizeModulator = new(Vector2.one, 10000f, false, 100, teleporterAttrTag, false, false);
+        SizeModulator sizeModulator = new(VVector2.One, 10000f, false, 100, teleporterAttrTag, false, false);
         PlayerModInfo.RpcAttrModulator.LocalInvoke((player.PlayerId, sizeModulator, true));
 
         float p = 0f;

@@ -244,7 +244,7 @@ internal class ShowUp : AbstractModule<Virial.Game.Game>, IGameOperator
 
     public PlayerControl? CurrentShowUp { get; private set; } = null;
     private HashSet<GameObject> AllShowUp = [];
-    public bool AnyoneShowedUp => CurrentShowUp != null && CurrentShowUp;
+    public bool AnyoneShowedUp => CurrentShowUp != null && CurrentShowUp.AsBoolFast();
     public bool AnySocialShown => AnyoneShowedUp || AllShowUp.Count > 0;
     public bool ShowedUp(GamePlayer player) => AnyoneShowedUp && CurrentShowUp!.PlayerId == player.PlayerId;
 

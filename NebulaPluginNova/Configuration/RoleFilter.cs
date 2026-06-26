@@ -272,7 +272,7 @@ public static class RoleFilterHelper
             if (assignable.Count <= nonAssignable.Count)
                 return string.Join(separator, assignable.Select(r => r.DisplayColoredName));
             else
-                return Language.Translate("roleFilter.exceptPattern." + category).Replace("%ROLES%", string.Join(separator, nonAssignable.Select(r => useShortName ? r.GetRoleIconTag() + " " + r.DisplayColoredShort : r.DisplayColoredName)));
+                return Language.Translate("roleFilter.exceptPattern." + category).Replace("%ROLES%", string.Join(separator, nonAssignable.Select(r => useShortName ? r.GetRoleIconTag(true) + " " + r.DisplayColoredShort : r.DisplayColoredName)));
         }
 
         string impostorStr = canAssignToImpostor ? GetCategoryString("impostor", assignableImpostor, nonAssignableImpostor) : "";

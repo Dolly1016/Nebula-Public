@@ -36,12 +36,13 @@ public class Lumine : DefinedGhostRoleTemplate, DefinedGhostRole
                     10f, "lumine", buttonSprite, null, _ => !isUsed, true);
                 lumineButton.OnClick = (button) =>
                 {
-                    RpcLumineLight.Invoke(MyPlayer.VanillaPlayer.transform.position);
+                    var pos = MyPlayer.Position;
+                    RpcLumineLight.Invoke(pos);
 
-                    var near = Helpers.AllDeadBodies().Where(db => db.transform.position.Distance(MyPlayer.VanillaPlayer.transform.position) < 2f).ToArray();
+                    var near = ModSingleton<DeadBodyManager>.Instance.AllDeadBodies.Where(db => db.Position.Distance(pos) < 2f).ToArray();
                     if (near.Length > 0)
                         new StaticAchievementToken("lumine.common1");
-                    if (near.Any(db => db.ParentId == MyPlayer.PlayerId))
+                    if (near.Any(db => db.Player.PlayerId == MyPlayer.PlayerId))
                         new StaticAchievementToken("lumine.another1");
 
                     isUsed = true;
@@ -51,7 +52,7 @@ public class Lumine : DefinedGhostRoleTemplate, DefinedGhostRole
         }
     }
 
-    static private IEnumerator CoLight(Vector2 pos)
+    static private IEnumerator CoLight(VVector2 pos)
     {
         SpriteRenderer lightRenderer = AmongUsUtil.GenerateCustomLight(pos);
         lightRenderer.transform.localScale *= LightSizeOption;
@@ -86,6 +87,6 @@ public class Lumine : DefinedGhostRoleTemplate, DefinedGhostRole
         yield break;
     }
 
-    static public RemoteProcess<Vector2> RpcLumineLight = new(
+    static public RemoteProcess<VVector2> RpcLumineLight = new(
         "LumineLight", (pos, _) => NebulaManager.Instance.StartCoroutine(CoLight(pos).WrapToIl2Cpp()));
 }

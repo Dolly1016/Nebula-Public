@@ -548,7 +548,7 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
     public KillCharacteristics KillCharacteristics => killCharacteristics;
     public bool CanBeTarget => canBeTarget;
 
-    public Virial.Compat.Vector2 TruePosition => new((Vector2)displayPlayer.transform.position + collider.offset * collider.transform.localScale);
+    public Virial.Compat.Vector2 TruePosition => new((Virial.Compat.Vector2)displayPlayer.transform.position + (Virial.Compat.Vector2)collider.offset * collider.transform.localScale);
 
     public Virial.Compat.Vector2 Position => new(displayPlayer.transform.position);
 
@@ -564,7 +564,8 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
     public bool UsingSomeUtility => vanilla_inMovingPlat || vanilla_onLadder;
 
     private List<SpriteRenderer> additionalRenderers = [];
-    CosmeticsLayer IPlayerlike.VanillaCosmetics => displayPlayer.Cosmetics;
+    CosmeticsLayer IPlayerlike.VanillaCosmetics => this.cosmeticsLayer;
+    PlayerAnimations IPlayerlike.VanillaAnimations => this.displayPlayer.Animations;
 
     internal static readonly RemoteProcess<(int id, GamePlayer? visualPlayer, FakePlayerParameters parameters)> RpcSpawnFakePlayer = new("SendSpawnFakePlayer",
     (message, calledByMe) =>
@@ -590,9 +591,12 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
             AirshipStatus airship = AmongUsLLImpl.ShipStatusInstance.TryCast<AirshipStatus>();
             if (airship.AsBoolFast())
             {
-                Vector2 vector = (Vector2)airship!.GapPlatform!.transform.position - player.Position.ToUnityVector();
-                bool canUse = !airship.GapPlatform.Target && vector.magnitude < 3f;
-                if (canUse) airship.GapPlatform.Target = player.RealPlayer.VanillaPlayer;
+                var gapPlatform = airship.GapPlatform;
+
+                VVector2 vector = (VVector2)gapPlatform!.transform.position - player.Position;
+                
+                bool canUse = !gapPlatform.Target.AsBoolFast() && vector.Magnitude < 3f;
+                if (canUse) gapPlatform.Target = player.RealPlayer.VanillaPlayer;
                 ReplyMovingPlatform.Invoke((id, canUse));
             }
         }
@@ -633,7 +637,7 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
         }));
         cosmetics.SetVisor(outfit.VisorId, outfit.ColorId);
 
-        foreach (var r in additionalRenderers) if (r) r.material = cosmetics.currentBodySprite.BodySprite.sharedMaterial;
+        foreach (var r in additionalRenderers) if (r.AsBoolFast()) r.material = cosmetics.currentBodySprite.BodySprite.sharedMaterial;
 
         pet.UpdatePet(HatManager.Instance.GetPetById(outfit.PetId), petPosition);
         
@@ -732,9 +736,9 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
             player.FlipX = false;
             bool down = ladder.IsTop;
             Animations.PlayClimbAnimation(down);
-            player.displayPlayer.Cosmetics.AnimateClimb(down);
-            player.displayPlayer.Cosmetics.TogglePetVisible(false);
-            if (player.displayPlayer.Cosmetics.bodyType.GetVisorOptions().HideDuringClimb) player.displayPlayer.Cosmetics.ToggleVisor(false);
+            player.cosmeticsLayer.AnimateClimb(down);
+            player.cosmeticsLayer.TogglePetVisible(false);
+            if (player.cosmeticsLayer.bodyType.GetVisorOptions().HideDuringClimb) player.cosmeticsLayer.ToggleVisor(false);
 
             yield return WalkPlayerTo(ladder.Destination.transform.position, 0.001f, (float)(ladder.IsTop ? 2 : 1), false);
             player.visualPlayer.VanillaCosmetics.SetPetPosition(this.player.Position.ToUnityVector());
@@ -790,34 +794,37 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
             }
             bool fromTop = zipline.atTop;
 
-            float ziplineTime = Time.time;
-            float totalTime = Time.time;
+            float nowtime = Time.time;
+            float ziplineTime = nowtime;
+            float totalTime = nowtime;
 
             void ZiplinePlaySound(AudioClip sound, Vector2 soundPosition)
             {
                 float soundVolume = SoundManager.GetSoundVolume(soundPosition, AmongUsLLImpl.LocalPlayer.GetTruePosition(), 2f, 6f, 0f);
                 if (soundVolume <= 0f) return;
-                SoundManager.Instance.PlaySoundImmediate(sound, false, soundVolume, 1f, null);
+                AmongUsLLImpl.SoundManagerInstance.PlaySoundImmediate(sound, false, soundVolume, 1f, null);
             }
 
             var id = (player as IPlayerlike).PlayerlikeId;
             string ziplineSoundId = "ZiplineTravel_" + id;
             IEnumerator ZiplineStartSound()
             {
+                var sfxChannel = AmongUsLLImpl.SoundManagerInstance.SfxChannel;
+
                 if (fromTop)
                 {
-                    SoundManager.Instance.PlayDynamicSound(ziplineSoundId, zBehaviour.downSound, false, (DynamicSound.GetDynamicsFunction)(zBehaviour.SoundDynamics), SoundManager.Instance.SfxChannel);
+                    AmongUsLLImpl.SoundManagerInstance.PlayDynamicSound(ziplineSoundId, zBehaviour.downSound, false, (DynamicSound.GetDynamicsFunction)(zBehaviour.SoundDynamics), sfxChannel);
                     yield return new WaitForSeconds(zBehaviour.downSound.length - 0.05f);
-                    SoundManager.Instance.PlayDynamicSound(ziplineSoundId, zBehaviour.downLoopSound, true, (DynamicSound.GetDynamicsFunction)(zBehaviour.SoundDynamics), SoundManager.Instance.SfxChannel);
+                    AmongUsLLImpl.SoundManagerInstance.PlayDynamicSound(ziplineSoundId, zBehaviour.downLoopSound, true, (DynamicSound.GetDynamicsFunction)(zBehaviour.SoundDynamics), sfxChannel);
                 }
                 if (zBehaviour.ShouldPlaySound())
                 {
-                    SoundManager.Instance.PlayDynamicSound(ziplineSoundId, zBehaviour.upSound, true, (DynamicSound.GetDynamicsFunction)(zBehaviour.SoundDynamics), SoundManager.Instance.SfxChannel);
+                    AmongUsLLImpl.SoundManagerInstance.PlayDynamicSound(ziplineSoundId, zBehaviour.upSound, true, (DynamicSound.GetDynamicsFunction)(zBehaviour.SoundDynamics), sfxChannel);
                 }
             }
             void ZiplineStopsound()
             {
-                if (SoundManager.Instance.HasNamedSound(ziplineSoundId)) SoundManager.Instance.StopNamedSound(ziplineSoundId);
+                if (AmongUsLLImpl.SoundManagerInstance.HasNamedSound(ziplineSoundId)) AmongUsLLImpl.SoundManagerInstance.StopNamedSound(ziplineSoundId);
             }
 
             //REMOVED: キル中ならキルアニメーションが終わるまで待つ (FakePlayerにキルモーションはないためカット)
@@ -983,14 +990,14 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
             worldTargetPos -= offset;
             if (Constants.ShouldPlaySfx())
             {
-                SoundManager.Instance.PlayDynamicSound("PlatformMoving", movingPlatform.MovingSound, true, (DynamicSound.GetDynamicsFunction)movingPlatform.SoundDynamics, SoundManager.Instance.SfxChannel);
+                AmongUsLLImpl.SoundManagerInstance.PlayDynamicSound("PlatformMoving", movingPlatform.MovingSound, true, (DynamicSound.GetDynamicsFunction)movingPlatform.SoundDynamics, AmongUsLLImpl.SoundManagerInstance.SfxChannel);
             }
             movingPlatform.IsLeft = !movingPlatform.IsLeft;
             yield return Effects.All(
                 Effects.Slide2D(movingPlatform.transform, sourcePos.ToUnityVector(), targetPos.ToUnityVector(), PlayerModInfo.OriginalSpeed),
                 Effects.Slide2DWorld(player.displayPlayer.transform, worldSourcePos.ToUnityVector(), worldTargetPos.ToUnityVector(), PlayerModInfo.OriginalSpeed)
             );
-            if (Constants.ShouldPlaySfx()) SoundManager.Instance.StopNamedSound("PlatformMoving");
+            if (Constants.ShouldPlaySfx()) AmongUsLLImpl.SoundManagerInstance.StopNamedSound("PlatformMoving");
             
             yield return WalkPlayerTo(worldUseTargetPos.ToUnityVector(), 0.01f, 1f, false);
             player.displayPlayer.Cosmetics.SetPetPosition(player.Position.ToUnityVector());

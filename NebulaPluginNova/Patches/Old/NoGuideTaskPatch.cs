@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial;
 
 namespace Nebula.Patches;
 
@@ -20,7 +21,7 @@ file static class NoGuideHelpers
             case TaskTypes.UploadData:
                 return GeneralConfigurations.NoGuideUploadOption;
             case TaskTypes.EmptyGarbage:
-                return GeneralConfigurations.NoGuideGarbageOption && (AmongUsUtil.CurrentMapId is 0 or 4);
+                return GeneralConfigurations.NoGuideGarbageOption && (NebulaAPI.AmongUs.MapId is 0 or 4);
             case TaskTypes.RoastMarshmallow:
                 return GeneralConfigurations.NoGuideMarshmallowOption;
             case TaskTypes.HelpCritter:

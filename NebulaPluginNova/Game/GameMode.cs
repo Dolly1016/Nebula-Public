@@ -17,7 +17,7 @@ internal class GameModeDefinitionImpl : GameModeDefinition
         GameModes.Standard = new GameModeDefinitionImpl("gamemode.standard", 4, typeof(IGameModeStandard), () => new StandardRoleAllocator());
         GameModes.FreePlay = new GameModeDefinitionImpl("gamemode.freeplay", 0, typeof(IGameModeFreePlay), () => new FreePlayRoleAllocator());
         GameModes.AeroGuesser = new GameModeDefinitionImpl("gamemode.aeroguesser", 1, typeof(IGameModeAeroGuesser), amHost => AeroGuesserSenario.CoIntro(amHost), false);
-        GameModes.PaintQuiz = new GameModeDefinitionImpl("gamemode.paintquiz", 1, typeof(IGameModePaintQuiz), amHost => PaintQuizSenario.CoIntro(amHost), false, true);
+        GameModes.PaintQuiz = new GameModeDefinitionImpl("gamemode.paintquiz", 1, typeof(IGameModePaintQuiz), amHost => PaintQuizSenario.CoIntro(amHost), false, shouldNotAdd: true);
     }
 
     private GameModeDefinitionImpl(string translationKey, int minPlayers, Type gameModeType, Func<IRoleAllocator> roleAllocator, Func<bool, IEnumerator>? alternativeRoutine, bool withRoleSettings, bool shouldNotAdd = false)

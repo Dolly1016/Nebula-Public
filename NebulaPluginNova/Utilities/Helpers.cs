@@ -53,15 +53,15 @@ public static class Helpers
         => vec.normalized * vec.magnitude.Delta(speed, threshold);
 
     public static Vector3 Delta(this Vector3 vec, float speed, float threshold)
-        => vec.normalized * new Vector2(vec.x,vec.y).magnitude.Delta(speed, threshold);
+        => vec.normalized * new VVector2(vec.x,vec.y).Magnitude.Delta(speed, threshold);
 
-    public static Vector3 AsWorldPos(this Vector3 vec, bool isBack)
-    {
-        Vector3 result = vec;
-        result.z = result.y / 1000f;
-        if(isBack) result.z  += 0.001f;
-        return result;
-    }
+    public static VVector2 Delta(this VVector2 vec, float speed, float threshold)
+        => vec.Normalized * vec.Magnitude.Delta(speed, threshold);
+
+    public static VVector3 Delta(this VVector3 vec, float speed, float threshold)
+        => vec.Normalized * new VVector2(vec.x, vec.y).Magnitude.Delta(speed, threshold);
+
+    public static Vector3 AsWorldPos(this VVector2 vec, bool isBack) => new(vec.x, vec.y, isBack ? vec.y / 1000f + 0.001f : vec.y / 1000f);
 
     public static int CurrentMonth => DateTime.Now.Month;
     public static void DeleteDirectoryWithInnerFiles(string directoryPath)
@@ -408,36 +408,10 @@ public static class Helpers
         return null!;
     }
 
-    /*
-    static public void SyncSingleNetObject(InnerNetObject obj)
-    {
-        MessageWriter messageWriter = MessageWriter.Get(obj.sendMode);
-        messageWriter.StartMessage(1);
-        messageWriter.WritePacked(obj.NetId);
-        try
-        {
-            if (obj.Serialize(messageWriter, false))
-            {
-                messageWriter.EndMessage();
-                AmongUsClient.Instance.SendOrDisconnect(messageWriter);
-                messageWriter.Recycle();
-            }
-            else messageWriter.CancelMessage();
-
-            if (obj.Chunked && obj.IsDirty) return;
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError(ex.ToString());
-            messageWriter.CancelMessage();
-        }
-    }
-    */
-
     static public void PlayKillStingerSE()
     {
         var vanillaAnim = HudManager.Instance.KillOverlay.KillAnims[0];
-        SoundManager.Instance.PlaySound(vanillaAnim.Stinger, false, 1f, null).volume = vanillaAnim.StingerVolume;
+        AmongUsLLImpl.SoundManagerInstance.PlaySound(vanillaAnim.Stinger, false, 1f, null).volume = vanillaAnim.StingerVolume;
     }
 
     static public void RefreshMemory()

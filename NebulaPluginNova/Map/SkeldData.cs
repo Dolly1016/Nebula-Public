@@ -62,7 +62,7 @@ public class SkeldData : MapData
         new(0.1f, 5.8f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //カフェ上
         new(-5.7f, 3.7f, MapObjectType.SmallInCorner | MapObjectType.Reachable), //カフェ左上
         new(-3.3f, 4.1f, MapObjectType.SmallOrTabletopOutOfSight), //カフェ左上テーブル
-        new(-3.9f, -1.9f, MapObjectType.SmallOrTabletopOutOfSight), //カフェ左下テーブル
+        new(-4.0f, -2.0f, MapObjectType.SmallOrTabletopOutOfSight), //カフェ左下テーブル
         new(2.0f, -1.1f, MapObjectType.SmallOrTabletopOutOfSight), //カフェ右下テーブル
         new(1.2f, 3.1f, MapObjectType.SmallOrTabletopOutOfSight), //カフェ右上テーブル
         new(2.8f, -2.45f, MapObjectType.SmallInCorner), //カフェ右下

@@ -60,6 +60,8 @@ internal class NebulaPreprocessorImpl : NebulaPreprocessor
         }
     }
 
+    CommunicableTextTag NebulaPreprocessor.RegisterCommunicableText(string translationKey) => new TranslatableTag(translationKey);
+
     void NebulaPreprocessor.RegisterAssignable(DefinedAssignable assignable)
     {
         if (assignable is DefinedRole dr)

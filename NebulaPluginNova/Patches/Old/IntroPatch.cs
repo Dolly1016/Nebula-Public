@@ -30,7 +30,7 @@ public static class ShowIntroPatch
 
         HudManager.Instance.HideGameLoader();
 
-        SoundManager.Instance.PlaySound(__instance.IntroStinger, false, 1f, null);
+        AmongUsLLImpl.SoundManagerInstance.PlaySound(__instance.IntroStinger, false, 1f, null);
 
         __instance.HideAndSeekPanels.SetActive(false);
         __instance.CrewmateRules.SetActive(false);
@@ -184,7 +184,7 @@ public static class ShowIntroPatch
         __instance.RoleText.color = unityColor;
         __instance.YouAreText.color = unityColor;
         roleBlurbText.color = unityColor;
-        SoundManager.Instance.PlaySound(AmongUsLLImpl.LocalPlayer.Data.Role.IntroSound, false, 1f, null);
+        AmongUsLLImpl.SoundManagerInstance.PlaySound(AmongUsLLImpl.LocalPlayer.Data.Role.IntroSound, false, 1f, null);
         __instance.YouAreText.gameObject.SetActive(true);
         __instance.RoleText.gameObject.SetActive(true);
         roleBlurbText.gameObject.SetActive(true);

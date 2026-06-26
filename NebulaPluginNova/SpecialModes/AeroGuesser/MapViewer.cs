@@ -41,8 +41,8 @@ internal class MapViewer : CustomCameraBehaviour
 
     private EmptyBehaviour camObject = null!;
     private byte lastMapId = byte.MaxValue;
-    private Vector2 inQuizFitting = new(3.5f, 1.7f);
-    private Vector2 fitting = new(6.4f, 3.8f);
+    private VVector2 inQuizFitting = new(3.5f, 1.7f);
+    private VVector2 fitting = new(6.4f, 3.8f);
 
     /// <summary>
     /// マップを用意します。SetHideメソッドで表示状態を切り替えない限り表示されない点に注意してください。
@@ -51,7 +51,7 @@ internal class MapViewer : CustomCameraBehaviour
     /// <param name="position"></param>
     /// <param name="viewport"></param>
     /// <returns></returns>
-    public IEnumerator SetUpMap(byte mapId, Vector2 position, Vector2 viewport)
+    public IEnumerator SetUpMap(byte mapId, VVector2 position, VVector2 viewport)
     {
         void SetUpCamObject()
         {
@@ -103,7 +103,7 @@ internal class MapViewer : CustomCameraBehaviour
 
         void FixPosition()
         {
-            camObject.transform.position = position;
+            camObject.transform.position = position.AsUnityVector3(0f);
             var cam = HudManager.Instance.PlayerCam;
             cam.Locked = true;
             cam.SetTarget(camObject);
@@ -128,10 +128,10 @@ internal class MapViewer : CustomCameraBehaviour
     private bool hide = false;
     public void Hide() => hide = true;
     public void Show() => hide = false;
-    void CustomCameraBehaviour.UpdateCamera(ICustomWideCamera camera, out Vector3 localPosition, out Vector2 localScale, out float localAngle)
+    void CustomCameraBehaviour.UpdateCamera(ICustomWideCamera camera, out VVector3 localPosition, out VVector2 localScale, out float localAngle)
     {
         localPosition = new(0f,(1f - interaction.AnswerQ) * (1f - interaction.ShowWidelyQ) * (0.8f + interaction.MapButtonQ * 0.5f) + (reshowing ? 0.6f : 0f), 0f - 10f); //HudManagerのzが-10fなので、分かりやすくするために揃える
-        localScale = Vector2.one * (1f - interaction.EndQuizQ);
+        localScale = VVector2.One * (1f - interaction.EndQuizQ);
         localAngle = 0f;
 
         float mapViewQVal = mapViewQ.Value;

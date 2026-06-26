@@ -1,6 +1,7 @@
 ﻿using Hazel;
 using Nebula.Roles.Crewmate;
 using Nebula.Roles.Neutral;
+using Virial;
 using Virial.Assignable;
 using Virial.Events.Role;
 using Virial.Game;
@@ -207,7 +208,7 @@ public class StandardRoleAllocator : IRoleAllocator
         RoleTable table = new();
 
         int players = impostors.Count + others.Count;
-        GameParameters gameParameters = new(AmongUsUtil.CurrentMapId, AmongUsUtil.AdjustedImpostors(players), players);
+        GameParameters gameParameters = new(NebulaAPI.AmongUs.MapId, AmongUsUtil.AdjustedImpostors(players), players);
 
         //ロールプールを作る
         CreateRolePool(gameParameters, out var impostorRoles, out var crewmateRoles, out var neutralRoles, out var customChances, out var allRoles);

@@ -34,6 +34,7 @@ public interface IGameModeModule : IModuleContainer, IModule
 
     bool CanUseStampOnly => false;
     bool CanGetTitle => true;
+    bool CanOpenHelpScreen => true;
 
     string? GetAlternativeWinOrLoseText() => null;
     string? GetAlternativePlayerStatusText() => null;

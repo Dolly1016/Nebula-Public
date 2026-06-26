@@ -18,7 +18,7 @@ public interface NebulaPreprocessor
     /// </summary>
     /// <param name="translationKey"></param>
     /// <returns></returns>
-    //CommunicableTextTag RegisterCommunicableText(string translationKey);
+    CommunicableTextTag RegisterCommunicableText(string translationKey);
 
     /// <summary>
     /// 新たなプレイヤーアサイナブルを追加します。

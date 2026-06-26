@@ -249,7 +249,7 @@ public static class MeetingHudExtension
 
             GameOperatorManager.Instance?.Run(new PlayerVoteCastEvent(GamePlayer.GetPlayer(message.source)!, GamePlayer.GetPlayer(message.target), message.weight));
 
-            if (AmongUsLLImpl.AmongUsClientInstance.AmHost)
+            if (AmongUsLLImpl.TryGetAmongUsClientInstance(out var amongUsClient) && amongUsClient.AmHost)
             {
                 //MeetingHud.CastVote
                 NetworkedPlayerInfo playerById = GameData.Instance.GetPlayerById(message.source);
@@ -257,7 +257,7 @@ public static class MeetingHudExtension
                 
                 if (playerVoteArea != null && !playerVoteArea.AmDead && !playerVoteArea.DidVote)
                 {
-                    if (playerById.AmOwner || AmongUsClient.Instance.NetworkMode != NetworkModes.LocalGame) SoundManager.Instance.PlaySound(hud.VoteLockinSound, false, 1f, null);
+                    if (playerById.AmOwner || amongUsClient.NetworkMode != NetworkModes.LocalGame) AmongUsLLImpl.SoundManagerInstance.PlaySound(hud.VoteLockinSound, false, 1f, null);
                     
                     playerVoteArea.SetVote(message.target);
                     hud.SetDirtyBit(1U);
@@ -268,7 +268,7 @@ public static class MeetingHudExtension
 
             if (!GeneralConfigurations.ShowVoteStateOption)
             {
-                SoundManager.Instance.PlaySound(HudManager.Instance.Chat.messageSound, false, 1f, null).pitch = 0.5f + System.Random.Shared.NextSingle() * 0.6f;
+                AmongUsLLImpl.SoundManagerInstance.PlaySound(AmongUsLLImpl.HudManagerBridge.Chat.messageSound, false, 1f, null).pitch = 0.5f + System.Random.Shared.NextSingle() * 0.6f;
             }
         }
         );

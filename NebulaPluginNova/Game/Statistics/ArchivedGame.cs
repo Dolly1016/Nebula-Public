@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial;
 using Virial.Game;
 
 namespace Nebula.Game.Statistics;
@@ -45,7 +46,7 @@ internal class ArchivedGameImpl : IArchivedGame
         game.AllPlayerInfo.Do(p => players[p.PlayerId] = new ArchivedPlayerImpl(p));
         events = game.GameStatistics.Sealed;
         roleHistory = game.RoleHistory;
-        mapId = AmongUsUtil.CurrentMapId;
+        mapId = NebulaAPI.AmongUs.MapId;
         palette = new ArchivedColor[DynamicPalette.PlayerColors.Length];
         for (int i = 0; i < palette.Length; i++)
         {

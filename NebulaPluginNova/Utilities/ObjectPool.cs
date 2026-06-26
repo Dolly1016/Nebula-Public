@@ -2,8 +2,9 @@
 
 public class ObjectPool<T> where T : Component
 {
-    List<T> activatedObjects = new();
-    List<T> inactivatedObjects = new();
+    private record ObjectEntry(T Val, int InstanceId, GameObject GameObj);
+    List<ObjectEntry> activatedObjects = new();
+    List<ObjectEntry> inactivatedObjects = new();
     public Action<T>? OnInstantiated { get; set; }
     Func<T> generator;
     Transform parent;
@@ -21,8 +22,8 @@ public class ObjectPool<T> where T : Component
 
     public void DestroyAll()
     {
-        foreach (var obj in activatedObjects) GameObject.Destroy(obj.gameObject);
-        foreach (var obj in inactivatedObjects) GameObject.Destroy(obj.gameObject);
+        foreach (var obj in activatedObjects) GameObject.Destroy(obj.GameObj);
+        foreach (var obj in inactivatedObjects) GameObject.Destroy(obj.GameObj);
         activatedObjects.Clear();
         inactivatedObjects.Clear();
     }
@@ -31,18 +32,19 @@ public class ObjectPool<T> where T : Component
     {
         if(inactivatedObjects.Count > 0)
         {
-            T result = inactivatedObjects[inactivatedObjects.Count - 1];
+            var result = inactivatedObjects[inactivatedObjects.Count - 1];
             inactivatedObjects.RemoveAt(inactivatedObjects.Count - 1);
 
             activatedObjects.Add(result);
-            result.gameObject.SetActive(true);
-            return result;
+            result.GameObj.SetActive(true);
+            return result.Val;
         }
         else
         {
             T result = generator.Invoke();
+            var entry = new ObjectEntry(result, result.GetInstanceID(), result.gameObject);
             OnInstantiated?.Invoke(result);
-            activatedObjects.Add(result);
+            activatedObjects.Add(entry);
             return result;
         }
     }
@@ -51,7 +53,7 @@ public class ObjectPool<T> where T : Component
     {
         foreach(var obj in activatedObjects)
         {
-            obj.gameObject.SetActive(false);
+            obj.GameObj.SetActive(false);
             inactivatedObjects.Add(obj);
         }
         activatedObjects.Clear();
@@ -59,9 +61,17 @@ public class ObjectPool<T> where T : Component
 
     public void Inactivate(T obj)
     {
-        activatedObjects.Remove(obj);
-        inactivatedObjects.Add(obj);
-        obj.gameObject.SetActive(false);
+        var instanceId = obj.GetInstanceID();
+        var entry = activatedObjects.Find(entry => entry.InstanceId == instanceId);
+        if (entry != null)
+        {
+            inactivatedObjects.Add(entry);
+            entry.GameObj.SetActive(false);
+        }
+        else
+        {
+            GameObject.Destroy(obj.gameObject);
+        }
     }
 
     public int Count => activatedObjects.Count;

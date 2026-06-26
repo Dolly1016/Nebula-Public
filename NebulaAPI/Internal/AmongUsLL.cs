@@ -12,6 +12,6 @@ internal interface AmongUsLL
     float VanillaKillDistance { get; }
     int ScreenWidth { get; }
     int ScreenHeight { get; }
-        
+    byte MapId { get; }
     internal PlayerControl LocalPlayer { get; }
 }

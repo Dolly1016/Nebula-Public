@@ -1,32 +1,35 @@
-﻿using Hazel;
+﻿namespace Nebula.Extensions;
 
-namespace Nebula.Extensions;
 
 public static class MessageReaderExtention
 {
-    public static int PeekInt32(this MessageReader reader,int offset = 0)
+    public static int PeekInt32(this Hazel.MessageReader reader,int offset = 0)
     {
+        var span = reader.Buffer.AsSpan();
+        var readHead = reader.readHead;
         return
-            reader.Buffer[reader.readHead + 0 + offset] << 0x00
-          | reader.Buffer[reader.readHead + 1 + offset] << 0x08
-          | reader.Buffer[reader.readHead + 2 + offset] << 0x10
-          | reader.Buffer[reader.readHead + 3 + offset] << 0x18;
+            span[readHead + 0 + offset] << 0x00
+          | span[readHead + 1 + offset] << 0x08
+          | span[readHead + 2 + offset] << 0x10
+          | span[readHead + 3 + offset] << 0x18;
     }
 
-    public static short PeekInt16(this MessageReader reader, int offset = 0)
+    public static short PeekInt16(this Hazel.MessageReader reader, int offset = 0)
     {
+        var span = reader.Buffer.AsSpan();
+        var readHead = reader.readHead;
         return (short)(
-            reader.Buffer[reader.readHead + 0 + offset] << 0x00
-          | reader.Buffer[reader.readHead + 1 + offset] << 0x08
+            span[readHead + 0 + offset] << 0x00
+          | span[readHead + 1 + offset] << 0x08
           );
     }
 
-    public static byte PeekByte(this MessageReader reader, int offset = 0)
+    public static byte PeekByte(this Hazel.MessageReader reader, int offset = 0)
     {
         return reader.Buffer[reader.readHead + offset];
     }
 
-    public static unsafe float PeekSingle(this MessageReader reader, int offset = 0)
+    public static unsafe float PeekSingle(this Hazel.MessageReader reader, int offset = 0)
     {
         float output = 0;
         fixed (byte* bufPtr = &(((byte[])reader.Buffer)[reader.readHead + offset]))
@@ -42,7 +45,8 @@ public static class MessageReaderExtention
         return output;
     }
 
-    public static byte GetPrevByte(this MessageReader reader) => reader.PeekByte(-1);
-    public static int GetPrevInt32(this MessageReader reader) => reader.PeekInt32(-4);
+    public static byte GetPrevByte(this Hazel.MessageReader reader) => reader.PeekByte(-1);
+    public static int GetPrevInt32(this Hazel.MessageReader reader) => reader.PeekInt32(-4);
 
 }
+

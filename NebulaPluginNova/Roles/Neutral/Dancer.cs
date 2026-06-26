@@ -26,7 +26,7 @@ public class PlayerDanceEvent : AbstractPlayerEvent
 [NebulaPreprocess(PreprocessPhase.PostBuildNoS)]
 public class DanceModule : AbstractModule<GamePlayer>, IGameOperator
 {
-    public static RemoteProcess<(GamePlayer player, Vector2 startPos, uint playerMask, uint corpseMask)> RpcDance = new("Dance", (message, _) => GameOperatorManager.Instance?.Run(new PlayerDanceEvent(message.player, BitMasks.AsPlayer((uint)message.playerMask), BitMasks.AsPlayer((uint)message.corpseMask))));
+    public static RemoteProcess<(GamePlayer player, VVector2 startPos, uint playerMask, uint corpseMask)> RpcDance = new("Dance", (message, _) => GameOperatorManager.Instance?.Run(new PlayerDanceEvent(message.player, BitMasks.AsPlayer((uint)message.playerMask), BitMasks.AsPlayer((uint)message.corpseMask))));
     //ダンス完遂に必要な時間
     private static float DanceDuration => Dancer.DanceDurationOption;
     //ダンスの効力が及ぶ範囲
@@ -42,8 +42,8 @@ public class DanceModule : AbstractModule<GamePlayer>, IGameOperator
         this.Register(NebulaAPI.CurrentGame!);
     }
 
-    private Vector2? lastPos = null;
-    private Vector2 displacement = new();
+    private VVector2? lastPos = null;
+    private VVector2 displacement = new();
     private float distance = 0f;
     private float danceGuage = 0f;
 
@@ -51,7 +51,7 @@ public class DanceModule : AbstractModule<GamePlayer>, IGameOperator
     public bool IsDancing => danceGuage > 0.7f;
 
     //ダンスの開始位置
-    public Vector2 DanceStartPos { get; private set; } = new(-100f, -100f);
+    public VVector2 DanceStartPos { get; private set; } = new(-100f, -100f);
     //ダンス継続時間
     public float DancingProgress { get; private set; } = 0f;
     public float Percentage => DancingProgress / DanceDuration;
@@ -70,7 +70,7 @@ public class DanceModule : AbstractModule<GamePlayer>, IGameOperator
         }
 
         //ダンス状態のチェック
-        Vector2 currentPos = MyContainer.VanillaPlayer.transform.position;
+        var currentPos = MyContainer.Position;
         if (lastPos != null)
         {
             distance *= 0.89f;
@@ -81,20 +81,20 @@ public class DanceModule : AbstractModule<GamePlayer>, IGameOperator
         }
         lastPos = currentPos;
 
-        if (distance > 0.3f && displacement.magnitude < 0.18f)
-            danceGuage = Math.Min(danceGuage + Time.deltaTime * 4.2f, 1f);
+        if (distance > 0.3f && displacement.Magnitude < 0.18f)
+            danceGuage = Mathn.Min(danceGuage + ev.DeltaTime * 4.2f, 1f);
         else
-            danceGuage = Math.Max(danceGuage - Time.deltaTime * 2.7f, 0f);
+            danceGuage = Mathn.Max(danceGuage - ev.DeltaTime * 2.7f, 0f);
 
         if (IsDancing)
         {
             if (DancingProgress < 0.1f) DanceStartPos = currentPos;
             
-            DancingProgress += Time.deltaTime;
+            DancingProgress += ev.DeltaTime;
             NotDancingProgress = 0f;
 
-            NebulaGameManager.Instance!.AllPlayerInfo.Where(p => p != MyContainer && !p.IsDead && DanceStartPos.Distance(p.VanillaPlayer.transform.position) < DanceRange).Do(p => playerMask |= 1u << p.PlayerId);
-            Helpers.AllDeadBodies().Where(p => p.ParentId != MyContainer.PlayerId && DanceStartPos.Distance(p.transform.position) < DanceRange).Do(p => corpseMask |= 1u << p.ParentId);
+            NebulaGameManager.Instance!.AllPlayerInfo.Where(p => p != MyContainer && !p.IsDead && DanceStartPos.Distance(p.Position) < DanceRange).Do(p => playerMask |= 1u << p.PlayerId);
+            ModSingleton<DeadBodyManager>.Instance.AllDeadBodies.Where(p => p.IsActive && p.Player.PlayerId != MyContainer.PlayerId && DanceStartPos.Distance(p.Position) < DanceRange).Do(p => corpseMask |= 1u << p.Player.PlayerId);
 
 
             if (DancingProgress > DanceDuration && !eventInvoked && MyContainer.AmOwner)
@@ -111,7 +111,7 @@ public class DanceModule : AbstractModule<GamePlayer>, IGameOperator
         else
         { 
             eventInvoked = false;
-            NotDancingProgress += Time.deltaTime;
+            NotDancingProgress += ev.DeltaTime;
             if (NotDancingProgress > 0.5f) ResetState();
         }
     }

@@ -57,7 +57,7 @@ internal class Monoway : PerkFunctionalInstance
     static IDividedSpriteLoader IconSprite = DividedSpriteLoader.FromResource("Nebula.Resources.MovementIcon.png", 100f, 3, 1);
     static Image InvalidSprite = SpriteLoader.FromResource("Nebula.Resources.InvalidIcon.png", 100f);
 
-    private static RemoteProcess<(IconType iconType, Vector4 vec, float duration)> RpcEffect = new("Monoway", (message, calledByMe) => {
+    private static RemoteProcess<(IconType iconType, VVector4 vec, float duration)> RpcEffect = new("Monoway", (message, calledByMe) => {
         NebulaManager.Instance.StartCoroutine(CoAnimIcon(message.iconType, message.vec.z > 0f ? 90f : -90f).WrapToIl2Cpp());
 
         if (!calledByMe || (message.iconType is IconType.Rotate ? GeneralConfigurations.MovementRotationPerksAlsoAffectCastersOption : GeneralConfigurations.MovementRestrictionPerksAlsoAffectCastersOption))
@@ -66,7 +66,7 @@ internal class Monoway : PerkFunctionalInstance
             {
                 if (message.iconType is IconType.Rotate)
                 {
-                    var speedMod = new SpeedModulator(1f, new Vector4(1f, 0f, 0f, 1f), true, message.duration, false, 0);
+                    var speedMod = new SpeedModulator(1f, new VVector4(1f, 0f, 0f, 1f), true, message.duration, false, 0);
                     var modifier = new SpeedModulator.MatrixModifier(speedMod);
                     PlayerModInfo.RpcAttrModulator.Invoke((AmongUsLLImpl.LocalPlayer.PlayerId, speedMod, true));
 
@@ -75,10 +75,10 @@ internal class Monoway : PerkFunctionalInstance
                         float p = 0f;
                         while (p < 1f)
                         {
-                            float theta = p * Mathf.PI * 0.5f;
-                            float cos = Mathf.Cos(theta);
-                            float sin = Mathf.Sin(theta);
-                            modifier.SetDirection(new(cos, message.vec.y * sin, message.vec.z * sin, cos));
+                            float theta = p * Mathn.PI * 0.5f;
+                            float cos = Mathn.Cos(theta);
+                            float sin = Mathn.Sin(theta);
+                            modifier.SetDirection(new (cos, message.vec.y * sin, message.vec.z * sin, cos));
                             p += Time.deltaTime / 0.5f;
                             yield return null;
                         }

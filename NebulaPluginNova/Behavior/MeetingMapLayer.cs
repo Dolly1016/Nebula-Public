@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Rendering;
+using Virial;
 using Virial.DI;
 using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
@@ -457,7 +458,7 @@ public class DiscussionSupport : AbstractModule<Virial.Game.Game>, IGameOperator
                 MapBehaviour.Instance.transform.FindChild("CloseButton")?.TryGetComponent<ButtonBehavior>(out closeButton);
 
                 ResetAll();
-                meetingLayer = UnityHelper.CreateObject("MeetingLayer", MapBehaviour.Instance.transform, new(0f,0f,-3f));
+                meetingLayer = UnityHelper.CreateObject("MeetingLayer", MapBehaviour.Instance.transform, new(0f,0f,-3f), out var meetingLayerTransform);
                 var collider = meetingLayer.AddComponent<BoxCollider2D>();
                 collider.size = new(100f, 100f);
                 collider.isTrigger = true;
@@ -488,8 +489,8 @@ public class DiscussionSupport : AbstractModule<Virial.Game.Game>, IGameOperator
                 var pageChanger = holder.Instantiate(new(100f, 100f), out _);
                 pageChanger!.AddComponent<SortingGroup>();
                 pageChanger.name = "PageChanger";
-                pageChanger.transform.SetParent(meetingLayer.transform);
-                pageChanger.transform.localPosition = AmongUsUtil.CurrentMapId switch {
+                pageChanger.transform.SetParent(meetingLayerTransform);
+                pageChanger.transform.localPosition = NebulaAPI.AmongUs.MapId switch {
                     5 => new(0f, 2.4f, -20f),
                     _ => new(-2f, 2.4f, -20f)
                     };
@@ -501,7 +502,7 @@ public class DiscussionSupport : AbstractModule<Virial.Game.Game>, IGameOperator
                 //チュートリアル
                 Tutorial.ShowTutorial(
                             new TutorialBuilder().AsSimpleTitledOnceTextWidget("meetingTool")
-                            .ShowWhile(() => MeetingHud.Instance && AmongUsUtil.MapIsOpen && lines.Count == 0 && icons.Count == 0)
+                            .ShowWhile(() => MeetingHud.Instance.AsBoolFast() && AmongUsUtil.MapIsOpen && lines.Count == 0 && icons.Count == 0)
                             );
             }
         }

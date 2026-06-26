@@ -11,14 +11,15 @@ internal static class CosmeticsHelpers
     static public void ChangeBodyTypeAndWrapUp(this GamePlayer player, PlayerBodyTypes bodyType)
     {
         ChangeBodyType(player, bodyType);
-        player.VanillaPlayer.cosmetics.SetBodyCosmeticsVisible(true);
-        player.VanillaPlayer.cosmetics.UpdateVisibility();
+        player.VanillaCosmetics.SetBodyCosmeticsVisible(true);
+        player.VanillaCosmetics.UpdateVisibility();
     }
 
     static public void ChangeBodyType(this GamePlayer player, PlayerBodyTypes bodyType)
     {
-        var lastFlipX = player.VanillaPlayer.MyPhysics.FlipX;
-        player.VanillaPlayer.MyPhysics.SetBodyType(bodyType);
-        player.VanillaPlayer.MyPhysics.FlipX = lastFlipX;
+        var physics = player.VanillaPlayer.MyPhysics;
+        var lastFlipX = physics.FlipX;
+        physics.SetBodyType(bodyType);
+        physics.FlipX = lastFlipX;
     }
 }

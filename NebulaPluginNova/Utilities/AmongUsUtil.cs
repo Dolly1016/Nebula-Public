@@ -171,13 +171,12 @@ public static class AmongUsUtil
 
     public static UiElement CurrentUiElement => ControllerManager.Instance.CurrentUiState.CurrentSelection;
     public static bool InMeeting => MeetingHud.Instance.AsBoolFast() && !ExileController.Instance.AsBoolFast();
-    public static byte CurrentMapId => AmongUsLLImpl.CurrentGameOptionsInstance.MapId;
     private static string[] mapName = new string[] { "skeld", "mira", "polus", "undefined", "airship", "fungle" };
     public static string ToMapName(byte mapId) => mapName[mapId];
     public static string ToLocalizedMapName(byte mapId) => Language.Translate("map." + mapName[mapId].HeadLower());
     public static string ToDisplayLocationString(string room, byte? mapId = null, bool shortName = false)
     {
-        string key = "location." + mapName[mapId ?? CurrentMapId] + "." + room;
+        string key = "location." + mapName[mapId ?? NebulaAPI.AmongUs.MapId] + "." + room;
         if (shortName)
         {
             string? shortResult = Language.Find(key + ".short");
@@ -590,7 +589,7 @@ public static class AmongUsUtil
         notifier.AddMessageToQueue(newMessage);
 
 
-        if (playSound) SoundManager.Instance.PlaySoundImmediate(notifier.settingsChangeSound, false, 1f, 1f, null);
+        if (playSound) AmongUsLLImpl.SoundManagerInstance.PlaySoundImmediate(notifier.settingsChangeSound, false, 1f, 1f, null);
     }
 
     public static void SetHue(this GameObject rendererHolder, float hue)
@@ -608,7 +607,7 @@ public static class AmongUsUtil
         {
             if (withSound && Constants.ShouldPlaySfx())
             {
-                SoundManager.Instance.PlayDynamicSound("NoisemakerAlert", noisemaker.deathSound, false, (DynamicSound.GetDynamicsFunction)((source, dt) =>
+                AmongUsLLImpl.SoundManagerInstance.PlayDynamicSound("NoisemakerAlert", noisemaker.deathSound, false, (DynamicSound.GetDynamicsFunction)((source, dt) =>
                 {
                     if (!AmongUsLLImpl.LocalPlayer)
                     {
@@ -618,7 +617,7 @@ public static class AmongUsUtil
                     source.volume = 1f;
                     Vector2 truePosition = AmongUsLLImpl.LocalPlayer.GetTruePosition();
                     source.volume = SoundManager.GetSoundVolume(targetPos, truePosition, 7f, 50f, 0.5f);
-                }), SoundManager.Instance.SfxChannel);
+                }), AmongUsLLImpl.SoundManagerInstance.SfxChannel);
                 VibrationManager.Vibrate(1f, AmongUsLLImpl.LocalPlayer.GetTruePosition(), 7f, 1.2f, VibrationManager.VibrationFalloff.None, null, false);
             }
             GameObject gameObject = GameObject.Instantiate<GameObject>(noisemaker.deathArrowPrefab, Vector3.zero, Quaternion.identity);
@@ -652,7 +651,7 @@ public static class AmongUsUtil
             ping.gameObject.SetActive(true);
 
             ping.image.enabled = true;
-            if (playSE) SoundManager.Instance.PlaySound(ping.soundOnEnable, false, 1f, null).pitch = pitch;
+            if (playSE) AmongUsLLImpl.SoundManagerInstance.PlaySound(ping.soundOnEnable, false, 1f, null).pitch = pitch;
 
             pings[i++] = ping;
 

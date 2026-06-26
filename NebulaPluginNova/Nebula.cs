@@ -61,12 +61,12 @@ public class NebulaPlugin
     public const string PluginName = "NebulaOnTheShip";
     public const string PluginVersion = "3.3.0.0";
 
-    public const string VisualVersion = "v3.3.0.3";
+    public const string VisualVersion = "v3.3.0.5";
     //public const string VisualVersion = "Snapshot 26.06.07a";
     //public const string VisualVersion = "Addon Loading DEMO 2";
 
     public const string PluginEpochStr = "108";
-    public const string PluginBuildNumStr = "1601";
+    public const string PluginBuildNumStr = "1603";
     public static readonly int PluginEpoch = int.Parse(PluginEpochStr);
     public static readonly int PluginBuildNum = int.Parse(PluginBuildNumStr);
     public const bool GuardVanillaLangData = false;
@@ -193,14 +193,7 @@ public class NebulaPlugin
         LoadInterstellar();
 
         Harmony.PatchAll();
-
-        //パッチが当たったメソッドの情報を表示
-        /*
-        foreach(var m in Harmony.GetPatchedMethods())
-        {
-            LogUtils.WriteToConsole(m.Name);
-        }
-        */
+        Nebula.Patches.BugFix.MapDecorAwakePatcher.TryApply(Harmony);
 
         bool isFirst = true;
         SceneManager.sceneLoaded += (UnityEngine.Events.UnityAction<Scene, LoadSceneMode>)((scene, loadMode) =>

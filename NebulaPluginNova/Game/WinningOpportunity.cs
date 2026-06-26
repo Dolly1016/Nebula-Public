@@ -78,8 +78,8 @@ internal class WinningOpportunity : AbstractModule<Virial.Game.Game>, IWinningOp
 
     private void OnUpdate(GameHudUpdateEvent ev)
     {
-        var t = Time.deltaTime;
-        opportunityMap.Values.Do(o => o.Update(t));
+        var t = ev.DeltaTime;
+        foreach (var o in opportunityMap.Values) o.Update(t);
     }
 
     static private readonly RemoteProcess<(int teamId, float opportunity, bool isMomentary)> RpcUpdateOpportunity = new("UpdateOpportunity", (message, _) =>

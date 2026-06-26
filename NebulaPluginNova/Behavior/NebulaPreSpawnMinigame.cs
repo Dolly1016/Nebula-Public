@@ -170,7 +170,7 @@ public class NebulaPreSpawnMinigame : Minigame
 
     public static NebulaPreSpawnLocation[] PreSpawnLocations { get
         {
-            byte mapId = AmongUsUtil.CurrentMapId;
+            byte mapId = NebulaAPI.AmongUs.MapId;
             var cand = NebulaPreSpawnLocation.Locations[mapId];
 
             //スポーンポイントを抽出する
@@ -221,7 +221,7 @@ public class NebulaPreSpawnMinigame : Minigame
 
         if (AmongUsLLImpl.LocalPlayer.AsBoolFast()) AmongUsLLImpl.LocalPlayer.NetTransform.Halt();
         
-        byte mapId = AmongUsUtil.CurrentMapId;
+        byte mapId = NebulaAPI.AmongUs.MapId;
 
         var cand = PreSpawnLocations;
         var rand = Helpers.GetRandomArray(cand.Length);
@@ -319,8 +319,9 @@ public class NebulaPreSpawnMinigame : Minigame
 
             while (true)
             {
-                selectedTransform.localPosition -= new Vector3(selectedTransform.localPosition.x * Time.deltaTime * 3.2f, 0f, 0f);
-                selectedTransform.localScale -= (selectedTransform.localScale - new Vector3(1f, 1f, 1f)) * Time.deltaTime * 3.2f;
+                var deltaTime = Time.deltaTime;
+                selectedTransform.localPosition -= new Vector3(selectedTransform.localPosition.x * deltaTime * 3.2f, 0f, 0f);
+                selectedTransform.localScale -= (((VVector3)selectedTransform.localScale - VVector3.One) * deltaTime * 3.2f).ToUnityVector();
 
                 yield return null;
             }

@@ -38,11 +38,12 @@ public class NoSGUIText : AbstractGUIWidget
         text.fontSizeMax = attr.FontSize.FontSizeMax;
         text.enableAutoSizing = attr.FontSize.AllowAutoSizing;
         text.enableWordWrapping = attr.Wrapping;
-        text.rectTransform.sizeDelta = new(Math.Min(width, attr.Size.Width), attr.Size.Height);
+        text.rectTransform.sizeDelta = new(Mathn.Min(width, attr.Size.Width), attr.Size.Height);
         text.rectTransform.anchorMin = new UnityEngine.Vector2(0.5f, 0.5f);
         text.rectTransform.anchorMax = new UnityEngine.Vector2(0.5f, 0.5f);
         text.rectTransform.pivot = new UnityEngine.Vector2(0.5f, 0.5f);
         text.UseRoleIcon();
+
         if (attr.Font != null)
         {
             text.font = attr.Font.Font;

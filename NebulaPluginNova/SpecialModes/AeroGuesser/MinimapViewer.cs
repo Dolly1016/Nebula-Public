@@ -13,7 +13,7 @@ internal interface IMinimapViewerInteraction : IWithAnswerPhase
 {
     float MapQ { get; }
     void BackToMapSelection();
-    void ClickMap(byte mapId, Vector2 position, bool isFixed);
+    void ClickMap(byte mapId, VVector2 position, bool isFixed);
 }
 internal class MinimapViewer : AbstractMinimapViewer
 {
@@ -31,7 +31,7 @@ internal class MinimapViewer : AbstractMinimapViewer
         this.interaction = minimapViewerInteraction;
     }
 
-    (byte mapId, Vector2 position)? currentSelection = null;
+    (byte mapId, VVector2 position)? currentSelection = null;
 
     protected override void OnSetUp()
     {
@@ -80,7 +80,7 @@ internal class MinimapViewer : AbstractMinimapViewer
         collider.isTrigger = true;
         collider.size = new(8.6f, 6f);
 
-        myPinRenderer = CreatePin(Vector2.zero, AmongUsLLImpl.LocalPlayer.PlayerId);
+        myPinRenderer = CreatePin(VVector2.Zero, AmongUsLLImpl.LocalPlayer.PlayerId);
         myPinRenderer.gameObject.SetActive(false);
     }
 
@@ -93,13 +93,13 @@ internal class MinimapViewer : AbstractMinimapViewer
     }
 
 
-    private void ShowPin(Vector2 screenPos)
+    private void ShowPin(VVector2 screenPos)
     {
         var localPos = ScreenToLocalPos(screenPos);
         ShowPinFromLocalPos(localPos);
     }
 
-    private void ShowPinFromLocalPos(Vector2 localPos)
+    private void ShowPinFromLocalPos(VVector2 localPos)
     {
         myPinRenderer.gameObject.SetActive(true);
         myPinRenderer.transform.localPosition = localPos.AsVector3(-5f);
@@ -108,7 +108,7 @@ internal class MinimapViewer : AbstractMinimapViewer
         currentSelection = (CurrentMapId, realPos);
     }
 
-    private void ShowPinFromRealPos(Vector2 realPos)
+    private void ShowPinFromRealPos(VVector2 realPos)
     {
         var localPos = RealToLocalPos(realPos);
         ShowPinFromLocalPos(localPos);

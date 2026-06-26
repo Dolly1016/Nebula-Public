@@ -11,7 +11,7 @@ namespace Nebula.Patches;
 [HarmonyPatch(typeof(DoorsSystemType), nameof(DoorsSystemType.UpdateSystem))]
 internal class DoorsSystemTypeUpdateSystemPatch
 {
-    static bool Prefix(DoorsSystemType __instance, [HarmonyArgument(0)] PlayerControl player, [HarmonyArgument(1)] MessageReader msgReader)
+    static bool Prefix(DoorsSystemType __instance, [HarmonyArgument(0)] PlayerControl player, [HarmonyArgument(1)] Hazel.MessageReader msgReader)
     {
         var b = msgReader.ReadByte();
         if ((b & 64) == 0) return false;

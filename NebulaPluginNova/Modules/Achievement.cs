@@ -275,6 +275,7 @@ public interface INebulaAchievement
     static private readonly TextAttribute DetailContentAttribute = GUI.API.GetAttribute(AttributeAsset.OverlayContent);
     static private readonly Virial.Color GlobalProgressColor = new(180,180,180);
     string Id { get; }
+    int NumId { get; internal set; } //バージョン等が一致したゲーム内でのみ使用できるID。バージョンを跨いだIDの一貫性は保証されない。
     string? Group { get; }
     string TranslationKey => "achievement." + Id + ".title";
     string GoalTranslationKey => "achievement." + Id + ".goal";
@@ -509,6 +510,7 @@ public class AbstractAchievement : ProgressRecord, INebulaAchievement
     public IEnumerable<DefinedAssignable> role;
     public IEnumerable<AchievementType> type;
     public Cache<INebulaAchievement>? preAchievement;
+    public int NumId { get; set; }
     public int Trophy { get; private init; }
     public bool NoHint => noHint;
     public IEnumerable<DefinedAssignable> RelatedRole => role;
@@ -563,7 +565,7 @@ public class InnerslothAchievement : INebulaAchievement
     public int Attention => 0;
 
     public string Id { get; private init; }
-
+    public int NumId { get; set; }
     int INebulaAchievement.Trophy => 3;
 
     bool INebulaAchievement.IsHidden => false;
@@ -640,6 +642,7 @@ public class SumUpReferenceAchievement : INebulaAchievement
 
     private string key { get; init; }
     public string Id => Group != null ? (Group + "." + key) : key;
+    public int NumId { get; set; }
     public int Attention { get; private init; }
 
     public int Trophy { get; private init; }
@@ -1202,16 +1205,23 @@ static public class NebulaAchievementManager
             if (recordsList.Count > 0) recordsList.Clear();
         }
 
+        TitleRegisterImpl.Instance.BuildAll();
 
-        foreach (var achievement in AllAchievements) achievement.CheckClear();
+        for(int i = 0;i < allAchievements.Count;i++)
+        {
+            allAchievements[i].NumId = i;
+            allAchievements[i].CheckClear();
+        }
 
         //進捗を記録する。 
         SendOnlineProgress(true).StartOnProcess();
         GetOnlineGlobalProgress().StartOnProcess();
 
-        TitleRegisterImpl.Instance.BuildAll();
+
     }
 
+    static public INebulaAchievement? GetFromNumId(int id) => allAchievements!.Get(id, null);
+    
     static private void RegisterAchievement(INebulaAchievement ach)
     {
         allAchievements.Add(ach);
@@ -1392,12 +1402,12 @@ static public class NebulaAchievementManager
             billboard.body.SetActive(false);
             billboard.holder.transform.localScale = Vector3.one * 1.1f;
 
-            
+            var billboardAnimTransform = billboard.animator.transform;
             coroutineHolder.StartCoroutine(ManagedEffects.Sequence(
-                Shake(billboard.animator.transform, 0.1f, 0.01f),
-                Shake(billboard.animator.transform, 0.2f, 0.02f),
-                Shake(billboard.animator.transform, 0.3f, 0.03f),
-                Shake(billboard.animator.transform, 0.3f, 0.04f)
+                Shake(billboardAnimTransform, 0.1f, 0.01f),
+                Shake(billboardAnimTransform, 0.2f, 0.02f),
+                Shake(billboardAnimTransform, 0.3f, 0.03f),
+                Shake(billboardAnimTransform, 0.3f, 0.04f)
                 ).WrapToIl2Cpp());
 
             float t;

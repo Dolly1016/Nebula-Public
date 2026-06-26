@@ -174,6 +174,8 @@ internal class DyingMessageCanvas : MonoBehaviour
     private DyingMessageBrush? brush;
     private DefinedAssignable? assignable;
     private float brushRadius = 0f;
+
+    [HideFromIl2Cpp]
     public void SetUpAsDyingMessage(float leftTime, VVector2 pos, DefinedAssignable? assignable, Action<Texture2D>? callBack, Action? onFailed = null)
     {
         this.maxTime = leftTime;
@@ -193,6 +195,7 @@ internal class DyingMessageCanvas : MonoBehaviour
         this.brush = null;
     }
 
+    [HideFromIl2Cpp]
     public void SetUpAsQuizPaint()
     {
         this.maxTime = -1f;
@@ -265,6 +268,7 @@ internal class DyingMessageCanvas : MonoBehaviour
         this.brush = brush;
     }
 
+    [HideFromIl2Cpp]
     void StartDraw(VVector2 mousePos)
     {
         currentStroke = [];
@@ -273,6 +277,7 @@ internal class DyingMessageCanvas : MonoBehaviour
     }
 
     //lastPos.HasValue == trueが前提条件
+    [HideFromIl2Cpp]
     void UpdateDraw(VVector2 mousePos)
     {
         float dist = VVector2.Distance(lastPos.Value, mousePos);
@@ -345,6 +350,7 @@ internal class DyingMessageCanvas : MonoBehaviour
         }
     }
 
+    [HideFromIl2Cpp]
     IEnumerator CoDestroy() {
         for (int i = 0; i < 2; i++)
         {
@@ -381,6 +387,7 @@ internal class DyingMessageCanvas : MonoBehaviour
             request.Value.AddPoint(pos);
     }
 
+    [HideFromIl2Cpp]
     private VVector2 GetNormalizedMousePos()
     {
         // Viewport座標(0-1)を取得、またはRaycastの結果からUVを取得
@@ -392,6 +399,7 @@ internal class DyingMessageCanvas : MonoBehaviour
     private const int MinDelta = -7;
     private const int MaxDelta = 8;
 
+    [HideFromIl2Cpp]
     public (byte beginX, byte beginY, byte[] trajectory)[] Serialize()
     {
         FinishDraw();
@@ -448,6 +456,7 @@ internal class DyingMessageCanvas : MonoBehaviour
         return encoded.ToArray();
     }
 
+    [HideFromIl2Cpp]
     private bool ClipLine(VVector2 p1, VVector2 p2, out VVector2 start, out VVector2 end, out bool isStartClipped, out bool isEndClipped)
     {
         float t0 = 0, t1 = 1;
@@ -480,6 +489,7 @@ internal class DyingMessageCanvas : MonoBehaviour
         return false;
     }
 
+    [HideFromIl2Cpp]
     private bool ClipTest(float p, float q, ref float t0, ref float t1)
     {
         if (p < 0)
@@ -498,6 +508,7 @@ internal class DyingMessageCanvas : MonoBehaviour
         return true;
     }
 
+    [HideFromIl2Cpp]
     private void SerializeNormalizedStroke(List<VVector2> stroke, List<(byte beginX, byte beginY, byte[] trajectory)> list)
     {
         byte bX = (byte)Mathn.Clamp(Mathn.RoundToInt(stroke[0].x * 255f), 0, 255);

@@ -19,7 +19,7 @@ internal class AnswerMinimapViewer : AbstractMinimapViewer
     private IFunctionalValue<float> alphaQ = Arithmetic.FloatZero;
     private IFunctionalValue<float> hideQ = Arithmetic.FloatZero;
     private bool reshowing = false;
-    public void ShowAnswer(byte mapId, Vector2 position, AeroPlayerOneQuizStatus[] playerStatus)
+    public void ShowAnswer(byte mapId, VVector2 position, AeroPlayerOneQuizStatus[] playerStatus)
     {
         reshowing = false;
         renderers.Do(r =>

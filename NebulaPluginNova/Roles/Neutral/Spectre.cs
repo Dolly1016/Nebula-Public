@@ -126,7 +126,8 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                 {
                     minigame.MyDish = this;
                 }),
-                OutlineColor = MyRole.UnityColor
+                OutlineColor = MyRole.UnityColor,
+                UsableDistance = 0.9f,
             };
             
         }
@@ -216,12 +217,13 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole, IAssignableDocument
         
         public void Awake()
         {
-            var center = VanillaAsset.GetMapCenter(AmongUsUtil.CurrentMapId);
-            var scale = VanillaAsset.GetMapScale(AmongUsUtil.CurrentMapId);
+            var mapId = NebulaAPI.AmongUs.MapId;
+            var center = VanillaAsset.GetMapCenter(mapId);
+            var scale = VanillaAsset.GetMapScale(mapId);
             allDishes = [];
             foreach (var dish in ModSingleton<FriesDishManager>.Instance.AllDishes)
             {
-                var renderer = UnityHelper.CreateObject<SpriteRenderer>("Dish", transform, VanillaAsset.ConvertToMinimapPos(dish.Position, center, scale));
+                var renderer = UnityHelper.CreateObject<SpriteRenderer>("Dish", transform, VanillaAsset.ConvertToMinimapPos(dish.Position, center, scale).AsUnityVector3());
                 renderer.transform.localScale = new(0.7f, 0.7f, 1f);
                 renderer.gameObject.AddComponent<MinimapScaler>();
                 allDishes.Add((dish.DishId, renderer));

@@ -234,8 +234,9 @@ public class UbiquitousMapLayer : MonoBehaviour
         darkIconPool.RemoveAll();
         lightIconPool.RemoveAll();
 
-        var center = VanillaAsset.GetMapCenter(AmongUsUtil.CurrentMapId);
-        var scale = VanillaAsset.GetMapScale(AmongUsUtil.CurrentMapId);
+        byte mapId = NebulaAPI.AmongUs.MapId;
+        var center = VanillaAsset.GetMapCenter(mapId);
+        var scale = VanillaAsset.GetMapScale(mapId);
 
         int alive = 0, shown = 0;
 
@@ -255,7 +256,7 @@ public class UbiquitousMapLayer : MonoBehaviour
                 if(d < Ubiquitous.droneDetectionRadiousOption)
                 {
                     var icon = (ModSingleton<BalancedColorManager>.Instance.IsLightColor(DynamicPalette.PlayerColors[p.PlayerId]) ? lightIconPool : darkIconPool).Instantiate();
-                    icon.transform.localPosition = VanillaAsset.ConvertToMinimapPos(p.VanillaPlayer.transform.position, center, scale);
+                    icon.transform.localPosition = VanillaAsset.ConvertToMinimapPos(p.VanillaPlayer.transform.position, center, scale).AsUnityVector3();
                     shown++;
                     if (alive >= 10 && alive == shown) challengeToken.Value = true;
                     break;

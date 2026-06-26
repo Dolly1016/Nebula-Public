@@ -1,5 +1,4 @@
-﻿using Hazel;
-using Il2CppInterop.Generator.Extensions;
+﻿using Il2CppInterop.Generator.Extensions;
 using Il2CppSystem.Reflection.Internal;
 using InnerNet;
 using MonoMod.Utils;
@@ -129,15 +128,12 @@ public static class RPCRouter
     public static void SendRpc(string name, int hash, Action<MessageWriter> sender, Action localBodyProcess, bool shouldBeReliable) {
         if(currentSection == null)
         {
-            MessageWriter writer;
-
-            writer = AmongUsLLImpl.AmongUsClientInstance.StartRpcImmediately(AmongUsLLImpl.LocalPlayer.NetId, 128, shouldBeReliable ? SendOption.Reliable : SendOption.None, -1);
-            writer.Write(hash);
-            sender.Invoke(writer);
-            //NebulaPlugin.Log.PrintWithBepInEx(NebulaLog.LogLevel.Log, null, "sent RPC:" + name + "(size:" + writer.Length + ")");
-
-            AmongUsLLImpl.AmongUsClientInstance.FinishRpcImmediately(writer);
-
+            var origWriter = AmongUsLLImpl.AmongUsClientInstance.StartRpcImmediately(AmongUsLLImpl.LocalPlayer.NetId, 128, shouldBeReliable ? Hazel.SendOption.Reliable : Hazel.SendOption.None, -1);
+            var virialWriter = MessageWriter.Get();
+            virialWriter.Write(hash);
+            sender.Invoke(virialWriter);
+            virialWriter.End(origWriter);
+            AmongUsLLImpl.AmongUsClientInstance.FinishRpcImmediately(origWriter);
 
             try
             {
@@ -286,7 +282,6 @@ public abstract class RemoteProcessArgumentBase
 
         new RemoteProcessArgument<Vector2>((writer, vec) =>
         {
-            writer.Buffer[0] = 1;
             writer.Write(vec.x);
             writer.Write(vec.y);
         }, reader => new(reader.ReadSingle(), reader.ReadSingle()));
@@ -384,7 +379,7 @@ public abstract class RemoteProcessArgumentBase
             int type = reader.ReadInt32();
 
             if (type == 1)
-                return new SpeedModulator(reader.ReadSingle(), new Vector4(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()), reader.ReadBoolean(), timer, canPassMeeting, priority, dupTag, reader.ReadBoolean());
+                return new SpeedModulator(reader.ReadSingle(), new VVector4(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()), reader.ReadBoolean(), timer, canPassMeeting, priority, dupTag, reader.ReadBoolean());
             else if (type == 2)
                 return new SizeModulator(new(reader.ReadSingle(), reader.ReadSingle()), timer, canPassMeeting, priority, dupTag, reader.ReadBoolean(), reader.ReadBoolean());
             else if (type == 3)
@@ -763,25 +758,17 @@ file class MessageTreaters
     const int MessageLength = 32384;
     static MessageWriter writer = new((int)MessageLength);
     static MessageReader reader = new();
-    static MessageTreaters()
-    {
-        reader.Buffer = new byte[0];
-        reader.Offset = 0;
-        reader.Position = 0;
-        reader.Length = 0;
-        reader.Tag = byte.MaxValue;
-    }
+
 
     static public MessageWriter GetWriter()
     {
-        writer.Position = 0;
+        writer.Initialize();
         return writer;
     }
 
-    static public MessageReader GetReader()
+    static public MessageReader GetReader(byte[] message)
     {
-        reader.Position = 0;
-        reader.Offset = 0;
+        reader.InitializeWith(message);
         return reader;
     }
 
@@ -825,8 +812,8 @@ public class LongRemoteProcess<Parameter> : RemoteProcess<Parameter>
     {
         var writer = MessageTreaters.GetWriter();
         this.Sender(writer, parameter);
-        var length = writer.Position;
-        var byteArray = writer.Buffer.Take(length).ToArray();
+        var length = writer.Length;
+        var byteArray = writer.Message.ToArray();
         var id = GetAvailableCacheId();
 
         //分割数
@@ -885,11 +872,7 @@ public class LongRemoteProcess<Parameter> : RemoteProcess<Parameter>
             if (cache.Flags.All(f => f))
             {
                 cached.Remove(cache);
-                var messageReader = MessageTreaters.GetReader();
-                messageReader.Buffer = cache.Data;
-                messageReader.Offset = 0;
-                messageReader.Position = 0;
-                messageReader.Length = length;
+                var messageReader = MessageTreaters.GetReader(cache.Data);
                 Body.Invoke(Receiver.Invoke(messageReader), false);
             }
         }
@@ -1124,22 +1107,30 @@ public class RPCScheduler
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.HandleRpc))]
 class NebulaRPCInGameHandlerPatch
 {
-    static public void ReceiveMessage(MessageReader reader)
+    static public void ReceiveMessage(Hazel.MessageReader reader)
     {
+        var virialReadaer= MessageReader.Get(reader);
         int id = reader.ReadInt32();
-        if (RemoteProcessBase.AllNebulaProcess.TryGetValue(id, out var rpc))
+        try
         {
-            rpc.Receive(reader);
+            if (RemoteProcessBase.AllNebulaProcess.TryGetValue(id, out var rpc))
+            {
+                rpc.Receive(virialReadaer);
+            }
+            else
+            {
+                NebulaLogger.Instance.Error("RPC NotFound Error. id: " + id);
+                throw new Exception("RPC Error Occurred. (Not found: " + id + ")");
+            }
         }
-        else
+        finally
         {
-            NebulaLogger.Instance.Error("RPC NotFound Error. id: " + id);
-            throw new Exception("RPC Error Occurred. (Not found: " + id + ")");
+            virialReadaer.End();
         }
     }
      
 
-    static void Postfix([HarmonyArgument(0)] byte callId, [HarmonyArgument(1)] MessageReader reader)
+    static void Postfix([HarmonyArgument(0)] byte callId, [HarmonyArgument(1)] Hazel.MessageReader reader)
     {
         if (callId != 128) return;
 

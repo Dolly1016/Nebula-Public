@@ -2,6 +2,7 @@
 using Nebula.Behavior;
 using Nebula.Map;
 using Nebula.Modules.CustomMap;
+using Virial;
 using Virial.Game;
 
 namespace Nebula.Patches.Old;
@@ -60,7 +61,7 @@ public class ShipStatusPatch
 
                 Sprite sprite = null!;
 
-                if (AmongUsUtil.CurrentMapId == 5)
+                if (NebulaAPI.AmongUs.MapId == 5)
                 {
                     var renderer = vent.transform.GetChild(3);
                     sprite = renderer.GetComponent<SpriteRenderer>().sprite;
@@ -82,7 +83,7 @@ public class ShipStatusPatch
 [HarmonyPatch(typeof(HeliSabotageSystem), nameof(HeliSabotageSystem.UpdateSystem))]
 class HeliSabotageSystemPatch
 {
-    static void Postfix(HeliSabotageSystem __instance, [HarmonyArgument(1)] MessageReader msgReader)
+    static void Postfix(HeliSabotageSystem __instance, [HarmonyArgument(1)] Hazel.MessageReader msgReader)
     {
         if((msgReader.GetPrevByte() & 240) == (int)HeliSabotageSystem.Tags.DamageBit)
         {

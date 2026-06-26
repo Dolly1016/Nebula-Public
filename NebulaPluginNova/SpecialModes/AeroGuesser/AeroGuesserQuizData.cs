@@ -13,10 +13,10 @@ internal class AeroGuesserQuizData
         Normal = 0,
         Hard = 1,
     }
-    internal record QuizEntry(byte mapId, Difficulty difficulty, Vector2 position, Vector2 viewport);
-    internal record QuizRawEntry(Vector2 position, Vector2 viewport, string comment)
+    internal record QuizEntry(byte mapId, Difficulty difficulty, VVector2 position, VVector2 viewport);
+    internal record QuizRawEntry(VVector2 position, VVector2 viewport, string comment)
     {
-        static public implicit operator QuizRawEntry((Vector2 position, Vector2 viewport, string comment) tuple) => new(tuple.position, tuple.viewport, tuple.comment);
+        static public implicit operator QuizRawEntry((VVector2 position, VVector2 viewport, string comment) tuple) => new(tuple.position, tuple.viewport, tuple.comment);
     }
 
     private static QuizRawEntry[] SkeldNormal = [

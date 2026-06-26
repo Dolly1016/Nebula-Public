@@ -97,7 +97,7 @@ public static class HudManagerUpdatePatch
         NebulaGameManager.Instance?.AllPlayerInfo.Do(p => p.Unbox().HudUpdate());
         NebulaProfiler.LapTimer("NebulaGameManager.OnHudUpdate");
 
-        if (!TextField.AnyoneValid &&  NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Help).KeyDownForAction && !IntroCutscene.Instance && !Minigame.Instance && !ExileController.Instance)
+        if ((NebulaGameManager.Instance?.GameMode?.CanOpenHelpScreen ?? true) && !TextField.AnyoneValid &&  NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Help).KeyDownForAction && !IntroCutscene.Instance.AsBoolFast() && !Minigame.Instance.AsBoolFast() && !ExileController.Instance.AsBoolFast())
         {
             HelpScreen.TryOpenHelpScreen(0);
         }

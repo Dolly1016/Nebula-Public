@@ -64,7 +64,7 @@ public class CustomKillOverlay : OverlayKillAnimation
         {
             var vanillaAnim = parent.KillAnims[0];
 
-            if (Constants.ShouldPlaySfx())　SoundManager.Instance.PlaySound(vanillaAnim.Stinger, false, 1f, null).volume = vanillaAnim.StingerVolume;
+            if (Constants.ShouldPlaySfx()) AmongUsLLImpl.SoundManagerInstance.PlaySound(vanillaAnim.Stinger, false, 1f, null).volume = vanillaAnim.StingerVolume;
 
             var flameParent = GameObject.Instantiate(parent.flameParent, NebulaGameManager.Instance!.WideCamera.Camera.transform);
             flameParent.transform.GetChild(0).gameObject.layer = LayerExpansion.GetDefaultLayer();

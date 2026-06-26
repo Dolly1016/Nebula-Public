@@ -68,8 +68,9 @@ public class Cannon : DefinedSingleAbilityRoleTemplate<Cannon.Ability>, DefinedR
         static CannonMapLayer() => ClassInjector.RegisterTypeInIl2Cpp<CannonMapLayer>();
         public void AddMark(NebulaSyncStandardObject obj, Action onFired)
         {
-            var center = VanillaAsset.GetMapCenter(AmongUsUtil.CurrentMapId);
-            var scale = VanillaAsset.GetMapScale(AmongUsUtil.CurrentMapId);
+            var mapId = NebulaAPI.AmongUs.MapId;
+            var center = VanillaAsset.GetMapCenter(mapId);
+            var scale = VanillaAsset.GetMapScale(mapId);
             var localPos = VanillaAsset.ConvertToMinimapPos(obj.Position, center, scale);
 
             var renderer = UnityHelper.CreateObject<SpriteRenderer>("CannonButton", transform, localPos.AsVector3(-0.5f));

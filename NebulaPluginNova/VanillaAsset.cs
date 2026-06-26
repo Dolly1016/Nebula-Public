@@ -90,18 +90,18 @@ public class VanillaAsset
     static public SpriteRenderer GetMinimapRenderer(byte mapId) => MapAsset[mapId].MapPrefab.ColorControl.gameObject.GetComponent<SpriteRenderer>();
     static public Vector2 GetMapCenter(byte mapId) => MapAsset[mapId].MapPrefab.transform.GetChild(5).localPosition;
     static public float GetMapScale(byte mapId) => VanillaAsset.MapAsset[mapId].MapScale;
-    static public Vector2 ConvertToMinimapPos(Vector2 pos,Vector2 center, float scale)=> (pos / scale) + center;
-    static public Vector2 ConvertToMinimapPos(Vector2 pos, byte mapId) => ConvertToMinimapPos(pos, GetMapCenter(mapId), GetMapScale(mapId));
-    static public Vector2 ConvertFromMinimapPosToWorld(Vector2 minimapPos, Vector2 center, float scale) => (minimapPos - center) * scale;
-    static public Vector2 ConvertFromMinimapPosToWorld(Vector2 minimapPos, byte mapId) => ConvertFromMinimapPosToWorld(minimapPos, GetMapCenter(mapId), GetMapScale(mapId));
+    static public VVector2 ConvertToMinimapPos(VVector2 pos,VVector2 center, float scale)=> (pos / scale) + center;
+    static public VVector2 ConvertToMinimapPos(VVector2 pos, byte mapId) => ConvertToMinimapPos(pos, GetMapCenter(mapId), GetMapScale(mapId));
+    static public VVector2 ConvertFromMinimapPosToWorld(VVector2 minimapPos, VVector2 center, float scale) => (minimapPos - center) * scale;
+    static public VVector2 ConvertFromMinimapPosToWorld(VVector2 minimapPos, byte mapId) => ConvertFromMinimapPosToWorld(minimapPos, GetMapCenter(mapId), GetMapScale(mapId));
 
     static public void LoadAssetAtInitialize()
     {   
         //PlayerOptionsMenuPrefab = UnityHelper.FindAsset<PlayerCustomizationMenu>("LobbyPlayerCustomizationMenu")!;
     }
 
-    public static void PlaySelectSE() => SoundManager.Instance.PlaySound(SelectClip.Clip, false, 0.8f);
-    public static void PlayHoverSE() => SoundManager.Instance.PlaySound(HoverClip.Clip, false, 0.8f);
+    public static void PlaySelectSE() => AmongUsLLImpl.SoundManagerInstance.PlaySound(SelectClip.Clip, false, 0.8f);
+    public static void PlayHoverSE() => AmongUsLLImpl.SoundManagerInstance.PlaySound(HoverClip.Clip, false, 0.8f);
 
     static private Dictionary<string, UnityEngine.Object> VanillaAudioClips = [];
     static public AudioClip? GetAudioClip(string name)
@@ -181,7 +181,7 @@ public class VanillaAsset
 
         var scrollBar = bar.GetComponent<Scrollbar>();
 
-        var scroller = UnityHelper.CreateObject<Scroller>("Scroller", transform, new Vector3(0, 0, 5));
+        var scroller = UnityHelper.CreateObject<Scroller>("Scroller", transform, new(0, 0, 5));
         var collider = scroller.gameObject.AddComponent<BoxCollider2D>();
         collider.size = size;
 
@@ -207,7 +207,7 @@ public class VanillaAsset
         scroller.gameObject.AddComponent<ScriptBehaviour>().UpdateHandler += () =>
         {
             var found = buttonManager.Buttons.Find(predicate);
-            if (found != null && found && found.gameObject.GetInstanceID() == instanceId)
+            if (found.AsBoolFast() && found.gameObject.GetInstanceID() == instanceId)
             {
                 scroller.MouseMustBeOverToScroll = false;
                 collider.size = size;

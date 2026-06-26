@@ -409,7 +409,7 @@ public static class GeneralConfigurations
     {
         if (screen == null) screen = MetaScreen.GenerateWindow(new(7.5f, 4.5f), HudManager.Instance.transform, Vector3.zero, true, false);
 
-        mapId ??= AmongUsUtil.CurrentMapId;
+        mapId ??= NebulaAPI.AmongUs.MapId;
 
         MetaWidgetOld widget = new();
 

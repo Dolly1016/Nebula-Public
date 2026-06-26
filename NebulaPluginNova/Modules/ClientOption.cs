@@ -220,11 +220,11 @@ public class ClientOption
 
                 if (playMusic)
                 {
-                    SoundManager.Instance.CrossFadeSound("MapTheme", LobbyBehaviour.Instance.MapTheme, 0.5f, 1.5f);
+                    AmongUsLLImpl.SoundManagerInstance.CrossFadeSound("MapTheme", AmongUsLLImpl.LobbyInstance.MapTheme, 0.5f, 1.5f);
                 }
                 else
                 {
-                    SoundManager.Instance.CrossFadeSound("MapTheme", null, 0.5f, 1.5f);
+                    AmongUsLLImpl.SoundManagerInstance.CrossFadeSound("MapTheme", null, 0.5f, 1.5f);
                 }
             }
         };
@@ -279,7 +279,7 @@ public class ClientOption
         float toVol = mute ? 0f : volume;
         return ManagedEffects.Lerp(0.8f, p => {
             float lastVal = 0f;
-            SoundManager.Instance.SetChannelVolume(Mathn.Lerp(fromVol, toVol, p), ref lastVal, "AmbienceVolume");
+            AmongUsLLImpl.SoundManagerInstance.SetChannelVolume(Mathn.Lerp(fromVol, toVol, p), ref lastVal, "AmbienceVolume");
             SoundManager.ambienceVolume = lastVal;
         });
     }

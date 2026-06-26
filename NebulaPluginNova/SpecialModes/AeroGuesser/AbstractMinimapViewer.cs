@@ -70,11 +70,11 @@ internal abstract class AbstractMinimapViewer
 
     protected abstract void OnSetMap(byte mapId, bool changed);
 
-    protected Vector2 LocalToRealPos(Vector2 localPos) => VanillaAsset.ConvertFromMinimapPosToWorld(localPos / MinimapRenderer.transform.localScale.x, currentMapId);
-    protected Vector2 RealToLocalPos(Vector2 realPos) => VanillaAsset.ConvertToMinimapPos(realPos, currentMapId) * MinimapRenderer.transform.localScale.x;
-    protected Vector2 ScreenToLocalPos(Vector2 screenPos) => scaler.transform.InverseTransformPoint(HudManager.Instance.UICamera.ScreenToWorldPoint(screenPos));
+    protected VVector2 LocalToRealPos(VVector2 localPos) => VanillaAsset.ConvertFromMinimapPosToWorld(localPos / MinimapRenderer.transform.localScale.x, currentMapId);
+    protected VVector2 RealToLocalPos(VVector2 realPos) => VanillaAsset.ConvertToMinimapPos(realPos, currentMapId) * MinimapRenderer.transform.localScale.x;
+    protected VVector2 ScreenToLocalPos(VVector2 screenPos) => scaler.transform.InverseTransformPoint(HudManager.Instance.UICamera.ScreenToWorldPoint(screenPos.AsUnityVector3()));
 
-    protected SpriteRenderer CreatePin(Vector2 localPos, int? colorId = null)
+    protected SpriteRenderer CreatePin(VVector2 localPos, int? colorId = null)
     {
         var renderer = UnityHelper.CreateObject<SpriteRenderer>("Pin", MapScaler.transform, localPos.AsVector3(-5f));
         renderer.sprite = pinImage.GetSprite(colorId.HasValue ? 1 : 0);

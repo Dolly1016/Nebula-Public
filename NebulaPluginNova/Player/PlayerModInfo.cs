@@ -163,6 +163,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     public NetworkedPlayerInfo MyVanillaData { get; private set; }
     private TextMeshProHandler? playerNameText, playerRoleText;
     private Transform playerNameParent;
+    private GameObject playerNameParentObj;
 
     public byte PlayerId { get; private set; }
     public bool AmOwner { get; private set; }
@@ -365,6 +366,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         playerNameText = new(nameText);
         playerRoleText = new(roleText);
         playerNameParent = nameText.transform.parent;
+        playerNameParentObj = playerNameParent.gameObject;
 
         nameText.UseRoleIcon();
 
@@ -896,9 +898,9 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     private List<TimeLimitedModulator> timeLimitedModulators = new();
     private VVector2 smoothPlayerSize = VVector2.One;
     public Transform PlayerScaler;
-    private Vector4 directionalPlayerSpeed = new(1f, 0f, 0f, 1f);
+    private VVector4 directionalPlayerSpeed = new(1f, 0f, 0f, 1f);
     //ローカルでのみ値が計算できればよい。
-    public Vector4 DirectionalPlayerSpeed => directionalPlayerSpeed;
+    public VVector4 DirectionalPlayerSpeed => directionalPlayerSpeed;
 
     private bool speedAchievementChecked = false;
     private void UpdateModulators(float deltaTime)
@@ -1061,13 +1063,13 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     //                                      //
     //////////////////////////////////////////
 
-    public void CalcSpeed(ref Vector4 directionalPlayerSpeed, ref float speed)
+    public void CalcSpeed(ref VVector4 directionalPlayerSpeed, ref float speed)
     {
         foreach (var m in SpeedModulators) m.Calc(ref directionalPlayerSpeed, ref speed);
     }
 
     public const float OriginalSpeed = 2.5f;
-    public float CalcSpeed(ref Vector4 directionalPlayerSpeed)
+    public float CalcSpeed(ref VVector4 directionalPlayerSpeed)
     {
         float speed = OriginalSpeed;
         CalcSpeed(ref directionalPlayerSpeed, ref speed);
@@ -1198,7 +1200,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
                 PlayerModInfo localInfo = GamePlayer.LocalPlayer.Unbox();
 
-                NebulaProfiler.LapTimer("Before UpdateVisibilityInner.1");
+                NebulaProfiler.LapTimer("UpdateVisibilityInner.1");
 
                 //属性効果はより透明にする効果を優先する
                 if (!IsDead)
@@ -1223,7 +1225,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
                     }
                 }
 
-                NebulaProfiler.LapTimer("Before UpdateVisibilityInner.2");
+                NebulaProfiler.LapTimer("UpdateVisibilityInner.2");
 
                 //その他、イベントによる変更
                 var finalVisibility = (int?)GameOperatorManager.Instance?.Run<PlayerUpdateVisibilityEvent>(new(this, (PlayerUpdateVisibilityEvent.VisibilityLevel)invisibleLevel, (PlayerUpdateVisibilityEvent.VisibilityLevel)visibilityCache)).Visibility ?? invisibleLevel;
@@ -1232,15 +1234,15 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
                 visibilityCache = finalVisibility;
                 immediateVisibilityCache = immediateInvisibleLevel;
 
-                NebulaProfiler.LapTimer("Before UpdateVisibilityInner.3");
+                NebulaProfiler.LapTimer("UpdateVisibilityInner.3");
             }
 
-            NebulaProfiler.LapTimer("Before UpdateVisibilityInner.4");
+            NebulaProfiler.LapTimer("UpdateVisibilityInner.4");
 
             int visualInvisibleLevel = visibilityCache;
             int mixedVisualInvisibleLevel = Mathn.Max(visibilityCache, immediateVisibilityCache);
 
-            NebulaProfiler.LapTimer("Before UpdateVisibilityInner.5");
+            NebulaProfiler.LapTimer("UpdateVisibilityInner.5");
 
             //情報が開示済みの場合、あるいは自分自身を見る場合は半透明までにしかならない
             if (AmOwner || NebulaGameManager.Instance!.CanBeSpectator)
@@ -1249,25 +1251,25 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
                 mixedVisualInvisibleLevel = Mathn.Min(1, mixedVisualInvisibleLevel);
             }
 
-            NebulaProfiler.LapTimer("Before UpdateVisibilityInner.6");
+            NebulaProfiler.LapTimer("UpdateVisibilityInner.6");
+
+            playerNameParentObj.SetActive(!ModSingleton<ShowUp>.Instance.AnyoneShowedUp && !MyControl.inVent && (mixedVisualInvisibleLevel < 2) && showNameText /*&& MyControl.cosmetics.bodyType != PlayerBodyTypes.Long*/);
+
+            NebulaProfiler.LapTimer("UpdateVisibilityInner.7");
 
             var myCosmetics = MyLayer;
-
-            myCosmetics.nameText.transform.parent.gameObject.SetActive(!ModSingleton<ShowUp>.Instance.AnyoneShowedUp && !MyControl.inVent && (mixedVisualInvisibleLevel < 2) && showNameText /*&& MyControl.cosmetics.bodyType != PlayerBodyTypes.Long*/);
-
-            NebulaProfiler.LapTimer("Before UpdateVisibilityInner.7");
-
             if (IsDead)
             {
                 if (myCosmetics.currentBodySprite.BodySprite != null) myCosmetics.currentBodySprite.BodySprite.color = Color.white;
 
                 if (!MyControl.AmOwner && myCosmetics.currentPet.AsBoolFast(out var currentPet))
                 {
-                    foreach (var rend in currentPet.renderers.GetFastEnumerator()) rend.color = Color.clear;
-                    foreach (var rend in currentPet.shadows.GetFastEnumerator()) rend.color = Color.clear;
+                    var clearColor = Color.clear;
+                    foreach (var rend in currentPet.renderers.GetFastEnumerator()) rend.color = clearColor;
+                    foreach (var rend in currentPet.shadows.GetFastEnumerator()) rend.color = clearColor;
                 }
 
-                NebulaProfiler.LapTimer("Before UpdateVisibilityInner.8");
+                NebulaProfiler.LapTimer("UpdateVisibilityInner.8");
 
                 Color c = new(1f, 1f, 1f, 0.5f);
                 myCosmetics.GetComponent<NebulaCosmeticsLayer>().AdditionalRenderers().Do(r => r.color = c);
@@ -1284,7 +1286,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
                 }
                 alpha = alphaIgnoresWall = 0.5f;
 
-                NebulaProfiler.LapTimer("Before UpdateVisibilityInner.9");
+                NebulaProfiler.LapTimer("UpdateVisibilityInner.9");
 
                 return;
             }
@@ -1293,11 +1295,11 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
             if (update)
             {
-                NebulaProfiler.LapTimer("Before UpdateVisibilityInner.10");
+                NebulaProfiler.LapTimer("UpdateVisibilityInner.10");
 
                 UpdateVisibilityAlpha(visualInvisibleLevel, deltaTime!.Value);
 
-                NebulaProfiler.LapTimer("Before UpdateVisibilityInner.11");
+                NebulaProfiler.LapTimer("UpdateVisibilityInner.11");
 
                 bool CheckIsInWall()
                 {
@@ -1311,7 +1313,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
                     int shadowMask = Constants.ShadowMask;
                     int objectMask = Constants.ShipAndAllObjectsMask;
 
-                    NebulaProfiler.LapTimer("Before UpdateVisibilityInner.12a");
+                    NebulaProfiler.LapTimer("UpdateVisibilityInner.12a");
 
                     var light = AmongUsLLImpl.LocalPlayer.lightSource;
                     VVector2 pos = light.transform.position;
@@ -1324,7 +1326,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
                     }
                     );
 
-                    NebulaProfiler.LapTimer("Before UpdateVisibilityInner.12b");
+                    NebulaProfiler.LapTimer("UpdateVisibilityInner.12b");
 
 
                     var mag = isAcrossWalls ? 0.19f : 0.4f;
@@ -1346,7 +1348,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
                         });
                     }
 
-                    NebulaProfiler.LapTimer("Before UpdateVisibilityInner.12c");
+                    NebulaProfiler.LapTimer("UpdateVisibilityInner.12c");
 
                     //特に何もなければ、壁の中にいない。
                     return false;
@@ -1354,22 +1356,22 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
                 bool isInShadow = CheckIsInWall();
 
-                NebulaProfiler.LapTimer("Before UpdateVisibilityInner.13");
+                NebulaProfiler.LapTimer("UpdateVisibilityInner.13");
 
                 IsInShadowCache = isInShadow;
             }
 
             var shadowHidesPlayer =  !ignoreShadow && IsInShadowCache;
-            if (shadowHidesPlayer) myCosmetics.nameText.transform.parent.gameObject.SetActive(false);
+            if (shadowHidesPlayer) playerNameParentObj.SetActive(false);
 
-            NebulaProfiler.LapTimer("Before UpdateVisibilityInner.14");
+            NebulaProfiler.LapTimer("UpdateVisibilityInner.14");
 
             float immadiateAlpha = immediateVisibilityCache switch { 2 => 0f, 1 => 0.25f, _ => 1f };
             alpha = Mathn.Min(immadiateAlpha, shadowHidesPlayer ? 0f : VisibilityAlpha);
             alphaIgnoresWall = VisibilityAlpha;
             var color = new Color(1f, 1f, 1f, alpha);
 
-            NebulaProfiler.LapTimer("Before UpdateVisibilityInner.15");
+            NebulaProfiler.LapTimer("UpdateVisibilityInner.15");
 
             if (myCosmetics.currentBodySprite.BodySprite.AsBoolFast(out var bodySprite)) bodySprite.color = color;
 
@@ -1402,7 +1404,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
                 }
             }
 
-            NebulaProfiler.LapTimer("Before UpdateVisibilityInner.16");
+            NebulaProfiler.LapTimer("UpdateVisibilityInner.16");
         }
         catch (Exception e){ }
     }
@@ -1543,6 +1545,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     
     Virial.Compat.Vector2 IGameObject.Position => new(MyControlTransform.position);
     Virial.Compat.Vector2 IPlayerlike.TruePosition => new(MyControl.GetTruePosition());
+    UnityEngine.Vector2 IPlayerlike.UnityTruePosition => MyControl.GetTruePosition();
     bool GamePlayer.CanMove => MyControl.CanMove;
     bool GamePlayer.IsDisconnected => IsDisconnected;
     float? GamePlayer.DeathTime => DeathTimeStamp;
@@ -1630,6 +1633,8 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     bool IPlayerlike.CanBeTarget => true;
 
     CosmeticsLayer IPlayerlike.VanillaCosmetics => MyLayer;
+    PlayerAnimations IPlayerlike.VanillaAnimations => MyAnimations;
+    PlayerPhysics GamePlayer.VanillaPhysics => MyPhysics;
 
     private VanillaPlayerLogics playerLogic;
     IPlayerLogics IPlayerlike.Logic => playerLogic;

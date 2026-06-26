@@ -1,6 +1,7 @@
 ﻿using Nebula.Behavior;
 using Nebula.Map;
 using System.Reflection.Metadata;
+using Virial;
 using Virial.Events.Game.Minimap;
 using Virial.Game;
 
@@ -220,7 +221,7 @@ static class MapBehaviourGenericShowPatch
     static void Postfix(MapBehaviour __instance)
     {
         __instance.transform.localPosition = new Vector3(0, 0, -50f);
-        __instance.ColorControl.GetComponent<SpriteRenderer>().sprite = NebulaAsset.GetMapSprite(AmongUsUtil.CurrentMapId, 0xFFFFFF); //ShipStatus.Instance.MapPrefab.ColorControl.GetComponent<SpriteRenderer>().sprite;
+        __instance.ColorControl.GetComponent<SpriteRenderer>().sprite = NebulaAsset.GetMapSprite(NebulaAPI.AmongUs.MapId, 0xFFFFFF); //ShipStatus.Instance.MapPrefab.ColorControl.GetComponent<SpriteRenderer>().sprite;
         MapBehaviourExtension.UpdateScale(__instance);
     }
 }

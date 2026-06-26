@@ -211,6 +211,6 @@ public class  ModViperDeadBody : MonoBehaviour
 
     internal void PlayKillerSE()
     {
-        if (Constants.ShouldPlaySfx()) SoundManager.Instance.PlaySound(viperDeadBody.acidSplashSFX, false, 1f, null);
+        if (Constants.ShouldPlaySfx()) AmongUsLLImpl.SoundManagerInstance.PlaySound(viperDeadBody.acidSplashSFX, false, 1f, null);
     }
 }

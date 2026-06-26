@@ -72,9 +72,10 @@ public static class LoadPatch
                 __instance.errorPopup.transform.GetChild(3).gameObject.SetActive(false);
                 __instance.errorPopup.transform.GetChild(4).transform.localPosition += new Vector3(0f,-0.8f,0f);
 
-                var button = __instance.errorPopup.transform.GetChild(6).GetComponent<PassiveButton>();
-                button.transform.localPosition += new Vector3(0f, -1f, 0f);
-                
+                __instance.errorPopup.transform.GetChild(6).gameObject.SetActive(false);
+                //var button = __instance.errorPopup.transform.GetChild(6).GetComponent<PassiveButton>();
+                //button.transform.localPosition += new Vector3(0f, -1f, 0f);
+
                 var infoText =__instance.errorPopup.transform.GetChild(4).GetComponent<TextMeshPro>();
                 infoText.alignment = TMPro.TextAlignmentOptions.TopLeft;
                 infoText.rectTransform.sizeDelta = new Vector2(11f, 4f);
@@ -90,11 +91,13 @@ public static class LoadPatch
 
                 var infoTextHolder = UnityHelper.CreateObject("InfoTextHolder",__instance.errorPopup.transform,infoText.transform.localPosition);
                 infoText.transform.SetParent(infoTextHolder.transform, true);
+                /*
                 var textButton = infoTextHolder.SetUpButton(true);
                 textButton.OnMouseOut.AddListener(() => infoText.color = Color.white);
                 textButton.OnMouseOver.AddListener(() => infoText.color = Color.green);
                 textButton.OnClick.AddListener(() => ClipboardHelper.PutClipboardString(detailText));
                 textButton.gameObject.AddComponent<BoxCollider2D>().size = new Vector2(11f,4f);
+                */
 
                 //停止
                 while (true) yield return null;

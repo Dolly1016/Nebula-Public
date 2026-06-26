@@ -98,6 +98,11 @@ public interface IPlayerlike : IModuleContainer, IGameObject
     Virial.Compat.Vector2 TruePosition { get; }
 
     /// <summary>
+    /// プレイヤーの足元の位置を返します。
+    /// </summary>
+    internal UnityEngine.Vector2 UnityTruePosition => TruePosition;
+
+    /// <summary>
     /// 自身が主たる操作主であればtrueを返します。
     /// Playerでない限り、falseを返します。
     /// </summary>
@@ -111,6 +116,7 @@ public interface IPlayerlike : IModuleContainer, IGameObject
     internal void UpdateVisibility(float? deltaTime, bool update, bool ignoreShadow, bool showNameText = true);
 
     internal CosmeticsLayer VanillaCosmetics { get; }
+    internal PlayerAnimations VanillaAnimations { get; }
 
     /// <summary>
     /// プレイヤーの現在の見た目を取得します。

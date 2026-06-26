@@ -126,7 +126,7 @@ public class GameStartManagerUpdatePatch
                 int num = Mathn.CeilToInt(__instance.countDownTimer);
                 __instance.countDownTimer -= Time.deltaTime;
                 int num2 = Mathn.CeilToInt(__instance.countDownTimer);
-                if (!__instance.GameStartTextParent.activeSelf) SoundManager.Instance.PlaySound(__instance.gameStartSound, false, 1f, null);
+                if (!__instance.GameStartTextParent.activeSelf) AmongUsLLImpl.SoundManagerInstance.PlaySound(__instance.gameStartSound, false, 1f, null);
 
                 __instance.GameStartTextParent.SetActive(true);
                 __instance.GameStartText.text = translation.GetString(StringNames.GameStarting, num2);
@@ -275,9 +275,9 @@ public class DelayPlayDropshipAmbiencePatch
 {
     static private System.Collections.IEnumerator CoDelayPlayWithoutMusic(LobbyBehaviour __instance)
     {
-        SoundManager.Instance.StopAllSound();
+        AmongUsLLImpl.SoundManagerInstance.StopAllSound();
         yield return new WaitForSeconds(0.5f);
-        AudioSource audioSource = SoundManager.Instance.PlayNamedSound("DropShipAmb", __instance.DropShipSound, true, SoundManager.Instance.AmbienceChannel);
+        AudioSource audioSource = AmongUsLLImpl.SoundManagerInstance.PlayNamedSound("DropShipAmb", __instance.DropShipSound, true, AmongUsLLImpl.SoundManagerInstance.AmbienceChannel);
         audioSource.loop = true;
         audioSource.pitch = 1.2f;
     }

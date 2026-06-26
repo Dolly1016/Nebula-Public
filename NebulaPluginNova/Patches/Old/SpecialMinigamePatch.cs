@@ -141,7 +141,7 @@ class PlanetSurveillanceMinigameNextCameraPatch
     {
         if (ConsoleTimer.IsOpenedByAvailableWay()) return true;
 
-        if (direction != 0 && Constants.ShouldPlaySfx()) SoundManager.Instance.PlaySound(__instance.ChangeSound, false, 1f, null);
+        if (direction != 0 && Constants.ShouldPlaySfx()) AmongUsLLImpl.SoundManagerInstance.PlaySound(__instance.ChangeSound, false, 1f, null);
         
         __instance.Dots[__instance.currentCamera].sprite = __instance.DotDisabled;
         __instance.currentCamera = (__instance.currentCamera + direction).Wrap(__instance.survCameras.Length);

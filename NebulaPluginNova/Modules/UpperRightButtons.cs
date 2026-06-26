@@ -16,26 +16,28 @@ public interface IUpperRightContent
 {
     bool IsShown { get; }
     int Priority { get; }
-    void Update(Vector3 localPos);
+    void Update(VVector3 localPos);
     void VisibilityUpdate() { }
 }
 
 public class FunctionalUpperRightContent : IUpperRightContent
 {
     PassiveButton button;
-    
+    GameObject buttonObj;
+
     public FunctionalUpperRightContent(PassiveButton button, int priority)
     {
         this.button = button;
+        this.buttonObj = button.gameObject;
         if (button.TryGetComponent<AspectPosition>(out var ap)) ap.enabled = false;
 
         (button.transform.FindChild("background") ?? button.transform.FindChild("Background")).gameObject.SetActive(false);
         Priority = priority;
     }
 
-    public bool IsShown => button.gameObject.active;
+    public bool IsShown => buttonObj.active;
     public int Priority { get; init; }
-    void IUpperRightContent.Update(UnityEngine.Vector3 localPos)
+    void IUpperRightContent.Update(VVector3 localPos)
     {
         button.transform.position = ModSingleton<UpperRightButtons>.Instance.HolderLocalPosToWorldPos(localPos);
     }
@@ -44,32 +46,34 @@ public class FunctionalUpperRightContent : IUpperRightContent
 public class CustomUpperRightContent : IUpperRightContent
 {
     public PassiveButton Button => button;
+    private GameObject buttonObj;
+    private Transform buttonTransform;
     PassiveButton button;
     SpriteRenderer renderer;
     Func<bool> predicate;
 
-    bool IUpperRightContent.IsShown => button.gameObject.active;
+    bool IUpperRightContent.IsShown => buttonObj.active;
 
     public int Priority { get; init; }
     static private readonly IDividedSpriteLoader buttonImages = DividedSpriteLoader.FromResource("Nebula.Resources.UpperRightButton.png", 100f, 100, 94, true);
 
-    void IUpperRightContent.Update(Vector3 localPos)
+    void IUpperRightContent.Update(VVector3 localPos)
     {
-        button.transform.localPosition = localPos;
+        buttonTransform.localPosition = localPos;
     }
 
     void IUpperRightContent.VisibilityUpdate()
     {
-        button.gameObject.SetActive(predicate.Invoke());
+        buttonObj.SetActive(predicate.Invoke());
     }
     public CustomUpperRightContent(int priority, Image inactiveSprite, Image activeSprite, Image selectedSprite, Action onClicked, Func<bool> predicate, Func<bool> selectedSpritePredicate)
     {
         Priority = priority;
-        renderer = UnityHelper.CreateObject<SpriteRenderer>("Button", ModSingleton<UpperRightButtons>.Instance.ButtonsHolder, Vector3.zero);
+        renderer = UnityHelper.CreateObject<SpriteRenderer>("Button", ModSingleton<UpperRightButtons>.Instance.ButtonsHolder, VVector3.Zero, out buttonObj, out buttonTransform);
         renderer.sprite = inactiveSprite.GetSprite();
-        button = renderer.gameObject.SetUpButton(true, renderer, Virial.Color.White, Virial.Color.White);
-        button.transform.localScale = new(UpperRightButtons.BackgroundScale, UpperRightButtons.BackgroundScale, 1f);
-        var collider = renderer.gameObject.AddComponent<BoxCollider2D>();
+        button = buttonObj.SetUpButton(true, renderer, Virial.Color.White, Virial.Color.White);
+        buttonTransform.localScale = new(UpperRightButtons.BackgroundScale, UpperRightButtons.BackgroundScale, 1f);
+        var collider = buttonObj.AddComponent<BoxCollider2D>();
         collider.size = new(1f, 1f);
         collider.isTrigger = true;
 
@@ -118,7 +122,7 @@ internal class UpperRightButtons : AbstractModule<Virial.Game.Game>, IGameOperat
     {
         allContents.Add(content);
     }
-    public Vector3 HolderLocalPosToWorldPos(Vector3 localPos) => buttonsHolder.transform.TransformPoint(localPos);
+    public Vector3 HolderLocalPosToWorldPos(VVector3 localPos) => buttonsHolder.transform.TransformPoint(localPos);
     protected override void OnInjected(Virial.Game.Game container)
     {
         SetUp();
@@ -128,6 +132,8 @@ internal class UpperRightButtons : AbstractModule<Virial.Game.Game>, IGameOperat
     AspectPosition holder;
     SpriteRenderer background;
     GameObject buttonsHolder;
+    private float backSizeY;
+    ValueObserver<int> numOfButtonsObserver;
     public Transform ButtonsHolder => buttonsHolder.transform;
     public const float BackgroundScale = 0.551f;
     const float ButtonWidth = 0.55f;
@@ -148,24 +154,28 @@ internal class UpperRightButtons : AbstractModule<Virial.Game.Game>, IGameOperat
         background.tileMode = SpriteTileMode.Continuous;
         background.transform.localScale = new(BackgroundScale, BackgroundScale, 1f);
 
+        backSizeY = background.sprite.bounds.size.y;
+
         buttonsHolder = UnityHelper.CreateObject("Holder", holder.transform, new(0f,0f,-10f));
 
         var friendListButton = hud.GetComponentInChildren<FriendsListButton>();
         friendListButton.NotifCircle.transform.localPosition = new(0.6f, 0.95f, -1f);
         Register(new FunctionalUpperRightContent(friendListButton.Button.GetComponent<PassiveButton>(), 0));
 
-        var chatButton = hud.Chat.chatButton;
-        chatButton.activeSprites.transform.localPosition = Vector3.zero;
-        chatButton.inactiveSprites.transform.localPosition = Vector3.zero;
-        chatButton.selectedSprites.transform.localPosition = Vector3.zero;
+        var chat = hud.Chat;
+        var chatButton = chat.chatButton;
+        var zeroVec = Vector3.zero;
+        chatButton.activeSprites.transform.localPosition = zeroVec;
+        chatButton.inactiveSprites.transform.localPosition = zeroVec;
+        chatButton.selectedSprites.transform.localPosition = zeroVec;
         chatButton.GetComponent<Collider2D>().offset = Vector2.zero;
-        hud.Chat.chatNotifyDot.transform.localPosition = new(0.23f, 0.23f, -1f);
-        hud.Chat.chatButtonAspectPosition = holder;
+        chat.chatNotifyDot.transform.localPosition = new(0.23f, 0.23f, -1f);
+        chat.chatButtonAspectPosition = holder;
         Register(new FunctionalUpperRightContent(chatButton, 10));
         Register(new FunctionalUpperRightContent(hud.SettingsButton.GetComponent<PassiveButton>(), 5));
         Register(new FunctionalUpperRightContent(hud.MapButton, 1));
 
-        var lastGame = new CustomUpperRightContent(101, 1, () => LastGameHistory.ShowLastGameStatistics(), () => LastGameHistory.ArchivedGame != null && LobbyBehaviour.Instance && !PlayerCustomizationMenu.Instance, () => LastGameHistory.ScreenIsVisible);
+        var lastGame = new CustomUpperRightContent(101, 1, () => LastGameHistory.ShowLastGameStatistics(), () => LastGameHistory.ArchivedGame != null && AmongUsLLImpl.LobbyInstance.AsBoolFast() && !PlayerCustomizationMenu.Instance.AsBoolFast(), () => LastGameHistory.ScreenIsVisible);
         Register(lastGame);
         lastGame.Button.OnMouseOver.AddListener(() =>
         {
@@ -173,7 +183,7 @@ internal class UpperRightButtons : AbstractModule<Virial.Game.Game>, IGameOperat
         });
         lastGame.Button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(lastGame.Button));
 
-        var helpButton = new CustomUpperRightContent(100, 0, () => HelpScreen.TryOpenHelpScreen(HelpScreen.HelpTab.MyInfo), () => true, () => HelpScreen.LastHelpScreen);
+        var helpButton = new CustomUpperRightContent(100, 0, () => HelpScreen.TryOpenHelpScreen(HelpScreen.HelpTab.MyInfo), () => NebulaGameManager.Instance?.GameMode?.CanOpenHelpScreen ?? true, () => HelpScreen.LastHelpScreen);
         Register(helpButton);
         GameOperatorManager.Instance?.Subscribe<GameStartEvent>(_ =>
         {
@@ -181,9 +191,14 @@ internal class UpperRightButtons : AbstractModule<Virial.Game.Game>, IGameOperat
         }, MyContainer);
 
 #if PC
-        var formButton = new CustomUpperRightContent(102, 2, () => DevTeamContact.OpenContactWindow(HudManager.Instance.transform), () => LobbyBehaviour.Instance && !PlayerCustomizationMenu.Instance, () => DevTeamContact.IsShown);
+        var formButton = new CustomUpperRightContent(102, 2, () => DevTeamContact.OpenContactWindow(hud.transform), () => AmongUsLLImpl.LobbyInstance.AsBoolFast() && !PlayerCustomizationMenu.Instance.AsBoolFast(), () => DevTeamContact.IsShown);
         Register(formButton);
 #endif
+
+        numOfButtonsObserver = new(0, index => {
+            background.transform.localPosition = new(-ButtonWidth * 0.5f * (float)(index - 1) + 0.008f, 0.0228f, 0.1f);
+            background.size = new(1.48f + ButtonWidth / BackgroundScale * (float)(index - 1), backSizeY);
+        }, true);
 
         OnUpdate(null!);
     }
@@ -201,8 +216,7 @@ internal class UpperRightButtons : AbstractModule<Virial.Game.Game>, IGameOperat
             index++;
         }
 
-        background.transform.localPosition = new(-ButtonWidth * 0.5f * (float)(index - 1) + 0.008f, 0.0228f, 0.1f);
-        background.size = new(1.48f + ButtonWidth / BackgroundScale * (float)(index - 1), background.sprite.bounds.size.y);
+        numOfButtonsObserver.Set(index);
     }
 
 }

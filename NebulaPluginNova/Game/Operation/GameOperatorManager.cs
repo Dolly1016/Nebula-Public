@@ -190,6 +190,7 @@ public class GameOperatorManager
     // 同じ型の作用素を登録する処理を高速化するためのキャッシュ
     static private Dictionary<Type, GameOperatorBuilder> allBuildersCache = [];
 
+    private Virial.Logging.ILogger Logger = NebulaAPI.Logging.CombinedLogger(NebulaAPI.Logging.NebulaLogger("GameOperator"), NebulaAPI.Logging.BepInExLogger());
     private void DoSingleOperation(object e, Type type)
     {
         if (allOperatorInstance.TryGetValue(type, out var operators))
@@ -207,7 +208,7 @@ public class GameOperatorManager
                     o.action.Invoke(e);
                 }catch (Exception ex)
                 {
-                    NebulaLogger.Instance.Error(ex.ToString());
+                    Logger.Error(ex.ToString());
                 }
                 return false;
             });

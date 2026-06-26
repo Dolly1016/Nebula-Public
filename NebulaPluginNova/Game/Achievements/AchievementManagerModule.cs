@@ -40,7 +40,7 @@ internal class AchievementManagerModule : AbstractModule<Virial.Game.Game>, IGam
         
         if (Helpers.CurrentMonth == 3) new AchievementToken<int>("graduation2", 0, (exileAnyone, _) => exileAnyone >= 3);
 
-        if (Helpers.CurrentMonth == 5 && (AmongUsUtil.CurrentMapId is 1 or 4))
+        if (Helpers.CurrentMonth == 5 && (NebulaAPI.AmongUs.MapId is 1 or 4))
         {
             if (GamePlayer.LocalPlayer!.TryGetModifier<Lover.Instance>(out var lover))
             {
@@ -78,9 +78,10 @@ internal class AchievementManagerModule : AbstractModule<Virial.Game.Game>, IGam
 
         if(Helpers.CurrentMonth == 6)
         {
-            if(AmongUsUtil.CurrentMapId is 0 or 2 or 5)
+            var mapId = NebulaAPI.AmongUs.MapId;
+            if (mapId is 0 or 2 or 5)
             {
-                bool isSkeld = AmongUsUtil.CurrentMapId is 0;
+                bool isSkeld = mapId is 0;
                 IPlayerAttribute attr = isSkeld ? PlayerAttributes.Accel : PlayerAttributes.Decel;
                 float time = 0f;
                 bool isCleared = false;
@@ -115,7 +116,7 @@ internal class AchievementManagerModule : AbstractModule<Virial.Game.Game>, IGam
 
         if (Helpers.CurrentMonth == 8)
         {
-            if (AmongUsUtil.CurrentMapId is 5)
+            if (NebulaAPI.AmongUs.MapId is 5)
             {
                 GameOperatorManager.Instance?.Subscribe<PlayerKillPlayerEvent>(ev =>
                 {

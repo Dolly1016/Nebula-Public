@@ -427,7 +427,7 @@ class PlayerCanMovePatch
 
         NebulaProfiler.LapTimer("PlayerControl.CanMove.2");
 
-        __result &= !TextField.AnyoneValid && CameraAllowMoving() && !ModSingleton<Marketplace>.Instance && !(modPlayer?.IsTeleporting ?? false);
+        __result &= !TextField.AnyoneValid && CameraAllowMoving() && !ModSingleton<Marketplace>.Instance.AsBoolFast() && !(modPlayer?.IsTeleporting ?? false);
 
         NebulaProfiler.LapTimer("PlayerControl.CanMove.3");
     }
@@ -443,7 +443,8 @@ class WalkPatch
         if (info == null) return;
 
         var orig = __result;
-        Vector4 temp = Vector2.zero;
+
+        VVector4 temp = new(0f, 0f, 0f, 0f);
         IEnumerator CoWalk()
         {
             while (true)
@@ -546,14 +547,24 @@ public static class OverlayKillAnimationInitializePatch
     {
         if (KillOverlayPatch.NextIsSelfKill)
         {
-            __instance.transform.GetChild(0).gameObject.SetActive(false);
-            if(__instance.transform.childCount >= 3) __instance.transform.GetChild(2).gameObject.SetActive(false);
+            //GetChild(2)とGetChild(3)はペットがいる場合。自殺の場合ペットの有無はキラーと被害者で同じなのでこの決め打ちでよい。
+
+            var transform = __instance.transform;
+            int childCount = transform.childCount;
+            bool hasPet = childCount >= 3;
+
+            transform.GetChild(0).gameObject.SetActive(false);
+            if(hasPet) transform.GetChild(2).gameObject.SetActive(false);
 
             float x = 0.6f;
-            var victim = __instance.transform.GetChild(1);
+            var victim = transform.GetChild(1);
             victim.localPosition = new(x, 0f, 0f);
-            var pet = __instance.transform.GetChild(3);
-            pet.localPosition = new(x, -0.37f, 0f);
+            Transform? pet = null;
+            if (hasPet)
+            {
+                pet = transform.GetChild(3);
+                pet.localPosition = new(x, -0.37f, 0f);
+            }
 
             IEnumerator CoMoveLeft()
             {
@@ -563,7 +574,7 @@ public static class OverlayKillAnimationInitializePatch
                     if (!__instance) yield break;
                     x -= (x - (-1.8f)) * Time.deltaTime * 5.2f;
                     victim!.localPosition = new(x, 0f, 0f);
-                    pet!.localPosition = new(x, -0.37f, 0f);
+                    if(hasPet) pet!.localPosition = new(x, -0.37f, 0f);
                     yield return null;
                 }
             }
@@ -688,7 +699,7 @@ public static class UsePlatformPatch
             yield return Effects.Wait(0.1f);
             worldSourcePos -= (Vector3)target.Collider.offset;
             worldTargetPos -= (Vector3)target.Collider.offset;
-            if (Constants.ShouldPlaySfx()) SoundManager.Instance.PlayDynamicSound("PlatformMoving", __instance.MovingSound, true, (GetDynamicsFunction)__instance.SoundDynamics, SoundManager.Instance.SfxChannel);
+            if (Constants.ShouldPlaySfx()) AmongUsLLImpl.SoundManagerInstance.PlayDynamicSound("PlatformMoving", __instance.MovingSound, true, (GetDynamicsFunction)__instance.SoundDynamics, AmongUsLLImpl.SoundManagerInstance.SfxChannel);
 
             modPlayer?.DeathPosition = new(worldUseSourcePos, worldUseTargetPos);
 
@@ -698,7 +709,7 @@ public static class UsePlatformPatch
             Effects.Slide2D(__instance.transform, sourcePos, targetPos, /*target.MyPhysics.Speed*/ 2.5f),
             Effects.Slide2DWorld(target.transform, worldSourcePos, worldTargetPos, /*target.MyPhysics.Speed*/ 2.5f)
             ]);
-            if (Constants.ShouldPlaySfx()) SoundManager.Instance.StopNamedSound("PlatformMoving");
+            if (Constants.ShouldPlaySfx()) AmongUsLLImpl.SoundManagerInstance.StopNamedSound("PlatformMoving");
             if (target == null)
             {
                 __instance.ResetPlatform();
@@ -759,14 +770,21 @@ public static class CoUseLadderPatch
 [HarmonyPatch(typeof(NetworkedPlayerInfo), nameof(NetworkedPlayerInfo.Deserialize))]
 internal class NetworkedPlayerInfoPatch
 {
-    static bool Prefix(NetworkedPlayerInfo __instance, [HarmonyArgument(0)] MessageReader reader, [HarmonyArgument(1)] bool initialState)
+    static bool Prefix(NetworkedPlayerInfo __instance, [HarmonyArgument(0)] Hazel.MessageReader reader, [HarmonyArgument(1)] bool initialState)
     {
         NebulaProfiler.LapTimer("Before NetworkedPlayerInfo.Deserialize");
 
-        __instance.PlayerId = reader.ReadByte();
-        __instance.ClientId = reader.ReadPackedInt32();
-        byte b = reader.ReadByte();
+        Virial.Utilities.MessageReader virialReader;
+        
+        virialReader = Virial.Utilities.MessageReader.Get(reader);
+
+        __instance.PlayerId = virialReader.ReadByte();
+        __instance.ClientId = virialReader.ReadPackedInt32();
+        byte b = virialReader.ReadByte();
         __instance.Outfits.Clear();
+
+        virialReader.End();
+
         for (int i = 0; i < (int)b; i++)
         {
             PlayerOutfitType playerOutfitType = (PlayerOutfitType)reader.ReadByte();
@@ -774,23 +792,31 @@ internal class NetworkedPlayerInfoPatch
             playerOutfit.Deserialize(reader);
             __instance.Outfits[playerOutfitType] = playerOutfit;
         }
-        __instance.PlayerLevel = reader.ReadPackedUInt32();
-        byte b2 = reader.ReadByte();
+
+        virialReader = Virial.Utilities.MessageReader.Get(reader);
+
+        __instance.PlayerLevel = virialReader.ReadPackedUInt32();
+        byte b2 = virialReader.ReadByte();
         __instance.Disconnected = (b2 & 1) > 0;
         //__instance.IsDead = (b2 & 4) > 0;
-        __instance.RoleType = (RoleTypes)reader.ReadUInt16();
-        if (reader.ReadBoolean())
+        __instance.RoleType = (RoleTypes)virialReader.ReadUInt16();
+
+        if (virialReader.ReadBoolean())
         {
-            __instance.RoleWhenAlive = new((RoleTypes)reader.ReadUInt16());
+            __instance.RoleWhenAlive = new((RoleTypes)virialReader.ReadUInt16());
         }
-        byte b3 = reader.ReadByte();
+        byte b3 = virialReader.ReadByte();
         __instance.Tasks.Clear();
+
+        virialReader.End();
+
         for (int j = 0; j < (int)b3; j++)
         {
             NetworkedPlayerInfo.TaskInfo taskInfo = new NetworkedPlayerInfo.TaskInfo();
             taskInfo.Deserialize(reader);
             __instance.Tasks.Add(taskInfo);
         }
+
         __instance.FriendCode = reader.ReadString();
         __instance.Puid = reader.ReadString();
         if (initialState && GameData.Instance.GetPlayerById(__instance.PlayerId) == null && !GameData.Instance.IsProcessingInfo(__instance))

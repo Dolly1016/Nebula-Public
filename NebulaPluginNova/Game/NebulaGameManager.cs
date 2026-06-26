@@ -276,7 +276,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         
         int players = notStarted ? PlayerControl.AllPlayerControls.Count : allModPlayers.Count;
         int impostors = AmongUsUtil.AdjustedImpostors(players);
-        byte mapId = AmongUsUtil.CurrentMapId;
+        byte mapId = NebulaAPI.AmongUs.MapId;
         return new GameParameters(mapId, impostors, players);
     }
 
@@ -361,7 +361,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     IArchivedPlayer? IArchivedGame.GetPlayer(byte playerId) => GetPlayer(playerId);
     IEnumerable<IArchivedPlayer> IArchivedGame.GetAllPlayers() => AllPlayerInfo;
     IArchivedEvent[] IArchivedGame.ArchivedEvents => GameStatistics.Sealed;
-    byte IArchivedGame.MapId => AmongUsUtil.CurrentMapId;
+    byte IArchivedGame.MapId => NebulaAPI.AmongUs.MapId;
     ArchivedColor IArchivedGame.GetColor(byte colorId) => new(DynamicPalette.PlayerColors[colorId], DynamicPalette.ShadowColors[colorId], DynamicPalette.VisorColors[colorId]);
 
     static private SpriteLoader vcConnectSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.VCReconnectButton.png", 100f);

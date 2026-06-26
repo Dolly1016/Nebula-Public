@@ -29,22 +29,26 @@ internal class TimeLogger
         stopwatch.Restart();
     }
 
-    public void Measure(string tag)
+    public long Measure(string tag)
     {
         long ticks = stopwatch.ElapsedTicks;
         long millisec = stopwatch.ElapsedMilliseconds;
         Log(tag + " " + ticks + "ticks (" + millisec + "ms)");
         Restart();
+        return ticks;
     }
 
-    public void MeasureIf(string tag, long minMillisec)
+    public bool MeasureIf(string tag, long minMillisec)
     {
+        bool returnedValue = false;
         long ticks = stopwatch.ElapsedTicks;
         long millisec = stopwatch.ElapsedMilliseconds;
         if (minMillisec <= millisec) {
             Log(tag + " " + ticks + "ticks (" + millisec + "ms)");
+            returnedValue = true;
         }
         Restart();
+        return returnedValue;
     }
 
 

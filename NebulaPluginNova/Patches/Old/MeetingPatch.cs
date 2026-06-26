@@ -581,7 +581,7 @@ class MeetingHudUpdatePatch
 
                 __instance.discussionTimer = (float)GameManager.Instance.LogicOptions.CastFast<LogicOptionsNormal>().GetDiscussionTime();
 
-                MeetingHud.Instance!.lastSecond = 11;
+                __instance.lastSecond = 11;
 
                 MeetingHudExtension.ReflectVotingMask();
 
@@ -598,7 +598,7 @@ class MeetingHudUpdatePatch
                     {
                         __instance.lastSecond = intCnt;
                         __instance.StartCoroutine(Effects.PulseColor(__instance.TimerText, Color.red, Color.white, 0.25f));
-                        SoundManager.Instance.PlaySound(__instance.VoteEndingSound, false, 1f, null).pitch = Mathn.Lerp(1.5f, 0.8f, (float)__instance.lastSecond / 10f);
+                        AmongUsLLImpl.SoundManagerInstance.PlaySound(__instance.VoteEndingSound, false, 1f, null).pitch = Mathn.Lerp(1.5f, 0.8f, (float)__instance.lastSecond / 10f);
                     }
 
                     //定期的に時間を同期させる。投票漏れを防ぐためにわずかに時間を短く見積もる。

@@ -137,7 +137,7 @@ public class Disturber : DefinedSingleAbilityRoleTemplate<Disturber.Ability>, De
             poles = new();
             Positions = new();
 
-            float scale = MaxDistanceBetweenPolesOption / VanillaAsset.GetMapScale(AmongUsUtil.CurrentMapId);
+            float scale = MaxDistanceBetweenPolesOption / VanillaAsset.GetMapScale(NebulaAPI.AmongUs.MapId);
             collider = UnityHelper.CreateObject<CircleCollider2D>("Click", transform, new(0f, 0f, -5f));
 #if ANDROID
             collider.radius = 20f;
@@ -187,7 +187,7 @@ public class Disturber : DefinedSingleAbilityRoleTemplate<Disturber.Ability>, De
                 var screenPosAsWorld = UnityHelper.ScreenToWorldPoint(Input.mousePosition, LayerExpansion.GetUILayer());
                 var worldPosOnMinimap = transform.InverseTransformPoint(screenPosAsWorld);
                 worldPosOnMinimap.z = -5f;
-                var worldPos = VanillaAsset.ConvertFromMinimapPosToWorld(worldPosOnMinimap, AmongUsUtil.CurrentMapId);
+                var worldPos = VanillaAsset.ConvertFromMinimapPosToWorld(worldPosOnMinimap, NebulaAPI.AmongUs.MapId);
 
                 bool canPlace = MapData.GetCurrentMapData().CheckMapArea(worldPos, 0.06f);
                 if (canPlace)
@@ -223,8 +223,8 @@ public class Disturber : DefinedSingleAbilityRoleTemplate<Disturber.Ability>, De
 
             var screenPosAsWorld = UnityHelper.ScreenToWorldPoint(Input.mousePosition, LayerExpansion.GetUILayer());
             var worldPosOnMinimap = transform.InverseTransformPoint(screenPosAsWorld);
-            var worldPos = VanillaAsset.ConvertFromMinimapPosToWorld(worldPosOnMinimap, AmongUsUtil.CurrentMapId);
-            camera.transform.position = worldPos;
+            var worldPos = VanillaAsset.ConvertFromMinimapPosToWorld(worldPosOnMinimap, NebulaAPI.AmongUs.MapId);
+            camera.transform.position = worldPos.AsUnityVector3(0f);
 
             if(Positions.Count == 0)
             {
@@ -238,7 +238,7 @@ public class Disturber : DefinedSingleAbilityRoleTemplate<Disturber.Ability>, De
             {
                 circleRenderer.gameObject.SetActive(true);
                 collider.gameObject.SetActive(true);
-                collider.transform.localPosition = ((Vector2)Positions[Positions.Count - 1].minimapPos).AsVector3(-5f);
+                collider.transform.localPosition = ((VVector2)Positions[Positions.Count - 1].minimapPos).AsUnityVector3(-5f);
             }
 
             bool canPlace = MapData.GetCurrentMapData().CheckMapArea(worldPos, 0.06f);
@@ -254,11 +254,11 @@ public class Disturber : DefinedSingleAbilityRoleTemplate<Disturber.Ability>, De
 
         public void RegisterPoles(DisturbPole[] poles, List<DisturbPole[]> list)
         {
-            var positions = poles.Select(p => VanillaAsset.ConvertToMinimapPos(p.Position, AmongUsUtil.CurrentMapId)).ToArray();
+            var positions = poles.Select(p => VanillaAsset.ConvertToMinimapPos(p.Position, NebulaAPI.AmongUs.MapId)).ToArray();
 
             var renderer = UnityHelper.SetUpLineRenderer("PoleLine", transform, new(0f, 0f, -8f), LayerExpansion.GetUILayer(), width: 0.035f);
             renderer.positionCount = poles.Length;
-            renderer.SetPositions(positions.Select(p => p.AsVector3(0f)).ToArray());
+            renderer.SetPositions(positions.Select(p => p.AsUnityVector3(0f)).ToArray());
             Color col = VColor.Green.RGBMultiplied(0.65f).ToUnityColor();
             renderer.SetColors(col, col);
 

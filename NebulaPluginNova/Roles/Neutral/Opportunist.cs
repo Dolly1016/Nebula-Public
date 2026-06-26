@@ -221,7 +221,7 @@ internal class Opportunist : DefinedRoleTemplate, HasCitation, DefinedRole
 
     private static IEnumerable<TaskArea> GetTaskArea(int num)
     {
-        var positions = TaskPositions[AmongUsUtil.CurrentMapId];
+        var positions = TaskPositions[NebulaAPI.AmongUs.MapId];
         var randomArray = Helpers.GetRandomArray(positions.Length);
         SystemTypes lastType = SystemTypes.Doors;
         int count = 0;
@@ -237,7 +237,7 @@ internal class Opportunist : DefinedRoleTemplate, HasCitation, DefinedRole
         }
     }
 
-    internal static IEnumerable<(Vector2 center, Vector2 size)> GetTaskPositions() => TaskPositions[AmongUsUtil.CurrentMapId].Select(t => ((t.Min + t.Max) * 0.5f, t.Max - t.Min));
+    internal static IEnumerable<(Vector2 center, Vector2 size)> GetTaskPositions() => TaskPositions[NebulaAPI.AmongUs.MapId].Select(t => ((t.Min + t.Max) * 0.5f, t.Max - t.Min));
     private static TaskArea[][] TaskPositions = [
         [
             TaskArea.Create(SystemTypes.Nav, null, new(18f, -4.6f), 2.5f),

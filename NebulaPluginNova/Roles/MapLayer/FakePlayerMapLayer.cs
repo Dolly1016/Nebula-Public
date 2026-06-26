@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Virial;
 using static Nebula.Roles.Impostor.Sculptor;
 
 namespace Nebula.Roles.MapLayer;
@@ -55,7 +56,7 @@ internal class FakePlayerMapLayer : MonoBehaviour
             var screenPosAsWorld = UnityHelper.ScreenToWorldPoint(Input.mousePosition, LayerExpansion.GetUILayer());
             var worldPosOnMinimap = transform.InverseTransformPoint(screenPosAsWorld);
             worldPosOnMinimap.z = -5f;
-            var worldPos = VanillaAsset.ConvertFromMinimapPosToWorld(worldPosOnMinimap, AmongUsUtil.CurrentMapId);
+            var worldPos = VanillaAsset.ConvertFromMinimapPosToWorld(worldPosOnMinimap, NebulaAPI.AmongUs.MapId);
 
             bool inMap = MapData.GetCurrentMapData().CheckMapArea(worldPos, 0.2f);
             if (inMap) OnClick(worldPos, worldPosOnMinimap);
@@ -67,8 +68,9 @@ internal class FakePlayerMapLayer : MonoBehaviour
         cameraDotRenderer = UnityHelper.CreateObject<SpriteRenderer>("DotImage", camera.transform, new(0f, 0f, -10f), LayerExpansion.GetDefaultLayer());
         cameraDotRenderer.sprite = whiteCircleSprite.GetSprite();
 
-        CurrentMapCenter = VanillaAsset.GetMapCenter(AmongUsUtil.CurrentMapId);
-        CurrentMapScale = VanillaAsset.GetMapScale(AmongUsUtil.CurrentMapId);
+        byte mapId = NebulaAPI.AmongUs.MapId;
+        CurrentMapCenter = VanillaAsset.GetMapCenter(mapId);
+        CurrentMapScale = VanillaAsset.GetMapScale(mapId);
     }
     protected virtual void Update()
     {
@@ -78,8 +80,8 @@ internal class FakePlayerMapLayer : MonoBehaviour
 
         var screenPosAsWorld = UnityHelper.ScreenToWorldPoint(Input.mousePosition, LayerExpansion.GetUILayer());
         var worldPosOnMinimap = transform.InverseTransformPoint(screenPosAsWorld);
-        var worldPos = VanillaAsset.ConvertFromMinimapPosToWorld(worldPosOnMinimap, AmongUsUtil.CurrentMapId);
-        camera.transform.position = worldPos;
+        var worldPos = VanillaAsset.ConvertFromMinimapPosToWorld(worldPosOnMinimap, NebulaAPI.AmongUs.MapId);
+        camera.transform.position = worldPos.AsUnityVector3(0f);
 
         worldPosOnMinimap.z = -5f;
         collider.transform.localPosition = worldPosOnMinimap;

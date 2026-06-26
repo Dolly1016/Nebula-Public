@@ -51,7 +51,7 @@ public class Comet : DefinedSingleAbilityRoleTemplate<Comet.Ability>, DefinedRol
         {
             if (AmOwner)
             {
-                AchievementToken<bool> acTokenCommon = new((AmongUsUtil.CurrentMapId is 0 or 4) ? "comet.common1" : "comet.common2", false, (val, _) => val);
+                AchievementToken<bool> acTokenCommon = new((NebulaAPI.AmongUs.MapId is 0 or 4) ? "comet.common1" : "comet.common2", false, (val, _) => val);
                 AchievementToken<(Vector2 pos, bool cleared)>? acTokenCommon2 = null;
 
                 if(BlazeDurationOption <= 15f && BlazeSpeedOption <= 2.5f)

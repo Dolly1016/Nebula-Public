@@ -115,7 +115,7 @@ internal class Navvy : DefinedSingleAbilityRoleTemplate<Navvy.Ability>, DefinedR
 
                         //テープを設置
                         sealRenderer = UnityHelper.CreateObject<SpriteRenderer>("Seal", tracker.CurrentTarget.transform,
-                        AmongUsUtil.CurrentMapId switch
+                        NebulaAPI.AmongUs.MapId switch
                         {
                             5 => new(0.35f, -0.3f, -0.001f),
                             2 => new(0.35f, -0.1f, -0.001f),
@@ -133,15 +133,15 @@ internal class Navvy : DefinedSingleAbilityRoleTemplate<Navvy.Ability>, DefinedR
 
                         //テープを設置
                         var isVert = InvalidDoor.IsVertDoor(currentTargetDoor);
-                        sealRenderer = UnityHelper.CreateObject<SpriteRenderer>("Seal", AmongUsLLImpl.ShipStatusInstance.transform, Vector3.zero, LayerExpansion.GetShipLayer());
-                        sealRenderer.transform.position = currentTargetDoor.transform.position + AmongUsUtil.CurrentMapId switch
+                        sealRenderer = UnityHelper.CreateObject<SpriteRenderer>("Seal", AmongUsLLImpl.ShipStatusInstance.transform, VVector3.Zero, LayerExpansion.GetShipLayer());
+                        sealRenderer.transform.position = currentTargetDoor.transform.position + NebulaAPI.AmongUs.MapId switch
                         {
                             5 => isVert ? new(0.25f, -1.0f, -0.001f) : new(0.35f, -0.6f, -0.001f),
                             4 => isVert ? new(0.25f, -0.7f, -0.001f) : new(0.55f, -0.5f, -0.001f),
                             _ => isVert ? new(0.2f, -0.7f, -0.001f) : new(0.48f, -0.45f, -0.001f)
                         };
                         float scale = 1.15f;
-                        if (AmongUsUtil.CurrentMapId is 4) scale /= 0.7f;
+                        if (NebulaAPI.AmongUs.MapId is 4) scale /= 0.7f;
                         sealRenderer.transform.localScale = Vector3.one * scale;
 
                         StatsSealDoor.Progress();

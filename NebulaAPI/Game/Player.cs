@@ -345,6 +345,7 @@ public interface Player : ICommandExecutor, IArchivedPlayer, IPlayerlike
     // Internal
 
     internal PlayerControl VanillaPlayer { get; }
+    internal PlayerPhysics VanillaPhysics { get; }
 
 
     // PlayerAPI

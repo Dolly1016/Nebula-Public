@@ -138,7 +138,7 @@ internal class AeroGuesserSenario : AbstractModuleContainer, IModule, IGameModeA
         yield return NebulaAPI.CurrentGame?.GetModule<Synchronizer>()?.CoSync(SynchronizeTag.PreStartGame, true);
 
         
-        HudManager.Instance.StartCoroutine(HudManager.Instance.CoFadeFullScreen(Color.black, Color.clear, 0.8f));
+        if(AmongUsLLImpl.TryGetHudManager(out var hudManager)) hudManager.StartCoroutine(hudManager.CoFadeFullScreen(Color.black, Color.clear, 0.8f));
 
         //ホストであればここで問題を作成する
         AeroGuesserQuizData.QuizEntry[]? entries = AmongUsClient.Instance.AmHost ? AeroGuesserQuizData.GetRandomEntry(CurrentSetting.QuizNum, [
@@ -207,7 +207,7 @@ internal class AeroGuesserSenario : AbstractModuleContainer, IModule, IGameModeA
 
         int ShowCount(int count)
         {
-            SoundManager.Instance.PlaySoundImmediate(AmongUsUtil.HnSPrefab.FinalHideCountdownSFX, false);
+            AmongUsLLImpl.SoundManagerInstance.PlaySoundImmediate(AmongUsUtil.HnSPrefab.FinalHideCountdownSFX, false);
 
             var fastQ = Arithmetic.Decel(1f, 0f, 0.3f);
             var slowQ = Arithmetic.Decel(1f, 0f, 1.15f);
@@ -355,7 +355,7 @@ internal class AeroGuesserSenario : AbstractModuleContainer, IModule, IGameModeA
             }
             else 
             {
-                cachedPlayerSelections[p.PlayerId] = new(byte.MaxValue, Vector2.zero, -1, true);
+                cachedPlayerSelections[p.PlayerId] = new(byte.MaxValue, VVector2.Zero, -1, true);
             }
         }
     }
@@ -365,7 +365,7 @@ internal class AeroGuesserSenario : AbstractModuleContainer, IModule, IGameModeA
     }
 
     
-    private record PlayerSelection(byte MapId, Vector2 Position, int Num, bool Fixed)
+    private record PlayerSelection(byte MapId, VVector2 Position, int Num, bool Fixed)
     {
         public PlayerSelection GetAsFixed() => new(MapId, Position, Num, true);
     }
@@ -379,7 +379,7 @@ internal class AeroGuesserSenario : AbstractModuleContainer, IModule, IGameModeA
         //得点計算
         if (AmongUsClient.Instance.AmHost)
         {
-            (byte playerId, int score, byte mapId, Vector2 position)[] results = cachedPlayerSelections.Select(selection =>
+            (byte playerId, int score, byte mapId, VVector2 position)[] results = cachedPlayerSelections.Select(selection =>
             {
                 int score = 0;
                 if (selection.Value.MapId == entry.mapId)
@@ -511,7 +511,7 @@ internal class AeroGuesserSenario : AbstractModuleContainer, IModule, IGameModeA
     }
 
     int clickCount = 0;
-    void IMinimapViewerInteraction.ClickMap(byte mapId, Vector2 position, bool isFixed)
+    void IMinimapViewerInteraction.ClickMap(byte mapId, VVector2 position, bool isFixed)
     {
         RpcSendSelection.Invoke((GamePlayer.LocalPlayer!.PlayerId, mapId, position, isFixed ? -1 : clickCount++));
         if (isFixed)
@@ -545,11 +545,11 @@ internal class AeroGuesserSenario : AbstractModuleContainer, IModule, IGameModeA
     });
 
     private (AeroGuesserQuizData.QuizEntry entry, bool isFirstOrLast)? unprocessedQuiz = null;
-    static private readonly RemoteProcess<(bool isFirstOrLast, byte mapId, int difficulty, Vector2 position, Vector2 viewport)> RpcSendQuiz = new("AeroGuesser.SendQuiz", (message, _) => {
+    static private readonly RemoteProcess<(bool isFirstOrLast, byte mapId, int difficulty, VVector2 position, VVector2 viewport)> RpcSendQuiz = new("AeroGuesser.SendQuiz", (message, _) => {
         ModSingleton<AeroGuesserSenario>.Instance?.unprocessedQuiz = (new(message.mapId, (AeroGuesserQuizData.Difficulty)message.difficulty, message.position, message.viewport), message.isFirstOrLast);
     });
 
-    static private readonly RemoteProcess<(byte playerId, byte mapId, Vector2 position, int num)> RpcSendSelection = new("AeroGuesser.SendSelection", (message, _) => {
+    static private readonly RemoteProcess<(byte playerId, byte mapId, VVector2 position, int num)> RpcSendSelection = new("AeroGuesser.SendSelection", (message, _) => {
         var cache = ModSingleton<AeroGuesserSenario>.Instance?.cachedPlayerSelections;
         if (cache == null) return;
         if(message.num == -1 && GeneralConfigurations.HurryTimerOption) ModSingleton<AeroGuesserSenario>.Instance!.hurryTimer = true;
@@ -560,7 +560,7 @@ internal class AeroGuesserSenario : AbstractModuleContainer, IModule, IGameModeA
     });
 
     private AeroPlayerOneQuizStatus[]? unprocessedStatus = null;
-    static private readonly RemoteProcess<(byte playerId, int score, byte mapId, Vector2 position)[]> RpcSendAnswer = new("AeroGuesser.SendAnswer", (message, _) => {
+    static private readonly RemoteProcess<(byte playerId, int score, byte mapId, VVector2 position)[]> RpcSendAnswer = new("AeroGuesser.SendAnswer", (message, _) => {
         ModSingleton<AeroGuesserSenario>.Instance?.unprocessedStatus = message.Select(entry => new AeroPlayerOneQuizStatus(entry.playerId, entry.score, entry.mapId, entry.position)).ToArray();
     });
 
@@ -572,4 +572,4 @@ internal class AeroGuesserSenario : AbstractModuleContainer, IModule, IGameModeA
     private bool hurryTimer = false;
 }
 
-internal record AeroPlayerOneQuizStatus(byte PlayerId, int Score, byte selectedMap, Vector2 selectedPosition);
+internal record AeroPlayerOneQuizStatus(byte PlayerId, int Score, byte selectedMap, VVector2 selectedPosition);

@@ -11,6 +11,8 @@ public enum SynchronizeTag
     CheckExtraVictims,
     PostMeeting,
     AeroGuessPreQuiz,
+    PaintQuizPreSharing,
+    PaintQuizPreQuiz,
 }
 
 [NebulaRPCHolder]

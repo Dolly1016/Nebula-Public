@@ -14,8 +14,8 @@ static internal class AnimationEffects
 
     static public IEnumerator CoPlayRoleNameEffect(Transform parent, Vector3 localPos, Color color, int layer, float scale = 1f)
     {
-        var renderer = UnityHelper.CreateObject<SpriteRenderer>("Anim", parent, localPos, layer);
-        renderer.transform.localScale = new(scale, scale, 1f);
+        var renderer = UnityHelper.CreateObject<SpriteRenderer>("Anim", parent, localPos, out var rendererObj, out var rendererTransform, layer);
+        rendererTransform.localScale = new(scale, scale, 1f);
         renderer.color = color;
         for (int i = 0; i < 5; i++)
         {
@@ -23,7 +23,7 @@ static internal class AnimationEffects
             renderer.sprite = NameEffectsImage.GetSprite(i);
             yield return new WaitForSeconds(0.09f);
         }
-        if (renderer.AsBoolFast()) UnityEngine.Object.Destroy(renderer.gameObject);
+        if (renderer.AsBoolFast()) UnityEngine.Object.Destroy(rendererObj);
         yield break;
     }
 

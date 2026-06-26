@@ -229,7 +229,7 @@ internal class KillRequestHandler
            // MurderPlayer ここから
 
            //死亡する本人でなくかつ全員にSEを再生する場合、あるいはキルの本人であればキルSEを再生する。
-           if (((!realTargetWillDie && param.KillParam.HasFlag(KillParameter.WithKillSEWidely)) || (param.Killer?.AmOwner ?? false)) && Constants.ShouldPlaySfx()) SoundManager.Instance.PlaySound(vanillaRealTarget.KillSfx, false, 0.8f, null);
+           if (((!realTargetWillDie && param.KillParam.HasFlag(KillParameter.WithKillSEWidely)) || (param.Killer?.AmOwner ?? false)) && Constants.ShouldPlaySfx()) AmongUsLLImpl.SoundManagerInstance.PlaySound(vanillaRealTarget.KillSfx, false, 0.8f, null);
 
 
            if (realTargetWillDie)
@@ -354,7 +354,7 @@ internal class KillRequestHandler
           bool amTarget = param.Target.AmOwner;
           bool everyoneShouldHearSE = realTargetWillDie && param.KillParam.HasFlag(KillParameter.WithKillSEWidely);
           bool dontPlaySe = param.KillParam.HasFlag(KillParameter.WithoutSelfSE);
-          if (((amKiller && !dontPlaySe) || (everyoneShouldHearSE && !amTarget)) && Constants.ShouldPlaySfx()) SoundManager.Instance.PlaySound(param.RealTarget.VanillaPlayer.KillSfx, false, 0.8f, null);
+          if (((amKiller && !dontPlaySe) || (everyoneShouldHearSE && !amTarget)) && Constants.ShouldPlaySfx()) AmongUsLLImpl.SoundManagerInstance.PlaySound(param.RealTarget.VanillaPlayer.KillSfx, false, 0.8f, null);
 
           if (param.Target is IFakePlayer fp)
           {
@@ -377,7 +377,7 @@ internal class KillRequestHandler
               }
 
 
-              if (MeetingHud.Instance.AsBoolFast()) MeetingHud.Instance.ResetPlayerState();
+              if (MeetingHud.Instance.AsBoolFast(out var meeting)) meeting.ResetPlayerState();
 
 
 

@@ -73,7 +73,7 @@ public class TrackerPlayerMapLayer : MonoBehaviour
         if (Target == null) return;
         iconPool.RemoveAll();
 
-        var currentMapId = AmongUsUtil.CurrentMapId;
+        var currentMapId = NebulaAPI.AmongUs.MapId;
         var center = VanillaAsset.GetMapCenter(currentMapId);
         var scale = VanillaAsset.GetMapScale(currentMapId);
 
@@ -81,7 +81,7 @@ public class TrackerPlayerMapLayer : MonoBehaviour
         if (!Target!.IsDead && !MeetingHud.Instance)
         {
             var icon = iconPool.Instantiate();
-            icon.transform.localPosition = VanillaAsset.ConvertToMinimapPos(Target.Position, center, scale);
+            icon.transform.localPosition = VanillaAsset.ConvertToMinimapPos(Target.Position, center, scale).AsUnityVector3();
         }
 
     }
