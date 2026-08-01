@@ -690,6 +690,20 @@ internal class JackalCriteria : AbstractModule<IGameModeStandard>, IGameOperator
     }
 };
 
+[NebulaPreprocess(PreprocessPhase.BuildNoSModule)]
+public class JackalBasicRuleOperator : AbstractModule<Virial.Game.Game>, IGameOperator
+{
+    static JackalBasicRuleOperator() => DIManager.Instance.RegisterModule(() => new JackalBasicRuleOperator());
+
+    private JackalBasicRuleOperator() => this.RegisterPermanently();
+
+    void CheckSameSide(PlayerIsSameSideCallback ev)
+    {
+        if (ev.Player1.Role.Role.Team == NebulaTeams.JackalTeam && !ev.Player1.CanKill(ev.Player2)) ev.MarkAsSameSide();
+        else if (ev.Player2.Role.Role.Team == NebulaTeams.JackalTeam && !ev.Player2.CanKill(ev.Player1)) ev.MarkAsSameSide();
+    }
+}
+
 [NebulaPreprocess(PreprocessPhase.PostRoles)]
 internal class JackalTeamAllocator : AbstractModule<Virial.Game.Game>, IGameOperator
 {

@@ -140,6 +140,11 @@ public class ImpostorBasicRuleOperator : AbstractModule<Virial.Game.Game>, IGame
     {
         if (callback.ExcludedTeam != NebulaTeams.ImpostorTeam && GamePlayer.AllPlayers.Any(p => p.IsImpostor && p.IsAlive)) callback.MarkRemaining();
     }
+
+    void CheckSameSide(PlayerIsSameSideCallback ev)
+    {
+        if ((ev.Player1.IsImpostor || ev.Player1.IsMadmate) && (ev.Player2.IsImpostor || ev.Player2.IsMadmate)) ev.MarkAsSameSide();
+    }
 }
 
 internal static class KillerOpportunityHelpers { 

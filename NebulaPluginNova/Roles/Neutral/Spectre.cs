@@ -570,6 +570,12 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             if (ShowWhereKillersAreOption) CheckAndTrackKiller(ev.Player);
         }
 
+        void CheckSameSide(PlayerIsSameSideCallback ev)
+        {
+            if (ev.Player1.Role.Role == this && IsSameTeam(ev.Player2)) ev.MarkAsSameSide();
+            if (ev.Player2.Role.Role == this && IsSameTeam(ev.Player1)) ev.MarkAsSameSide();
+        }
+
         private bool IsKiller(GamePlayer player, out VColor color)
         {
             if (player.IsImpostor)

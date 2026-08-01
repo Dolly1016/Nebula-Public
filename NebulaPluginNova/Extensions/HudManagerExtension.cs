@@ -31,7 +31,7 @@ public static class HudManagerExtension
 
         bridge.ReportButton.ToggleVisible(!flag && (NebulaGameManager.Instance?.LocalStatus.HasReportButton ?? false) && AmongUsLLImpl.ShipStatusInstance.AsBoolFast());
         bridge.KillButton.ToggleVisible((modPlayer?.ShowKillButton ?? true) && !flag);
-        bridge.SabotageButton.ToggleVisible((modRole?.CanInvokeSabotage ?? false));
+        bridge.SabotageButton.ToggleVisible((modPlayer?.CanInvokeSabotage ?? false));
 
         var ventState = GameOperatorManager.Instance?.Run(new Virial.Events.Player.PlayerUpdateVentStateLocalEvent(modPlayer));
 

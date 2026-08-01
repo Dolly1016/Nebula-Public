@@ -835,11 +835,6 @@ public interface RuntimeRole : RuntimeAssignable
     //AssignableAspectAPI
 
     /// <summary>
-    /// サボタージュを起こすことができる場合trueを返します。
-    /// </summary>
-    bool CanInvokeSabotage => Role.Category == RoleCategory.ImpostorRole;
-
-    /// <summary>
     /// バニラのキルボタンを使用できる場合trueを返します。
     /// </summary>
     bool HasVanillaKillButton => Role.Category == RoleCategory.ImpostorRole;

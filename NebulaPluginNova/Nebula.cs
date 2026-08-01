@@ -61,12 +61,12 @@ public class NebulaPlugin
     public const string PluginName = "NebulaOnTheShip";
     public const string PluginVersion = "3.4.1.3";
 
-    public const string VisualVersion = "v3.4.1.3";
-    //public const string VisualVersion = "Snapshot 26.06.27b";
+    //public const string VisualVersion = "v3.4.1.3";
+    public const string VisualVersion = "Snapshot 26.08.01a";
     //public const string VisualVersion = "Addon Loading DEMO 2";
 
     public const string PluginEpochStr = "108";
-    public const string PluginBuildNumStr = "1619";
+    public const string PluginBuildNumStr = "1620";
     public static readonly int PluginEpoch = int.Parse(PluginEpochStr);
     public static readonly int PluginBuildNum = int.Parse(PluginBuildNumStr);
     public const bool GuardVanillaLangData = false;

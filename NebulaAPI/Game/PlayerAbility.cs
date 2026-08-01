@@ -13,6 +13,16 @@ public interface IPlayerAbility : IBindPlayer, IGameOperator, ILifespan
     bool BlockUsingUtility => false;
 
     /// <summary>
+    /// インポスターであってもサボタージュが使用できない場合、trueを返します。
+    /// </summary>
+    bool BlockSabotage => false;
+
+    /// <summary>
+    /// 自身の陣営に関係なくサボタージュを発動できる場合、trueを返します。
+    /// </summary>
+    bool CanInvokeSabotage => false;
+
+    /// <summary>
     /// プレイヤーが通報ボタンを持つとき、trueを返します。
     /// falseを返すアビリティが1つでもあれば、プレイヤーは通報ボタンを持ちません。
     /// </summary>

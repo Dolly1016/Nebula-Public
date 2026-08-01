@@ -1,6 +1,7 @@
 ﻿using Hazel;
 using Nebula.Game.Statistics;
 using System.Text;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Patches;
@@ -236,17 +237,41 @@ public static class HeliSystemTypeDeterioratePatch
 [HarmonyPatch(typeof(SabotageSystemType), nameof(SabotageSystemType.UpdateSystem))]
 public static class SwitchSabotagePatch
 {
-    static bool Prefix(SabotageSystemType __instance, [HarmonyArgument(1)] Hazel.MessageReader msgReader)
+    static bool Prefix(SabotageSystemType __instance, [HarmonyArgument(0)] PlayerControl player, [HarmonyArgument(1)] Hazel.MessageReader msgReader)
     {
-        if (!(__instance.Timer > 0f) && !MeetingHud.Instance.AsBoolFast() && (SystemTypes)msgReader.PeekByte() == SystemTypes.Electrical && AmongUsClient.Instance.AmHost)
+        __instance.IsDirty = true;
+
+        if (__instance.Timer > 0f) return false;
+        if (MeetingHud.Instance.AsBoolFast()) return false;
+        if (!AmongUsLLImpl.AmongUsClientInstance.AmHost) return false;
+
+        var systemType = (SystemTypes)msgReader.PeekByte();
+
+        PlayerInvokeSabotageHostEvent.SabotageType virialSaboType = systemType switch
         {
-            __instance.IsDirty = true;
+            SystemTypes.Electrical => PlayerInvokeSabotageHostEvent.SabotageType.BlackOut,
+            SystemTypes.LifeSupp => PlayerInvokeSabotageHostEvent.SabotageType.O2,
+            SystemTypes.Reactor => PlayerInvokeSabotageHostEvent.SabotageType.Reactorlike,
+            SystemTypes.Laboratory => PlayerInvokeSabotageHostEvent.SabotageType.Reactorlike,
+            SystemTypes.HeliSabotage => PlayerInvokeSabotageHostEvent.SabotageType.Reactorlike,
+            SystemTypes.Comms => PlayerInvokeSabotageHostEvent.SabotageType.Communication,
+            _ => PlayerInvokeSabotageHostEvent.SabotageType.Others
+        };
+        if (virialSaboType != PlayerInvokeSabotageHostEvent.SabotageType.Others) {
+            GameOperatorManager.Instance?.Run<PlayerInvokeSabotageHostEvent>(new(virialSaboType, player.GetModInfo()!));
+        }
+
+
+
+        if (systemType == SystemTypes.Electrical)
+        {
             byte b = (byte)(System.Random.Shared.Next((1 << 6) - 1) + 1);
             AmongUsLLImpl.ShipStatusInstance.RpcUpdateSystem(SystemTypes.Electrical, (byte)(b | 128));
             __instance.Timer = 30f;
             __instance.IsDirty = true;
             return false;
         }
+
         return true;
     }
 }

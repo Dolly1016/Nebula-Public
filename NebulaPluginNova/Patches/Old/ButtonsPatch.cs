@@ -25,6 +25,22 @@ public static class SabotageButtonPatch
     }
 }
 
+[HarmonyPatch(typeof(SabotageButton), nameof(SabotageButton.DoClick))]
+public static class SabotageButtonDoClickPatch
+{
+    static bool Prefix(SabotageButton __instance)
+    {
+        if (!(GamePlayer.LocalPlayer?.CanInvokeSabotage ?? false)) return false;
+        if (!AmongUsLLImpl.TryGetLocalPlayer(out var localPlayer)) return false;
+        if (localPlayer.inVent) return false;
+        if (!AmongUsLLImpl.GameManagerInstance.SabotagesEnabled()) return false;
+
+        AmongUsLLImpl.HudManagerInstance.ToggleMapVisible(new MapOptions{ Mode = MapOptions.Modes.Sabotage });
+
+        return false;
+    }
+}
+
 // HnS無効にしているので不要？
 /*
 [HarmonyPatch(typeof(AdminButton), nameof(AdminButton.Refresh))]

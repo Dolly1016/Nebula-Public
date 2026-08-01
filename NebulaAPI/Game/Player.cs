@@ -757,6 +757,7 @@ public interface Player : ICommandExecutor, IArchivedPlayer, IPlayerlike
     PlayerTasks Tasks => GetModule<PlayerTasks>()!;
 
 
+    bool CanInvokeSabotage => AllAbilities.Any(a => a.CanInvokeSabotage) || (IsImpostor && !AllAbilities.Any(a => a.BlockSabotage));
 
     /// <summary>
     /// キルボタンを表示すべきか否かを取得します。
@@ -798,15 +799,11 @@ public interface Player : ICommandExecutor, IArchivedPlayer, IPlayerlike
     /// <returns></returns>
     public static Player? GetPlayer(byte playerId) => NebulaAPI.instance.CurrentGame?.GetPlayer(playerId);
 
-    public bool IsSameSideOf(Player player)
-    {
-        //TODO: いずれイベントでまとめる
-        var myTeam = this.Role.Role.Team;
-        if(this.IsTrueCrewmate && player.IsTrueCrewmate) return true;
-        if((this.IsImpostor || this.IsMadmate) && (player.IsImpostor || player.IsMadmate)) return true;
-        if (myTeam == NebulaTeams.JackalTeam) return !this.CanKill(player);
-        if (player.Role.Role.Team == NebulaTeams.JackalTeam) return !player.CanKill(this);
-        if(myTeam == player.Role.Role.Team) return true;
-        return false;
-    }
+    /// <summary>
+    /// 与えられたプレイヤーが仲間である場合、trueを返します。
+    /// 主に称号の獲得条件で仲間かどうか調べるときに使用します。
+    /// </summary>
+    /// <param name="player"></param>
+    /// <returns></returns>
+    bool IsSameSideOf(Player player);
 }

@@ -2385,6 +2385,10 @@ public class NebulaCosmeticsLayer : MonoBehaviour
                 if (id != cache?.Id) cache = itemProvider(productIdConverter(id));
                 if (cache != null) return cache;
             }
+            else
+            {
+                cache = null;
+            }
             return orig;
         }
 
@@ -2563,6 +2567,8 @@ public class NebulaCosmeticsLayer : MonoBehaviour
             hatBackExObj!.SetActive(false);
 
             foreach (var mask in HatMaskObjects()) mask.SetActive(false);
+
+            CurrentFunctionalModHatCache = null;
         }
 
         CosmicVisor? currentVisualVisor = null;
@@ -2697,6 +2703,8 @@ public class NebulaCosmeticsLayer : MonoBehaviour
             visorBackObj!.SetActive(false);
             visorFrontExObj!.SetActive(false);
             visorBackExObj!.SetActive(false);
+
+            CurrentFunctionalModVisorCache = null;
 
             foreach (var mask in VisorMaskObjects()) mask.SetActive(false);
         }

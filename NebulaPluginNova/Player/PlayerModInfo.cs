@@ -1593,6 +1593,13 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     Virial.Game.OutfitDefinition IPlayerlike.CurrentOutfit => CurrentOutfit.Outfit;
     Virial.Game.OutfitDefinition GamePlayer.DefaultOutfit => DefaultOutfit.Outfit;
 
+    bool GamePlayer.IsSameSideOf(GamePlayer player)
+    {
+        var ev = GameOperatorManager.Instance?.Run<PlayerIsSameSideCallback>(new(this, player));
+        if (ev == null) return false;
+        return ev.IsSameSide;
+    }
+
     // Virial::Internal
 
     PlayerControl GamePlayer.VanillaPlayer => MyControl;

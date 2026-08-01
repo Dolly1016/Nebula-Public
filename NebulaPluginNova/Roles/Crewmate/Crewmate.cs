@@ -68,3 +68,16 @@ public class CrewmateGameRule : AbstractModule<IGameModeStandard>, IGameOperator
         }
     }
 }
+
+[NebulaPreprocess(PreprocessPhase.BuildNoSModule)]
+public class CrewmateBasicRuleOperator : AbstractModule<Virial.Game.Game>, IGameOperator
+{
+    static CrewmateBasicRuleOperator() => DIManager.Instance.RegisterModule(() => new CrewmateBasicRuleOperator());
+
+    private CrewmateBasicRuleOperator() => this.RegisterPermanently();
+
+    void CheckSameSide(PlayerIsSameSideCallback ev)
+    {
+        if (ev.Player1.IsTrueCrewmate && ev.Player2.IsTrueCrewmate) ev.MarkAsSameSide();
+    }
+}

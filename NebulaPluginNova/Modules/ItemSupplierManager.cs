@@ -306,6 +306,8 @@ public class ItemSupplier : NebulaSyncStandardObject
             var supplier = NebulaSyncObject.GetObject<ItemSupplier>(message.objectId);
             if (supplier?.holdingPerk == null) return;
 
+            GameOperatorManager.Instance?.Run<PlayerGainPerkEvent>(new(message.player));
+
             if (message.player.AmOwner)
             {
                 ModSingleton<ItemSupplierManager>.Instance?.SetPerk(supplier.holdingPerk);
