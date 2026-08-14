@@ -1,0 +1,41 @@
+# Assignable
+
+"role.niceSlip.name" : "ナイススリップ"
+"role.niceSlip.short" : "スリ"
+"role.niceSlip.blurb" : "しなやか軟体生物"
+"role.niceSlip.hint" : "ドアをすり抜けて移動しよう"
+
+# Document
+
+"role.niceSlip.doc" : "閉じているドアをすり抜けて移動できるクルーメイトです。"
+"role.niceSlip.ability.title" : "固有能力 "すり抜け""
+"role.niceSlip.ability.main" : "閉じているドアのそばでのみ能力を使用できます。"
+
+# Options
+
+"options.role.niceSlip.detail" : "ナイススリップは閉じているドアをすり抜けられるクルーメイトです。"
+"options.role.niceSlip.slipCoolDown" : "すり抜けクールダウン"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.niceSlip.slip" : "ドアをすり抜けた回数"
+
+# Titles
+
+"achievement.niceSlip.common1.title" : "しなやかな身のこなし"
+"achievement.niceSlip.common1.goal" : "1回のゲーム中に3回以上、ドアをすり抜ける。"
+"achievement.niceSlip.common1.splitted.0" : "しなやかな"
+
+"achievement.niceSlip.common2.title" : "許されざる顔パス"
+"achievement.niceSlip.common2.goal" : "除染室のドアをすり抜ける。"
+"achievement.niceSlip.common2.flavor" : ""キレイそうな顔してたから..."<br>"面食いは黙ってな！""
+"achievement.niceSlip.common2.splitted.1" : "顔"
+
+"achievement.niceSlip.challenge.title" : "天道に阻むものなし"
+"achievement.niceSlip.challenge.goal" : "すり抜けから10秒以内に緊急会議を開始して<br>インポスターを追放する。"

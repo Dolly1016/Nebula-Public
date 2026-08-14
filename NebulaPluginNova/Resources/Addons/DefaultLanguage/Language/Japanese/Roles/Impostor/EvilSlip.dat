@@ -1,0 +1,30 @@
+# Assignable
+
+"role.evilSlip.name" : "イビルスリップ"
+"role.evilSlip.short" : "スリ"
+"role.evilSlip.blurb" : "密室殺人のトリック"
+"role.evilSlip.hint" : "ドアをすり抜けて移動しよう"
+
+# Document
+
+"role.evilSlip.doc" : "閉じているドアをすり抜けて移動できるインポスターです。"
+"role.evilSlip.ability.title" : "固有能力 "すり抜け""
+"role.evilSlip.ability.main" : "閉じているドアのそばでのみ能力を使用できます。"
+
+# Options
+
+"options.role.evilSlip.detail" : "イビルスリップは閉じているドアをすり抜けられるインポスターです。"
+"options.role.evilSlip.slipCoolDown" : "すり抜けクールダウン"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.evilSlip.slip" : "ドアをすり抜けた回数"
+
+# Titles
+

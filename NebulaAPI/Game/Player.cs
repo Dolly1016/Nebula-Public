@@ -155,6 +155,18 @@ public static class PlayerAttributes
     /// クールダウンの進行速度上昇効果を表します。
     /// </summary>
     static public IPlayerAttribute CooldownSpeed { get; internal set; }
+
+    /// <summary>
+    /// 壁越しでも姿が見えるようになる効果を表します。
+    /// 通常、視点主との間に壁を挟むプレイヤーは見えなくなりますが、この効果を持つ間はその判定を無視します。
+    /// </summary>
+    static public IPlayerAttribute VisibleThroughWall { get; internal set; }
+
+    /// <summary>
+    /// 姿はそのままに、頭上の名前表示だけを隠す効果を表します。
+    /// 名前表示には役職名も含まれます。
+    /// </summary>
+    static public IPlayerAttribute HiddenName { get; internal set; }
 }
 
 public class Outfit

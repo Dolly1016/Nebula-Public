@@ -1,0 +1,16 @@
+# Document
+
+"role.slip.ability.slip" : "<title>Slip</title>Squeeze through a closed door and move to the opposite side of it.<br>Slipping sideways squashes your body vertically and stretches it horizontally, while slipping up or down makes your body thin and stretches it lengthwise."
+
+# Options
+
+
+# Game
+
+"gameAction.slip.nice" : "Door Slip"
+"gameAction.slip.evil" : "Door Slip"
+
+# UI
+
+"button.label.slip" : "Slip"
+"ui.action.slip" : "Slip through a closed door."

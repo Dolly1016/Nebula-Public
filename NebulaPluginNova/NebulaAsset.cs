@@ -58,6 +58,8 @@ public enum NebulaAudioClip {
     AeroGuesserQuizEnd,
     AeroGuesserQuizStart,
     QuizScore,
+    Slip,
+    SlipPop,
 }
 
 public static class SoundManagerHelper
@@ -181,6 +183,8 @@ public static class NebulaAsset
         audioMap[NebulaAudioClip.AeroGuesserQuizEnd] = Load<AudioClip>("AeroQuizEnd.ogg");
         audioMap[NebulaAudioClip.AeroGuesserQuizStart] = Load<AudioClip>("AeroQuizStart.ogg");
         audioMap[NebulaAudioClip.QuizScore] = Load<AudioClip>("QuizScore.ogg");
+        audioMap[NebulaAudioClip.Slip] = Load<AudioClip>("Slip.mp3");
+        audioMap[NebulaAudioClip.SlipPop] = Load<AudioClip>("SlipPop.mp3");
         BrokenShaderMat = Load<Material>("BrokenShaderMat");
 
         PaparazzoShot = Load<GameObject>("PhotoObject");

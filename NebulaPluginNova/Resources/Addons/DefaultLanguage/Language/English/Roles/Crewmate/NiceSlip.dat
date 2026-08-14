@@ -1,0 +1,28 @@
+# Assignable
+
+"role.niceSlip.name" : "Nice Slip"
+"role.niceSlip.short" : "S"
+
+# Document
+
+"role.niceSlip.doc" : "A crewmate who can squeeze through closed doors."
+"role.niceSlip.ability.title" : "Inherent Ability [Slip]"
+"role.niceSlip.ability.main" : "The ability can only be used next to a closed door."
+
+# Options
+
+"options.role.niceSlip.detail" : "The Nice Slip is a crewmate who can squeeze through closed doors."
+"options.role.niceSlip.slipCoolDown" : "Slip Cooldown"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.niceSlip.slip" : "Number of door slips"
+
+# Titles
+

@@ -134,7 +134,7 @@ public class Seer : DefinedSingleAbilityRoleTemplate<Seer.Ability>, HasCitation,
         [Local, OnlyMyPlayer]
         void OnSeerDead(PlayerDieEvent ev)
         {
-            if (NebulaGameManager.Instance.AllPlayerInfo.All(p => !p.IsDead || p.AmOwner)) new StaticAchievementToken("seer.another1");
+            if (MyPlayer.IsAlive && NebulaGameManager.Instance!.AllPlayerInfo.All(p => !p.IsDead || p.AmOwner)) new StaticAchievementToken("seer.another1");
         }
     }
 }

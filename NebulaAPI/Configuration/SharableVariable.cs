@@ -12,13 +12,13 @@ public interface ISharableEntry
     /// <summary>
     /// RPC上でEntryを識別するためのID
     /// </summary>
-    internal int Id { get; set; }
+    internal protected int Id { get; set; }
 
     /// <summary>
     /// RPC上に載せる際の生の値。
     /// RPCを介した更新ではローカルの値は更新せず、現在の値のみ更新します。
     /// </summary>
-    internal int RpcValue { get; set; }
+    internal protected  int RpcValue { get; set; }
 
     /// <summary>
     /// このエントリが表す値を文字列で返します。
@@ -28,7 +28,7 @@ public interface ISharableEntry
     /// <summary>
     /// ローカルに保存されている値を復元します。
     /// </summary>
-    internal void RestoreSavedValue();
+    internal protected  void RestoreSavedValue();
 }
 
 /// <summary>
@@ -50,7 +50,7 @@ public interface ISharableVariable<T> : ISharableEntry, Reference<T>
     /// このメソッドでは書き換え可能なプレイヤーのチェックをスキップします。適切なプレイヤーであることを確認してから呼び出してください。
     /// </summary>
     /// <param name="value"></param>
-    internal void SetValueWithoutSaveUnsafe(T value);
+    internal protected void SetValueWithoutSaveUnsafe(T value);
 }
 
 /// <summary>

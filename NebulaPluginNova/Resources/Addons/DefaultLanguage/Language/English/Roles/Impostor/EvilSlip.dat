@@ -1,0 +1,28 @@
+# Assignable
+
+"role.evilSlip.name" : "Evil Slip"
+"role.evilSlip.short" : "Sl"
+
+# Document
+
+"role.evilSlip.doc" : "An impostor who can squeeze through closed doors."
+"role.evilSlip.ability.title" : "Inherent Ability [Slip]"
+"role.evilSlip.ability.main" : "The ability can only be used next to a closed door."
+
+# Options
+
+"options.role.evilSlip.detail" : "The Evil Slip is an impostor who can squeeze through closed doors."
+"options.role.evilSlip.slipCoolDown" : "Slip Cooldown"
+
+# Game
+
+
+# UI
+
+
+# Stats
+
+"stats.evilSlip.slip" : "Number of door slips"
+
+# Titles
+

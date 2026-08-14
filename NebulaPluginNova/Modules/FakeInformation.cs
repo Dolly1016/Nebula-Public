@@ -75,7 +75,7 @@ internal class FakeInformation : AbstractModule<Virial.Game.Game>, IGameOperator
             List<FakeAdminParam> param = new();
             foreach (var d in Helpers.AllDeadBodies()) if (d.ShouldBeOnAdmin()) param.Add(new(d.ParentId, d.TruePosition, false, true));
             //foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo) if (!p.IsDead) param.Add(new(p.PlayerId, p.VanillaPlayer.GetTruePosition(), p.Role.Role.Category == Virial.Assignable.RoleCategory.ImpostorRole, false));
-            foreach (var p in NebulaGameManager.Instance!.AllPlayerlike) if (!p.IsDead) param.Add(new(p.RealPlayer.PlayerId, p.TruePosition, p.RealPlayer.Role.Role.Category == Virial.Assignable.RoleCategory.ImpostorRole, false));
+            foreach (var p in NebulaGameManager.Instance!.AllPlayerlike) if (!p.IsDead) param.Add(new(p.RealPlayer.PlayerId, p.TruePosition, p.RealPlayer.IsImpostorlike, false));
             return new(param.ToArray());
         } }
 

@@ -1,0 +1,16 @@
+# Document
+
+"role.slip.ability.slip" : "<title>すり抜け</title>閉じているドアをすり抜けて、ドアを挟んだ反対側へ移動します。"
+
+# Options
+
+
+# Game
+
+"gameAction.slip.nice" : "ドアのすり抜け"
+"gameAction.slip.evil" : "ドアのすり抜け"
+
+# UI
+
+"button.label.slip" : "すり抜け"
+"ui.action.slip" : "閉じているドアをすり抜けます。"

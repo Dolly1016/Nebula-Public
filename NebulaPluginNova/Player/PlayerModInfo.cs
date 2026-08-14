@@ -148,6 +148,10 @@ public class PlayerAttributeImpl : IPlayerAttribute
 
         PlayerAttributes.Thurifer = new PlayerAttributeImpl(11, "$thurifer", "thurifer");
         PlayerAttributes.CooldownSpeed = new PlayerAttributeImpl(12, "cooldown", "cooldown");
+
+        //いずれも見た目にのみ作用する効果なので、他プレイヤーからは認識できないようにする
+        PlayerAttributes.VisibleThroughWall = new PlayerAttributeImpl(2, "$visibleThroughWall") { Cognizable = _ => false };
+        PlayerAttributes.HiddenName = new PlayerAttributeImpl(2, "$hiddenName") { Cognizable = _ => false };
     }
 }
 
@@ -1150,6 +1154,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
     private int visibilityCache = 0; //穏やかに変わる可視性のキャッシュ
     private int immediateVisibilityCache = 0; //即座に変わる可視性のキャッシュ
+    private bool hiddenNameCache = false; //名前表示を隠すかどうかのキャッシュ
     public bool IsInvisible => VisibilityLevel == 2;
     private int VisibilityLevel => Mathn.Max(immediateVisibilityCache, visibilityCache);
     private float VisibilityAlpha = 1f;
@@ -1253,6 +1258,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
                 //属性による可視性の情報を控えておく
                 visibilityCache = finalVisibility;
                 immediateVisibilityCache = immediateInvisibleLevel;
+                hiddenNameCache = HasAttribute(PlayerAttributes.HiddenName);
             }
 
             int visualInvisibleLevel = visibilityCache;
@@ -1265,7 +1271,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
                 mixedVisualInvisibleLevel = Mathn.Min(1, mixedVisualInvisibleLevel);
             }
 
-            playerNameParentObj.SetActive(!ModSingleton<ShowUp>.Instance.AnyoneShowedUp && !MyControl.inVent && (mixedVisualInvisibleLevel < 2) && showNameText /*&& MyControl.cosmetics.bodyType != PlayerBodyTypes.Long*/);
+            playerNameParentObj.SetActive(!ModSingleton<ShowUp>.Instance.AnyoneShowedUp && !MyControl.inVent && (mixedVisualInvisibleLevel < 2) && showNameText && !hiddenNameCache /*&& MyControl.cosmetics.bodyType != PlayerBodyTypes.Long*/);
 
             var myCosmetics = MyLayer;
             if (IsDead)
@@ -1309,6 +1315,8 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
                     if (GamePlayer.LocalPlayer!.IsDead) return false;
                     //自分自身であれば常に見える。
                     if (AmOwner) return false;
+                    //壁越しでも見える効果を持つ場合、常に見える
+                    if (HasAttribute(PlayerAttributes.VisibleThroughWall)) return false;
                     //ろくろ首はどこからでも見える
                     if (myCosmetics.bodyType == PlayerBodyTypes.Long) return false;
 
