@@ -68,9 +68,10 @@ public static class PlayerState
     public static TranslatableTag Poisoned = new("state.poisoned");
     public static TranslatableTag Layoff = new("state.layoff");
     public static TranslatableTag Punished = new("state.punished");
+    public static TranslatableTag SelfSacrifice = new("state.selfSacrifice");
     public static TranslatableTag Disconnected = new("state.disconnected") { Color = Color.gray };
     public static TranslatableTag[] AllKillStates = [Dead, Guessed, Embroiled, Trapped, Deranged, Cursed, Crushed, Frenzied, Gassed, Bubbled, Meteor, Starved, Balloon, Laser, Drill, Dissolved, Poisoned];
-    public static TranslatableTag[] AllDeadStates = [..AllKillStates, Lost, Suicide, Misguessed, Pseudocide, Exiled, Layoff, Punished];
+    public static TranslatableTag[] AllDeadStates = [..AllKillStates, Lost, Suicide, SelfSacrifice, Misguessed, Pseudocide, Exiled, Layoff, Punished];
     static PlayerState()
     {
         Virial.Text.PlayerStates.Alive = Alive;

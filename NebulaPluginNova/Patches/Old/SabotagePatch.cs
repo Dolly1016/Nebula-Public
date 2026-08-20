@@ -169,13 +169,14 @@ public static class HeliUpdateSystemPatch
 [HarmonyPatch(typeof(SwitchSystem), nameof(SwitchSystem.Deteriorate))]
 public static class SwitchSystemPatch
 {
-    static bool Prefix(SwitchSystem __instance)
+    static bool Prefix(SwitchSystem __instance, [HarmonyArgument(0)] float deltaTime)
     {
         if (NebulaGameManager.Instance?.LocalFakeSabotage?.HasFakeSabotage(SystemTypes.Electrical) ?? false)
         {
             __instance.Value = (byte)Math.Max((int)(__instance.Value - 3), 0);
             return false;
         }
+
         return true;
     }
 }

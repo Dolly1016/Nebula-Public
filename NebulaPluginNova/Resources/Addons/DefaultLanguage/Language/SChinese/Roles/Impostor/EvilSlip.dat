@@ -1,0 +1,31 @@
+# Assignable
+ 
+"role.evilSlip.name" : "邪恶的穿隙者"
+"role.evilSlip.short" : "邪穿"
+"role.evilSlip.blurb" : "密室诡计"
+"role.evilSlip.hint" : "可以穿过关闭的门。"
+ 
+# Document
+ 
+"role.evilSlip.doc" : "邪恶的穿隙者可以穿过关闭的门。"
+"role.evilSlip.ability.title" : "固有能力【柔韧】"
+"role.evilSlip.ability.main" : "只能在关闭的门附近使用。"
+ 
+# Options
+ 
+"options.role.evilSlip.detail" : "邪恶的穿隙者可以穿过关闭的门。"
+"options.role.evilSlip.slipCoolDown" : "穿入冷却时间"
+ 
+# Game
+ 
+ 
+# UI
+ 
+ 
+# Stats
+ 
+"stats.evilSlip.slip" : "穿入使用次数"
+ 
+# Titles
+ 
+ 

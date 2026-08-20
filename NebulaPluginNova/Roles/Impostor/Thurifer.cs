@@ -397,7 +397,7 @@ public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, Defi
                         while (t < delay)
                         {
                             //アニメーション中、追放中は何もしない
-                            if (MeetingHud.Instance.AsBoolFast() && MeetingHud.Instance.state < MeetingHud.VoteStates.Discussion)
+                            if (MeetingHud.Instance.AsBoolFast(out var meetingHud) && meetingHud.state < MeetingHud.MeetingStates.Discussion)
                             {
                                 yield return null;
                             }

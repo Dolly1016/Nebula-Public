@@ -231,7 +231,7 @@ internal class Creeping : DefinedSingleAbilityRoleTemplate<Creeping.Ability>, Ha
             if (MyCreeping != null)
             {
                 if (ExileController.Instance.AsBoolFast()) return;
-                if (MeetingHud.Instance.AsBoolFast() && MeetingHud.Instance.state >= MeetingHud.VoteStates.Results) return;
+                if (MeetingHud.Instance.AsBoolFast(out var meetingHud) && meetingHud.state >= MeetingHud.MeetingStates.Results) return;
 
                 timer -= ev.DeltaTime;
                 if (timer < 0f)

@@ -101,7 +101,7 @@ public class Comet : DefinedSingleAbilityRoleTemplate<Comet.Ability>, DefinedRol
             if (MyPlayer.HasAttribute(PlayerAttributes.Invisible))
             {
                 if (ev.Dead.AmOwner) return;
-                if (!Helpers.AnyNonTriggersBetween(MyPlayer.VanillaPlayer.GetTruePosition(), ev.Dead.VanillaPlayer.GetTruePosition(), out var vec) &&
+                if (!Helpers.AnyNonTriggersBetween(MyPlayer.TruePosition, ev.DeadBodyPos ?? ev.Dead.TruePosition, out var vec) &&
                     vec.Magnitude < BlazeVisionOption * 0.75f)
                     new StaticAchievementToken("comet.challenge");
             }

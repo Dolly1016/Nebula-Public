@@ -17,6 +17,7 @@ using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Text;
 using static UnityEngine.UI.GridLayoutGroup;
 
 namespace Nebula.Roles.Impostor;
@@ -55,7 +56,7 @@ internal class Viper : DefinedSingleAbilityRoleTemplate<Viper.Ability>, HasCitat
                     AcidCooldownOption.GetCooldown(MyPlayer.TeamKillCooldown), "acid", Virial.Components.ModAbilityButton.LabelType.Impostor,
                     new WrapSpriteLoader(()=> AmongUsUtil.GetRolePrefab<ViperRole>()!.killSprite),
                     (player, button) => {
-                        MyPlayer.MurderPlayer(player, PlayerState.Dissolved, null, KillParameter.NormalKill | KillParameter.WithViperDeadBody);
+                        MyPlayer.MurderPlayer(player, PlayerState.Dissolved, EventDetails.Kill, KillParameter.NormalKill | KillParameter.WithViperDeadBody);
                         button.StartCoolDown();
                     },
                     p => predicate(p));

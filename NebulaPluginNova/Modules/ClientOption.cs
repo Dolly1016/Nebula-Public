@@ -251,7 +251,7 @@ public class ClientOption
                 {
                     foreach(var area in MeetingHud.Instance.playerStates)
                     {
-                        var p = GamePlayer.GetPlayer(area.TargetPlayerId);
+                        var p = GamePlayer.GetPlayer(area.PlayerId.Value);
                         if (p != null) NameplateSetCosmeticsPatch.Postfix(area, p.VanillaPlayer.Data);
                     }
                 }

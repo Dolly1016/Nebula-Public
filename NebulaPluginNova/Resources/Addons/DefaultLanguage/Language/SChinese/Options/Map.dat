@@ -34,7 +34,7 @@
 "options.map.flipY" : "地图垂直翻转"
 "options.map.canHearOthersFootstep" : "可以听到其他玩家脚步声"
 "options.map.othersFootstepRange" : "脚步声传播范围"
-"options.map.hideFarKiller" : "隐藏远程击杀凶手"
+"options.map.hideFarKiller" : "远程击杀不显示凶手"
 
 # Map Customization
 

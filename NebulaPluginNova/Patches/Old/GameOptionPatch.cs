@@ -241,23 +241,27 @@ class CreateGameOptionsAwakePatch
             NormalGameOptionsV08.MaxImpostors = 
             NormalGameOptionsV09.MaxImpostors =
             NormalGameOptionsV10.MaxImpostors =
+            NormalGameOptionsV11.MaxImpostors =
             LegacyGameOptions.MaxImpostors = ModdedOptionValues.MaxImpostors;
 
         NormalGameOptionsV07.RecommendedImpostors = 
             NormalGameOptionsV08.RecommendedImpostors =
             NormalGameOptionsV09.RecommendedImpostors =
             NormalGameOptionsV10.RecommendedImpostors =
+            NormalGameOptionsV11.RecommendedImpostors =
             LegacyGameOptions.RecommendedImpostors = ModdedOptionValues.RecommendedImpostors;
 
         NormalGameOptionsV07.RecommendedKillCooldown = 
             NormalGameOptionsV08.RecommendedKillCooldown =
             NormalGameOptionsV09.RecommendedKillCooldown =
             NormalGameOptionsV10.RecommendedKillCooldown =
+            NormalGameOptionsV11.RecommendedKillCooldown =
             LegacyGameOptions.RecommendedKillCooldown = ModdedOptionValues.RecommendedKillCondown;
         NormalGameOptionsV07.MinPlayers =
             NormalGameOptionsV08.MinPlayers =
             NormalGameOptionsV09.MinPlayers =
             NormalGameOptionsV10.MinPlayers =
+            NormalGameOptionsV11.MinPlayers =
             LegacyGameOptions.MinPlayers = ModdedOptionValues.MinPlayers;
 
         //ゲームモードはノーマル固定

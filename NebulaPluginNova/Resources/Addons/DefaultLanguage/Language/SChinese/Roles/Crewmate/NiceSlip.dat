@@ -1,0 +1,42 @@
+# Assignable
+ 
+"role.niceSlip.name" : "正义的穿隙者"
+"role.niceSlip.short" : "正穿"
+"role.niceSlip.blurb" : "柔韧的身体构造"
+"role.niceSlip.hint" : "可以穿过关闭的门。"
+ 
+# Document
+ 
+"role.niceSlip.doc" : "正义的穿隙者可以穿过关闭的门。"
+"role.niceSlip.ability.title" : "固有能力【柔韧】"
+"role.niceSlip.ability.main" : "只能在关闭的门附近使用。"
+ 
+# Options
+ 
+"options.role.niceSlip.detail" : "正义的穿隙者可以穿过关闭的门。"
+"options.role.niceSlip.slipCoolDown" : "穿入冷却时间"
+ 
+# Game
+ 
+ 
+# UI
+ 
+ 
+# Stats
+ 
+"stats.niceSlip.slip" : "穿入使用次数"
+ 
+# Titles
+ 
+"achievement.niceSlip.common1.title" : "柔韧之躯"
+"achievement.niceSlip.common1.goal" : "在同一局游戏中穿过3次以上的门。"
+"achievement.niceSlip.common1.splitted.0" : "柔韧"
+ 
+"achievement.niceSlip.common2.title" : "厚脸皮"
+"achievement.niceSlip.common2.goal" : "穿过去污室的门。"
+"achievement.niceSlip.common2.flavor" : "“你怎么那么不卫生……”"
+"achievement.niceSlip.common2.splitted.1" : "脸"
+ 
+"achievement.niceSlip.challenge.title" : "风雨无阻"
+"achievement.niceSlip.challenge.goal" : "穿过关闭的门后，在10秒内发起紧急会议并驱逐伪装者。"
+ 

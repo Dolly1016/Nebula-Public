@@ -93,7 +93,7 @@ public class MeetingPlayerButtonManager : AbstractModule<Virial.Game.Game>, IGam
 
         foreach (var playerVoteArea in MeetingHud.Instance.playerStates)
         {
-            var player = NebulaGameManager.Instance?.GetPlayer(playerVoteArea.TargetPlayerId);
+            var player = NebulaGameManager.Instance?.GetPlayer(playerVoteArea.PlayerId.Value);
             if (player == null) continue;
 
             GameObject template = playerVoteArea.Buttons.transform.Find("CancelButton").gameObject;
@@ -153,7 +153,7 @@ public class MeetingPlayerButtonManager : AbstractModule<Virial.Game.Game>, IGam
 
     private void DoClick(MeetingPlayerButtonState player)
     {
-        if (!(MeetingHud.Instance.state == MeetingHud.VoteStates.Voted || MeetingHud.Instance.state == MeetingHud.VoteStates.NotVoted)) return;
+        if (!(MeetingHud.Instance.state == MeetingHud.MeetingStates.Voted || MeetingHud.Instance.state == MeetingHud.MeetingStates.NotVoted)) return;
         if (currentAction != null)
         {
             currentAction.ButtonAction.Invoke(player);

@@ -1955,7 +1955,7 @@ public class NebulaNameplate : MonoBehaviour
     public void UpdateColor()
     {
         var voteArea = GetComponent<PlayerVoteArea>();
-        SetColors(voteArea.TargetPlayerId, AdaptiveRenderer);
+        SetColors(voteArea.PlayerId.Value, AdaptiveRenderer);
     }
 }
 
@@ -2104,14 +2104,15 @@ public class NebulaCosmeticsLayer : MonoBehaviour
         }
 
         var bodyParent = MyLayer.normalBodySprite.BodySprite.transform.parent;
-        if (bodyParent.gameObject.TryGetComponent<MeetingCalledAnimation>(out _))
+        var bodyParentParent = bodyParent.AsBoolFast() ? bodyParent.parent : null;
+        if (bodyParentParent.AsBoolFast() && bodyParentParent!.gameObject.TryGetComponent<MeetingCalledAnimation>(out _))
         {
             MyLayer.gameObject.AddComponent<SortingGroup>();
         }
-        else if(bodyParent.parent.AsBoolFast())
+        else if(bodyParentParent.AsBoolFast())
         {
             SetSortingProperty(true, 10000f);
-            bodyParent.parent.gameObject.AddComponent<SortingGroup>();
+            bodyParentParent!.gameObject.AddComponent<SortingGroup>();
         }
         else
         {
@@ -3266,7 +3267,7 @@ public static class TabEnablePatch
             IEnumerable<(NamePlateData vanillaData, CosmicNameplate? modData)> unlockedVanillaNameplates = DestroyableSingleton<HatManager>.Instance.GetUnlockedNamePlates().Select(hat => (hat, (CosmicNameplate?)null));
             IEnumerable<(NamePlateData vanillaData, CosmicNameplate? modData)> modNameplates = MoreCosmic.AllNameplates.Values.Select(plate => (plate.VanillaItem, (CosmicNameplate?)plate));
 
-            __instance.previewArea.TargetPlayerId = NebulaPlayerTab.PreviewColorId;
+            __instance.previewArea.PlayerId = NebulaPlayerTab.PreviewColorId;
             SetUpTab(__instance, HatManager.Instance.allNamePlates.First(v => v.IsEmpty), unlockedVanillaNameplates.Concat(modNameplates),
                 () => HatManager.Instance.GetNamePlateById(DataManager.Player.Customization.NamePlate),
                 (nameplate) => __instance.SelectNameplate(nameplate),
@@ -3342,7 +3343,7 @@ public static class TabEnablePatch
             {
                 nebulaPlate.AdaptiveRenderer.sprite = mPlate.Adaptive?.GetSprite(0);
                 nebulaPlate.AdaptiveRenderer.transform.localPosition = new Vector3(0, 0, mPlate.AdaptiveInFront ? -0.1f : 0.1f);
-                SetColors(__instance.TargetPlayerId, nebulaPlate.AdaptiveRenderer);
+                SetColors(__instance.PlayerId.Value, nebulaPlate.AdaptiveRenderer);
 
             }
             else

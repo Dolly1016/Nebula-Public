@@ -255,7 +255,7 @@ internal class Gambler : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                 highlight.enabled = false;
                 highlight.color = UnityEngine.Color.red;
                 highlight.transform.localPosition = new(-0.0155f, 0.0127f, -2.8f);
-                highlights[pva.TargetPlayerId] = highlight;
+                highlights[pva.PlayerId.Value] = highlight;
             }
             void ClearAllHighlights() => highlights.Do(entry => entry.Value.enabled = false);
             void UpdateHighlight(byte player, bool on) => highlights[player].enabled = on;
@@ -333,7 +333,7 @@ internal class Gambler : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                 var button = renderer.gameObject.SetUpButton(true);
                 button.OnClick.AddListener(() =>
                 {
-                    if (MeetingHud.Instance.state != MeetingHud.VoteStates.NotVoted) return;
+                    if (MeetingHud.Instance.state != MeetingHud.MeetingStates.NotVoted) return;
 
                     if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
                         betting.CheckAndUpdateNumber(-1, bettings, myChips);
@@ -342,7 +342,7 @@ internal class Gambler : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                 });
                 button.OnMouseOver.AddListener(() =>
                 {
-                    if (MeetingHud.Instance.state != MeetingHud.VoteStates.NotVoted) return;
+                    if (MeetingHud.Instance.state != MeetingHud.MeetingStates.NotVoted) return;
                     NebulaManager.Instance.SetHelpWidget(button, Language.Translate(betting.IsNoVoteBetting ? "gambler.ui.zeroBetting" : "gambler.ui.maxBetting").Bold() + "<br>" + Language.Translate("gambler.betting.control"));
                     betting.TargetRenderers.Do(r => r.transform.localScale = new(0.35f, 0.35f, 1f));
                 });
@@ -354,7 +354,7 @@ internal class Gambler : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                 var exButton = button.gameObject.AddComponent<ExtraPassiveBehaviour>();
                 exButton.OnRightClicked = () =>
                 {
-                    if (MeetingHud.Instance.state != MeetingHud.VoteStates.NotVoted) return;
+                    if (MeetingHud.Instance.state != MeetingHud.MeetingStates.NotVoted) return;
                     RemoveBetting(betting);
                 };
 
@@ -366,7 +366,7 @@ internal class Gambler : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                 List<SpriteRenderer> renderers = [];
                 foreach(var pva in MeetingHud.Instance.playerStates)
                 {
-                    if ((targetMask & (1 << pva.TargetPlayerId)) == 0) continue;
+                    if ((targetMask & (1 << pva.PlayerId.Value)) == 0) continue;
 
                     var chipsRenderer = UnityHelper.CreateObject<SpriteRenderer>("GamblerChips", pva.transform, new(1.3f, 0.15f, -2f));
                     chipsRenderer.material = renderer.sharedMaterial;
@@ -395,7 +395,7 @@ internal class Gambler : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 
             addButtonObj = GenerateMeetingButton(0, () =>
             {
-                if (MeetingHud.Instance.state != MeetingHud.VoteStates.NotVoted) return;
+                if (MeetingHud.Instance.state != MeetingHud.MeetingStates.NotVoted) return;
 
                 int mask = 0;
                 int count = 0;
@@ -419,7 +419,7 @@ internal class Gambler : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             checkButtonObj = GenerateMeetingButton(1, () =>
             {
                 var meetingHud = MeetingHud.Instance;
-                if (meetingHud.state == MeetingHud.VoteStates.NotVoted)
+                if (meetingHud.state == MeetingHud.MeetingStates.NotVoted)
                 {
                     if (CanVoteOption)
                     {
@@ -460,7 +460,7 @@ internal class Gambler : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                     x += 0.38f;
                 }
 
-                bool finished = MeetingHud.Instance.state == MeetingHud.VoteStates.Voted;
+                bool finished = MeetingHud.Instance.state == MeetingHud.MeetingStates.Voted;
 
                 if (hueStack.Count == 0 || finished || bettings.Count >= MaxBettingPatternsOption)
                 {

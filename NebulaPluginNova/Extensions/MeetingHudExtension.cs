@@ -105,13 +105,13 @@ public static class MeetingHudExtension
     {
         foreach (var p in MeetingHud.Instance.playerStates.GetFastEnumerator())
         {
-            if (((1 << p.TargetPlayerId) & VoteForMask) != 0)
+            if (((1 << p.PlayerId.Value) & VoteForMask) != 0)
                 p.SetEnabled();
             else
                 p.SetDisabled();
         }
 
-        if (CanSkip && MeetingHud.Instance.CurrentState == MeetingHud.VoteStates.NotVoted && CanVote)
+        if (CanSkip && MeetingHud.Instance.CurrentState == MeetingHud.MeetingStates.NotVoted && CanVote)
             MeetingHud.Instance.SkipVoteButton.SetEnabled();
         else
             MeetingHud.Instance.SkipVoteButton.SetDisabled();
@@ -121,12 +121,12 @@ public static class MeetingHudExtension
     {
         foreach (PlayerVoteArea pva in meetingHud.playerStates.GetFastEnumerator())
         {
-            var p = NebulaGameManager.Instance?.GetPlayer(pva.TargetPlayerId);
+            var p = NebulaGameManager.Instance?.GetPlayer(pva.PlayerId.Value);
             bool isDead = p == null || p.IsDead || p.WillDie;
 
             if (pva.AmDead == isDead) continue;
 
-            pva.SetDead(pva.DidReport, isDead);
+            pva.SetDead(isDead);
             pva.Overlay.gameObject.SetActive(isDead);
         }
 
@@ -135,7 +135,7 @@ public static class MeetingHudExtension
 
     public static void ResetPlayerState(this MeetingHud meetingHud)
     {
-        if (MeetingHud.Instance.state <= MeetingHud.VoteStates.Discussion)
+        if (MeetingHud.Instance.state <= MeetingHud.MeetingStates.Discussion)
         {
             meetingHud.UpdatePlayerState();
             return;
@@ -143,7 +143,8 @@ public static class MeetingHudExtension
 
         Reset();
 
-        meetingHud.ClearVote();
+        //自身の投票状態をリセット
+        meetingHud.ClearVote(byte.MaxValue, true);
 
         meetingHud.UpdatePlayerState();
         foreach (PlayerVoteArea voter in meetingHud.playerStates.GetFastEnumerator())
@@ -232,10 +233,10 @@ public static class MeetingHudExtension
         RpcModCastVote.Invoke((playerId, suspectIdx, votes));
     }
 
-    public static PlayerVoteArea GetPlayer(this MeetingHud instance, int playerId) => instance.playerStates.FirstOrDefault(p => p.TargetPlayerId == playerId)!;
+    public static PlayerVoteArea GetPlayer(this MeetingHud instance, int playerId) => instance.playerStates.FirstOrDefault(p => p.PlayerId.Value == playerId)!;
     public static bool TryGetPlayer(this MeetingHud instance, int playerId, [MaybeNullWhen(false)]out PlayerVoteArea pva)
     {
-        pva = instance.playerStates.FirstOrDefault(p => p.TargetPlayerId == playerId);
+        pva = instance.playerStates.FirstOrDefault(p => p.PlayerId.Value == playerId);
         return pva != null;
     }
 
@@ -246,7 +247,7 @@ public static class MeetingHudExtension
             MeetingHud hud = MeetingHud.Instance;
 
             WeightMap[message.source] = message.weight;
-            if (AmongUsLLImpl.LocalPlayer.PlayerId == message.source) hud.state = MeetingHud.VoteStates.Voted;
+            if (AmongUsLLImpl.LocalPlayer.PlayerId == message.source) hud.state = MeetingHud.MeetingStates.Voted;
 
             GameOperatorManager.Instance?.Run(new PlayerVoteCastEvent(GamePlayer.GetPlayer(message.source)!, GamePlayer.GetPlayer(message.target), message.weight));
 
@@ -386,7 +387,7 @@ public static class MeetingHudExtension
         yield return meetingHud.MeetingIntro.CoRun();
         meetingHud.SetMasksEnabled(false);
         meetingHud.TitleText.text = VanillaTranslationCache.GetString(StringNames.MeetingWhoIsTitle);
-        meetingHud.state = MeetingHud.VoteStates.Discussion;
+        meetingHud.state = MeetingHud.MeetingStates.Discussion;
         ControllerManager.Instance.OpenOverlayMenu(meetingHud.name, null, meetingHud.DefaultButtonSelected, meetingHud.ControllerSelectable, false);
         ConsoleJoystick.SetMode_Menu();
         yield break;
@@ -416,7 +417,9 @@ public static class MeetingHudExtension
                 pva.NameText.text = "???";
                 pva.LevelNumberText.transform.parent.gameObject.SetActive(false);
             }
-            pva.SetDead(asReporter, !asReporter, false);
+            if(asReporter) pva.SetReporter();
+            pva.SetDead(!asReporter);
+            
             return pva;
         }
         PlayerVoteArea playerVoteArea = GeneratePva(intro.OverlayParent, intro.ReporterPos, reporter, true, 0);
@@ -512,7 +515,7 @@ public static class MeetingHudExtension
         var meetingHud = MeetingHud.Instance;
         if (!meetingHud.AsBoolFast()) return;
         var state = meetingHud.state;
-        if (state == MeetingHud.VoteStates.Voted || state == MeetingHud.VoteStates.NotVoted)
+        if (state == MeetingHud.MeetingStates.Voted || state == MeetingHud.MeetingStates.NotVoted)
         {
             if (!keepCurrentVoting) meetingHud.ResetPlayerState();
             meetingHud.ForceSkipAll();

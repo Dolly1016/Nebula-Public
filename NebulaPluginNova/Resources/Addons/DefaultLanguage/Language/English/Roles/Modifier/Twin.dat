@@ -1,0 +1,33 @@
+# Assignable
+
+"role.twin.name" : "Twin"
+"role.twin.generalBlurb" : "Two Bodies, One Soul"
+"role.twin.blurb" : "You are the twin of %NAME%"
+
+# Document
+
+"role.twin.doc" : "A modifier for pairs of 2. Twins are chosen only from among Crewmates.<br>When either twin is about to be killed, the kill is prevented and the other one dies instead by <var>self-sacrifice</var>.<br>Only the killer can see the guard effect when a kill is prevented.<br>While both twins are alive, they can cast only <var>one vote between the two of them</var>.<br>Being a Twin grants no victory condition of its own."
+
+# Options
+
+"options.role.twin.detail" : "Twins are a pair of Crewmates.<br>A kill on one of them is prevented at the cost of the other's life."
+"options.role.twin.numOfPairs" : "# Pairs"
+"options.role.twin.selfSacrificeDelay" : "Self-Sacrifice Delay"
+"options.role.twin.selfSacrificeDelayDispersion" : "Self-Sacrifice Delay Dispersion"
+"options.role.twin.selfSacrificeDelayDispersion.detail" : "Adding variation to the delay makes it even more difficult to identify Twins from the time difference between the kill and the partner's death."
+
+# Game
+
+"state.selfSacrifice" : "Self-Sacrifice"
+
+# UI
+
+
+# Stats
+
+
+# Titles
+
+
+# Team
+

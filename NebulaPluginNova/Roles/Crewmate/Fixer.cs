@@ -77,7 +77,7 @@ internal class Fixer : DefinedSingleAbilityRoleTemplate<Fixer.Ability>, DefinedR
 
                    if (MyPlayer.IsSameSideOf(p.MyPlayer))
                    {
-                       if (MeetingHud.Instance.playerStates.Count(pva => pva.VotedFor == p.MyPlayer.PlayerId) >= 5)
+                       if (MeetingHud.Instance.playerStates.Count(pva => pva.VotedForId.Value == p.MyPlayer.PlayerId) >= 5)
                        {
                            GameOperatorManager.Instance?.SubscribeSingleListener<MeetingEndEvent>((ev) => { if (ev.Exiled.Any(p => !MyPlayer.IsSameSideOf(p))) new StaticAchievementToken("fixer.common2"); });
                        }

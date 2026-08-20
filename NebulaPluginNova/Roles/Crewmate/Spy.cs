@@ -86,9 +86,9 @@ internal class Spy : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignableD
                 }, this);
             }
 
-            if (!MeetingHud.Instance && !ev.Dead.AmOwner)
+            if (!MeetingHud.Instance.AsBoolFast() && !ev.Dead.AmOwner)
             {
-                if (ev.Murderer.IsImpostor && ev.Dead.Position.Distance(MyPlayer.Position) < 3f) new StaticAchievementToken("spy.common2");
+                if (ev.Murderer.IsImpostor && (ev.DeadBodyPos ?? ev.Dead.Position).Distance(MyPlayer.Position) < 3f) new StaticAchievementToken("spy.common2");
             }
         }
 

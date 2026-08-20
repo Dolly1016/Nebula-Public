@@ -791,7 +791,7 @@ public static class AmongUsUtil
             scaledAsset.spritesToScale.Add(renderer);
     }
 
-    public static NormalGameOptionsV10 GetCurrentNormalOption() => GameOptionsManager.Instance.currentNormalGameOptions; //GameOptionsManager.Instance.CurrentGameOptions.CastFast<NormalGameOptionsV10>();
+    public static NormalGameOptionsV11 GetCurrentNormalOption() => GameOptionsManager.Instance.currentNormalGameOptions; //GameOptionsManager.Instance.CurrentGameOptions.CastFast<NormalGameOptionsV10>();
 
     public static bool MapIsOpen => MapBehaviour.Instance.AsBoolFast() && MapBehaviour.Instance.IsOpen;
 

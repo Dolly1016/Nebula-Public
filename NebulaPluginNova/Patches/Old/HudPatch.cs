@@ -2,6 +2,7 @@
 using Nebula.Behavior;
 using Nebula.Game.Statistics;
 using Nebula.Modules.Cosmetics;
+using System.Text;
 using Virial.DI;
 using Virial.Events.Player;
 using static Nebula.Modules.HelpScreen;
@@ -158,7 +159,22 @@ class TaskTextPatch
     {
         try
         {
-            __instance.taskText.text = GameOperatorManager.Instance?.Run(new PlayerTaskTextLocalEvent(GamePlayer.LocalPlayer, __instance.taskText.text)).Text;
+            if (PlayerControl.LocalPlayer.AsBoolFast(out var localPlayer))
+            {
+                string GetEmergencyTasksText()
+                {
+                    Il2CppSystem.Text.StringBuilder sb = new(), dummy = new();
+                    foreach (var task in localPlayer.myTasks.GetFastEnumerator())
+                    {
+                        if (!PlayerTask.TaskIsEmergency(task)) continue;
+
+                        task.AppendTaskText(dummy);
+                        task.AppendTaskText(sb);
+                    }
+                    return sb.ToString();
+                }
+                __instance.taskText.text = GameOperatorManager.Instance?.Run(new PlayerTaskTextLocalEvent(GamePlayer.LocalPlayer, __instance.taskText.text, GetEmergencyTasksText)).Text;
+            }
         }
         catch { }
     }

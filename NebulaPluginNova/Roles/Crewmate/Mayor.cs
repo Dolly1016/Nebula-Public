@@ -95,7 +95,7 @@ public class Mayor : DefinedSingleAbilityRoleTemplate<Mayor.Ability>, HasCitatio
 
                 var binder = UnityHelper.CreateObject("MayorButtons", MeetingHud.Instance.SkipVoteButton.transform.parent, MeetingHud.Instance.SkipVoteButton.transform.localPosition);
                 GameOperatorManager.Instance?.Subscribe<GameUpdateEvent>(ev=> {
-                    binder.gameObject.SetActive(!MyPlayer.IsDead && MeetingHud.Instance.CurrentState == MeetingHud.VoteStates.NotVoted);
+                    binder.gameObject.SetActive(!MyPlayer.IsDead && MeetingHud.Instance.CurrentState == MeetingHud.MeetingStates.NotVoted);
                 }, new GameObjectLifespan(binder));
 
                 var countText = UnityEngine.Object.Instantiate(MeetingHud.Instance.TitleText, binder.transform);

@@ -1,0 +1,16 @@
+# Document
+ 
+"role.slip.ability.slip" : "<title>穿入</title>穿过关闭的门，通过门缝移动到门的另一侧。"
+ 
+# Options
+ 
+ 
+# Game
+ 
+"gameAction.slip.nice" : "穿过门缝"
+"gameAction.slip.evil" : "穿过门缝"
+ 
+# UI
+ 
+"button.label.slip" : "穿入"
+"ui.action.slip" : "穿过关闭的门。"

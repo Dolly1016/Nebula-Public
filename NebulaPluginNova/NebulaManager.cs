@@ -1,4 +1,5 @@
 ﻿using Il2CppInterop.Runtime.Injection;
+using Il2CppInterop.Runtime.Runtime;
 using Il2CppSystem.Xml.Schema;
 using InnerNet;
 using Nebula.Behavior;

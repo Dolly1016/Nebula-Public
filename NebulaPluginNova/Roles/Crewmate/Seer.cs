@@ -82,7 +82,7 @@ public class GhostAndFlashAbility : IGameOperator
         if (ev.Player.AmOwner) return;
         if (!ev.Dead.HasAttribute(PlayerAttributes.BuskerEffect))
         {
-            new Ghost(ev.Dead.Position, GhostDuration, CommonToken, CanSeeGhostInShadow).RegisterPermanently();
+            new Ghost(ev.DeadBodyPos ?? ev.Dead.Position, GhostDuration, CommonToken, CanSeeGhostInShadow).RegisterPermanently();
             AmongUsUtil.PlayFlash(FlashColor);
         }
     }

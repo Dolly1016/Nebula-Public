@@ -212,8 +212,8 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                 bool usedInTheMeeting = true;
                 var meetingButton = new Modules.ScriptComponents.ModAbilityButtonImpl(alwaysShow: true).Register(this);
                 meetingButton.SetSprite(meetingButtonSprite.GetSprite());
-                meetingButton.Availability = (button) => MeetingHud.Instance.AsBoolFast(out var meeting) && meeting.CurrentState == MeetingHud.VoteStates.NotVoted;
-                meetingButton.Visibility = (button) => !MyPlayer.IsDead && LeftMeeting > 0 && MeetingHud.Instance.AsBoolFast(out var meeting) && (meeting.CurrentState == MeetingHud.VoteStates.NotVoted || meeting.CurrentState == MeetingHud.VoteStates.Discussion) && !usedInTheMeeting;
+                meetingButton.Availability = (button) => MeetingHud.Instance.AsBoolFast(out var meeting) && meeting.CurrentState == MeetingHud.MeetingStates.NotVoted;
+                meetingButton.Visibility = (button) => !MyPlayer.IsDead && LeftMeeting > 0 && MeetingHud.Instance.AsBoolFast(out var meeting) && (meeting.CurrentState == MeetingHud.MeetingStates.NotVoted || meeting.CurrentState == MeetingHud.MeetingStates.Discussion) && !usedInTheMeeting;
                 var meetingIcon = meetingButton.ShowUsesIcon(4);
                 meetingButton.OnClick = (button) =>
                 {
@@ -326,7 +326,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                     if (scarletArea?.DidVote ?? false)
                     {
                         if (!ev.DidVote) ev.Vote = 1;
-                        ev.VoteTo = NebulaGameManager.Instance?.GetPlayer(scarletArea.VotedFor);
+                        ev.VoteTo = NebulaGameManager.Instance?.GetPlayer(scarletArea.VotedForId.Value);
                     }
                 }
 
@@ -357,7 +357,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             MyRole.MeetingFixedScarlet = p.PlayerId;
             if ((NebulaGameManager.Instance?.CanSeeAllInfo ?? false) || calledByMe)
             {
-                var voteFor = MeetingHud.Instance.GetPlayer(p.PlayerId)?.VotedFor ?? byte.MaxValue;
+                var voteFor = MeetingHud.Instance.GetPlayer(p.PlayerId)?.VotedForId.Value ?? byte.MaxValue;
                 if (GamePlayer.GetPlayer(voteFor) != null) UpdateVisualCommand(voteFor);
             }
         });

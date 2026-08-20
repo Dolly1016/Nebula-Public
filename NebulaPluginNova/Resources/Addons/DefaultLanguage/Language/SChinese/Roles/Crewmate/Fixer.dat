@@ -6,7 +6,7 @@
 
 # Document
 
-"role.fixer.doc" : "控局者可以在会议中屏蔽其他玩家的通讯。"
+"role.fixer.doc" : "控局者可以在会议中屏蔽其他玩家的通讯与会议中的能力。"
 "role.fixer.ability.title" : "固有能力【辩证调停】"
 "role.fixer.ability.main" : "在会议中可以对一名玩家实施干扰，屏蔽其平板的通信。<br>请勿盲目屏蔽他人，利用它保护最重要的船员。"
 "role.fixer.ability.jamming" : "<title>屏蔽</title>屏蔽目标平板的通讯。<br>该能力有一定使用次数。"

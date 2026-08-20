@@ -156,7 +156,7 @@ internal class KillRequestHandler
         bool isMeetingKill = inMeetingActually || !killParam.HasFlag(KillParameter.WithDeadBody);
         if (inMeetingActually)
         {
-            bool isAnimating = inMeeting && meeting.state <= MeetingHud.VoteStates.Animating;
+            bool isAnimating = inMeeting && meeting.state <= MeetingHud.MeetingStates.Animating;
             if(!isAnimating && !inExile) killParam |= KillParameter.WithKillSEWidely;
         }
         if(inExile) killParam |= KillParameter.WithoutSelfSE;

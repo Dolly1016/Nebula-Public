@@ -92,7 +92,7 @@ static public class MeetingRoleSelectWindow
         {
             if (MeetingHud.Instance.AsBoolFast())
             {
-                while (MeetingHud.Instance.state != MeetingHud.VoteStates.Results) yield return null;
+                while (MeetingHud.Instance.state != MeetingHud.MeetingStates.Results) yield return null;
             }
             else
             {
@@ -147,7 +147,7 @@ static file class GuesserSystem
                     if (GamePlayer.LocalPlayer?.IsDead ?? false) return;
                     var meetingHud = MeetingHud.Instance;
                     var meetingState = meetingHud.state;
-                    if (!(meetingState == MeetingHud.VoteStates.Voted || meetingState == MeetingHud.VoteStates.NotVoted)) return;
+                    if (!(meetingState == MeetingHud.MeetingStates.Voted || meetingState == MeetingHud.MeetingStates.NotVoted)) return;
                     if (!MeetingHudExtension.CanUseAbilityFor(p, true)) return;
 
                     if (guessIf?.Invoke() ?? true)
