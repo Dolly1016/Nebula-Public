@@ -255,7 +255,7 @@ internal class Gimlet : DefinedSingleAbilityRoleTemplate<Gimlet.Ability>, Define
 
             if(!killInvoked && !player.AmOwner && !localPlayer.IsDead && !localPlayer.IsDived && (CanKillImpostorOption || player.CanKill(localPlayer)) && player.Position.Distance(localPlayer.Position) < (DrillSizeOption * 0.55f + 0.25f))
             {
-                player.MurderPlayer(localPlayer, PlayerState.Drill, null, KillParameter.RemoteKill);
+                player.MurderPlayer(localPlayer, PlayerState.Drill, EventDetails.Kill, KillParameter.RemoteKill);
                 killInvoked = true;
             }
 

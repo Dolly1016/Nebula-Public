@@ -1,6 +1,7 @@
 ﻿using AmongUs.Data;
 using AmongUs.GameOptions;
 using Il2CppInterop.Runtime.Injection;
+using InnerNet;
 using Nebula.Behavior;
 using Nebula.Game.Statistics;
 using Nebula.Map;
@@ -680,20 +681,15 @@ public static class AmongUsUtil
         HudManager.Instance.StartCoroutine(GetEnumarator().WrapToIl2Cpp());
     }
 
-    public static bool IsCustomServer()
-    {
-        return ServerManager.Instance?.CurrentRegion.TranslateName is StringNames.NoTranslation or null;
-    }
+    public static bool IsCustomServer() => ServerManager.Instance?.CurrentRegion.TranslateName is StringNames.NoTranslation or null;
+    
 
-    public static bool IsLocalServer()
-    {
-        return AmongUsClient.Instance.NetworkMode == NetworkModes.LocalGame;
-    }
+    public static bool IsLocalServer() => AmongUsClient.Instance.NetworkMode == NetworkModes.LocalGame;
+    
+    public static bool IsLocalLobby() => GameCode.IntToGameName(AmongUsClient.Instance.GameId) == null;
 
-    public static bool IsOnlineServer()
-    {
-        return AmongUsClient.Instance.NetworkMode == NetworkModes.OnlineGame;
-    }
+    public static bool IsOnlineServer() => AmongUsClient.Instance.NetworkMode == NetworkModes.OnlineGame;
+    
 
     public static void SetPlayerMaterial(Renderer renderer, VColor mainColor, VColor shadowColor, VColor visorColor)
     {

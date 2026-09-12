@@ -136,6 +136,8 @@ public class PlayerAttributeImpl : IPlayerAttribute
         PlayerAttributes.CurseOfBloody = new PlayerAttributeImpl(3, "curseOfBloody", "curseOfBloody");
         PlayerAttributes.Footprint = new PlayerAttributeImpl(3, "footprint", "footprint") { Cognizable = _ => false };
         PlayerAttributes.Isolation = new PlayerAttributeImpl(4, "$isolation", "isolation") { Cognizable = p => p.IsImpostor };
+        PlayerAttributes.IsolationAdmin = new PlayerAttributeImpl(4, "$isolationAdmin", "isolationAdmin") { Cognizable = p => p.IsImpostor, IdenticalAttribute = PlayerAttributes.Isolation };
+        PlayerAttributes.IsolationVitals = new PlayerAttributeImpl(4, "$isolationVitals", "isolationVitals") { Cognizable = p => p.IsImpostor, IdenticalAttribute = PlayerAttributes.Isolation };
         PlayerAttributes.BuskerEffect = new PlayerAttributeImpl(4, "busker", "busker") { Cognizable = _ => false };
         PlayerAttributes.InternalInvisible = new PlayerAttributeImpl(2, "$internalInvisible") { Cognizable = _ => false, IdenticalAttribute = PlayerAttributes.Invisible };
 
@@ -1512,7 +1514,11 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     GamePlayer? GamePlayer.MyKiller => MyKiller;
 
     // Virial::ReportAPI
-    void GamePlayer.ReportDeadBody(GamePlayer deadBody, bool canInvokeInSabo, bool consumeEmergencyButton) => MeetingHudExtension.ModCmdReportDeadBody(this, deadBody, MeetingHudExtension.ReportType.ReportDeadBody, canInvokeInSabo, consumeEmergencyButton);
+    void GamePlayer.ReportDeadBody(GamePlayer deadBody, bool canInvokeInSabo, bool consumeEmergencyButton)
+    {
+        if (!(NebulaGameManager.Instance?.LocalStatus.CanReport ?? false)) return;
+        MeetingHudExtension.ModCmdReportDeadBody(this, deadBody, MeetingHudExtension.ReportType.ReportDeadBody, canInvokeInSabo, consumeEmergencyButton);
+    }
     void GamePlayer.RequestEmergencyMeeting(bool canInvokeInSabo, bool consumeEmergencyButton) => MeetingHudExtension.ModCmdReportDeadBody(this, null, MeetingHudExtension.ReportType.EmergencyMeeting, canInvokeInSabo, consumeEmergencyButton);
 
     // Virial::HoldingAPI

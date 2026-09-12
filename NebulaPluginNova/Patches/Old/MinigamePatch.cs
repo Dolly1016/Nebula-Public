@@ -358,3 +358,43 @@ public static class TaskAdderGamePatch
         return true;
     }
 }
+
+//ID入力タスクの0省略ブロック(Airship, Common Task)
+[HarmonyPatch(typeof(EnterCodeMinigame), nameof(EnterCodeMinigame.AcceptDigits))]
+public static class EnterCodeMinigameAcceptDigitsPatch
+{
+    public static void Prefix(EnterCodeMinigame __instance)
+    {
+        if (__instance.NumberText.text.Length != 5) __instance.number = 0;
+    }
+}
+
+//ID入力タスクの0省略ブロック(Skeld & MIRA HQ, O2 Sabotage)
+[HarmonyPatch(typeof(KeypadGame), nameof(KeypadGame.Enter))]
+public static class KeypadGameEnterPatch
+{
+    public static void Prefix(KeypadGame __instance)
+    {
+        if (__instance.NumberText.text.Length != 5) __instance.number = 0;
+    }
+}
+
+//ID入力タスクの0省略ブロック(Airship, Heri. Sabotage)
+[HarmonyPatch(typeof(AirshipAuthGame), nameof(AirshipAuthGame.Enter))]
+public static class AirshipAuthGameEnterPatch
+{
+    public static void Prefix(AirshipAuthGame __instance)
+    {
+        if (__instance.NumberText.text.Length != 5) __instance.number = 0;
+    }
+}
+
+//ID入力タスクの0省略ブロック(MIRA HQ & Fungle, Comm. Sabotage)
+[HarmonyPatch(typeof(AuthGame), nameof(AuthGame.Enter))]
+public static class AuthGameEnterPatch
+{
+    public static void Prefix(AuthGame __instance)
+    {
+        if (__instance.NumberText.text.Length != 5) __instance.number = 0;
+    }
+}

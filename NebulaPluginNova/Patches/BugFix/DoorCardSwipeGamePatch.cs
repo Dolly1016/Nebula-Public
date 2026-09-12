@@ -57,3 +57,44 @@ internal static class DoorCardSwipeGameUpdatePatch
         }
     }
 }
+
+/// <summary>
+/// 高リフレッシュレートで垂直同期がオンのとき、カードスワイプがうまくいかない問題。
+/// </summary>
+[HarmonyPatch(typeof(CardSlideGame), nameof(CardSlideGame.Update))]
+internal static class CardSlideGameUpdatePatch
+{
+    static private bool shouldHelp = false;
+    static private float lastY = 0f;
+    static void Prefix(CardSlideGame __instance)
+    {
+        shouldHelp = AmongUsUtil.IsInFastUpdate && __instance.State == CardSlideGame.TaskStages.Inserted && Controller.currentTouchType != Controller.TouchType.Joystick;
+        lastY = __instance.col.transform.localPosition.y;
+    }
+    static void Postfix(CardSlideGame __instance)
+    {
+        if (shouldHelp)
+        {
+            var currentY = __instance.col.transform.localPosition.y;
+            var diff = lastY - currentY;
+            if (diff > 0.01f)
+            {
+                //ここに入れば元の処理で正しく時間が加算される。
+            }
+            else if (diff > 0.01f * AmongUsUtil.FastRate)
+            {
+                __instance.dragTime += Time.deltaTime;
+                __instance.redLight.color = __instance.gray;
+                __instance.greenLight.color = __instance.gray;
+                if (!__instance.moving)
+                {
+                    __instance.moving = true;
+                    if (Constants.ShouldPlaySfx())
+                    {
+                        AmongUsLLImpl.SoundManagerInstance.PlaySound(__instance.CardMove.ToArray().Random(), false, 1f, null);
+                    }
+                }
+            }
+        }
+    }
+}

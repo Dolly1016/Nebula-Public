@@ -78,13 +78,13 @@ public static class PolishTeleportStoneStartPatch
         SetHue(rubyRenderer);
 
         rubyGame.Buttons.Do(b => SetHue(b.GetComponent<SpriteRenderer>()));
-        rubyGame.Buttons[0].ModGameObject(false).Position = new(1.4263f, 0.9409f, -1f);
-        rubyGame.Buttons[1].ModGameObject(false).Position = new(-1.2148f, 1.1671f, -1f);
-        rubyGame.Buttons[2].ModGameObject(false).Position = new(0.0426f, 2.0312f, -1f);
-        rubyGame.Buttons[3].ModGameObject(false).Position = new(-1.5018f, 0.0475f, -1f);
-        rubyGame.Buttons[4].ModGameObject(false).Position = new(-0.2493f, 0.8739f, -1f);
-        rubyGame.Buttons[5].ModGameObject(false).Position = new(-0.7164f, -0.8277f, -1f);
-        rubyGame.Buttons[6].ModGameObject(false).Position = new(0.5165f, -0.4754f, -1f);
+        rubyGame.Buttons[0].ModGameObject(false).LocalPosition = new(1.4263f, 0.9409f, -1f);
+        rubyGame.Buttons[1].ModGameObject(false).LocalPosition = new(-1.2148f, 1.1671f, -1f);
+        rubyGame.Buttons[2].ModGameObject(false).LocalPosition = new(0.0426f, 2.0312f, -1f);
+        rubyGame.Buttons[3].ModGameObject(false).LocalPosition = new(-1.5018f, 0.0475f, -1f);
+        rubyGame.Buttons[4].ModGameObject(false).LocalPosition = new(-0.2493f, 0.8739f, -1f);
+        rubyGame.Buttons[5].ModGameObject(false).LocalPosition = new(-0.7164f, -0.8277f, -1f);
+        rubyGame.Buttons[6].ModGameObject(false).LocalPosition = new(0.5165f, -0.4754f, -1f);
 
         rubyGame.Buttons[2].ModGameObject(false).LocalEulerAngles = new(0f, 0f, 350f);
         rubyGame.Buttons[6].ModGameObject(false).LocalEulerAngles = new(0f, 0f, 270f);

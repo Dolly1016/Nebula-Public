@@ -1,6 +1,7 @@
 ﻿using Interstellar.Routing.Router;
 using Interstellar.VoiceChat;
 using Nebula.Behavior;
+using Nebula.Game.Hud;
 using Nebula.Game.Statistics;
 using Nebula.Modules.Cosmetics;
 using Nebula.Modules.PreStartProcess;
@@ -323,6 +324,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     public AttributeShower AttributeShower { get; private set; } = new();
     public RPCScheduler Scheduler { get; private set; } = new();
     public LocalStatus LocalStatus { get; private set; } = new();
+    private SystemMessageNotification? systemMessageShower = null;
     public FakeSabotageStatus? LocalFakeSabotage => GamePlayer.LocalPlayer?.Unbox().FakeSabotage;
     public IRoleAllocator? RoleAllocator { get; internal set; } = null;
 
@@ -958,6 +960,13 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     public void RegisterInputMapper(Func<Virial.Compat.VirtualKeyInput, Virial.Compat.VirtualKeyInput> mapper, ILifespan lifespan)
     {
         inputMappers.Add(new(mapper, lifespan));
+    }
+
+    public void PushSystemMessage(string text, bool chatOnly = false)
+    {
+        if (!HudManager.InstanceExists) return;
+        systemMessageShower ??= new(HudManager.Instance);
+        systemMessageShower.ShowMessage(text, chatOnly);
     }
 }
 

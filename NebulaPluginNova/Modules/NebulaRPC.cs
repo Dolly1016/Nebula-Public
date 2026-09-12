@@ -3,6 +3,7 @@ using Il2CppSystem.Reflection.Internal;
 using InnerNet;
 using MonoMod.Utils;
 using Nebula.Modules.Logging;
+using Nebula.Online;
 using Nebula.Scripts;
 using Sentry.Internal.Extensions;
 using System.Reflection;
@@ -1117,7 +1118,7 @@ class NebulaRPCInGameHandlerPatch
 {
     static public void ReceiveMessage(Hazel.MessageReader reader)
     {
-        var virialReadaer= MessageReader.Get(reader);
+        var virialReadaer = MessageReader.Get(reader);
         int id = virialReadaer.ReadInt32();
         try
         {
@@ -1136,12 +1137,30 @@ class NebulaRPCInGameHandlerPatch
             virialReadaer.End();
         }
     }
-     
+
 
     static void Postfix([HarmonyArgument(0)] byte callId, [HarmonyArgument(1)] Hazel.MessageReader reader)
     {
-        if (callId != 128) return;
+        switch (callId)
+        {
+            case 128:
+                ReceiveMessage(reader);
+                break;
+            case NebulaAuthProtocol.AuthCallId:
+                NoSAuth.ReceiveAuth(reader);
+                break;
 
-        ReceiveMessage(reader);
+            case NebulaAuthProtocol.ResultCallId:
+                NoSAuth.ReceiveResult(reader);
+                break;
+
+            case NebulaAuthProtocol.RoomCallId:
+                PublicRoomService.Receive(reader);
+                break;
+
+            case NebulaAuthProtocol.MessageCallId:
+                ServerNotification.Receive(reader);
+                break;
+        }
     }
 }

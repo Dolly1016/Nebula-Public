@@ -6,10 +6,6 @@ using Virial.Game;
 
 namespace Nebula.Roles.Complex;
 
-/// <summary>
-/// 閉じているドアをすり抜けられる役職です。
-/// ドアの向きに応じて、身体を横方向あるいは縦方向に引き伸ばしながら移動します。
-/// </summary>
 [NebulaRPCHolder]
 public class Slip : DefinedSingleAbilityRoleTemplate<Slip.Ability>, DefinedRole, IAssignableDocument
 {

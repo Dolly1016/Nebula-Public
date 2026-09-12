@@ -144,15 +144,17 @@ public static class MeetingHudExtension
         Reset();
 
         //自身の投票状態をリセット
-        meetingHud.ClearVote(byte.MaxValue, true);
+        meetingHud.ClearVote(new(GamePlayer.LocalPlayer!.PlayerId), true);
 
         meetingHud.UpdatePlayerState();
+
         foreach (PlayerVoteArea voter in meetingHud.playerStates.GetFastEnumerator())
         {
             voter.ThumbsDown.enabled = false;
             voter.UnsetVote();
             voter.ClearButtons();
         }
+
         meetingHud.SkipVoteButton.ClearButtons();
 
         GameOperatorManager.Instance?.Run(new MeetingResetEvent());

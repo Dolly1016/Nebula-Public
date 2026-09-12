@@ -114,7 +114,11 @@ public static class CountOverlayUpdatePatch
                             var p = admin.Players[i];
 
                             if (p.isDead && !MapBehaviourExtension.ShowDeadBodies) continue;
-                            if (MapBehaviourExtension.AffectedByFakeAdmin && (NebulaGameManager.Instance?.GetPlayer(p.playerId)?.HasAttribute(PlayerAttributes.Isolation) ?? false)) continue;
+
+                            GamePlayer player = GamePlayer.GetPlayer(p.playerId);
+                            if (player == null) continue;
+
+                            if (MapBehaviourExtension.AffectedByFakeAdmin && (player.HasAttribute(PlayerAttributes.Isolation) || player.HasAttribute(PlayerAttributes.IsolationAdmin))) continue;
 
                             if (AlreadyAdded(i)) continue;
 

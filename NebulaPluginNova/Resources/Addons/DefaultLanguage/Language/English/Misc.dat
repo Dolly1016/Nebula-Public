@@ -100,6 +100,7 @@
 
 "notification.lobby.noTitleForFreeplay" : "Titles cannot be earned in free play."
 "notification.lobby.noTitleForOP" : "Titles cannot be earned in games where the host has the OP permission."
+"notification.server.systemRole" : "Server"
 
 # Inventory
 

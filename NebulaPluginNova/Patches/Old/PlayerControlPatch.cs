@@ -989,6 +989,7 @@ public class DissolvedDeadBodyClickPatch
         if((__instance.ParentId & DissolvedDeadBodyMask) != 0)
         {
             if (__instance.Reported) return false;
+            if (!(NebulaGameManager.Instance?.LocalStatus.CanReport ?? false)) return false;
 
             var localPlayer = AmongUsLLImpl.LocalPlayer;
             Vector2 truePosition = localPlayer.GetTruePosition();

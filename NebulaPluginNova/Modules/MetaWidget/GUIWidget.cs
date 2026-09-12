@@ -350,7 +350,7 @@ public class NebulaGUIWidgetEngine : Virial.Media.GUI
                 AttributeAsset.CenteredBold => new TextAttribute(Virial.Text.TextAlignment.Center, GetFont(FontAsset.Gothic), Virial.Text.FontStyle.Bold, new(1.9f, 1f, 1.9f), new(8f, 8f), new(255, 255, 255), true),
                 AttributeAsset.CenteredBoldFixed => new TextAttribute(Virial.Text.TextAlignment.Center, GetFont(FontAsset.Gothic), Virial.Text.FontStyle.Bold, new(1.9f, 1f, 1.9f), new(1.1f, 0.32f), new(255, 255, 255), false),
                 AttributeAsset.LeftBoldFixed => new TextAttribute(Virial.Text.TextAlignment.Left, GetFont(FontAsset.Gothic), Virial.Text.FontStyle.Bold, new(1.9f, 1f, 1.9f), new(1.1f, 0.32f), new(255, 255, 255), false),
-                
+
                 AttributeAsset.OverlayTitle => new TextAttribute(GUI.Instance.GetAttribute(AttributeParams.StandardBaredBoldLeft)) { FontSize = new(1.8f) },
                 AttributeAsset.OverlayContent => new TextAttribute(GUI.Instance.GetAttribute(AttributeParams.StandardBaredLeft)) { FontSize = new(1.5f, 1.1f, 1.5f), Size = new(5f, 6f) },
                 AttributeAsset.OverlayBold => new TextAttribute(GUI.Instance.GetAttribute(AttributeParams.StandardBaredLeft)) { FontSize = new(1.5f, 1.1f, 1.5f), Size = new(5f, 6f), Style = Virial.Text.FontStyle.Bold },

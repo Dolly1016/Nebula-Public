@@ -18,11 +18,22 @@ namespace Nebula.Scripts;
 
 internal class AddonBehaviour
 {
+    internal class LibraryCondition
+    {
+        [JsonSerializableField]
+        public string Library;
+        [JsonSerializableField]
+        public string Addon;
+    }
+
     [JsonSerializableField]
     public bool LoadRoles = false;
 
     [JsonSerializableField]
     public bool UseHiddenMembers = false;
+
+    [JsonSerializableField]
+    public List<LibraryCondition> LoadCondition = [];
 }
 
 internal record AddonScript(Assembly Assembly, NebulaAddon Addon, object? Reference, AddonBehaviour Behaviour, List<(Assembly LibAssembly, string LibPath)> Assemblies);
@@ -225,6 +236,13 @@ internal static class AddonScriptManager
                 foreach (var lib in libraries)
                 {
                     var fileName = $"{addon.Id}_{addon.HandshakeHash.ToBase36()}_{lib.FullName.Substring(libPrefix.Length, lib.FullName.Length - libPrefix.Length - 4)}.dll";
+
+                    //読み込み条件を考慮。依存ライブラリが読み込まれていれば読み込みをスキップ
+                    var libName = lib.Name.Substring(0, lib.Name.Length - 4);
+                    if(addonBehaviour?.LoadCondition.Find(cond => cond.Library == libName, out var found) ?? false)
+                    {
+                        if (addon.Dependency.Any(addon => addon.Id == found.Addon)) continue;
+                    }
 
                     if (!TryLoadCache(fileName, out var libPath) || !TryLoadFrom(libPath, out var libAssembly))
                     {

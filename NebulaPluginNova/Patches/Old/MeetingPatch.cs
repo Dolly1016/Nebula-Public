@@ -87,7 +87,7 @@ public static class MeetingModRpc
                     return 1;
                 });
             }
-
+            
             meetingHud.state = MeetingStates.NotVoted;
             meetingHud.ResetPlayerState();
 
@@ -137,6 +137,8 @@ public static class MeetingModRpc
 
     public static readonly RemoteProcess<(List<VoterState> firstStates, List<(byte playerFrom, byte playerTo)> mapList, byte exiled, byte[] exiledAll,  bool tie, bool isObvious)> RpcModCompleteVoting = new("CompleteVoting", 
         (writer,message) => {
+            var ev = GameOperatorManager.Instance?.Run<MeetingFixExiledHostEvent>(new(message.exiled, message.exiledAll));
+
             writer.Write(message.firstStates.Count);
             foreach(var state in message.firstStates)
             {
@@ -149,9 +151,9 @@ public static class MeetingModRpc
                 writer.Write(swap.playerFrom);
                 writer.Write(swap.playerTo);
             }
-            writer.Write(message.exiled);
-            writer.WriteBytesAndSize(message.exiledAll);
-            writer.Write(message.tie);
+            writer.Write(ev?.RawExiled ?? message.exiled);
+            writer.WriteBytesAndSize(ev?.RawExiledAll ?? message.exiledAll);
+            writer.Write(message.tie && (ev?.CanBeTie ?? true));
             writer.Write(message.isObvious);
         },
         (reader) => {

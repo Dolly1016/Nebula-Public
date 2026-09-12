@@ -12,6 +12,7 @@ using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Text;
 
 namespace Nebula.Roles.Impostor;
 
@@ -165,7 +166,7 @@ internal class Zeal : DefinedSingleAbilityRoleTemplate<Zeal.Ability>, DefinedRol
                             if (killHistory.Count >= 2) new StaticAchievementToken("zeal.common1");
 
                             killHistory.Add((p, NebulaGameManager.Instance?.CurrentTime ?? 0f));
-                            MyPlayer.MurderPlayer(p, PlayerState.Dead, null, KillParameter.NormalKill);
+                            MyPlayer.MurderPlayer(p, PlayerState.Dead, EventDetails.Kill, KillParameter.NormalKill);
                             lifespan.Release();
                             UpdateKillButtons();
                             if (killButtons.Count == 0) cooldownTimer.Start(); //キルボタンを持たなくなったらクールダウンをため直す

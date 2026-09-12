@@ -111,6 +111,16 @@ public static class PlayerAttributes
     static public IPlayerAttribute Isolation { get; internal set; }
 
     /// <summary>
+    /// アドミン端末からの無縁化効果を表します。
+    /// </summary>
+    static public IPlayerAttribute IsolationAdmin { get; internal set; }
+
+    /// <summary>
+    /// バイタル端末からの無縁化効果を表します。
+    /// </summary>
+    static public IPlayerAttribute IsolationVitals { get; internal set; }
+
+    /// <summary>
     /// Buskerの偽装死を隠蔽する効果を表します。効果は偽装死に限らず適用されます。
     /// </summary>
     static public IPlayerAttribute BuskerEffect { get; internal set; }

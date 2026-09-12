@@ -65,7 +65,7 @@ class VitalsMinigameUpdatePatch
 
             var modInfo = NebulaGameManager.Instance?.GetPlayer(v.PlayerInfo.PlayerId);
 
-            if (myInfo.state == VitalsState.Disconnected || (modInfo?.HasAttribute(PlayerAttributes.Isolation) ?? false))
+            if (myInfo.state == VitalsState.Disconnected || (modInfo?.HasAttribute(PlayerAttributes.Isolation) ?? false) || (modInfo?.HasAttribute(PlayerAttributes.IsolationVitals) ?? false))
             {
                 if (!v.IsDiscon || forcely)
                 {

@@ -1,5 +1,6 @@
 ﻿using Nebula.Behavior;
 using Nebula.Modules.GUIWidget;
+using Nebula.Online;
 using Nebula.UI.MainMenu;
 using UnityEngine.Playables;
 using UnityEngine.UI;
@@ -26,6 +27,7 @@ public static class MainMenuSetUpPatch
     static void Postfix(MainMenuManager __instance)
     {
         VanillaAsset.LoadOnMainMenu(__instance);
+        NoSAuth.Reset();
 
         MainMenuManagerInstance.SetPrefab(__instance);
 
@@ -34,6 +36,8 @@ public static class MainMenuSetUpPatch
         __instance.PlayOnlineButton.OnClick.AddListener(() => IsLocalGame = false);
         __instance.playLocalButton.OnClick.AddListener(() => IsLocalGame = true);
 
+        /*
+        // FindGameをなくす
         {
             var scaler = __instance.onlineButtonsContainer.GetChild(1);
             scaler.GetChild(0).localPosition = new(-1f, 0.5f, 0f);//CreateLobby
@@ -41,6 +45,7 @@ public static class MainMenuSetUpPatch
             scaler.GetChild(2).gameObject.SetActive(false);//FindGame
             scaler.GetChild(3).gameObject.SetActive(false);//Line
         }
+        */
 
         var leftPanel = __instance.mainMenuUI.transform.FindChild("AspectScaler").FindChild("LeftPanel");
         var auLogo = leftPanel.FindChild("Sizer").GetComponent<AspectSize>();

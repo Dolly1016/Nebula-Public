@@ -8,7 +8,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace Nebula.Modules;
+namespace Nebula.Online;
 
 internal class Migration
 {

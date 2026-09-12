@@ -573,9 +573,10 @@ public class NebulaManager : MonoBehaviour
                 {
                     StampHelpers.TryShowStampRingMenu(() => !stampInput.KeyUp);
                 }
-                
+
                 if (Input.GetKeyDown(KeyCode.K))
                 {
+                    
                     /*
                     IEnumerator CoCheck()
                     {
@@ -656,26 +657,9 @@ public class NebulaManager : MonoBehaviour
                     CoCheck().StartOnScene();
                     */
 
-                    /*
+                    
                     //new FunctionBlock(HudManager.Instance.transform, new(0f,0f,-100f));
-                    foreach(var obj in UnityEngine.Resources.FindObjectsOfTypeAll(Il2CppType.Of<Texture2D>())){
-                        if (obj.name == null || obj.name.Length == 0) continue;
-
-                        var filepath = "AmongUsTextures/" + obj.name.Replace("|", "-") + ".png";
-                        Directory.CreateDirectory(Path.GetDirectoryName(filepath));
-                        if (File.Exists(filepath)) continue;
-                        var texture = Helpers.CreateReadableTexture(obj.CastFast<Texture2D>());
-                        byte[] bytes = UnityEngine.ImageConversion.EncodeToPNG(texture);
-                        MonoBehaviour.Destroy(texture);
-                        try
-                        {
-                            File.WriteAllBytes(filepath, bytes);
-                        }catch(IOException e)
-                        {
-                            LogUtils.WriteToConsole("Skipped: " + obj.name);
-                        }
-                    }
-                    */
+                    
 
 
                     /*

@@ -11,6 +11,7 @@ using Virial.Utilities;
 
 namespace Nebula.Roles.Modifier;
 
+
 public class Twin : DefinedModifierTemplate, DefinedAllocatableModifier, RoleFilter, IAssignableDocument
 {
     private Twin() : base("twin", new(122, 196, 232), [NumOfPairsOption, RoleChanceOption, SelfSacrificeDelayOption, SelfSacrificeDelayDispersionOption])

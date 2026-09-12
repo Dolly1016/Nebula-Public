@@ -10,6 +10,7 @@ using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Events.VoiceChat;
 using Virial.Game;
+using Virial.Text;
 
 namespace Nebula.Roles.Impostor;
 
@@ -415,7 +416,7 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
                             }
                         }
 
-                        MyPlayer.MurderPlayer(target, PlayerState.Dead, null, killParam);
+                        MyPlayer.MurderPlayer(target, PlayerState.Dead, EventDetails.Kill, killParam);
                         NebulaManager.Instance.ScheduleDelayAction(CalmDown);
                         NebulaAPI.CurrentGame?.KillButtonLikeHandler.StartCooldown();
 

@@ -1,5 +1,6 @@
 ﻿using LibCpp2IL.Elf;
 using Nebula.Modules.GUIWidget;
+using Nebula.Online;
 using System;
 using System.Collections.Generic;
 using System.Linq;
