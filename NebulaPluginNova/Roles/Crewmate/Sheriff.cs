@@ -165,7 +165,7 @@ public class Sheriff : DefinedSingleAbilityRoleTemplate<Sheriff.Ability>, HasCit
                     {
                         if (ev.VoteToWillBeExiled) lastMyExile = ev.VoteFor;
                     }, this);
-                    GameOperatorManager.Instance?.SubscribeAchievement<GameEndEvent>("combination.2.sheriff.vanity.common2", ev => lastMyExile != null && NebulaGameManager.Instance?.LastDead == lastMyExile && !ev.EndState.Winners.Test(MyPlayer), this);
+                    GameOperatorManager.Instance?.SubscribeAchievement<GameEndEvent>("combination.2.sheriff.vanity.common2", ev => lastMyExile != null && NebulaGameManager.Instance?.LastDead == lastMyExile && !ev.CheckWin(MyPlayer), this);
                 }
             }
         }

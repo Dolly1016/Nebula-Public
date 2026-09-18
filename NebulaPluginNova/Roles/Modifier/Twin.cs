@@ -1,8 +1,10 @@
 ﻿using Nebula.Game.Statistics;
+using Nebula.Roles.Complex;
 using System.Linq;
 using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
+using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
@@ -14,6 +16,17 @@ namespace Nebula.Roles.Modifier;
 
 public class Twin : DefinedModifierTemplate, DefinedAllocatableModifier, RoleFilter, IAssignableDocument
 {
+    private record SelfsacrificeExtraDeadInfo(GamePlayer Target) : GamePlayer.ExtraDeadInfo(PlayerState.SelfSacrifice)
+    {
+        public override string ToStateText() => "for " + Target.PlayerName;
+    }
+
+    static private readonly RemoteProcess<(GamePlayer twin, GamePlayer target)> RpcShareExtraInfo = new("ShareExInfoTwin",
+        (message, _) => {
+            message.twin.PlayerStateExtraInfo = new SelfsacrificeExtraDeadInfo(message.target);
+        }
+    );
+
     private Twin() : base("twin", new(122, 196, 232), [NumOfPairsOption, RoleChanceOption, SelfSacrificeDelayOption, SelfSacrificeDelayDispersionOption])
     {
         ConfigurationHolder?.SetDisplayState(() => NumOfPairsOption == 0 ? ConfigurationHolderState.Inactivated : RoleChanceOption == 100 ? ConfigurationHolderState.Emphasized : ConfigurationHolderState.Activated);
@@ -105,11 +118,11 @@ public class Twin : DefinedModifierTemplate, DefinedAllocatableModifier, RoleFil
 
         string? RuntimeModifier.DisplayIntroBlurb => Language.Translate("role.twin.blurb").Replace("%NAME%", (MyTwin.Get()?.Name ?? "ERROR").Color(MyRole.Color));
 
-        #region Guard
         //ガードを発動済みかどうか(ホストでのみ使用する)
         private bool guardIsUsed = false;
         //直前のキル判定を双子として防いだかどうか(ホストでのみ使用する)
         private bool guardedByMe = false;
+        private GamePlayer? guardFor = null;
 
         [OnlyMyPlayer]
         void CheckKill(PlayerCheckKilledEvent ev)
@@ -121,6 +134,8 @@ public class Twin : DefinedModifierTemplate, DefinedAllocatableModifier, RoleFil
 
             //キラーが自分自身の場合(自殺等)はガードしない
             if (ev.Killer.PlayerId == MyPlayer.PlayerId) return;
+
+            guardFor = ev.Killer;
 
             //相方が既に死亡している場合、身代わりは立てられない
             if (MyTwin.Get()?.IsDead ?? true) return;
@@ -141,7 +156,17 @@ public class Twin : DefinedModifierTemplate, DefinedAllocatableModifier, RoleFil
             var myTwin = MyTwin.Get();
             if (myTwin?.IsDead ?? true) return;
 
+            RpcShareExtraInfo.Invoke((myTwin, guardFor));
             myTwin.Suicide(PlayerState.SelfSacrifice, EventDetail.Kill, KillParameter.NormalKill);
+        }
+
+        [OnlyHost]
+        void OnExiled(PlayerExiledEvent ev)
+        {
+            if (guardFor != null && ev.Player == guardFor) {
+                var myTwin = MyTwin.Get();
+                if (myTwin != null) NebulaAchievementManager.RpcClearAchievement.Invoke(("twin.common1", myTwin));
+            }
         }
 
         [OnlyMyPlayer, OnlyHost]
@@ -170,11 +195,9 @@ public class Twin : DefinedModifierTemplate, DefinedAllocatableModifier, RoleFil
         //会議が始まる場合は、待機中の身代わりを即座に成立させる
         [OnlyHost]
         void OnPreMeetingStart(MeetingPreStartEvent ev) => SacrificeMyTwin();
-        #endregion
-
-        #region Exile
+        
         [OnlyMyPlayer, OnlyHost]
-        void OnExiled(PlayerExiledEvent ev)
+        void OnExiledKiller(PlayerExiledEvent ev)
         {
             var myTwin = MyTwin.Get();
             if (myTwin?.IsDead ?? true) return;
@@ -193,9 +216,7 @@ public class Twin : DefinedModifierTemplate, DefinedAllocatableModifier, RoleFil
 
             myTwin.Suicide(PlayerState.Suicide, EventDetail.Kill, KillParameter.WithAssigningGhostRole);
         }
-        #endregion
 
-        #region Vote
         [OnlyHost]
         void FixVotes(MeetingFixVoteHostEvent ev)
         {
@@ -213,6 +234,23 @@ public class Twin : DefinedModifierTemplate, DefinedAllocatableModifier, RoleFil
             //票が投じられない方をランダムに決定する
             ev.SetVote(System.Random.Shared.Next(2) == 0 ? MyPlayer : myTwin, 0);
         }
-        #endregion
+
+
+        bool amNiceSecret = false;
+        [Local]
+        void OnGameStart(GameStartEvent ev)
+        {
+            amNiceSecret = MyPlayer.Role.Role == Secret.MyNiceRole;
+        }
+        [Local]
+        void OnGameEnd(GameEndEvent ev)
+        {
+            var twinState = MyTwin.Get()?.PlayerState;
+            var myState = MyPlayer.PlayerState;
+            if (twinState == null) return;
+            if ((twinState == PlayerState.SelfSacrifice && myState == PlayerState.Exiled) || myState == PlayerState.SelfSacrifice && twinState == PlayerState.Exiled) new StaticAchievementToken("twin.another1");
+
+            if (amNiceSecret && ev.CheckWin(MyPlayer) && twinState == PlayerState.SelfSacrifice && GamePlayer.AllPlayers.All(p => p.IsTrueCrewmate || (p.MyKiller == MyPlayer && p.IsDead)) && GamePlayer.AllPlayers.Count(p => !p.IsTrueCrewmate) >= 2) new StaticAchievementToken("twin.challenge");
+        }
     }
 }

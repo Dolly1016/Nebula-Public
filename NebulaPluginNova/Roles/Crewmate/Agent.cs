@@ -131,7 +131,7 @@ public class Agent : DefinedRoleTemplate, DefinedRole, IAssignableDocument
         [Local]
         void OnGameEnd(GameEndEvent ev)
         {
-            if (ev.EndState.Winners.Test(MyPlayer) && MyPlayer.Tasks.TotalTasks > 0 && NumOfExemptedTasksOption <= 3)
+            if (ev.CheckWin(MyPlayer) && MyPlayer.Tasks.TotalTasks > 0 && NumOfExemptedTasksOption <= 3)
             {
                 if (MyPlayer.Tasks.TotalCompleted - MyPlayer.Tasks.Quota > 0 && AmongUsUtil.NumOfAllTasks >= 8)
                     new StaticAchievementToken("agent.common1");

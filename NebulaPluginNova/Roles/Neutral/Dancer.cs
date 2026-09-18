@@ -538,9 +538,9 @@ public class Dancer : DefinedRoleTemplate, DefinedRole, IAssignableDocument
         void OnGameEnd(GameEndEvent ev)
         {
             var localPlayer = GamePlayer.LocalPlayer;
-            if (AmOwner && ev.EndState.EndCondition == NebulaGameEnd.DancerWin && ev.EndState.Winners.Test(MyPlayer) && completedDanceLooked.Any(p => p.IsImpostor || p.Role == Jackal.MyRole)) new StaticAchievementToken("dancer.challenge");
-            if (danceLooked.Contains(localPlayer) && !localPlayer.IsDead && ev.EndState.Winners.Test(localPlayer)) new StaticAchievementToken("dancer.common4");
-            if (completedDanceLooked.Contains(localPlayer) && localPlayer.IsDead && ev.EndState.EndCondition == NebulaGameEnd.CrewmateWin && ev.EndState.Winners.Test(localPlayer)) new StaticAchievementToken("dancer.common5");
+            if (AmOwner && ev.EndState.EndCondition == NebulaGameEnd.DancerWin && ev.CheckWin(MyPlayer) && completedDanceLooked.Any(p => p.IsImpostor || p.Role == Jackal.MyRole)) new StaticAchievementToken("dancer.challenge");
+            if (danceLooked.Contains(localPlayer) && !localPlayer.IsDead && ev.CheckWin(localPlayer)) new StaticAchievementToken("dancer.common4");
+            if (completedDanceLooked.Contains(localPlayer) && localPlayer.IsDead && ev.EndState.EndCondition == NebulaGameEnd.CrewmateWin && ev.CheckWin(localPlayer)) new StaticAchievementToken("dancer.common5");
         }
     }
 }

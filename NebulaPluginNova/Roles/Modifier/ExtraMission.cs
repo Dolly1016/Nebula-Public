@@ -77,7 +77,7 @@ public class ExtraMission : DefinedAllocatableModifierTemplate, DefinedAllocatab
             }
             if ((target?.AmOwner ?? false) && !target.IsDead)
             {
-                if (target.Unbox().TryGetModifier<Instance>(out var targetMission) && (targetMission.target?.IsDead ?? false) && ev.EndState.Winners.Test(target)) new StaticAchievementToken("extraMission.challenge");
+                if (target.Unbox().TryGetModifier<Instance>(out var targetMission) && (targetMission.target?.IsDead ?? false) && ev.CheckWin(target)) new StaticAchievementToken("extraMission.challenge");
                 new StaticAchievementToken("extraMission.common2");
             }
         }

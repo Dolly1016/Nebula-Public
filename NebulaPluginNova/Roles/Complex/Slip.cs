@@ -2,6 +2,9 @@ using Virial;
 using Virial.Assignable;
 using Virial.Compat;
 using Virial.Configuration;
+using Virial.Events.Game;
+using Virial.Events.Game.Meeting;
+using Virial.Events.Player;
 using Virial.Game;
 
 namespace Nebula.Roles.Complex;
@@ -32,8 +35,8 @@ public class Slip : DefinedSingleAbilityRoleTemplate<Slip.Ability>, DefinedRole,
     static internal GameActionType NiceSlipAction = null!;
     static internal GameActionType EvilSlipAction = null!;
 
-    static private readonly FloatConfiguration NiceSlipCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.niceSlip.slipCoolDown", (5f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
-    static private readonly FloatConfiguration EvilSlipCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.evilSlip.slipCoolDown", (5f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Second);
+    static private readonly FloatConfiguration NiceSlipCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.niceSlip.slipCoolDown", (0f, 60f, 2.5f), 20f, FloatConfigurationDecorator.Second);
+    static private readonly FloatConfiguration EvilSlipCoolDownOption = NebulaAPI.Configurations.Configuration("options.role.evilSlip.slipCoolDown", (0f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Second);
 
     private const float SlipDuration = 0.9f;
 
@@ -62,7 +65,7 @@ public class Slip : DefinedSingleAbilityRoleTemplate<Slip.Ability>, DefinedRole,
         yield return new("%SEC%", SlipDuration.DecimalToString("1"));
     }
 
-    internal readonly record struct SlipTarget(VVector2 Approach, VVector2 Destination, bool IsHorizontalSlip);
+    internal readonly record struct SlipTarget(VVector2 Approach, VVector2 Destination, bool IsHorizontalSlip, OpenableDoor? Door);
 
     //すり抜けの開始、終了位置の距離
     private const float HorizontalSlipDistanceFromDoorCenter = 0.46f;
@@ -70,19 +73,6 @@ public class Slip : DefinedSingleAbilityRoleTemplate<Slip.Ability>, DefinedRole,
 
     private const float MaxApproachDuration = 1.5f;
     private const float ConsolelessDoorUsableDistance = 1f;
-
-    //Airshipではすり抜けられるドアを制限する
-    private const int AirshipMapId = 4;
-
-    static private bool CanSlipDoorOnAirship(OpenableDoor door)
-    {
-        //SystemTypes.Decontaminationが割り当てられた電気ドアを除外する
-        if (door.Room == SystemTypes.Decontamination) return false;
-
-        //ミニゲームを開いて開けるドアのみ許可する
-        var doorConsole = door.GetComponent<DoorConsole>();
-        return doorConsole.AsBoolFast() && doorConsole.MinigamePrefab.AsBoolFast();
-    }
 
     static private bool CanUseDoorConsole(OpenableDoor door, NetworkedPlayerInfo playerInfo, VVector2 truePosition, out float distance)
     {
@@ -159,12 +149,10 @@ public class Slip : DefinedSingleAbilityRoleTemplate<Slip.Ability>, DefinedRole,
         SlipTarget? result = null;
         float nearestDistance = float.MaxValue;
 
-        bool isAirship = NebulaAPI.AmongUs.MapId == AirshipMapId;
 
         foreach (var door in shipStatus.AllDoors.GetFastEnumerator())
         {
             if (door.IsOpen) continue;
-            if (isAirship && !CanSlipDoorOnAirship(door)) continue;
             //ドアのコンソールを使用できる状況でのみ、すり抜けの選択肢を取れる
             if (!CanUseDoorConsole(door, playerInfo, truePosition, out var distance)) continue;
             if (!(distance < nearestDistance)) continue;
@@ -172,7 +160,7 @@ public class Slip : DefinedSingleAbilityRoleTemplate<Slip.Ability>, DefinedRole,
             if (!TryCalcSlipPositions(collider, truePosition, out var approach, out var destination, out var isHorizontalSlip)) continue;
 
             nearestDistance = distance;
-            result = new(approach - colliderOffset, destination - colliderOffset, isHorizontalSlip);
+            result = new(approach - colliderOffset, destination - colliderOffset, isHorizontalSlip, door);
         }
 
         return result;
@@ -301,9 +289,12 @@ public class Slip : DefinedSingleAbilityRoleTemplate<Slip.Ability>, DefinedRole,
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
         int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
+        bool amEvil;
 
+        TimeMoment lastSlipTime;
         public Ability(GamePlayer player, bool isUsurped, bool isEvil) : base(player, isUsurped)
         {
+            amEvil = isEvil;
             if (AmOwner)
             {
                 SlipTarget? target = null;
@@ -311,6 +302,8 @@ public class Slip : DefinedSingleAbilityRoleTemplate<Slip.Ability>, DefinedRole,
                 var slipButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, "slip",
                     isEvil ? EvilSlipCoolDownOption : NiceSlipCoolDownOption, "slip", isEvil ? buttonEvilSprite : buttonNiceSprite,
                     _ => target != null).SetAsUsurpableButton(this);
+
+                var achToken = isEvil ? null : new AchievementToken<int>("niceSlip.common1", 0, (v, _) => v >= 3);
 
                 slipButton.OnUpdate = _ => target = SearchSlipTarget(MyPlayer);
                 slipButton.OnClick = (button) =>
@@ -321,8 +314,46 @@ public class Slip : DefinedSingleAbilityRoleTemplate<Slip.Ability>, DefinedRole,
                     RpcSlip.Invoke((MyPlayer, target.Value.Approach, target.Value.Destination, target.Value.IsHorizontalSlip));
                     (isEvil ? StatsEvilSlip : StatsNiceSlip).Progress();
 
+                    if (isEvil)
+                    {
+                        if (lastKillTime.ElapsedLessThan(5f)) new StaticAchievementToken("evilSlip.common1");
+                    } else
+                    {
+                        achToken!.Value++;
+                        if (target.Value.Door?.Room == SystemTypes.Decontamination) new StaticAchievementToken("niceSlip.common2");
+                    }
+                    lastSlipTime = NebulaAPI.CurrentGame!.CurrentTime;
+
                     button.StartCoolDown();
                 };
+            }
+        }
+
+        [Local]
+        void OnMeetingCalled(CalledEmergencyMeetingEvent ev)
+        {
+            if(ev.Reporter == MyPlayer && lastSlipTime.ElapsedLessThan(10f))
+            {
+                GameOperatorManager.Instance?.SubscribeSingleListener<MeetingEndEvent>(ev => {
+                    if (ev.Exiled.Any(p => p.IsImpostor)) new StaticAchievementToken("niceSlip.challenge");
+                }, this);
+            }
+        }
+
+        TimeMoment lastKillTime;
+        [Local]
+        void OnKillPlayer(PlayerKillPlayerEvent ev)
+        {
+            lastKillTime = NebulaAPI.CurrentGame!.CurrentTime;
+        }
+
+        [Local]
+        void OnGameEnd(GameEndEvent ev)
+        {
+            if(amEvil && lastSlipTime.ElapsedLessThan(10f))
+            {
+                var p = GamePlayer.AllPlayers.MaxBy(p => p.DeathTime);
+                if (p?.MyKiller == MyPlayer && ev.CheckWin(MyPlayer)) new StaticAchievementToken("evilSlip.challenge");
             }
         }
     }

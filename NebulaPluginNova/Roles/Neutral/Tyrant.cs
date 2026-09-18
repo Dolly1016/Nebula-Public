@@ -177,7 +177,7 @@ internal class Tyrant : DefinedRoleTemplate, DefinedRole
         [Local]
         void OnGameEnd(GameEndEvent ev)
         {
-            if(!MyPlayer.IsDead && ev.EndState.EndCondition == NebulaGameEnd.TyrantWin && ev.EndState.Winners.Test(MyPlayer))
+            if(!MyPlayer.IsDead && ev.EndState.EndCondition == NebulaGameEnd.TyrantWin && ev.CheckWin(MyPlayer))
             {
                 HashSet<RoleTeam> teams = [];
                 foreach(var p in GamePlayer.AllPlayers) if (p.Role.Role.Team != MyTeam && p.Role.WinningOpportunity > 0.75f) teams.Add(p.Role.Role.Team);

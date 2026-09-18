@@ -66,4 +66,21 @@ public interface Game : IModuleContainer, ILifespan, IArchivedGame
     void RequestGameEnd(GameEnd gameEnd, BitMask<Virial.Game.Player> additionalWinners);
     
     internal void SetGameMode(IGameModeModule gameModeModule);
+
+    internal float CurrentRawTime { get; }
+
+    /// <summary>
+    /// 現在の時間を取得します。
+    /// </summary>
+    Virial.Utilities.TimeMoment CurrentTime { get; }
+
+    /// <summary>
+    /// 画面の現在の拡大率を取得します。
+    /// </summary>
+    float ScreenRate { get; }
+
+    /// <summary>
+    /// 画面の現在の目標拡大率を取得します。
+    /// </summary>
+    float ScreenGoalRate { get; }
 }

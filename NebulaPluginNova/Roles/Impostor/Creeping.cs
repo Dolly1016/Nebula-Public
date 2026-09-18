@@ -103,7 +103,7 @@ internal class Creeping : DefinedSingleAbilityRoleTemplate<Creeping.Ability>, Ha
         private void OnMurderedAnyone(PlayerKillPlayerEvent ev)
         {
             var currentTime = NebulaGameManager.Instance?.CurrentTime ?? 0f;
-            if (GamePlayer.AllPlayers.Any(p => p != ev.Dead && p.IsDead && p.DeathTime + 2f > currentTime && (p.MyKiller?.AmOwner ?? false))) new StaticAchievementToken("creeping.common2");
+            if (GamePlayer.AllPlayers.Any(p => p != ev.Dead && p.IsDead && (p.DeathTime?.ElapsedLessThan(2f) ?? false) && (p.MyKiller?.AmOwner ?? false))) new StaticAchievementToken("creeping.common2");
             if (ev.Dead.PlayerState == PlayerState.Poisoned) {
                 new StaticAchievementToken("creeping.common1");
                 if (MeetingHud.Instance) NebulaAchievementManager.RpcProgressStats.Invoke(("creeping.another1", ev.Dead));
@@ -113,7 +113,7 @@ internal class Creeping : DefinedSingleAbilityRoleTemplate<Creeping.Ability>, Ha
         [Local]
         private void OnGameEnd(GameEndEvent ev)
         {
-            if (MyPlayer.IsAlive && ev.EndState.Winners.Test(MyPlayer) && MeetingHud.Instance) new StaticAchievementToken("creeping.common3");
+            if (MyPlayer.IsAlive && ev.CheckWin(MyPlayer) && MeetingHud.Instance) new StaticAchievementToken("creeping.common3");
         }
     }
 

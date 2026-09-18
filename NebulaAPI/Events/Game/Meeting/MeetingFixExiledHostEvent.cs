@@ -37,9 +37,9 @@ public class MeetingFixExiledHostEvent : Virial.Events.Event
     /// 追放されるプレイヤーを変更します。
     /// </summary>
     /// <param name="exiled"></param>
-    public void SetExiledPlayers(Virial.Game.Player[] exiled)
+    public void SetExiledPlayers(Virial.Game.Player?[]? exiled)
     {
-        if (exiled.Length == 0)
+        if (exiled == null || exiled.Length == 0)
         {
             this.exiled = byte.MaxValue;
             this.exiledAll = [];
@@ -54,7 +54,7 @@ public class MeetingFixExiledHostEvent : Virial.Events.Event
             return;
         }
 
-        this.exiled = list.First().PlayerId;
+        this.exiled = list.First()!.PlayerId;
         this.exiledAll = list.Select(p => p.PlayerId).Distinct().ToArray();
         this.CanBeTie = false;
     }

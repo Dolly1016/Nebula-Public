@@ -59,7 +59,7 @@ public static class NebulaExileWrapUp
 
                     if (info != null)
                     {
-                        info.Unbox().DeathTimeStamp = NebulaGameManager.Instance!.CurrentTime;
+                        info.Unbox().DeathTimeStamp = NebulaAPI.CurrentGame!.CurrentTime;
                         info.Unbox().MyState = PlayerState.Exiled;
                         if (info.AmOwner && NebulaAchievementManager.GetRecord("death." + info.PlayerState.TranslationKey, out var rec)) new StaticAchievementToken(rec);
                         if(info.AmOwner) new StaticAchievementToken("stats.death." + info.PlayerState.TranslationKey);
@@ -222,7 +222,10 @@ class ExileControllerBeginPatch
             }
         }
 
-        var texts = GameOperatorManager.Instance?.Run(new FixExileTextEvent(MeetingHudExtension.ExiledAllModCache!)).GetTexts();
+        var ev = GameOperatorManager.Instance?.Run(new FixExileTextEvent(MeetingHudExtension.ExiledAllModCache!));
+        var texts = ev?.GetTexts();
+
+        if (ev.GetExileText() != null) __instance.completeString = ev.GetExileText();
 
         var impostorText = __instance.ImpostorText;
         impostorText.rectTransform.pivot = new(0.5f, 1f);

@@ -51,7 +51,7 @@ internal class SniperIcon : PerkFunctionalInstance
         new StaticAchievementToken("perk.blank");
         new StaticAchievementToken("perk.manyPerks1.blankShot");
         if (player.Role.Role == Neutral.Jester.MyRole) GameOperatorManager.Instance?.Subscribe<GameEndEvent>(ev => {
-            if (ev.EndState.EndCondition == NebulaGameEnd.JesterWin && ev.EndState.Winners.Test(player)) new StaticAchievementToken("jester.common2");
+            if (ev.EndState.EndCondition == NebulaGameEnd.JesterWin && ev.CheckWin(player)) new StaticAchievementToken("jester.common2");
         }, player.Role);
     }
 }

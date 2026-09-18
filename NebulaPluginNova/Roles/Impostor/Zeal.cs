@@ -183,7 +183,7 @@ internal class Zeal : DefinedSingleAbilityRoleTemplate<Zeal.Ability>, DefinedRol
                     return killButton;
                 }
 
-                GameOperatorManager.Instance?.SubscribeAchievement<GameEndEvent>("zeal.challenge", ev => killHistory.Count >= 3  && ev.EndState.Winners.Test(MyPlayer) && (NebulaGameManager.Instance?.LastDead?.MyKiller?.AmOwner ?? false), this);
+                GameOperatorManager.Instance?.SubscribeAchievement<GameEndEvent>("zeal.challenge", ev => killHistory.Count >= 3  && ev.CheckWin(MyPlayer) && (NebulaGameManager.Instance?.LastDead?.MyKiller?.AmOwner ?? false), this);
                 GameOperatorManager.Instance?.SubscribeAchievement<PlayerDieEvent>("zeal.another1", ev => ev.Player.AmOwner && killButtons.Count >= 2, this);
                 
 

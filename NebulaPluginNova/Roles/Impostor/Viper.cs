@@ -131,7 +131,7 @@ internal class Viper : DefinedSingleAbilityRoleTemplate<Viper.Ability>, HasCitat
             }, this);
             GameOperatorManager.Instance?.Subscribe<GameEndEvent>(ev =>
             {
-                if (!reported && !MyPlayer.IsDead && ev.EndState.Winners.Test(MyPlayer)) new StaticAchievementToken("viper.challenge");
+                if (!reported && !MyPlayer.IsDead && ev.CheckWin(MyPlayer)) new StaticAchievementToken("viper.challenge");
             }, this);
         }
     }

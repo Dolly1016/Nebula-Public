@@ -28,6 +28,16 @@
 
 # Titles
 
+"achievement.twin.common1.title" : "許すまじ敵"
+"achievement.twin.common1.goal" : "双子の相方を犠牲にせしめたキラーを追放する。"
+"achievement.twin.common1.splitted.1" : "まじ"
+
+"achievement.twin.another1.title" : "惨憺たる運命"
+"achievement.twin.another1.goal" : "双子の一方が自己犠牲で死亡したうえで、もう一方が追放される。"
+
+"achievement.twin.challenge.title" : "全部だからね"
+"achievement.twin.challenge.goal" : "相方を失いながら全非クループレイヤーを自身の手でキルし、勝利する。"
+"achievement.twin.challenge.cond" : "シークレットとしてゲームを開始すること+非クループレイヤー: 2人以上"
 
 # Team
 

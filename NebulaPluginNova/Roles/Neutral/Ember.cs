@@ -40,7 +40,7 @@ public class Ember : DefinedRoleTemplate, DefinedRole
         [Local]
         void OnGameEnd(GameEndEvent ev)
         {
-            if (ev.EndState.Winners.Test(MyPlayer))
+            if (ev.CheckWin(MyPlayer))
                 new StaticAchievementToken("ember.another2");
             else
                 new StaticAchievementToken("ember.another1");

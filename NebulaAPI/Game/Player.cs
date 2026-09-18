@@ -9,6 +9,7 @@ using Virial.DI;
 using Virial.Helpers;
 using Virial.Media;
 using Virial.Text;
+using Virial.Utilities;
 
 namespace Virial.Game;
 
@@ -377,7 +378,7 @@ public interface Player : ICommandExecutor, IArchivedPlayer, IPlayerlike
     /// <summary>
     /// 死亡時刻をゲーム開始からの経過時間で返します。
     /// </summary>
-    float? DeathTime { get; }
+    TimeMoment? DeathTime { get; }
 
     /// <summary>
     /// 切断されているとき、Trueを返します。切断されている場合は死亡しているものとして扱われます。
@@ -745,6 +746,10 @@ public interface Player : ICommandExecutor, IArchivedPlayer, IPlayerlike
     /// キル役職の場合、trueを返します。
     /// </summary>
     bool IsKiller => Role.Role.IsKiller;
+    /// <summary>
+    /// 第三陣営の場合、trueを返します。
+    /// </summary>
+    bool IsNeutral => Role.Role.Category is RoleCategory.NeutralRole;
 
 
     /// <summary>

@@ -28,3 +28,8 @@
 
 # Titles
 
+"achievement.evilSlip.common1.title" : "鮮やかな逃亡"
+"achievement.evilSlip.common1.goal" : "キルから5秒以内にドアをすり抜ける。"
+
+"achievement.evilSlip.challenge.title" : "伸縮自在のストーカー"
+"achievement.evilSlip.challenge.goal" : "すり抜けから10秒以内に最後の生存者をキルし、勝利する。"

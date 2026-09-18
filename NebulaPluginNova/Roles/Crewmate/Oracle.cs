@@ -332,7 +332,7 @@ internal class Oracle : DefinedSingleAbilityRoleTemplate<Oracle.Ability>, Define
             if(ev.Dead.PlayerState == PlayerStates.Guessed && divideResults.ContainsKey((byte)ev.Dead.PlayerId))
             {
                 if (ev.Dead.IsImpostor && ev.Murderer.IsTrueCrewmate) GameOperatorManager.Instance?.Subscribe<GameEndEvent>(ev => { 
-                    if(ev.EndState.Winners.Test(MyPlayer) && !GamePlayer.AllPlayers.Any(p => p.PlayerState == PlayerStates.Exiled && (p.MyKiller?.IsTrueCrewmate ?? false)))
+                    if(ev.CheckWin(MyPlayer) && !GamePlayer.AllPlayers.Any(p => p.PlayerState == PlayerStates.Exiled && (p.MyKiller?.IsTrueCrewmate ?? false)))
                     {
                         new StaticAchievementToken("oracle.challenge");
                     }

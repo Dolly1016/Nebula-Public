@@ -314,7 +314,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     //各種収集データ
     public GamePlayer? MyKiller = null;
     public GamePlayer.ExtraDeadInfo? PlayerStateExtraInfo { get; set; }
-    public float? DeathTimeStamp = null;
+    public TimeMoment? DeathTimeStamp = null;
     public CommunicableTextTag? MyState = PlayerState.Alive;
 
     public IEnumerable<RuntimeAssignable> AllAssigned()
@@ -1538,7 +1538,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     UnityEngine.Vector2 IPlayerlike.UnityTruePosition => IsDisconnected ? UnityEngine.Vector2.zero : MyControl.GetTruePosition();
     bool GamePlayer.CanMove => MyControl.CanMove;
     bool GamePlayer.IsDisconnected => IsDisconnected;
-    float? GamePlayer.DeathTime => DeathTimeStamp;
+    TimeMoment? GamePlayer.DeathTime => DeathTimeStamp;
     CommunicableTextTag GamePlayer.PlayerState => MyState ?? PlayerState.Alive;
 
     // Virial::AttributeAPI

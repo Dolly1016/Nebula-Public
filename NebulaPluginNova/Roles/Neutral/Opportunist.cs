@@ -142,13 +142,13 @@ internal class Opportunist : DefinedRoleTemplate, HasCitation, DefinedRole
         [Local]
         void OnGameEnd(GameEndEvent ev)
         {
-            if (MyPlayer.IsAlive && ev.EndState.Winners.Test(MyPlayer)) {
+            if (MyPlayer.IsAlive && ev.CheckWin(MyPlayer)) {
                 if (ev.EndState.ExtraWins.Test(NebulaGameEnd.ExtraOpportunistWin)) new StaticAchievementToken("opportunist.common1");
-                if (GamePlayer.AllPlayers.All(p => ev.EndState.Winners.Test(p) || p.AmOwner)) new StaticAchievementToken("opportunist.common2");
-                if (GamePlayer.AllPlayers.Any(p => p.IsAlive && !ev.EndState.Winners.Test(p))) new StaticAchievementToken("opportunist.challenge");
+                if (GamePlayer.AllPlayers.All(p => !ev.CheckWin(p) || p.AmOwner)) new StaticAchievementToken("opportunist.common2");
+                if (GamePlayer.AllPlayers.Any(p => p.IsAlive && !ev.CheckWin(p))) new StaticAchievementToken("opportunist.challenge");
             }
-            if (MyPlayer.IsAlive && !ev.EndState.Winners.Test(MyPlayer)) new StaticAchievementToken("opportunist.another1");
-            if (MyPlayer.IsDead && (MyPlayer.DeathTime ?? 0f) + 2f > NebulaGameManager.Instance?.CurrentTime) new StaticAchievementToken("opportunist.another2");
+            if (MyPlayer.IsAlive && !ev.CheckWin(MyPlayer)) new StaticAchievementToken("opportunist.another1");
+            if (MyPlayer.IsDead && (MyPlayer.DeathTime?.ElapsedLessThan(2f) ?? false)) new StaticAchievementToken("opportunist.another2");
         }
 
     }

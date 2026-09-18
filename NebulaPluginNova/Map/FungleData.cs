@@ -208,9 +208,9 @@ public class FungleData : MapData
     protected override IDividedSpriteLoader GetSealedDoorSprite(bool isVert) => isVert ? SealedDoorSpriteFungleV : SealedDoorSpriteFungleH;
     override public Vector3 GetDoorSealingPos(OpenableDoor door, bool isVert) => isVert ? new(-0.07f, -0.4f, -0.01f) : new(-0.02f, -0.4f, -0.01f);
 
-    private readonly Virial.Utilities.ComponentCache<AmbientSoundPlayer> beachFar = new(() => AmongUsLLImpl.ShipStatusInstance.transform.TryDig("Outside", "OutsideBeach", "SFX", "AMB_Beach_Far")?.GetComponent<AmbientSoundPlayer>()!);
-    private readonly Virial.Utilities.ComponentCache<AmbientSoundPlayer> beachClose = new(() => AmongUsLLImpl.ShipStatusInstance.transform.TryDig("Outside", "OutsideBeach", "SFX", "AMB_Beach_Close")?.GetComponent<AmbientSoundPlayer>()!);
-    private readonly Virial.Utilities.ComponentCache<AmbientSoundPlayer> highlands = new(() => AmongUsLLImpl.ShipStatusInstance.transform.TryDig("Outside", "OutsideHighlands", "SFX", "AMB_Outside")?.GetComponent<AmbientSoundPlayer>()!);
+    private readonly Virial.Utilities.ComponentCache<AmbientSoundPlayer> beachFar = new(() => AmongUsLLImpl.ShipStatusInstance.transform.TryFindChild(out var found, "Outside", "OutsideBeach", "SFX", "AMB_Beach_Far") ? found.GetComponent<AmbientSoundPlayer>() : null!);
+    private readonly Virial.Utilities.ComponentCache<AmbientSoundPlayer> beachClose = new(() => AmongUsLLImpl.ShipStatusInstance.transform.TryFindChild(out var found, "Outside", "OutsideBeach", "SFX", "AMB_Beach_Close") ? found.GetComponent<AmbientSoundPlayer>() : null!);
+    private readonly Virial.Utilities.ComponentCache<AmbientSoundPlayer> highlands = new(() => AmongUsLLImpl.ShipStatusInstance.transform.TryFindChild(out var found, "Outside", "OutsideHighlands", "SFX", "AMB_Outside") ? found.GetComponent<AmbientSoundPlayer>() : null!);
     public override WindType GetWindType(Vector2 position)
     {
         if (

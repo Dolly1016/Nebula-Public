@@ -18,5 +18,7 @@ public class GameEndEvent : AbstractGameEvent
     internal GameEndEvent(Virial.Game.Game game, Virial.Game.EndState endState) : base(game) {
         this.EndState = endState;
     }
+
+    public bool CheckWin(Virial.Game.Player player) => EndState.Winners.Test(player);
 }
 

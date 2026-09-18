@@ -13,7 +13,7 @@ public static class MapBehaviourExtension
     public static bool ShowDeadBodies = true;
     public static Color? MapColor = null;
     public static int RoomFlag = 0xFFFFFFF;
-    public static void InitializeModOption(this MapCountOverlay overlay)
+    public static void InitializeModOption()
     {
         CanIdentifyImpostors = false;
         CanIdentifyDeadBodies = false;
@@ -38,10 +38,14 @@ public static class MapBehaviourExtension
         }
     }
 
-    public static void RestrictRoom(this MapBehaviour map, int roomFlag)
+    public static void RestrictRoom(int roomFlag)
     {
         RoomFlag = roomFlag;
-        map.ColorControl.GetComponent<SpriteRenderer>().sprite = NebulaAsset.GetMapSprite(NebulaAPI.AmongUs.MapId, roomFlag);
+    }
+
+    internal static void PerformRestrictRoom(MapBehaviour map)
+    {
+        map.ColorControl.GetComponent<SpriteRenderer>().sprite = NebulaAsset.GetMapSprite(NebulaAPI.AmongUs.MapId, RoomFlag);
     }
 
     public static void UpdateCount(this CounterArea counterArea, int cnt, int impostors, int deadBodies)

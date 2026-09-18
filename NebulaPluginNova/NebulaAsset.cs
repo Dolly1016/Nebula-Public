@@ -134,7 +134,7 @@ public static class NebulaAsset
         DivMap[2] = [Load<GameObject>("PolusDivMap")];
         DivMap[3] = null!;
         DivMap[4] = [Load<GameObject>("AirshipDivMap")];
-        DivMap[5] = [Load<GameObject>("FungleDivMap"), Load<GameObject>("FungleDivMapModified")];
+        DivMap[5] = [Load<GameObject>("FungleDivMap"), Load<GameObject>("FungleDivMapLab"), Load<GameObject>("FungleDivMapModified"), Load<GameObject>("FungleDivMapModifiedLab")];
 
         audioMap[NebulaAudioClip.ThrowAxe] = Load<AudioClip>("RaiderThrow.wav");
         audioMap[NebulaAudioClip.SniperShot] = Load<AudioClip>("SniperShot.wav");
@@ -208,7 +208,10 @@ public static class NebulaAsset
     private static int GetInMapId(byte mapId) { 
         if(mapId == 5)
         {
-            if (GeneralConfigurations.FungleForClassicGameOption.Value) return 1;
+            int num = 0;
+            if (GeneralConfigurations.FungleForClassicGameOption.Value) num += 2;
+            if (GeneralConfigurations.FungleSimpleLaboratoryOption.Value) num += 1;
+            return num;
         }
         return 0;
     }

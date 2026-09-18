@@ -376,11 +376,11 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignable
         void OnGameEnd(GameEndEvent ev)
         {
             if (ev.EndState.EndCondition != NebulaGameEnd.JackalWin) return;
-            if (!ev.EndState.Winners.Test(MyPlayer)) return;
+            if (!ev.CheckWin(MyPlayer)) return;
 
             if (ev.EndState.EndReason != GameEndReason.Situation) return;
 
-            var lastDead = NebulaGameManager.Instance!.AllPlayerInfo.MaxBy(p => p.DeathTime ?? 0f);
+            var lastDead = NebulaGameManager.Instance!.AllPlayerInfo.MaxBy(p => p.DeathTime);
             if (lastDead == null || lastDead.MyKiller == null || !lastDead.MyKiller.AmOwner) return;
 
             if ( /*インポスターが最後に死亡*/ (lastDead as GamePlayer).IsImpostor &&

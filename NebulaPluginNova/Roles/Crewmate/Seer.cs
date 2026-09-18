@@ -49,7 +49,7 @@ public class Ghost : FlexibleLifespan, IGameOperator
                 commonToken.Value = true;
         }
 
-        if (time > 0f && AmongUsUtil.InMeeting) time -= Time.deltaTime;
+        if (time > 0f && !AmongUsUtil.InMeeting) time -= Time.deltaTime;
         indexTime -= Time.deltaTime;
 
         if (indexTime < 0f)

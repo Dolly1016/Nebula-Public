@@ -20,16 +20,30 @@ public class FixExileTextEvent : Event
     public IReadOnlyList<Virial.Game.Player> Exiled => exiled;
 
     private List<string> texts = [];
+    private string? topText = null;
 
     /// <summary>
-    /// 追放画面で表示されるテキストを追加します。
+    /// 追放画面で下部に表示されるテキストを追加します。
     /// </summary>
     /// <param name="text"></param>
     public void AddText(string text) => texts.Add(text);
 
     /// <summary>
-    /// 追放画面で表示されるテキストを取得します。
+    /// 追放画面で下部に表示されるテキストを取得します。
     /// </summary>
     /// <returns></returns>
     public IReadOnlyList<string> GetTexts() => texts;
+
+    /// <summary>
+    /// 追放画面で一番上に表示されるテキストを設定します。
+    /// </summary>
+    /// <param name="text"></param>
+    public void SetExileText(string? text) => topText = text;
+
+    /// <summary>
+    /// 追放画面で一番上に表示されるテキストを取得します。
+    /// nullの場合、デフォルトのテキストが表示されます。
+    /// </summary>
+    /// <returns></returns>
+    public string? GetExileText() => topText;
 }

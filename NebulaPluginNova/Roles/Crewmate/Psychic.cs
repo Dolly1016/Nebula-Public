@@ -87,7 +87,7 @@ public class Psychic : DefinedSingleAbilityRoleTemplate<Psychic.Ability>, Define
 
                 //死亡時間(5秒単位)
                 {
-                    float elapsedTime = (NebulaGameManager.Instance!.CurrentTime - ev.Reported!.DeathTime!.Value);
+                    float elapsedTime = (NebulaGameManager.Instance!.CurrentTime - ev.Reported!.DeathTime);
                     if (elapsedTime > 20) lastReported = ev.Reported;
                     int aboutTime = (int)(elapsedTime + 2.5f);
                     aboutTime -= aboutTime % 5;

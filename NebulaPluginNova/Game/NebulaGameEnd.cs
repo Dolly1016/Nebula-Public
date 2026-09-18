@@ -7,6 +7,7 @@ using Virial;
 using Virial.Assignable;
 using Virial.Events.Game;
 using Virial.Game;
+using Virial.Media;
 using Virial.Runtime;
 using Virial.Text;
 
@@ -186,7 +187,7 @@ public class LastGameHistory
         if (LastWidget != null)
         {
             var buttonRenderer = UnityHelper.CreateObject<SpriteRenderer>("InfoButton", window.transform, new(-2.9f, 2.5f, -50f), out var buttonRendererObj, LayerExpansion.GetUILayer());
-            buttonRenderer.sprite = EndGameManagerSetUpPatch.InfoButtonSprite.GetSprite();
+            buttonRenderer.sprite = EndGameManagerSetUpPatch.InfoButtonSprite.GetSprite(0);
             var button = buttonRendererObj.SetUpButton(false, buttonRenderer);
             button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, LastWidget));
             button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
@@ -221,8 +222,8 @@ public class EndGameManagerSetUpPatch
 #endif
 
 
-    static internal SpriteLoader InfoButtonSprite = SpriteLoader.FromResource("Nebula.Resources.InformationButton.png", 100f);
-    static SpriteLoader DiscordButtonSprite = SpriteLoader.FromResource("Nebula.Resources.DiscordIcon.png", 100f);
+    static internal MultiImage InfoButtonSprite = DividedSpriteLoader.FromResource("Nebula.Resources.InformationButton.png", 100f, 2, 1);
+    static Image DiscordButtonSprite = SpriteLoader.FromResource("Nebula.Resources.DiscordIcon.png", 100f);
 
     private static IMetaWidgetOld GetRoleContent(TMPro.TMP_FontAsset font)
     {
@@ -429,19 +430,18 @@ public class EndGameManagerSetUpPatch
 #endif
 
         var buttonRenderer = UnityHelper.CreateObject<SpriteRenderer>("InfoButton", __instance.transform, new(-2.9f, 2.5f, -50f), out var buttonObj, LayerExpansion.GetUILayer());
-        buttonRenderer.sprite = InfoButtonSprite.GetSprite();
+        buttonRenderer.sprite = InfoButtonSprite.GetSprite(0);
         var button = buttonRenderer.gameObject.SetUpButton(false, buttonRenderer);
         button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, GetRoleContent(__instance.WinText.font)));
         button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
         buttonObj.AddComponent<BoxCollider2D>().size = new(0.3f, 0.3f);
-
 
 #if PC
         if (NebulaPlugin.AllowHttpCommunication)
         {
             if (!AmongUsLLImpl.AmongUsClientInstance.AmHost || ClientOption.WebhookOption.urlEntry.Value.Length == 0 || !ClientOption.WebhookOption.autoSendEntry.Value)
             {
-                var discordButtonRenderer = UnityHelper.CreateObject<SpriteRenderer>("WebhookButton", __instance.transform, new Vector3(-3.4f, 2.5f, -50f), out var discordButtonObj, LayerExpansion.GetUILayer());
+                var discordButtonRenderer = UnityHelper.CreateObject<SpriteRenderer>("WebhookButton", __instance.transform, new Vector3(-3.8f, 2.5f, -50f), out var discordButtonObj, LayerExpansion.GetUILayer());
                 discordButtonRenderer.sprite = DiscordButtonSprite.GetSprite();
                 var discordButton = discordButtonObj.SetUpButton(true, discordButtonRenderer);
                 discordButton.OnClick.AddListener(() =>

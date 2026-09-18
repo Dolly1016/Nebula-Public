@@ -13,7 +13,7 @@ public static class OpenMapCountOverlayPatch
 
     static void Prefix(MapCountOverlay __instance)
     {
-        __instance.InitializeModOption();
+        MapBehaviourExtension.InitializeModOption();
 
         var timer = NebulaGameManager.Instance?.ConsoleRestriction?.ShowTimerIfNecessary(ConsoleRestriction.ConsoleType.Admin, __instance.transform, new Vector3(4.8f, 2f, -50f));
         if (timer != null) timer.transform.localScale = Vector3.one / __instance.transform.localScale.x;
@@ -225,7 +225,6 @@ static class MapBehaviourGenericShowPatch
     static void Postfix(MapBehaviour __instance)
     {
         __instance.transform.localPosition = new Vector3(0, 0, -50f);
-        __instance.ColorControl.GetComponent<SpriteRenderer>().sprite = NebulaAsset.GetMapSprite(NebulaAPI.AmongUs.MapId, 0xFFFFFF); //ShipStatus.Instance.MapPrefab.ColorControl.GetComponent<SpriteRenderer>().sprite;
         MapBehaviourExtension.UpdateScale(__instance);
     }
 }
@@ -257,6 +256,15 @@ class MapBehaviourShowNormalMapPatch
                 return false;
             }
             
+        }
+
+        if (opts.Mode == MapOptions.Modes.CountOverlay)
+        {
+            MapBehaviourExtension.PerformRestrictRoom(__instance);
+        }
+        else
+        {
+            __instance.ColorControl.GetComponent<SpriteRenderer>().sprite = NebulaAsset.GetMapSprite(NebulaAPI.AmongUs.MapId, 0xFFFFFF);
         }
 
         switch (opts.Mode)

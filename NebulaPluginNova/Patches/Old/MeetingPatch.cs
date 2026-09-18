@@ -964,6 +964,8 @@ static class CheckForEndVotingPatch
 
                 foreach (var state in __instance.playerStates)
                 {
+                    state.ClearForResults();
+
                     if (!state.DidVote) continue;
                     if (state.VotedForId.Value == 254) continue;
                     voteForMap[state.PlayerId] = NebulaGameManager.Instance?.GetPlayer(state.VotedForId.Value);

@@ -62,11 +62,11 @@ public class NebulaPlugin
     public const string PluginVersion = "3.4.2.1";
 
     //public const string VisualVersion = "v3.4.2.1";
-    public const string VisualVersion = "Snapshot 26.09.12a";
-    //public const string VisualVersion = "Addon Loading DEMO 2";
+    public const string VisualVersion = "Snapshot 26.09.18a";
+    //public const string VisualVersion = "Friend/Block Demo";
 
     public const string PluginEpochStr = "109";
-    public const string PluginBuildNumStr = "1631";
+    public const string PluginBuildNumStr = "1632";
     public static readonly int PluginEpoch = int.Parse(PluginEpochStr);
     public static readonly int PluginBuildNum = int.Parse(PluginBuildNumStr);
     public const bool GuardVanillaLangData = false;

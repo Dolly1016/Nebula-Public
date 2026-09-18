@@ -687,11 +687,16 @@ class ZiplineCoolDownUpdatePatch
 [HarmonyPatch(typeof(MapConsole), nameof(MapConsole.Use))]
 public static class MapConsoleUsePatch
 {
-    public static void Postfix(MapConsole __instance)
+    public static void Prefix(MapConsole __instance)
     {
         int mapId = NebulaAPI.AmongUs.MapId;
         int consoleId = 0;
-        if (mapId == 4 && __instance.transform.GetPositionFast().x > 10f) consoleId = 1;
-        MapBehaviourExtension.RestrictRoom(MapBehaviour.Instance, GeneralConfigurations.AdminRoomOptions[mapId][consoleId].Value << 1);
+        if (mapId == 4 && __instance.transform.position.x > 10f) consoleId = 1;
+        MapBehaviourExtension.RestrictRoom(GeneralConfigurations.AdminRoomOptions[mapId][consoleId].Value << 1);
+    }
+
+    public static void Postfix()
+    {
+        MapBehaviourExtension.InitializeModOption();
     }
 }

@@ -27,7 +27,10 @@ public static class MainMenuSetUpPatch
     static void Postfix(MainMenuManager __instance)
     {
         VanillaAsset.LoadOnMainMenu(__instance);
+
+        //オンライン関連の初期化
         NoSAuth.Reset();
+        PlayerNameCheck.Reset();
 
         MainMenuManagerInstance.SetPrefab(__instance);
 

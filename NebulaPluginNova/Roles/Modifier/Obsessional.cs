@@ -153,7 +153,7 @@ public class Obsessional : DefinedAllocatableModifierTemplate, DefinedAllocatabl
         [Local]
         void OnGameEnd(GameEndEvent ev)
         {
-            if (ev.EndState.Winners.Test(MyPlayer))
+            if (ev.CheckWin(MyPlayer))
             {
                 //勝利
 
@@ -166,7 +166,7 @@ public class Obsessional : DefinedAllocatableModifierTemplate, DefinedAllocatabl
                     new StaticAchievementToken("obsessional.lover1");
 
                 //勝者に自身と執着対象しかいない場合
-                if (NebulaGameManager.Instance!.AllPlayerInfo.Where(p => ev.EndState.Winners.Test(p)).All(p => p.AmOwner || p.PlayerId == (obsession?.PlayerId ?? 255)))
+                if (NebulaGameManager.Instance!.AllPlayerInfo.Where(p => ev.CheckWin(p)).All(p => p.AmOwner || p.PlayerId == (obsession?.PlayerId ?? 255)))
                     new StaticAchievementToken("obsessional.challenge");
             }
             else
@@ -176,7 +176,7 @@ public class Obsessional : DefinedAllocatableModifierTemplate, DefinedAllocatabl
                 if (MyPlayer.Role.Role.Category == Virial.Assignable.RoleCategory.ImpostorRole && ev.EndState.EndCondition == NebulaGameEnd.ImpostorWin)
                     new StaticAchievementToken("obsessional.another2");
 
-                if (ev.EndState.Winners.Test(obsession) && (obsession?.TryGetModifier<Lover.Instance>(out _) ?? false))
+                if (ev.CheckWin(obsession) && (obsession?.TryGetModifier<Lover.Instance>(out _) ?? false))
                     new StaticAchievementToken("obsessional.lover2");
             }
         }

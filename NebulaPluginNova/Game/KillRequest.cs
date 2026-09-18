@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TMPro;
+using Virial;
 using Virial.Events.Player;
 using Virial.Game;
 using Virial.Text;
@@ -287,7 +288,7 @@ internal class KillRequestHandler
 
                if (targetInfo != null)
                {
-                   targetInfo.DeathTimeStamp = NebulaGameManager.Instance!.CurrentTime;
+                   targetInfo.DeathTimeStamp = NebulaAPI.CurrentGame!.CurrentTime;
                    targetInfo.MyKiller = killerInfo;
 
                    var deadState = param.PlayerState;
@@ -384,7 +385,7 @@ internal class KillRequestHandler
 
 
 
-              target.Unbox().DeathTimeStamp = NebulaGameManager.Instance!.CurrentTime;
+              target.Unbox().DeathTimeStamp = NebulaAPI.CurrentGame!.CurrentTime;
               target.Unbox().MyKiller = killer;
               target.Unbox().MyState = param.PlayerState;
               if (target.AmOwner && NebulaAchievementManager.GetRecord("death." + target!.PlayerState.TranslationKey, out var rec)) new StaticAchievementToken(rec);

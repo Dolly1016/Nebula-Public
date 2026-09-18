@@ -77,7 +77,7 @@ internal class Nighty : DefinedAllocatableModifierTemplate, DefinedAllocatableMo
         [Local]
         void OnGameEnd(GameEndEvent ev)
         {
-            if(ev.EndState.EndCondition == NebulaGameEnd.ImpostorWin && usedBombCounter >= 8 && GamePlayer.AllPlayers.Count(p => p.IsImpostor) >= 2 && GamePlayer.AllPlayers.All(p => !p.IsImpostor || p.IsAlive) && ev.EndState.Winners.Test(MyPlayer))
+            if(ev.EndState.EndCondition == NebulaGameEnd.ImpostorWin && usedBombCounter >= 8 && GamePlayer.AllPlayers.Count(p => p.IsImpostor) >= 2 && GamePlayer.AllPlayers.All(p => !p.IsImpostor || p.IsAlive) && ev.CheckWin(MyPlayer))
             {
                 HashSet<CommunicableTextTag> states = [];
                 foreach(var p in GamePlayer.AllPlayers)

@@ -7,6 +7,7 @@ using Nebula.Behavior;
 using Nebula.Modules.Cosmetics;
 using Nebula.Modules.GUIWidget;
 using Nebula.Modules.Logging;
+using Nebula.Online;
 using Nebula.Roles;
 using Rewired.UI.ControlMapper;
 using Sentry.Internal.Extensions;
@@ -34,6 +35,8 @@ public class GameStartManagerUpdatePatch
     {
         if (!GameData.Instance.AsBoolFast(out var gameData)) return false;
         if (!GameManager.Instance.AsBoolFast(out var gameManager)) return false;
+
+        PlayerNameCheck.CheckPending();
 
         var auClient = AmongUsLLImpl.AmongUsClientInstance;
         bool isGamePublic = auClient.IsGamePublic;

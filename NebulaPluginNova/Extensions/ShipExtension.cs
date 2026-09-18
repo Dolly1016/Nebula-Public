@@ -547,9 +547,11 @@ public static class ShipExtension
 
         //Storageの影を調整
         {
-            var outsideShadows = ship.transform.TryDig("Outside", "OutsideHighlands", "Shadows");
-            outsideShadows?.TryDig("OnewayShadow-Top")?.gameObject.SetActive(false);
-            outsideShadows?.TryDig("OnewayShadow-Top+Ledge")?.gameObject.SetActive(false);
+            if (ship.transform.TryFindChild(out var outsideShadows, "Outside", "OutsideHighlands", "Shadows"))
+            {
+                if (outsideShadows.TryFindChild(out var top, "OnewayShadow-Top")) top.gameObject.SetActive(false);
+                if (outsideShadows.TryFindChild(out var ledge, "OnewayShadow-Top+Ledge")) ledge.gameObject.SetActive(false);
+            }
             var collider = ship.FastRooms[SystemTypes.Storage].transform.GetChild(1).GetComponent<EdgeCollider2D>();
             Vector2[] points = collider.points;
             var subArray1 = points.SubArray(0, 5);

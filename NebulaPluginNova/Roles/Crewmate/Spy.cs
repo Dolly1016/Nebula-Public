@@ -73,7 +73,7 @@ internal class Spy : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignableD
 
         [Local]
         void OnGameEnd(GameEndEvent ev) {
-            if (MyPlayer.IsAlive && ev.EndState.EndCondition == NebulaGameEnd.CrewmateWin && ev.EndState.Winners.Test(MyPlayer)) new StaticAchievementToken("spy.common1");
+            if (MyPlayer.IsAlive && ev.EndState.EndCondition == NebulaGameEnd.CrewmateWin && ev.CheckWin(MyPlayer)) new StaticAchievementToken("spy.common1");
         }
 
         [Local]
@@ -82,7 +82,7 @@ internal class Spy : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignableD
             if(ev.Dead.IsImpostor && ev.Murderer.IsImpostor && ev.Dead != ev.Murderer)
             {
                 GameOperatorManager.Instance?.Subscribe<GameEndEvent>(ev => {
-                    if (ev.EndState.EndCondition == NebulaGameEnd.CrewmateWin && ev.EndState.Winners.Test(MyPlayer)) new StaticAchievementToken("spy.challenge");
+                    if (ev.EndState.EndCondition == NebulaGameEnd.CrewmateWin && ev.CheckWin(MyPlayer)) new StaticAchievementToken("spy.challenge");
                 }, this);
             }
 

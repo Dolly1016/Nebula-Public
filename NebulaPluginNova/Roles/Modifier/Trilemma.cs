@@ -254,7 +254,7 @@ internal class Trilemma : DefinedModifierTemplate, DefinedAllocatableModifier, R
                 new StaticAchievementToken("trilemma.common1");
                 GameOperatorManager.Instance.Subscribe<GameEndEvent>(ev =>
                 {
-                    if (ev.EndState.EndReason == GameEndReason.Situation && ev.EndState.Winners.Test(MyPlayer) && !MyPlayer.IsDead && NebulaGameManager.Instance?.LastDead?.MyKiller == MyPlayer)
+                    if (ev.EndState.EndReason == GameEndReason.Situation && ev.CheckWin(MyPlayer) && !MyPlayer.IsDead && NebulaGameManager.Instance?.LastDead?.MyKiller == MyPlayer)
                     {
                         new StaticAchievementToken("trilemma.challenge");
                     }
@@ -265,7 +265,7 @@ internal class Trilemma : DefinedModifierTemplate, DefinedAllocatableModifier, R
         [Local]
         void OnGameEnd(GameEndEvent ev)
         {
-            if (MyPlayer.IsDead && ev.EndState.Winners.Test(MyPlayer) && MyTrilemmas.All(p => p.AmOwner || !ev.EndState.Winners.Test(p))) new StaticAchievementToken("trilemma.common2");
+            if (MyPlayer.IsDead && ev.CheckWin(MyPlayer) && MyTrilemmas.All(p => p.AmOwner || !ev.CheckWin(p))) new StaticAchievementToken("trilemma.common2");
         }
         #endregion Titles
     }

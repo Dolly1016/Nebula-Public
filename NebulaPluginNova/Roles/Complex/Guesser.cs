@@ -148,7 +148,7 @@ static file class GuesserSystem
                     var meetingHud = MeetingHud.Instance;
                     var meetingState = meetingHud.state;
                     if (!(meetingState == MeetingHud.MeetingStates.Voted || meetingState == MeetingHud.MeetingStates.NotVoted)) return;
-                    if (!MeetingHudExtension.CanUseAbilityFor(p, true)) return;
+                    if (!MeetingHudExtension.CanUseAbilityForLocal(p, true)) return;
 
                     if (guessIf?.Invoke() ?? true)
                     {

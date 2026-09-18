@@ -393,6 +393,12 @@ public class JsonDataSaver<T> where T : class, new()
 
         if (!FileIO.Exists(dataPathTo)) return;
 
-        Data = JsonStructure.Deserialize<T>(FileIO.ReadAllText(dataPathTo));
+        try
+        {
+            Data = JsonStructure.Deserialize<T>(FileIO.ReadAllText(dataPathTo));
+        }catch(Exception ex) {
+            LogUtils.WriteToConsole(ex.ToString());
+            Data = new();
+        }
     }
 }

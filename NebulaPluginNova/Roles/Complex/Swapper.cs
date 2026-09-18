@@ -46,9 +46,12 @@ file class SwapperSystem : AbstractModule<Virial.Game.Game>, IGameOperator
     void OnFixSwapping(MeetingMapVotesHostEvent ev) { 
         foreach(var request in requests)
         {
-            if (!MeetingHudExtension.CanVoteFor(request.Swapped1) || !MeetingHudExtension.CanVoteFor(request.Swapped2)) continue;
-            ev.Swap(request.Swapped1, request.Swapped2);
-            if (request.Swapper.TryGetAbility<Swapper.Ability>(out var swapper)) swapper.EnsureSwap(request.CurrentLeftSwap - 1);
+            if (MeetingHudExtension.CanUseAbilityFor(request.Swapper, request.Swapped1, true) && MeetingHudExtension.CanUseAbilityFor(request.Swapper, request.Swapped2, true))
+            {
+                if (!MeetingHudExtension.CanVoteFor(request.Swapped1) || !MeetingHudExtension.CanVoteFor(request.Swapped2)) continue;
+                ev.Swap(request.Swapped1, request.Swapped2);
+                if (request.Swapper.TryGetAbility<Swapper.Ability>(out var swapper)) swapper.EnsureSwap(request.CurrentLeftSwap - 1);
+            }
         }
     }
 }
@@ -178,15 +181,27 @@ public class Swapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
                                 {
                                     GameOperatorManager.Instance?.Subscribe<GameEndEvent>(ev => {
                                         var roles = GamePlayer.AllPlayers.Aggregate<GamePlayer, (bool justice, bool madmate, bool mayor)>((false, false, false), (val, p) => {
-                                            val.mayor |= p.Role == Crewmate.Mayor.MyRole;
-                                            val.justice |= p.Role == Crewmate.Justice.MyRole;
-                                            val.madmate |= p.Role == Crewmate.Madmate.MyRole;
+                                            val.mayor |= p.Role.Role == Crewmate.Mayor.MyRole;
+                                            val.justice |= p.Role.Role == Crewmate.Justice.MyRole;
+                                            val.madmate |= p.Role.Role == Crewmate.Madmate.MyRole;
                                             return val;
                                         });
                                         if (!(roles.madmate && roles.mayor && roles.justice)) return;
                                         if (ev.EndState.EndReason != GameEndReason.Situation) return;
-                                        if (!ev.EndState.Winners.Test(MyPlayer)) return;
+                                        if (!ev.CheckWin(MyPlayer)) return;
                                         new StaticAchievementToken("evilSwapper.challenge");
+                                    }, this);
+                                }
+                            }
+
+                            if (!AmEvil)
+                            {
+                                bool selectedImpostorWillBeExiled = (player1IsExiled && player1.IsImpostor) || (player2IsExiled && player2.IsImpostor);
+                                if (selectedImpostorWillBeExiled && GamePlayer.AllPlayers.Count(p => p.IsAlive && p.IsImpostor) == 1)
+                                {
+                                    GameOperatorManager.Instance?.Subscribe<GameEndEvent>(ev =>
+                                    {
+                                        if (ev.CheckWin(MyPlayer)) new StaticAchievementToken("niceSwapper.challenge");
                                     }, this);
                                 }
                             }

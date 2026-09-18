@@ -4,7 +4,10 @@ using Hazel;
 using Nebula.Behavior;
 using Nebula.Game.Statistics;
 using Nebula.Modules.Cosmetics;
+using Nebula.Online;
+using Nebula.Roles;
 using PowerTools;
+using Sentry;
 using UnityEngine;
 using Virial;
 using Virial.Events.Player;
@@ -35,6 +38,8 @@ public static class PlayerStartPatch
                 {
                     __instance.lightSource.lightChild.layer = LayerExpansion.GetVanillaShadowLightLayer();
                 }
+
+                __instance.cosmetics.nameText.UseRoleIcon();
             }))
             );
 
@@ -137,16 +142,47 @@ public static class PlayerUpdatePatch
 
         if (NebulaGameManager.Instance.GameState == NebulaGameStates.NotStarted)
         {
+            //ロビーでの名前
+
             bool showVanillaColor = ClientOption.GetValue(ClientOption.ClientOptionType.ShowVanillaColor) == 1;
             try
             {
                 var nameText = __instance.cosmetics.nameText;
-                if (showVanillaColor) nameText.text = __instance.Data.PlayerName + " ■".Color(DynamicPalette.VanillaColorsPalette[__instance.PlayerId]);
-                else nameText.text = __instance.Data.PlayerName;
+                var text = nameText.text;
+                if (showVanillaColor) text = __instance.Data.PlayerName + " ■".Color(DynamicPalette.VanillaColorsPalette[__instance.PlayerId]);
+                else text = __instance.Data.PlayerName;
 
+                //オンライン認証
+                if (NoSAuth.IsAuthRequired)
+                {
+                    var auth = NoSAuth.Get(__instance.Data.ClientId);
+                    switch (auth.Status)
+                    {
+                        case AuthStatus.Unknown:
+                        case AuthStatus.Unregistered:
+                        case AuthStatus.Unavailable:
+                        case AuthStatus.NoResponse:
+                            text = text.Color(Color.gray);
+                            break;
+                        case AuthStatus.Verified:
+                            if (auth.Uid == null) break;
+                            var data = PlayerNameHistory.Observe(auth, __instance.Data);
+                            if (data.HasValue)
+                            {
+                                if (data.Value.IsFriend) text += TextIcon.Heart.GetTextIconTag();
+                                if (data.Value.IsBlocked) text += TextIcon.Caution.GetTextIconTag();
+                                if (data.Value.Experience <= 1) text += TextIcon.Leaf.GetTextIconTag();
+                                if (data.Value.UsedByOthers) text += TextIcon.Info.GetTextIconTag();
+                            }
+                            break;
+                    }
+                }
+
+                nameText.text = text;
                 nameText.transform.parent.gameObject.SetActive(!ModSingleton<ShowUp>.Instance.AnyoneShowedUp);
             }
             catch { }
+
             return;
         }
 
@@ -259,7 +295,7 @@ public static class PlayerStartMeetingPatch
             var targetInfo = Helpers.GetPlayer(info.PlayerId)!.GetModInfo();
 
             //ベイトレポートチェック
-            if (targetInfo?.Role.Role is Roles.Crewmate.Bait && ((targetInfo.MyKiller?.PlayerId ?? byte.MaxValue) == __instance.PlayerId) && (targetInfo.Unbox().DeathTimeStamp.HasValue && NebulaGameManager.Instance!.CurrentTime - targetInfo.Unbox().DeathTimeStamp!.Value < 3f))
+            if (targetInfo?.Role.Role is Roles.Crewmate.Bait && ((targetInfo.MyKiller?.PlayerId ?? byte.MaxValue) == __instance.PlayerId) && targetInfo.Unbox().DeathTimeStamp.ElapsedLessThan(3f))
                 tag = EventDetail.BaitReport;
         }
 

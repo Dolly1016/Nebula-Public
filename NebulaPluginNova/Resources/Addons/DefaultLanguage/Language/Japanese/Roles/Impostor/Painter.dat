@@ -22,7 +22,7 @@
 "options.role.painter.sampleCoolDown" : "サンプルクールダウン"
 "options.role.painter.paintCoolDown" : "ペイントクールダウン"
 "options.role.painter.loseSampleOnMeeting" : "緊急会議でのサンプル放棄"
-"options.role.painter.transformAfterMeeting" : "会議後まで見た目を変化を遅延"
+"options.role.painter.transformAfterMeeting" : "会議後まで見た目の変化を遅延"
 
 # Game
 

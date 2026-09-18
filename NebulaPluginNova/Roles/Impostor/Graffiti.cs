@@ -107,7 +107,7 @@ internal class Graffiti : DefinedSingleAbilityRoleTemplate<Graffiti.Ability>, De
                 GameOperatorManager.Instance?.Subscribe<GameEndEvent>(ev =>
                 {
                     var players = GamePlayer.AllPlayers.Where(p => p == MyPlayer || p.IsSameSideOf(MyPlayer));
-                    if (dyingMessageGenerated && ev.EndState.Winners.Test(MyPlayer) && players.Count() >= 2 && players.All(p => p.IsAlive)) new StaticAchievementToken("graffiti.challenge");
+                    if (dyingMessageGenerated && ev.CheckWin(MyPlayer) && players.Count() >= 2 && players.All(p => p.IsAlive)) new StaticAchievementToken("graffiti.challenge");
                 }, this);
             }
         }

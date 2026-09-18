@@ -214,16 +214,6 @@ public static class UnityHelper
         return line;
     }
 
-    static public Transform? TryDig(this Transform transform, params string[] objectName)
-    {
-        foreach(var name in objectName)
-        {
-            if (transform == null || !transform) return null;
-            transform = transform.FindChild(name);
-        }
-        return transform;
-    }
-
     public static T? FindAsset<T>(string name) where T : Il2CppObjectBase
     {
         foreach (var asset in UnityEngine.Object.FindObjectsOfTypeIncludingAssets(Il2CppType.Of<T>()))

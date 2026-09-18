@@ -717,7 +717,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
                 /* 自陣営2人以上で仲間が全員生存 */
     MetChallengeCond(allModPlayers.Values.Aggregate((0, true), AggregateFunc)) &&
                 /*キル数2以上*/ allModPlayers.Values.Count(p => p.MyKiller?.AmOwner ?? false) >= 2 &&
-                /*最後の死亡者をキルしている*/ (allModPlayers.Values.MaxBy(p => p.Unbox().DeathTimeStamp ?? 0f)?.MyKiller?.AmOwner ?? false))
+                /*最後の死亡者をキルしている*/ (allModPlayers.Values.MaxBy(p => p.DeathTime)?.MyKiller?.AmOwner ?? false))
                 new StaticAchievementToken("challenge.impostor");
 
             //各役職・終了条件の勝利回数に加算
@@ -884,7 +884,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
 
         );
 
-    public GamePlayer? LastDead => allModPlayers.Values.MaxBy(p => p.Unbox().DeathTimeStamp ?? 0f);
+    public GamePlayer? LastDead => allModPlayers.Values.MaxBy(p => p.DeathTime);
 
     // Virial.Game.Game
     Virial.Game.Player? Virial.Game.Game.GetPlayer(byte playerId)=>GetPlayer(playerId);
@@ -968,6 +968,12 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         systemMessageShower ??= new(HudManager.Instance);
         systemMessageShower.ShowMessage(text, chatOnly);
     }
+
+    float Virial.Game.Game.CurrentRawTime => this.CurrentTime;
+    Virial.Utilities.TimeMoment Virial.Game.Game.CurrentTime => new(this.CurrentTime);
+
+    float Virial.Game.Game.ScreenRate => WideCamera.CurrentRate;
+    float Virial.Game.Game.ScreenGoalRate => WideCamera.TargetRate;
 }
 
 internal record KeyInputMapper(Func<Virial.Compat.VirtualKeyInput, Virial.Compat.VirtualKeyInput> mapper, ILifespan lifespan);

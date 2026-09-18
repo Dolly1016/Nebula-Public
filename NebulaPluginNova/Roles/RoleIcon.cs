@@ -12,6 +12,14 @@ using static Il2CppSystem.Xml.Schema.FacetsChecker.FacetsCompiler;
 
 namespace Nebula.Roles;
 
+public enum TextIcon
+{
+    Leaf,
+    Heart,
+    Caution,
+    Info,
+}
+
 static public class RoleIcon
 {
     static private Dictionary<string, Image> imageCache = [];
@@ -77,6 +85,8 @@ static public class RoleIcon
 
     static public string GetRoleIconTagSmall(this DefinedAssignable assignable, bool masked = false) => GetRoleIconTag(assignable, masked, 70);
 
+    static public string GetTextIconTag(this TextIcon icon) => RuntimeSpriteGenerator.TextIconTag(icon);
+
     static public void UseRoleIcon(this TMPro.TextMeshPro text) => text.spriteAsset = RuntimeSpriteGenerator.SpriteAsset;
     static public void UseMaskedRoleIcon(this TMPro.TextMeshPro text) => text.spriteAsset = RuntimeSpriteGenerator.MaskedAsset;
 
@@ -87,7 +97,81 @@ static public class RoleIcon
         static private void Preprocess(NebulaPreprocessor preprocessor)
         {
             CreateSpriteAsset(Roles.AllAssignables().Select(a => (a.GetRoleIcon()?.GetSprite(), GetRoleIconMaterial(a, iconOutlineWidth, 0f), a.InternalName)).ToArray()!);
+            AddTextIcons();
             SpriteAsset.MarkDontUnload();
+        }
+
+        private const int TextIconUnicode = 0xf1000;
+        static private readonly string[] textIconNames = Enum.GetNames(typeof(TextIcon)).Select(name => name.ToLowerInvariant()).ToArray();
+
+        static public string TextIconTag(TextIcon icon) => $"<sprite name=\"{textIconNames[(int)icon]}\">";
+
+        static private void AddTextIcons()
+        {
+            var texture = GraphicsHelper.LoadTextureFromResources("Nebula.Resources.TextIcons.png");
+            if (!texture.AsBoolFast()) return;
+
+            texture.name = "TextIcons";
+            texture.MarkDontUnload();
+
+            SpriteAsset.fallbackSpriteAssets.Add(BuildTextIconAsset(texture, new Material(Shader.Find("Sprites/Default")), "NoSTextIcons"));
+            MaskedAsset.fallbackSpriteAssets.Add(BuildTextIconAsset(texture, UnityHelper.GetMeshRendererMaskedMaterial(), "NoSMaskedTextIcons"));
+        }
+
+        static private TMP_SpriteAsset BuildTextIconAsset(Texture2D texture, Material material, string name)
+        {
+            material.mainTexture = texture;
+            material.MarkDontUnload();
+
+            var size = texture.height;
+
+            var glyphList = new List<TMP_SpriteGlyph>();
+            var characterList = new List<TMP_SpriteCharacter>();
+            var infoList = new List<TMP_Sprite>();
+
+            for (int i = 0; i < textIconNames.Length; i++)
+            {
+                var rectX = i * size;
+
+                TMP_SpriteGlyph glyph = new();
+                glyph.index = (uint)i;
+                glyph.glyphRect = new(rectX, 0, size, size);
+                glyph.metrics = new(size, size, 0f, size * 0.8f, size);
+                glyphList.Add(glyph);
+
+                TMP_SpriteCharacter character = new((uint)(TextIconUnicode + i), glyph);
+                character.name = textIconNames[i];
+                character.glyphIndex = glyph.index;
+                character.scale = 1.05f;
+                characterList.Add(character);
+
+                infoList.Add(new() { x = rectX, y = 0f, width = size, height = size, id = i, pivot = new(0.5f, 0.5f), xAdvance = size, xOffset = 0f, yOffset = size * 0.8f, scale = 1.05f, name = textIconNames[i], hashCode = i, unicode = TextIconUnicode + i });
+            }
+
+            var asset = ScriptableObject.CreateInstance<TMP_SpriteAsset>();
+            asset.name = name;
+            asset.material = material;
+            asset.spriteSheet = texture;
+            asset.spriteGlyphTable = glyphList.ToIl2CppList();
+            asset.spriteCharacterTable = characterList.ToIl2CppList();
+            asset.spriteInfoList = infoList.ToIl2CppList();
+
+            try
+            {
+                asset.UpdateLookupTables();
+
+                for (int i = 0; i < asset.spriteCharacterTable.Count; i++)
+                {
+                    asset.spriteCharacterTable[i].glyphIndex = (uint)i;
+                    asset.spriteCharacterTable[i].glyph = asset.spriteGlyphTable[i];
+                }
+            }
+            catch (Exception e)
+            {
+                LogUtils.WriteToConsole(e.ToString());
+            }
+
+            return asset;
         }
 
 

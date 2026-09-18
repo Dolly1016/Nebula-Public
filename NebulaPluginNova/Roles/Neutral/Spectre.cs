@@ -689,7 +689,7 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole, IAssignableDocument
         [Local]
         void OnGameEnd(GameEndEvent ev)
         {
-            if (ev.EndState.EndCondition == NebulaGameEnd.SpectreWin && ev.EndState.Winners.Test(MyPlayer))
+            if (ev.EndState.EndCondition == NebulaGameEnd.SpectreWin && ev.CheckWin(MyPlayer))
             {
                 if (MoreCosmic.GetTags(MyPlayer.DefaultOutfit.outfit).Contains("hat.role.spectre")) new StaticAchievementToken("spectre.costume1");
                 if (ev.EndState.OriginalEndReason.IsSpecial() && ev.EndState.OriginalEndCondition != NebulaGameEnd.SpectreWin) new StaticAchievementToken("spectre.common3");

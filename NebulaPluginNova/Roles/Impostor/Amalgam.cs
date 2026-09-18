@@ -284,6 +284,7 @@ internal class Amalgam : DefinedRoleTemplate, DefinedRole, DefinedSingleAbilityR
                         window.CloseScreen();
                     });
                 };
+                selectButton.SetAsUsurpableButton(this);
             }
         }
 

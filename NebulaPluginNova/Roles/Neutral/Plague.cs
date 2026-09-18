@@ -613,7 +613,7 @@ internal class Plague : DefinedRoleTemplate, DefinedRole, IAssignableDocument
         [Local]
         void OnGameEnd(GameEndEvent ev)
         {
-            if (progress.CanWin && ev.EndState.EndCondition != NebulaGameEnd.PlagueWin && ev.EndState.Winners.Test(MyPlayer)) new StaticAchievementToken("plague.challenge");
+            if (progress.CanWin && ev.EndState.EndCondition != NebulaGameEnd.PlagueWin && ev.CheckWin(MyPlayer)) new StaticAchievementToken("plague.challenge");
         }
 
         [Local]

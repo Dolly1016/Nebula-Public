@@ -161,7 +161,7 @@ public class Avenger : DefinedRoleTemplate, DefinedRole, IAssignableDocument
         [Local]
         void OnGameEnd(GameEndEvent ev)
         {
-            if(ev.EndState.EndCondition == NebulaGameEnd.AvengerWin && ev.EndState.Winners.Test(MyPlayer))
+            if(ev.EndState.EndCondition == NebulaGameEnd.AvengerWin && ev.CheckWin(MyPlayer))
             {
                 if(MyPlayer.Unbox().GetModifiers<Lover.Instance>().Any(l => l.MyLover.Get()?.Role.Role is Avenger)) new StaticAchievementToken("avenger.challenge");
             }

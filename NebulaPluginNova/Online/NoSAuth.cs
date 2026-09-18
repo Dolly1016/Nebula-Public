@@ -1,4 +1,4 @@
-using InnerNet;
+﻿using InnerNet;
 using Nebula.Patches;
 
 namespace Nebula.Online;
@@ -40,9 +40,7 @@ internal static class NoSAuth
 
     public static NebulaAuthEntry Get(int clientId)
     {
-        return Results.TryGetValue(clientId, out var entry)
-            ? entry
-            : new NebulaAuthEntry(clientId, null, AuthStatus.Unknown, -1);
+        return Results.TryGetValue(clientId, out var entry) ? entry : new NebulaAuthEntry(clientId, null, AuthStatus.Unknown, -1);
     }
 
     public static NebulaAuthEntry Get(NetworkedPlayerInfo info) => Get(info.ClientId);
@@ -147,7 +145,6 @@ internal static class NoSAuth
         else if (sub == NebulaAuthProtocol.Sub.Policy)
         {
             var required = reader.ReadBoolean();
-            //var changed = !IsPolicyKnown || IsAuthRequired != required;
             IsAuthRequired = required;
             IsPolicyKnown = true;
         }
@@ -163,5 +160,8 @@ internal static class NoSAuth
 
         var entry = new NebulaAuthEntry(clientId, uid, status, experience);
         Results[clientId] = entry;
+
+        // uid が確定したので、名前の突き合わせ待ちに積む
+        PlayerNameCheck.Register(clientId);
     }
 }

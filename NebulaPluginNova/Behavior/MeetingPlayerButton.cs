@@ -12,7 +12,7 @@ namespace Nebula.Behavior;
 public record MeetingPlayerAction(Image icon, Action<MeetingPlayerButtonState> ButtonAction, Predicate<MeetingPlayerButtonState> Predicate, bool CanUseOnce = false)
 {
     private bool canUse = true;
-    public bool CanUseTo(MeetingPlayerButtonState p) => canUse && MeetingHudExtension.CanUseAbilityFor(p.MyPlayer, false) && Predicate.Invoke(p);
+    public bool CanUseTo(MeetingPlayerButtonState p) => canUse && MeetingHudExtension.CanUseAbilityForLocal(p.MyPlayer, false) && Predicate.Invoke(p);
     public bool OnUsed() => canUse &= !CanUseOnce;
 }
 

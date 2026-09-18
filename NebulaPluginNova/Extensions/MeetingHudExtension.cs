@@ -27,20 +27,26 @@ public static class MeetingHudExtension
     static public float VotingTimer = 0f;
     static public float LeftTime => DiscussionTimer + VotingTimer;
     static public float ResultTimer = 0f;
-    static private int VoteForMask = 0;
     static private int CanVoteMask = 0;
-    static private int SealedMask = 0;
+    static private int VoteForMask = 0;
+    static private int CanUseAbilityMask = 0;
+    static private int UseAbilityForMask = 0;
     static internal string SpreaderAndBG = "VoteSpreaderAndBG";
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     static private bool CanVoteForByMask(byte playerId) => (VoteForMask & (1 << playerId)) != 0;
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    static private bool CanUseAbilityForByMask(byte playerId) => (SealedMask & (1 << playerId)) == 0;
+    static private bool CanUseAbilityForByMask(byte playerId) => (UseAbilityForMask & (1 << playerId)) == 0;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    static private bool CanVoteByMask(byte playerId) => (CanVoteMask & (1 << playerId)) != 0;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    static private bool CanUseAbilityByMask(byte playerId) => (CanUseAbilityMask & (1 << playerId)) == 0;
 
     static public bool CanVoteFor(byte playerId) => !(GamePlayer.GetPlayer(playerId)?.IsDead ?? true) && CanVoteForByMask(playerId) && CanUseAbilityForByMask(playerId);
     static public bool CanVoteFor(GamePlayer player) => !player.IsDead && CanVoteForByMask(player.PlayerId) && CanUseAbilityForByMask(player.PlayerId);
-    static public bool CanUseAbilityFor(GamePlayer player, bool shouldBeAlive) => CanUseAbility && (!shouldBeAlive || !player.IsDead) && CanUseAbilityForByMask(player.PlayerId);
-    static public bool HasVote(byte playerId) => (CanVoteMask & (1 << playerId)) != 0;
+    static public bool CanUseAbilityForLocal(GamePlayer player, bool shouldBeAlive) => CanUseAbilityByMask(GamePlayer.LocalPlayer.PlayerId) && (!shouldBeAlive || !player.IsDead) && CanUseAbilityForByMask(player.PlayerId);
+    static public bool CanUseAbilityFor(GamePlayer abilityUser, GamePlayer target, bool shouldBeAlive) => CanUseAbilityByMask(abilityUser.PlayerId) && (!shouldBeAlive || !target.IsDead) && CanUseAbilityForByMask(target.PlayerId);
+    static public bool HasVote(byte playerId) => CanVoteByMask(playerId);
     static public bool CanSkip = true;
     static public bool ExileEvenIfTie = false;
     static public bool IsObvious = false;
@@ -50,9 +56,9 @@ public static class MeetingHudExtension
     static public int LastSharedCount = 110;
 
     //自分自身が投票権を持つ場合、True。
-    static public bool CanVote { set; get => field && (CanVoteMask & (1 << GamePlayer.LocalPlayer!.PlayerId)) != 0; }
+    static public bool CanVote { set; get => field && CanVoteByMask(GamePlayer.LocalPlayer!.PlayerId); }
     //自分自身が会議内で能力を使える場合、True。
-    static public bool CanUseAbility = true;
+    static public bool CanUseAbility => CanUseAbilityByMask(GamePlayer.LocalPlayer!.PlayerId);
 
     static public GamePlayer? LastReporter = null;
     //直近の投票の結果吊られるプレイヤー
@@ -62,8 +68,9 @@ public static class MeetingHudExtension
     static public bool WasTie = false;
 
     public static void UpdateVotingMask(int mask) => VoteForMask = mask;
-    public static void UpdateSealedMask(int mask) => SealedMask = mask;
-    public static void AddSealedMask(int mask) => SealedMask |= mask;
+    public static void UpdateSealedMask(int mask) => UseAbilityForMask = mask;
+    public static void AddSealedMask(int mask) => UseAbilityForMask |= mask;
+    public static void RemoveUsingAbilityMask(int mask) => CanUseAbilityMask &= ~mask;
     public static void UpdateCanVoteMask(int mask) => CanVoteMask = mask;
     public static void RemoveCanVoteMask(int mask) => CanVoteMask &= ~mask;
 
@@ -76,8 +83,7 @@ public static class MeetingHudExtension
         ResultTimer = 5f;
         VoteForMask = 0xFFFFFFF;
         CanVoteMask = 0xFFFFFFF;
-        CanUseAbility = true;
-        SealedMask = 0;
+        UseAbilityForMask = 0;
         CanSkip = true;
         ExileEvenIfTie = false;
         IsObvious = false;

@@ -1139,28 +1139,29 @@ class NebulaRPCInGameHandlerPatch
     }
 
 
-    static void Postfix([HarmonyArgument(0)] byte callId, [HarmonyArgument(1)] Hazel.MessageReader reader)
+    static bool Prefix([HarmonyArgument(0)] byte callId, [HarmonyArgument(1)] Hazel.MessageReader reader)
     {
         switch (callId)
         {
             case 128:
                 ReceiveMessage(reader);
-                break;
+                return false;
             case NebulaAuthProtocol.AuthCallId:
                 NoSAuth.ReceiveAuth(reader);
-                break;
+                return false;
 
             case NebulaAuthProtocol.ResultCallId:
                 NoSAuth.ReceiveResult(reader);
-                break;
+                return false;
 
             case NebulaAuthProtocol.RoomCallId:
                 PublicRoomService.Receive(reader);
-                break;
+                return false;
 
             case NebulaAuthProtocol.MessageCallId:
                 ServerNotification.Receive(reader);
-                break;
+                return false;
         }
+        return true;
     }
 }

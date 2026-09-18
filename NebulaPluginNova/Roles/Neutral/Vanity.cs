@@ -121,7 +121,7 @@ internal class Vanity : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                 killButton.ShowUsesIcon(3, this.leftShots.ToString());
                 if (Sheriff.SealAbilityUntilReportingDeadBodiesOption && !NebulaGameManager.Instance!.AllPlayerInfo.Any(p => p.IsDead)) lockSprite = killButton.AddLockedOverlay();
 
-                GameOperatorManager.Instance?.SubscribeAchievement<GameEndEvent>("vanity.challenge", ev => killedLastCrewmate && ev.EndState.Winners.Test(MyPlayer), this);
+                GameOperatorManager.Instance?.SubscribeAchievement<GameEndEvent>("vanity.challenge", ev => killedLastCrewmate && ev.CheckWin(MyPlayer), this);
 
                 GameOperatorManager.Instance?.Subscribe<MeetingStartEvent>(ev =>
                 {

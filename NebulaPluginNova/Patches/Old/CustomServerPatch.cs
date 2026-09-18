@@ -9,6 +9,7 @@ using System.Text.Json.Serialization;
 using UnityEngine.Events;
 using UnityEngine.Networking;
 using UnityEngine.ResourceManagement;
+using UnityEngine.SceneManagement;
 using Virial.Helpers;
 using static HttpMatchmakerManager;
 
@@ -38,6 +39,14 @@ public static class ServerDropdownPatch
     const int RegionsPerColumn = 5;
     public static bool Prefix(ServerDropdown __instance)
     {
+        bool isInFindAGameScene = SceneManager.GetActiveScene().name == "FindAGame";
+
+        if (isInFindAGameScene)
+        {
+            __instance.transform.localPosition = new(3.5362f, -1.24f, -10f);
+            __instance.firstOption.transform.localPosition = new(-2.05f, 0.02f, -1f);
+        }
+
         var regions = CustomServerLoader.CurrentAvailableRegions().ToArray();
         int num = 0;
 
@@ -73,7 +82,6 @@ public static class ServerDropdownPatch
         {
             foreach (var button in buttons) button.transform.localPosition -= new Vector3((columns - 1) * BaseX * 0.5f, 0f, 0f);
         }
-
 
         return false;
     }
@@ -308,6 +316,32 @@ file static class ModServerSearcher
                 logger.Error("The error callback passed to RetryableWebRequest threw an exception: " + ex2.Message, null);
             }
             yield break;
+        }
+    }
+}
+
+[HarmonyPatch(typeof(AuthManager._CoWaitForNonce_d__6), nameof(AuthManager._CoWaitForNonce_d__6.MoveNext))]
+public static class AuthManagerCoWaitForNoncePatch
+{
+    public static bool Prefix(AuthManager._CoWaitForNonce_d__6 __instance, ref bool __result)
+    {
+        if (AmongUsUtil.IsCustomServer())
+        {
+            __result = false;
+            return false;
+        }
+        return true;
+    }
+}
+
+[HarmonyPatch(typeof(AuthManager._CoConnect_d__4), nameof(AuthManager._CoConnect_d__4.MoveNext))]
+public static class AuthManagerCoConnectPatch
+{
+    public static void Postfix(AuthManager._CoConnect_d__4 __instance, ref bool __result)
+    {
+        if (AmongUsUtil.IsCustomServer())
+        {
+            __result = false;
         }
     }
 }

@@ -114,7 +114,7 @@ internal class Cupid : DefinedSingleAbilityRoleTemplate<Cupid.Ability>, DefinedR
             if (hasCreatedLover && selected1!.IsDead && selected2!.IsDead && !MyPlayer.IsDead &&
                 GamePlayer.AllPlayers.Count(p => p.PlayerState == PlayerState.Laser && (p.MyKiller == MyPlayer || p.MyKiller == selected1 || p.MyKiller == selected2)) >= 4 &&
                 GamePlayer.AllPlayers.All(p => p == MyPlayer || p.IsDead) &&
-                ev.EndState.EndCondition == NebulaGameEnd.ImpostorWin && ev.EndState.Winners.Test(MyPlayer)
+                ev.EndState.EndCondition == NebulaGameEnd.ImpostorWin && ev.CheckWin(MyPlayer)
                 )
                 new StaticAchievementToken("cupid.challenge");
         }

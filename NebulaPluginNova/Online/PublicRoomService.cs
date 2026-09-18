@@ -21,7 +21,6 @@ internal static class PublicRoomService
         NotVerified,
     }
 
-    // タグ数上限
     public const int MaxTags = 16;
 
 
@@ -74,11 +73,9 @@ internal static class PublicRoomService
         var sub = reader.ReadByte();
         if (sub != NebulaAuthProtocol.RoomSub.Status) return;
 
-        // どの依頼への応答かはサーバーが添えてくる
         var requestSub = reader.ReadByte();
         var code = reader.ReadPackedInt32();
 
-        // 0 以外は拒否。可視性は変わっていない
         if (code != 0) return;
 
         if (requestSub == NebulaAuthProtocol.RoomSub.Publish)

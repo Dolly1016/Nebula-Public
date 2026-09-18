@@ -246,7 +246,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 
                 GameOperatorManager.Instance?.Subscribe<GameEndEvent>(ev =>
                 {
-                    if (ev.EndState.EndCondition == NebulaGameEnd.ScarletWin && ev.EndState.Winners.Test(MyPlayer) && ev.EndState.Winners.Test(GetMyFavorite()) &&
+                    if (ev.EndState.EndCondition == NebulaGameEnd.ScarletWin && ev.CheckWin(MyPlayer) && ev.CheckWin(GetMyFavorite()) &&
                      NebulaGameManager.Instance!.AllPlayerInfo.Count(p => p.IsDead && IsMyFlirt(p)) >= 2 &&
                      NebulaGameManager.Instance!.AllPlayerInfo.Count(p => !p.IsDead && IsMyFlirt(p)) >= 2)
                         new StaticAchievementToken("scarlet.challenge");
@@ -294,8 +294,8 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                 AmOwner &&
                 (GetMyFavorite()?.AmOwner ?? false) &&
                 ev.EndState.EndCondition == NebulaGameEnd.ScarletWin &&
-                ev.EndState.Winners.Test(MyPlayer) &&
-                NebulaGameManager.Instance!.AllPlayerInfo.Where(p => !p.AmOwner).All(p => !ev.EndState.Winners.Test(p))
+                ev.CheckWin(MyPlayer) &&
+                NebulaGameManager.Instance!.AllPlayerInfo.Where(p => !p.AmOwner).All(p => !ev.CheckWin(p))
                 )
                 new StaticAchievementToken("scarlet.love");
                 

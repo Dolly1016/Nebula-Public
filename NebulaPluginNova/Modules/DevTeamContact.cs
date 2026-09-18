@@ -41,7 +41,7 @@ static internal class DevTeamContact
         contents.Add(jsonContent, "payload_json");
 
         int num = 1;
-        foreach(var image in images) contents.Add(new ByteArrayContent(screenshots.Peek().Texture.EncodeToPNG()), $"files[{num++}]", "Image.png");
+        foreach(var image in images) contents.Add(new ByteArrayContent(image), $"files[{num++}]", "Image.png");
         if (log != null)
         {
             if(log.Length > 1000 * 1000 * 24)
@@ -150,7 +150,7 @@ static internal class DevTeamContact
                         if (confirmDialog) confirmDialog.CloseScreen();
 
                         MetaUI.ShowConfirmDialog(parent,
-                            response.StatusCode == System.Net.HttpStatusCode.OK ?
+                            response.StatusCode == System.Net.HttpStatusCode.OK || response.StatusCode == System.Net.HttpStatusCode.NoContent ?
                             new TranslateTextComponent("ui.contact.finished") :
                             new RawTextComponent(Language.Translate("ui.contact.failed").Replace("%DETAIL%", $"[{response.StatusCode}] {response.Content.ToString()}")));
                     });

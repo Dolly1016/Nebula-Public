@@ -95,7 +95,7 @@ internal class JekyllAndHyde : DefinedRoleTemplate, DefinedRole, IAssignableDocu
                             {
                                 if (target.IsCrewmate) GameOperatorManager.Instance?.Subscribe<GameEndEvent>(ev =>
                                 {
-                                    if (ev.EndState.EndCondition == NebulaGameEnd.CrewmateWin && AmJekyll && ev.EndState.Winners.Test(MyPlayer)) new StaticAchievementToken("jekyllAndHyde.challenge");
+                                    if (ev.EndState.EndCondition == NebulaGameEnd.CrewmateWin && AmJekyll && ev.CheckWin(MyPlayer)) new StaticAchievementToken("jekyllAndHyde.challenge");
                                 }, this);
                             });
                             NebulaAPI.CurrentGame?.KillButtonLikeHandler.StartCooldown();
@@ -170,7 +170,7 @@ internal class JekyllAndHyde : DefinedRoleTemplate, DefinedRole, IAssignableDocu
         [Local]
         void OnGameEnd(GameEndEvent ev)
         {
-            if (MyPlayer.IsDead && !ev.EndState.Winners.Test(MyPlayer) && !AmJekyll) new StaticAchievementToken("jekyllAndHyde.another1");
+            if (MyPlayer.IsDead && !ev.CheckWin(MyPlayer) && !AmJekyll) new StaticAchievementToken("jekyllAndHyde.another1");
         } 
 
         public bool AmJekyll { get; private set; } = true;

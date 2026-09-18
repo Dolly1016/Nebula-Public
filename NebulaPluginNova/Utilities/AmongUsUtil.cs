@@ -344,7 +344,7 @@ public static class AmongUsUtil
         if (Helpers.CurrentMonth == 11)
         {
             var deadBodyPlayer = deadbody.Player;
-            if (!(deadBodyPlayer?.MyKiller?.AmOwner ?? true) && NebulaGameManager.Instance!.CurrentTime - (deadBodyPlayer.DeathTime ?? 0f) < 5f) new StaticAchievementToken("freshWine");
+            if (!(deadBodyPlayer?.MyKiller?.AmOwner ?? true) && deadBodyPlayer.DeathTime.ElapsedLessThan(5f)) new StaticAchievementToken("freshWine");
         }
 
         RpcCleanDeadBodyDef.Invoke(new() { TargetId = deadbody.Id, SourceId = sourceId, RelatedTag = relatedTag });
