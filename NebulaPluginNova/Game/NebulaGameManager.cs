@@ -1,6 +1,7 @@
 ﻿using Interstellar.Routing.Router;
 using Interstellar.VoiceChat;
 using Nebula.Behavior;
+using Nebula.Collab;
 using Nebula.Game.Hud;
 using Nebula.Game.Statistics;
 using Nebula.Modules.Cosmetics;
@@ -601,6 +602,8 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
 
             //ローカルモジュール
             AttributeShower.Update(localModInfo);
+
+            TBCLFields.Update();
         }
 
     }

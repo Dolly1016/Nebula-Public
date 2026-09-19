@@ -682,10 +682,26 @@ public interface Player : ICommandExecutor, IArchivedPlayer, IPlayerlike
     /// 幽霊役職を割り当て済みの場合、trueを返します。
     /// </summary>
     bool AttemptedGhostAssignment { get; internal set; }
+
     /// <summary>
     /// 全ての能力を返します。
     /// </summary>
-    IEnumerable<IPlayerAbility> AllAbilities => AllAssigned().Select(a => a.MyAbilities).Smooth()!;
+    IEnumerable<IPlayerAbility> AllAbilities => AllAssigned().Select(a => a.MyAbilities).Smooth()!.Concat(NonAssignableAbilities);
+
+
+    /// <summary>
+    /// アビリティを付与します。
+    /// クライアント間で同プレイヤーのアビリティ付与状況は同期されません。
+    /// </summary>
+    /// <param name="ability">付与するアビリティ</param>
+    /// <returns>アビリティを付与された場合、true。紐づいたプレイヤーが異なるなど受理できない場合、false。</returns>
+    bool AttachAbility(IPlayerAbility ability);
+
+    /// <summary>
+    /// 役職等に関連しない、付与されたアビリティを返します。
+    /// </summary>
+    IEnumerable<IPlayerAbility> NonAssignableAbilities { get; }
+
     /// <summary>
     /// 能力を取得します。
     /// </summary>

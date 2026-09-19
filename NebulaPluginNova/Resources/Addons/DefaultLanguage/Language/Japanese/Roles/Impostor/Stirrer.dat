@@ -21,7 +21,7 @@
 "options.role.stirrer.sabotageMaxCharge" : "偽サボタージュチャージの最大数"
 "options.role.stirrer.sabotageCoolDown" : "偽サボタージュのクールダウン"
 "options.role.stirrer.sabotageInterval" : "偽サボタージュ発生後の追加クールダウン"
-"options.role.stirrer.sabotageInterval.detail" : "偽サボタージュ発動後、再び偽サボタージュを発動させるまでの間に<br>追加のクールダウンを設けます。<br><br>"
+"options.role.stirrer.sabotageInterval.detail" : "偽サボタージュ発動後、再び偽サボタージュを発動させるまでの間に<br>追加のクールダウンを設けます。"
 
 # Game
 

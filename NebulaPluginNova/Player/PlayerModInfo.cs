@@ -1603,6 +1603,19 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     void GamePlayer.RemoveModifier(DefinedModifier modifier) => RpcInvokerUnsetModifier(modifier).InvokeSingle();
     void GamePlayer.RemoveModifierLocal(RuntimeModifier modifier) => UnsetModifierLocal(m => m == modifier);
 
+    List<IPlayerAbility> attachedAbilities = [];
+    bool GamePlayer.AttachAbility(IPlayerAbility ability)
+    {
+        if (ability.MyPlayer != this) return false;
+        if (ability.IsDeadObject) return false;
+
+        attachedAbilities.RemoveAll(a => a.IsDeadObject);
+        attachedAbilities.Add(ability);
+        return true;
+    }
+
+    IEnumerable<IPlayerAbility> GamePlayer.NonAssignableAbilities => attachedAbilities.Where(a => a.IsAliveObject);
+
     bool GamePlayer.CanKill(GamePlayer target) => GameOperatorManager.Instance!.Run(new PlayerCheckCanKillLocalEvent(this, target)).CanKill;
 
     Virial.Game.OutfitDefinition IPlayerlike.CurrentOutfit => CurrentOutfit.Outfit;
