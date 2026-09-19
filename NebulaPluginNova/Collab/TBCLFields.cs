@@ -4,14 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Nebula.Modules.Cosmetics;
 using Virial.Events.VoiceChat;
 
 namespace Nebula.Collab;
 
-internal static class TBCLFields
+internal unsafe static class TBCLFields
 {
-    internal unsafe struct PlayerData
+    internal struct PlayerData
     {
         public byte PlayerId;
 
@@ -33,26 +34,35 @@ internal static class TBCLFields
     {
         public float LocalMicPositionX;
         public float LocalMicPositionY;
-        public PlayerData[] Players;
-    }
 
-    internal class SnapshotEntry
-    {
-        public Snapshot Data;
-
-        internal SnapshotEntry(Snapshot data)
-        {
-            this.Data = data;
-        }
+        public int PlayersLength;
+        public PlayerData* Players;
     }
 
     const int Version = 20260918;
+    const int SnapshotCapacity = 64;
     const int PlayersCapacity = 24;
     const int NameCapacity = 32;
-    static public bool RequireUpdate = false;
-    static public SnapshotEntry Data = null;
 
-    static public Queue<SnapshotEntry> Saver = [];
+    static public bool RequireUpdate = false;
+
+    static private Snapshot* snapshots = null;
+    static private int nextIndex = 0;
+
+    static public Snapshot* Latest = null;
+
+    static public void Initialize()
+    {
+        if (snapshots != null) return;
+
+        snapshots = (Snapshot*)NativeMemory.AllocZeroed(SnapshotCapacity, (nuint)sizeof(Snapshot));
+
+        var players = (PlayerData*)NativeMemory.AllocZeroed(SnapshotCapacity * PlayersCapacity, (nuint)sizeof(PlayerData));
+        for (int i = 0; i < SnapshotCapacity; i++) snapshots[i].Players = players + i * PlayersCapacity;
+
+        nextIndex = 0;
+        Latest = null;
+    }
 
     static private VVector2? GetLocalMicPosition(GamePlayer? localPlayer)
     {
@@ -70,7 +80,7 @@ internal static class TBCLFields
         return position;
     }
 
-    static private unsafe void SetName(ref PlayerData data, string name)
+    static private void SetName(ref PlayerData data, string name)
     {
         int length = Math.Min(name.Length, NameCapacity);
         fixed (char* buffer = data.Name)
@@ -84,17 +94,20 @@ internal static class TBCLFields
     {
         if (!RequireUpdate) return;
 
-        Snapshot snapshot = new();
+        Initialize();
+
+        var snapshot = snapshots + nextIndex;
+        nextIndex = (nextIndex + 1) % SnapshotCapacity;
 
         var localPlayer = GamePlayer.LocalPlayer;
 
         var micPosition = GetLocalMicPosition(localPlayer);
-        snapshot.LocalMicPositionX = micPosition?.x ?? 0f;
-        snapshot.LocalMicPositionY = micPosition?.y ?? 0f;
+        snapshot->LocalMicPositionX = micPosition?.x ?? 0f;
+        snapshot->LocalMicPositionY = micPosition?.y ?? 0f;
 
         var allPlayers = GamePlayer.AllOrderedPlayers;
         int length = Math.Min(allPlayers.Count, PlayersCapacity);
-        var players = new PlayerData[length];
+        var players = snapshot->Players;
 
         for (int index = 0; index < length; index++)
         {
@@ -128,10 +141,9 @@ internal static class TBCLFields
             data.ColorB = color.B;
         }
 
-        snapshot.Players = players;
+        snapshot->PlayersLength = length;
 
-        while (Saver.Count > 100) Saver.Dequeue();
-        Data = new(snapshot);
-        Saver.Enqueue(Data);
+        //全ての書き込みを終えてから公開する
+        Latest = snapshot;
     }
 }
