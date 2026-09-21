@@ -44,3 +44,7 @@
 "achievement.extraMission.challenge.title" : "それぞれの思惑"
 "achievement.extraMission.challenge.goal" : "追加ミッションのターゲットが死亡し、かつ自身も誰かの追加ミッションの<br>ターゲットに指定された上で生存し、勝利する。"
 "achievement.extraMission.challenge.splitted.0" : "それぞれの"
+
+# Team
+
+"end.detail.extraMission.blocked" : "ターゲット生存"

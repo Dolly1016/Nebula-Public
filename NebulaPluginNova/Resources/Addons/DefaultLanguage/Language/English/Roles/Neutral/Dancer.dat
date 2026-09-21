@@ -99,6 +99,10 @@
 
 # Team
 
+"end.detail.dancer.win" : "Dancer win"
+"end.detail.dancer.extra" : "Extra win from a fulfilled death forecast"
+"end.detail.dancer.blocked" : "Win blocked by a death forecast"
+
 "teams.dancer" : "Dancer"
 "end.dancer" : "Dancer Wins <color=#FFFFFF>with Ghosts</color>%EXTRA%"
 

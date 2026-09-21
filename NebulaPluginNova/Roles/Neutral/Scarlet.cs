@@ -17,6 +17,7 @@ using Virial.Events.Player;
 using Virial.Game;
 using Virial.Text;
 using static UnityEngine.GraphicsBuffer;
+using Virial.Runtime;
 
 namespace Nebula.Roles.Neutral;
 
@@ -38,7 +39,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole, IAssignableDocument
     static private IntegerConfiguration NumOfKept = NebulaAPI.Configurations.Configuration("options.role.scarlet.numOfKept", (1,10), 3);
     static private IntegerConfiguration MaxUsesOfCommand = NebulaAPI.Configurations.Configuration("options.role.scarlet.numOfCommand", (1, 10), 2);
     static internal BoolConfiguration CanOverrideTaskWin = NebulaAPI.Configurations.Configuration("options.role.scarlet.canOverrideTaskWin", false);
-    static private BoolConfiguration WithFavoriteGauge = NebulaAPI.Configurations.Configuration("options.role.scarlet.favoriteGauge", true);
+    static internal BoolConfiguration WithFavoriteGauge = NebulaAPI.Configurations.Configuration("options.role.scarlet.favoriteGauge", true);
     static private FloatConfiguration RequiredGaugeToWin = NebulaAPI.Configurations.Configuration("options.role.scarlet.requiredGaugeToWin", (10f, 150f, 5f), 20f, FloatConfigurationDecorator.Second, () => WithFavoriteGauge);
     static private FloatConfiguration SurplusGauge = NebulaAPI.Configurations.Configuration("options.role.scarlet.surplusGauge", (5f, 80f, 5f), 20f, FloatConfigurationDecorator.Second, () => WithFavoriteGauge);
     static private FloatConfiguration GaugeReductionSpeed = NebulaAPI.Configurations.Configuration("options.role.scarlet.gaugeReductionRatio", (0f, 2f, 0.125f), 0.25f, FloatConfigurationDecorator.Ratio, () => WithFavoriteGauge);
@@ -254,7 +255,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             }
         }
 
-        bool FavoriteGaugeMeetCondition => !(FavoriteGauge < FavoriteGaugeThreshold);
+        internal bool FavoriteGaugeMeetCondition => !(FavoriteGauge < FavoriteGaugeThreshold);
 
         [OnlyMyPlayer, OnlyHost]
         void OnDead(PlayerDieOrDisconnectEvent ev)
@@ -277,15 +278,24 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             }
         }
 
-        [EventPriority(-1)]
-        void OnCheckGameEnd(EndCriteriaMetEvent ev)
+        [NonEventListener]
+        void TryOverwrite(EndCriteriaMetBaseEvent ev)
         {
             var favorite = GetMyFavorite();
             if (favorite == null) return;
             if (WithFavoriteGauge && !FavoriteGaugeMeetCondition) return; //ゲージがたまりきっていなければ乗っ取らない。
-            if (!CanOverrideTaskWin && ev.EndReason == GameEndReason.Task) return;//タスク勝利の乗っ取り
-            if (ev.OverwrittenGameEnd == NebulaGameEnd.AvengerWin && (favorite.Role != Avenger.MyRole || !ev.Winners.Test(favorite))) return; //Avenger勝利は本命がAvengerで勝利していない限り乗っ取らない。
-            if (!MyPlayer.IsDead && !favorite.IsDead && ev.Winners.Test(favorite)) ev.TryOverwriteEnd(NebulaGameEnd.ScarletWin, GameEndReason.Special);
+            if (!CanOverrideTaskWin && ev.OriginalEndReason == GameEndReason.Task) return;//タスク勝利の乗っ取り
+            if (!MyPlayer.IsDead && !favorite.IsDead && ev.OriginalWinners.Test(favorite)) ev.TryOverwriteEnd(NebulaGameEnd.ScarletWin, GameEndReason.Special);
+        }
+        void OnCheckGameEnd(EndCriteriaMetEvent ev) => TryOverwrite(ev);
+
+        void OnCheckGameEnd(EndCriteriaOverwrittenEvent ev)
+        {
+            var favorite = GetMyFavorite();
+            if (ev.OriginalGameEnd == NebulaGameEnd.AvengerWin && favorite?.Role == Avenger.MyRole && ev.OriginalWinners.Test(favorite))
+            {
+                TryOverwrite(ev);
+            }
         }
 
         void OnGameEnd(GameEndEvent ev)
@@ -306,7 +316,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole, IAssignableDocument
         {
             var favorite = GetMyFavorite();
             if (favorite == null) return;
-            ev.SetWinIf(ev.GameEnd == NebulaGameEnd.ScarletWin && ev.LastWinners.Test(favorite) && !favorite.IsDead);
+            if (ev.SetWinIf(ev.GameEnd == NebulaGameEnd.ScarletWin && ev.LastWinners.Test(favorite) && !favorite.IsDead)) ev.Recorder.AddReason(ev.Player.PlayerId, ScarletDetails.Win);
         }
 
         void FixVote(PlayerFixVoteHostEvent ev)
@@ -547,7 +557,14 @@ public class ScarletLover : DefinedModifierTemplate, DefinedModifier
         void ShowMyRoleForScarlet(PlayerCheckRoleInfoVisibilityLocalEvent ev) => ev.CanSeeRole |= !AmFavorite && ((MyScarlet as RuntimeAssignable)?.AmOwner ?? false);
 
         [OnlyMyPlayer]
-        void BlockWins(PlayerBlockWinEvent ev) => ev.IsBlocked |= AmFavorite && (MyScarlet as RuntimeAssignable)!.MyPlayer.IsDead && ev.GameEnd != NebulaGameEnds.JesterGameEnd.Get();
+        void BlockWins(PlayerBlockWinEvent ev)
+        {
+            if (AmFavorite)
+            {
+                if (ev.SetBlockedIf((MyScarlet as RuntimeAssignable)!.MyPlayer.IsDead && ev.GameEnd != NebulaGameEnds.JesterGameEnd.Get())) ev.Recorder.AddReason(ev.Player.PlayerId, ScarletDetails.Blocked);
+                if (ev.SetBlockedIf(Scarlet.WithFavoriteGauge && !MyScarlet.FavoriteGaugeMeetCondition)) ev.Recorder.AddReason(ev.Player.PlayerId, ScarletDetails.BlockedByGauge);
+            }
+        }
 
         [OnlyMyPlayer]
         void CheckExtraWins(PlayerCheckExtraWinEvent ev)
@@ -563,10 +580,27 @@ public class ScarletLover : DefinedModifierTemplate, DefinedModifier
             if (!scarletPlayer.IsDead && ev.WinnersMask.Test(scarletPlayer))
             {
                 ev.ExtraWinMask.Add(NebulaGameEnd.ExtraLoversWin);
-                ev.IsExtraWin = true;
+                if (ev.SetWin(true)) ev.Recorder.AddReason(ev.Player.PlayerId, ScarletDetails.Extra);
             }            
         }
 
         bool RuntimeAssignable.MyCrewmateTaskIsIgnored => !Scarlet.CanOverrideTaskWin && AmFavorite;
+    }
+}
+
+[NebulaPreprocess(PreprocessPhase.PostRoles)]
+file static class ScarletDetails
+{
+    static internal CommunicableTextTag Win = null!;
+    static internal CommunicableTextTag Extra = null!;
+    static internal CommunicableTextTag Blocked = null!;
+    static internal CommunicableTextTag BlockedByGauge = null!;
+
+    static void Preprocess(NebulaPreprocessor preprocessor)
+    {
+        Win = preprocessor.RegisterCommunicableText("end.detail.scarlet.win");
+        Extra = preprocessor.RegisterCommunicableText("end.detail.scarlet.extra");
+        Blocked = preprocessor.RegisterCommunicableText("end.detail.scarlet.blocked");
+        BlockedByGauge = preprocessor.RegisterCommunicableText("end.detail.scarlet.blocked.gauge");
     }
 }

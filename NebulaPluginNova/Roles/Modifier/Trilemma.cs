@@ -13,6 +13,8 @@ using Virial.Game;
 using Virial.Utilities;
 using Virial;
 using static UnityEngine.GraphicsBuffer;
+using Virial.Runtime;
+using Virial.Text;
 
 namespace Nebula.Roles.Modifier;
 
@@ -181,7 +183,10 @@ internal class Trilemma : DefinedModifierTemplate, DefinedAllocatableModifier, R
         private bool AmLastTrilemma => MyTrilemmas.All(p => p.IsDead || p == MyPlayer) && !MyPlayer.IsDead;
 
         [OnlyMyPlayer]
-        void CheckBlock(PlayerBlockWinEvent ev) => ev.SetBlockedIf(!AmLastTrilemma);
+        void CheckBlock(PlayerBlockWinEvent ev)
+        {
+            if (ev.SetBlockedIf(!AmLastTrilemma)) ev.Recorder.AddReason(ev.Player.PlayerId, TrilemmaDetails.Blocked);
+        }
 
         [OnlyMyPlayer]
         void CheckExtraWin(PlayerCheckExtraWinEvent ev)
@@ -190,7 +195,7 @@ internal class Trilemma : DefinedModifierTemplate, DefinedAllocatableModifier, R
 
             if (WinConditionOption.GetValue() == 1 && AmLastTrilemma)
             {
-                ev.SetWin(true);
+                if (ev.SetWin(true)) ev.Recorder.AddReason(ev.Player.PlayerId, TrilemmaDetails.Extra);
                 ev.ExtraWinMask.Add(NebulaGameEnd.ExtraTrilemmaWin);
             }
         }
@@ -198,12 +203,12 @@ internal class Trilemma : DefinedModifierTemplate, DefinedAllocatableModifier, R
         [OnlyMyPlayer]
         void CheckWin(PlayerCheckWinEvent ev)
         {
-            ev.SetWinIf(ev.GameEnd == NebulaGameEnd.TrilemmaWin && WinConditionOption.GetValue() == 2 && AmLastTrilemma);
+            if (ev.SetWinIf(ev.GameEnd == NebulaGameEnd.TrilemmaWin && WinConditionOption.GetValue() == 2 && AmLastTrilemma)) ev.Recorder.AddReason(ev.Player.PlayerId, TrilemmaDetails.Win);
         }
 
         void OnCheckGameEnd(EndCriteriaMetEvent ev)
         {
-            if (WinConditionOption.GetValue() == 2 && AmLastTrilemma && ev.Winners.Test(MyPlayer)) ev.TryOverwriteEnd(NebulaGameEnd.TrilemmaWin, GameEndReason.Special);
+            if (WinConditionOption.GetValue() == 2 && AmLastTrilemma && ev.OriginalWinners.Test(MyPlayer)) ev.TryOverwriteEnd(NebulaGameEnd.TrilemmaWin, GameEndReason.Special);
         }
 
 
@@ -271,3 +276,18 @@ internal class Trilemma : DefinedModifierTemplate, DefinedAllocatableModifier, R
     }
 }
 
+
+[NebulaPreprocess(PreprocessPhase.PostRoles)]
+file static class TrilemmaDetails
+{
+    static internal CommunicableTextTag Win = null!;
+    static internal CommunicableTextTag Extra = null!;
+    static internal CommunicableTextTag Blocked = null!;
+
+    static void Preprocess(NebulaPreprocessor preprocessor)
+    {
+        Win = preprocessor.RegisterCommunicableText("end.detail.trilemma.win");
+        Extra = preprocessor.RegisterCommunicableText("end.detail.trilemma.extra");
+        Blocked = preprocessor.RegisterCommunicableText("end.detail.trilemma.blocked");
+    }
+}

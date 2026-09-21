@@ -186,8 +186,37 @@ public static class NebulaGameEnds
     public readonly static Cache<GameEnd> NoGameEnd = new(() => GameEnd.TryGet(63, out var end) ? end : null!);
 }
 
+public class GameEndStage
+{
+    public GameEnd EndCondition { get; private init; }
+
+    public GameEndReason EndReason { get; private init; }
+
+    public BitMask<Virial.Game.Player> Winners { get; private init; }
+
+    public BitMask<ExtraWin> ExtraWins { get; private init; }
+
+    public GameEndDetail? Detail { get; private init; }
+
+    public GameEndStage(GameEnd endCondition, GameEndReason endReason, BitMask<Virial.Game.Player> winners, BitMask<ExtraWin> extraWins, GameEndDetail? detail)
+    {
+        EndCondition = endCondition;
+        EndReason = endReason;
+        Winners = winners;
+        ExtraWins = extraWins;
+        Detail = detail;
+    }
+}
+
 public class EndState
 {
+    private readonly GameEndStage[] stages;
+
+    public IReadOnlyList<GameEndStage> Stages => stages;
+
+    public GameEndStage OriginalStage => stages[0];
+
+    public GameEndStage FinalStage => stages[^1];
 
     public BitMask<Virial.Game.Player> Winners { get; private init; }
     public BitMask<ExtraWin> ExtraWins { get; private init; }
@@ -196,13 +225,79 @@ public class EndState
     public GameEndReason OriginalEndReason { get; private init; }
     public GameEnd OriginalEndCondition { get; private init; }
 
-    public EndState(BitMask<Virial.Game.Player> winners, GameEnd endCondition, GameEndReason reason, GameEnd originalEndCondition, GameEndReason originalReason, BitMask<ExtraWin> extraWins)
+    public EndState(params GameEndStage[] stages)
     {
-        this.Winners = winners;
-        this.EndCondition = endCondition;
-        this.ExtraWins = extraWins;
-        EndReason = reason;
-        this.OriginalEndCondition = originalEndCondition;
-        this.OriginalEndReason = originalReason;
+        if (stages.Length == 0) throw new ArgumentException("EndState requires one or more stages.", nameof(stages));
+
+        this.stages = stages;
+
+        var original = stages[0];
+        var final = stages[^1];
+
+        Winners = final.Winners;
+        ExtraWins = final.ExtraWins;
+        EndReason = final.EndReason;
+        EndCondition = final.EndCondition;
+        OriginalEndReason = original.EndReason;
+        OriginalEndCondition = original.EndCondition;
+    }
+}
+
+internal class GameEndPhase
+{
+    public CommunicableTextTag Name { get; private init; }
+    internal BitMask<Virial.Game.Player> Winners { get; private init; }
+    internal IReadOnlyList<(CommunicableTextTag reason, BitMask<Virial.Game.Player> players)> Reasons { get; private init; }
+
+    internal GameEndPhase(CommunicableTextTag name, BitMask<Virial.Game.Player> winners, IReadOnlyList<(CommunicableTextTag, BitMask<Virial.Game.Player>)> reasons)
+    {
+        Name = name;
+        Winners = winners;
+        Reasons = reasons;
+    }
+}
+
+/// <summary>
+/// 勝敗がどう決まったのかの記録。
+/// </summary>
+public class GameEndDetail
+{
+    private readonly List<GameEndPhase> phases = [];
+    private readonly List<(CommunicableTextTag reason, uint players)> pendingReasons = [];
+    private uint lastWinners = 0u;
+
+    internal IReadOnlyList<GameEndPhase> Phases => phases;
+
+    /// <summary>
+    /// プレイヤーの勝敗が変化する、あるいは変化しない理由を追加します。
+    /// </summary>
+    /// <param name="playerId">理由を与えるプレイヤーのID。</param>
+    /// <param name="reason">理由。</param>
+    public void AddReason(byte playerId, CommunicableTextTag reason)
+    {
+        if (reason == null) return;
+
+        var bit = 1u << playerId;
+        var index = pendingReasons.FindIndex(entry => entry.reason == reason);
+
+        if (index < 0) pendingReasons.Add((reason, bit));
+        else pendingReasons[index] = (reason, pendingReasons[index].players | bit);
+    }
+
+    internal void EndPhase(CommunicableTextTag name, BitMask<Virial.Game.Player> winners)
+    {
+        var raw = winners?.AsRawPattern ?? 0u;
+
+        // 冗長なフェーズの削除
+        if (pendingReasons.Count == 0 && raw == lastWinners)
+        {
+            pendingReasons.Clear();
+            return;
+        }
+
+        phases.Add(new GameEndPhase(name, winners ?? BitMasks.AsPlayer(raw), pendingReasons.Select(entry => (entry.reason, (BitMask<Virial.Game.Player>)BitMasks.AsPlayer(entry.players))).ToArray()));
+
+        lastWinners = raw;
+        pendingReasons.Clear();
     }
 }

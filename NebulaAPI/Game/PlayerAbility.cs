@@ -39,6 +39,7 @@ public interface IPlayerAbility : IBindPlayer, IGameOperator, ILifespan
     IEnumerable<DefinedAssignable> SubAssignableOnHelp => [];
 
     Virial.Media.GUIWidget? ProgressWidget => null;
+    string? MoreInformation => null;
 }
 
 public interface IUsurpableAbility : IPlayerAbility

@@ -81,6 +81,10 @@
 
 # Team
 
+"end.detail.scarlet.win" : "Scarlet win"
+"end.detail.scarlet.extra" : "Extra win as the Scarlet's sweetheart"
+"end.detail.scarlet.blocked" : "Sweetheart win blocked by the Scarlet's death"
+
 "teams.scarlet" : "Scarlet"
 "end.scarlet" : "Scarlet Wins%EXTRA%"
 

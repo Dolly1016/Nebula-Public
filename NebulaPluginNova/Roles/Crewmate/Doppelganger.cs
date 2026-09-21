@@ -192,7 +192,7 @@ internal class Doppelganger : DefinedSingleAbilityRoleTemplate<Doppelganger.Abil
             lifespan.Bind(this);
             fakePlayerReleasable = lifespan;
 
-            fakePlayer = FakePlayerController.SpawnSyncFakePlayer(MyPlayer, new(position, KillCharacteristics.KillAllAndLeaveBodyOne, true, true, flipX, MyPlayer.VanillaCosmetics.GetPetPosition())).BindLifespan(lifespan);
+            fakePlayer = FakePlayerController.SpawnSyncFakePlayer(MyPlayer, new(position, KillCharacteristics.KillAllAndLeaveBodyOne, true, true, flipX, MyPlayer.VanillaCosmetics.GetPetPosition(), null, DoppelgangerFakePlayerDetails.Reason)).BindLifespan(lifespan);
             isMoving = false;
         }
 
@@ -324,5 +324,16 @@ internal class Doppelganger : DefinedSingleAbilityRoleTemplate<Doppelganger.Abil
                     .StartOnScene();
             }
             );
+    }
+}
+
+[Virial.Attributes.NebulaPreprocess(Virial.Attributes.PreprocessPhase.PostRoles)]
+file static class DoppelgangerFakePlayerDetails
+{
+    static internal Virial.Text.CommunicableTextTag Reason = null!;
+
+    static void Preprocess(Virial.Runtime.NebulaPreprocessor preprocessor)
+    {
+        Reason = preprocessor.RegisterCommunicableText("fakePlayer.doppelganger");
     }
 }

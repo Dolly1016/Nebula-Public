@@ -34,6 +34,7 @@
 # Game
 
 "gameAction.marionette.placement" : "人形設置"
+"fakePlayer.marionette" : "マリオネットのデコイ"
 
 # UI
 

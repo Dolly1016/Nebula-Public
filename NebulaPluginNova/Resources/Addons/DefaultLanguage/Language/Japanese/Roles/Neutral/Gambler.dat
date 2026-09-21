@@ -86,6 +86,8 @@
 
 # Team
 
+"end.detail.gambler.win" : "ギャンブラー勝利"
+
 "teams.gambler" : "ギャンブラー"
 "end.gambler" : "ギャンブラー%EXTRA%勝利"
 

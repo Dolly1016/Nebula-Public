@@ -431,6 +431,47 @@ public abstract class RemoteProcessArgumentBase
         new RemoteProcessArgument<DefinedGhostRole>((writer, role) => writer.Write(role?.Id ?? -1), reader => Roles.Roles.GetGhostRole(reader.ReadInt32())!);
         new RemoteProcessArgument<DefinedModifier>((writer, role) => writer.Write(role?.Id ?? -1), reader => Roles.Roles.GetModifier(reader.ReadInt32())!);
 
+        new RemoteProcessArgument<GameEndDetail>((writer, detail) =>
+        {
+            if(detail == null)
+            {
+                writer.Write((int)0);
+                return;
+            }
+            writer.Write(detail.Phases.Count);
+            foreach(var phase in detail.Phases)
+            {
+                writer.Write(phase.Name.Id);
+                writer.Write((int)phase.Winners.AsRawPattern);
+                writer.Write(phase.Reasons.Count);
+                foreach(var reason in phase.Reasons)
+                {
+                    writer.Write(reason.reason.Id);
+                    writer.Write((int)reason.players.AsRawPattern);
+                }
+            }
+        }, reader =>
+        {
+            GameEndDetail detail = new();
+            var phases = reader.ReadInt32();
+            for(int i = 0; i < phases; i++)
+            {
+                var nameId = reader.ReadInt32();
+                var winners = reader.ReadInt32();
+                var reasons = reader.ReadInt32();
+                for(int j = 0; j < reasons; j++)
+                {
+                    var reasonId = reader.ReadInt32();
+                    var players = (uint)reader.ReadInt32();
+                    var tag = TranslatableTag.ValueOf(reasonId)!;
+                    //受け取り側では対象プレイヤーを一人ずつ積み直す。
+                    for (byte playerId = 0; playerId < 32; playerId++) if ((players & (1u << playerId)) != 0) detail.AddReason(playerId, tag);
+                }
+                detail.EndPhase(TranslatableTag.ValueOf(nameId)!, BitMasks.AsPlayer((uint)winners));
+            }
+            return detail;
+        });
+
         new RemoteProcessArgument<PlayerControl>((writer, player) => writer.Write(player.AsBoolFast() ? player!.PlayerId : byte.MaxValue), reader => Helpers.GetPlayer(reader.ReadByte())!);
     }
 }

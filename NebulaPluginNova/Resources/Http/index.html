@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Game Records — Nebula on the Ship</title>
+<link rel="stylesheet" href="/style.css">
+<!-- 文言。英語を土台に敷き、その上に使用中の言語を重ねる。
+     カスケードの結果、使用中の言語で定義されていないキーだけが英語のまま残る。 -->
+<link rel="stylesheet" href="/text.english.css">
+<link rel="stylesheet" href="/text.current.css">
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ============ サイドバー : 過去のゲーム ============ -->
+  <aside class="sidebar">
+    <div class="sidebar-head">
+      <h1 data-t="app-title">Game Records</h1>
+      <button type="button" id="reload" class="icon-button" data-t-title="action-reload" data-t-aria="action-reload">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5a7 7 0 1 0 6.6 4.7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 2.5v4.2l3.6-2.1z" fill="currentColor"/></svg>
+      </button>
+    </div>
+
+    <div class="filters" role="group" data-t-aria="filter-group">
+      <button type="button" class="chip is-active" data-filter="all" data-t="filter-all">All</button>
+      <button type="button" class="chip" data-filter="marked" data-t="filter-marked">Marked</button>
+    </div>
+
+    <nav id="game-list" class="game-list" data-t-aria="list-label"></nav>
+
+    <!-- 件数を差し込むので app.js が組み立てる。 -->
+    <p id="list-limit" class="sidebar-foot"></p>
+  </aside>
+
+  <!-- ============ 本体 : 選択中のゲーム ============ -->
+  <main class="main">
+    <p id="status" class="status" role="status" data-t="status-loading">Loading…</p>
+
+    <article id="game" class="game" hidden>
+
+      <header class="game-head">
+        <div class="game-head-top">
+          <h2 id="game-title">—</h2>
+          <button type="button" id="mark" class="icon-button mark-button" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.6l2.6 5.3 5.8.8-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8L3.6 9.7l5.8-.8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+
+        <dl class="facts">
+          <div class="fact"><dt data-t="fact-started">Started</dt><dd id="fact-started">—</dd></div>
+          <div class="fact"><dt data-t="fact-ended">Ended</dt><dd id="fact-ended">—</dd></div>
+          <div class="fact"><dt data-t="fact-map">Map</dt><dd id="fact-map">—</dd></div>
+          <div class="fact"><dt data-t="fact-host">Host</dt><dd id="fact-host">—</dd></div>
+          <div class="fact fact-win">
+            <dt data-t="fact-win">Result</dt>
+            <dd>
+              <span id="fact-win">—</span>
+              <button type="button" id="detail-open" class="icon-button" data-t-title="action-detail" data-t-aria="action-detail">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 10.8v6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="7.6" r="1.2" fill="currentColor"/></svg>
+              </button>
+            </dd>
+          </div>
+        </dl>
+      </header>
+
+      <!-- ============ タスクターンの移動 ============ -->
+      <section id="route" class="route" hidden>
+        <h3 data-t="route-title">Movement</h3>
+
+        <div id="route-segments" class="route-segments" role="group" data-t-aria="route-segment-group"></div>
+
+        <div class="route-stage">
+          <div class="route-map">
+            <div id="route-canvas" class="route-canvas">
+              <div id="route-markers" class="route-markers"></div>
+            </div>
+          </div>
+
+          <aside class="route-panel">
+            <h4 data-t="route-show">Show</h4>
+            <label class="route-toggle">
+              <input type="checkbox" id="route-show-alive" checked>
+              <span data-t="route-show-alive">Alive</span>
+            </label>
+            <label class="route-toggle">
+              <input type="checkbox" id="route-show-ghosts">
+              <span data-t="route-show-ghosts">Ghosts</span>
+            </label>
+          </aside>
+        </div>
+
+        <div id="route-controls" class="route-controls">
+          <button type="button" id="route-play" class="icon-button" data-t-title="route-play" data-t-aria="route-play">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5l11 6.5-11 6.5z" fill="currentColor"/></svg>
+          </button>
+          <input type="range" id="route-seek" class="route-seek" min="0" max="0" step="1" value="0" data-t-aria="route-seek">
+          <span id="route-time" class="route-time">0:00</span>
+        </div>
+
+        <ul id="route-events" class="route-events"></ul>
+      </section>
+
+      <p id="route-empty" class="status" data-t="route-empty" hidden>This record has no movement data.</p>
+
+    </article>
+  </main>
+</div>
+
+<!-- ============ 勝敗の詳細 ============ -->
+<div id="overlay" class="overlay" hidden>
+  <div class="overlay-backdrop" data-close></div>
+  <div class="overlay-panel" role="dialog" aria-modal="true" aria-labelledby="overlay-title">
+    <div class="overlay-head">
+      <h3 id="overlay-title" data-t="detail-title">Result in detail</h3>
+      <button type="button" class="icon-button" data-close data-t-title="action-close" data-t-aria="action-close">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <div class="overlay-body">
+      <section>
+        <h4 data-t="detail-players">Players</h4>
+        <div class="table-scroll">
+          <table class="players">
+            <thead>
+              <tr>
+                <th scope="col" class="col-win"><span class="sr-only" data-t="detail-col-win">Result</span></th>
+                <th scope="col" data-t="detail-col-player">Player</th>
+                <th scope="col" data-t="detail-col-role">Role</th>
+                <th scope="col" data-t="detail-col-task">Tasks</th>
+                <th scope="col" data-t="detail-col-state">Outcome</th>
+              </tr>
+            </thead>
+            <tbody id="player-rows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <h4 data-t="detail-history">How the result was decided</h4>
+        <div id="stage-list" class="stages"></div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script src="/player-icon.js"></script>
+<script src="/map-image.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>

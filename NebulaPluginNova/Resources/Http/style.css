@@ -1,0 +1,552 @@
+:root {
+  color-scheme: dark;
+  --bg: #12141a;
+  --panel: #191d26;
+  --panel-2: #212633;
+  --line: #2c3342;
+  --text: #e7eaf2;
+  --muted: #98a2b8;
+  --accent: #6fb7ff;
+  --mark: #ffc857;
+  --win: #58d68d;
+  --lose: #6b7488;
+  --sidebar-width: 268px;
+
+  /* 経緯のタイムラインの寸法。ポップアップの横幅もここから決めるので :root に置く。 */
+  --label-width: 285px;
+  --column-width: 34px;
+}
+
+* { box-sizing: border-box; }
+
+/* hidden 属性は UA スタイルの display:none で効くが、作者スタイルの display に負ける。
+   .overlay の display:grid などに打ち消されないよう、ここで優先させる。 */
+[hidden] { display: none !important; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 14px/1.7 "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", system-ui, sans-serif;
+}
+
+h1 { font-size: 16px; margin: 0; letter-spacing: .02em; }
+h2 { font-size: 21px; margin: 0; }
+h3 { font-size: 16px; margin: 0; }
+h4 { font-size: 12px; margin: 0 0 10px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------- 骨格 */
+
+.layout {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+  min-height: 100%;
+}
+
+.sidebar {
+  border-right: 1px solid var(--line);
+  background: var(--panel);
+  padding: calc(16px + env(safe-area-inset-top, 0px)) 14px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  align-self: start;
+  max-height: 100vh;
+}
+
+.main {
+  padding: calc(26px + env(safe-area-inset-top, 0px)) 24px 56px;
+  min-width: 0;
+}
+
+/* ---------------------------------------------------------------- 部品 */
+
+.icon-button {
+  flex: 0 0 auto;
+  width: 30px; height: 30px;
+  display: inline-grid; place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-2);
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0;
+}
+.icon-button svg { width: 17px; height: 17px; display: block; }
+.icon-button:hover { color: var(--accent); border-color: var(--accent); }
+.icon-button.mark-button[aria-pressed="true"] { color: var(--mark); border-color: var(--mark); }
+.icon-button.mark-button[aria-pressed="true"] svg path { fill: currentColor; }
+
+.chip {
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 3px 12px;
+  font: inherit; font-size: 12px;
+  cursor: pointer;
+}
+.chip:hover { border-color: var(--accent); }
+.chip.is-active { border-color: var(--accent); color: var(--accent); }
+
+.status { color: var(--muted); font-size: 13px; margin: 0; padding: 12px 0; }
+.status.is-error { color: #ff8a8a; }
+
+/* ---------------------------------------------------------------- サイドバー */
+
+.sidebar-head { display: flex; align-items: center; gap: 8px; }
+.sidebar-head h1 { flex: 1 1 auto; }
+
+.filters { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.game-list {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  margin: 0 -6px;
+  padding: 0 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.game-link {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  padding: 7px 9px;
+  cursor: pointer;
+}
+.game-link:hover { background: var(--panel-2); }
+.game-link.is-current { background: var(--panel-2); border-color: var(--accent); }
+
+.game-link .date { display: block; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.game-link .cond { display: block; font-size: 13.5px; }
+.game-link .star { color: var(--mark); font-size: 11px; margin-left: 4px; }
+
+.sidebar-foot { margin: 0; font-size: 11.5px; color: var(--muted); }
+
+/* ---------------------------------------------------------------- ゲーム本体 */
+
+.game-head-top { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+.game-head-top h2 { flex: 1 1 auto; min-width: 0; }
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 1px;
+  margin: 0;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.fact { background: var(--panel); padding: 12px 14px; }
+.fact dt { font-size: 11px; color: var(--muted); letter-spacing: .06em; margin-bottom: 2px; }
+.fact dd { margin: 0; font-size: 14.5px; }
+.fact-win dd { display: flex; align-items: center; gap: 8px; }
+.fact-win #fact-win { flex: 1 1 auto; min-width: 0; }
+
+/* ---------------------------------------------------------------- 移動経路 */
+
+.route { margin-top: 22px; }
+
+.route h3 { font-size: 13px; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 8px; }
+
+/* ターンと会議のボタン。この下にマップと出来事が続く。 */
+.route-segments { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.route-segments .chip.is-meeting { color: var(--muted); }
+.route-segments .chip.is-active { color: var(--accent); }
+
+/*
+ * ミニマップ。外の枠に余白を持たせ、画像そのものは内側の箱に収める。
+ * 端にいる印が枠に張り付かず、はみ出す分も余白に収まる。
+ */
+/* マップと、その右のサイドパネル。狭いときは下へ回す。 */
+.route-stage { display: flex; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+
+.route-panel {
+  flex: 0 0 auto;
+  min-width: 132px;
+  padding: 14px 14px 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.route-panel h4 { margin-bottom: 8px; }
+
+.route-toggle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12.5px;
+  padding: 3px 0;
+  cursor: pointer;
+}
+.route-toggle input { accent-color: var(--accent); margin: 0; }
+
+.route-map {
+  flex: 1 1 420px;
+  min-width: 0;
+  /* 画像の幅は余白のぶんだけ外を広げて確保する（内側で 760px） */
+  max-width: 800px;
+  padding: 20px;
+  background: #0b0e15;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* 画像の縦横比は app.js が aspect-ratio に入れる。中の印は割合で置く。 */
+.route-canvas {
+  position: relative;
+  width: 100%;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+.route-markers { position: absolute; inset: 0; }
+
+.route-marker {
+  position: absolute;
+  width: 22px; height: 19px;
+  margin: -10px 0 0 -11px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  cursor: default;
+  transition: opacity .12s;
+}
+
+/* 記録した状態をそのまま見せる。死んでいれば薄く、姿が見えない間はさらに薄く。 */
+.route-marker.is-dead { opacity: .45; }
+
+/* ニセモノ。本物と同じ見た目なので、破線の輪で区別できるようにする。 */
+.route-marker.is-fake::after {
+  content: "";
+  position: absolute;
+  inset: -4px -3px;
+  border: 1px dashed #ffffff8c;
+  border-radius: 50%;
+}
+.route-marker.is-invisible { opacity: .2; }
+
+/* WebGL が使えないときの代わり */
+.route-marker.fallback { border-radius: 6px 6px 8px 8px; background: var(--pc, #888); }
+
+.route-controls { display: flex; align-items: center; gap: 10px; margin-top: 10px; max-width: 800px; }
+.route-controls .icon-button.is-active { color: var(--accent); border-color: var(--accent); }
+
+.route-seek { flex: 1 1 auto; min-width: 0; accent-color: var(--accent); }
+
+.route-time { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 84px; text-align: right; }
+
+/* 会議中はマップを沈ませて、止まった絵であることが分かるようにする。 */
+.route-canvas.is-meeting { opacity: .85; }
+
+/* その区切りで起きたこと。 */
+.route-events {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.route-event {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 10px;
+  align-items: baseline;
+  padding: 5px 9px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+.route-event:hover { background: var(--panel-2); }
+.route-event.is-selected { background: var(--panel-2); box-shadow: inset 0 0 0 1px var(--accent); }
+
+.route-event.is-empty { display: block; color: var(--muted); cursor: default; }
+.route-event.is-empty:hover { background: none; }
+
+.route-event .time { color: var(--muted); font-variant-numeric: tabular-nums; }
+.route-event .who { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---------------------------------------------------------------- オーバーレイ */
+
+.overlay { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 20px; }
+.overlay-backdrop { position: absolute; inset: 0; background: #06080ccc; }
+
+/*
+ * 横幅はタイムラインが横スクロールせずに収まる幅まで広げる。
+ * 人数が少ないうちは今までどおりの幅で、13 人あたりから広がり始める。
+ * ただし 100%（= 画面幅から .overlay のパディングを引いた分）は超えない。
+ * 超える人数では今までどおりタイムラインが横スクロールする。
+ */
+.overlay-panel {
+  /* 人数によらず確保する幅 */
+  --panel-base-width: 760px;
+  /* タイムラインの左右に挟まるものの合計。
+     パネルの枠線(2) + .overlay-body の左右パディング(32) + .stage の枠線とパディング(28)
+     + フェーズの箱の枠線(2) + 縦スクロールバー(20) */
+  --panel-chrome: 84px;
+  --panel-width: calc(var(--label-width) + var(--players, 0) * var(--column-width) + var(--panel-chrome));
+
+  position: relative;
+  width: min(max(var(--panel-base-width), var(--panel-width)), 100%);
+  max-height: min(84vh, 760px);
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 18px 48px #0009;
+}
+
+.overlay-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.overlay-head h3 { flex: 1 1 auto; }
+
+.overlay-body { overflow-y: auto; padding: 18px 16px 22px; display: flex; flex-direction: column; gap: 26px; }
+
+/* ---------------------------------------------------------------- 役職アイコン */
+
+/*
+ * ゲーム内で作ったアトラス 1 枚から、1 マスだけを切り出して出す。
+ * どのマスかは app.js が --col / --row に入れる。決まるまでは場所を取らない。
+ */
+.role-icon {
+  --icon-size: 1.25em;
+  display: inline-block;
+  width: 0;
+  height: var(--icon-size);
+  vertical-align: -0.28em;
+  background-repeat: no-repeat;
+}
+
+.role-icon.is-ready {
+  width: var(--icon-size);
+  background-size: calc(var(--icon-size) * var(--cols)) calc(var(--icon-size) * var(--rows));
+  background-position:
+    calc(var(--col) * var(--icon-size) * -1)
+    calc(var(--row) * var(--icon-size) * -1);
+}
+
+.role-name { line-height: 1.5; }
+
+/* 役職の下に添える追加情報。主役は役職名なので控えめに。 */
+.role-more { margin-top: 1px; font-size: 11.5px; line-height: 1.5; color: var(--muted); }
+
+/* ---------------------------------------------------------------- 表 */
+
+.table-scroll { overflow-x: auto; }
+
+table.players { width: 100%; border-collapse: collapse; }
+
+table.players th {
+  text-align: left; font-size: 11px; font-weight: 600;
+  color: var(--muted); letter-spacing: .06em;
+  border-bottom: 1px solid var(--line);
+  padding: 5px 9px;
+  white-space: nowrap;
+}
+table.players td { border-bottom: 1px solid var(--line); padding: 8px 9px; vertical-align: top; }
+table.players tr.is-winner { background: #58d68d0f; }
+
+.col-win { width: 52px; }
+
+.badge {
+  display: inline-block;
+  font-size: 11px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  white-space: nowrap;
+}
+.badge.win { color: var(--win); }
+
+.player-name { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+.player-name .host { font-size: 10.5px; color: var(--accent); border: 1px solid currentColor; border-radius: 4px; padding: 0 4px; }
+
+/* タスクの進み具合。色は記録された文字列が持っているので、ここでは触らない。 */
+.col-task { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.state-extra { display: block; font-size: 11.5px; color: #ff9c9c; }
+.dc { display: block; font-size: 11.5px; color: var(--muted); }
+
+/* ---------------------------------------------------------------- 経緯 */
+
+.stages { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+
+.stage {
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 11px 13px;
+  background: var(--panel-2);
+}
+.stage-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+.stage-head .no { font-size: 11px; color: var(--muted); }
+.stage-head .cond { font-weight: 600; }
+.stage-head .tag { font-size: 10.5px; color: var(--accent); border: 1px solid currentColor; border-radius: 4px; padding: 0 5px; }
+.stage-meta { font-size: 12px; color: var(--muted); }
+.stage-winners { font-size: 13px; margin-top: 4px; }
+
+/* ---------------------------------------------------------------- タイムライン */
+
+.timeline {
+  /* フェーズの箱と箱のあいだ。勝利のラインはこの隙間を跨いで繋がる。 */
+  --phase-gap: 8px;
+  --bar-width: 14px;
+  margin-top: 10px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.tl-grid { display: grid; min-width: min-content; }
+
+/* 先頭列はフェーズ名と理由、以降はプレイヤー1人ずつ */
+.tl-row { display: grid; grid-template-columns: var(--label-width) repeat(var(--players), var(--column-width)); }
+
+.tl-head { margin-bottom: 6px; }
+
+.tl-player {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 2px 8px;
+}
+
+.tl-player img, .tl-player .fallback {
+  width: 26px; height: 22px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  cursor: default;
+}
+/* WebGL が使えないときの代わり */
+.tl-player .fallback { border-radius: 6px 6px 8px 8px; background: var(--pc, #888); }
+
+/* --- フェーズは一つずつ角の丸い箱に収める */
+
+.tl-phase {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel-2);
+  margin-bottom: var(--phase-gap);
+}
+.tl-phase:last-child { margin-bottom: 0; }
+
+.tl-phase .tl-label { padding: 9px 12px 11px; }
+
+.tl-phase-name { font-size: 12.5px; font-weight: 600; }
+
+.tl-reasons { margin: 4px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 2px; }
+
+.tl-reason {
+  font-size: 11.5px;
+  color: var(--muted);
+  cursor: default;
+  border-radius: 4px;
+  padding: 0 4px;
+  transition: color .08s, background-color .08s;
+}
+.tl-reason::before { content: "└ "; color: var(--line); }
+.tl-reason.is-lit { color: #fff; background: #ffffff14; }
+.tl-reason.is-dim { color: #ffffff30; }
+
+/* --- 勝利のライン */
+
+.tl-cell { position: relative; min-height: 38px; }
+
+/* 常にある薄い軌道。ラインが無いところの目印。 */
+.tl-cell::before {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0; left: 50%;
+  width: 2px;
+  margin-left: -1px;
+  background: #ffffff0a;
+}
+
+.tl-bar {
+  position: absolute;
+  left: 50%;
+  width: var(--bar-width);
+  margin-left: calc(var(--bar-width) / -2);
+  background: var(--pc, transparent);
+  opacity: .9;
+}
+
+/* 始まりと終わり。フェーズの真ん中で始まり、真ん中で終わる。
+   前後のフェーズへ続くときは箱の隙間ぶんはみ出して繋げる。 */
+.tl-bar.from-above  { top: calc(-1 * var(--phase-gap) - 2px); }
+.tl-bar.from-middle { top: 50%; }
+.tl-bar.to-bottom   { bottom: 0; }
+.tl-bar.to-middle   { bottom: 50%; }
+
+.tl-bar.cap-top    { border-radius: calc(var(--bar-width) / 2) calc(var(--bar-width) / 2) 0 0; }
+.tl-bar.cap-bottom { border-radius: 0 0 calc(var(--bar-width) / 2) calc(var(--bar-width) / 2); }
+
+/* カーソルを合わせたときに光るのは点だけ。ラインには手を出さない。 */
+.tl-cell .dot {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 7px; height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  border-radius: 50%;
+  background: #fff;
+  opacity: 0;
+  transition: opacity .08s, transform .08s;
+}
+/* 点があるのは理由を持つセルだけ。持たないセルは強調も減光も一切しない。 */
+.tl-cell.has-reason .dot { opacity: .8; }
+.tl-cell.has-reason.is-lit .dot { opacity: 1; transform: scale(1.5); box-shadow: 0 0 6px #fff9; }
+.tl-cell.has-reason.is-dim .dot { opacity: .18; }
+
+/* --- 自前の吹き出し */
+
+.tl-tip {
+  position: fixed;
+  z-index: 100;
+  pointer-events: none;
+  transform: translate(-50%, -100%);
+  background: #0e1118;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 3px 9px;
+  font-size: 12px;
+  color: var(--text);
+  white-space: nowrap;
+  box-shadow: 0 6px 18px #000a;
+  text-align: left;
+}
+
+/* 吹き出しの2行目。主役は1行目なので一回り小さくする。 */
+.tl-tip-sub { margin-top: 1px; font-size: 11px; color: var(--muted); }
+
+/* ---------------------------------------------------------------- 狭い画面 */
+
+@media (max-width: 720px) {
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  .sidebar { position: static; max-height: none; border-right: none; border-bottom: 1px solid var(--line); }
+  .game-list { max-height: 210px; }
+  .main { padding-inline: 16px; }
+}

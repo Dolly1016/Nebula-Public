@@ -59,6 +59,10 @@
 
 # Team
 
+"end.detail.trilemma.win" : "Trilemma win"
+"end.detail.trilemma.extra" : "Trilemma extra win"
+"end.detail.trilemma.blocked" : "Blocked as a dropped Trilemma"
+
 "end.trilemma" : "Trilemma Wins %EXTRA%"
 "end.extra.trilemma" : " <color=#FFFFFF>with</color> Trilemma"
 

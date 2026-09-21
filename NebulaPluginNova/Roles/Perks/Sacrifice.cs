@@ -35,7 +35,7 @@ internal class Sacrifice : PerkFunctionalInstance
     {
         if (used) return;
 
-        myFakePlayer = FakePlayerController.SpawnSyncFakePlayer(MyPlayer, new(MyPlayer.Position, KillCharacteristics.Disappear, true, false, MyPlayer.VanillaCosmetics.FlipX, MyPlayer.VanillaCosmetics.GetPetPosition())).BindLifespan(NebulaAPI.CurrentGame);
+        myFakePlayer = FakePlayerController.SpawnSyncFakePlayer(MyPlayer, new(MyPlayer.Position, KillCharacteristics.Disappear, true, false, MyPlayer.VanillaCosmetics.FlipX, MyPlayer.VanillaCosmetics.GetPetPosition(), null, SacrificeFakePlayerDetails.Reason)).BindLifespan(NebulaAPI.CurrentGame);
         PerkInstance.MyTimer?.Start();
         used = true;
     }
@@ -59,4 +59,15 @@ internal class Sacrifice : PerkFunctionalInstance
         myFakePlayer.Release();
     }
 
+}
+
+[Virial.Attributes.NebulaPreprocess(Virial.Attributes.PreprocessPhase.PostRoles)]
+file static class SacrificeFakePlayerDetails
+{
+    static internal Virial.Text.CommunicableTextTag Reason = null!;
+
+    static void Preprocess(Virial.Runtime.NebulaPreprocessor preprocessor)
+    {
+        Reason = preprocessor.RegisterCommunicableText("fakePlayer.sacrifice");
+    }
 }

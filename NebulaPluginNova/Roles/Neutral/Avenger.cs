@@ -9,6 +9,8 @@ using Virial.Configuration;
 using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Runtime;
+using Virial.Text;
 
 namespace Nebula.Roles.Neutral;
 
@@ -114,7 +116,10 @@ public class Avenger : DefinedRoleTemplate, DefinedRole, IAssignableDocument
         }
 
         [OnlyMyPlayer]
-        void CheckWins(PlayerCheckWinEvent ev) => ev.SetWinIf(ev.GameEnd == NebulaGameEnd.AvengerWin && CheckKillCondition);
+        void CheckWins(PlayerCheckWinEvent ev)
+        {
+            if (ev.SetWinIf(ev.GameEnd == NebulaGameEnd.AvengerWin && CheckKillCondition)) ev.Recorder.AddReason(ev.Player.PlayerId, AvengerDetails.Win);
+        }
         
 
         [OnlyMyPlayer]
@@ -184,5 +189,16 @@ public class Avenger : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 
             }
         }
+    }
+}
+
+[NebulaPreprocess(PreprocessPhase.PostRoles)]
+file static class AvengerDetails
+{
+    static internal CommunicableTextTag Win = null!;
+
+    static void Preprocess(NebulaPreprocessor preprocessor)
+    {
+        Win = preprocessor.RegisterCommunicableText("end.detail.avenger.win");
     }
 }

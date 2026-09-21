@@ -89,5 +89,9 @@
 
 # Team
 
+"end.detail.opportunist.win" : "Opportunist extra win"
+"end.detail.opportunist.missed.task" : "Opportunist's tasks unfinished"
+"end.detail.opportunist.missed.dead" : "Opportunist died"
+
 "teams.opportunist" : "Opportunist"
 "end.extra.opportunist" : " <color=#FFFFFF>with</color> Opportunist"

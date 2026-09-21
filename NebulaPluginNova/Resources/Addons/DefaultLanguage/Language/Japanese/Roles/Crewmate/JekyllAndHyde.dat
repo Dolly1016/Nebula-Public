@@ -65,3 +65,9 @@
 "achievement.jekyllAndHyde.challenge.cond" : "クルーメイト陣営のプレイヤーをキルすること"
 "achievement.jekyllAndHyde.challenge.flavor" : ""それでも、生きてゆく" ―ヘンリー・ジキル？"
 "achievement.jekyllAndHyde.challenge.splitted.2" : "人間"
+
+# Team
+
+"end.detail.jekyllAndHyde.win.impostor" : "ハイドとしてインポスター勝利"
+"end.detail.jekyllAndHyde.win.crewmate" : "ジキルとしてクルーメイト勝利"
+"end.detail.jekyllAndHyde.missed" : "タスク未完了による敗北"

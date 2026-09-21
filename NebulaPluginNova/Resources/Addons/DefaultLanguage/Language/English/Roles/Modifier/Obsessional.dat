@@ -62,5 +62,8 @@
 
 # Team
 
+"end.detail.obsessional.extra" : "Obsessional extra win"
+"end.detail.obsessional.blocked" : "Blocked their role's win condition"
+
 "end.extra.obsessional" : " <color=#FFFFFF>with</color> Obsessional"
 

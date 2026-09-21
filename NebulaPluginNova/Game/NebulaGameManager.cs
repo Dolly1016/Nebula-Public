@@ -23,6 +23,7 @@ using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Text;
 using Virial.Utilities;
 
 namespace Nebula.Game;
@@ -101,16 +102,17 @@ public static class RoleHistoryHelper {
 
         VColor color;
 
+        //アイコンは役職定義ではなく実体から引く。実体の方が見た目の事情を知っている。
         if (ghostRole != null)
         {
-            result = isShort ? ghostRole.Role.GetRoleIconTag() + ghostRole.Role.DisplayColoredShort : ghostRole.Role.DisplayColoredName;
+            result = ghostRole.GetRoleIconTag() + (isShort ? ghostRole.Role.DisplayColoredShort : ghostRole.Role.DisplayColoredName);
             color = ghostRole.Role.Color;
             ghostRole.DecorateNameConstantly(ref result, true, true);
             result = ghostRole.OverrideRoleName(result, isShort, true) ?? result;
         }
         else
         {
-            result = isShort ? role.Role.GetRoleIconTag() + role.DisplayColoredShort : role.DisplayColoredName;
+            result = role.GetRoleIconTag() + (isShort ? role.DisplayColoredShort : role.DisplayColoredName);
             color = role.Role.Color;
             role.DecorateNameConstantly(ref result, true, true);
             result = role.OverrideRoleName(result, isShort, true) ?? result;
@@ -298,6 +300,10 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     //ゲーム開始時からの経過時間
     public float CurrentTime { get; private set; } = 0f;
 
+    //ゲームの開始・終了時刻。いずれも世界標準時。まだ迎えていない間はnull。
+    public DateTime? StartedAtUtc { get; private set; } = null;
+    public DateTime? EndedAtUtc { get; private set; } = null;
+
     //各種進行状況
     public NebulaGameStates GameState { get; private set; } = NebulaGameStates.NotStarted;
     internal void SetAsStarted()
@@ -369,7 +375,21 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     IArchivedPlayer? IArchivedGame.GetPlayer(byte playerId) => GetPlayer(playerId);
     IEnumerable<IArchivedPlayer> IArchivedGame.GetAllPlayers() => AllPlayerInfo;
     IArchivedEvent[] IArchivedGame.ArchivedEvents => GameStatistics.Sealed;
-    byte IArchivedGame.MapId => NebulaAPI.AmongUs.MapId;
+    byte IArchivedGameData.MapId => NebulaAPI.AmongUs.MapId;
+    DateTime? IArchivedGameData.StartedAtUtc => StartedAtUtc;
+    DateTime? IArchivedGameData.EndedAtUtc => EndedAtUtc;
+    ArchivedGameEnd? IArchivedGameData.EndInfo => EndState != null ? ArchivedGameEnd.FromEndState(EndState, AllPlayerInfo) : null;
+    IReadOnlyList<ArchivedPlayerResult> IArchivedGameData.PlayerResults => AllPlayerInfo.OrderBy(p => p.PlayerId).Select(p => ArchivedPlayerResult.FromPlayer(p, ColorOf(p))).ToArray();
+    IReadOnlyList<ArchivedMovementPhase> IArchivedGameData.MovementPhases => ModSingleton<Statistics.MovementRecorder>.Instance?.Phases ?? [];
+    IReadOnlyList<ArchivedGameEventRecord> IArchivedGameData.Events => GameStatistics.Sealed.Select(ArchivedGameEventRecord.FromEvent).ToArray();
+
+    /// <summary>プレイヤーの見た目の色。配色は設定で変わるので、値そのものを写し取る。</summary>
+    static private ArchivedColor ColorOf(GamePlayer player)
+    {
+        var colorId = player.DefaultOutfit.outfit.ColorId;
+        if (colorId < 0 || colorId >= DynamicPalette.PlayerColors.Length) return new(VColor.White, VColor.White, VColor.White);
+        return new(DynamicPalette.PlayerColors[colorId], DynamicPalette.ShadowColors[colorId], DynamicPalette.VisorColors[colorId]);
+    }
     ArchivedColor IArchivedGame.GetColor(byte colorId) => new(DynamicPalette.PlayerColors[colorId], DynamicPalette.ShadowColors[colorId], DynamicPalette.VisorColors[colorId]);
 
     static private SpriteLoader vcConnectSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.VCReconnectButton.png", 100f);
@@ -471,17 +491,32 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
             );
     }
 
-    internal void InvokeEndGame(Virial.Game.GameEnd? endCondition, GameEndReason endReason, int winnersMask = 0)
+    /// <param name="preWinnerReason">
+    /// <paramref name="winnersMask"/> のプレイヤーに与える勝利の理由。判定イベントを通らないためここで渡す。
+    /// </param>
+    internal void InvokeEndGame(Virial.Game.GameEnd? endCondition, GameEndReason endReason, int winnersMask = 0, CommunicableTextTag? preWinnerReason = null)
     {
         if(endCondition == null) return;
         if (GameState != NebulaGameStates.Initialized) return;
-        
-        var finallyEnd = GameOperatorManager.Instance!.Run(new EndCriteriaMetEvent(endCondition, endReason, winnersMask, CheckWinners));
 
-        NebulaGameEnd.RpcSendGameEnd(finallyEnd.OverwrittenGameEnd!, (int)finallyEnd.Winners.AsRawPattern, finallyEnd.ExtraWinRawMask, finallyEnd.OverwrittenEndReason, finallyEnd.GameEnd, finallyEnd.EndReason);
-
-        (BitMask<GamePlayer> winnersRawMask, ulong extraWinRawMask) CheckWinners(int prewinnersMask, Virial.Game.GameEnd gameEnd, GameEndReason reason, BitMask<GamePlayer>? lastWinners)
+        List<(byte endId, int winnersRawPattern, ulong ExtraWinMask, GameEndReason Reason, GameEndDetail Detail)> endInfoList = [];
+        EndCriteriaMetBaseEvent finallyEnd = GameOperatorManager.Instance!.Run<EndCriteriaMetEvent>(new EndCriteriaMetEvent(endCondition, endReason, winnersMask, CheckWinners));
+        endInfoList.Add((finallyEnd.OriginalGameEnd.Id, (int)finallyEnd.OriginalWinners.AsRawPattern, finallyEnd.OriginalExtraWinMask, finallyEnd.OriginalEndReason, finallyEnd.OriginalDetail));
+        int trial = 0;
+        while(true)
         {
+            if (!finallyEnd.Overwritten) break;
+            endInfoList.Add((finallyEnd.OverwrittenGameEnd.Id, (int)finallyEnd.OverwrittenWinners.AsRawPattern, finallyEnd.OverwrittenExtraWinMask, finallyEnd.OverwrittenEndReason, finallyEnd.OverwrittenDetail));
+            if (trial >= 8) break;
+
+            finallyEnd = GameOperatorManager.Instance!.Run<EndCriteriaOverwrittenEvent>(new(finallyEnd.OverwrittenGameEnd, finallyEnd.OverwrittenEndReason, finallyEnd.OverwrittenExtraWinMask, finallyEnd.OverwrittenWinners, finallyEnd.OverwrittenDetail, CheckWinners));
+            trial++;
+        }
+        NebulaGameEnd.RpcSendGameEnd(endInfoList);
+
+        (BitMask<GamePlayer> winnersRawMask, ulong extraWinRawMask, GameEndDetail detail) CheckWinners(int prewinnersMask, Virial.Game.GameEnd gameEnd, GameEndReason reason, BitMask<GamePlayer>? lastWinners)
+        {
+            GameEndDetail detail = new();
             lastWinners ??= new EmptyMask<GamePlayer>();
 
             int winnersRawMask = prewinnersMask;
@@ -489,37 +524,44 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
 
             if (gameEnd.AllowWin)
             {
+                //勝者が先に決まっている分は判定イベントを通らないので、ここで理由を与える
+                if (preWinnerReason != null)
+                    foreach (var p in allModPlayers.Values) if ((prewinnersMask & (1 << p.PlayerId)) != 0) detail.AddReason(p.PlayerId, preWinnerReason);
+
                 //勝利者を洗い出す
-                foreach (var p in allModPlayers.Values) winnersRawMask |= GameEntityManager.Run(new PlayerCheckWinEvent(p, gameEnd, lastWinners)).IsWin ? (1 << p.PlayerId) : 0;
+                foreach (var p in allModPlayers.Values) winnersRawMask |= GameEntityManager.Run(new PlayerCheckWinEvent(p, gameEnd, lastWinners, detail)).IsWin ? (1 << p.PlayerId) : 0;
+                detail.EndPhase(NebulaGameEnd.PhaseCheckWin, BitMasks.AsPlayer((uint)winnersRawMask));
 
                 //勝利のブロックチェック
                 FunctionalMask<GamePlayer> winnerMask = new(p => (winnersRawMask & (1 << (p?.PlayerId ?? 24))) != 0);
 
-                foreach (var p in allModPlayers.Values) blockedRawMask |= GameEntityManager.Run(new PlayerBlockWinEvent(p, winnerMask, gameEnd, lastWinners)).IsBlocked ? 1 << p.PlayerId : 0;
+                foreach (var p in allModPlayers.Values) blockedRawMask |= GameEntityManager.Run(new PlayerBlockWinEvent(p, winnerMask, gameEnd, lastWinners, detail)).IsBlocked ? 1 << p.PlayerId : 0;
 
                 //ブロックチェックの結果を統合
                 winnersRawMask &= ~blockedRawMask;
+                detail.EndPhase(NebulaGameEnd.PhaseBlockWin, BitMasks.AsPlayer((uint)winnersRawMask));
 
                 //追加勝利の判定
                 EditableBitMask<Virial.Game.ExtraWin> extraWinMask = new HashSetMask<Virial.Game.ExtraWin>();
                 for (int phase = 0; phase < (int)ExtraWinCheckPhase.PhaseMax; phase++)
                 {
                     int extraMask = 0;
-                    foreach (var p in allModPlayers.Values) extraMask |= GameEntityManager.Run(new PlayerCheckExtraWinEvent(p, winnerMask, extraWinMask, gameEnd, (ExtraWinCheckPhase)phase, lastWinners)).IsExtraWin ? 1 << p.PlayerId : 0;
+                    foreach (var p in allModPlayers.Values) extraMask |= GameEntityManager.Run(new PlayerCheckExtraWinEvent(p, winnerMask, extraWinMask, gameEnd, (ExtraWinCheckPhase)phase, lastWinners, detail)).IsExtraWin ? 1 << p.PlayerId : 0;
 
                     //追加勝利の結果を統合
                     winnersRawMask |= extraMask;
+                    detail.EndPhase(NebulaGameEnd.PhaseExtraWin[phase], BitMasks.AsPlayer((uint)winnersRawMask));
                 }
 
                 //追加勝利の理由を拾い出す
                 ulong extraWinRawMask = 0;
                 foreach (var exWin in ExtraWin.AllExtraWins) if (extraWinMask.Test(exWin)) extraWinRawMask |= exWin.ExtraWinMask;
 
-                return (BitMasks.AsPlayer((uint)winnersRawMask), extraWinRawMask);
+                return (BitMasks.AsPlayer((uint)winnersRawMask), extraWinRawMask, detail);
             }
             else
             {
-                return (new EmptyMask<GamePlayer>(), 0);
+                return (new EmptyMask<GamePlayer>(), 0, detail);
             }
         }
     }
@@ -662,6 +704,8 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     }
     public void OnGameStart()
     {
+        StartedAtUtc = DateTime.UtcNow;
+
         WideCamera.OnGameStart();
         new GameMapImpl();
 
@@ -692,6 +736,8 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
 
     public void OnGameEnd()
     {
+        EndedAtUtc = DateTime.UtcNow;
+
         GameStatistics.RecordEvent(new GameStatistics.Event(GameStatistics.EventVariation.GameEnd, null, 0) { RelatedTag = EventDetail.GameEnd });
 
         //幽霊役職の割り当てはここで確認する
@@ -839,16 +885,18 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         foreach (var p in AllPlayerInfo) p.Unbox().AssignableAction(action);
     }
 
-    public void RpcInvokeSpecialWin(Virial.Game.GameEnd endCondition, int winnersMask)
+    /// <param name="preWinnerReason"><paramref name="winnersMask"/> のプレイヤーに与える勝利の理由。</param>
+    public void RpcInvokeSpecialWin(Virial.Game.GameEnd endCondition, int winnersMask, CommunicableTextTag? preWinnerReason = null)
     {
-        RpcInvokeSpecialTrigger.Invoke((endCondition.Id, winnersMask));
+        RpcInvokeSpecialTrigger.Invoke((endCondition.Id, winnersMask, preWinnerReason?.Id ?? -1));
     }
 
-    private static readonly RemoteProcess<(int id, int winnersMask)> RpcInvokeSpecialTrigger = new("SpecialTrigger", (message, _) => {
+    private static readonly RemoteProcess<(int id, int winnersMask, int reasonId)> RpcInvokeSpecialTrigger = new("SpecialTrigger", (message, _) => {
         if (NebulaAPI.CurrentGame?.GameMode?.AllowSpecialGameEnd ?? false)
         {
             GameEnd.TryGet((byte)message.id, out var end);
-            Instance!.CriteriaManager.Trigger(end!, GameEndReason.Special, BitMasks.AsPlayer((uint)message.winnersMask));
+            Instance!.CriteriaManager.Trigger(end!, GameEndReason.Special, BitMasks.AsPlayer((uint)message.winnersMask),
+                message.reasonId >= 0 ? TranslatableTag.ValueOf(message.reasonId) : null);
         }
     });
 
@@ -901,7 +949,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     IEnumerable<IPlayerlike> Virial.Game.Game.GetAllPlayerlikes() => allPlayerlikes.Values;
 
     void Virial.Game.Game.TriggerGameEnd(GameEnd gameEnd, GameEndReason reason, EditableBitMask<GamePlayer>? additionalWinners) => CriteriaManager.Trigger(gameEnd, reason, additionalWinners);
-    void Virial.Game.Game.RequestGameEnd(GameEnd gameEnd, BitMask<GamePlayer> winners) => RpcInvokeSpecialWin(gameEnd, AllPlayerInfo.Where(p => winners.Test(p)).Aggregate(0, (v, p) => v | (1 << p.PlayerId)));
+    void Virial.Game.Game.RequestGameEnd(GameEnd gameEnd, BitMask<GamePlayer> winners, CommunicableTextTag? preWinnerReason) => RpcInvokeSpecialWin(gameEnd, AllPlayerInfo.Where(p => winners.Test(p)).Aggregate(0, (v, p) => v | (1 << p.PlayerId)), preWinnerReason);
 
     private Cache<GamePlayer> localPlayerCache;
     public GamePlayer LocalPlayer => localPlayerCache.Get();

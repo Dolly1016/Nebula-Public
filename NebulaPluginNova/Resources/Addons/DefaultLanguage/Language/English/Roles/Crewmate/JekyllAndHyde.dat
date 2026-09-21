@@ -65,3 +65,9 @@
 "achievement.jekyllAndHyde.challenge.cond" : "Kill a crewmate team player"
 "achievement.jekyllAndHyde.challenge.flavor" : ""And yet, I will go on living" —Henry Jekyll?"
 "achievement.jekyllAndHyde.challenge.splitted.2" : "Human"
+
+# Team
+
+"end.detail.jekyllAndHyde.win.impostor" : "Impostor win as Hyde"
+"end.detail.jekyllAndHyde.win.crewmate" : "Crewmate win as Jekyll"
+"end.detail.jekyllAndHyde.missed" : "Loss from unfinished tasks"

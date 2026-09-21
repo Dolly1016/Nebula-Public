@@ -13,6 +13,7 @@
 "title.buttons.stats" : "統計"
 "title.buttons.form" : "バグ報告"
 "title.buttons.migration" : "データ引継"
+"title.buttons.history" : "戦歴"
 
 "ui.update.waitFinishing" : "バージョン変更中です..."
 "ui.update.finishUpdate" : "処理が完了しました！<br>ゲームを再起動してください。"

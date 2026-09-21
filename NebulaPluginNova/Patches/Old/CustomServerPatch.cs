@@ -30,6 +30,12 @@ public static class UpdateGameOptionRegionTextPatch
     }
 }
 
+[HarmonyPatch(typeof(ServerManager), nameof(ServerManager.SetRegion))]
+public static class RememberRegionPatch
+{
+    public static void Postfix([HarmonyArgument(0)] IRegionInfo region) => CustomServerLoader.RememberRegion(region);
+}
+
 [HarmonyPatch(typeof(ServerDropdown), nameof(ServerDropdown.FillServerOptions))]
 public static class ServerDropdownPatch
 {

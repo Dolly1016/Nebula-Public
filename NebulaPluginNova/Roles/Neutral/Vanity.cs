@@ -16,6 +16,8 @@ using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Runtime;
+using Virial.Text;
 
 namespace Nebula.Roles.Neutral;
 
@@ -145,7 +147,7 @@ internal class Vanity : DefinedRoleTemplate, DefinedRole, IAssignableDocument
         [OnlyMyPlayer]
         void OnCheckWin(PlayerCheckWinEvent ev)
         {
-            ev.SetWinIf(killedCrewmate && IndependentTeamOption && ev.GameEnd == NebulaGameEnd.VanityWin && !MyPlayer.IsDead);
+            if (ev.SetWinIf(killedCrewmate && IndependentTeamOption && ev.GameEnd == NebulaGameEnd.VanityWin && !MyPlayer.IsDead)) ev.Recorder.AddReason(ev.Player.PlayerId, VanityDetails.Win);
         }
 
         [OnlyMyPlayer]
@@ -159,7 +161,7 @@ internal class Vanity : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                 (!killedCrewmate && ev.GameEnd == NebulaGameEnd.CrewmateWin)
                 )
             {
-                ev.SetWin(true);
+                if (ev.SetWin(true)) ev.Recorder.AddReason(ev.Player.PlayerId, VanityDetails.Extra);
                 ev.ExtraWinMask.Add(NebulaGameEnd.ExtraVanityWin);
             }
         }
@@ -246,5 +248,18 @@ internal class Vanity : DefinedRoleTemplate, DefinedRole, IAssignableDocument
         (Image, Virial.Color?, Virial.Color?)? RuntimeAssignable.OverriddenRoleIcon => (Sheriff.MyRole.GetRoleIcon()!, (Sheriff.MyRole as DefinedRole).Color, null);
         RoleTaskType RuntimeRole.TaskType => amAware ? RoleTaskType.NoTask : RoleTaskType.CrewmateTask;
         bool RuntimeAssignable.MyCrewmateTaskIsIgnored => true;
+    }
+}
+
+[NebulaPreprocess(PreprocessPhase.PostRoles)]
+file static class VanityDetails
+{
+    static internal CommunicableTextTag Win = null!;
+    static internal CommunicableTextTag Extra = null!;
+
+    static void Preprocess(NebulaPreprocessor preprocessor)
+    {
+        Win = preprocessor.RegisterCommunicableText("end.detail.vanity.win");
+        Extra = preprocessor.RegisterCommunicableText("end.detail.vanity.extra");
     }
 }

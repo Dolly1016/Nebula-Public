@@ -18,4 +18,9 @@ internal class ResidentBehaviour : MonoBehaviour
     {
         ModSingleton<ResidentBehaviour>.Instance = this;
     }
+
+    void OnApplicationQuit()
+    {
+        Nebula.Http.NebulaHttpServer.Stop();
+    }
 }

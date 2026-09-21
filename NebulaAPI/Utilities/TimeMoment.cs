@@ -24,8 +24,8 @@ public struct TimeMoment
         this.time = -1000f;
     }
 
-    internal bool ElapsedLessThanInternal(float sec) => time + sec < (NebulaAPI.CurrentGame?.CurrentRawTime ?? 0f);
-    internal bool ElapsedMoreThanInternal(float sec) => time + sec > (NebulaAPI.CurrentGame?.CurrentRawTime ?? 0f);
+    internal bool ElapsedLessThanInternal(float sec) => time < 0f ? false : time + sec < (NebulaAPI.CurrentGame?.CurrentRawTime ?? 0f);
+    internal bool ElapsedMoreThanInternal(float sec) => time < 0f ? false : time + sec > (NebulaAPI.CurrentGame?.CurrentRawTime ?? 0f);
 
     static public implicit operator float(TimeMoment? moment) => moment?.time ?? 0f;
 }

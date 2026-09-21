@@ -15,6 +15,7 @@ using Virial.Events.Player;
 using Virial.Events.Role;
 using Virial.Game;
 using Virial.Runtime;
+using Virial.Text;
 
 namespace Nebula.Roles.Neutral;
 
@@ -203,7 +204,7 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignable
         [OnlyMyPlayer]
         void CheckWins(PlayerCheckWinEvent ev)
         {
-            ev.SetWinIf(ev.GameEnd == NebulaGameEnd.JackalWin && NebulaGameManager.Instance!.AllPlayerInfo.Any(p => !p.IsDead && Jackal.IsJackalLeader(p, JackalTeamId, true)));
+            if (ev.SetWinIf(ev.GameEnd == NebulaGameEnd.JackalWin && NebulaGameManager.Instance!.AllPlayerInfo.Any(p => !p.IsDead && Jackal.IsJackalLeader(p, JackalTeamId, true)))) ev.Recorder.AddReason(ev.Player.PlayerId, JackalDetails.Win);
         }
 
         void RuntimeRole.Usurp()
@@ -487,7 +488,10 @@ public class Sidekick : DefinedRoleTemplate, HasCitation, DefinedRole
         int[]? RuntimeAssignable.RoleArguments => [1, JackalTeamId];
 
         [OnlyMyPlayer]
-        void CheckWins(PlayerCheckWinEvent ev) => ev.SetWinIf(ev.GameEnd == NebulaGameEnd.JackalWin && NebulaGameManager.Instance!.AllPlayerInfo.Any(p => !p.IsDead && Jackal.IsJackalLeader(p, JackalTeamId, true)));
+        void CheckWins(PlayerCheckWinEvent ev)
+        {
+            if (ev.SetWinIf(ev.GameEnd == NebulaGameEnd.JackalWin && NebulaGameManager.Instance!.AllPlayerInfo.Any(p => !p.IsDead && Jackal.IsJackalLeader(p, JackalTeamId, true)))) ev.Recorder.AddReason(ev.Player.PlayerId, JackalDetails.Win);
+        }
         void RuntimeAssignable.OnActivated()
         {
             if (ShouldResolveToJackalTeamId)
@@ -568,10 +572,16 @@ public class SidekickModifier : DefinedModifierTemplate, HasCitation, DefinedMod
 
         //設定によっては共存する役職の勝利条件をブロックする
         [OnlyMyPlayer]
-        void BlockWins(PlayerBlockWinEvent ev) => ev.IsBlocked |= !Sidekick.CanWinAsOriginalTeamOption && ev.GameEnd != NebulaGameEnd.JackalWin;
+        void BlockWins(PlayerBlockWinEvent ev)
+        {
+            if (ev.SetBlockedIf(!Sidekick.CanWinAsOriginalTeamOption && ev.GameEnd != NebulaGameEnd.JackalWin)) ev.Recorder.AddReason(ev.Player.PlayerId, JackalDetails.Blocked);
+        }
 
         [OnlyMyPlayer]
-        void CheckWins(PlayerCheckWinEvent ev) => ev.SetWinIf(ev.GameEnd == NebulaGameEnd.JackalWin && NebulaGameManager.Instance!.AllPlayerInfo.Any(p => !p.IsDead && Jackal.IsJackalLeader(p, JackalTeamId, true)));
+        void CheckWins(PlayerCheckWinEvent ev)
+        {
+            if (ev.SetWinIf(ev.GameEnd == NebulaGameEnd.JackalWin && NebulaGameManager.Instance!.AllPlayerInfo.Any(p => !p.IsDead && Jackal.IsJackalLeader(p, JackalTeamId, true)))) ev.Recorder.AddReason(ev.Player.PlayerId, JackalDetails.Win);
+        }
 
         public Instance(GamePlayer player, bool givenTeamId, int jackalId) : base(player)
         {
@@ -726,5 +736,18 @@ internal class JackalTeamAllocator : AbstractModule<Virial.Game.Game>, IGameOper
             last.argument[0] = i;
             return (last.role, last.argument);
         });
+    }
+}
+
+[NebulaPreprocess(PreprocessPhase.PostRoles)]
+file static class JackalDetails
+{
+    static internal CommunicableTextTag Win = null!;
+    static internal CommunicableTextTag Blocked = null!;
+
+    static void Preprocess(NebulaPreprocessor preprocessor)
+    {
+        Win = preprocessor.RegisterCommunicableText("end.detail.jackal.win");
+        Blocked = preprocessor.RegisterCommunicableText("end.detail.jackal.blocked");
     }
 }

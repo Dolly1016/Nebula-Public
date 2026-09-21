@@ -460,8 +460,39 @@ public static class MeetingHudExtension
         MeetingHud.Instance.ResetPlayerState();
     }
 
+    /// <summary>
+    /// 会議の始まりを記録に残す。
+    /// </summary>
+    /// <remarks>
+    /// もとは <c>PlayerControl.StartMeeting</c> のパッチで拾っていたが、会議の流れが
+    /// <see cref="ModStartMeeting"/> に置き換わってそちらは呼ばれなくなり、記録が落ちていた。
+    /// ここは全クライアントで走るので、どの端末の記録にも残る。
+    /// </remarks>
+    private static void RecordMeetingStart(PlayerControl reporter, NetworkedPlayerInfo? deadBody)
+    {
+        TranslatableTag tag = deadBody == null ? EventDetail.EmergencyButton : EventDetail.Report;
+
+        if (deadBody != null)
+        {
+            //ベイトレポートチェック
+            var targetInfo = Helpers.GetPlayer(deadBody.PlayerId)?.GetModInfo();
+            if (targetInfo?.Role.Role is Roles.Crewmate.Bait
+                && (targetInfo.MyKiller?.PlayerId ?? byte.MaxValue) == reporter.PlayerId
+                && targetInfo.Unbox().DeathTimeStamp.ElapsedLessThan(3f))
+                tag = EventDetail.BaitReport;
+        }
+
+        NebulaGameManager.Instance?.GameStatistics.RecordEvent(new GameStatistics.Event(
+            deadBody == null ? GameStatistics.EventVariation.EmergencyButton : GameStatistics.EventVariation.Report,
+            reporter.PlayerId,
+            deadBody == null ? 0 : (1 << deadBody.PlayerId))
+        { RelatedTag = tag });
+    }
+
     internal static void ModStartMeeting(PlayerControl reporter, NetworkedPlayerInfo? deadBody, ReportType reportType)
     {
+        RecordMeetingStart(reporter, deadBody);
+
         //会議前の位置を共有する
         PlayerModInfo.RpcSharePreMeetingPoint.Invoke((AmongUsLLImpl.LocalPlayer.PlayerId, GamePlayer.LocalPlayer?.Position ?? VVector2.Zero));
 

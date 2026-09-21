@@ -74,3 +74,7 @@
 "achievement.madmate.challenge.goal" : "Win as an impostor while all impostors are alive."
 "achievement.madmate.challenge.splitted.0" : "Chaotic "
 "achievement.madmate.challenge.splitted.2" : "Ending"
+
+# Team
+
+"end.detail.madmate.win" : "Impostor win as a Madmate"

@@ -192,6 +192,10 @@ public class GameStatistics
             }
         }
         allEvents.Insert(index, statisticsEvent);
+
+        //足取りの区切りも、出来事を記録したこの瞬間に合わせる。
+        //別々の合図で区切ると、境目の時刻が出来事とわずかにずれてしまう。
+        ModSingleton<MovementRecorder>.Instance?.OnEventRecorded(statisticsEvent);
     }
 
     public void RpcRecordEvent(EventVariation variation, TranslatableTag relatedTag, PlayerControl? source, params PlayerControl[] targets)

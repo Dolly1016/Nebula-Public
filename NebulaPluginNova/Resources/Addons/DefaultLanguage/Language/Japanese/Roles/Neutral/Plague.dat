@@ -64,6 +64,8 @@
 
 # Team
 
+"end.detail.plague.win" : "プレイグ＆直接感染者勝利"
+
 "teams.plague" : "プレイグ"
 "end.plague" : "プレイグ%EXTRA%勝利"
 

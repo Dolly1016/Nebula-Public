@@ -75,6 +75,11 @@
 
 # Team
 
+"end.detail.paparazzo.win" : "Paparazzo win"
+"end.detail.paparazzo.missed.subjects" : "Too few subjects photographed"
+"end.detail.paparazzo.missed.disclosed" : "Too few subjects disclosed"
+"end.detail.paparazzo.missed.photos" : "Too few photos disclosed"
+
 "teams.paparazzo" : "Paparazzo"
 "end.paparazzo" : "Paparazzo Wins%EXTRA%"
 

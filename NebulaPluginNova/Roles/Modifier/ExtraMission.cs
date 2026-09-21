@@ -2,6 +2,8 @@
 using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Runtime;
+using Virial.Text;
 
 namespace Nebula.Roles.Modifier;
 
@@ -50,7 +52,10 @@ public class ExtraMission : DefinedAllocatableModifierTemplate, DefinedAllocatab
         }
 
         [OnlyMyPlayer]
-        void BlockWins(PlayerBlockWinEvent ev) => ev.IsBlocked |= !(target?.IsDead ?? true);
+        void BlockWins(PlayerBlockWinEvent ev)
+        {
+            if (ev.SetBlockedIf(!(target?.IsDead ?? true))) ev.Recorder.AddReason(ev.Player.PlayerId, ExtraMissionDetails.Blocked);
+        }
 
 
         [Local]
@@ -101,3 +106,13 @@ public class ExtraMission : DefinedAllocatableModifierTemplate, DefinedAllocatab
         );
 }
 
+[NebulaPreprocess(PreprocessPhase.PostRoles)]
+file static class ExtraMissionDetails
+{
+    static internal CommunicableTextTag Blocked = null!;
+
+    static void Preprocess(NebulaPreprocessor preprocessor)
+    {
+        Blocked = preprocessor.RegisterCommunicableText("end.detail.extraMission.blocked");
+    }
+}

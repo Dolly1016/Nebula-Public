@@ -31,6 +31,7 @@ internal class GameOperatorBuilder
         public bool HasLocalAttr = Method.GetCustomAttribute<Local>() != null;
         public bool HasOnlyLocalPlayerAttr = Method.GetCustomAttribute<OnlyLocalPlayer>() != null;
         public bool HasOnlyHostAttr = Method.GetCustomAttribute<OnlyHost>() != null;
+        public bool HasNonListenerAttr = Method.GetCustomAttribute<NonEventListener>() != null;
     }
     static private Action<object>? BuildAction(object instance, Action<object, object> procedure, AttributeInfo attributes)
     {
@@ -96,6 +97,8 @@ internal class GameOperatorBuilder
         var exp = Expression.Lambda<Action<object, object>>(call, instanceParam, eventParam).Compile();
         AttributeInfo attributes = new(operation.Method);
 
+        if (attributes.HasNonListenerAttr) return;
+
         allActions.Add((eventType, (instance) => (BuildAction(instance, exp, attributes), priority)));
     }
 
@@ -144,6 +147,9 @@ internal class GameOperatorBuilder
                 continue;
             }
 
+            AttributeInfo attributes = new(method);
+            if (attributes.HasNonListenerAttr) continue;
+
             var eventType = parameters[0].ParameterType;
 
             var instanceParam = Expression.Parameter(typeof(object), "instance");
@@ -152,7 +158,7 @@ internal class GameOperatorBuilder
             var convertInstance = Expression.Convert(instanceParam, entityType);
             var call = Expression.Call(convertInstance, method, convertEv);
             var exp = Expression.Lambda<Action<object, object>>(call, instanceParam, eventParam).Compile();
-            AttributeInfo attributes = new(method);
+            
             int priority = method.GetCustomAttribute<EventPriority>()?.Priority ?? EventPriority.Default;
 
             builderActions.Add((eventType, (instance) => (BuildAction(instance, exp, attributes), priority)));

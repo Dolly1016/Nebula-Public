@@ -62,5 +62,8 @@
 
 # Team
 
+"end.detail.obsessional.extra" : "オブセッショナル追加勝利"
+"end.detail.obsessional.blocked" : "役職の勝利条件ブロック"
+
 "end.extra.obsessional" : " <color=#FFFFFF>+</color> オブセッショナル"
 

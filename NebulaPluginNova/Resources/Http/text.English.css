@@ -1,0 +1,86 @@
+@charset "utf-8";
+
+/*
+ * 閲覧画面の文言（英語）。
+ *
+ * 値は CSS のカスタムプロパティとして持たせ、app.js が getComputedStyle で読み出す。
+ * このファイルは常に最初に読み込まれる土台で、その上に使用中の言語のファイルが重なる。
+ * つまり、他の言語で定義されていないキーは、カスケードの結果ここの英語がそのまま残る。
+ *
+ * {0} は app.js が値で置き換える差し込み位置。
+ */
+
+:root {
+  --t-html-lang: "en";
+  --t-page-title: "Nebula on the Ship  Game Result Viewer";
+
+  /* サイドバー */
+  --t-app-title: "Game Data";
+  --t-action-reload: "Reload";
+  --t-filter-group: "Data to show";
+  --t-filter-all: "All";
+  --t-filter-marked: "Marked";
+  --t-list-label: "Past games";
+  --t-list-limit: "Unless marked, data older than the latest {0} is deleted.";
+  --t-list-empty: "No data yet.";
+  --t-list-empty-marked: "No marked data.";
+
+  /* 本体 */
+  --t-status-loading: "Loading";
+  --t-status-empty: "No data yet. Finish a game once and it will be saved.";
+  --t-fact-started: "Started";
+  --t-fact-ended: "Ended";
+  --t-fact-map: "Map";
+  --t-fact-host: "Host";
+  --t-fact-win: "Result";
+  --t-action-mark: "Mark to keep";
+  --t-action-unmark: "Remove the mark";
+  --t-action-detail: "Show the game result in detail";
+  --t-result-none: "(no result recorded)";
+
+  /* 移動経路 */
+  --t-route-title: "Movement";
+  --t-route-show: "Show";
+  --t-route-show-alive: "Alive";
+  --t-route-show-ghosts: "Ghosts";
+  --t-route-fake: "FakePlayer (reason unknown)";
+  --t-route-fake-owner: "summoned by {0}";
+  --t-route-segment-group: "Part of the game to show";
+  --t-route-turn: "Turn {0}";
+  --t-route-meeting: "Meeting {0}";
+  --t-route-no-events: "Nothing was recorded here.";
+  --t-route-play: "Play";
+  --t-route-pause: "Pause";
+  --t-route-seek: "Time";
+  --t-route-empty: "No movement data.";
+
+  /* 勝敗の詳細 */
+  --t-action-close: "Close";
+  --t-detail-title: "Game Result Details";
+  --t-detail-players: "Players";
+  --t-detail-col-win: "Result";
+  --t-detail-col-player: "Player";
+  --t-detail-col-role: "Role";
+  --t-detail-col-task: "Tasks";
+  --t-detail-col-state: "Status";
+  --t-detail-history: "Win Determination";
+  --t-badge-win: "WIN";
+  --t-badge-host: "Host";
+  --t-badge-disconnected: "Left";
+  --t-state-alive: "Alive";
+  --t-state-dead: "Dead";
+  --t-state-killer: "by {0}";
+  --t-player-unknown: "Unknown";
+
+  /* 経緯 */
+  --t-stage-first: "The win that happened";
+  --t-stage-usurped: "Usurped win {0}";
+  --t-stage-final: "Final game result";
+  --t-stage-reason: "End reason: {0}";
+
+  /* 失敗したとき */
+  --t-error-detail: "Could not show the details. If reloading does not help, please send this message to the developer.";
+  --t-error-record: "Could not load the data. ({0})";
+  --t-error-load: "Could not load the data. The server in the game may have stopped. ({0})";
+  --t-error-mark: "Could not change the mark. ({0})";
+}

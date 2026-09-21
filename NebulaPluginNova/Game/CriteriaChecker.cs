@@ -14,10 +14,10 @@ namespace Nebula.Game;
 
 public class CriteriaManager
 {
-    private record TriggeredGameEnd(Virial.Game.GameEnd gameEnd, Virial.Game.GameEndReason reason, EditableBitMask<Virial.Game.Player>? additionalWinners);
+    private record TriggeredGameEnd(Virial.Game.GameEnd gameEnd, Virial.Game.GameEndReason reason, EditableBitMask<Virial.Game.Player>? additionalWinners, CommunicableTextTag? preWinnerReason);
     private List<TriggeredGameEnd> triggeredGameEnds = [];
     
-    public void Trigger(Virial.Game.GameEnd gameEnd, Virial.Game.GameEndReason reason, EditableBitMask<Virial.Game.Player>? additionalWinners)
+    public void Trigger(Virial.Game.GameEnd gameEnd, Virial.Game.GameEndReason reason, EditableBitMask<Virial.Game.Player>? additionalWinners, CommunicableTextTag? preWinnerReason = null)
     {
         if (additionalWinners != null && reason == GameEndReason.Special && triggeredGameEnds.Find(end => end.gameEnd == gameEnd && end.reason == reason && end.additionalWinners != null, out var end))
         {
@@ -25,7 +25,7 @@ public class CriteriaManager
         }
         else
         {
-            triggeredGameEnds.Add(new(gameEnd, reason, additionalWinners));
+            triggeredGameEnds.Add(new(gameEnd, reason, additionalWinners, preWinnerReason));
         }
     }
 
@@ -60,6 +60,8 @@ public class CriteriaManager
         var basicEnd = ends[0];
         var combinedWinners = ends.Where(g => g.gameEnd == basicEnd.gameEnd).Select(g => g.additionalWinners);
         
-        NebulaGameManager.Instance?.InvokeEndGame(basicEnd.gameEnd, basicEnd.reason, NebulaGameManager.Instance.AllPlayerInfo.Aggregate(0, (v, p) => ends.Any(e => e.additionalWinners?.Test(p) ?? false) ? (v | (1 << p.PlayerId)) : v));
+        NebulaGameManager.Instance?.InvokeEndGame(basicEnd.gameEnd, basicEnd.reason,
+            NebulaGameManager.Instance.AllPlayerInfo.Aggregate(0, (v, p) => ends.Any(e => e.additionalWinners?.Test(p) ?? false) ? (v | (1 << p.PlayerId)) : v),
+            ends.Select(e => e.preWinnerReason).FirstOrDefault(r => r != null));
     }
 }

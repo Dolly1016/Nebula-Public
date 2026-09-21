@@ -86,6 +86,8 @@
 
 # Team
 
+"end.detail.gambler.win" : "Gambler win"
+
 "teams.gambler" : "Gambler"
 "end.gambler" : "Gambler Wins %EXTRA%"
 

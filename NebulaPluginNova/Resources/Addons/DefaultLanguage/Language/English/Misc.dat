@@ -13,6 +13,7 @@
 "title.buttons.stats" : "Stats"
 "title.buttons.form" : "Bug Report"
 "title.buttons.migration" : "Data Migration"
+"title.buttons.history" : "Game History"
 
 "ui.update.waitFinishing" : "Wait for updating..."
 "ui.update.finishUpdate" : "Update finished!<br>Please restart the game."

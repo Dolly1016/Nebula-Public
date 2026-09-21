@@ -13,6 +13,7 @@ using System.ComponentModel;
 using Nebula.Game.Statistics;
 using Virial.Text;
 using Virial.Events.Game;
+using Virial.Runtime;
 
 namespace Nebula.Roles.Crewmate;
 
@@ -143,7 +144,25 @@ internal class JekyllAndHyde : DefinedRoleTemplate, DefinedRole, IAssignableDocu
         [OnlyMyPlayer]
         void CheckWins(PlayerCheckWinEvent ev)
         {
-            ev.SetWinIf((ev.GameEnd == (AmJekyll ? NebulaGameEnd.CrewmateWin : NebulaGameEnd.ImpostorWin)) && (!AmJekyll || MyPlayer.Tasks.IsCompletedCurrentTasks));
+            if (AmJekyll)
+            {
+                //ジキルはクルーメイト勝利。ただしタスクを終えていなければ勝利を逃す。
+                if (ev.GameEnd != NebulaGameEnd.CrewmateWin) return;
+
+                if (MyPlayer.Tasks.IsCompletedCurrentTasks)
+                {
+                    if (ev.SetWinIf(true)) ev.Recorder.AddReason(ev.Player.PlayerId, JekyllAndHydeDetails.WinAsCrewmate);
+                }
+                else
+                {
+                    ev.Recorder.AddReason(ev.Player.PlayerId, JekyllAndHydeDetails.Missed);
+                }
+            }
+            else
+            {
+                //ハイドはインポスター勝利。追加の条件は無い。
+                if (ev.SetWinIf(ev.GameEnd == NebulaGameEnd.ImpostorWin)) ev.Recorder.AddReason(ev.Player.PlayerId, JekyllAndHydeDetails.WinAsImpostor);
+            }
         }
 
         [OnlyMyPlayer]
@@ -210,5 +229,20 @@ internal class JekyllAndHyde : DefinedRoleTemplate, DefinedRole, IAssignableDocu
         bool RuntimeRole.HasImpostorVision => !AmJekyll && HasImpostorVisionOption;
         bool RuntimeRole.IgnoreBlackout => !AmJekyll && HasImpostorVisionOption;
         RoleTaskType RuntimeRole.TaskType => RoleTaskType.RoleTask;
+    }
+}
+
+[NebulaPreprocess(PreprocessPhase.PostRoles)]
+file static class JekyllAndHydeDetails
+{
+    static internal CommunicableTextTag WinAsImpostor = null!;
+    static internal CommunicableTextTag WinAsCrewmate = null!;
+    static internal CommunicableTextTag Missed = null!;
+
+    static void Preprocess(NebulaPreprocessor preprocessor)
+    {
+        WinAsImpostor = preprocessor.RegisterCommunicableText("end.detail.jekyllAndHyde.win.impostor");
+        WinAsCrewmate = preprocessor.RegisterCommunicableText("end.detail.jekyllAndHyde.win.crewmate");
+        Missed = preprocessor.RegisterCommunicableText("end.detail.jekyllAndHyde.missed");
     }
 }

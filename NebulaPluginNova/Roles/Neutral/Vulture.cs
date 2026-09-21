@@ -7,6 +7,8 @@ using Virial.Configuration;
 using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Game;
+using Virial.Text;
+using Virial.Runtime;
 
 namespace Nebula.Roles.Neutral;
 
@@ -104,11 +106,22 @@ public class Vulture : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignabl
 
                     StatsEaten.Progress();
 
-                    if (leftEaten <= 0) NebulaGameManager.Instance?.RpcInvokeSpecialWin(NebulaGameEnd.VultureWin, 1 << MyPlayer.PlayerId);
+                    if (leftEaten <= 0) NebulaGameManager.Instance?.RpcInvokeSpecialWin(NebulaGameEnd.VultureWin, 1 << MyPlayer.PlayerId, VultureDetails.Win);
                 };
             }
         }
 
         bool RuntimeRole.HasImpostorVision => true;
+    }
+}
+
+[NebulaPreprocess(PreprocessPhase.PostRoles)]
+file static class VultureDetails
+{
+    static internal CommunicableTextTag Win = null!;
+
+    static void Preprocess(NebulaPreprocessor preprocessor)
+    {
+        Win = preprocessor.RegisterCommunicableText("end.detail.vulture.win");
     }
 }

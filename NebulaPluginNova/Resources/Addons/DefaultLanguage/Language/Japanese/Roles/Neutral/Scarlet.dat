@@ -81,6 +81,11 @@
 
 # Team
 
+"end.detail.scarlet.win" : "スカーレット勝利"
+"end.detail.scarlet.extra" : "スカーレットの本命として追加勝利"
+"end.detail.scarlet.blocked" : "スカーレット死亡による本命勝利ブロック"
+"end.detail.scarlet.blocked.gauge" : "本命ゲージ不足による勝利ブロック"
+
 "teams.scarlet" : "スカーレット"
 "end.scarlet" : "スカーレット%EXTRA%勝利"
 

@@ -12,6 +12,7 @@ using Virial.Events.Player;
 using Virial.Game;
 using Virial.Text;
 using Virial.Utilities;
+using Virial.Runtime;
 
 namespace Nebula.Roles.Modifier;
 
@@ -133,10 +134,16 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
         public bool IsAloneLover => MyLover.Get().IsDead;
 
         [OnlyMyPlayer]
-        void CheckWins(PlayerCheckWinEvent ev) => ev.SetWinIf(ev.GameEnd == NebulaGameEnd.LoversWin && !MyPlayer.IsDead);
+        void CheckWins(PlayerCheckWinEvent ev)
+        {
+            if (ev.SetWinIf(ev.GameEnd == NebulaGameEnd.LoversWin && !MyPlayer.IsDead)) ev.Recorder.AddReason(ev.Player.PlayerId, LoverDetails.Win);
+        }
 
         [OnlyMyPlayer]
-        void BlockWins(PlayerBlockWinEvent ev) => ev.IsBlocked |= BlockRoleWinOption && ev.GameEnd != NebulaGameEnd.LoversWin;
+        void BlockWins(PlayerBlockWinEvent ev)
+        {
+            if (ev.SetBlockedIf(BlockRoleWinOption && ev.GameEnd != NebulaGameEnd.LoversWin)) ev.Recorder.AddReason(ev.Player.PlayerId, LoverDetails.Blocked);
+        }
 
         void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo, bool inEndScene)
         {
@@ -245,7 +252,7 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
             if (ev.WinnersMask.Test(MyPlayer)) return;
 
             ev.ExtraWinMask.Add(NebulaGameEnd.ExtraLoversWin);
-            ev.IsExtraWin = true;
+            if (ev.SetWin(true)) ev.Recorder.AddReason(ev.Player.PlayerId, LoverDetails.Extra);
         }
 
         //相方は一度決定したら変更されないため、キャッシュさせる。
@@ -289,3 +296,18 @@ internal class LoversCriteria : AbstractModule<IGameModeStandard>, IGameOperator
         return;
     }
 };
+
+[NebulaPreprocess(PreprocessPhase.PostRoles)]
+file static class LoverDetails
+{
+    static internal CommunicableTextTag Win = null!;
+    static internal CommunicableTextTag Extra = null!;
+    static internal CommunicableTextTag Blocked = null!;
+
+    static void Preprocess(NebulaPreprocessor preprocessor)
+    {
+        Win = preprocessor.RegisterCommunicableText("end.detail.lover.win");
+        Extra = preprocessor.RegisterCommunicableText("end.detail.lover.extra");
+        Blocked = preprocessor.RegisterCommunicableText("end.detail.lover.blocked");
+    }
+}

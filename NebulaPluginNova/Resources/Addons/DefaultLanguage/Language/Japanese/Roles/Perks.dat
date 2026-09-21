@@ -92,6 +92,7 @@
 "perk.sacrifice.name" : "身代わり"
 "perk.sacrifice.detail" : "その場に身代わりを召喚する。<br>身代わりがキルされてもパークの使用者は死亡しない。<br>身代わりは%D%秒後に消滅する。"
 "perk.sacrifice.duration" : "身代わりの効果時間"
+"fakePlayer.sacrifice" : "身代わり"
 
 "perk.ketchupMessage.name" : "ケチャップメッセージ"
 "perk.ketchupMessage.detail" : "その場にダイイングメッセージのような文字を描く。"

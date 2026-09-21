@@ -815,6 +815,17 @@ public interface RuntimeAssignable : ILifespan, IBindPlayer, IGameOperator, IRel
             return NebulaAPI.GUI.VerticalHolder(Media.GUIAlignment.Left, widgets);
         }
     }
+
+    /// <summary>
+    /// 更なる追加情報です。1行で収まると望ましいです。ProgressWidgetとは別のタイミングで表示されるので、内容に重複があっても不自然にはなりません。
+    /// </summary>
+    string? MoreInformation
+    {
+        get
+        {
+            return string.Join(", ", MyAbilities.Select(a => a.MoreInformation).Where(a => a != null));
+        }
+    }
 }
 
 /// <summary>

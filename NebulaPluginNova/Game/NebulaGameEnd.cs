@@ -2,6 +2,7 @@
 using Nebula.Game.Statistics;
 using Nebula.Modules.Logging;
 using Nebula.Roles.Modifier;
+using UnityEngine.AI;
 using UnityEngine.Rendering;
 using Virial;
 using Virial.Assignable;
@@ -26,10 +27,10 @@ public class NebulaGameEnd
     static public readonly GameEnd ArsonistWin = new(27, "arsonist", Roles.Neutral.Arsonist.MyRole.Color, 32);
     static public readonly GameEnd LoversWin = new(28, "lover", Roles.Modifier.Lover.MyRole.Color, 19);
     static public readonly GameEnd PaparazzoWin = new(29, "paparazzo", Roles.Neutral.Paparazzo.MyRole.Color, 31);
-    static public readonly GameEnd AvengerWin = new(30, "avenger", Roles.Neutral.Avenger.MyRole.Color, 62);
+    static public readonly GameEnd AvengerWin = new(30, "avenger", Roles.Neutral.Avenger.MyRole.Color, 64);
     static public readonly GameEnd DancerWin = new(31, "dancer", Roles.Neutral.Dancer.MyRole.Color, 30);
-    static public readonly GameEnd ScarletWin = new(32, "scarlet", Roles.Neutral.Scarlet.MyRole.Color, 64);
-    static public readonly GameEnd SpectreWin = new(33, "spectre", Roles.Neutral.Spectre.MyRole.Color, 63);
+    static public readonly GameEnd ScarletWin = new(32, "scarlet", Roles.Neutral.Scarlet.MyRole.Color, 63);
+    static public readonly GameEnd SpectreWin = new(33, "spectre", Roles.Neutral.Spectre.MyRole.Color, 62);
     static public readonly GameEnd TrilemmaWin = new(34, "trilemma", Roles.Modifier.Trilemma.MyRole.Color, 61);
     static public readonly GameEnd GamblerWin = new(35, "gambler", Roles.Neutral.Gambler.MyRole.Color, 29);
     static public readonly GameEnd TyrantWin = new(36, "tyrant", Roles.Neutral.Tyrant.MyRole.Color, 32);
@@ -45,8 +46,16 @@ public class NebulaGameEnd
     static public readonly ExtraWin ExtraVanityWin = new(4, "vanity", Roles.Neutral.Vanity.MyRole.Color);
     static public readonly ExtraWin ExtraOpportunistWin = new(5, "opportunist", Roles.Neutral.Opportunist.MyRole.Color);
 
+    static internal CommunicableTextTag PhaseCheckWin = null!, PhaseBlockWin = null!;
+    static internal CommunicableTextTag[] PhaseExtraWin = null!;
+
     static void Preprocess(NebulaPreprocessor preprocessor)
     {
+        PhaseCheckWin = preprocessor.RegisterCommunicableText("end.phase.checkWin");
+        PhaseBlockWin = preprocessor.RegisterCommunicableText("end.phase.blockWin");
+        PhaseExtraWin = Enumerable.Range(0, (int)ExtraWinCheckPhase.PhaseMax)
+            .Select(i => preprocessor.RegisterCommunicableText("end.phase.extraWin" + i)).ToArray();
+
         //Tipsの追加
         string ImpostorTeam(string text) => text.Replace("%IMPOSTOR%", Language.Translate("document.tip.winCond.teams.impostor").Color(Roles.Impostor.Impostor.MyTeam.Color));
         string JackalTeam(string text) => text.Replace("%JACKAL%", Language.Translate("document.tip.winCond.teams.jackal").Color(Roles.Neutral.Jackal.MyTeam.Color));
@@ -86,19 +95,23 @@ public class NebulaGameEnd
         }));
     }
 
-    private readonly static RemoteProcess<(byte conditionId, int winnersMask,ulong extraWinMask, GameEndReason endReason, byte originalConditionId, GameEndReason originalEndReason)> RpcEndGame = new(
+    private readonly static RemoteProcess<(byte conditionId, int winnersMask,ulong extraWinMask, GameEndReason endReason, GameEndDetail detail)[]> RpcEndGame = new(
        "EndGame",
        (message, isCalledByMe) =>
        {
            if (NebulaGameManager.Instance != null)
            {
-               var end = GameEnd.TryGet(message.conditionId, out var e1) ? e1 : NebulaGameEnd.NoGame;
-               var originalEnd = GameEnd.TryGet(message.originalConditionId, out var e2) ? e2 : NebulaGameEnd.NoGame;
-               var winners = BitMasks.AsPlayer((uint)message.winnersMask);
-               EditableBitMask<ExtraWin> extraWin = new HashSetMask<ExtraWin>();
-               foreach(var exW in ExtraWin.AllExtraWins) if((exW.ExtraWinMask & message.extraWinMask) != 0) extraWin.Add(exW);
+               var stages = message.Select(info =>
+               {
+                   var end = GameEnd.TryGet(info.conditionId, out var e) ? e : NebulaGameEnd.NoGame;
 
-               NebulaGameManager.Instance.EndState ??= new EndState(winners, end, message.endReason, originalEnd, message.originalEndReason, extraWin);
+                   EditableBitMask<ExtraWin> extraWin = new HashSetMask<ExtraWin>();
+                   foreach (var exW in ExtraWin.AllExtraWins) if ((exW.ExtraWinMask & info.extraWinMask) != 0) extraWin.Add(exW);
+
+                   return new GameEndStage(end, info.endReason, BitMasks.AsPlayer((uint)info.winnersMask), extraWin, info.detail);
+               }).ToArray();
+
+               NebulaGameManager.Instance.EndState ??= new EndState(stages);
                NebulaGameManager.Instance.OnGameEnd();
                GameOperatorManager.Instance?.Run(new GameEndEvent(NebulaGameManager.Instance, NebulaGameManager.Instance.EndState));
                NebulaGameManager.Instance.ToGameEnd();
@@ -106,10 +119,10 @@ public class NebulaGameEnd
        }
        );
 
-    public static bool RpcSendGameEnd(Virial.Game.GameEnd winCondition, int winnersMask, ulong extraWinMask, GameEndReason endReason, Virial.Game.GameEnd originalWinCondition, GameEndReason originalEndReason)
+    public static bool RpcSendGameEnd(IEnumerable<(byte winConditionId, int winnersMask, ulong extraWinMask, GameEndReason endReason, GameEndDetail detail)> endInfo)
     {
         if (NebulaGameManager.Instance?.EndState != null) return false;
-        RpcEndGame.Invoke((winCondition.Id, winnersMask, extraWinMask, endReason, originalWinCondition.Id, originalEndReason));
+        RpcEndGame.Invoke(endInfo.ToArray());
         return true;
     }
 }
@@ -119,10 +132,10 @@ public class LastGameHistory
     static public MetaWidgetOld? LastWidget = null;
     static public IArchivedGame? ArchivedGame = null;
 
-    public static void SetHistory(TMPro.TMP_FontAsset font, IMetaWidgetOld roleWidget, string endCondition)
+    public static void SetHistory(TMPro.TMP_FontAsset font, IMetaWidgetOld roleWidget, string endCondition, IArchivedGame archivedGame)
     {
         LastWidget = new MetaWidgetOld(new MetaWidgetOld.Text(new(TextAttributeOld.BoldAttrLeft) { Font = font }) { RawText = endCondition }, new MetaWidgetOld.VerticalMargin(0.15f), roleWidget);
-        ArchivedGame = ArchivedGameImpl.FromCurrentGame();
+        ArchivedGame = archivedGame;
     }
 
     public static Texture2D GenerateTexture()
@@ -186,12 +199,24 @@ public class LastGameHistory
 
         if (LastWidget != null)
         {
-            var buttonRenderer = UnityHelper.CreateObject<SpriteRenderer>("InfoButton", window.transform, new(-2.9f, 2.5f, -50f), out var buttonRendererObj, LayerExpansion.GetUILayer());
-            buttonRenderer.sprite = EndGameManagerSetUpPatch.InfoButtonSprite.GetSprite(0);
-            var button = buttonRendererObj.SetUpButton(false, buttonRenderer);
-            button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, LastWidget));
-            button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
-            buttonRendererObj.AddComponent<BoxCollider2D>().size = new(0.3f, 0.3f);
+            {
+                var buttonRenderer = UnityHelper.CreateObject<SpriteRenderer>("InfoButton", window.transform, new(-2.9f, 2.5f, -50f), out var buttonRendererObj, LayerExpansion.GetUILayer());
+                buttonRenderer.sprite = EndGameManagerSetUpPatch.InfoButtonSprite.GetSprite(0);
+                var button = buttonRendererObj.SetUpButton(false, buttonRenderer);
+                button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, LastWidget));
+                button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
+                buttonRendererObj.AddComponent<BoxCollider2D>().size = new(0.3f, 0.3f);
+            }
+
+            {
+                var buttonRenderer = UnityHelper.CreateObject<SpriteRenderer>("BrowserButton", window.transform, new(-3.27f, 2.5f, -50f), out var buttonRendererObj, LayerExpansion.GetUILayer());
+                buttonRenderer.sprite = EndGameManagerSetUpPatch.InfoButtonSprite.GetSprite(1);
+                var button = buttonRendererObj.SetUpButton(false, buttonRenderer);
+                button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, Language.Translate("end.browser")));
+                button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
+                button.OnClick.AddListener(() => { if (Nebula.Http.NebulaHttpServer.Start()) Application.OpenURL(Nebula.Http.NebulaHttpServer.Url); });
+                buttonRendererObj.AddComponent<BoxCollider2D>().size = new(0.3f, 0.3f);
+            }
         }
     }
 }
@@ -225,7 +250,7 @@ public class EndGameManagerSetUpPatch
     static internal MultiImage InfoButtonSprite = DividedSpriteLoader.FromResource("Nebula.Resources.InformationButton.png", 100f, 2, 1);
     static Image DiscordButtonSprite = SpriteLoader.FromResource("Nebula.Resources.DiscordIcon.png", 100f);
 
-    private static IMetaWidgetOld GetRoleContent(TMPro.TMP_FontAsset font)
+    private static IMetaWidgetOld GetRoleContent(TMPro.TMP_FontAsset font, bool showWebAnnouncement = false)
     {
         MetaWidgetOld widget = new();
 
@@ -242,29 +267,10 @@ public class EndGameManagerSetUpPatch
 
             string stateText = p.Unbox().GetStateText();
             
-            string taskText = (!p.IsDisconnected && p.Tasks.Quota > 0) ? $"({p.Tasks.Unbox().ToString(true)})".Color(p.Tasks.IsCrewmateTask ? PlayerModInfo.CrewTaskColor : PlayerModInfo.FakeTaskColor) : "";
+            string taskText = ResultText.TaskText(p);
 
             //Role Text
-            string roleText = "";
-            var entries = NebulaGameManager.Instance.RoleHistory.EachMoment(history => history.PlayerId == p.PlayerId,
-                (role, ghostRole, modifiers) => (RoleHistoryHelper.ConvertToRoleName(role, ghostRole, modifiers, true), RoleHistoryHelper.ConvertToRoleName(role, ghostRole, modifiers, false))).ToArray();
-
-            if (entries.Length < 5)
-            {
-                for (int i = 0; i < entries.Length - 1; i++)
-                {
-                    if (roleText.Length > 0) roleText += " → ";
-                    roleText += entries[i].Item1;
-                }
-            }
-            else
-            {
-                roleText = entries[0].Item1 + " → ...";
-            }
-
-            if (roleText.Length > 0) roleText += " → ";
-            roleText += entries[^1].Item2;
-            roleText = "\u200B" + roleText;
+            string roleText = "\u200B" + ResultText.RoleText(NebulaGameManager.Instance.RoleHistory, p.PlayerId);
             players.Add((nameText, stateText, taskText, roleText));
         }
 
@@ -386,7 +392,7 @@ public class EndGameManagerSetUpPatch
         // テキストを追加する
         GameObject bonusText = UnityEngine.Object.Instantiate(__instance.WinText.gameObject);
         bonusText.transform.SetParent(null);
-        var winTextPos = __instance.WinText.transform.GetPositionFast();
+        var winTextPos = __instance.WinText.transform.position;
         bonusText.transform.position = new Vector3(winTextPos.x, winTextPos.y - 0.5f, winTextPos.z);
         bonusText.transform.localScale = new Vector3(0.7f, 0.7f, 1f);
         TMPro.TMP_Text textRenderer = bonusText.GetComponent<TMPro.TMP_Text>();
@@ -414,7 +420,10 @@ public class EndGameManagerSetUpPatch
             __instance.WinText.color = Color.white;
         }
 
-            LastGameHistory.SetHistory(__instance.WinText.font, GetRoleContent(__instance.WinText.font), textRenderer.text.Color(endColor));
+        var archivedGame = ArchivedGameImpl.FromCurrentGame();
+        LastGameHistory.SetHistory(__instance.WinText.font, GetRoleContent(__instance.WinText.font), textRenderer.text.Color(endColor), archivedGame);
+
+        GameRecordStore.Save(archivedGame);
 
 #if PC
         GameStatisticsViewer? viewer;
@@ -429,19 +438,31 @@ public class EndGameManagerSetUpPatch
         if(NebulaGameManager.Instance?.GameMode?.ShowStatistics ?? false) __instance.StartCoroutine(CoShowStatistics().WrapToIl2Cpp());
 #endif
 
-        var buttonRenderer = UnityHelper.CreateObject<SpriteRenderer>("InfoButton", __instance.transform, new(-2.9f, 2.5f, -50f), out var buttonObj, LayerExpansion.GetUILayer());
-        buttonRenderer.sprite = InfoButtonSprite.GetSprite(0);
-        var button = buttonRenderer.gameObject.SetUpButton(false, buttonRenderer);
-        button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, GetRoleContent(__instance.WinText.font)));
-        button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
-        buttonObj.AddComponent<BoxCollider2D>().size = new(0.3f, 0.3f);
+        {
+            var buttonRenderer = UnityHelper.CreateObject<SpriteRenderer>("InfoButton", __instance.transform, new(-2.9f, 2.5f, -50f), out var buttonObj, LayerExpansion.GetUILayer());
+            buttonRenderer.sprite = InfoButtonSprite.GetSprite(0);
+            var button = buttonRenderer.gameObject.SetUpButton(false, buttonRenderer);
+            button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, GetRoleContent(__instance.WinText.font, true)));
+            button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
+            buttonObj.AddComponent<BoxCollider2D>().size = new(0.3f, 0.3f);
+        }
+
+        {
+            var buttonRenderer = UnityHelper.CreateObject<SpriteRenderer>("WebButton", __instance.transform, new(-3.27f, 2.5f, -50f), out var buttonObj, LayerExpansion.GetUILayer());
+            buttonRenderer.sprite = InfoButtonSprite.GetSprite(1);
+            var button = buttonRenderer.gameObject.SetUpButton(false, buttonRenderer);
+            button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, Language.Translate("end.browser")));
+            button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
+            button.OnClick.AddListener(() => { if (Nebula.Http.NebulaHttpServer.Start()) Application.OpenURL(Nebula.Http.NebulaHttpServer.Url); });
+            buttonObj.AddComponent<BoxCollider2D>().size = new(0.3f, 0.3f);
+        }
 
 #if PC
         if (NebulaPlugin.AllowHttpCommunication)
         {
             if (!AmongUsLLImpl.AmongUsClientInstance.AmHost || ClientOption.WebhookOption.urlEntry.Value.Length == 0 || !ClientOption.WebhookOption.autoSendEntry.Value)
             {
-                var discordButtonRenderer = UnityHelper.CreateObject<SpriteRenderer>("WebhookButton", __instance.transform, new Vector3(-3.8f, 2.5f, -50f), out var discordButtonObj, LayerExpansion.GetUILayer());
+                var discordButtonRenderer = UnityHelper.CreateObject<SpriteRenderer>("WebhookButton", __instance.transform, new Vector3(-3.9f, 2.5f, -50f), out var discordButtonObj, LayerExpansion.GetUILayer());
                 discordButtonRenderer.sprite = DiscordButtonSprite.GetSprite();
                 var discordButton = discordButtonObj.SetUpButton(true, discordButtonRenderer);
                 discordButton.OnClick.AddListener(() =>

@@ -576,7 +576,6 @@ public class NebulaManager : MonoBehaviour
 
                 if (Input.GetKeyDown(KeyCode.K))
                 {
-                    
                     /*
                     IEnumerator CoCheck()
                     {

@@ -30,6 +30,8 @@
 
 # Team
 
+"end.detail.crewmate.win" : "クルーメイト勝利"
+
 "teams.crewmate" : "クルーメイト"
 "end.crewmate" : "クルーメイト%EXTRA%勝利"
 

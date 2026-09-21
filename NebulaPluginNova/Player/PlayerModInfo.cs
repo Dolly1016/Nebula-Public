@@ -1609,6 +1609,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         if (ability.MyPlayer != this) return false;
         if (ability.IsDeadObject) return false;
 
+        GameOperatorManager.Instance?.Subscribe(ability, ability);
         attachedAbilities.RemoveAll(a => a.IsDeadObject);
         attachedAbilities.Add(ability);
         return true;

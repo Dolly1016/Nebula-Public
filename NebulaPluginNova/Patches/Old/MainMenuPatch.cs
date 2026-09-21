@@ -1,4 +1,5 @@
 ﻿using Nebula.Behavior;
+using Nebula.Http;
 using Nebula.Modules.GUIWidget;
 using Nebula.Online;
 using Nebula.UI.MainMenu;
@@ -212,6 +213,11 @@ public static class MainMenuSetUpPatch
 #if PC
         if (NebulaPlugin.AllowHttpCommunication)
         {
+            SetUpButton("title.buttons.history", () =>
+            {
+                if (Nebula.Http.NebulaHttpServer.Start()) Application.OpenURL(Nebula.Http.NebulaHttpServer.Url);
+            });
+
             SetUpButton("title.buttons.form", () =>
             {
                 DevTeamContact.OpenContactWindow(null);

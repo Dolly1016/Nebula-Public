@@ -144,7 +144,7 @@ internal class Tyrant : DefinedRoleTemplate, DefinedRole
                 if (AmOwner) StatsKill.Progress();
                 killMask.Add(ev.Dead);
 
-                if ((GamePlayer.LocalPlayer?.AmHost ?? false) && killingTotal >= NumOfKillingToWinOption) NebulaGameManager.Instance?.RpcInvokeSpecialWin(NebulaGameEnd.TyrantWin, 1 << MyPlayer.PlayerId);
+                if ((GamePlayer.LocalPlayer?.AmHost ?? false) && killingTotal >= NumOfKillingToWinOption) NebulaGameManager.Instance?.RpcInvokeSpecialWin(NebulaGameEnd.TyrantWin, 1 << MyPlayer.PlayerId, TyrantDetails.Win);
             }, this);
             GameOperatorManager.Instance?.Subscribe<SetUpVotingAreaEvent>(ev =>
             {
@@ -164,6 +164,14 @@ internal class Tyrant : DefinedRoleTemplate, DefinedRole
                     ev.VoteArea.StartCoroutine(CoUpdateXMark().WrapToIl2Cpp());
                 }
             }, NebulaAPI.CurrentGame!);
+        }
+
+        [OnlyMyPlayer]
+        void CheckWins(PlayerCheckWinEvent ev)
+        {
+            //キルできる者が誰も生き残らなかったなら、必要なキル数には二度と届かない。
+            if (killingTotal < RequiredKillingToWin && !GamePlayer.AllPlayers.Any(p => p.IsAlive && p.IsKiller))
+                ev.Recorder.AddReason(ev.Player.PlayerId, TyrantDetails.Missed);
         }
 
         [OnlyMyPlayer, Local]
@@ -197,5 +205,18 @@ internal class Tyrant : DefinedRoleTemplate, DefinedRole
 
         bool RuntimeRole.HasImpostorVision => true;
         bool RuntimeRole.IgnoreBlackout => true;
+    }
+}
+
+[NebulaPreprocess(PreprocessPhase.PostRoles)]
+file static class TyrantDetails
+{
+    static internal CommunicableTextTag Win = null!;
+    static internal CommunicableTextTag Missed = null!;
+
+    static void Preprocess(NebulaPreprocessor preprocessor)
+    {
+        Win = preprocessor.RegisterCommunicableText("end.detail.tyrant.win");
+        Missed = preprocessor.RegisterCommunicableText("end.detail.tyrant.missed");
     }
 }

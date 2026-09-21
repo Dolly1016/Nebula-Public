@@ -9,6 +9,8 @@ using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Runtime;
+using Virial.Text;
 
 namespace Nebula.Roles.Neutral;
 
@@ -361,7 +363,30 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole, IAssignableDocument
         }
 
         [OnlyMyPlayer]
-        void CheckWins(PlayerCheckWinEvent ev) => ev.SetWinIf(ev.GameEnd == NebulaGameEnd.PaparazzoWin && CheckPaparazzoWin());
+        void CheckWins(PlayerCheckWinEvent ev)
+        {
+            if (ev.SetWinIf(ev.GameEnd == NebulaGameEnd.PaparazzoWin && CheckPaparazzoWin()))
+            {
+                ev.Recorder.AddReason(ev.Player.PlayerId, PaparazzoDetails.Win);
+                return;
+            }
+
+            var missed = GetMissedDetail();
+            if (missed != null) ev.Recorder.AddReason(ev.Player.PlayerId, missed);
+        }
+
+        private CommunicableTextTag? GetMissedDetail()
+        {
+            CommunicableTextTag? missed = null;
+            int shortage = 0;
+
+            if (MyPlayer.IsDead) shortage++;
+            if (GetActivatedBits(CapturedMask) < RequiredSubjectsOption) { shortage++; missed = PaparazzoDetails.MissedSubjects; }
+            if (GetActivatedBits(DisclosedMask) < RequiredDisclosedOption) { shortage++; missed = PaparazzoDetails.MissedDisclosed; }
+            if (DisclosedPhotos < RequiredPicturesOption) { shortage++; missed = PaparazzoDetails.MissedPhotos; }
+
+            return shortage == 1 ? missed : null;
+        }
 
         public override void OnActivated()
         {
@@ -695,4 +720,21 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole, IAssignableDocument
     });
 
     public static readonly Dictionary<int, (float scale, float angle, int length, byte[]?[] bytes)> storedTexture = [];
+}
+
+[NebulaPreprocess(PreprocessPhase.PostRoles)]
+file static class PaparazzoDetails
+{
+    static internal CommunicableTextTag Win = null!;
+    static internal CommunicableTextTag MissedSubjects = null!;
+    static internal CommunicableTextTag MissedDisclosed = null!;
+    static internal CommunicableTextTag MissedPhotos = null!;
+
+    static void Preprocess(NebulaPreprocessor preprocessor)
+    {
+        Win = preprocessor.RegisterCommunicableText("end.detail.paparazzo.win");
+        MissedSubjects = preprocessor.RegisterCommunicableText("end.detail.paparazzo.missed.subjects");
+        MissedDisclosed = preprocessor.RegisterCommunicableText("end.detail.paparazzo.missed.disclosed");
+        MissedPhotos = preprocessor.RegisterCommunicableText("end.detail.paparazzo.missed.photos");
+    }
 }

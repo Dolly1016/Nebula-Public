@@ -49,6 +49,10 @@
 
 # Team
 
+"end.detail.lover.win" : "ラバーズ単独勝利"
+"end.detail.lover.extra" : "ラバーズ追加勝利"
+"end.detail.lover.blocked" : "ラバーズ以外での勝利をブロック"
+
 "end.lover" : "ラバーズ%EXTRA%勝利"
 "end.extra.lover" : " <color=#FFFFFF>+</color> ラバーズ"
 

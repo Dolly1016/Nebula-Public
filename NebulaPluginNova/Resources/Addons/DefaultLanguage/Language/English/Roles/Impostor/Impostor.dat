@@ -27,6 +27,8 @@
 
 # Team
 
+"end.detail.impostor.win" : "Impostor win"
+
 "teams.impostor" : "Impostor"
 "end.impostor" : "Impostors Win%EXTRA%"
 

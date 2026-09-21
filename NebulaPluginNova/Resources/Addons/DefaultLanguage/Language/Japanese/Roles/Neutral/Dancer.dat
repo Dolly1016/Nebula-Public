@@ -99,6 +99,10 @@
 
 # Team
 
+"end.detail.dancer.win" : "ダンサー勝利"
+"end.detail.dancer.extra" : "完遂した死の預言による追加勝利"
+"end.detail.dancer.blocked" : "死の預言による勝利ブロック"
+
 "teams.dancer" : "ダンサー"
 "end.dancer" : "ダンサー<color=#FFFFFF> + 亡霊</color>%EXTRA%勝利"
 

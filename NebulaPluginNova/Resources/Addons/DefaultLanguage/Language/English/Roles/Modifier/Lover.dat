@@ -49,6 +49,10 @@
 
 # Team
 
+"end.detail.lover.win" : "Lovers solo win"
+"end.detail.lover.extra" : "Lovers extra win"
+"end.detail.lover.blocked" : "Blocked every win but the Lovers'"
+
 "end.lover" : "Lovers Win%EXTRA%"
 "end.extra.lover" : " <color=#FFFFFF>with</color> Lovers"
 

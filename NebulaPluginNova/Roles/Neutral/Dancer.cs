@@ -9,6 +9,7 @@ using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
 using Virial.Runtime;
+using Virial.Text;
 
 namespace Nebula.Roles.Neutral;
 
@@ -358,7 +359,7 @@ public class Dancer : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                     if (nextIsFinalDance && AmOwner && players.Any())
                     {
                         RpcLastDance.Invoke(players.ToArray());
-                        NebulaGameManager.Instance?.RpcInvokeSpecialWin(NebulaGameEnd.DancerWin, (int)WinnersMask.AsRawPattern);
+                        NebulaGameManager.Instance?.RpcInvokeSpecialWin(NebulaGameEnd.DancerWin, (int)WinnersMask.AsRawPattern, DancerDetails.Win);
                     }
                     else
                     {
@@ -487,7 +488,7 @@ public class Dancer : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                     UpdateButtonGraphic();
                 }
                 else if (GamePlayer.LocalPlayer?.AmHost ?? false)
-                    NebulaGameManager.Instance?.RpcInvokeSpecialWin(NebulaGameEnd.DancerWin, (int)WinnersMask.AsRawPattern);
+                    NebulaGameManager.Instance?.RpcInvokeSpecialWin(NebulaGameEnd.DancerWin, (int)WinnersMask.AsRawPattern, DancerDetails.Win);
             }
             
             //会議以外、自分以外のキルをDancerに通知する
@@ -499,7 +500,7 @@ public class Dancer : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 
         void BlockWinning(PlayerBlockWinEvent ev)
         {
-            ev.SetBlockedIf(!MyPlayer.IsDead && activeDanceLooked.Contains(ev.Player));
+            if (ev.SetBlockedIf(!MyPlayer.IsDead && activeDanceLooked.Contains(ev.Player))) ev.Recorder.AddReason(ev.Player.PlayerId, DancerDetails.Blocked);
         }
 
         void ExtraWinning(PlayerCheckExtraWinEvent ev)
@@ -507,7 +508,7 @@ public class Dancer : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             if (ev.Phase != ExtraWinCheckPhase.DancerPhase) return;
 
             //タイムラグで拾い漏れがあるので、少し緩めに取る(有効な預言をうけ且つ死亡している and ダンサーの狂乱で死亡)
-            if (ev.GameEnd == NebulaGameEnd.DancerWin && (completedDanceLooked.Contains(ev.Player) || (activeDanceLooked.Contains(ev.Player) && ev.Player.IsDead) || (ev.WinnersMask.Test(ev.Player.MyKiller) && ev.Player.PlayerState == PlayerState.Frenzied))) ev.IsExtraWin = true;
+            if (ev.SetWinIf(ev.GameEnd == NebulaGameEnd.DancerWin && (completedDanceLooked.Contains(ev.Player) || (activeDanceLooked.Contains(ev.Player) && ev.Player.IsDead) || (ev.WinnersMask.Test(ev.Player.MyKiller) && ev.Player.PlayerState == PlayerState.Frenzied)))) ev.Recorder.AddReason(ev.Player.PlayerId, DancerDetails.Extra);
         }
 
         BitMask<GamePlayer> WinnersMask { get
@@ -542,5 +543,21 @@ public class Dancer : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             if (danceLooked.Contains(localPlayer) && !localPlayer.IsDead && ev.CheckWin(localPlayer)) new StaticAchievementToken("dancer.common4");
             if (completedDanceLooked.Contains(localPlayer) && localPlayer.IsDead && ev.EndState.EndCondition == NebulaGameEnd.CrewmateWin && ev.CheckWin(localPlayer)) new StaticAchievementToken("dancer.common5");
         }
+    }
+}
+
+
+[NebulaPreprocess(PreprocessPhase.PostRoles)]
+file static class DancerDetails
+{
+    static internal CommunicableTextTag Win = null!;
+    static internal CommunicableTextTag Extra = null!;
+    static internal CommunicableTextTag Blocked = null!;
+
+    static void Preprocess(NebulaPreprocessor preprocessor)
+    {
+        Win = preprocessor.RegisterCommunicableText("end.detail.dancer.win");
+        Extra = preprocessor.RegisterCommunicableText("end.detail.dancer.extra");
+        Blocked = preprocessor.RegisterCommunicableText("end.detail.dancer.blocked");
     }
 }

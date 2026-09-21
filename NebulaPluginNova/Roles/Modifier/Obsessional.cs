@@ -7,6 +7,8 @@ using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
 using static UnityEngine.GraphicsBuffer;
+using Virial.Runtime;
+using Virial.Text;
 
 namespace Nebula.Roles.Modifier;
 
@@ -118,7 +120,10 @@ public class Obsessional : DefinedAllocatableModifierTemplate, DefinedAllocatabl
 
         //本来の勝利条件をブロックする
         [OnlyMyPlayer]
-        void BlockWins(PlayerBlockWinEvent ev) => ev.IsBlocked |= true;
+        void BlockWins(PlayerBlockWinEvent ev)
+        {
+            if (ev.SetBlockedIf(true)) ev.Recorder.AddReason(ev.Player.PlayerId, ObsessionalDetails.Blocked);
+        }
 
         [OnlyMyPlayer]
         void CheckExtraWins(PlayerCheckExtraWinEvent ev)
@@ -130,7 +135,7 @@ public class Obsessional : DefinedAllocatableModifierTemplate, DefinedAllocatabl
 
             if (obsession != null && ev.WinnersMask.Test(obsession))
             {
-                ev.SetWin(true);
+                if (ev.SetWin(true)) ev.Recorder.AddReason(ev.Player.PlayerId, ObsessionalDetails.Extra);
                 ev.ExtraWinMask.Add(NebulaGameEnd.ExtraObsessionalWin);
             }
         }
@@ -188,5 +193,18 @@ public class Obsessional : DefinedAllocatableModifierTemplate, DefinedAllocatabl
         {
             if (ev.Target == obsession) ev.SetAsCannotKillBasically();
         }
+    }
+}
+
+[NebulaPreprocess(PreprocessPhase.PostRoles)]
+file static class ObsessionalDetails
+{
+    static internal CommunicableTextTag Extra = null!;
+    static internal CommunicableTextTag Blocked = null!;
+
+    static void Preprocess(NebulaPreprocessor preprocessor)
+    {
+        Extra = preprocessor.RegisterCommunicableText("end.detail.obsessional.extra");
+        Blocked = preprocessor.RegisterCommunicableText("end.detail.obsessional.blocked");
     }
 }

@@ -26,7 +26,7 @@ internal class FakePlayerManager : AbstractModule<Virial.Game.Game>, IGameOperat
 
     protected override void OnInjected(Virial.Game.Game container) => this.Register(container);
     
-    public int GenerateAvailableId() => (AvailableId++) << 8 + GamePlayer.LocalPlayer!.PlayerId;
+    public int GenerateAvailableId() => ((AvailableId++) << 8) + GamePlayer.LocalPlayer!.PlayerId;
 
     [EventPriority(0)]
     void OnInteract(PlayerInteractPlayerLocalEvent ev)
@@ -431,7 +431,8 @@ internal class FakePet : IGameOperator
 
 
 [NebulaPreprocess(PreprocessPhase.BuildNoSModuleContainer), NebulaRPCHolder]
-internal record FakePlayerParameters(VVector2 position, KillCharacteristics KillCharacteristics, bool CanBeTarget, bool CanWalk, bool InitialFlipX, VVector2? petInitialPos, OutfitCandidate? specialOutfit = null)
+
+internal record FakePlayerParameters(VVector2 position, KillCharacteristics KillCharacteristics, bool CanBeTarget, bool CanWalk, bool InitialFlipX, VVector2? petInitialPos, OutfitCandidate? specialOutfit = null, Virial.Text.CommunicableTextTag? SpawnReason = null)
 {
     static FakePlayerParameters()
     {
@@ -446,9 +447,13 @@ internal record FakePlayerParameters(VVector2 position, KillCharacteristics Kill
             writer.Write(parameters.petInitialPos?.x ?? parameters.position.x);
             writer.Write(parameters.petInitialPos?.y ?? (parameters.position.y + 0.2f));
             writer.WriteIfNotNullCustom(parameters.specialOutfit);
+            writer.Write(parameters.SpawnReason?.Id ?? -1);
         }, (reader) =>
         {
-            return new(new(reader.ReadSingle(), reader.ReadSingle()), (KillCharacteristics)reader.ReadInt32(), reader.ReadBoolean(), reader.ReadBoolean(), reader.ReadBoolean(),new(reader.ReadSingle(), reader.ReadSingle()), reader.ReadIfNotNullCustom<OutfitCandidate>());
+            var parameters = new FakePlayerParameters(new(reader.ReadSingle(), reader.ReadSingle()), (KillCharacteristics)reader.ReadInt32(), reader.ReadBoolean(), reader.ReadBoolean(), reader.ReadBoolean(), new(reader.ReadSingle(), reader.ReadSingle()), reader.ReadIfNotNullCustom<OutfitCandidate>());
+
+            var reasonId = reader.ReadInt32();
+            return parameters with { SpawnReason = reasonId < 0 ? null : TranslatableTag.ValueOf(reasonId) };
         });
     }
 }
@@ -481,7 +486,12 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
     internal readonly FakePlayerNetTransform NetTransform;
     internal readonly FakePlayerLogics Logics;
     private OutfitCandidate? specialOutfit = null;
+    private readonly Virial.Text.CommunicableTextTag? spawnReason;
     IPlayerLogics IPlayerlike.Logic => this.Logics;
+
+    Virial.Game.Player? IFakePlayer.Owner => GamePlayer.GetPlayer((byte)(id & 0xFF));
+
+    Virial.Text.CommunicableTextTag? IFakePlayer.SpawnReason => spawnReason;
 
     protected bool isDeadObject { get; private set; } = false;
     public void Release() => isDeadObject = true;
@@ -507,6 +517,7 @@ internal class FakePlayer : AbstractModuleContainer, IFakePlayer, ILifespan, IGa
         this.canBeTarget = parameters.CanBeTarget;
 
         this.specialOutfit = parameters.specialOutfit;
+        this.spawnReason = parameters.SpawnReason;
 
         NebulaGameManager.Instance.RegisterFakePlayer(this);
 

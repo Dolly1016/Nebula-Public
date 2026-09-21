@@ -283,28 +283,8 @@ public static class PlayerCompleteTaskPatch
     }
 }
 
-[HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.StartMeeting))]
-public static class PlayerStartMeetingPatch
-{
-    public static void Prefix(PlayerControl __instance, [HarmonyArgument(0)] NetworkedPlayerInfo info)
-    {
-        TranslatableTag tag = info == null ? EventDetail.EmergencyButton : EventDetail.Report;
-
-        if (info != null)
-        {
-            var targetInfo = Helpers.GetPlayer(info.PlayerId)!.GetModInfo();
-
-            //ベイトレポートチェック
-            if (targetInfo?.Role.Role is Roles.Crewmate.Bait && ((targetInfo.MyKiller?.PlayerId ?? byte.MaxValue) == __instance.PlayerId) && targetInfo.Unbox().DeathTimeStamp.ElapsedLessThan(3f))
-                tag = EventDetail.BaitReport;
-        }
-
-        NebulaGameManager.Instance?.GameStatistics.RecordEvent(new GameStatistics.Event(
-            info == null ? GameStatistics.EventVariation.EmergencyButton : GameStatistics.EventVariation.Report, __instance.PlayerId,
-            info == null ? 0 : (1 << info.PlayerId))
-        { RelatedTag = tag });
-    }
-}
+//会議の始まりは MeetingHudExtension.ModStartMeeting で記録する。
+//PlayerControl.StartMeeting は ReportDeadBody のパッチが return false で迂回していて呼ばれない。
 
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.CurrentOutfit), MethodType.Getter)]
 class CurrentOutfitPatch

@@ -27,6 +27,8 @@
 
 # Team
 
+"end.detail.impostor.win" : "インポスター勝利"
+
 "teams.impostor" : "インポスター"
 "end.impostor" : "インポスター%EXTRA%勝利"
 

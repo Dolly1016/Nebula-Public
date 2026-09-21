@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Virial.Assignable;
 using Virial.Events.Game;
 using Virial.Game;
+using static Nebula.Roles.Crewmate.Climber;
 
 namespace Nebula.Roles.Perks;
 
@@ -17,6 +18,7 @@ internal class Hookshot : PerkFunctionalInstance
     bool used = false;
     public Hookshot(PerkDefinition def, PerkInstance instance) : base(def, instance)
     {
+        GamePlayer.LocalPlayer?.AttachAbility(new UseActionBlocker(GamePlayer.LocalPlayer, this));
     }
 
     public override bool HasAction => true;
@@ -31,5 +33,21 @@ internal class Hookshot : PerkFunctionalInstance
     void OnUpdate(GameHudUpdateEvent ev)
     {
         PerkInstance.SetDisplayColor(used ? Color.gray : Color.white);
+    }
+
+    internal class UseActionBlocker : AbstractPlayerAbility, IPlayerAbility
+    {
+        public UseActionBlocker(GamePlayer player, Hookshot hookshotPerk) : base(player)
+        {
+            this.Bind(hookshotPerk);
+        }
+
+        private Crewmate.Climber.Hookshot? hookshot = null;
+        public void SetHookshot(Crewmate.Climber.Hookshot hookshot)
+        {
+            this.hookshot = hookshot;
+        }
+
+        bool IPlayerAbility.BlockUsingUtility => hookshot != null && !hookshot.IsDeadObject && !hookshot.IsDisappearing;
     }
 }

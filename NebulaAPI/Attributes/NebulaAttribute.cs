@@ -151,6 +151,15 @@ public class OnlyHost : Attribute
 }
 
 /// <summary>
+/// イベントリスナとして扱わないメソッドを表します。
+/// </summary>
+[AttributeUsage(AttributeTargets.Method)]
+public class NonEventListener : Attribute
+{
+
+}
+
+/// <summary>
 /// リスナに優先度を設定します。デフォルトの優先度は0で、値が大きいほど優先して実行されます。
 /// </summary>
 [AttributeUsage(AttributeTargets.Method)]

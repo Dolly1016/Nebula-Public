@@ -299,7 +299,9 @@ internal class Amalgam : DefinedRoleTemplate, DefinedRole, DefinedSingleAbilityR
                 ProgressGUI.SmallAssignableNameText(ability.role, "-"),
                 ability.ability.ProgressWidget?.Move(new(0.14f, 0f))
                 )));
-        
+
+        string? IPlayerAbility.MoreInformation => string.Join(", ", abilities.Select(a => a.role.GetRoleIconTag() + a.role.DisplayColoredShort));
+
         static RemoteProcess<(GamePlayer amalgam, DefinedRole role)> RpcAddRole = new("AddRoleAmalgam", (message, _) =>
         {
             if(message.amalgam.TryGetAbility<Ability>(out var ability))

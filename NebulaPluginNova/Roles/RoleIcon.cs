@@ -85,6 +85,17 @@ static public class RoleIcon
 
     static public string GetRoleIconTagSmall(this DefinedAssignable assignable, bool masked = false) => GetRoleIconTag(assignable, masked, 70);
 
+    static public string GetRoleIconTag(this RuntimeAssignable runtime, bool masked = false, int size = 100)
+    {
+        var overridden = runtime.OverriddenRoleIcon;
+        if (overridden.HasValue && RuntimeSpriteGenerator.TryGetIconOwner(overridden.Value.image, out var disguised))
+            return disguised.GetRoleIconTag(masked, size);
+
+        return runtime.Assignable.GetRoleIconTag(masked, size);
+    }
+
+    static public string GetRoleIconTagSmall(this RuntimeAssignable runtime, bool masked = false) => GetRoleIconTag(runtime, masked, 70);
+
     static public string GetTextIconTag(this TextIcon icon) => RuntimeSpriteGenerator.TextIconTag(icon);
 
     static public void UseRoleIcon(this TMPro.TextMeshPro text) => text.spriteAsset = RuntimeSpriteGenerator.SpriteAsset;
@@ -96,7 +107,15 @@ static public class RoleIcon
         const float iconOutlineWidth = 0.45f;
         static private void Preprocess(NebulaPreprocessor preprocessor)
         {
-            CreateSpriteAsset(Roles.AllAssignables().Select(a => (a.GetRoleIcon()?.GetSprite(), GetRoleIconMaterial(a, iconOutlineWidth, 0f), a.InternalName)).ToArray()!);
+            var assignables = Roles.AllAssignables().ToArray();
+
+            foreach (var a in assignables)
+            {
+                var icon = a.GetRoleIcon();
+                if (icon != null) iconOwners.TryAdd(icon, a);
+            }
+
+            CreateSpriteAsset(assignables.Select(a => (a.GetRoleIcon()?.GetSprite(), GetRoleIconMaterial(a, iconOutlineWidth, 0f), a.InternalName, a)).ToArray()!);
             AddTextIcons();
             SpriteAsset.MarkDontUnload();
         }
@@ -183,6 +202,38 @@ static public class RoleIcon
         static private Dictionary<string, int> idMap = [];
         static public string SpriteTagFromAssignable(DefinedAssignable assignable, bool masked, AssignmentType? type) => masked ? $"<sprite name=\"masked_{(type != null ? type.Postfix + "_" : "")}{assignable.InternalName}\">" : $"<sprite name=\"{(type != null ? type.Postfix + "_" : "")}{assignable.InternalName}\">";
 
+        /// <summary>
+        /// スプライトタグの名前から、アトラス上の位置と元の役職を引く対応表。マスク版は含まない。
+        /// </summary>
+        /// <remarks>
+        /// 閲覧画面へアイコンを配るために使う。<see cref="Atlases"/> と組で意味を成す。
+        /// 役職そのものを持たせてあるので、表示名は引く時点の言語で取れる。
+        /// </remarks>
+        static public IReadOnlyDictionary<string, (int sheet, int cell, DefinedAssignable assignable)> IconMap => iconMap;
+        static private readonly Dictionary<string, (int sheet, int cell, DefinedAssignable assignable)> iconMap = [];
+
+        /// <summary>シートの名前。0 番が通常、以降は割り当て種別ごとの色違い。</summary>
+        static public IReadOnlyList<string> SheetNames => sheetNames;
+        static private readonly List<string> sheetNames = [];
+
+        /// <summary>シートごとのアトラス。<see cref="SheetNames"/> と同じ並び。</summary>
+        static public IReadOnlyList<Texture2D> Atlases => atlases;
+        static private readonly List<Texture2D> atlases = [];
+
+        /// <summary>アトラス 1 マスの大きさ（ピクセル）。</summary>
+        static public int IconCellSize => imageSize.x;
+        static public int IconColumns => ImagePerLines;
+        static public int IconRows => ImageLines;
+
+        /// <summary>通常シートの名前。割り当て種別が付かない役職はここに入る。</summary>
+        public const string DefaultSheetName = "default";
+
+        /// <summary>アイコンの画像 → その画像を自分のものとして持つ役職。</summary>
+        static private readonly Dictionary<Image, DefinedAssignable> iconOwners = [];
+
+        /// <summary>その画像を自分のアイコンとして持つ役職。見つからなければ false。</summary>
+        static public bool TryGetIconOwner(Image image, out DefinedAssignable assignable) => iconOwners.TryGetValue(image, out assignable!);
+
         static public TMP_SpriteAsset SpriteAsset { get; private set; } = null!;
         static public TMP_SpriteAsset MaskedAsset { get; private set; } = null!;
 
@@ -200,7 +251,7 @@ static public class RoleIcon
         /// <summary>
         /// Texture2Dのリストからアトラスを作成し、TMP_SpriteAssetを構築する
         /// </summary>
-        static private void CreateSpriteAsset((Sprite sprite, Material material, string name)[] images)
+        static private void CreateSpriteAsset((Sprite sprite, Material material, string name, DefinedAssignable assignable)[] images)
         {
             int layer = 20;
             GameObject holder = UnityHelper.CreateObject("Holder", null, Vector3.zero);
@@ -214,7 +265,7 @@ static public class RoleIcon
 
             RoleIconSheet defaultSheet = new(null!, null);
             RoleIconSheet[] extraSheets = AssignmentType.AllTypes.Select(type => new RoleIconSheet(GetRoleIconMaterial(type.Color.ToUnityColor(), new(1f, 1f, 1f), iconOutlineWidth, 0f), type.Postfix)).ToArray();
-            IEnumerable<RoleIconSheet> allSheets = [defaultSheet, .. extraSheets];
+            RoleIconSheet[] allSheets = [defaultSheet, .. extraSheets];
 
             var glyphList = new List<TMP_SpriteGlyph>();
 
@@ -245,8 +296,13 @@ static public class RoleIcon
                 glyph.metrics = new(rectW, rectH, 0f, rectH * 0.8f, rectW);
                 glyphList.Add(glyph);
 
-                foreach (var sheets in allSheets)
+                for (int sheetIndex = 0; sheetIndex < allSheets.Length; sheetIndex++)
                 {
+                    var sheets = allSheets[sheetIndex];
+
+                    //閲覧画面でこのタグを見つけたとき、どのシートのどのマスを切り取ればよいか。
+                    iconMap[sheets.PrefixNotNull + entry.name] = (sheetIndex, i, entry.assignable);
+
                     TMP_SpriteCharacter character = new(0xf0000 + (uint)i, glyph);
                     character.name = sheets.PrefixNotNull + entry.name;
                     character.glyphIndex = glyph.index;
@@ -281,6 +337,10 @@ static public class RoleIcon
                 atlas.Apply();
                 atlas.MarkDontUnload();
                 atlas.name = "RoleIconAtlas";
+
+                //シートの並びは allSheets と同じ。閲覧画面へはこの並びで配る。
+                sheetNames.Add(sheet.Prefix ?? DefaultSheetName);
+                atlases.Add(atlas);
 
                 RenderTexture.active = null;
 

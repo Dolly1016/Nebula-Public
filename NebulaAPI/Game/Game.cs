@@ -63,7 +63,11 @@ public interface Game : IModuleContainer, ILifespan, IArchivedGame
     /// </summary>
     /// <param name="gameEnd"></param>
     /// <param name="additionalWinners"></param>
-    void RequestGameEnd(GameEnd gameEnd, BitMask<Virial.Game.Player> additionalWinners);
+    /// <param name="preWinnerReason">
+    /// <paramref name="additionalWinners"/> に与える勝利の理由。
+    /// 勝者を先に決めてしまう終了では判定イベントを通らないため、ここで渡します。
+    /// </param>
+    void RequestGameEnd(GameEnd gameEnd, BitMask<Virial.Game.Player> additionalWinners, Virial.Text.CommunicableTextTag? preWinnerReason = null);
     
     internal void SetGameMode(IGameModeModule gameModeModule);
 

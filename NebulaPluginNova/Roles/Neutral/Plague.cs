@@ -23,6 +23,7 @@ using Virial.Game.Console;
 using Virial.Media;
 using Virial.Runtime;
 using static Nebula.Roles.Impostor.Thurifer;
+using Virial.Text;
 
 namespace Nebula.Roles.Neutral;
 
@@ -592,7 +593,7 @@ internal class Plague : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                     {
                         var winners = BitMasks.AsPlayer(MyPlayer);
                         progress.GetDirectlyInfected().Do(p => winners.Add(p));
-                        NebulaGameManager.Instance?.RpcInvokeSpecialWin(NebulaGameEnd.PlagueWin, (int)winners.AsRawPattern);
+                        NebulaGameManager.Instance?.RpcInvokeSpecialWin(NebulaGameEnd.PlagueWin, (int)winners.AsRawPattern, PlagueDetails.Win);
                         sentWinningRequest = true;
                     }
                 }
@@ -678,5 +679,16 @@ public class PlagueInfected : DefinedModifierTemplate, DefinedModifier
         {
             if (AmOwner || canSeeAllInfo) name += MyRole.GetRoleIconTagSmall();
         }
+    }
+}
+
+[NebulaPreprocess(PreprocessPhase.PostRoles)]
+file static class PlagueDetails
+{
+    static internal CommunicableTextTag Win = null!;
+
+    static void Preprocess(NebulaPreprocessor preprocessor)
+    {
+        Win = preprocessor.RegisterCommunicableText("end.detail.plague.win");
     }
 }

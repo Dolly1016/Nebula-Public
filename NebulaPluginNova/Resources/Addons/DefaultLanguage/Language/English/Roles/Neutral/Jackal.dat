@@ -41,6 +41,9 @@
 
 # Team
 
+"end.detail.jackal.win" : "Jackal win"
+"end.detail.jackal.blocked" : "Win blocked by the Jackal role"
+
 "teams.jackal" : "Jackal"
 "end.jackal" : "Team Jackal Wins%EXTRA%"
 

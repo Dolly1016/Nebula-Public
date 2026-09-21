@@ -8,6 +8,8 @@ using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
 using Virial.Media;
+using Virial.Text;
+using Virial.Runtime;
 
 namespace Nebula.Roles.Neutral;
 
@@ -166,7 +168,7 @@ public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignab
                     0f, "ignite", igniteButtonSprite,
                     null, _ => canIgnite && !won);
                 igniteButton.OnClick = (button) => {
-                    NebulaGameManager.Instance.RpcInvokeSpecialWin(NebulaGameEnd.ArsonistWin, 1 << MyPlayer.PlayerId);
+                    NebulaGameManager.Instance.RpcInvokeSpecialWin(NebulaGameEnd.ArsonistWin, 1 << MyPlayer.PlayerId, ArsonistDetails.Win);
                     won = true;
                 };
             }
@@ -224,5 +226,16 @@ public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignab
 
             }
         });
+    }
+}
+
+[NebulaPreprocess(PreprocessPhase.PostRoles)]
+file static class ArsonistDetails
+{
+    static internal CommunicableTextTag Win = null!;
+
+    static void Preprocess(NebulaPreprocessor preprocessor)
+    {
+        Win = preprocessor.RegisterCommunicableText("end.detail.arsonist.win");
     }
 }

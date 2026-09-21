@@ -171,6 +171,7 @@ internal class Climber : DefinedSingleAbilityRoleTemplate<Climber.Ability>, Defi
         {
             NebulaAsset.PlaySE(NebulaAudioClip.Climber1, volume: 1f);
             if(message.player.TryGetAbility<Ability>(out var ability)) ability.SetHookshot(hookshot);
+            if (message.player.TryGetAbility<Perks.Hookshot.UseActionBlocker>(out var perkAbility)) perkAbility.SetHookshot(hookshot);
         }
 
         NebulaManager.Instance.StartDelayAction(message.delay, () =>

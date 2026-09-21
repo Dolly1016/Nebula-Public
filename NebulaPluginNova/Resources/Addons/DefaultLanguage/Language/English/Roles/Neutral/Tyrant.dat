@@ -38,6 +38,9 @@
 
 # Team
 
+"end.detail.tyrant.win" : "Tyrant win"
+"end.detail.tyrant.missed" : "Every killer gone before the kill count was met"
+
 "teams.tyrant" : "Tyrant"
 "end.tyrant" : "Tyrant Wins %EXTRA%"
 

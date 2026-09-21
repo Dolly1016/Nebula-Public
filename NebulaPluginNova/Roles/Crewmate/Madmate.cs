@@ -135,10 +135,13 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignabl
         bool RuntimeRole.CheckGuessAbility(DefinedRole abilityRole) => abilityRole == MyMadden || abilityRole == MyRole;
 
         [OnlyMyPlayer]
-        void CheckWins(PlayerCheckWinEvent ev) => ev.IsWin |= ev.GameEnd == NebulaGameEnd.ImpostorWin;
+        void CheckWins(PlayerCheckWinEvent ev)
+        {
+            if (ev.SetWinIf(ev.GameEnd == NebulaGameEnd.ImpostorWin)) ev.Recorder.AddReason(ev.Player.PlayerId, MadmateDetails.Win);
+        }
 
         [OnlyMyPlayer]
-        void BlockWins(PlayerBlockWinEvent ev) => ev.IsBlocked |= ev.GameEnd == NebulaGameEnd.CrewmateWin;
+        void BlockWins(PlayerBlockWinEvent ev) => ev.SetBlockedIf(ev.GameEnd == NebulaGameEnd.CrewmateWin);
 
         void SetMadmateTask()
         {
@@ -287,3 +290,20 @@ public class Madmate : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignabl
     }
 }
 
+
+/// <summary>
+/// Madmate の勝敗の理由。
+/// </summary>
+/// <remarks>
+/// 役職クラスは Roles フェーズで読み込まれるため、翻訳タグの登録はこちらへ分けている。
+/// </remarks>
+[NebulaPreprocess(PreprocessPhase.PostRoles)]
+file static class MadmateDetails
+{
+    static internal CommunicableTextTag Win = null!;
+
+    static void Preprocess(NebulaPreprocessor preprocessor)
+    {
+        Win = preprocessor.RegisterCommunicableText("end.detail.madmate.win");
+    }
+}

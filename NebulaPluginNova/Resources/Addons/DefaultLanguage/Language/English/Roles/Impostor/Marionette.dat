@@ -34,6 +34,7 @@
 # Game
 
 "gameAction.marionette.placement" : "Doll Placement"
+"fakePlayer.marionette" : "Marionette's decoy"
 
 # UI
 

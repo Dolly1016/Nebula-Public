@@ -27,6 +27,8 @@ using Il2CppInterop.Runtime.Attributes;
 using Virial.Events.Game.Minimap;
 using Virial.Utilities;
 using Nebula.Modules.Cosmetics;
+using Virial.Runtime;
+using Virial.Text;
 
 namespace Nebula.Roles.Neutral;
 
@@ -557,10 +559,13 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole, IAssignableDocument
         bool Won => !MyPlayer.IsDead && CanWinForGuage;
         void OnCheckGameEnd(EndCriteriaMetEvent ev)
         {
-            if (Won && ev.EndReason != GameEndReason.Sabotage) ev.TryOverwriteEnd(NebulaGameEnd.SpectreWin, GameEndReason.Special);
+            if (Won && ev.OriginalEndReason != GameEndReason.Sabotage) ev.TryOverwriteEnd(NebulaGameEnd.SpectreWin, GameEndReason.Special);
         }
 
-        void CheckWins(PlayerCheckWinEvent ev) => ev.SetWinIf(ev.GameEnd == NebulaGameEnd.SpectreWin && Won && IsSameTeam(ev.Player));
+        void CheckWins(PlayerCheckWinEvent ev)
+        {
+            if (ev.SetWinIf(ev.GameEnd == NebulaGameEnd.SpectreWin && Won && IsSameTeam(ev.Player))) ev.Recorder.AddReason(ev.Player.PlayerId, SpectreDetails.Win);
+        }
 
 
         //キラー役職に矢印を付ける
@@ -785,3 +790,14 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole, IAssignableDocument
     }
 
 }    
+
+[NebulaPreprocess(PreprocessPhase.PostRoles)]
+file static class SpectreDetails
+{
+    static internal CommunicableTextTag Win = null!;
+
+    static void Preprocess(NebulaPreprocessor preprocessor)
+    {
+        Win = preprocessor.RegisterCommunicableText("end.detail.spectre.win");
+    }
+}

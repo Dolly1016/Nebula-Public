@@ -44,3 +44,7 @@
 "achievement.extraMission.challenge.title" : "Each One's Motive"
 "achievement.extraMission.challenge.goal" : "The extra mission target dies, and you survive<br>while being designated as someone else's extra mission target, then win."
 "achievement.extraMission.challenge.splitted.0" : "Each One's "
+
+# Team
+
+"end.detail.extraMission.blocked" : "Target survived"

@@ -41,6 +41,9 @@
 
 # Team
 
+"end.detail.jackal.win" : "ジャッカル勝利"
+"end.detail.jackal.blocked" : "ジャッカルの役職による勝利ブロック"
+
 "teams.jackal" : "ジャッカル"
 "end.jackal" : "ジャッカル%EXTRA%勝利"
 

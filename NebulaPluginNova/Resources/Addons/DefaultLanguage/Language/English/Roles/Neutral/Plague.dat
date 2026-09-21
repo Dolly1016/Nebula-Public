@@ -60,6 +60,8 @@
 
 # Team
 
+"end.detail.plague.win" : "Plague and directly infected win"
+
 "teams.plague" : "Plague"
 "end.plague" : "Plague Wins%EXTRA%"
 

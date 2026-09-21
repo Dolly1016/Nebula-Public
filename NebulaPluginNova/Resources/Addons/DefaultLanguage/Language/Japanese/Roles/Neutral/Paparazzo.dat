@@ -75,6 +75,11 @@
 
 # Team
 
+"end.detail.paparazzo.win" : "パパラッチ勝利"
+"end.detail.paparazzo.missed.subjects" : "撮影対象数不足"
+"end.detail.paparazzo.missed.disclosed" : "開示対象数不足"
+"end.detail.paparazzo.missed.photos" : "開示枚数不足"
+
 "teams.paparazzo" : "パパラッチ"
 "end.paparazzo" : "パパラッチ%EXTRA%勝利"
 

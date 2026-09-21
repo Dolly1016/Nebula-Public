@@ -5,6 +5,8 @@ using Virial.Game;
 using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
+using Virial.Runtime;
+using Virial.Text;
 
 namespace Nebula.Roles.Ghost.Neutral;
 
@@ -182,7 +184,7 @@ public class Grudge : DefinedGhostRoleTemplate, DefinedGhostRole
 
             if (canWin)
             {
-                ev.SetWin(true);
+                if (ev.SetWin(true)) ev.Recorder.AddReason(ev.Player.PlayerId, GrudgeDetails.Extra);
                 ev.ExtraWinMask.Add(NebulaGameEnd.ExtraGrudgeWin);
             }
         }
@@ -216,5 +218,16 @@ public class Grudge : DefinedGhostRoleTemplate, DefinedGhostRole
                 var grudge = message.GhostRole as Grudge.Instance;
                 if (grudge != null) grudge.canWin = true;
             });
+    }
+}
+
+[NebulaPreprocess(PreprocessPhase.PostRoles)]
+file static class GrudgeDetails
+{
+    static internal CommunicableTextTag Extra = null!;
+
+    static void Preprocess(NebulaPreprocessor preprocessor)
+    {
+        Extra = preprocessor.RegisterCommunicableText("end.detail.grudge.extra");
     }
 }

@@ -1,0 +1,76 @@
+@charset "utf-8";
+
+:root {
+  --t-html-lang: "ja";
+  --t-page-title: "Nebula on the Ship \2014 Game Result Viewer";
+
+  /* サイドバー */
+  --t-app-title: "ゲームデータ";
+  --t-action-reload: "再読み込み";
+  --t-filter-group: "表示するデータ";
+  --t-filter-all: "すべて";
+  --t-filter-marked: "マーク済み";
+  --t-list-label: "過去のゲーム";
+  --t-list-limit: "マークしない限り、最新{0}件以降は削除されます。";
+  --t-list-empty: "まだデータがありません。";
+  --t-list-empty-marked: "マークしたデータはありません。";
+
+  /* 本体 */
+  --t-status-loading: "読み込み中";
+  --t-status-empty: "まだデータがありません。ゲームを 1 回終わらせると保存されます。";
+  --t-fact-started: "開始時刻";
+  --t-fact-ended: "終了時刻";
+  --t-fact-map: "マップ";
+  --t-fact-host: "ホスト";
+  --t-fact-win: "勝利";
+  --t-action-mark: "マークして残す";
+  --t-action-unmark: "マークを外す";
+  --t-action-detail: "勝敗の詳細を見る";
+  --t-result-none: "（勝敗の記録なし）";
+
+  /* 移動経路 */
+  --t-route-title: "移動経路";
+  --t-route-show: "表示";
+  --t-route-show-alive: "生存者";
+  --t-route-show-ghosts: "幽霊";
+  --t-route-fake: "理由不明のFakePlayer";
+  --t-route-fake-owner: "{0}が召喚";
+  --t-route-segment-group: "表示する区切り";
+  --t-route-turn: "ターン {0}";
+  --t-route-meeting: "会議 {0}";
+  --t-route-no-events: "ここで起きたことは記録されていません。";
+  --t-route-play: "再生";
+  --t-route-pause: "一時停止";
+  --t-route-seek: "時間";
+  --t-route-empty: "移動の記録がありません。";
+
+  /* 勝敗の詳細 */
+  --t-action-close: "閉じる";
+  --t-detail-title: "ゲーム結果詳細";
+  --t-detail-players: "プレイヤー";
+  --t-detail-col-win: "勝敗";
+  --t-detail-col-player: "プレイヤー";
+  --t-detail-col-role: "役職";
+  --t-detail-col-task: "タスク";
+  --t-detail-col-state: "状態";
+  --t-detail-history: "勝敗判定";
+  --t-badge-win: "WIN";
+  --t-badge-host: "ホスト";
+  --t-badge-disconnected: "切断";
+  --t-state-alive: "生存";
+  --t-state-dead: "死亡";
+  --t-state-killer: "by {0}";
+  --t-player-unknown: "不明";
+
+  /* 経緯 */
+  --t-stage-first: "発生した勝利";
+  --t-stage-usurped: "乗っ取り勝利 {0}";
+  --t-stage-final: "最終";
+  --t-stage-reason: "終了理由: {0}";
+
+  /* 失敗したとき */
+  --t-error-detail: "詳細を表示できませんでした。再読み込みしても直らない場合はこのメッセージを開発者に伝えてください。";
+  --t-error-record: "データを読み込めませんでした。（{0}）";
+  --t-error-load: "データを読み込めませんでした。ゲーム側のサーバーが止まっているかもしれません。（{0}）";
+  --t-error-mark: "マークを変更できませんでした。（{0}）";
+}

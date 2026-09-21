@@ -234,7 +234,7 @@ internal class Sculptor : DefinedSingleAbilityRoleTemplate<Sculptor.Ability>, De
             var path = NavVerticesHelpers.CalcPath(MyPlayer.TruePosition, to);
             if (path == null) return false;
 
-            var decoy = FakePlayerController.SpawnSyncFakePlayer(GamePlayer.GetPlayer(playerId)!, new(MyPlayer.Position, KillCharacteristics.Disappear, true, true, false, null, new(outfit, "SculptorDecoy", OutfitPriority.FakeSpecialOutfit, true))).BindLifespan(this);
+            var decoy = FakePlayerController.SpawnSyncFakePlayer(GamePlayer.GetPlayer(playerId)!, new(MyPlayer.Position, KillCharacteristics.Disappear, true, true, false, null, new(outfit, "SculptorDecoy", OutfitPriority.FakeSpecialOutfit, true), SculptorFakePlayerDetails.Reason)).BindLifespan(this);
             myDecoysLocal.Add(decoy);
             if (myDecoysLocal.Count(d => d.IsActive) > GamePlayer.AllPlayers.Count(p => !p.IsDead)) new StaticAchievementToken("sculptor.common3");
             NebulaManager.Instance.StartCoroutine(
@@ -271,5 +271,16 @@ internal class Sculptor : DefinedSingleAbilityRoleTemplate<Sculptor.Ability>, De
             }
             myDecoysLocal.Remove(decoy);
         }
+    }
+}
+
+[Virial.Attributes.NebulaPreprocess(Virial.Attributes.PreprocessPhase.PostRoles)]
+file static class SculptorFakePlayerDetails
+{
+    static internal Virial.Text.CommunicableTextTag Reason = null!;
+
+    static void Preprocess(Virial.Runtime.NebulaPreprocessor preprocessor)
+    {
+        Reason = preprocessor.RegisterCommunicableText("fakePlayer.sculptor");
     }
 }

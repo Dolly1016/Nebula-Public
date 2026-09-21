@@ -5,6 +5,24 @@
 
 "end.status.noWinners" : "No Winners"
 
+# Game End
+
+"end.reason.task" : "Tasks"
+"end.reason.situation" : "Player Count"
+"end.reason.specialSituation" : "Player Count"
+"end.reason.special" : "Special"
+"end.reason.sabotage" : "Sabotage"
+"end.phase.checkWin" : "Win Check"
+"end.phase.blockWin" : "Win Block"
+"end.phase.extraWin0" : "Extra Win Phase"
+"end.phase.extraWin1" : "Extra Win Phase"
+"end.phase.extraWin2" : "Extra Win Phase"
+"end.phase.extraWin3" : "Extra Win Phase"
+"end.phase.extraWin4" : "Extra Win Phase"
+"end.phase.extraWin5" : "Extra Win Phase"
+"end.phase.extraWin6" : "Extra Win Phase"
+"end.phase.extraWin7" : "Extra Win Phase"
+
 # No Team Statictics
 
 "statistics.events.startGame" : "Game Start"

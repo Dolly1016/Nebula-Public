@@ -59,6 +59,10 @@
 
 # Team
 
+"end.detail.trilemma.win" : "トリレンマ勝利"
+"end.detail.trilemma.extra" : "トリレンマ追加勝利"
+"end.detail.trilemma.blocked" : "トリレンマ脱落ブロック"
+
 "end.trilemma" : "トリレンマ%EXTRA%勝利"
 "end.extra.trilemma" : " <color=#FFFFFF>+</color> トリレンマ"
 

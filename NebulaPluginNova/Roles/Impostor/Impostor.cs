@@ -8,6 +8,8 @@ using Virial.DI;
 using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Runtime;
+using Virial.Text;
 
 namespace Nebula.Roles.Impostor;
 
@@ -42,9 +44,18 @@ public class Impostor : DefinedRoleTemplate, DefinedRole
 public class ImpostorGameRule : AbstractModule<IGameModeStandard>, IGameOperator
 {
     static ImpostorGameRule() => DIManager.Instance.RegisterModule(() => new ImpostorGameRule());
+    static private CommunicableTextTag ImpostorWinDetail = null!;
+
+    static void Preprocess(NebulaPreprocessor preprocessor)
+    {
+        ImpostorWinDetail = preprocessor.RegisterCommunicableText("end.detail.impostor.win");
+    }
 
     public ImpostorGameRule() => this.RegisterPermanently();
-    void CheckWins(PlayerCheckWinEvent ev) => ev.SetWinIf(ev.Player.IsImpostor && ev.GameEnd == NebulaGameEnd.ImpostorWin);  
+    void CheckWins(PlayerCheckWinEvent ev)
+    {
+        if (ev.SetWinIf(ev.Player.IsImpostor && ev.GameEnd == NebulaGameEnd.ImpostorWin)) ev.Recorder.AddReason(ev.Player.PlayerId, ImpostorWinDetail);
+    }
     
     void DecoratePlayerColor(PlayerDecorateNameEvent ev)
     {

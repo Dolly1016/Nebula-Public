@@ -4,6 +4,8 @@ using Virial.DI;
 using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Runtime;
+using Virial.Text;
 
 namespace Nebula.Roles.Crewmate;
 
@@ -34,8 +36,21 @@ public class Crewmate : DefinedRoleTemplate, DefinedRole
 public class CrewmateGameRule : AbstractModule<IGameModeStandard>, IGameOperator
 {
     static CrewmateGameRule() => DIManager.Instance.RegisterModule(() => new CrewmateGameRule());
+    static private CommunicableTextTag CrewmateDetail;
+
+    static void Preprocess(NebulaPreprocessor preprocessor)
+    {
+        CrewmateDetail = preprocessor.RegisterCommunicableText("end.detail.crewmate.win");
+    }
+
     public CrewmateGameRule() => this.RegisterPermanently();
-    void CheckWins(PlayerCheckWinEvent ev) => ev.SetWinIf(ev.Player.Role.Role.Category == RoleCategory.CrewmateRole && ev.GameEnd == NebulaGameEnd.CrewmateWin);
+    void CheckWins(PlayerCheckWinEvent ev)
+    {
+        if(ev.SetWinIf(ev.Player.IsTrueCrewmate && ev.GameEnd == NebulaGameEnd.CrewmateWin))
+        {
+            ev.Recorder.AddReason(ev.Player.PlayerId, CrewmateDetail);
+        }
+    }
 
     [OnlyHost]
     void CheckExileWin(GameUpdateEvent ev)

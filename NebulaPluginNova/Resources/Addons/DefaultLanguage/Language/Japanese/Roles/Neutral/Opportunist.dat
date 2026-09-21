@@ -89,5 +89,9 @@
 
 # Team
 
+"end.detail.opportunist.win" : "オポチュニスト追加勝利"
+"end.detail.opportunist.missed.task" : "オポチュニストのタスク未遂"
+"end.detail.opportunist.missed.dead" : "オポチュニスト死亡"
+
 "teams.opportunist" : "オポチュニスト"
 "end.extra.opportunist" : " <color=#FFFFFF>+</color> オポチュニスト"

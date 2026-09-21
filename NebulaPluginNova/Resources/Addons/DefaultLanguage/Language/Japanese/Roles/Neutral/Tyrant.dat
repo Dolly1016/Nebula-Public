@@ -38,6 +38,9 @@
 
 # Team
 
+"end.detail.tyrant.win" : "タイラント勝利"
+"end.detail.tyrant.missed" : "キル数不足のまま他のキル陣営全滅"
+
 "teams.tyrant" : "タイラント"
 "end.tyrant" : "タイラント%EXTRA%勝利"
 

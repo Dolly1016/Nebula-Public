@@ -5,6 +5,25 @@
 
 "end.status.noWinners" : "勝者なし"
 
+# Game End
+
+"end.reason.task" : "タスク"
+"end.reason.situation" : "人数都合"
+"end.reason.specialSituation" : "人数都合"
+"end.reason.special" : "特殊"
+"end.reason.sabotage" : "サボタージュ"
+"end.phase.checkWin" : "勝利判定"
+"end.phase.blockWin" : "勝利ブロック"
+"end.phase.extraWin0" : "追加勝利フェーズ 1"
+"end.phase.extraWin1" : "追加勝利フェーズ 2"
+"end.phase.extraWin2" : "追加勝利フェーズ 3"
+"end.phase.extraWin3" : "追加勝利フェーズ 4"
+"end.phase.extraWin4" : "追加勝利フェーズ 5"
+"end.phase.extraWin5" : "追加勝利フェーズ 6"
+"end.phase.extraWin6" : "追加勝利フェーズ 7"
+"end.phase.extraWin7" : "追加勝利フェーズ 8"
+"end.browser" : "ウェブブラウザで詳細な結果を確認"
+
 # No Team Statictics
 
 "statistics.events.startGame" : "ゲーム開始"

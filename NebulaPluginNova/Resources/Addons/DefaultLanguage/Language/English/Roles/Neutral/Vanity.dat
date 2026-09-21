@@ -53,6 +53,9 @@
 
 # Team
 
+"end.detail.vanity.win" : "Vanity solo win"
+"end.detail.vanity.extra" : "Vanity extra win"
+
 "teams.vanity" : "Vanity"
 "end.vanity" : "Vanity Wins %EXTRA%"
 "end.extra.vanity" : " <color=#FFFFFF>with</color> Vanity"

@@ -12,6 +12,8 @@ using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Game;
+using Virial.Runtime;
+using Virial.Text;
 
 namespace Nebula.Roles.Neutral;
 
@@ -132,11 +134,16 @@ internal class Opportunist : DefinedRoleTemplate, HasCitation, DefinedRole
         void CheckExtraWins(PlayerCheckExtraWinEvent ev)
         {
             if (ev.Phase != ExtraWinCheckPhase.OpportunistPhase) return;
-            if(MyPlayer.IsAlive && MyPlayer.Tasks.TotalCompleted > 0 && MyPlayer.Tasks.IsCompletedTotalTasks)
+
+            var completedTasks = MyPlayer.Tasks.TotalCompleted > 0 && MyPlayer.Tasks.IsCompletedTotalTasks;
+
+            if (MyPlayer.IsAlive && completedTasks)
             {
                 ev.ExtraWinMask.Add(NebulaGameEnd.ExtraOpportunistWin);
-                ev.IsExtraWin = true;
+                if (ev.SetWin(true)) ev.Recorder.AddReason(ev.Player.PlayerId, OpportunistDetails.Win);
             }
+            else if (MyPlayer.IsAlive) ev.Recorder.AddReason(ev.Player.PlayerId, OpportunistDetails.MissedTask);
+            else if (completedTasks) ev.Recorder.AddReason(ev.Player.PlayerId, OpportunistDetails.MissedDead);
         }
 
         [Local]
@@ -323,4 +330,17 @@ internal class Opportunist : DefinedRoleTemplate, HasCitation, DefinedRole
         ];
 }
 
+[NebulaPreprocess(PreprocessPhase.PostRoles)]
+file static class OpportunistDetails
+{
+    static internal CommunicableTextTag Win = null!;
+    static internal CommunicableTextTag MissedTask = null!;
+    static internal CommunicableTextTag MissedDead = null!;
 
+    static void Preprocess(NebulaPreprocessor preprocessor)
+    {
+        Win = preprocessor.RegisterCommunicableText("end.detail.opportunist.win");
+        MissedTask = preprocessor.RegisterCommunicableText("end.detail.opportunist.missed.task");
+        MissedDead = preprocessor.RegisterCommunicableText("end.detail.opportunist.missed.dead");
+    }
+}

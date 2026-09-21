@@ -53,6 +53,9 @@
 
 # Team
 
+"end.detail.vanity.win" : "ヴァニティ単独勝利"
+"end.detail.vanity.extra" : "ヴァニティ追加勝利"
+
 "teams.vanity" : "ヴァニティ"
 "end.vanity" : "ヴァニティ%EXTRA%勝利"
 "end.extra.vanity" : " <color=#FFFFFF>+</color> ヴァニティ"
