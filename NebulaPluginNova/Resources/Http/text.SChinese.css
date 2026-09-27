@@ -1,0 +1,76 @@
+@charset "utf-8";
+
+:root {
+  --t-html-lang: "sc";
+  --t-page-title: "Nebula on the Ship 历史对局回顾";
+
+  /* 侧边栏 */
+  --t-app-title: "游戏数据";
+  --t-action-reload: "刷新";
+  --t-filter-group: "数据筛选";
+  --t-filter-all: "全部";
+  --t-filter-marked: "已标记";
+  --t-list-label: "历史对局";
+  --t-list-limit: "未标记对局仅保留最新{0}条，超出部分将自动删除。";
+  --t-list-empty: "暂无数据";
+  --t-list-empty-marked: "暂无标记的数据";
+
+  /* 主内容区 */
+  --t-status-loading: "加载中";
+  --t-status-empty: "暂无对局数据，完成一局游戏后将自动保存。";
+  --t-fact-started: "开始时间";
+  --t-fact-ended: "结束时间";
+  --t-fact-map: "地图";
+  --t-fact-host: "主持人";
+  --t-fact-win: "胜利";
+  --t-action-mark: "标记并保留";
+  --t-action-unmark: "取消标记";
+  --t-action-detail: "查看胜负详情";
+  --t-result-none: "（无胜负记录）";
+
+  /* 移动路径 */
+  --t-route-title: "移动路径";
+  --t-route-show: "显示";
+  --t-route-show-alive: "存活玩家";
+  --t-route-show-ghosts: "鬼魂";
+  --t-route-fake: "假人（未知原因）";
+  --t-route-fake-owner: "由{0}召唤";
+  --t-route-segment-group: "显示分段";
+  --t-route-turn: "第{0}回合";
+  --t-route-meeting: "第{0}次会议";
+  --t-route-no-events: "此处无记录";
+  --t-route-play: "播放";
+  --t-route-pause: "暂停";
+  --t-route-seek: "进度";
+  --t-route-empty: "暂无移动记录";
+
+  /* 胜负详情 */
+  --t-action-close: "关闭";
+  --t-detail-title: "对局详情";
+  --t-detail-players: "玩家";
+  --t-detail-col-win: "胜负";
+  --t-detail-col-player: "玩家";
+  --t-detail-col-role: "职业";
+  --t-detail-col-task: "任务";
+  --t-detail-col-state: "状态";
+  --t-detail-history: "胜负判定";
+  --t-badge-win: "胜利";
+  --t-badge-host: "主持人";
+  --t-badge-disconnected: "掉线";
+  --t-state-alive: "存活";
+  --t-state-dead: "死亡";
+  --t-state-killer: "被{0}击杀";
+  --t-player-unknown: "未知";
+
+  /* 胜负判定 */
+  --t-stage-first: "首次胜负判定";
+  --t-stage-usurped: "胜负改判 {0}";
+  --t-stage-final: "最终结果";
+  --t-stage-reason: "结束原因：{0}";
+
+  /* 错误提示 */
+  --t-error-detail: "无法加载详情。若刷新后仍未解决，请将此错误信息反馈给开发者。";
+  --t-error-record: "数据加载失败。（{0}）";
+  --t-error-load: "数据加载失败，可能是游戏服务端未运行。（{0}）";
+  --t-error-mark: "标记状态修改失败。（{0}）";
+}
