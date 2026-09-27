@@ -504,6 +504,12 @@ public class BalloonConsole : NebulaSyncStandardObject{
 
     public const string MyTag = "WhammyConsole";
     public CustomConsole Console { get; private set; }
+
+    public override void OnInstantiated()
+    {
+        base.OnInstantiated();
+        ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance?.Spawn(Nebula.Game.Statistics.MapObjectKinds.SlingshotConsole, Position, id: ObjectId);
+    }
     static BalloonConsole() => NebulaSyncObject.RegisterInstantiater(MyTag, (args) => new BalloonConsole(new(args[0], args[1])));
 
 }
@@ -513,7 +519,7 @@ public class BalloonConsole : NebulaSyncStandardObject{
 public class BalloonManager : AbstractModule<Virial.Game.Game>, IGameOperator
 {
     static public readonly MultiImage BalloonTrapSprite = DividedSpriteLoader.FromResource("Nebula.Resources.Balloon.ConsoleBalloon.png", 100f, 4, 1).SetPivot(new(0.025f,0.15f));
-    private record TrappedConsole(Console Console, SpriteRenderer Animator);
+    private record TrappedConsole(Console Console, SpriteRenderer Animator, int TrackerId);
     private List<TrappedConsole> localTrappedConsoles = [];
 
     static BalloonManager() => DIManager.Instance.RegisterModule(() => new BalloonManager());
@@ -570,7 +576,7 @@ public class BalloonManager : AbstractModule<Virial.Game.Game>, IGameOperator
     }
 
     public bool ConsoleHasTrap(Console console) => localTrappedConsoles.Any(c => c.Console.GetInstanceIdFast() == console.GetInstanceIdFast());
-    public void EntrapToConsole(Console console) {
+    public void EntrapToConsole(Console console, int trackerId = 0) {
         bool flip = console!.transform.GetPositionFast().x > GamePlayer.LocalPlayer!.Position.x;
         VVector3 pos = GetConsoleBalloonPos(console, ref flip);
 
@@ -578,14 +584,27 @@ public class BalloonManager : AbstractModule<Virial.Game.Game>, IGameOperator
         var scale = renderer.transform.lossyScale;
         
         renderer.transform.localScale = new((flip ? -1f : 1f) / scale.x, 1f / scale.y, 1f);
-        localTrappedConsoles.Add(new(console, renderer));
+        localTrappedConsoles.Add(new(console, renderer, trackerId));
     }
 
     private void ReleaseTrap(TrappedConsole console)
     {
         GameObject.Destroy(console.Animator.gameObject);
         localTrappedConsoles.Remove(console);
+
+        if (console.TrackerId != 0) RpcReleaseConsoleTrap.Invoke(console.TrackerId);
     }
+
+    /// <summary>
+    /// コンソールに風船を仕掛けたことを知らせる。仕掛けた本人だけが送る。
+    /// </summary>
+    /// <remarks>仕掛けは本人の手元にしか無いので、記録の上でも見えていない扱いにする。</remarks>
+    static internal readonly RemoteProcess<(int trackerId, VVector2 position)> RpcEntrapConsole = new("EntrapConsole",
+        (message, _) => ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance?.Spawn(
+            Nebula.Game.Statistics.MapObjectKinds.BalloonTrap, message.position, hidden: true, id: message.trackerId));
+
+    static internal readonly RemoteProcess<int> RpcReleaseConsoleTrap = new("ReleaseConsoleTrap",
+        (message, _) => ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance?.Find(message)?.Despawn());
 
     static private readonly RemoteProcess<(GamePlayer player, GamePlayer whammy)> RpcBalloon = new("SetBalloon",
         (message, _) => {
@@ -1307,7 +1326,9 @@ public class Whammy : DefinedSingleAbilityRoleTemplate<Whammy.Ability>, DefinedR
                 {
                     this.leftBalloons--;
                     StatsBalloon.Progress(1);
-                    ModSingleton<BalloonManager>.Instance.EntrapToConsole(consoleTracker.CurrentTarget!);
+                    var balloonTrackerId = ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance?.IssueSharedId() ?? 0;
+                    ModSingleton<BalloonManager>.Instance.EntrapToConsole(consoleTracker.CurrentTarget!, balloonTrackerId);
+                    BalloonManager.RpcEntrapConsole.Invoke((balloonTrackerId, (VVector2)consoleTracker.CurrentTarget!.transform.GetPositionFast()));
                     acAnother1Token.Value.usedAbility = true;
 
                     NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, GameActionTypes.WhammyPlacementAction);

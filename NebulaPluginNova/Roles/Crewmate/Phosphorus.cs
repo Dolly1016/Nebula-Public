@@ -3,6 +3,7 @@ using Virial;
 using Virial.Assignable;
 using Virial.Configuration;
 using Virial.Events.Game.Meeting;
+using Virial.Events.Player;
 using Virial.Game;
 using Virial.Helpers;
 
@@ -63,6 +64,24 @@ public class Phosphorus : DefinedSingleAbilityRoleTemplate<Phosphorus.Ability>, 
         private int[]? globalLanterns = null;
         List<NebulaSyncStandardObject> localLanterns = null!;
 
+        /// <summary>記録の上でのランタンの識別子。置いた時のものを最後まで使う。</summary>
+        /// <remarks>全体へ公開する時に別の識別子が振り直されるが、記録はこちらで通す。</remarks>
+        private readonly List<int> lanternIds = [];
+
+        /// <summary>
+        /// 置いたことが伝わると、全クライアントで同じ識別子の記録が立つ。
+        /// </summary>
+        [OnlyMyPlayer]
+        void OnPlaceLantern(PlayerDoGameActionEvent ev)
+        {
+            if (ev.ActionType.Id != GameActionTypes.LanternPlacementAction.Id) return;
+            if (ev.Argument == null) return;
+
+            //置いた直後は本人にしか見えない。
+            ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance?.Spawn(
+                Nebula.Game.Statistics.MapObjectKinds.Lantern, ev.Position, hidden: true, id: ev.Argument.Value);
+        }
+
         public Ability(GamePlayer player, bool isUsurped, int[] arguments) : base(player, isUsurped)
         {
             if (arguments.Length > 0) globalLanterns = arguments;
@@ -79,6 +98,7 @@ public class Phosphorus : DefinedSingleAbilityRoleTemplate<Phosphorus.Ability>, 
                 lanternButton.OnEffectStart = (button) =>
                 {
                     CombinedRemoteProcess.CombinedRPC.Invoke(false, globalLanterns!.Select((id)=>RpcLantern.GetInvoker(id)).ToArray());
+                    RpcUpdateLantern.Invoke((lanternIds.ToArray(), true, true));
 
                     StatsLighting.Progress();
                     if (acTokenChallenge == null)
@@ -88,7 +108,11 @@ public class Phosphorus : DefinedSingleAbilityRoleTemplate<Phosphorus.Ability>, 
                         if (lanterns.Any(l => deadBodies.Any(d => d.TruePosition.Distance(l.Position) < 0.8f))) acTokenChallenge = new("phosphorus.challenge");
                     }
                 };
-                lanternButton.OnEffectEnd = (button) => lanternButton.StartCoolDown();
+                lanternButton.OnEffectEnd = (button) =>
+                {
+                    RpcUpdateLantern.Invoke((lanternIds.ToArray(), true, false));
+                    lanternButton.StartCoolDown();
+                };
 
                 int left = NumOfLampsOption;
 
@@ -98,9 +122,12 @@ public class Phosphorus : DefinedSingleAbilityRoleTemplate<Phosphorus.Ability>, 
                 placeButton.OnClick = (button) => {
                     var pos = AmongUsLLImpl.LocalPlayer.GetTruePosition();
                     
-                    NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, pos, GameActionTypes.LanternPlacementAction);
+                    //手元の識別子を添えて知らせる。記録はこの番号で最後まで通す。
+                    var placed = NebulaSyncObject.LocalInstantiate(Lantern.MyLocalTag, new float[] { pos.x, pos.y });
+                    lanternIds.Add(placed.ObjectId);
+                    NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, pos, GameActionTypes.LanternPlacementAction, placed.ObjectId);
 
-                    localLanterns.Add((NebulaSyncObject.LocalInstantiate(Lantern.MyLocalTag, new float[] { pos.x, pos.y }).SyncObject as NebulaSyncStandardObject)!);
+                    localLanterns.Add((placed.SyncObject as NebulaSyncStandardObject)!);
 
                     left--;
                     placeButton.UpdateUsesIcon(left.ToString());
@@ -126,12 +153,34 @@ public class Phosphorus : DefinedSingleAbilityRoleTemplate<Phosphorus.Ability>, 
                     NebulaSyncObject.LocalDestroy(localLanterns[i].ObjectId);
                 }
                 localLanterns = null!;
+
+                //全体へ公開したので、ここから先は周りにも見える。
+                RpcUpdateLantern.Invoke((lanternIds.ToArray(), true, false));
             }
         }
 
       
 
     }
+
+    /// <summary>
+    /// ランタンのありさまを知らせる。置いた本人だけが送る。
+    /// </summary>
+    static readonly RemoteProcess<(int[] lanternIds, bool visible, bool lit)> RpcUpdateLantern = new("UpdateLantern",
+        (message, _) =>
+        {
+            var recorder = ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance;
+            if (recorder == null) return;
+
+            foreach (var id in message.lanternIds)
+            {
+                var tracker = recorder.Find(id);
+                if (tracker == null) continue;
+
+                tracker.SetHidden(!message.visible);
+                tracker.SetStage(message.lit ? 1 : 0);
+            }
+        });
 
     public static RemoteProcess<int> RpcLantern = new(
       "Lantern",

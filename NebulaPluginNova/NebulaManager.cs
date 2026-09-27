@@ -576,6 +576,9 @@ public class NebulaManager : MonoBehaviour
 
                 if (Input.GetKeyDown(KeyCode.K))
                 {
+                    LogUtils.WriteToConsole("BepInExRootPath: " + BepInEx.Paths.BepInExRootPath);
+                    LogUtils.WriteToConsole("GameRootPath: " + BepInEx.Paths.GameRootPath);
+                    LogUtils.WriteToConsole("GameDataPath: " + BepInEx.Paths.GameDataPath);
                     /*
                     IEnumerator CoCheck()
                     {
@@ -656,9 +659,9 @@ public class NebulaManager : MonoBehaviour
                     CoCheck().StartOnScene();
                     */
 
-                    
+
                     //new FunctionBlock(HudManager.Instance.transform, new(0f,0f,-100f));
-                    
+
 
 
                     /*

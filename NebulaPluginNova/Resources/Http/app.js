@@ -194,13 +194,6 @@ const RoleIcons = (() => {
  * その会議で起きたことを並べる。マップの色でどちらを見ているかが分かるようにしてある。
  */
 const RouteViewer = (() => {
-  /** GameStatistics.EventVariation の Id。 */
-  const VARIATION = { GAME_START: 2, GAME_END: 3, MEETING_END: 4, REPORT: 5, EMERGENCY: 6 };
-
-  /** 区切りの境目になる出来事。ゲーム開始・会議開始・会議終了・ゲーム終了。 */
-  const TURN_STARTERS = new Set([VARIATION.GAME_START, VARIATION.MEETING_END]);
-  const MEETING_STARTERS = new Set([VARIATION.REPORT, VARIATION.EMERGENCY]);
-
   /** 会議中のマップの色。青でも赤でもない、沈んだ色にする。 */
   const MEETING_COLOR = '#79808f';
 
@@ -214,8 +207,16 @@ const RouteViewer = (() => {
   const playButton = $('route-play');
   const seekEl = $('route-seek');
   const timeEl = $('route-time');
+  const objectsEl = $('route-objects');
   const showAliveEl = $('route-show-alive');
   const showGhostsEl = $('route-show-ghosts');
+  const showObjectsEl = $('route-show-objects');
+  const votesButtonEl = $('route-votes');
+  const votePopupEl = $('vote-popup');
+  const voteTablesEl = $('vote-tables');
+  const voteCloseEl = $('vote-close');
+
+  const SKIP_VOTE = 253;
 
   /** マップの寸法と座標の変換に要る値。マップIDで引く。*/
   let maps = null;
@@ -240,6 +241,18 @@ const RouteViewer = (() => {
   /** マップ上の印。プレイヤーIDで引く。*/
   let markers = new Map();
 
+  /** マップに現れる物の絵と性質。種類の名前で引く。*/
+  let kinds = null;
+
+  /** 絵が並んだ画像の、1マスの大きさと全体の大きさ(ピクセル)。*/
+  let sheet = { cellSize: 64, width: 0, height: 0 };
+
+  /** いま出している物の印。物の識別子で引く。*/
+  let objectMarkers = new Map();
+
+  /** マップに現れる物のありさま。ArchivedMapObjectState と揃える。*/
+  const OBJECT_STATE = { HIDDEN: 1, STAGE_SHIFT: 1 };
+
   /** 再生位置。点の番号。整数でない値も取るので補間して描ける。*/
   let cursor = 0;
   let playing = false;
@@ -262,6 +275,27 @@ const RouteViewer = (() => {
     return maps;
   }
 
+  /**
+   * マップに現れる物の種類を読む。
+   *
+   * 描き方はここに載っている性質だけで決める。種類ごとの場合分けは持たない。
+   */
+  async function loadKinds() {
+    if (kinds) return kinds;
+
+    try {
+      const response = await fetch('/api/map-objects');
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const loaded = await response.json();
+      sheet = { cellSize: loaded.cellSize || 64, width: loaded.width || 0, height: loaded.height || 0 };
+      kinds = new Map((loaded.kinds ?? []).map((k) => [k.id, k]));
+    } catch (error) {
+      console.warn('マップオブジェクトの情報を読み込めませんでした。', error);
+      kinds = new Map();
+    }
+    return kinds;
+  }
+
   /** 圧縮された足取りを展開する。展開できなければ空。*/
   async function inflate(packed) {
     if (!packed) return [];
@@ -282,12 +316,14 @@ const RouteViewer = (() => {
 
   async function show(record) {
     stop();
+    closeVotes();
+    votesButtonEl.hidden = true;
     section.hidden = true;
     emptyEl.hidden = true;
     segments = [];
     segment = null;
 
-    const [all, phases] = await Promise.all([loadMaps(), inflate(record.movement)]);
+    const [all, phases] = await Promise.all([loadMaps(), inflate(record.movement), loadKinds()]);
 
     //表示中のゲームが切り替わっていたら、遅れて届いた結果は捨てる。
     if (record !== current) return;
@@ -335,14 +371,15 @@ const RouteViewer = (() => {
 
     let currentSegment = null;
     for (const event of events) {
-      if (TURN_STARTERS.has(event.variation)) currentSegment = open('turn', event.time);
-      else if (MEETING_STARTERS.has(event.variation)) currentSegment = open('meeting', event.time);
+      //区切りの意味は記録側が決めている。こちらは出来事の種類を知らない。
+      if (event.segment === 'turn') currentSegment = open('turn', event.time);
+      else if (event.segment === 'meeting') currentSegment = open('meeting', event.time);
       else if (!currentSegment) currentSegment = open('turn', event.time);
 
       currentSegment.events.push(event);
 
       //ゲーム終了でその区切りは打ち止め。
-      if (event.variation === VARIATION.GAME_END) close(event.time);
+      if (event.segment === 'gameEnd') close(event.time);
     }
 
     //出来事を記録していない古い記録でも、足取りだけは見られるようにする。
@@ -428,6 +465,72 @@ const RouteViewer = (() => {
     }
   }
 
+  /**
+   * その区切りに関わる物の印を並べる。
+   *
+   * 何が出るかは、区切りの初めから残っていた物と、その間に現れた物の両方。
+   * 前者は足取りが区切りごとに控えているので、記録全体を遡らずに済む。
+   */
+  function buildObjectMarkers() {
+    objectsEl.replaceChildren();
+    objectMarkers = new Map();
+
+    for (const object of objectsIn(segment)) {
+      const kind = kinds?.get(object.kind);
+      if (!kind) continue;
+
+      const el = document.createElement('div');
+      el.className = 'route-object';
+
+      //絵は1枚の画像に並んでいる。1マスだけを見せるよう、画像を引き伸ばしてから位置を合わせる。
+      const { columns, rows } = grid();
+      el.style.backgroundSize = `${columns * 100}% ${rows * 100}%`;
+      el.style.backgroundPosition = cellPosition(kind.icons[0]);
+
+      objectsEl.appendChild(el);
+      objectMarkers.set(object.objectId, { el, object, kind, icon: kind.icons[0] });
+    }
+  }
+
+  const grid = () => ({
+    columns: Math.max(1, Math.round(sheet.width / sheet.cellSize)),
+    rows: Math.max(1, Math.round(sheet.height / sheet.cellSize)),
+  });
+
+  /**
+   * 絵の番号から、その1マスを見せる background-position を作る。
+   * 割合で置くので、端のマスがちょうど端に来るよう列数から1を引いて割る。
+   */
+  function cellPosition(icon) {
+    const { columns, rows } = grid();
+    const column = icon % columns;
+    const row = Math.floor(icon / columns);
+    return `${columns > 1 ? (column / (columns - 1)) * 100 : 0}% ${rows > 1 ? (row / (rows - 1)) * 100 : 0}%`;
+  }
+
+  /** その時刻のありさま。変わった記録を時刻の順に辿る。*/
+  function stateOf(object, now) {
+    let state = object.state ?? 0;
+    const changes = object.changes ?? [];
+    for (let i = 0; i < changes.length; i += 2) {
+      if (changes[i] > now) break;
+      state = changes[i + 1];
+    }
+    return state;
+  }
+
+  /** その区切りに関わる物。*/
+  function objectsIn(seg) {
+    const all = current?.mapObjects ?? [];
+    if (all.length === 0 || !seg) return [];
+
+    const initial = new Set(seg.phase?.initialObjectIds ?? []);
+    const to = Number.isFinite(seg.end) ? seg.end : Infinity;
+
+    return all.filter((o) =>
+      initial.has(o.objectId) || (o.spawn <= to && (o.despawn == null || o.despawn >= seg.start)));
+  }
+
   /** ニセモノの印は本物のプレイヤーIDと衝突しない鍵で持つ。*/
   const fakeKey = (fakeId) => 'fake:' + fakeId;
 
@@ -440,8 +543,8 @@ const RouteViewer = (() => {
 
   /** ゲーム内の座標をミニマップ上の割合にする。*/
   function toPercent(x, y) {
-    const px = (x / mapInfo.scale + mapInfo.centerX) * mapInfo.pixelsPerUnit + mapInfo.width / 2;
-    const py = mapInfo.height / 2 - (y / mapInfo.scale + mapInfo.centerY) * mapInfo.pixelsPerUnit;
+    const px = (x / mapInfo.scale + mapInfo.centerX - mapInfo.originX) * mapInfo.pixelsPerUnit;
+    const py = (mapInfo.originY - (y / mapInfo.scale + mapInfo.centerY)) * mapInfo.pixelsPerUnit;
     return [(px / mapInfo.width) * 100, (py / mapInfo.height) * 100];
   }
 
@@ -500,12 +603,175 @@ const RouteViewer = (() => {
     canvasEl.classList.toggle('is-meeting', isMeeting);
     controlsEl.hidden = isMeeting || sampleCount() === 0;
 
+    closeVotes();
+    votesButtonEl.hidden = !isMeeting || votesIn(segment).length === 0;
+
     seekEl.max = String(Math.max(0, sampleCount() - 1));
     cursor = 0;
 
     buildMarkers();
+    buildObjectMarkers();
     buildEventList();
     render();
+  }
+
+  function votesIn(seg) {
+    if (!seg) return [];
+    const to = Number.isFinite(seg.end) ? seg.end : Infinity;
+    return (current?.votes ?? []).filter((v) => v.time >= seg.start && v.time <= to);
+  }
+
+  function openVotes() {
+    voteTablesEl.replaceChildren(...votesIn(segment).map(voteTablesOf).flat());
+    votePopupEl.hidden = false;
+  }
+
+  function closeVotes() {
+    votePopupEl.hidden = true;
+  }
+
+  function voteTablesOf(result) {
+    const votes = result.votes ?? [];
+    const swaps = result.swaps ?? [];
+
+    const swappedTo = new Map();
+    for (let i = 0; i < swaps.length; i += 2) swappedTo.set(swaps[i], swaps[i + 1]);
+
+    const before = new Map();
+    const after = new Map();
+
+    const add = (map, target, voter) => {
+      if (!map.has(target)) map.set(target, new Map());
+      const byVoter = map.get(target);
+      byVoter.set(voter, (byVoter.get(voter) ?? 0) + 1);
+    };
+
+    for (let i = 0; i < votes.length; i += 2) {
+      const voter = votes[i];
+      const target = votes[i + 1];
+      add(before, target, voter);
+      add(after, swappedTo.has(target) ? swappedTo.get(target) : target, voter);
+    }
+
+    const ids = [...new Set([...before.keys(), ...after.keys(), ...swappedTo.keys(), ...swappedTo.values()])];
+    ids.sort((a, b) => (a === SKIP_VOTE) - (b === SKIP_VOTE) || countOfVotes(before, b) - countOfVotes(before, a) || a - b);
+
+    if (swappedTo.size === 0) return [voteTableOf(null, ids, before, null, null)];
+
+    return [
+      voteTableOf(t('vote-before'), ids, before, null, null),
+      voteTableOf(t('vote-after'), ids, after, swappedTo, before),
+    ];
+  }
+
+  const countOfVotes = (map, id) => [...(map.get(id)?.values() ?? [])].reduce((sum, n) => sum + n, 0);
+
+  function votersCellOf(byVoter) {
+    const cell = document.createElement('td');
+    cell.className = 'voters';
+
+    const list = document.createElement('div');
+    list.className = 'voter-list';
+
+    for (const [voter, count] of [...(byVoter?.entries() ?? [])].sort((a, b) => b[1] - a[1] || a[0] - b[0])) {
+      if (count >= 3) list.appendChild(voterIconOf(voter, count));
+      else for (let i = 0; i < count; i++) list.appendChild(voterIconOf(voter, 0));
+    }
+
+    cell.appendChild(list);
+    return cell;
+  }
+
+  function voterIconOf(id, badge) {
+    const holder = document.createElement('span');
+    holder.className = 'vote-voter';
+
+    const player = (current?.players ?? []).find((p) => p.playerId === id);
+    if (player) {
+      holder.appendChild(iconOf(player));
+    } else {
+      const unknown = document.createElement('span');
+      unknown.className = 'fallback';
+      holder.appendChild(unknown);
+    }
+
+    attachTip(holder, player ? player.name : t('vote-extra'));
+
+    if (badge > 0) {
+      const num = document.createElement('b');
+      num.textContent = String(badge);
+      holder.appendChild(num);
+    }
+
+    return holder;
+  }
+
+  function voteTableOf(caption, ids, counts, swappedTo, before) {
+    const table = document.createElement('table');
+    table.className = 'vote-table';
+
+    if (caption) {
+      const cap = document.createElement('caption');
+      cap.textContent = caption;
+      table.appendChild(cap);
+    }
+
+    const head = document.createElement('tr');
+    for (const [key, cls] of [['vote-player', 'who'], ['vote-count', 'count'], ['vote-voters', 'voters']]) {
+      const th = document.createElement('th');
+      th.className = cls;
+      th.textContent = t(key);
+      head.appendChild(th);
+    }
+    if (swappedTo) head.appendChild(document.createElement('th'));
+    table.appendChild(head);
+
+    for (const id of ids) {
+      const row = document.createElement('tr');
+
+      const who = document.createElement('td');
+      who.className = 'who';
+      who.append(...voteLabelOf(id));
+      row.appendChild(who);
+
+      const count = document.createElement('td');
+      count.className = 'count';
+      count.textContent = String(countOfVotes(counts, id));
+      row.appendChild(count);
+
+      row.appendChild(votersCellOf(counts.get(id)));
+
+      if (swappedTo) {
+        const swap = document.createElement('td');
+        swap.className = 'swap';
+
+        const to = swappedTo.get(id);
+        const from = [...swappedTo.keys()].filter((key) => swappedTo.get(key) === id);
+
+        if (to !== undefined) swap.textContent = t('vote-swapped-to', nameOfVoteTarget(to));
+        else if (from.length > 0) swap.textContent = t('vote-swapped-from', from.map(nameOfVoteTarget).join(', '));
+
+        row.classList.toggle('is-swapped', swap.textContent.length > 0 || countOfVotes(counts, id) !== countOfVotes(before, id));
+        row.appendChild(swap);
+      }
+
+      table.appendChild(row);
+    }
+
+    return table;
+  }
+
+  const nameOfVoteTarget = (id) => (id === SKIP_VOTE ? t('vote-skip') : playerNameOf(current, id));
+
+  function voteLabelOf(id) {
+    if (id === SKIP_VOTE) return [document.createTextNode(t('vote-skip'))];
+
+    const player = (current?.players ?? []).find((p) => p.playerId === id);
+    if (!player) return [document.createTextNode(String(id))];
+
+    const name = document.createElement('span');
+    name.textContent = player.name;
+    return [iconOf(player), name];
   }
 
   const sampleCount = () => (segment?.kind === 'turn' ? segment.count ?? 0 : 0);
@@ -515,6 +781,8 @@ const RouteViewer = (() => {
 
   function render() {
     if (!segment) return;
+
+    renderObjects();
 
     //会議中は最終位置を映したままにする。出来事を選んでも動かさない。
     if (segment.kind === 'meeting') {
@@ -576,6 +844,126 @@ const RouteViewer = (() => {
 
       place(fakeKey(fake.fakeId), x, y, fake.states[at] ?? 0);
     }
+  }
+
+  /** いま映している瞬間の、ゲーム内時刻。物の位置はこの時刻から割り出す。*/
+  function timeNow() {
+    if (!segment) return 0;
+    if (segment.kind === 'meeting') return segment.start;
+    if (segment.phase) return segment.phase.startTime + (segment.offset + cursor) * segment.phase.interval;
+    return segment.start + cursor * interval();
+  }
+
+  /**
+   * マップに現れる物を、その時刻の姿で置く。
+   *
+   * 居場所の求め方は性質で決まる。
+   * 足取りを控えている物はその最後の点、等速で動く物は速度から計算、どちらでもなければ現れた場所。
+   */
+  function renderObjects() {
+    const now = timeNow();
+    const show = showObjectsEl.checked;
+
+    for (const marker of objectMarkers.values()) {
+      const { el, object, kind } = marker;
+      if (!show || now < object.spawn || (object.despawn != null && now >= object.despawn)) {
+        el.hidden = true;
+        continue;
+      }
+
+      const [x, y] = positionOf(object, kind, now);
+      const [left, top] = toPercent(x, y);
+      el.hidden = false;
+      el.style.left = `${left}%`;
+      el.style.top = `${top}%`;
+      el.style.transform = transformOf(object, kind, now);
+
+      const state = stateOf(object, now);
+
+      //周りに見えていない間は薄く出す。居場所は分かるが、気付かれてはいない。
+      el.classList.toggle('is-hidden', kind.concealable && (state & OBJECT_STATE.HIDDEN) !== 0);
+
+      //絵が複数ある物は、段で使い分ける。変わった時だけ差し替える。
+      const icons = kind.icons ?? [];
+      if (icons.length > 1) {
+        const stage = Math.min(state >> OBJECT_STATE.STAGE_SHIFT, icons.length - 1);
+        const icon = icons[stage];
+        if (icon !== marker.icon) {
+          marker.icon = icon;
+          el.style.backgroundPosition = cellPosition(icon);
+        }
+      }
+    }
+  }
+
+  function positionOf(object, kind, now) {
+    //持ち主に付いて回る物は、自前の座標を持たない。持ち主の足取りをそのまま使う。
+    if (kind.followsOwner && object.ownerId != null) {
+      const followed = ownerPositionOf(object.ownerId);
+      if (followed) return followed;
+    }
+
+    const moves = object.moves ?? [];
+    if (moves.length > 0) {
+      //時刻の順に並んでいるので、今より前の最後の点を採る。
+      let x = object.x;
+      let y = object.y;
+      for (let i = 0; i < moves.length; i += 3) {
+        if (moves[i] > now) break;
+        x = moves[i + 1];
+        y = moves[i + 2];
+      }
+      return [x, y];
+    }
+
+    if (kind.linear) {
+      const elapsed = now - object.spawn;
+      return [object.x + object.vx * elapsed, object.y + object.vy * elapsed];
+    }
+
+    return [object.x, object.y];
+  }
+
+  /**
+   * 持ち主の、いまの居場所。足取りが見つからなければ null。
+   */
+  function ownerPositionOf(playerId) {
+    const track = segment?.phase?.tracks?.find((t) => t.playerId === playerId);
+    if (!track) return null;
+
+    const count = sampleCount();
+
+    //会議中は止まった絵なので、直前のターンの最後の点を使う。
+    if (segment.kind === 'meeting' || count === 0) {
+      const last = segment.offset + Math.max(0, (segment.count ?? 0) - 1);
+      if (last * 2 + 1 >= track.points.length) return null;
+      return [track.points[last * 2], track.points[last * 2 + 1]];
+    }
+
+    //本物の印と同じ補間で位置を出す。
+    const local = Math.min(Math.floor(cursor), count - 1);
+    const index = segment.offset + local;
+    const next = Math.min(index + 1, segment.offset + count - 1);
+    const ratio = cursor - Math.floor(cursor);
+    const points = track.points;
+
+    return [
+      points[index * 2] + (points[next * 2] - points[index * 2]) * ratio,
+      points[index * 2 + 1] + (points[next * 2 + 1] - points[index * 2 + 1]) * ratio,
+    ];
+  }
+
+  /**
+   * 絵の向き。
+   * 回る物は時刻から角度を出し、向きを持つ物は記録した角度のまま。上下反転は回る向きも裏返す。
+   */
+  function transformOf(object, kind, now) {
+    let angle = 0;
+    if (kind.turnsPerSecond > 0) angle = (now - object.spawn) * kind.turnsPerSecond * 360 * (object.flipY ? -1 : 1);
+    else if (kind.oriented) angle = -object.angle;
+
+    const flip = `scale(${object.flipX ? -1 : 1}, ${object.flipY ? -1 : 1})`;
+    return `rotate(${angle}deg) ${flip}`;
   }
 
   /** 直前のターンの最後の様子。会議中はこれを映し続ける。*/
@@ -728,7 +1116,11 @@ const RouteViewer = (() => {
     frame = requestAnimationFrame(tick);
   }
 
-  for (const toggle of [showAliveEl, showGhostsEl]) toggle.addEventListener('change', () => render());
+  votesButtonEl.addEventListener('click', () => openVotes());
+  voteCloseEl.addEventListener('click', () => closeVotes());
+  votePopupEl.addEventListener('click', (ev) => { if (ev.target === votePopupEl) closeVotes(); });
+
+  for (const toggle of [showAliveEl, showGhostsEl, showObjectsEl]) toggle.addEventListener('change', () => render());
 
   playButton.addEventListener('click', () => (playing ? stop() : play()));
   seekEl.addEventListener('input', () => {

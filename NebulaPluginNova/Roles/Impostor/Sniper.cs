@@ -231,9 +231,13 @@ public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitat
         [OnlyMyPlayer]
         void OnDead(PlayerDieEvent ev)
         {
-            if (MyRifle != null) RpcEquip.Invoke((MyPlayer.PlayerId, false));
-
             if (acTokenAnother != null && (MyPlayer.PlayerState == PlayerState.Guessed || MyPlayer.PlayerState == PlayerState.Exiled)) acTokenAnother.Value.isCleared |= acTokenAnother.Value.triggered;
+        }
+
+        [OnlyMyPlayer]
+        void OnDeadForAllPlayer(PlayerDieEvent ev)
+        {
+            RpcEquip.LocalInvoke((MyPlayer.PlayerId, false));
         }
 
         void OnMeetingStart(MeetingStartEvent ev)
@@ -250,6 +254,11 @@ public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitat
             if (acTokenAnother != null) acTokenAnother.Value.triggered = false;
         }
 
+        [Local]
+        void OnInfrequentUpdate(GameInfrequentUpdateEvent ev)
+        {
+            RpcSniperHertbeat.Invoke((MyPlayer.PlayerId, MyRifle != null));
+        }
 
         IEnumerator CoShowAimAssist()
         {
@@ -333,7 +342,8 @@ public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitat
 
         void EquipRifle()
         {
-            MyRifle = new SniperRifle(MyPlayer).Register(this);
+            if (MyRifle != null && MyRifle.IsDeadObject) MyRifle = null;
+            if (MyRifle == null) MyRifle = new SniperRifle(MyPlayer).Register(this);
 
             if (AmOwner && AimAssistOption) NebulaManager.Instance.StartCoroutine(CoShowAimAssist().WrapToIl2Cpp());
         }
@@ -348,17 +358,26 @@ public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitat
         "EquipRifle",
         (message, _) =>
         {
-            var role = NebulaGameManager.Instance?.GetPlayer(message.playerId)?.Role;
-            var sniper = role.GetAbility<Ability>();
-            if (sniper != null)
+            var player = NebulaGameManager.Instance?.GetPlayer(message.playerId);
+            if (player?.TryGetAbility<Ability>(out var sniper) ?? false)
             {
                 if (message.equip)
+                {
                     sniper.EquipRifle();
+                }
                 else
+                {
                     sniper.UnequipRifle();
+                }
             }
         }
         );
+
+
+        static RemoteProcess<(byte playerId, bool equip)> RpcSniperHertbeat = new("SniperHeartbeat", (message, _) =>
+        {
+            RpcEquip.LocalInvoke((message.playerId, message.equip));
+        }, false);
     }
 
     private static SpriteLoader snipeNoticeSprite = SpriteLoader.FromResource("Nebula.Resources.SniperRifleArrow.png", 200f);

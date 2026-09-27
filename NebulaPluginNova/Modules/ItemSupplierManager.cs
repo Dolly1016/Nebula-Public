@@ -229,6 +229,16 @@ public class ItemSupplier : NebulaSyncStandardObject
         });
     }
 
+    private Nebula.Game.Statistics.MapObjectTracker? tracker;
+
+    public override void OnInstantiated()
+    {
+        base.OnInstantiated();
+        tracker = ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance?.Spawn(
+            NoncrewmateOnly ? Nebula.Game.Statistics.MapObjectKinds.PerkPlantNoncrewmate : Nebula.Game.Statistics.MapObjectKinds.PerkPlant, Position, id: ObjectId);
+        tracker?.SetStage(age);
+    }
+
     static ItemSupplier()
     {
         NebulaSyncObject.RegisterInstantiater(MyAllplayersTag, (args) => new ItemSupplier(new(args[0], args[1]), false));
@@ -241,6 +251,7 @@ public class ItemSupplier : NebulaSyncStandardObject
     {
         this.age = age;
         Sprite = sprite.GetSprite((NoncrewmateOnly ? 4 : 0) + age);
+        tracker?.SetStage(age);
 
         if (age == 3) leftBloom--;
 

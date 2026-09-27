@@ -62,6 +62,15 @@ internal class Navvy : DefinedSingleAbilityRoleTemplate<Navvy.Ability>, DefinedR
 
         static private readonly RoleRPC.Definition UpdateState = RoleRPC.Get<Ability>("navvy.seal", (ability, num, calledByMe) => ability.leftTapes = num);
 
+        /// <summary>ベントにテープを貼ったことを知らせる。テープは本人の手元にしか無い。</summary>
+        static private readonly RemoteProcess<int> RpcTapeVent = new("TapeVent",
+            (message, _) => ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance?.FindVent(message)?.SetStage(1));
+
+        /// <summary>ドアにテープを貼ったことを知らせる。会議を跨がないので、消えたことは知らせなくてよい。</summary>
+        static private readonly RemoteProcess<(int trackerId, VVector2 position)> RpcTapeDoor = new("TapeDoor",
+            (message, _) => ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance?.Spawn(
+                Nebula.Game.Statistics.MapObjectKinds.SealedDoor, message.position, id: message.trackerId));
+
         public Ability(GamePlayer player, bool isUsurped, int left) : base(player, isUsurped)
         {
             UtilityInvalidationSystem.Instance.GraphicVentLevels = RedundantSealingOption ? VisualStandardSteps : VisualSteps[VentRemoveStepsOption];
@@ -112,6 +121,7 @@ internal class Navvy : DefinedSingleAbilityRoleTemplate<Navvy.Ability>, DefinedR
                     {
                         UpdateState.RpcSync(MyPlayer, leftTapes - CostForVentSealingOption);
                         nextSealedVents.Add(tracker.CurrentTarget!.Id);
+                        RpcTapeVent.Invoke(tracker.CurrentTarget!.Id);
 
                         //テープを設置
                         sealRenderer = UnityHelper.CreateObject<SpriteRenderer>("Seal", tracker.CurrentTarget.transform,
@@ -130,6 +140,9 @@ internal class Navvy : DefinedSingleAbilityRoleTemplate<Navvy.Ability>, DefinedR
                     {
                         UpdateState.RpcSync(MyPlayer, leftTapes - CostForDoorSealingOption);
                         nextSealedDoors.Add(currentTargetDoor!.Id);
+                        RpcTapeDoor.Invoke((
+                            ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance?.IssueSharedId() ?? 0,
+                            (VVector2)currentTargetDoor!.transform.GetPositionFast()));
 
                         //テープを設置
                         var isVert = InvalidDoor.IsVertDoor(currentTargetDoor);

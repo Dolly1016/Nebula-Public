@@ -326,16 +326,10 @@ public static class GeneralConfigurations
     static public readonly BoolConfiguration CanTalkInWanderingPhaseOption = NebulaAPI.Configurations.Configuration("options.voiceChat.canTalkInWanderingPhase", true, () => UseVoiceChatOption);
     static public readonly ValueConfiguration<int> KillersHearDeadOption = NebulaAPI.Configurations.Configuration("options.voiceChat.killersHearDead", ["options.switch.off", "options.voiceChat.killersHearDead.onlyMyKiller", "options.voiceChat.killersHearDead.onlyImpostors", "options.voiceChat.killersHearDead.allKillers"], 0, () => UseVoiceChatOption);
     static public readonly BoolConfiguration DistanceDecayInGhostOption = NebulaAPI.Configurations.Configuration("options.voiceChat.distanceDecayInGhost", false, () => UseVoiceChatOption && CanTalkInWanderingPhaseOption);
-    static public readonly BoolConfiguration ImpostorsRadioOption = NebulaAPI.Configurations.Configuration("options.voiceChat.impostorsRadio", false, () => UseVoiceChatOption);
-    static public readonly BoolConfiguration JackalRadioOption = NebulaAPI.Configurations.Configuration("options.voiceChat.jackalRadio", false, () => UseVoiceChatOption);
-    static public readonly BoolConfiguration LoversRadioOption = NebulaAPI.Configurations.Configuration("options.voiceChat.loversRadio", false, () => UseVoiceChatOption);
-    static public readonly BoolConfiguration ScarletRadioOption = NebulaAPI.Configurations.Configuration("options.voiceChat.scarletRadio", false, () => UseVoiceChatOption);
     static public readonly BoolConfiguration AffectedByCommsSabOption = NebulaAPI.Configurations.Configuration("options.voiceChat.affectedByCommsSab", false, () => UseVoiceChatOption && CanTalkInWanderingPhaseOption);
     static public readonly BoolConfiguration IsolateGhostsStrictlyOption = NebulaAPI.Configurations.Configuration("options.voiceChat.isolateGhostsStrictly", false, () => UseVoiceChatOption);
     static internal readonly IConfigurationHolder VoiceChatOptions = NebulaAPI.Configurations.Holder("options.voiceChat", [ConfigurationTab.Settings], [GameModes.FreePlay, GameModes.Standard], () => !AmongUsUtil.IsLocalServer()).AppendConfigurations([
-        UseVoiceChatOption, CanTalkInWanderingPhaseOption, KillersHearDeadOption, AffectedByCommsSabOption, IsolateGhostsStrictlyOption, DistanceDecayInGhostOption,
-        Group("options.voiceChat.radio", ImpostorsRadioOption, JackalRadioOption, LoversRadioOption, ScarletRadioOption)
-        ]);
+        UseVoiceChatOption, CanTalkInWanderingPhaseOption, KillersHearDeadOption, AffectedByCommsSabOption, IsolateGhostsStrictlyOption, DistanceDecayInGhostOption]);
 
     static public readonly BoolConfiguration LowLatencyPlayerSyncOption = NebulaAPI.Configurations.Configuration("options.quality.lowLatencyPlayerSync", true);
     static internal readonly IConfigurationHolder QualityOptions = NebulaAPI.Configurations.Holder("options.quality", [ConfigurationTab.Settings], [GameModes.FreePlay, GameModes.Standard]).AppendConfigurations([

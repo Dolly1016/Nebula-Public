@@ -23,6 +23,7 @@
 "end.phase.extraWin6" : "追加勝利フェーズ 7"
 "end.phase.extraWin7" : "追加勝利フェーズ 8"
 "end.browser" : "ウェブブラウザで詳細な結果を確認"
+"end.browser.steam" : "ウェブブラウザで詳細な結果を確認<br><b>左シフト押下 + クリック</b>でゲーム内ブラウザから開けます。"
 
 # No Team Statictics
 

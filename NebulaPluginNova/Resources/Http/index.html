@@ -73,7 +73,9 @@
 
         <div class="route-stage">
           <div class="route-map">
+            <button type="button" id="route-votes" class="route-votes" data-t="route-votes" hidden>Votes</button>
             <div id="route-canvas" class="route-canvas">
+              <div id="route-objects" class="route-objects"></div>
               <div id="route-markers" class="route-markers"></div>
             </div>
           </div>
@@ -87,6 +89,10 @@
             <label class="route-toggle">
               <input type="checkbox" id="route-show-ghosts">
               <span data-t="route-show-ghosts">Ghosts</span>
+            </label>
+            <label class="route-toggle">
+              <input type="checkbox" id="route-show-objects" checked>
+              <span data-t="route-show-objects">Objects</span>
             </label>
           </aside>
         </div>
@@ -103,6 +109,14 @@
       </section>
 
       <p id="route-empty" class="status" data-t="route-empty" hidden>This record has no movement data.</p>
+
+      <div id="vote-popup" class="vote-popup" hidden>
+        <div class="vote-panel">
+          <button type="button" id="vote-close" class="vote-close" data-t-aria="vote-close">&#215;</button>
+          <h4 data-t="vote-title">Vote Result</h4>
+          <div id="vote-tables" class="vote-tables"></div>
+        </div>
+      </div>
 
     </article>
   </main>

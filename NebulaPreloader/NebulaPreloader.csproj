@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>Nebula.Preloader</RootNamespace>
+    <AssemblyName>NebulaPreloader</AssemblyName>
+    <Platforms>AnyCPU;x86;x64</Platforms>
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+    <Version>1.0.0</Version>
+  </PropertyGroup>
+
+  <!-- BepInEx 6 の preloader/patcher API のみを参照する (Private=false: patchers へはこのDLLだけを置く) -->
+  <ItemGroup>
+    <Reference Include="$(AmongUs)\BepInEx\core\BepInEx.Core.dll">
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="$(AmongUs)\BepInEx\core\BepInEx.Preloader.Core.dll">
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="CopyCustomContent" AfterTargets="AfterBuild">
+    <Message Text="Deploy patcher to BepInEx/patchers..." />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(AmongUs)\BepInEx\patchers\" Condition="'$(AmongUs)' != ''" ContinueOnError="WarnAndContinue" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(AmongUsRelease)\Nebula_Steam\BepInEx\patchers\" Condition="'$(AmongUsRelease)' != '' And '$(Configuration)' == 'Release'" ContinueOnError="WarnAndContinue" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(AmongUsMod)\BepInEx\patchers\" Condition="'$(AmongUsMod)' != '' And '$(Configuration)' == 'Release'" ContinueOnError="WarnAndContinue" />
+  </Target>
+
+</Project>

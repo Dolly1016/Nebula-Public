@@ -108,6 +108,7 @@ internal class Fixer : DefinedSingleAbilityRoleTemplate<Fixer.Ability>, DefinedR
             MeetingHudExtension.AddSealedMask(1 << player.PlayerId); //能力使用可能な対象、および投票対象から除外
             if(JammingSealsVoteRightOption)  MeetingHudExtension.RemoveCanVoteMask(1 << player.PlayerId); //投票権を没収
             MeetingHudExtension.RemoveUsingAbilityMask(1 << player.PlayerId); //能力の使用を禁止
+            MeetingHudExtension.AddJammedMask(1 << player.PlayerId); //妨害中として記録
             MeetingHud.Instance.ResetPlayerState();
             MeetingHudExtension.ExpandDiscussionTime();
             

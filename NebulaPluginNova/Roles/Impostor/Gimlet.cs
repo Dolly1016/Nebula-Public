@@ -72,7 +72,8 @@ internal class Gimlet : DefinedSingleAbilityRoleTemplate<Gimlet.Ability>, Define
                 drillButton.OnClick = (button) => {
                     acTokenAnother2.Value.triggered = true;
                     killstreak = 0;
-                    RpcDrill.Invoke((MyPlayer, MyPlayer.Position, MyPlayer.Unbox().MouseAngle.RadToDeg()));
+                    RpcDrill.Invoke((MyPlayer, MyPlayer.Position, MyPlayer.Unbox().MouseAngle.RadToDeg(),
+                        ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance?.IssueSharedId() ?? 0));
                     StatsDrill.Progress();
                     NebulaAPI.CurrentGame?.KillButtonLikeHandler.StartCooldown();
                 };
@@ -148,12 +149,16 @@ internal class Gimlet : DefinedSingleAbilityRoleTemplate<Gimlet.Ability>, Define
 
     private static float DrillVisualSize => Mathn.Max(0.7f, 0.82f * DrillSizeOption);
 
-    static readonly private RemoteProcess<(GamePlayer player, Vector2 pos, float degree)> RpcDrill = new("Drill", (message, _)=>{
-        NebulaManager.Instance.StartCoroutine(CoDrill(message.player, message.pos, message.degree).WrapToIl2Cpp());
+    static readonly private RemoteProcess<(GamePlayer player, Vector2 pos, float degree, int drillId)> RpcDrill = new("Drill", (message, _)=>{
+        NebulaManager.Instance.StartCoroutine(CoDrill(message.player, message.pos, message.degree, message.drillId).WrapToIl2Cpp());
     });
-    static private IEnumerator CoDrill(GamePlayer player, Vector2 pos, float degree)
+    static private IEnumerator CoDrill(GamePlayer player, Vector2 pos, float degree, int drillId)
     {
         bool startDrill = false;
+
+        //ドリルは本人にぴったり付いて回るので、座標は1点も持たせない。向きは発進時のまま。
+        var tracker = ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance?.Spawn(
+            Nebula.Game.Statistics.MapObjectKinds.Drill, pos, angle: degree, id: drillId, ownerId: player.PlayerId);
 
         player.VanillaPlayer.NetTransform.SnapTo(pos);
         player.VanillaPlayer.NetTransform.SetPaused(true);
@@ -280,6 +285,8 @@ internal class Gimlet : DefinedSingleAbilityRoleTemplate<Gimlet.Ability>, Define
         
         player.VanillaPlayer.NetTransform.SetPaused(false);
         player.VanillaPlayer.moveable = true;
+
+        tracker?.Despawn();
 
         if (player.AmOwner && player.TryGetAbility<Ability>(out var ability))
         {

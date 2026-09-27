@@ -71,6 +71,7 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
         AchievementToken<int>? acTokenChallenge = null;
         HashSet<IPlayerlike> tryKillSet = [];
         private bool fakeLocal = false;
+        private Nebula.Game.Statistics.MapObjectTracker? axeTracker = null;
 
 
         public RaiderAxe(GamePlayer owner) : base(owner.TruePosition, ZOption.Front, false, staticAxeSprite.GetSprite())
@@ -175,6 +176,7 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
                 if (thrownDistance > 50f)
                 {
                     state = 2;
+                    axeTracker?.Despawn();
                     MyRenderer.gameObject.SetActive(false);
                     NebulaManager.Instance.StartCoroutine(ManagedEffects.CoDisappearEffect(MyRenderer.gameObject.layer, null, MyTransform.GetPositionFast(), 0.8f).WrapToIl2Cpp());
                 }
@@ -183,6 +185,13 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
                     state = 2;
                     MyRenderer.sprite = stuckAxeSprite.GetSprite();
                     MyTransform.eulerAngles = new Vector3(0f, 0f, thrownAngle * 180f / Mathn.PI);
+
+                    //飛んでいる斧はここで終わり、突き刺さった斧が新たに現れる。
+                    axeTracker?.Despawn();
+                    axeTracker = null;
+                    ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance?.Spawn(
+                        Nebula.Game.Statistics.MapObjectKinds.StuckAxe, Position + vec * d,
+                        angle: thrownAngle * 180f / Mathn.PI, flipY: MyRenderer.flipY);
 
                     if (AmOwner && killedMask == 0)
                         NebulaGameManager.Instance?.GameStatistics.RpcRecordEvent(GameStatistics.EventVariation.Kill, EventDetail.Missed, NebulaGameManager.Instance.CurrentTime - thrownTime, AmongUsLLImpl.LocalPlayer, 0);
@@ -232,6 +241,11 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
             MyRenderer.sprite = thrownAxeSprite.GetSprite();
             thrownTime = NebulaGameManager.Instance!.CurrentTime;
             MyRenderer.color = UnityEngine.Color.white;
+
+            axeTracker = ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance?.Spawn(
+                Nebula.Game.Statistics.MapObjectKinds.FlyingAxe, (VVector2)pos,
+                new VVector2(Mathn.Cos(angle), Mathn.Sin(angle)) * (speed * 4f),
+                flipY: MyRenderer.flipY);
         }
 
         static RaiderAxe()

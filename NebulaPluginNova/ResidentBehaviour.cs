@@ -21,6 +21,8 @@ internal class ResidentBehaviour : MonoBehaviour
 
     void OnApplicationQuit()
     {
+#if PC
         Nebula.Http.NebulaHttpServer.Stop();
+#endif
     }
 }

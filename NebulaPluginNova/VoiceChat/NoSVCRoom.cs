@@ -918,7 +918,6 @@ internal class NoSVCRoom
         if (LobbyBehaviour.Instance)
         {
             TryUpdateLocalProfile();
-            radios.Clear();
         }
         
         if(NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.Mute).KeyDown) interstellarRoom.SetMute(!interstellarRoom.Mute);
@@ -1005,52 +1004,31 @@ internal class NoSVCRoom
     static public Image IconRadioImage = SpriteLoader.FromResource("Nebula.Resources.UpperIconRadio.png", 100f);
 
     static readonly private IDividedSpriteLoader radioImages = DividedSpriteLoader.FromResource("Nebula.Resources.RadioIcons.png", 100f, 50, 50, true);
+    static private Image GetRadioIcon(RadioKind kind) => radioImages.AsLoader((int)kind);
 
-    private class RadioChannel
-    {
-        public VColor Color { get; }
-        public string LocalizedName { get; }
-        public Image Image { get; }
-        Func<GamePlayer, bool> canHear;
-        private readonly ILifespan lifespan;
-        public ILifespan Lifespan => lifespan;
-        public bool IsDead => lifespan.IsDeadObject;
-        public bool CanHear(GamePlayer player) => canHear.Invoke(player);
-
-        public RadioChannel(string localizedName, Virial.Media.Image image, Func<GamePlayer, bool> canHear, ILifespan lifespan, VColor color)
-        {
-            this.LocalizedName = localizedName;
-            this.Image = image;
-            this.canHear = canHear;
-            this.lifespan = lifespan;
-            Color = color;
-        }
-    }
-
-    public void RegisterRadioChannel(string localizedName, int imageId, Func<GamePlayer, bool> canHear, ILifespan lifespan, VColor color)
-        => RegisterRadioChannel(localizedName, radioImages.AsLoader(imageId), canHear, lifespan, color);
-
-    public void RegisterRadioChannel(string localizedName, Virial.Media.Image image, Func<GamePlayer, bool> canHear, ILifespan lifespan, VColor color)
-    {
-        var radio = new RadioChannel(localizedName, image, canHear, lifespan, color);
-        radios.Add(radio);
-        RegisterWidget(localizedName, color, radio.Image, lifespan, () => CurrentRadio == radio, 10);
-    }
-
-    private List<RadioChannel> radios = [];
     private RadioChannel? CurrentRadio { get; set; }
+
+    //ウィジェットを登録済みのラジオ。RadioManagerはVCの有無に依らず動くため、こちらで追随する。
+    private HashSet<RadioChannel> widgetRegisteredRadios = [];
 
     private VirtualInput radioInput = NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.VCRadio);
     private void UpdateRadio()
     {
-        radios.RemoveAll(r => r.IsDead);
+        var radios = ModSingleton<RadioManager>.Instance?.AllRadios ?? [];
+
+        widgetRegisteredRadios.RemoveWhere(r => r.IsDead);
+        foreach (var radio in radios)
+        {
+            if (!widgetRegisteredRadios.Add(radio)) continue;
+            RegisterWidget(radio.LocalizedName, radio.Color, GetRadioIcon(radio.Kind), radio.Lifespan, () => CurrentRadio == radio, 10);
+        }
+
         if (CurrentRadio?.IsDead ?? false) CurrentRadio = null;
         if (MeetingHud.Instance && CurrentRadio != null) CurrentRadio = null;
         
-        ulong mask = 0;
-        bool radio = CurrentRadio != null;
-        if (radio) GamePlayer.AllPlayers.Where(CurrentRadio!.CanHear).Do(p => mask |= 1UL << p.PlayerId);
-        UpdateVoiceState(radio, mask);
+        bool inRadio = CurrentRadio != null;
+        ulong mask = inRadio ? (ulong)(uint)CurrentRadio!.GetHearableMask() : 0UL;
+        UpdateVoiceState(inRadio, mask);
 
         if (radioInput.KeyDownInGame && radios.Count > 0 && !MeetingHud.Instance)
         {
@@ -1060,7 +1038,7 @@ internal class NoSVCRoom
                     PostBuilder = origRenderer =>
                     {
                         var renderer = UnityHelper.CreateSpriteRenderer("Icon", origRenderer.transform, new(0.18f, 0.12f, -0.01f));
-                        renderer.sprite = r.Image.GetSprite();
+                        renderer.sprite = GetRadioIcon(r.Kind).GetSprite();
                         renderer.SetBothOrder(0);
                         origRenderer.SetBothOrder(0);
                     }

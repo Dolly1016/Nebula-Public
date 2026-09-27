@@ -33,6 +33,7 @@
 "options.role.scarlet.gaugeReductionRatio" : "本命ゲージの減少速度"
 "options.role.scarlet.gaugeReductionRatio.detail" : "本命のそばにいない間、溜まる速度にこの設定値を乗じた速度でゲージが減少します。<br>1xで溜まる速度と同じ速度で減少します。1未満の数値を推奨します。"
 "options.role.scarlet.canLocateLovers" : "恋人の位置を表示"
+"options.role.scarlet.preAssignedLovers" : "恋人の事前割り当て"
 "options.role.scarlet.group.gauge" : "本命ゲージの設定"
 
 # Game

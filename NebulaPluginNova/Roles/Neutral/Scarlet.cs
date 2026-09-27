@@ -25,7 +25,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 {
     static readonly public RoleTeam MyTeam = NebulaAPI.Preprocessor!.CreateTeam("teams.scarlet", new(138, 26, 49), TeamRevealType.OnlyMe);
 
-    private Scarlet() : base("scarlet", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [GraceUntilDecidingFavoriteOption, NumOfKept, MaxUsesOfCommand, CanOverrideTaskWin, CanLocateLovers, VentConfiguration,
+    private Scarlet() : base("scarlet", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [GraceUntilDecidingFavoriteOption, NumOfKept, MaxUsesOfCommand, CanOverrideTaskWin, CanLocateLovers, PreAssignedLovers, VentConfiguration,
     new GroupConfiguration("options.role.scarlet.group.gauge",[WithFavoriteGauge, RequiredGaugeToWin, SurplusGauge, GaugeReductionSpeed], GroupConfigurationColor.ToDarkenColor(MyTeam.UnityColor))
     ])
     {
@@ -36,7 +36,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole, IAssignableDocument
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments.Get(0, player.PlayerId), arguments.Get(1, NumOfKept), arguments.Get(2, 1), arguments.Get(3, MaxUsesOfCommand), arguments.Get(4, (int)(float)GraceUntilDecidingFavoriteOption), (float)arguments.Get(5, 0) / 100f);
 
     static private FloatConfiguration GraceUntilDecidingFavoriteOption = NebulaAPI.Configurations.Configuration("options.role.scarlet.graceUntilDecidingFavorite", (30f, 600f, 10f), 120f, FloatConfigurationDecorator.Second);
-    static private IntegerConfiguration NumOfKept = NebulaAPI.Configurations.Configuration("options.role.scarlet.numOfKept", (1,10), 3);
+    static internal IntegerConfiguration NumOfKept = NebulaAPI.Configurations.Configuration("options.role.scarlet.numOfKept", (1,10), 3);
     static private IntegerConfiguration MaxUsesOfCommand = NebulaAPI.Configurations.Configuration("options.role.scarlet.numOfCommand", (1, 10), 2);
     static internal BoolConfiguration CanOverrideTaskWin = NebulaAPI.Configurations.Configuration("options.role.scarlet.canOverrideTaskWin", false);
     static internal BoolConfiguration WithFavoriteGauge = NebulaAPI.Configurations.Configuration("options.role.scarlet.favoriteGauge", true);
@@ -44,6 +44,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole, IAssignableDocument
     static private FloatConfiguration SurplusGauge = NebulaAPI.Configurations.Configuration("options.role.scarlet.surplusGauge", (5f, 80f, 5f), 20f, FloatConfigurationDecorator.Second, () => WithFavoriteGauge);
     static private FloatConfiguration GaugeReductionSpeed = NebulaAPI.Configurations.Configuration("options.role.scarlet.gaugeReductionRatio", (0f, 2f, 0.125f), 0.25f, FloatConfigurationDecorator.Ratio, () => WithFavoriteGauge);
     static private BoolConfiguration CanLocateLovers = NebulaAPI.Configurations.Configuration("options.role.scarlet.canLocateLovers", false);
+    static internal BoolConfiguration PreAssignedLovers = NebulaAPI.Configurations.Configuration("options.role.scarlet.preAssignedLovers", false);
     static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.NeutralVentConfiguration("role.scarlet.vent", true);
 
     static public Scarlet MyRole = new Scarlet();
@@ -69,6 +70,17 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole, IAssignableDocument
     static private Image favoriteButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.FlirtatiousMainButton.png", 115f);
     static private Image meetingButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.FlirtatiousMeetingButton.png", 115f);
     static private Image hourglassButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.HourglassButton.png", 115f);
+
+    internal (int count, int chance, int? secondaryCount, int? secondaryChance) GetAssignmentParameter()
+    {
+        var param = (this as DefinedRole).AllocationParameters;
+        if (param == null) return (0, 0, null, null);
+        int chance = param.GetRoleChance(1);
+        if (param.RoleCountSum == 1) return (1, chance, null, null);
+        int secondaryChance = param.GetRoleChance(2);
+        if (chance == secondaryChance) return (param.RoleCountSum, chance, null, null);
+        return (1, chance, param.RoleCountSum - 1, secondaryChance);
+    }
 
     [NebulaRPCHolder]
     public class Instance : RuntimeVentRoleTemplate, RuntimeRole
@@ -117,10 +129,6 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                 VColor arrowColor = isFavorite ? MyRole.Color : VColor.White;
                 var arrow = new TrackingArrowAbility(player, 0f, arrowColor).Register(this);
             }
-            if (GeneralConfigurations.ScarletRadioOption)
-            {
-                ModSingleton<NoSVCRoom>.Instance?.RegisterRadioChannel(player.Name, 3, p => p == player, this, MyRole.Color);
-            }
         }
 
         public override void OnActivated()
@@ -132,83 +140,88 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                 //既存のラバーズに対する操作
                 foreach (var p in GamePlayer.AllPlayers) if (IsMyLover(p)) OnAddLover(p, IsMyFavorite(p));
 
-                var hourglass = new Modules.ScriptComponents.ModAbilityButtonImpl().Register(this);
-                hourglass.SetSprite(hourglassButtonSprite.GetSprite());
-                hourglass.Availability = (button) => true;
-                hourglass.Visibility = (button) => !MyPlayer.IsDead && LeftFavorite > 0;
-                hourglass.SetLabel("scarlet.grance");
-                SuicideTimer = new TimerImpl(GraceOnAssignment).Register(this);
-                float afterMeeting = 5f;
-                SuicideTimer.SetPredicate(() => {
-                    if (MeetingHud.Instance.AsBoolFast() || ExileController.Instance.AsBoolFast()) return false;
-                    if(afterMeeting > 0f)
+                if (!PreAssignedLovers)
+                {
+                    var hourglass = new Modules.ScriptComponents.ModAbilityButtonImpl().Register(this);
+                    hourglass.SetSprite(hourglassButtonSprite.GetSprite());
+                    hourglass.Availability = (button) => true;
+                    hourglass.Visibility = (button) => !MyPlayer.IsDead && LeftFavorite > 0;
+                    hourglass.SetLabel("scarlet.grance");
+                    SuicideTimer = new TimerImpl(GraceOnAssignment).Register(this);
+                    float afterMeeting = 5f;
+                    SuicideTimer.SetPredicate(() =>
                     {
-                        afterMeeting -= Time.deltaTime;
-                        return false;
+                        if (MeetingHud.Instance.AsBoolFast() || ExileController.Instance.AsBoolFast()) return false;
+                        if (afterMeeting > 0f)
+                        {
+                            afterMeeting -= Time.deltaTime;
+                            return false;
+                        }
+                        return true;
+                    });
+                    hourglass.OnMeeting = _ => afterMeeting = 5f;
+                    hourglass.OnEffectEnd = _ =>
+                    {
+                        if (LeftFavorite > 0 && !MyPlayer.IsDead) MyPlayer.Suicide(PlayerState.Suicide, EventDetail.Kill, KillParameter.NormalKill);
+                    };
+                    hourglass.EffectTimer = SuicideTimer;
+                    hourglass.ActivateEffect();
+                    hourglass.SetInfoIcon("scarlet.suicide");
+
+
+                    int numOfFavorite = 0, numOfFlirt = 0;
+                    void CheckAndClearAch1(bool isFavorite)
+                    {
+                        if (isFavorite) numOfFavorite++;
+                        else numOfFlirt++;
+                        if (numOfFavorite > 0 && numOfFlirt > 0) new StaticAchievementToken("scarlet.common1");
                     }
-                    return true;
-                });
-                hourglass.OnMeeting = _ => afterMeeting = 5f;
-                hourglass.OnEffectEnd = _ =>
-                {
-                    if (LeftFavorite > 0 && !MyPlayer.IsDead) MyPlayer.Suicide(PlayerState.Suicide, EventDetail.Kill, KillParameter.NormalKill);
-                };
-                hourglass.EffectTimer = SuicideTimer;
-                hourglass.ActivateEffect();
-                hourglass.SetInfoIcon("scarlet.suicide");
 
-                int numOfFavorite = 0, numOfFlirt = 0;
-                void CheckAndClearAch1(bool isFavorite)
-                {
-                    if(isFavorite)numOfFavorite++;
-                    else numOfFlirt++;
-                    if (numOfFavorite > 0 && numOfFlirt > 0) new StaticAchievementToken("scarlet.common1");
-                }
+                    var playerTracker = ObjectTrackers.ForPlayerlike(this, null, MyPlayer, p => ObjectTrackers.PlayerlikeStandardPredicate(p) && !IsMyLover(p.RealPlayer));
 
-                var playerTracker = ObjectTrackers.ForPlayerlike(this, null, MyPlayer, p => ObjectTrackers.PlayerlikeStandardPredicate(p) && !IsMyLover(p.RealPlayer));
-
-                Modules.ScriptComponents.ModAbilityButtonImpl flirtButton = null!, favoriteButton = null!;
-                flirtButton = new Modules.ScriptComponents.ModAbilityButtonImpl().KeyBind(Virial.Compat.VirtualKeyInput.Ability).Register(this);
-                flirtButton.SetSprite(flirtButtonSprite.GetSprite());
-                flirtButton.Availability = (button) => playerTracker.CurrentTarget != null && MyPlayer.CanMove;
-                flirtButton.Visibility = (button) => !MyPlayer.IsDead && LeftFlirts > 0;
-                var flirtIcon = flirtButton.ShowUsesIcon(4);
-                flirtIcon.text = LeftFlirts.ToString();
-                flirtButton.OnClick = (button) =>
-                {
-                    playerTracker.CurrentTarget?.RealPlayer.AddModifier(ScarletLover.MyRole, [FlirtatiousId, 0]);
-                    LeftFlirts--;
+                    Modules.ScriptComponents.ModAbilityButtonImpl flirtButton = null!, favoriteButton = null!;
+                    flirtButton = new Modules.ScriptComponents.ModAbilityButtonImpl().KeyBind(Virial.Compat.VirtualKeyInput.Ability).Register(this);
+                    flirtButton.SetSprite(flirtButtonSprite.GetSprite());
+                    flirtButton.Availability = (button) => playerTracker.CurrentTarget != null && MyPlayer.CanMove;
+                    flirtButton.Visibility = (button) => !MyPlayer.IsDead && LeftFlirts > 0;
+                    var flirtIcon = flirtButton.ShowUsesIcon(4);
                     flirtIcon.text = LeftFlirts.ToString();
-                    flirtButton.StartCoolDown();
-                    favoriteButton.StartCoolDown();
-                    StatsKept.Progress();
-                    CheckAndClearAch1(false);
+                    flirtButton.OnClick = (button) =>
+                    {
+                        playerTracker.CurrentTarget?.RealPlayer.AddModifier(ScarletLover.MyRole, [FlirtatiousId, 0]);
+                        LeftFlirts--;
+                        flirtIcon.text = LeftFlirts.ToString();
+                        flirtButton.StartCoolDown();
+                        favoriteButton.StartCoolDown();
+                        StatsKept.Progress();
+                        CheckAndClearAch1(false);
 
-                    OnAddLover(playerTracker.CurrentTarget?.RealPlayer!, false);
-                };
-                flirtButton.CoolDownTimer = new TimerImpl(2f).SetAsAbilityCoolDown().Start().Register(this);
-                flirtButton.SetLabel("seduce");
+                        OnAddLover(playerTracker.CurrentTarget?.RealPlayer!, false);
+                    };
+                    flirtButton.CoolDownTimer = new TimerImpl(2f).SetAsAbilityCoolDown().Start().Register(this);
+                    flirtButton.SetLabel("seduce");
 
-                favoriteButton = new Modules.ScriptComponents.ModAbilityButtonImpl().KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility).Register(this);
-                favoriteButton.SetSprite(favoriteButtonSprite.GetSprite());
-                favoriteButton.Availability = (button) => playerTracker.CurrentTarget != null && MyPlayer.CanMove;
-                favoriteButton.Visibility = (button) => !MyPlayer.IsDead && LeftFavorite > 0;
-                var favoriteIcon = favoriteButton.ShowUsesIcon(4);
-                favoriteIcon.text = LeftFavorite.ToString();
-                favoriteButton.OnClick = (button) =>
-                {
-                    playerTracker.CurrentTarget?.RealPlayer.AddModifier(ScarletLover.MyRole, [FlirtatiousId, 1]);
-                    LeftFavorite--;
+                    favoriteButton = new Modules.ScriptComponents.ModAbilityButtonImpl().KeyBind(Virial.Compat.VirtualKeyInput.SecondaryAbility).Register(this);
+                    favoriteButton.SetSprite(favoriteButtonSprite.GetSprite());
+                    favoriteButton.Availability = (button) => playerTracker.CurrentTarget != null && MyPlayer.CanMove;
+                    favoriteButton.Visibility = (button) => !MyPlayer.IsDead && LeftFavorite > 0;
+                    var favoriteIcon = favoriteButton.ShowUsesIcon(4);
                     favoriteIcon.text = LeftFavorite.ToString();
-                    flirtButton.StartCoolDown();
-                    favoriteButton.StartCoolDown();
+                    favoriteButton.OnClick = (button) =>
+                    {
+                        playerTracker.CurrentTarget?.RealPlayer.AddModifier(ScarletLover.MyRole, [FlirtatiousId, 1]);
+                        LeftFavorite--;
+                        favoriteIcon.text = LeftFavorite.ToString();
+                        flirtButton.StartCoolDown();
+                        favoriteButton.StartCoolDown();
 
-                    CheckAndClearAch1(true);
+                        CheckAndClearAch1(true);
 
-                    OnAddLover(playerTracker.CurrentTarget?.RealPlayer!, true);
-                };
-                favoriteButton.CoolDownTimer = new TimerImpl(2f).SetAsAbilityCoolDown().Start().Register(this);
-                favoriteButton.SetLabel("favorite");
+                        OnAddLover(playerTracker.CurrentTarget?.RealPlayer!, true);
+                    };
+                    favoriteButton.CoolDownTimer = new TimerImpl(2f).SetAsAbilityCoolDown().Start().Register(this);
+                    favoriteButton.SetLabel("favorite");
+                }
 
                 bool usedInTheMeeting = true;
                 var meetingButton = new Modules.ScriptComponents.ModAbilityButtonImpl(alwaysShow: true).Register(this);
@@ -279,22 +292,22 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole, IAssignableDocument
         }
 
         [NonEventListener]
-        void TryOverwrite(EndCriteriaMetBaseEvent ev)
+        void TryOverwrite(EndCriteriaMetBaseEvent ev, int? priority = null)
         {
             var favorite = GetMyFavorite();
             if (favorite == null) return;
             if (WithFavoriteGauge && !FavoriteGaugeMeetCondition) return; //ゲージがたまりきっていなければ乗っ取らない。
             if (!CanOverrideTaskWin && ev.OriginalEndReason == GameEndReason.Task) return;//タスク勝利の乗っ取り
-            if (!MyPlayer.IsDead && !favorite.IsDead && ev.OriginalWinners.Test(favorite)) ev.TryOverwriteEnd(NebulaGameEnd.ScarletWin, GameEndReason.Special);
+            if (!MyPlayer.IsDead && !favorite.IsDead && ev.OriginalWinners.Test(favorite)) ev.TryOverwriteEnd(NebulaGameEnd.ScarletWin, priority ?? NebulaGameEnd.ScarletWin.Priority, GameEndReason.Special);
         }
         void OnCheckGameEnd(EndCriteriaMetEvent ev) => TryOverwrite(ev);
 
-        void OnCheckGameEnd(EndCriteriaOverwrittenEvent ev)
+        void OnCheckGameOverwritten(EndCriteriaOverwrittenEvent ev)
         {
             var favorite = GetMyFavorite();
-            if (ev.OriginalGameEnd == NebulaGameEnd.AvengerWin && favorite?.Role == Avenger.MyRole && ev.OriginalWinners.Test(favorite))
+            if (ev.OriginalGameEnd == NebulaGameEnd.AvengerWin && favorite?.Role.Role == Avenger.MyRole && ev.OriginalWinners.Test(favorite))
             {
-                TryOverwrite(ev);
+                TryOverwrite(ev, NebulaGameEnd.AvengerWin.Priority + 1);
             }
         }
 
@@ -474,7 +487,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 }
 
 
-public class ScarletLover : DefinedModifierTemplate, DefinedModifier
+public class ScarletLover : DefinedModifierTemplate, DefinedAllocatableModifier, RoleFilter, DefinedModifier
 {
     private ScarletLover() : base("scarletLover", Scarlet.MyTeam.Color, [], true, ()=>false)
     {
@@ -483,6 +496,49 @@ public class ScarletLover : DefinedModifierTemplate, DefinedModifier
     static public ScarletLover MyRole = new ScarletLover();
     Image? DefinedAssignable.IconImage => Scarlet.MyRole.GetRoleIcon();
     RuntimeModifier RuntimeAssignableGenerator<RuntimeModifier>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments.Get(0, 0), arguments.Get(1, 0) == 1);
+
+    void HasAssignmentRoutine.TryAssign(Virial.Assignable.IRoleTable roleTable)
+    {
+        if (Scarlet.PreAssignedLovers)
+        {
+            int lovers = Scarlet.NumOfKept + 1;
+            foreach(var scarlet in roleTable.GetPlayers(Scarlet.MyRole))
+            {
+                var cand = roleTable.GetAllPlayers().Where(p => p.playerId != scarlet && p.role.CanLoad(this)).Shuffle().ToArray();
+                for(int i = 0; i < lovers; i++)
+                {
+                    if (i >= cand.Length) break;
+                    roleTable.SetModifier(cand[i].playerId, MyRole, [scarlet, i == 0 ? 1 : 0]);
+                }
+            }
+        }
+    }
+
+    SpecialAssignment[] DefinedAllocatableModifier.SpecialAssignment
+    { get
+        {
+            if (!Scarlet.PreAssignedLovers) return [];
+            var param = Scarlet.MyRole.GetAssignmentParameter();
+            if (param.count == 0) return [];
+            return [new(this, param.count * (Scarlet.NumOfKept + 1), param.chance, param.secondaryCount * (Scarlet.NumOfKept + 1), param.secondaryChance)];
+        } 
+    }
+
+    bool ISpawnable.IsSpawnable => (Scarlet.MyRole as ISpawnable).IsSpawnable;
+    string ICodeName.CodeName => "SLV";
+
+    bool AssignableFilter<DefinedRole>.Test(DefinedRole role) => role.ModifierFilter?.Test(this) ?? false;
+    void AssignableFilter<DefinedRole>.ToggleAndShare(DefinedRole role) => role.ModifierFilter?.ToggleAndShare(this);
+    void AssignableFilter<DefinedRole>.SetAndShare(Virial.Assignable.DefinedRole role, bool val) => role.ModifierFilter?.SetAndShare(this, val);
+    RoleFilter HasRoleFilter.RoleFilter => this;
+    int HasAssignmentRoutine.AssignPriority => 1;
+
+    void IAssignToCategorizedRole.GetAssignProperties(RoleCategory category, out int assign100, out int assignRandom, out int assignChance)
+    {
+        assign100 = 0;
+        assignRandom = 0;
+        assignChance = 0;
+    }
 
     public class Instance : RuntimeAssignableTemplate, RuntimeModifier
     {
@@ -501,10 +557,6 @@ public class ScarletLover : DefinedModifierTemplate, DefinedModifier
         }
 
         void RuntimeAssignable.OnActivated() {
-            if (AmOwner && GeneralConfigurations.ScarletRadioOption)
-            {
-                ModSingleton<NoSVCRoom>.Instance?.RegisterRadioChannel(Language.Translate("voiceChat.info.scarletRadio"), 3, IsMyScarlet, this, MyRole.Color);
-            }
         }
 
         void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo, bool inEndScene)

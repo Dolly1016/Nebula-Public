@@ -365,7 +365,7 @@ public static class EnterCodeMinigameAcceptDigitsPatch
 {
     public static void Prefix(EnterCodeMinigame __instance)
     {
-        if (__instance.NumberText.text.Length != 5) __instance.number = 0;
+        if (!__instance.animating && __instance.NumberText.text.Length != 5) __instance.number = 0;
     }
 }
 
@@ -375,7 +375,7 @@ public static class KeypadGameEnterPatch
 {
     public static void Prefix(KeypadGame __instance)
     {
-        if (__instance.NumberText.text.Length != 5) __instance.number = 0;
+        if (!__instance.animating && __instance.NumberText.text.Length != 5) __instance.number = 0;
     }
 }
 
@@ -385,7 +385,7 @@ public static class AirshipAuthGameEnterPatch
 {
     public static void Prefix(AirshipAuthGame __instance)
     {
-        if (__instance.NumberText.text.Length != 5) __instance.number = 0;
+        if (!__instance.animating && __instance.NumberText.text.Length != 5) __instance.number = 0;
     }
 }
 
@@ -395,6 +395,6 @@ public static class AuthGameEnterPatch
 {
     public static void Prefix(AuthGame __instance)
     {
-        if (__instance.NumberText.text.Length != 5) __instance.number = 0;
+        if (!__instance.animating && __instance.NumberText.text.Length != 5) __instance.number = 0;
     }
 }

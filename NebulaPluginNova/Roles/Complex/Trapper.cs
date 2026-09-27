@@ -46,7 +46,10 @@ file static class TrapperSystem
             NebulaGameManager.Instance?.RpcDoGameAction(myRole.MyPlayer, myRole.MyPlayer.Position, myRole.MyPlayer.IsImpostor ? Trapper.EvilTrapPlacementAction : Trapper.NiceTrapPlacementAction);
 
             placeButton.StartCoolDown();
-            localTraps.Add(Trapper.Trap.GenerateTrap(buttonVariation[buttonIndex].id, pos!.Value));
+
+            var placed = Trapper.Trap.GenerateTrap(buttonVariation[buttonIndex].id, pos!.Value);
+            localTraps.Add(placed);
+            Trapper.RpcPlaceTrap.Invoke((placed.ObjectId, placed.TypeId, placed.Position));
             leftCost -= buttonVariation[buttonIndex].cost;
             button.UpdateUsesIcon(leftCost.ToString());
 
@@ -73,7 +76,7 @@ file static class TrapperSystem
     {
         foreach (var lTrap in localTraps)
         {
-            var gTrap = NebulaSyncObject.RpcInstantiate(Trapper.Trap.MyGlobalTag, [lTrap.TypeId, lTrap.Position.x, lTrap.Position.y])?.SyncObject as Trapper.Trap;
+            var gTrap = NebulaSyncObject.RpcInstantiate(Trapper.Trap.MyGlobalTag, [lTrap.TypeId, lTrap.Position.x, lTrap.Position.y, lTrap.ObjectId])?.SyncObject as Trapper.Trap;
             gTrap?.SetAsOwner();
             NebulaSyncObject.LocalDestroy(lTrap.ObjectId);
             if (gTrap?.TypeId is KillTrapId or CommTrapId) specialTraps?.Add(gTrap!);
@@ -180,6 +183,10 @@ public class Trapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
         static internal Image GetTrapSprite(int index) => trapSprites[index];
 
         public int TypeId;
+
+        /// <summary>置いた時に配った記録の識別子。手元だけのトラップでは0。</summary>
+        public int TrackerId;
+
         private float lastAccelTime = 0f;
         public Trap(Vector2 pos,int type, bool isLocal) : base(pos, ZOption.Back, true, trapSprites[type].GetSprite(), isLocal) {
             TypeId = type;
@@ -193,9 +200,18 @@ public class Trapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
             if (!(Color.A > 0f)) Color = VColor.White;
         }
 
+        public override void OnInstantiated()
+        {
+            base.OnInstantiated();
+
+            //加速・減速トラップは全体公開と同時に周りからも見えるようになる。
+            if (TrackerId != 0 && TypeId < 2)
+                ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance?.Find(TrackerId)?.SetHidden(false);
+        }
+
         static Trap()
         {
-            NebulaSyncObject.RegisterInstantiater(MyGlobalTag, (args) => new Trap(new(args[1], args[2]), (int)args[0], false));
+            NebulaSyncObject.RegisterInstantiater(MyGlobalTag, (args) => new Trap(new(args[1], args[2]), (int)args[0], false) { TrackerId = args.Length > 3 ? (int)args[3] : 0 });
             NebulaSyncObject.RegisterInstantiater(MyLocalTag, (args) => new Trap(new(args[1], args[2]), (int)args[0], true));
         }
 
@@ -208,6 +224,11 @@ public class Trapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
         {
             Sprite = trapSprites[4].GetSprite();
             Color = VColor.White;
+
+            //使った跡は周りからも見える。
+            var tracker = ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance?.Find(TrackerId);
+            tracker?.SetStage(1);
+            tracker?.SetHidden(false);
         }
 
         void Update(GameUpdateEvent ev)
@@ -361,6 +382,20 @@ public class Trapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
         }
 
     }
+
+    /// <summary>
+    /// トラップを置いたことを知らせる。置いた本人だけが送る。
+    /// </summary>
+    /// <remarks>会議まで周りには見えないので、記録の上でも見えていない扱いで始める。</remarks>
+    static internal RemoteProcess<(int trapId, int typeId, VVector2 position)> RpcPlaceTrap = new(
+        "PlaceTrap",
+        (message, _) =>
+        {
+            var kinds = Nebula.Game.Statistics.MapObjectKinds.Traps;
+            var kind = kinds[Mathn.Clamp(message.typeId, 0, kinds.Length - 1)];
+            ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance?.Spawn(kind, message.position, hidden: true, id: message.trapId);
+        }
+        );
 
     static private RemoteProcess<int> RpcTrapKill = new(
         "UseKillTrap",

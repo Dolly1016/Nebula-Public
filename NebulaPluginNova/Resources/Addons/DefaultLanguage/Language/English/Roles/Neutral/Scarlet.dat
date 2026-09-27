@@ -33,6 +33,7 @@
 "options.role.scarlet.gaugeReductionRatio" : "Reduction Ratio"
 "options.role.scarlet.gaugeReductionRatio.detail" : "While not near the favorite, the gauge decreases at a speed multiplied by this set value to the filling speed.<br>At 1x, it decreases at the same speed as the filling speed. A value less than 1 is recommended."
 "options.role.scarlet.canLocateLovers" : "Can Locate Lovers"
+"options.role.scarlet.preAssignedLovers" : "Pre-assigned Lovers"　
 "options.role.scarlet.group.gauge" : "Gauge Option"
 
 # Game

@@ -113,6 +113,9 @@ public class UtilityInvalidationSystem : AbstractModule<Virial.Game.Game>, IGame
 
     public void InvalidateVent(Vent vent, int level, int graphicLevel = -1)
     {
+        //テープ止まりだった段から、封鎖済みの段へ進む。
+        ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance?.FindVent(vent.Id)?.SetStage(2);
+
         if (ventMap.ContainsKey(vent.Id)) return;
 
         var invalidator = vent.gameObject.AddComponent<InvalidVent>();
@@ -122,6 +125,8 @@ public class UtilityInvalidationSystem : AbstractModule<Virial.Game.Game>, IGame
 
     public void ReactivateVent(InvalidVent vent)
     {
+        ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance?.FindVent(vent.Vent.Id)?.SetStage(0);
+
         var ventId = vent.Vent.Id;
         vent.Reactivate();
         GameObject.Destroy(vent);

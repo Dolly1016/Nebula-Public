@@ -24,7 +24,7 @@ namespace Nebula.Game.Statistics;
 internal sealed class GameRecord : IArchivedGameData
 {
     /// <summary>この形式の版番号。</summary>
-    public const int CurrentVersion = 13;
+    public const int CurrentVersion = 15;
 
     /// <summary>
     /// 読み書きに使う設定。プロパティ名はキャメルケース、列挙子は名前で書く。
@@ -63,6 +63,12 @@ internal sealed class GameRecord : IArchivedGameData
     /// <summary>ゲーム中に起きた出来事。古い順。</summary>
     public IReadOnlyList<ArchivedGameEventRecord> Events { get; set; } = [];
 
+    /// <summary>マップ上に現れた物。現れた順。</summary>
+    public IReadOnlyList<ArchivedMapObject> MapObjects { get; set; } = [];
+
+    /// <summary>投票の結果。古い順。</summary>
+    public IReadOnlyList<ArchivedVoteResult> VoteResults { get; set; } = [];
+
     private IReadOnlyList<ArchivedMovementPhase>? movementPhases = null;
 
     /// <summary>タスクフェイズごとのプレイヤーの足取り。古い順。</summary>
@@ -88,6 +94,8 @@ internal sealed class GameRecord : IArchivedGameData
         PlayerResults = game.PlayerResults.ToArray(),
         Movement = CompressedJson.Compress(game.MovementPhases.ToArray(), SerializerOptions),
         Events = game.Events.ToArray(),
+        MapObjects = game.MapObjects.ToArray(),
+        VoteResults = game.VoteResults.ToArray(),
     };
 
     public string ToJson() => JsonSerializer.Serialize(this, SerializerOptions);

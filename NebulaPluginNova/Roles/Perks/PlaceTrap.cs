@@ -36,6 +36,9 @@ internal class PlaceTrap : PerkFunctionalInstance
         this.pos = pos;
         obj = NebulaSyncObject.LocalInstantiate(Complex.Trapper.Trap.MyLocalTag, [isAccel ? 0 : 1, pos.x, pos.y]);
         used = true;
+
+        //ここも置いた本人しか知らない。会議が終わるまで周りには見えない。
+        Complex.Trapper.RpcPlaceTrap.Invoke((obj.ObjectId, isAccel ? 0 : 1, (VVector2)pos));
     }
 
     void OnUpdate(GameHudUpdateEvent ev)
@@ -47,7 +50,7 @@ internal class PlaceTrap : PerkFunctionalInstance
     {
         if(obj != null)
         {
-            NebulaSyncObject.RpcInstantiate(Complex.Trapper.Trap.MyGlobalTag, [isAccel ? 0 : 1, pos.x, pos.y]);
+            NebulaSyncObject.RpcInstantiate(Complex.Trapper.Trap.MyGlobalTag, [isAccel ? 0 : 1, pos.x, pos.y, obj.ObjectId]);
             NebulaSyncObject.LocalDestroy(obj.ObjectId);
         }
     }

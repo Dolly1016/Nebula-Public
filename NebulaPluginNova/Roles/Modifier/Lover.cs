@@ -232,10 +232,7 @@ public class Lover : DefinedModifierTemplate, DefinedAllocatableModifier, HasCit
         {
             if (AmOwner)
             {
-                if (GeneralConfigurations.LoversRadioOption)
-                {
-                    ModSingleton<NoSVCRoom>.Instance?.RegisterRadioChannel(Language.Translate("voiceChat.info.loversRadio"), 2, p => p == MyLover.Get(), this, MyRole.Color);
-                }
+                ModSingleton<RadioManager>.Instance?.Register(RadioKind.Lovers, Language.Translate("voiceChat.info.loversRadio"), p => p == MyLover.Get(), this, MyRole.Color);
             }
         }
 

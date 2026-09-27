@@ -193,6 +193,11 @@ public static class MeetingModRpc
         GameOperatorManager.Instance?.Run(new PlayerVotedLocalEvent(GamePlayer.LocalPlayer, votedBy!));
         GameOperatorManager.Instance?.Run(new MeetingVoteDisclosedEvent(firstStates.ToArray(), readonlyStates));
 
+        NebulaGameManager.Instance?.GameStatistics.RecordVoteResult(new Virial.Game.ArchivedVoteResult(
+            NebulaGameManager.Instance.CurrentTime,
+            [.. firstStates.Select(s => new Virial.Game.ArchivedVoteCast(s.VoterId, s.VotedForId))],
+            [.. mapList.Select(m => new Virial.Game.ArchivedVoteSwap(m.playerFrom, m.playerTo))]));
+
         meetingHud.exiledPlayer = Helpers.GetPlayer(exiled)?.Data;
         meetingHud.wasTie = tie;
         MeetingHudExtension.ExiledAllModCache = exiledAll.Select(p => GamePlayer.GetPlayer(p)!).ToArray();
@@ -666,6 +671,9 @@ class MeetingHudUpdatePatch
                     MeetingHudExtension.ResultTimer -= FastMethods.GetDeltaTimeFast();
                     __instance.UpdateTimerText(StringNames.MeetingProceeds, Mathn.CeilToInt(MeetingHudExtension.ResultTimer));
                     if (AmongUsLLImpl.AmongUsClientInstance.AmHost && MeetingHudExtension.ResultTimer <= 0f) __instance.HandleProceed();
+                }
+                foreach(var area in __instance.playerStates) {
+                    if (area.Flag.enabled) area.Flag.enabled = false;
                 }
                 break;
         }

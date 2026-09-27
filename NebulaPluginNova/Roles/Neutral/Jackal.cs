@@ -296,12 +296,8 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignable
                     }
                 }, this);
 
-                if (GeneralConfigurations.JackalRadioOption)
-                {
-                    ModSingleton<NoSVCRoom>.Instance?.RegisterRadioChannel(Language.Translate("voiceChat.info.jackalRadio"), 1, IsMySidekick, this, MyRole.Color);
-                }
+                ModSingleton<RadioManager>.Instance?.Register(RadioKind.Jackal, Language.Translate("voiceChat.info.jackalRadio"), IsMySidekick, this, MyRole.Color);
             }
-
             JackalizedAbility = MyJackalized?.GetAbilityOnRole(MyPlayer, AbilityAssignmentStatus.CanLoadToKillNeutral, StoredJackalizedArgument)?.Register(this);
         }
 
@@ -508,7 +504,8 @@ public class Sidekick : DefinedRoleTemplate, HasCitation, DefinedRole
                 {
                     var killButton = NebulaAPI.Modules.PlayerlikeKillButton(this, MyPlayer, true, Virial.Compat.VirtualKeyInput.Kill,
                         null, KillCoolDownOption.Cooldown, "kill", ModAbilityButton.LabelType.Impostor, null!,
-                        (player, _) => {
+                        (player, _) =>
+                        {
                             MyPlayer.MurderPlayer(player, PlayerState.Dead, EventDetail.Kill, KillParameter.NormalKill);
                             NebulaAPI.CurrentGame?.KillButtonLikeHandler.StartCooldown();
                         }
@@ -524,10 +521,7 @@ public class Sidekick : DefinedRoleTemplate, HasCitation, DefinedRole
                     suicideButton.SetLabelType(Virial.Components.ModAbilityButton.LabelType.Impostor);
                 }
 
-                if (GeneralConfigurations.JackalRadioOption)
-                {
-                    ModSingleton<NoSVCRoom>.Instance?.RegisterRadioChannel(Language.Translate("voiceChat.info.jackalRadio"), 1, p=> p.Role is Jackal.Instance jackal && jackal.JackalTeamId == JackalTeamId, this, MyRole.Color);
-                }
+                ModSingleton<RadioManager>.Instance?.Register(RadioKind.Jackal, Language.Translate("voiceChat.info.jackalRadio"), p => p.Role is Jackal.Instance jackal && jackal.JackalTeamId == JackalTeamId, this, MyRole.Color);
             }
         }
 
@@ -613,9 +607,8 @@ public class SidekickModifier : DefinedModifierTemplate, HasCitation, DefinedMod
                 AmongUsUtil.PlayCustomFlash(Jackal.MyRole.Color, 0f, 0.25f, 0.4f);
                 SidekickAchievementChecker.TriggerSidekickChallenge(MyPlayer);
 
-                if (GeneralConfigurations.JackalRadioOption)
                 {
-                    ModSingleton<NoSVCRoom>.Instance?.RegisterRadioChannel(Language.Translate("voiceChat.info.jackalRadio"), 1, p => p.Role is Jackal.Instance jackal && jackal.JackalTeamId == JackalTeamId, this, MyRole.Color);
+                    ModSingleton<RadioManager>.Instance?.Register(RadioKind.Jackal, Language.Translate("voiceChat.info.jackalRadio"), p => p.Role is Jackal.Instance jackal && jackal.JackalTeamId == JackalTeamId, this, MyRole.Color);
                 }
 
                 if (MyPlayer.Role.Role.Category == RoleCategory.ImpostorRole && MyPlayer.TryGetModifier<Lover.Instance>(out _))

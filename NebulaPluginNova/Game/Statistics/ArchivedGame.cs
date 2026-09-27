@@ -36,6 +36,8 @@ internal class ArchivedGameImpl : IArchivedGame
     private ArchivedPlayerResult[] playerResults;
     private ArchivedMovementPhase[] movementPhases;
     private ArchivedGameEventRecord[] eventRecords;
+    private ArchivedMapObject[] mapObjects;
+    private ArchivedVoteResult[] voteResults;
     IReadOnlyList<RoleHistory> IArchivedGame.RoleHistory => roleHistory;
 
     IArchivedEvent[] IArchivedGame.ArchivedEvents => events;
@@ -54,6 +56,10 @@ internal class ArchivedGameImpl : IArchivedGame
 
     IReadOnlyList<ArchivedGameEventRecord> IArchivedGameData.Events => eventRecords;
 
+    IReadOnlyList<ArchivedMapObject> IArchivedGameData.MapObjects => mapObjects;
+
+    IReadOnlyList<ArchivedVoteResult> IArchivedGameData.VoteResults => voteResults;
+
     IEnumerable<IArchivedPlayer> IArchivedGame.GetAllPlayers() => players.Values;
 
     IArchivedPlayer? IArchivedGame.GetPlayer(byte playerId) => players.TryGetValue(playerId, out var p) ? p : null;
@@ -68,6 +74,8 @@ internal class ArchivedGameImpl : IArchivedGame
         events = game.GameStatistics.Sealed;
         eventRecords = [.. events.Select(ArchivedGameEventRecord.FromEvent)];
         movementPhases = [.. ModSingleton<MovementRecorder>.Instance?.Phases ?? []];
+        mapObjects = [.. ModSingleton<MapObjectRecorder>.Instance?.ToArchive() ?? []];
+        voteResults = [.. game.GameStatistics.VoteResults];
         roleHistory = game.RoleHistory;
         mapId = NebulaAPI.AmongUs.MapId;
         startedAtUtc = game.StartedAtUtc;
@@ -95,6 +103,8 @@ internal class ArchivedGameImpl : IArchivedGame
         playerResults = data.PlayerResults.ToArray();
         movementPhases = data.MovementPhases.ToArray();
         eventRecords = data.Events.ToArray();
+        mapObjects = data.MapObjects.ToArray();
+        voteResults = data.VoteResults.ToArray();
         events = [];
         roleHistory = [];
         mapId = data.MapId;

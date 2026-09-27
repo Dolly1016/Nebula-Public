@@ -31,6 +31,27 @@ public class GameUpdateEvent : AbstractGameEvent
     }
 }
 
+[RecyclableEvent]
+public class GameInfrequentUpdateEvent : AbstractGameEvent
+{
+    public const float Interval = 0.25f;
+    public float DeltaTime { get; private set; }
+    public float GameTime { get; private set; }
+    public float ProcessTime { get; private set; }
+
+    private GameInfrequentUpdateEvent() : base(null!) { }
+
+    static private GameInfrequentUpdateEvent ev = new();
+    static internal GameInfrequentUpdateEvent Get(Virial.Game.Game game, float deltaTime, float gameTime, float processTime)
+    {
+        ev.Recycle(game);
+        ev.DeltaTime = deltaTime;
+        ev.GameTime = gameTime;
+        ev.ProcessTime = processTime;
+        return ev;
+    }
+}
+
 /// <summary>
 /// 毎ティック発火します。
 /// </summary>

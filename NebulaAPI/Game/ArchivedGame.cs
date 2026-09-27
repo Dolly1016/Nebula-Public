@@ -161,43 +161,14 @@ public record ArchivedGameEnd(IReadOnlyList<ArchivedGameEndStage> Stages)
 public enum ArchivedMovementState
 {
     None = 0,
-
-    /// <summary>死亡している。切断も死亡として扱われる。</summary>
     Dead = 1,
-
-    /// <summary>
-    /// 姿が見えない状態にある。
-    /// </summary>
-    /// <remarks>
-    /// 記録した端末から見た可視性なので、同じゲームでも端末によって値が変わる。
-    /// 以降の状態は端末に依らない。
-    /// </remarks>
     Invisible = 2,
-
-    /// <summary>ベントの中にいる。</summary>
     InVent = 4,
-
-    /// <summary>地中に潜っている。</summary>
     Dived = 8,
-
-    /// <summary>吹き飛ばされている。</summary>
     Blown = 16,
-
-    /// <summary>はしごや動く床で運ばれている。自力で動いていない。</summary>
-    Riding = 32,
+    Riding = 32, // はしご、ぬーん使用中
 }
 
-/// <summary>
-/// プレイヤー1人ぶんの、あるタスクフェイズ中の足取りを表します。
-/// </summary>
-/// <param name="PlayerId">対象のプレイヤー。</param>
-/// <param name="Points">
-/// 座標を x, y, x, y… の順に並べたもの。小数第1位まで。
-/// i 番目の点は <c>Points[i * 2]</c> と <c>Points[i * 2 + 1]</c> です。
-/// </param>
-/// <param name="States">
-/// 各点での状態。<see cref="ArchivedMovementState"/> の値を並べたもの。
-/// </param>
 public record ArchivedMovementTrack(byte PlayerId, IReadOnlyList<float> Points, IReadOnlyList<int> States)
 {
     public IReadOnlyList<float> Points { get; init; } = Points ?? [];
@@ -212,18 +183,6 @@ public record ArchivedMovementTrack(byte PlayerId, IReadOnlyList<float> Points, 
         index < 0 || index >= States.Count ? ArchivedMovementState.None : (ArchivedMovementState)States[index];
 }
 
-/// <summary>
-/// ニセモノ1体ぶんの足取りを表します。
-/// </summary>
-/// <remarks>
-/// ニセモノは途中で湧いて途中で消えるので、本物と違って記録が区切りの全体には及びません。
-/// <paramref name="StartIndex"/> が、その区切りの何点目から現れたかを表します。
-/// </remarks>
-/// <param name="FakeId">ニセモノの識別子。本物のプレイヤーIDとは重なりません。</param>
-/// <param name="OwnerId">呼び出したプレイヤー。分からない場合は null。</param>
-/// <param name="ReasonTranslationKey">湧いた理由の翻訳キー。無ければ空。</param>
-/// <param name="Color">見た目の配色。取得できない場合は null。</param>
-/// <param name="StartIndex">その区切りの何点目から記録が始まるか。</param>
 public record ArchivedFakeTrack(int FakeId, byte? OwnerId, string ReasonTranslationKey, ArchivedPlayerColor? Color, int StartIndex, IReadOnlyList<float> Points, IReadOnlyList<int> States)
 {
     public string ReasonTranslationKey { get; init; } = ReasonTranslationKey ?? "";
@@ -244,10 +203,15 @@ public record ArchivedFakeTrack(int FakeId, byte? OwnerId, string ReasonTranslat
 /// </param>
 /// <param name="Tracks">プレイヤーごとの足取り。点の数はどれも同じになります。</param>
 /// <param name="FakeTracks">ニセモノごとの足取り。湧き消えするので点の数はまちまちです。</param>
-public record ArchivedMovementPhase(float StartTime, float Interval, IReadOnlyList<ArchivedMovementTrack> Tracks, IReadOnlyList<ArchivedFakeTrack>? FakeTracks = null)
+/// <param name="InitialObjectIds">
+/// この区切りが始まった時点で残っていたマップオブジェクトの識別子。
+/// 時刻からも割り出せますが、ターン単位で見るときに全体を辿らずに済むよう持たせています。
+/// </param>
+public record ArchivedMovementPhase(float StartTime, float Interval, IReadOnlyList<ArchivedMovementTrack> Tracks, IReadOnlyList<ArchivedFakeTrack>? FakeTracks = null, IReadOnlyList<int>? InitialObjectIds = null)
 {
     public IReadOnlyList<ArchivedMovementTrack> Tracks { get; init; } = Tracks ?? [];
     public IReadOnlyList<ArchivedFakeTrack> FakeTracks { get; init; } = FakeTracks ?? [];
+    public IReadOnlyList<int> InitialObjectIds { get; init; } = InitialObjectIds ?? [];
 }
 
 /// <summary>
@@ -288,6 +252,82 @@ public record ArchivedGameEventRecord(int VariationId, float Time, byte? SourceI
     }
 }
 
+/// <summary>
+/// 動くマップオブジェクトが、ある時点にいた場所。
+/// </summary>
+public record ArchivedVoteCast(byte VoterId, byte VotedForId);
+
+public record ArchivedVoteSwap(byte From, byte To);
+
+/// <summary>
+/// 1回の投票の結果。
+/// </summary>
+/// <param name="Time">結果が開示されたゲーム内時刻(秒)。</param>
+/// <param name="Votes">すり替え前の票。重みのぶんだけ同じ投票者が並びます。投票者が255の票は同数時の追加票です。</param>
+/// <param name="Swaps">投票先のすり替え。すり替え後の票はここから割り出せます。</param>
+public record ArchivedVoteResult(float Time, IReadOnlyList<ArchivedVoteCast> Votes, IReadOnlyList<ArchivedVoteSwap> Swaps)
+{
+    public IReadOnlyList<ArchivedVoteCast> Votes { get; init; } = Votes ?? [];
+    public IReadOnlyList<ArchivedVoteSwap> Swaps { get; init; } = Swaps ?? [];
+}
+
+public record ArchivedMapObjectMove(float Time, float X, float Y);
+
+/// <summary>
+/// マップに現れた物の、その時々のありさま。
+/// </summary>
+/// <remarks>
+/// 1つの整数に詰めています。下位1ビットが見え方、その上が絵の段です。
+/// どこを使うかは、その種類が持つ性質で決まります。
+/// </remarks>
+public static class ArchivedMapObjectState
+{
+    /// <summary>置いた本人以外には見えていない、を表す位。</summary>
+    public const int Hidden = 1;
+
+    /// <summary>絵の段が始まる位。</summary>
+    public const int StageShift = 1;
+
+    public static bool IsHidden(int state) => (state & Hidden) != 0;
+
+    /// <summary>何枚目の絵で描くか。0 が既定。</summary>
+    public static int StageOf(int state) => state >> StageShift;
+
+    public static int Of(bool hidden, int stage) => (hidden ? Hidden : 0) | (stage << StageShift);
+}
+
+/// <summary>ありさまが変わった瞬間。</summary>
+public record ArchivedMapObjectChange(float Time, int State);
+
+/// <summary>
+/// マップ上に現れたオブジェクトの記録。
+/// </summary>
+/// <param name="ObjectId">この物の識別子。</param>
+/// <param name="OwnerId">持ち主のプレイヤーID。</param>
+/// <param name="KindId">種類。アイコンや性質はこの名前から引きます。</param>
+/// <param name="SpawnTime">現れたときのゲーム内時刻(秒)。</param>
+/// <param name="DespawnTime">消えたときのゲーム内時刻(秒)。残ったままなら null。</param>
+/// <param name="X">現れた場所。</param>
+/// <param name="Y">現れた場所。</param>
+/// <param name="VelocityX">等速で動く物の速度。それ以外は 0。</param>
+/// <param name="VelocityY">等速で動く物の速度。それ以外は 0。</param>
+/// <param name="Angle">向きを持つ物の角度(度)。それ以外は 0。</param>
+/// <param name="State">現れたときのありさま。</param>
+/// <param name="Changes">ありさまが変わった記録。変わったときだけ点が増えます。</param>
+/// <param name="FlipX">左右反転して描くか。</param>
+/// <param name="FlipY">上下反転して描くか。</param>
+/// <param name="Moves">動きうる対象。動いたときだけ点が増えます。</param>
+public record ArchivedMapObject(
+    int ObjectId, string KindId, float SpawnTime, float? DespawnTime,
+    float X, float Y, float VelocityX, float VelocityY, float Angle,
+    bool FlipX, bool FlipY, IReadOnlyList<ArchivedMapObjectMove> Moves,
+    int State = 0, IReadOnlyList<ArchivedMapObjectChange>? Changes = null, byte? OwnerId = null)
+{
+    public string KindId { get; init; } = KindId ?? "";
+    public IReadOnlyList<ArchivedMapObjectMove> Moves { get; init; } = Moves ?? [];
+    public IReadOnlyList<ArchivedMapObjectChange> Changes { get; init; } = Changes ?? [];
+}
+
 public interface IArchivedGameData
 {
     byte MapId { get; }
@@ -301,6 +341,12 @@ public interface IArchivedGameData
 
     /// <summary>ゲーム中に起きた出来事。古い順。</summary>
     IReadOnlyList<ArchivedGameEventRecord> Events { get; }
+
+    /// <summary>マップ上に現れた物。現れた順。</summary>
+    IReadOnlyList<ArchivedMapObject> MapObjects { get; }
+
+    /// <summary>投票の結果。古い順。</summary>
+    IReadOnlyList<ArchivedVoteResult> VoteResults { get; }
 }
 
 public interface IArchivedGame : IArchivedGameData
@@ -319,7 +365,10 @@ public interface IArchivedEventVariation
     Media.Image? InteractionIcon { get; }
     bool ShowPlayerPosition { get; }
     bool CanCombine { get; }
+    bool IsShownInGame { get; }
+    bool IsTrivial { get; }
 }
+
 public interface IArchivedEvent
 {
     IArchivedEventVariation EventVariation { get; }

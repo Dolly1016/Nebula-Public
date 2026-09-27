@@ -29,6 +29,14 @@ public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, Defi
 
         public const string MyTag = "Thuribulum";
 
+        private Nebula.Game.Statistics.MapObjectTracker? tracker;
+
+        public override void OnInstantiated()
+        {
+            base.OnInstantiated();
+            tracker = ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance?.Spawn(Nebula.Game.Statistics.MapObjectKinds.Censer, Position, id: ObjectId);
+        }
+
         int activeSpriteIndex = 0;
         float activeAnimTimer = 0f;
         private EffectCircle? activatedCircle = null;
@@ -61,6 +69,9 @@ public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, Defi
 
         void Update(GameUpdateEvent ev)
         {
+            //活性化している間だけ絵が変わる。変化が無ければ記録は増えない。
+            tracker?.SetStage(IsActive ? 1 : 0);
+
             //会議及び追放中でなく、アクティブならばタイマーを進めてアニメーションをさせる。
             if (activeTimer > 0f)
             {

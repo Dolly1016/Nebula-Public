@@ -30,12 +30,6 @@ public static class UpdateGameOptionRegionTextPatch
     }
 }
 
-[HarmonyPatch(typeof(ServerManager), nameof(ServerManager.SetRegion))]
-public static class RememberRegionPatch
-{
-    public static void Postfix([HarmonyArgument(0)] IRegionInfo region) => CustomServerLoader.RememberRegion(region);
-}
-
 [HarmonyPatch(typeof(ServerDropdown), nameof(ServerDropdown.FillServerOptions))]
 public static class ServerDropdownPatch
 {
@@ -74,7 +68,11 @@ public static class ServerDropdownPatch
                 serverListButton.Text.text = regionInfo.ModTranslatedName();
                 serverListButton.Text.ForceMeshUpdate(false, false);
                 serverListButton.Button.OnClick.RemoveAllListeners();
-                serverListButton.Button.OnClick.AddListener(() => __instance.ChooseOption(region));
+                serverListButton.Button.OnClick.AddListener(() =>
+                {
+                    __instance.ChooseOption(region);
+                    CustomServerLoader.UpdateLastRegion();
+                });
                 buttons.Add(serverListButton);
                 __instance.controllerSelectable.Add(serverListButton.Button);
                 num++;

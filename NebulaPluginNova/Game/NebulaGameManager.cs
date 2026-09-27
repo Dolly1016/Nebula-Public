@@ -382,6 +382,8 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     IReadOnlyList<ArchivedPlayerResult> IArchivedGameData.PlayerResults => AllPlayerInfo.OrderBy(p => p.PlayerId).Select(p => ArchivedPlayerResult.FromPlayer(p, ColorOf(p))).ToArray();
     IReadOnlyList<ArchivedMovementPhase> IArchivedGameData.MovementPhases => ModSingleton<Statistics.MovementRecorder>.Instance?.Phases ?? [];
     IReadOnlyList<ArchivedGameEventRecord> IArchivedGameData.Events => GameStatistics.Sealed.Select(ArchivedGameEventRecord.FromEvent).ToArray();
+    IReadOnlyList<ArchivedMapObject> IArchivedGameData.MapObjects => ModSingleton<Statistics.MapObjectRecorder>.Instance?.ToArchive() ?? [];
+    IReadOnlyList<ArchivedVoteResult> IArchivedGameData.VoteResults => GameStatistics.VoteResults;
 
     /// <summary>プレイヤーの見た目の色。配色は設定で変わるので、値そのものを写し取る。</summary>
     static private ArchivedColor ColorOf(GamePlayer player)
@@ -672,8 +674,14 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
 
     }
 
+    /// <summary>間を置いた更新を、最後に呼び出した時刻。</summary>
+    private float lastInfrequentUpdate = 0f;
+
     public void OnFixedUpdate(float deltaTime) {
         GameEntityManager.Run(GameUpdateEvent.Get(this, deltaTime, CurrentTime, Time.time), shouldNotCheckGameEnd: false);
+
+        RunInfrequentUpdate();
+
         if (AmongUsClient.Instance.GameState == InnerNet.InnerNetClient.GameStates.Started)
         {
             var killButton = HudManager.Instance.KillButton;
@@ -974,19 +982,39 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         }
         );
 
-    private readonly static RemoteProcess<(GamePlayer player, UnityEngine.Vector2 position, string id)> RpcGameAction = new(
+    //添える数値は有無を別の値で持つ。特定の値を「無し」の合図に使うと、その値自体を載せられなくなる。
+    private readonly static RemoteProcess<(GamePlayer player, UnityEngine.Vector2 position, string id, int argument, bool hasArgument)> RpcGameAction = new(
         "GameAction",
         (message, _) =>
         {
             if (GameActionType.TryGetActionType(message.id, out var actionType))
             {
-                var ev = new PlayerDoGameActionEvent(message.player, actionType, message.position);
+                var ev = new PlayerDoGameActionEvent(message.player, actionType, message.position, message.hasArgument ? message.argument : null);
                 GameOperatorManager.Instance?.Run(ev);
             }
         }
         );
 
-    public void RpcDoGameAction(GamePlayer player, UnityEngine.Vector2 position, GameActionType actionType) => RpcGameAction.Invoke((player, position, actionType.Id));
+    /// <summary>
+    /// プレイヤーが何かを行ったことを全クライアントへ知らせる。
+    /// </summary>
+    /// <param name="player">行った本人。</param>
+    /// <param name="argument">
+    /// 行動に添える数値。後から個別に指し示したいものがあるとき、その識別子を載せる。
+    /// </param>
+    public void RpcDoGameAction(GamePlayer player, UnityEngine.Vector2 position, GameActionType actionType, int? argument = null) =>
+        RpcGameAction.Invoke((player, position, actionType.Id, argument ?? 0, argument.HasValue));
+
+    private void RunInfrequentUpdate()
+    {
+        var elapsed = CurrentTime - lastInfrequentUpdate;
+        if (elapsed < GameInfrequentUpdateEvent.Interval) return;
+
+        lastInfrequentUpdate += GameInfrequentUpdateEvent.Interval;
+        if (CurrentTime - lastInfrequentUpdate > GameInfrequentUpdateEvent.Interval) lastInfrequentUpdate = CurrentTime;
+
+        GameEntityManager.Run(GameInfrequentUpdateEvent.Get(this, elapsed, CurrentTime, Time.time));
+    }
 
     public bool HavePassed(float since, float duration) => since + duration < CurrentTime;
 

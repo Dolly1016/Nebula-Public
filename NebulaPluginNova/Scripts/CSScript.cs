@@ -87,7 +87,7 @@ internal static class AddonScriptManager
 #if PC
         var psi = new System.Diagnostics.ProcessStartInfo()
         {
-            FileName = $"Tools{Path.DirectorySeparatorChar}AddonScriptCompiler.exe",
+            FileName = Path.Combine(BepInEx.Paths.BepInExRootPath, "tools", "AddonScriptCompiler.exe"),
             Arguments = $"--hello",
             UseShellExecute = false,
             CreateNoWindow = true,
@@ -296,7 +296,7 @@ internal static class AddonScriptManager
                 if (loadedLibs.Count > 0) args += " " + string.Join(" ", loadedLibs.Select(entry => $" --reference \"{entry.LibPath}\""));
                 var psi = new System.Diagnostics.ProcessStartInfo()
                 {
-                    FileName = $"Tools{Path.DirectorySeparatorChar}AddonScriptCompiler.exe",
+                    FileName = Path.Combine(BepInEx.Paths.BepInExRootPath, "tools", "AddonScriptCompiler.exe"),
                     Arguments = args,
                     UseShellExecute = false,
                     CreateNoWindow = true,

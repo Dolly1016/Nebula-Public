@@ -57,16 +57,22 @@ internal static class EmbeddedWebContent
     /// <summary>
     /// 埋め込みリソースを名前で読む。公開して良いかは見ないので、呼び出し側が名前を決めきっていること。
     /// </summary>
-    public static bool TryRead(string fileName, out byte[] content)
+    public static bool TryRead(string fileName, out byte[] content) =>
+        TryReadResource("Nebula::Http." + fileName, out content);
+
+    /// <summary>
+    /// 埋め込みリソースをアドレスで読む。<c>Resources/Http/</c> の外にある物はこちらを使う。
+    /// </summary>
+    public static bool TryReadResource(string address, out byte[] content)
     {
         content = [];
 
         try
         {
-            using var stream = NebulaResourceManager.GetResource("Nebula::Http." + fileName)?.AsStream();
+            using var stream = NebulaResourceManager.GetResource(address)?.AsStream();
             if (stream == null)
             {
-                Logger.Warning($"Missing an embedded web resource. ({fileName})");
+                Logger.Warning($"Missing an embedded resource. ({address})");
                 return false;
             }
 
@@ -77,7 +83,7 @@ internal static class EmbeddedWebContent
         }
         catch (Exception e)
         {
-            Logger.Warning($"Failed to read an embedded web resource. ({fileName})\n" + e.Message);
+            Logger.Warning($"Failed to read an embedded resource. ({address})\n" + e.Message);
             return false;
         }
     }

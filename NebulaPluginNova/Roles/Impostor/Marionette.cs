@@ -45,7 +45,13 @@ public class Marionette : DefinedSingleAbilityRoleTemplate<Marionette.Ability>, 
         public Decoy(Vector2 pos,bool reverse) : base(pos,ZOption.Just,CanSeeDecoyInShadowOption, decoySprite.GetSprite()) {
             MyRenderer.flipX = reverse;
             MyBehaviour = MyRenderer.gameObject.AddComponent<EmptyBehaviour>();
+
+            //入れ替えで動くので、居場所を随時読み取る形で追う。
+            tracker = ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance?.Track(
+                Nebula.Game.Statistics.MapObjectKinds.Decoy, () => Position, flipX: reverse);
         }
+
+        private readonly Nebula.Game.Statistics.MapObjectTracker? tracker = null;
 
         public bool Flipped { get => MyRenderer.flipX; set => MyRenderer.flipX = value; }
         public EmptyBehaviour MyBehaviour = null!;
@@ -58,6 +64,8 @@ public class Marionette : DefinedSingleAbilityRoleTemplate<Marionette.Ability>, 
         public override void OnReleased()
         {
             base.OnReleased();
+
+            tracker?.Despawn();
             
             try
             {

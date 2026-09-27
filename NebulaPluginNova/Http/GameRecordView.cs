@@ -57,6 +57,8 @@ internal static class GameRecordView
             Movement = record.Movement,
             FakeReasons = FakeReasonsOf(record),
             Events = record.Events.Select(EventOf).ToArray(),
+            MapObjects = record.MapObjects.Select(MapObjectOf).ToArray(),
+            Votes = record.VoteResults.Select(VoteOf).ToArray(),
             TimeOrigin = TimeOf(record, GameStatistics.EventVariation.GameStart.Id, first: true),
             TimeEnd = TimeOf(record, GameStatistics.EventVariation.GameEnd.Id, first: false),
             End = record.EndInfo != null ? new GameEndView { Stages = record.EndInfo.Stages.Select(StageOf).ToArray() } : null,
@@ -159,7 +161,8 @@ internal static class GameRecordView
 
     private static GameEventView EventOf(ArchivedGameEventRecord source) => new()
     {
-        Variation = source.VariationId,
+        Segment = SegmentOf(source.VariationId),
+        Trivial = GameStatistics.EventVariation.TryValueOf(source.VariationId)?.IsTrivial ?? false,
         Time = source.Time,
         SourceId = source.SourceId,
         TargetIds = source.TargetIds.Select(id => (int)id).ToArray(),
@@ -167,6 +170,83 @@ internal static class GameRecordView
         DetailText = Translate(source.DetailTranslationKey),
         Positions = source.Positions.Select(p => new EventPositionView { PlayerId = p.PlayerId, X = p.X, Y = p.Y }).ToArray(),
     };
+
+    /// <summary>
+    /// マップに現れた物 1 つ。
+    /// </summary>
+    /// <remarks>
+    /// 足取りは要素の多い配列なので、時刻・X・Y を並べた平らな配列にして持たせる。
+    /// 動かない物ではここが空になる。
+    /// </remarks>
+    private static MapObjectView MapObjectOf(ArchivedMapObject source)
+    {
+        var moves = new float[source.Moves.Count * 3];
+        for (int i = 0; i < source.Moves.Count; i++)
+        {
+            moves[i * 3] = source.Moves[i].Time;
+            moves[i * 3 + 1] = source.Moves[i].X;
+            moves[i * 3 + 2] = source.Moves[i].Y;
+        }
+
+        //ありさまも時刻と値を並べた平らな配列にする。
+        var changes = new float[source.Changes.Count * 2];
+        for (int i = 0; i < source.Changes.Count; i++)
+        {
+            changes[i * 2] = source.Changes[i].Time;
+            changes[i * 2 + 1] = source.Changes[i].State;
+        }
+
+        return new MapObjectView
+        {
+            ObjectId = source.ObjectId,
+            Kind = source.KindId,
+            Spawn = source.SpawnTime,
+            Despawn = source.DespawnTime,
+            X = source.X,
+            Y = source.Y,
+            Vx = source.VelocityX,
+            Vy = source.VelocityY,
+            Angle = source.Angle,
+            FlipX = source.FlipX,
+            FlipY = source.FlipY,
+            Moves = moves,
+            State = source.State,
+            Changes = changes,
+            OwnerId = source.OwnerId,
+        };
+    }
+
+    /// <summary>
+    /// 出来事がターンの区切りにどう関わるか。閲覧画面へは番号ではなくこの意味で渡す。
+    /// </summary>
+    /// <remarks>知らない番号の出来事は、区切りには関わらないものとして扱う。</remarks>
+    private static string SegmentOf(int variationId) =>
+        (GameStatistics.EventVariation.TryValueOf(variationId)?.Segment ?? EventSegment.None) switch
+        {
+            EventSegment.TurnStart => "turn",
+            EventSegment.MeetingStart => "meeting",
+            EventSegment.GameEnd => "gameEnd",
+            _ => "",
+        };
+
+    private static VoteResultView VoteOf(ArchivedVoteResult source)
+    {
+        var votes = new int[source.Votes.Count * 2];
+        for (int i = 0; i < source.Votes.Count; i++)
+        {
+            votes[i * 2] = source.Votes[i].VoterId;
+            votes[i * 2 + 1] = source.Votes[i].VotedForId;
+        }
+
+        var swaps = new int[source.Swaps.Count * 2];
+        for (int i = 0; i < source.Swaps.Count; i++)
+        {
+            swaps[i * 2] = source.Swaps[i].From;
+            swaps[i * 2 + 1] = source.Swaps[i].To;
+        }
+
+        return new VoteResultView { Time = source.Time, Votes = votes, Swaps = swaps };
+    }
 
     private static string MapName(byte mapId)
     {
@@ -237,6 +317,12 @@ internal sealed class GameDetailView
     /// <summary>ゲーム中に起きた出来事。古い順。</summary>
     public GameEventView[] Events { get; set; } = [];
 
+    /// <summary>マップ上に現れた物。現れた順。</summary>
+    public MapObjectView[] MapObjects { get; set; } = [];
+
+    /// <summary>投票の結果。古い順。</summary>
+    public VoteResultView[] Votes { get; set; } = [];
+
     /// <summary>足取りに出てくるニセモノの、湧いた理由。翻訳キー → 訳文。</summary>
     public Dictionary<string, string> FakeReasons { get; set; } = [];
 
@@ -289,8 +375,12 @@ internal sealed class PlayerView
 
 internal sealed class GameEventView
 {
-    /// <summary>出来事の種類。<c>GameStatistics.EventVariation</c> の Id。</summary>
-    public int Variation { get; set; }
+    /// <summary>
+    /// ターンの区切りにどう関わるか。"turn" / "meeting" / "gameEnd"、関わらなければ空。
+    /// </summary>
+    public string Segment { get; set; } = "";
+
+    public bool Trivial { get; set; }
 
     /// <summary>ゲーム内時刻(秒)。</summary>
     public float Time { get; set; }
@@ -305,6 +395,55 @@ internal sealed class GameEventView
 
     /// <summary>そのときの各プレイヤーの居場所。記録していなければ空。</summary>
     public EventPositionView[] Positions { get; set; } = [];
+}
+
+internal sealed class MapObjectView
+{
+    public int ObjectId { get; set; }
+
+    /// <summary>種類。絵と性質は <c>/api/map-objects</c> の一覧から引く。</summary>
+    public string Kind { get; set; } = "";
+
+    public float Spawn { get; set; }
+
+    /// <summary>消えた時刻。残ったままなら null。</summary>
+    public float? Despawn { get; set; }
+
+    public float X { get; set; }
+    public float Y { get; set; }
+
+    /// <summary>等速で動く物の速度。それ以外は 0。</summary>
+    public float Vx { get; set; }
+    public float Vy { get; set; }
+
+    /// <summary>向きを持つ物の角度(度)。</summary>
+    public float Angle { get; set; }
+
+    public bool FlipX { get; set; }
+    public bool FlipY { get; set; }
+
+    /// <summary>動きうる物の足取り。時刻・X・Y の繰り返し。</summary>
+    public float[] Moves { get; set; } = [];
+
+    /// <summary>現れたときのありさま。</summary>
+    public int State { get; set; }
+
+    /// <summary>ありさまが変わった記録。時刻・値の繰り返し。</summary>
+    public float[] Changes { get; set; } = [];
+
+    /// <summary>持ち主のプレイヤーID。付いて回る物では、この人の足取りが居場所になる。</summary>
+    public byte? OwnerId { get; set; }
+}
+
+internal sealed class VoteResultView
+{
+    public float Time { get; set; }
+
+    /// <summary>投票者・投票先の繰り返し。投票者が255の票は同数時の追加票。</summary>
+    public int[] Votes { get; set; } = [];
+
+    /// <summary>すり替え元・すり替え先の繰り返し。</summary>
+    public int[] Swaps { get; set; } = [];
 }
 
 internal sealed class EventPositionView

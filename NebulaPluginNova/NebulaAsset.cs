@@ -261,7 +261,10 @@ public static class NebulaAsset
         RenderTexture.active = null;
         cam.targetTexture = null;
         GameObject.Destroy(rt);
-        GameObject.Destroy(obj);
+
+        //Destroyはフレームの終わりまで効かない。1フレームのうちに何枚も撮ると、
+        //まだ消えていない前のマップが次の写真に重なって写る。ここは待たずに片付ける。
+        GameObject.DestroyImmediate(obj);
 
         return texture2D.ToSprite(100f);
     }

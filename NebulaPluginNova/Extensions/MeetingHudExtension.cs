@@ -31,22 +31,25 @@ public static class MeetingHudExtension
     static private int VoteForMask = 0;
     static private int CanUseAbilityMask = 0;
     static private int UseAbilityForMask = 0;
+    //会議中に妨害されているプレイヤーのマスク
+    static private int JammedMask = 0;
     static internal string SpreaderAndBG = "VoteSpreaderAndBG";
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     static private bool CanVoteForByMask(byte playerId) => (VoteForMask & (1 << playerId)) != 0;
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    static private bool CanUseAbilityForByMask(byte playerId) => (UseAbilityForMask & (1 << playerId)) == 0;
+    static private bool CanUseAbilityForByMask(byte playerId) => (UseAbilityForMask & (1 << playerId)) != 0;
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     static private bool CanVoteByMask(byte playerId) => (CanVoteMask & (1 << playerId)) != 0;
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    static private bool CanUseAbilityByMask(byte playerId) => (CanUseAbilityMask & (1 << playerId)) == 0;
+    static private bool CanUseAbilityByMask(byte playerId) => (CanUseAbilityMask & (1 << playerId)) != 0;
 
     static public bool CanVoteFor(byte playerId) => !(GamePlayer.GetPlayer(playerId)?.IsDead ?? true) && CanVoteForByMask(playerId) && CanUseAbilityForByMask(playerId);
     static public bool CanVoteFor(GamePlayer player) => !player.IsDead && CanVoteForByMask(player.PlayerId) && CanUseAbilityForByMask(player.PlayerId);
     static public bool CanUseAbilityForLocal(GamePlayer player, bool shouldBeAlive) => CanUseAbilityByMask(GamePlayer.LocalPlayer.PlayerId) && (!shouldBeAlive || !player.IsDead) && CanUseAbilityForByMask(player.PlayerId);
     static public bool CanUseAbilityFor(GamePlayer abilityUser, GamePlayer target, bool shouldBeAlive) => CanUseAbilityByMask(abilityUser.PlayerId) && (!shouldBeAlive || !target.IsDead) && CanUseAbilityForByMask(target.PlayerId);
     static public bool HasVote(byte playerId) => CanVoteByMask(playerId);
+    static public bool IsJammed(byte playerId) => (JammedMask & (1 << playerId)) != 0;
     static public bool CanSkip = true;
     static public bool ExileEvenIfTie = false;
     static public bool IsObvious = false;
@@ -68,11 +71,12 @@ public static class MeetingHudExtension
     static public bool WasTie = false;
 
     public static void UpdateVotingMask(int mask) => VoteForMask = mask;
-    public static void UpdateSealedMask(int mask) => UseAbilityForMask = mask;
-    public static void AddSealedMask(int mask) => UseAbilityForMask |= mask;
+    public static void UpdateSealedMask(int mask) => UseAbilityForMask = ~mask;
+    public static void AddSealedMask(int mask) => UseAbilityForMask &= ~mask;
     public static void RemoveUsingAbilityMask(int mask) => CanUseAbilityMask &= ~mask;
     public static void UpdateCanVoteMask(int mask) => CanVoteMask = mask;
     public static void RemoveCanVoteMask(int mask) => CanVoteMask &= ~mask;
+    public static void AddJammedMask(int mask) => JammedMask |= mask;
 
 
     public static void InitMeetingTimer()
@@ -83,7 +87,9 @@ public static class MeetingHudExtension
         ResultTimer = 5f;
         VoteForMask = 0xFFFFFFF;
         CanVoteMask = 0xFFFFFFF;
-        UseAbilityForMask = 0;
+        UseAbilityForMask = 0xFFFFFFF;
+        CanUseAbilityMask = 0xFFFFFFF;
+        JammedMask = 0;
         CanSkip = true;
         ExileEvenIfTie = false;
         IsObvious = false;

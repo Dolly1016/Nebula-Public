@@ -74,6 +74,28 @@ public enum GameStatisticsGatherTag
 }
 
 
+/// <summary>
+/// 出来事がターンの区切りにどう関わるか。
+/// </summary>
+/// <remarks>
+/// 足取りの区切りも閲覧画面の区切りも、ここだけを見て決める。
+/// 種類の番号を各所で突き合わせると、片方を直し忘れたときに境目がずれる。
+/// </remarks>
+public enum EventSegment
+{
+    /// <summary>区切りには関わらない。</summary>
+    None,
+
+    /// <summary>ここからターンが始まる。</summary>
+    TurnStart,
+
+    /// <summary>ここから会議が始まる。</summary>
+    MeetingStart,
+
+    /// <summary>ここでゲームが終わる。</summary>
+    GameEnd,
+}
+
 [NebulaRPCHolder]
 public class GameStatistics
 {
@@ -81,33 +103,50 @@ public class GameStatistics
     {
         static readonly Dictionary<int, EventVariation> AllEvents = [];
         static private readonly DividedSpriteLoader iconSprite = DividedSpriteLoader.FromResource("Nebula.Resources.GameStatisticsIcon.png", 100f, 8, 1);
-        static public readonly EventVariation Kill = new(0, iconSprite.AsLoader(0), iconSprite.AsLoader(0), true, true);
-        static public readonly EventVariation Exile = new(1, iconSprite.AsLoader(2), iconSprite.AsLoader(2), false, false);
-        static public readonly EventVariation GameStart = new(2, iconSprite.AsLoader(1), iconSprite.AsLoader(1), true, false);
-        static public readonly EventVariation GameEnd = new(3, iconSprite.AsLoader(1), iconSprite.AsLoader(1), true, false);
-        static public readonly EventVariation MeetingEnd = new(4, iconSprite.AsLoader(1), iconSprite.AsLoader(1), true, false);
-        static public readonly EventVariation Report = new(5, iconSprite.AsLoader(4), iconSprite.AsLoader(4), true, false);
-        static public readonly EventVariation EmergencyButton = new(6, iconSprite.AsLoader(3), iconSprite.AsLoader(3), true, false);
-        static public readonly EventVariation Disconnect = new(7, iconSprite.AsLoader(5), iconSprite.AsLoader(5), false, false);
-        static public readonly EventVariation Revive = new(8, iconSprite.AsLoader(6), iconSprite.AsLoader(6), true, false);
-        static public readonly EventVariation CleanBody = new(9, iconSprite.AsLoader(7), iconSprite.AsLoader(7), true, false);
+        static public readonly EventVariation Kill = new(0, iconSprite.AsLoader(0), iconSprite.AsLoader(0), true, true, isShownInGame: true);
+        static public readonly EventVariation Exile = new(1, iconSprite.AsLoader(2), iconSprite.AsLoader(2), false, false, isShownInGame: true);
+        static public readonly EventVariation GameStart = new(2, iconSprite.AsLoader(1), iconSprite.AsLoader(1), true, false, isShownInGame: true, segment: EventSegment.TurnStart);
+        static public readonly EventVariation GameEnd = new(3, iconSprite.AsLoader(1), iconSprite.AsLoader(1), true, false, isShownInGame: true, segment: EventSegment.GameEnd);
+        static public readonly EventVariation MeetingEnd = new(4, iconSprite.AsLoader(1), iconSprite.AsLoader(1), true, false, isShownInGame: true, segment: EventSegment.TurnStart);
+        static public readonly EventVariation Report = new(5, iconSprite.AsLoader(4), iconSprite.AsLoader(4), true, false, isShownInGame: true, segment: EventSegment.MeetingStart);
+        static public readonly EventVariation EmergencyButton = new(6, iconSprite.AsLoader(3), iconSprite.AsLoader(3), true, false, isShownInGame: true, segment: EventSegment.MeetingStart);
+        static public readonly EventVariation Disconnect = new(7, iconSprite.AsLoader(5), iconSprite.AsLoader(5), false, false, isShownInGame: true);
+        static public readonly EventVariation Revive = new(8, iconSprite.AsLoader(6), iconSprite.AsLoader(6), true, false, isShownInGame: true);
+        static public readonly EventVariation CleanBody = new(9, iconSprite.AsLoader(7), iconSprite.AsLoader(7), true, false, isShownInGame: true);
 
         public int Id { get; private init; }
         public Image? EventIcon { get; private init; }
         public Image? InteractionIcon { get; private init; }
         public bool ShowPlayerPosition { get; private init; }
         public bool CanCombine { get; private init; }
-        public EventVariation(int id, Image? eventIcon, Image? interactionIcon, bool showPlayerPosition, bool canCombine)
+
+        /// <summary>ゲーム内のリザルト画面に出すかどうか。</summary>
+        /// <remarks>既定では出さない。ゲーム内の年表は狭いので、並べる物を絞る。</remarks>
+        public bool IsShownInGame { get; private init; }
+
+        public bool IsTrivial { get; private init; }
+
+        /// <summary>ターンの区切りにどう関わるか。</summary>
+        public EventSegment Segment { get; private init; }
+
+        public EventVariation(int id, Image? eventIcon, Image? interactionIcon, bool showPlayerPosition, bool canCombine,
+            bool isShownInGame = false, EventSegment segment = EventSegment.None, bool isTrivial = false)
         {
             Id = id;
             EventIcon = eventIcon;
             InteractionIcon = interactionIcon;
             CanCombine = canCombine;
+            IsShownInGame = isShownInGame;
+            Segment = segment;
+            IsTrivial = isTrivial;
 
             AllEvents.Add(id, this);
             ShowPlayerPosition = showPlayerPosition;
         }
         static public EventVariation ValueOf(int id) => AllEvents[id];
+
+        /// <summary>知らない番号なら null。古い記録を読むときに要る。</summary>
+        static public EventVariation? TryValueOf(int id) => AllEvents.TryGetValue(id, out var found) ? found : null;
 
 
     }
@@ -169,6 +208,10 @@ public class GameStatistics
     public Event[] Sealed { get => allEvents.ToArray(); }
 
     public Dictionary<GameStatisticsGatherTag, Dictionary<byte, VVector2>> Gathering { get; set; } = [];
+
+    private readonly List<ArchivedVoteResult> voteResults = [];
+    public IReadOnlyList<ArchivedVoteResult> VoteResults => voteResults;
+    public void RecordVoteResult(ArchivedVoteResult result) => voteResults.Add(result);
 
     public void RecordEvent(Event statisticsEvent)
     {
@@ -331,7 +374,7 @@ public class GameStatisticsViewer : MonoBehaviour
 
     public void Start()
     {
-        allStatistics = archivedGame.ArchivedEvents;
+        allStatistics = archivedGame.ArchivedEvents.Where(e => e.EventVariation.IsShownInGame).ToArray();
         if (allStatistics.Length == 0) return;
 
         timelineBack = UnityHelper.SetUpLineRenderer("TimelineBack", transform, new Vector3(0, 0, -10f), LayerExpansion.GetUILayer(), 0.014f);

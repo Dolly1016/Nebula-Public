@@ -7,6 +7,7 @@ using Nebula.Roles.Crewmate;
 using Nebula.Roles.Impostor;
 using Nebula.SpecialModes.AeroGuesser;
 using Nebula.SpecialModes.PaintQuiz;
+using Steamworks;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Virial;
@@ -139,28 +140,38 @@ public static class ToolsInstaller
             Patches.LoadPatch.LoadingText = "Installing Tools";
             yield return null;
 
-            InstallTool("CPUAffinityEditor.exe", null, "Tools");
-            InstallTool("AddonScriptCompiler.dll", null, "Tools");
-            InstallTool("AddonScriptCompiler.exe", null, "Tools");
-            InstallTool("AddonScriptCompiler.runtimeconfig.json", null, "Tools");
-            InstallTool("AddonScriptCompiler.deps.json", null, "Tools");
-            InstallTool(Environment.Is64BitProcess ? "opus_x64.dll" : "opus_x86.dll", "opus.dll");
+            InstallTool("CPUAffinityEditor.exe", null, "tools");
+            InstallTool("AddonScriptCompiler.dll", null, "tools");
+            InstallTool("AddonScriptCompiler.exe", null, "tools");
+            InstallTool("AddonScriptCompiler.runtimeconfig.json", null, "tools");
+            InstallTool("AddonScriptCompiler.deps.json", null, "tools");
+            InstallTool(Environment.Is64BitProcess ? "opus_x64.dll" : "opus_x86.dll", "opus.dll", inBepInExDir: false);
+            if(Constants.GetPlatformType() == Platforms.StandaloneSteamPC) InstallTool("NebulaPreloader.dll", null, "patchers", shouldNotOverwrite: true);
         }
 #else
         yield break;
 #endif
     }
 
-    private static void InstallTool(string name, string? outputName, string? directory = null)
+    private static void InstallTool(string name, string? outputName, string? directory = null, bool inBepInExDir = true, bool shouldNotOverwrite = false)
     {
+        if(inBepInExDir)
+        {
+            directory = directory == null ? BepInEx.Paths.BepInExRootPath : Path.Combine(BepInEx.Paths.BepInExRootPath, directory);
+        }
+
         if (directory != null) Directory.CreateDirectory(directory);
+
+        var filePath = outputName ?? name;
+        if (directory != null) filePath = directory + Path.DirectorySeparatorChar + filePath;
+
+        if (shouldNotOverwrite && File.Exists(filePath)) return;
 
         Assembly assembly = Assembly.GetExecutingAssembly();
         using Stream? stream = assembly.GetManifestResourceStream("Nebula.Resources.Tools." + name);
         if (stream == null) return;
 
-        var filePath = outputName ?? name;
-        if (directory != null) filePath = directory + Path.DirectorySeparatorChar + filePath;
+
         using var file = File.Create(filePath);
         byte[] data = new byte[stream.Length];
         stream.Read(data);

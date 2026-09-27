@@ -67,10 +67,21 @@ internal class Nightmare : DefinedSingleAbilityRoleTemplate<Nightmare.Ability>, 
         public NightmareSeed(Vector2 pos) : base(pos, ZOption.Back, false, skullSprite.GetSprite(0), false) { 
         }
 
+        /// <summary>記録。置いた時に立てたものを識別子で引き当てる。使い捨ての種では見つからない。</summary>
+        private Nebula.Game.Statistics.MapObjectTracker? tracker;
+
         public override void OnInstantiated() {
             base.OnInstantiated();
             ActualOwner.TryGetAbility<Nightmare.Ability>(out nightmareRole);
             if (ActualOwner.AmOwner && !WillDespawn) Color = new(1f, 1f, 1f, 0.5f);
+
+            tracker = ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance?.Find(ObjectId);
+        }
+
+        public override void OnReleased()
+        {
+            base.OnReleased();
+            tracker?.Despawn();
         }
 
         static private MultiImage skullSprite = DividedSpriteLoader.FromResource("Nebula.Resources.NightmareSkull.png", 120f, 5, 1);
@@ -88,6 +99,8 @@ internal class Nightmare : DefinedSingleAbilityRoleTemplate<Nightmare.Ability>, 
                 }
             }
 
+            tracker?.SetStage((nightmareRole?.EffectIsActive ?? false) ? 1 : 0);
+
             if (WillDespawn && (nightmareRole == null || !nightmareRole.EffectIsActive)) this.Release();
         }
 
@@ -103,6 +116,9 @@ internal class Nightmare : DefinedSingleAbilityRoleTemplate<Nightmare.Ability>, 
         private NebulaSyncObjectReference MySeed;
         private bool Shared = false;
         public Vector2 Position { get; private init; }
+
+        /// <summary>記録の上での識別子。全体公開しても変わらない。</summary>
+        public int SeedId => MySeed.ObjectId;
 
         public NightmareSeedInfo(Vector2 pos)
         {
@@ -128,6 +144,9 @@ internal class Nightmare : DefinedSingleAbilityRoleTemplate<Nightmare.Ability>, 
                 {
                     MySeed.SyncObject.ReflectInstantiationGlobally();
                     (MySeed.SyncObject as NebulaSyncStandardObject)!.Color = VColor.White;
+
+                    //ここから先は周りにも見える。
+                    Nightmare.RpcRevealSeed.Invoke(SeedId);
                 }
 
             }
@@ -135,6 +154,10 @@ internal class Nightmare : DefinedSingleAbilityRoleTemplate<Nightmare.Ability>, 
     }
 
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
+
+    /// <summary>夜のランタンが全体に公開されたことを知らせる。置いた本人だけが送る。</summary>
+    static internal readonly RemoteProcess<int> RpcRevealSeed = new("RevealNightSeed",
+        (message, _) => ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance?.Find(message)?.SetHidden(false));
 
     static private Image placeButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.NightmarePlaceButton.png", 115f);
     static private Image nightmareButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.NightmareButton.png", 115f);
@@ -154,8 +177,11 @@ internal class Nightmare : DefinedSingleAbilityRoleTemplate<Nightmare.Ability>, 
                     .SetAsUsurpableButton(this);
                 if (!disposableNightSeedOption) placeButton.ShowUsesIcon(0, numOfNightSeedOption.GetValue().ToString());
                 placeButton.OnClick = (button) => {
-                    NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, GameActionTypes.NightmarePlacementAction);
-                    placed.Add(new NightmareSeedInfo(MyPlayer.Position + new Virial.Compat.Vector2(0f, -0.1f)));
+                    var seed = new NightmareSeedInfo(MyPlayer.Position + new Virial.Compat.Vector2(0f, -0.1f));
+                    placed.Add(seed);
+
+                    //置いた瞬間は本人しか知らない。識別子を添えて、全員の記録に同じ番号で残す。
+                    NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, seed.Position, GameActionTypes.NightmarePlacementAction, seed.SeedId);
                     StatsPlaceNightSeed.Progress();
 
                     placeButton.UpdateUsesIcon((numOfNightSeedOption - placed.Count).ToString());

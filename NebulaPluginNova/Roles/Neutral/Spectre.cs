@@ -136,6 +136,14 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 
         public const string MyTag = "SpectreDish";
         public int DishId { get; internal set; } = -1;
+
+        private Nebula.Game.Statistics.MapObjectTracker? tracker;
+
+        public override void OnInstantiated()
+        {
+            base.OnInstantiated();
+            tracker = ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance?.Spawn(Nebula.Game.Statistics.MapObjectKinds.SpectreDish, Position, id: ObjectId);
+        }
         public bool Ate = true;
         public float RespawnCooldown { get; private set; } = 0f;
         public CustomConsole Console { get; private set; }
@@ -144,6 +152,9 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             Ate = ate;
             RespawnCooldown = FriesReplenishmentCooldownOption;
             MyRenderer.sprite = DishSprite.GetSprite(ate ? 0 : 1);
+
+            //お揚げが残っている(24)か、食べられた後(25)か。
+            tracker?.SetStage(ate ? 1 : 0);
 
             if (ate && Minigame.Instance.AsBoolFast())
             {

@@ -128,6 +128,8 @@ internal class Creeping : DefinedSingleAbilityRoleTemplate<Creeping.Ability>, Ha
             MyRenderer.material = VanillaAsset.GetHighlightMaterial();
             SetBackRenderer(sprites.GetSprite(1));
 
+            ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance?.Spawn(Nebula.Game.Statistics.MapObjectKinds.Medkit, (VVector2)pos);
+
             MyConsole = MyRenderer.gameObject.AddComponent<CustomConsole>();
             MyConsole.Renderer = MyRenderer;
             MyConsole.Property = new()

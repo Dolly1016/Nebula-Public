@@ -227,6 +227,9 @@ public class Teleporter : NebulaSyncStandardObject
         ShadowRenderer.sprite = shadowSprite.GetSprite(kind);
 
         SystemConsolize(MyRenderer.gameObject, ConsoleRenderer, TeleporterUseButtons.Alternatives[kind].ImageNames, PolishRubyPrefab);
+
+        ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance?.Spawn(
+            Nebula.Game.Statistics.MapObjectKinds.Teleporters[Mathn.Clamp(kind, 0, Nebula.Game.Statistics.MapObjectKinds.Teleporters.Length - 1)], (VVector2)pos);
     }
 
     static Teleporter() => NebulaSyncObject.RegisterInstantiater(MyTag, (args) => new Teleporter(new(args[0], args[1]), (int)args[2]));

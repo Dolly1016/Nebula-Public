@@ -66,6 +66,12 @@ public interface IRoleTable
     IEnumerable<byte> GetPlayers(DefinedRole role);
 
     /// <summary>
+    /// 全プレイヤーの割り当てを取得します。
+    /// </summary>
+    /// <returns></returns>
+    IEnumerable<(byte playerId, DefinedRole role)> GetAllPlayers();
+
+    /// <summary>
     /// プレイヤーに役職を割り当てます。
     /// </summary>
     /// <param name="player"></param>

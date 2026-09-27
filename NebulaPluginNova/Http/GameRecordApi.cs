@@ -18,6 +18,8 @@ namespace Nebula.Http;
 /// GET  /role-icons/{名前}.png  役職アイコンのアトラス
 /// GET  /api/maps               ミニマップの一覧と座標の変換に要る値
 /// GET  /maps/{マップID}.png    ミニマップの画像
+/// GET  /api/map-objects        マップに現れる物の種類と、その性質
+/// GET  /map-objects.png        その絵が並んだ画像
 /// GET  /api/games              記録の一覧。新しい順
 /// GET  /api/games/{id}         記録 1 件。保存されている JSON をそのまま
 /// POST /api/games/{id}/mark    マークの付け外し。ボディは {"marked": true}
@@ -38,6 +40,10 @@ internal static class GameRecordApi
     //ミニマップ。こちらも実行時に描き起こすので静的配信とは別扱い。
     private const string MapApiPath = "/api/maps";
     private const string MapPrefix = "/maps/";
+
+    //マップに現れる物。絵は Resources/Http の外にあるので、静的配信には乗らない。
+    private const string MapObjectApiPath = "/api/map-objects";
+    private const string MapObjectImagePath = "/map-objects.png";
 
     public static void Handle(HttpExchange exchange)
     {
@@ -88,6 +94,36 @@ internal static class GameRecordApi
         if (path.StartsWith(MapPrefix, StringComparison.Ordinal))
         {
             HandleMapImage(exchange, path.Substring(MapPrefix.Length));
+            return;
+        }
+
+        if (path == MapObjectApiPath)
+        {
+            if (exchange.Method != "GET")
+            {
+                exchange.RespondStatus(405);
+                return;
+            }
+
+            exchange.RespondJson(MapObjectContent.Manifest);
+            return;
+        }
+
+        if (path == MapObjectImagePath)
+        {
+            if (exchange.Method != "GET")
+            {
+                exchange.RespondStatus(405);
+                return;
+            }
+
+            if (!MapObjectContent.TryGetImage(out var icons))
+            {
+                exchange.RespondStatus(404);
+                return;
+            }
+
+            exchange.Respond(200, MapContent.PngContentType, icons);
             return;
         }
 

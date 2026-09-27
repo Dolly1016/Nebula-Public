@@ -67,6 +67,7 @@ public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, De
         private int index;
         private GamePlayer myPlayer;
         private bool isFake;
+        private Nebula.Game.Statistics.MapObjectTracker? tracker = null;
         public BubblegunBubble(GamePlayer player, Vector2 pos, float angle, int index, bool isFake = false)
         {
             this.isFake = isFake;
@@ -105,7 +106,17 @@ public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, De
                 }
                 else
                 {
-                    moving = true;
+                    if (!moving)
+                    {
+                        moving = true;
+
+                        //ここから先は等速で真っ直ぐ進む。始まりの位置と速さだけ残せば、後の道のりは計算で出る。
+                        tracker = ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance?.Spawn(
+                            Nebula.Game.Statistics.MapObjectKinds.Bubble,
+                            (VVector2)rendererTransform.GetPositionFast(),
+                            (VVector2)(new Vector2(1f, 0f).Rotate(degreeAngle) * 0.8f * bubbleSpeedOption));
+                    }
+
                     spriteIndex = (spriteIndex + 1) % 4;
                     renderer.sprite = bubbleSprite.GetSprite(spriteIndex);
                     updateInterval = BubbleGraphicInterval;
@@ -154,6 +165,8 @@ public class Bubblegun : DefinedSingleAbilityRoleTemplate<Bubblegun.Ability>, De
 
         void IGameOperator.OnReleased()
         {
+            tracker?.Despawn();
+
             IEnumerator CoDisappear()
             {
                 for (int i = 0; i < 4; i++)

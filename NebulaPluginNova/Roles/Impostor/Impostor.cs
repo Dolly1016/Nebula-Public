@@ -127,9 +127,9 @@ public class ImpostorBasicRuleOperator : AbstractModule<Virial.Game.Game>, IGame
     [OnlyLocalPlayer]
     void OnSetRole(PlayerRoleSetEvent ev)
     {
-        if (GeneralConfigurations.ImpostorsRadioOption && ev.Role.Role.Category == RoleCategory.ImpostorRole)
+        if (ev.Role.Role.Category == RoleCategory.ImpostorRole)
         {
-            ModSingleton<NoSVCRoom>.Instance?.RegisterRadioChannel(Language.Translate("voiceChat.info.impostorRadio"), 0, p => p.Role.Role.Category == RoleCategory.ImpostorRole, ev.Role, VColor.ImpostorColor);
+            ModSingleton<RadioManager>.Instance?.Register(RadioKind.Impostor, Language.Translate("voiceChat.info.impostorRadio"), p => p.Role.Role.Category == RoleCategory.ImpostorRole, ev.Role, VColor.ImpostorColor);
         }
     }
 

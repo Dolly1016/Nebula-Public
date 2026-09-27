@@ -49,9 +49,7 @@ internal class CustomServerLoader
 
     static private readonly DataSaver Saver = new("NoSRegion");
 
-    // 最後に選ばれたリージョンの名前。バニラの regionInfo.json には添字しか残らず、
-    // Nebula のリージョンは AvailableRegions に居ないため名前が復元できない
-    static private readonly StringDataEntry LastRegionName = new("region", Saver, "");
+    static private readonly StringDataEntry LastRegionName = new("region", Saver, "Nebula on the Ship JP");
 
     public static IRegionInfo GenerateRegion(string name, string ip, ushort port) => new StaticHttpRegionInfo(name, StringNames.NoTranslation, ip,
         new ServerInfo[] { new ServerInfo("Http-1", ip, port, false) }).Cast<IRegionInfo>();
@@ -88,11 +86,24 @@ internal class CustomServerLoader
         });
     }
 
-    /// <summary>選ばれたリージョンの名前を控える。次回の起動でこの名前を探す。</summary>
-    internal static void RememberRegion(IRegionInfo region)
+    /// <summary>
+    /// 今選ばれているリージョンの名前を控える。次回の起動でこの名前を探す。
+    /// </summary>
+    /// <remarks>
+    /// 控えるのは <see cref="CurrentAvailableRegions"/> に載っているものだけ。
+    /// 他 Mod が残したリージョンや、部屋コード検索中の一時的な切り替えで
+    /// 前回の選択を失わないようにする。
+    /// </remarks>
+    internal static void UpdateLastRegion()
     {
-        if (region == null) return;
-        LastRegionName.Value = region.Name;
+        if (!DestroyableSingleton<ServerManager>.InstanceExists) return;
+
+        var name = DestroyableSingleton<ServerManager>.Instance.CurrentRegion?.Name;
+        if (name == null) return;
+
+        if (!CurrentAvailableRegions().Any(region => region.Name == name)) return;
+
+        LastRegionName.Value = name;
     }
 
     /// <summary>

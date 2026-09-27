@@ -106,10 +106,22 @@ internal class Nighty : DefinedAllocatableModifierTemplate, DefinedAllocatableMo
         private static readonly Image bombImage = SpriteLoader.FromResource("Nebula.Resources.BlindTrap.png", 100f);
         public NightyBomb(Vector2 pos) : base(pos, ZOption.Back, true, bombImage.GetSprite()) {}
 
+        private Nebula.Game.Statistics.MapObjectTracker? tracker;
+
         public override void OnInstantiated()
         {
             base.OnInstantiated();
             if (!Owner.AmOwner && !(NebulaGameManager.Instance?.CanSeeAllInfo ?? false) && !(GamePlayer.LocalPlayer?.IsImpostor ?? false)) Color = VColor.Clear;
+
+            //インポスター以外には終始見えない。
+            tracker = ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance?.Spawn(
+                Nebula.Game.Statistics.MapObjectKinds.NightyBomb, Position, hidden: true, id: ObjectId);
+        }
+
+        public override void OnReleased()
+        {
+            base.OnReleased();
+            tracker?.Despawn();
         }
 
         void OnUpdate(GameUpdateEvent ev)

@@ -313,6 +313,32 @@ public class Ubiquitous : DefinedSingleAbilityRoleTemplate<Ubiquitous.Ability>, 
         List<Vector2> dronePos = new();
         AchievementToken<bool> challengeToken = null!;
 
+        private int droneId = 0;
+
+        [OnlyMyPlayer]
+        void OnInvokeDrone(PlayerDoGameActionEvent ev)
+        {
+            if (ev.ActionType.Id != GameActionTypes.UbiquitousInvokeDroneAction.Id) return;
+            if (ev.Argument == null) return;
+
+            ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance?.Spawn(Nebula.Game.Statistics.MapObjectKinds.Drone, ev.Position, hidden: true, id: ev.Argument.Value);
+        }
+
+        [Local]
+        void OnUpdateDrone(GameInfrequentUpdateEvent ev)
+        {
+            if (droneId == 0) return;
+
+            if (!myDrone.AsBoolFast())
+            {
+                RpcRemoveDrone.Invoke(droneId);
+                droneId = 0;
+                return;
+            }
+
+            RpcReportDrone.Invoke((droneId, (VVector2)myDrone!.transform.position));
+        }
+
         [Local]
         void OnOpenNormalMap(MapOpenNormalEvent ev)
         {
@@ -336,7 +362,10 @@ public class Ubiquitous : DefinedSingleAbilityRoleTemplate<Ubiquitous.Ability>, 
             if (myDrone.AsBoolFast())
             {
                 AmongUsUtil.SetCamTarget();
-                RpcSpawnDetachedDrone.Invoke(myDrone!.ColliderPosition);
+                RpcSpawnDetachedDrone.Invoke((ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance?.IssueSharedId() ?? 0, myDrone!.ColliderPosition));
+
+                droneId = 0;
+
                 dronePos.Add(myDrone!.ColliderPosition);
                 myDrone.DestroyDroneObject();
             }
@@ -382,7 +411,8 @@ public class Ubiquitous : DefinedSingleAbilityRoleTemplate<Ubiquitous.Ability>, 
                     {
                         if (!myDrone.AsBoolFast())
                         {
-                            NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, GameActionTypes.UbiquitousInvokeDroneAction);
+                            droneId = ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance?.IssueSharedId() ?? 0;
+                            NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, GameActionTypes.UbiquitousInvokeDroneAction, droneId);
                             myDrone = UnityHelper.CreateObject<UbiquitousDrone>("Drone", null, MyPlayer.TruePosition.ToUnityVector());
                             StatsDrones.Progress();
 
@@ -460,6 +490,12 @@ public class Ubiquitous : DefinedSingleAbilityRoleTemplate<Ubiquitous.Ability>, 
             {
                 AmongUsUtil.SetCamTarget();
                 if (myDrone.AsBoolFast()) myDrone!.DestroyDroneObject();
+
+                if (droneId != 0)
+                {
+                    RpcRemoveDrone.Invoke(droneId);
+                    droneId = 0;
+                }
             }
         }
 
@@ -483,11 +519,19 @@ public class Ubiquitous : DefinedSingleAbilityRoleTemplate<Ubiquitous.Ability>, 
 
     }
 
-    static RemoteProcess<Vector2> RpcSpawnDetachedDrone = new("SpawnDetachedDrone",
+    static readonly RemoteProcess<(int droneId, VVector2 position)> RpcReportDrone = new("ReportDrone",
+        (message, _) => ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance?.Find(message.droneId)?.Report(message.position));
+
+    static readonly RemoteProcess<int> RpcRemoveDrone = new("RemoveDrone",
+        (message, _) => ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance?.Find(message)?.Despawn());
+
+    static RemoteProcess<(int droneId, Vector2 position)> RpcSpawnDetachedDrone = new("SpawnDetachedDrone",
         (message,_) => {
-            var drone = UnityHelper.CreateObject<UbiquitousDetachedDrone>("DetachedDrone", null, message);
+            var drone = UnityHelper.CreateObject<UbiquitousDetachedDrone>("DetachedDrone", null, message.position);
             ModSingleton<NoSVCRoom>.Instance.AddVirtualMicrophone(drone);
             ModSingleton<NoSVCRoom>.Instance.AddVirtualSpeaker(drone);
+
+            ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance?.Spawn(Nebula.Game.Statistics.MapObjectKinds.DetachedDrone, (VVector2)message.position, id: message.droneId);
         });
     
 }

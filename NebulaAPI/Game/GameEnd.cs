@@ -284,6 +284,13 @@ public class GameEndDetail
         else pendingReasons[index] = (reason, pendingReasons[index].players | bit);
     }
 
+    /// <summary>
+    /// プレイヤーの勝敗が変化する、あるいは変化しない理由を追加します。
+    /// </summary>
+    /// <param name="player">理由を与えるプレイヤー。</param>
+    /// <param name="reason">理由。</param>
+    public void AddReason(Virial.Game.Player player, CommunicableTextTag reason) => AddReason(player.PlayerId, reason);
+
     internal void EndPhase(CommunicableTextTag name, BitMask<Virial.Game.Player> winners)
     {
         var raw = winners?.AsRawPattern ?? 0u;

@@ -55,6 +55,11 @@ internal class RoleTable : IRoleTable
     {
         foreach (var tuple in roles) if (tuple.role == role) yield return tuple.playerId;
     }
+
+    public IEnumerable<(byte playerId, DefinedRole role)> GetAllPlayers()
+    {
+        foreach (var tuple in roles) yield return (tuple.playerId, tuple.role);
+    }
 }
 
 public class FreePlayRoleAllocator : IRoleAllocator

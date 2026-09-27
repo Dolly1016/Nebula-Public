@@ -65,6 +65,15 @@ internal class Plague : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 
         public const string MyTag = "PoisonPod";
 
+        private Nebula.Game.Statistics.MapObjectTracker? tracker;
+
+        public override void OnInstantiated()
+        {
+            base.OnInstantiated();
+            tracker = ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance?.Spawn(Nebula.Game.Statistics.MapObjectKinds.PoisonPod, Position, id: ObjectId);
+            tracker?.SetStage(1);
+        }
+
         private float animInterval = 0f;
         private int animIndex = -1;
         private bool isFull = false;
@@ -73,6 +82,9 @@ internal class Plague : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             get => isFull; set
             {
                 isFull = value;
+
+                //毒を蓄えている間だけ絵が変わる。
+                tracker?.SetStage(isFull ? 1 : 0);
                 if (MyRenderer.TryGetComponent<Collider2D>(out var collider))
                 {
                     collider.enabled = isFull;

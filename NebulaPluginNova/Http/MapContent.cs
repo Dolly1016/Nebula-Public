@@ -6,19 +6,6 @@ using Virial;
 
 namespace Nebula.Http;
 
-/// <summary>
-/// ミニマップの画像と、ゲーム内の座標をその画像の上へ移すための値を閲覧画面へ渡す。
-/// </summary>
-/// <remarks>
-/// <para>
-/// 画像は <see cref="NebulaAsset.GetMapSprite"/> がカメラで描き起こしたものなので、
-/// バンドル由来のテクスチャと違って読み出せる。そのまま PNG にできる。
-/// </para>
-/// <para>
-/// 役職アイコンと同じく、Unity を触れるのはメインスレッドだけなので
-/// <see cref="Prepare"/> をサーバー起動時に一度だけ通して控えておく。
-/// </para>
-/// </remarks>
 internal static class MapContent
 {
     private static readonly object Gate = new();
@@ -29,15 +16,12 @@ internal static class MapContent
 
     public const string PngContentType = "image/png";
 
-    /// <summary>画像の解像度。1 ゲーム内単位あたりのピクセル数。</summary>
     private const float PixelsPerUnit = 100f;
 
-    /// <summary>ミニマップの色。ゲーム内と同じ値。</summary>
+    private const int AllRooms = int.MaxValue;
+
     private static readonly Color MinimapColor = VanillaAsset.MapBlue;
 
-    /// <summary>
-    /// 全マップの画像を PNG にして控える。<b>メインスレッドから呼ぶこと。</b>
-    /// </summary>
     public static void Prepare()
     {
         lock (Gate)
@@ -52,7 +36,7 @@ internal static class MapContent
                 }
                 catch (Exception e)
                 {
-                    //一枚失敗しても他のマップは配れるようにする。
+                    //一枚失敗しても他のマップは配れるように
                     Logger.Warning($"Failed to capture a minimap. (map {mapId})\n" + e.Message);
                 }
             }
@@ -63,17 +47,18 @@ internal static class MapContent
 
     private static void Capture(byte mapId)
     {
-        //dlekS のように素材を持たないマップがある。
         var ship = VanillaAsset.MapAsset[mapId];
         if (ship == null) return;
 
-        var sprite = NebulaAsset.GetMapSprite(mapId, int.MaxValue);
+        var sprite = NebulaAsset.GetMapSprite(mapId, AllRooms);
         if (sprite == null) return;
 
         var png = ImageConversion.EncodeToPNG(sprite.texture);
         if (png == null || png.Length == 0) return;
 
-        var center = VanillaAsset.GetMapCenter(mapId);
+        var center = ship.MapPrefab.HerePoint.transform.parent.localPosition;
+
+        var bounds = sprite.bounds;
 
         images[mapId] = png;
         views[mapId] = new MapView
@@ -85,17 +70,17 @@ internal static class MapContent
             Scale = VanillaAsset.GetMapScale(mapId),
             CenterX = center.x,
             CenterY = center.y,
+            OriginX = bounds.min.x,
+            OriginY = bounds.max.y,
             Color = ToHex(MinimapColor),
         };
     }
 
-    /// <summary>マップ 1 枚の PNG。用意できていなければ false。</summary>
     public static bool TryGetImage(byte mapId, out byte[] png)
     {
         lock (Gate) return images.TryGetValue(mapId, out png!);
     }
 
-    /// <summary>配れるマップの一覧。</summary>
     public static string Manifest
     {
         get
@@ -115,15 +100,6 @@ internal static class MapContent
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
     };
 
-    /// <summary>
-    /// ミニマップ 1 枚ぶんの情報。
-    /// </summary>
-    /// <remarks>
-    /// ゲーム内の座標 (x, y) は、この画像の上では
-    /// <c>((x / scale + centerX) * pixelsPerUnit + width / 2,
-    ///   height / 2 - (y / scale + centerY) * pixelsPerUnit)</c> の位置になる。
-    /// 画像はマップの原点を中心に切り出されており、画面の上下と y 軸の向きが逆なことに注意。
-    /// </remarks>
     private sealed class MapView
     {
         public byte MapId { get; set; }
@@ -131,13 +107,17 @@ internal static class MapContent
         public int Height { get; set; }
         public float PixelsPerUnit { get; set; }
 
-        /// <summary>ゲーム内の距離をミニマップの距離にするときの割る数。</summary>
+        // ゲーム内の距離をミニマップの距離に変換
         public float Scale { get; set; }
 
         public float CenterX { get; set; }
         public float CenterY { get; set; }
 
-        /// <summary>ミニマップを塗る色。</summary>
+        // 画像の左上が指すミニマップ座標
+        public float OriginX { get; set; }
+        public float OriginY { get; set; }
+
+        // ミニマップを塗る色
         public string Color { get; set; } = "";
     }
 }

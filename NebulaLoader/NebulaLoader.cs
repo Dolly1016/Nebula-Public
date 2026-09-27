@@ -3,6 +3,7 @@ using BepInEx.Configuration;
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP;
 using Il2CppInterop.Generator.Extensions;
+using Steamworks;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;

@@ -2,6 +2,7 @@
 using Nebula.Game.Statistics;
 using Nebula.Modules.Logging;
 using Nebula.Roles.Modifier;
+using System.Reflection;
 using UnityEngine.AI;
 using UnityEngine.Rendering;
 using Virial;
@@ -208,15 +209,15 @@ public class LastGameHistory
                 buttonRendererObj.AddComponent<BoxCollider2D>().size = new(0.3f, 0.3f);
             }
 
+#if PC
             {
                 var buttonRenderer = UnityHelper.CreateObject<SpriteRenderer>("BrowserButton", window.transform, new(-3.27f, 2.5f, -50f), out var buttonRendererObj, LayerExpansion.GetUILayer());
                 buttonRenderer.sprite = EndGameManagerSetUpPatch.InfoButtonSprite.GetSprite(1);
                 var button = buttonRendererObj.SetUpButton(false, buttonRenderer);
-                button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, Language.Translate("end.browser")));
-                button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
-                button.OnClick.AddListener(() => { if (Nebula.Http.NebulaHttpServer.Start()) Application.OpenURL(Nebula.Http.NebulaHttpServer.Url); });
+                EndGameManagerSetUpPatch.SetUpAsHistoryBrowserButton(button);
                 buttonRendererObj.AddComponent<BoxCollider2D>().size = new(0.3f, 0.3f);
             }
+#endif
         }
     }
 }
@@ -314,6 +315,31 @@ public class EndGameManagerSetUpPatch
 
         return widget;
     }
+
+#if PC
+    internal static void SetUpAsHistoryBrowserButton(PassiveButton button)
+    {
+        var isSteam = Constants.GetPlatformType() == Platforms.StandaloneSteamPC;
+        var nebulaPreloader = isSteam ? Type.GetType("Nebula.Preloader.SteamOverlay, NebulaPreloader") : null;
+        var method = nebulaPreloader?.GetMethod("OpenWebPage", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+        var canUseInGameBrowser = method != null;
+
+        button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, Language.Translate(canUseInGameBrowser ?  "end.browser.steam" : "end.browser")));
+        button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
+        button.OnClick.AddListener(() => { if (Nebula.Http.NebulaHttpServer.Start())
+            {
+                if (canUseInGameBrowser && Input.GetKey(KeyCode.LeftShift))
+                {
+                    method?.Invoke(null, new object[] { Nebula.Http.NebulaHttpServer.Url });
+                }
+                else
+                {
+                    Application.OpenURL(Nebula.Http.NebulaHttpServer.Url);
+                }
+            }
+        });
+    }
+#endif
 
     public static void Postfix(EndGameManager __instance)
     {
@@ -447,15 +473,15 @@ public class EndGameManagerSetUpPatch
             buttonObj.AddComponent<BoxCollider2D>().size = new(0.3f, 0.3f);
         }
 
+#if PC
         {
             var buttonRenderer = UnityHelper.CreateObject<SpriteRenderer>("WebButton", __instance.transform, new(-3.27f, 2.5f, -50f), out var buttonObj, LayerExpansion.GetUILayer());
             buttonRenderer.sprite = InfoButtonSprite.GetSprite(1);
             var button = buttonRenderer.gameObject.SetUpButton(false, buttonRenderer);
-            button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, Language.Translate("end.browser")));
-            button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
-            button.OnClick.AddListener(() => { if (Nebula.Http.NebulaHttpServer.Start()) Application.OpenURL(Nebula.Http.NebulaHttpServer.Url); });
+            SetUpAsHistoryBrowserButton(button);
             buttonObj.AddComponent<BoxCollider2D>().size = new(0.3f, 0.3f);
         }
+#endif
 
 #if PC
         if (NebulaPlugin.AllowHttpCommunication)

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Nebula.Modules.Cosmetics;
+using Nebula.VoiceChat;
 using Virial.Events.VoiceChat;
 
 namespace Nebula.Collab;
@@ -21,13 +22,28 @@ internal unsafe static class TBCLFields
         public bool IsCrewmate;
         public bool IsNeutral;
         public bool IsImpostorlike;
+        public bool IsJammed;
 
         public float SpeakerPositionX;
         public float SpeakerPositionY;
 
+        public float BodyRateX;
+        public float BodyRateY;
+
         public byte NameLength;
         public fixed char Name[32];
         public float ColorR, ColorG, ColorB;
+    }
+
+    internal struct RadioData
+    {
+        public RadioKind Kind;
+
+        //このラジオで声の届くプレイヤーのPlayerIdマスク
+        public int HearableMask;
+
+        public byte NameLength;
+        public fixed char Name[32];
     }
 
     internal struct Snapshot
@@ -37,11 +53,15 @@ internal unsafe static class TBCLFields
 
         public int PlayersLength;
         public PlayerData* Players;
+
+        public int RadiosLength;
+        public RadioData* Radios;
     }
 
-    const int Version = 20260918;
+    const int Version = 20260928;
     const int SnapshotCapacity = 64;
     const int PlayersCapacity = 24;
+    const int RadiosCapacity = 8;
     const int NameCapacity = 32;
 
     static public bool RequireUpdate = false;
@@ -59,6 +79,9 @@ internal unsafe static class TBCLFields
 
         var players = (PlayerData*)NativeMemory.AllocZeroed(SnapshotCapacity * PlayersCapacity, (nuint)sizeof(PlayerData));
         for (int i = 0; i < SnapshotCapacity; i++) snapshots[i].Players = players + i * PlayersCapacity;
+
+        var radios = (RadioData*)NativeMemory.AllocZeroed(SnapshotCapacity * RadiosCapacity, (nuint)sizeof(RadioData));
+        for (int i = 0; i < SnapshotCapacity; i++) snapshots[i].Radios = radios + i * RadiosCapacity;
 
         nextIndex = 0;
         Latest = null;
@@ -82,12 +105,41 @@ internal unsafe static class TBCLFields
 
     static private void SetName(ref PlayerData data, string name)
     {
+        fixed (char* buffer = data.Name) data.NameLength = SetName(buffer, name);
+    }
+
+    static private void SetName(ref RadioData data, string name)
+    {
+        fixed (char* buffer = data.Name) data.NameLength = SetName(buffer, name);
+    }
+
+    static private byte SetName(char* buffer, string name)
+    {
         int length = Math.Min(name.Length, NameCapacity);
-        fixed (char* buffer = data.Name)
+        for (int i = 0; i < length; i++) buffer[i] = name[i];
+        return (byte)length;
+    }
+
+    static private int UpdateRadios(RadioData* radios)
+    {
+        var manager = ModSingleton<RadioManager>.Instance;
+        if (manager == null) return 0;
+
+        int length = 0;
+        foreach (var radio in manager.AllRadios)
         {
-            for (int i = 0; i < length; i++) buffer[i] = name[i];
+            if (length >= RadiosCapacity) break;
+            if (radio.IsDead) continue;
+
+            ref var data = ref radios[length];
+            data.Kind = radio.Kind;
+            data.HearableMask = radio.GetHearableMask();
+            SetName(ref data, radio.LocalizedName);
+
+            length++;
         }
-        data.NameLength = (byte)length;
+
+        return length;
     }
 
     static internal void Update()
@@ -125,9 +177,15 @@ internal unsafe static class TBCLFields
                 data.IsImpostorlike = player.IsImpostorlike;
             }
 
+            data.IsJammed = AmongUsUtil.InMeeting && MeetingHudExtension.IsJammed(player.PlayerId);
+
             var speakerPosition = GameOperatorManager.Instance?.Run<FixSpeakerPositionEvent>(new(player, player.Position), true)?.Position ?? player.Position;
             data.SpeakerPositionX = speakerPosition.x;
             data.SpeakerPositionY = speakerPosition.y;
+
+            var bodyRate = (player as PlayerModInfo)?.PlayerScaler is { } scaler && scaler.AsBoolFast() ? scaler.localScale : Vector3.one;
+            data.BodyRateX = bodyRate.x;
+            data.BodyRateY = bodyRate.y;
 
             var outfit = (AmongUsUtil.InMeeting ? player.DefaultOutfit : player.CurrentOutfit).outfit;
 
@@ -142,6 +200,8 @@ internal unsafe static class TBCLFields
         }
 
         snapshot->PlayersLength = length;
+
+        snapshot->RadiosLength = UpdateRadios(snapshot->Radios);
 
         //全ての書き込みを終えてから公開する
         Latest = snapshot;
