@@ -89,5 +89,9 @@
 
 # Team
 
+"end.detail.opportunist.win" : "投机者追加胜利"
+"end.detail.opportunist.missed.task" : "投机者未完成任务"
+"end.detail.opportunist.missed.dead" : "投机者死亡"
+
 "teams.opportunist" : "投机者"
 "end.extra.opportunist" : "<color=#FFFFFF>+</color>投机者"

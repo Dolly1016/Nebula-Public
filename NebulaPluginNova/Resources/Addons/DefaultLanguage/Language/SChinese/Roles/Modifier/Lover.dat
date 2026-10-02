@@ -43,7 +43,12 @@
 "achievement.lover.challenge.title" : "我们才是真爱"
 "achievement.lover.challenge.goal" : "两个伪装者存活，且自己非伪装者阵营的情况下，取代伪装者阵营胜利"
 "achievement.lover.challenge.splitted.2" : "恋"
+
 # Team
+
+"end.detail.lover.win" : "恋人独立胜利"
+"end.detail.lover.extra" : "恋人追加胜利"
+"end.detail.lover.blocked" : "因恋人身份阻止了其他胜利"
 
 "end.lover" : "恋人%EXTRA%胜利"
 "end.extra.lover" : "<color=#FFFFFF>+</color>恋人"

@@ -1,13 +1,13 @@
 # Assignable
 
-"role.obsessional.name" : "暗恋者"
-"role.obsessional.blurb" : "我深深地暗恋这%NAME%"
+"role.obsessional.name" : "暗恋"
+"role.obsessional.blurb" : "深深地暗恋着%NAME%"
 "role.obsessional.generalBlurb" : "只想安安静静地爱着你"
 
 # Document
 
-"role.obsessional.doc" : "暗恋者自身的胜利条件会变成暗恋对象的胜利条件。%SUICIDE%"
-"role.obsessional.doc.suicide" : "暗恋对象死亡时，暗恋者会<var>殉情</var>。"
+"role.obsessional.doc" : "暗恋自身的胜利条件会变成暗恋对象的胜利条件。%SUICIDE%"
+"role.obsessional.doc.suicide" : "暗恋对象死亡时，暗恋会<var>殉情</var>。"
 "role.obsessional.winCond" : "%WIN%"
 "role.obsessional.winCond.canWinEvenIfTargetDie" : "%SELF%暗恋对象胜利时，会跟随暗恋对象获胜。<br>自身职业的胜利条件<b><color=#ff0000ff>无效</color></b>。"
 "role.obsessional.winCond.cannotWinIfTargetDie" : "%SELF%暗恋对象<var>存活并</var>胜利时会跟随暗恋对象获胜。<br>自身职业的胜利条件<b><color=#ff0000ff>无效</color></b>。"
@@ -15,7 +15,7 @@
 
 # Options
 
-"options.role.obsessional.detail" : "暗恋者开局会分配一个玩家作为暗恋目标。<br>只有暗恋对象胜利才能获得额外胜利。"
+"options.role.obsessional.detail" : "暗恋开局会分配一个玩家作为暗恋目标。<br>只有暗恋对象胜利才能获得额外胜利。"
 "options.role.obsessional.canWinEvenIfObsessionalTargetDie" : "即使暗恋目标死亡也能胜利"
 "options.role.obsessional.canWinEvenIfObsessionalDie" : "即使自身死亡也能胜利"
 "options.role.obsessional.obsessionalSuicideWhenObsessionalTargetDie" : "暗恋目标死亡会殉情"
@@ -26,7 +26,7 @@
 
 # Game
 
-"role.obsessional.taskText" : "【暗恋者】暗恋目标是%PLAYER%。"
+"role.obsessional.taskText" : "【暗恋】暗恋目标是%PLAYER%。"
 
 # UI
 
@@ -62,5 +62,8 @@
 
 # Team
 
-"end.extra.obsessional" : "<color=#FFFFFF>+</color>暗恋者"
+"end.detail.obsessional.extra" : "暗恋追加胜利"
+"end.detail.obsessional.blocked" : "因暗恋身份阻止了该职业胜利"
+
+"end.extra.obsessional" : "<color=#FFFFFF>+</color>暗恋"
 

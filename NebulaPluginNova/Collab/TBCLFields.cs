@@ -64,8 +64,6 @@ internal unsafe static class TBCLFields
     const int RadiosCapacity = 8;
     const int NameCapacity = 32;
 
-    static public bool RequireUpdate = false;
-
     static private Snapshot* snapshots = null;
     static private int nextIndex = 0;
 
@@ -144,8 +142,6 @@ internal unsafe static class TBCLFields
 
     static internal void Update()
     {
-        if (!RequireUpdate) return;
-
         Initialize();
 
         var snapshot = snapshots + nextIndex;

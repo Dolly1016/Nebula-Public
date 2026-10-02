@@ -68,12 +68,9 @@ while (!exit)
                     var path = Environment.GetEnvironmentVariable("AmongUsRelease");
                     Console.WriteLine("dllファイルをアップロードしています...");
                     UploadAsset(release, "Nebula.dll", File.OpenRead(path + "\\Nebula.dll"));
-                    Console.WriteLine("Steam版 zipファイルをアップロードしています...");
-                    EnzipAsset(path + "\\Nebula_Steam");
-                    UploadAsset(release, "Nebula_Steam.zip", File.OpenRead(path + "\\Nebula_Steam.zip"));
-                    Console.WriteLine("Epic版 zipファイルをアップロードしています...");
-                    EnzipAsset(path + "\\Nebula_Epic");
-                    UploadAsset(release, "Nebula_Epic.zip", File.OpenRead(path + "\\Nebula_Epic.zip"));
+                    Console.WriteLine("zipファイルをアップロードしています...");
+                    EnzipAsset(path + "\\Nebula");
+                    UploadAsset(release, "Nebula.zip", File.OpenRead(path + "\\Nebula.zip"));
                     Console.WriteLine("公開が完了しました。");
                 }
             }

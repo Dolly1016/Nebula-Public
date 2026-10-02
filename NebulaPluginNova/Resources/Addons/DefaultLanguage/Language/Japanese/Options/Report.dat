@@ -1,0 +1,16 @@
+# Header
+
+"options.report" : "通報オプション"
+"options.report.detail" : "死体通報に関する設定です。"
+
+# Groups
+
+# Options
+
+"options.report.group.range" : "通報距離の詳細設定"
+"options.report.reportRange" : "通報距離"
+"options.report.reportRange.detail" : "死体を通報できる距離を設定します。<br><b>デフォルト</b>: 標準の通報距離を使用します。<br><b>固定値</b>: 通報距離を直接指定します。5xで標準と同じ距離になります。<br><b>視界依存</b>: 通報距離と視界を同期します。停電の影響を受けます。"
+"options.report.reportRange.default" : "標準"
+"options.report.reportRange.fixed" : "固定値"
+"options.report.reportRange.eyesight" : "視界依存"
+"options.report.reportRange.fixed.range" : "最大通報距離"

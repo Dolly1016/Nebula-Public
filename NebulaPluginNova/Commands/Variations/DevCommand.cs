@@ -56,6 +56,9 @@ internal class DevCommand : ICommand
     {
         string kind = parsedArgs.Count > 1 ? parsedArgs[1].ToLower() : "maparea";
         Color color = parsedArgs.Count > 2 ? (ColorUtility.TryParseHtmlString(parsedArgs[2], out var c) ? c : Color.white) : Color.white;
+        int? exNum = null;
+        if (parsedArgs.Count > 3 && int.TryParse(parsedArgs[3], out var parsed)) exNum = parsed;
+
         IEnumerable<(VVector2 point, string text, VVector2 size)>? points = null;
         switch (kind)
         {
@@ -69,7 +72,9 @@ internal class DevCommand : ICommand
             case "objects":
             case "objectpos":
             case "mapobjectpoints":
-                points = MapData.GetCurrentMapData().MapObjectPoints.Select(p => (p.Point, string.Join('\n', Enum.GetValues<Virial.Game.MapObjectType>().Where(type => ((int)p.Type & (int)type) != 0).Select(type => type.ToString())), VVector2.Zero));
+                IEnumerable<MapObjectPoint> tempPoints = MapData.GetCurrentMapData().MapObjectPoints;
+                if (exNum.HasValue) tempPoints = tempPoints.Where(p => ((int)p.Type & exNum.Value) != 0);
+                points = tempPoints.Select(p => (p.Point, string.Join('\n', Enum.GetValues<Virial.Game.MapObjectType>().Where(type => ((int)p.Type & (int)type) != 0).Select(type => type.ToString())), VVector2.Zero));
                 break;
             case "aeroguessereasy":
             case "aeroeasy":
@@ -125,9 +130,10 @@ internal class DevCommand : ICommand
             return new CoActionTask(() =>
             {
                 int num = 0;
+                var parent = UnityHelper.CreateObject("Dots", null, VVector3.Zero);
                 points.Do(p =>
                 {
-                    Helpers.DisplayDot(p.point, p.text, color, p.size);
+                    Helpers.DisplayDot(p.point, p.text, color, p.size, parent.transform);
                     num++;
                 });
                 env.Logger.Push(num + " dot(s) has been displayed.");

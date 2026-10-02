@@ -1,15 +1,15 @@
 # Assignable
 
-"role.bloody.name" : "血语者"
+"role.bloody.name" : "血语"
 "role.bloody.generalBlurb" : "生命最后的痕迹"
 
 # Document
 
-"role.bloody.doc" : "血语者被击杀后，凶手会留下鲜红的血迹。"
+"role.bloody.doc" : "血语被击杀后，凶手会留下鲜红的血迹。"
 
 # Options
 
-"options.role.bloody.detail" : "血语者被击杀后，凶手会留下鲜红的血迹。"
+"options.role.bloody.detail" : "血语被击杀后，凶手会留下鲜红的血迹。"
 "options.role.bloody.curseDuration" : "血迹持续时长"
 
 # Game

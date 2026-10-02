@@ -130,6 +130,19 @@ internal class NebulaModuleFactory : IModuleFactory
     Virial.Components.ObjectTracker<GamePlayer> IModuleFactory.PlayerTracker(ILifespan lifespan, GamePlayer player, Func<GamePlayer, bool>? filter, Func<GamePlayer, bool>? filterHeavier, bool canTrackInVentPlayer)
         => GetPlayerTracker(lifespan, player, ObjectTrackers.StandardPredicate, filter, filterHeavier, canTrackInVentPlayer);
 
+    private Virial.Components.ObjectTracker<Virial.Game.DeadBody> GetDeadBodyTracker(ILifespan lifespan, GamePlayer player, Predicate<Virial.Game.DeadBody> predicate, Func<Virial.Game.DeadBody, bool>? filter, Func<Virial.Game.DeadBody, bool>? filterHeavier)
+    {
+        Predicate<Virial.Game.DeadBody>? predicateHeavier = filterHeavier == null ? null : filterHeavier.Invoke;
+        if (filter == null)
+            return ObjectTrackers.ForDeadBody(lifespan, null, player, predicate, predicateHeavier, null);
+        else
+        {
+            return ObjectTrackers.ForDeadBody(lifespan, null, player, (p) => predicate.Invoke(p) && filter(p), predicateHeavier, null);
+        }
+    }
+
+    Virial.Components.ObjectTracker<Virial.Game.DeadBody> IModuleFactory.DeadBodyTracker(ILifespan lifespan, GamePlayer player, Func<Virial.Game.DeadBody, bool>? filter = null, Func<Virial.Game.DeadBody, bool>? filterHeavier = null)
+        => GetDeadBodyTracker(lifespan, player, _ => true, filter, filterHeavier);
     private Virial.Components.ObjectTracker<IPlayerlike> GetPlayerlikeTracker(ILifespan lifespan, GamePlayer player, Predicate<IPlayerlike> predicate, Func<IPlayerlike, bool>? filter, Func<IPlayerlike, bool>? filterHeavier, bool canTrackInVentPlayer)
     {
         Predicate<IPlayerlike>? predicateHeavier = filterHeavier == null ? null : filterHeavier.Invoke;

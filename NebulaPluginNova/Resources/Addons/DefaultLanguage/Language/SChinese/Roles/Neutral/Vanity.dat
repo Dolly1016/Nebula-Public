@@ -53,6 +53,9 @@
 
 # Team
 
+"end.detail.vanity.win" : "虚荣者独立胜利"
+"end.detail.vanity.extra" : "虚荣者追加胜利"
+
 "teams.vanity" : "虚荣者"
 "end.vanity" : "虚荣者%EXTRA%胜利"
 "end.extra.vanity" : "<color=#FFFFFF>+</color>虚荣者"

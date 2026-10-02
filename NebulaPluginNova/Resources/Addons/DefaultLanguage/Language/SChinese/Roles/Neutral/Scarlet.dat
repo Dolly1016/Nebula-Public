@@ -32,7 +32,8 @@
 "options.role.scarlet.surplusGauge.detail" : "在原先获胜情感值上追加额外上限。<br>数值越高，魅魔独自行动的时间越长。"
 "options.role.scarlet.gaugeReductionRatio" : "情感值衰减速度"
 "options.role.scarlet.gaugeReductionRatio.detail" : "当魅魔远离本命时，情感值会以积累速度乘以该设定值进行衰减。<br>设置1倍时，衰减与积累速度相同，建议设置小于1倍。"
-"options.role.scarlet.canLocateLovers" : "显示真爱位置"
+"options.role.scarlet.canLocateLovers" : "显示本命位置"
+"options.role.scarlet.preAssignedLovers" : "本命预分配"
 "options.role.scarlet.group.gauge" : "情感值设定"
 
 # Game
@@ -80,6 +81,11 @@
 "achievement.scarlet.challenge.splitted.2" : "女皇"
 
 # Team
+
+"end.detail.scarlet.win" : "魅魔胜利"
+"end.detail.scarlet.extra" : "因魅魔本命身份而追加胜利"
+"end.detail.scarlet.blocked" : "因魅魔死亡而阻止本命职业胜利"
+"end.detail.scarlet.blocked.gauge" : "因情感度不足而阻止胜利"
 
 "teams.scarlet" : "魅魔"
 "end.scarlet" : "魅魔%EXTRA%胜利"

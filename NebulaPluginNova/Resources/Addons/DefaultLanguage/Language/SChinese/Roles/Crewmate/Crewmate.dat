@@ -30,6 +30,8 @@
 
 # Team
 
+"end.detail.crewmate.win" : "船员胜利"
+
 "teams.crewmate" : "船员"
 "end.crewmate" : "船员%EXTRA%胜利"
 

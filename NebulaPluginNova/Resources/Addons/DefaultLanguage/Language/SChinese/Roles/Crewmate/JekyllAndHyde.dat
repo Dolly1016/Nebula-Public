@@ -65,3 +65,9 @@
 "achievement.jekyllAndHyde.challenge.cond" : "提示：击杀船员玩家"
 "achievement.jekyllAndHyde.challenge.flavor" : "“即便如此，也要活下去” ——亨利・杰基尔？"
 "achievement.jekyllAndHyde.challenge.splitted.2" : "人性"
+
+# Team
+ 
+"end.detail.jekyllAndHyde.win.impostor" : "作为海德与伪装者阵营胜利"
+"end.detail.jekyllAndHyde.win.crewmate" : "作为杰基尔与船员阵营胜利"
+"end.detail.jekyllAndHyde.missed" : "因未完成任务而失败"

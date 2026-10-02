@@ -99,6 +99,10 @@
 
 # Team
 
+"end.detail.dancer.win" : "舞蹈家胜利"
+"end.detail.dancer.extra" : "因死亡预言而追加胜利"
+"end.detail.dancer.blocked" : "因死亡预言而阻止了该职业胜利"
+
 "teams.dancer" : "舞蹈家"
 "end.dancer" : "舞蹈家<color=#FFFFFF>+鬼魂</color>%EXTRA%胜利"
 

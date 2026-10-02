@@ -106,6 +106,7 @@ public static class MainMenuSetUpPatch
         NebulaScreen.name = "NebulaScreen";
         SetModText(NebulaScreen.transform.GetChild(0).GetChild(0).GetComponent<TextTranslatorTMP>(), "title.label.nebula");
         __instance.mainButtons.Add(nebulaButton);
+        GameObject.Destroy(NebulaScreen.transform.GetChild(5).gameObject);
         GameObject.Destroy(NebulaScreen.transform.GetChild(4).gameObject);
 
         foreach (var button in __instance.mainButtons.GetFastEnumerator())

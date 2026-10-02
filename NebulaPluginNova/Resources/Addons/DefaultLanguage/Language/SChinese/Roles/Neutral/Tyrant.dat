@@ -38,6 +38,9 @@
 
 # Team
 
+"end.detail.tyrant.win" : "暴君胜利"
+"end.detail.tyrant.missed" : "击杀数不足且无其他杀戮型阵营"
+
 "teams.tyrant" : "暴君"
 "end.tyrant" : "暴君%EXTRA%胜利"
 

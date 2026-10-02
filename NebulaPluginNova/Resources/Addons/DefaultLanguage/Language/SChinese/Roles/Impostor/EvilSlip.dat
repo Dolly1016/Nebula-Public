@@ -28,4 +28,8 @@
  
 # Titles
  
+"achievement.evilSlip.common1.title" : "完美逃脱"
+"achievement.evilSlip.common1.goal" : "成功击杀后5秒内使用能力穿过门。"
  
+"achievement.evilSlip.challenge.title" : "柔韧的跟踪狂"
+"achievement.evilSlip.challenge.goal" : "使用能力后在10秒内成功击杀其他玩家。"

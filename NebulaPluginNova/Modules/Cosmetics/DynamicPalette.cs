@@ -726,6 +726,7 @@ public class NebulaPlayerTab : MonoBehaviour
 
     PassiveButton BrPaletteBackButton = null!;
 
+
     public PlayerTab playerTab = null!;
 
     static private float BrightnessHeight = 2.6f;

@@ -30,6 +30,7 @@
 "options.map.nonCrewmateCanUseTeleporterImmediately.detail" : "オンにするとインポスターおよび第三陣営は宝石を磨くミニゲーム無しに<br>テレポートができるようになります。"
 "options.map.ladderCoolDown" : "はしごの使用クールダウン"
 "options.map.ziplineCoolDown" : "ジップラインの使用クールダウン"
+"options.map.platformCooldown" : "昇降機の使用クールダウン"
 "options.map.flipX" : "マップの左右反転"
 "options.map.flipY" : "マップの上下反転"
 "options.map.canHearOthersFootstep" : "他人の足音"

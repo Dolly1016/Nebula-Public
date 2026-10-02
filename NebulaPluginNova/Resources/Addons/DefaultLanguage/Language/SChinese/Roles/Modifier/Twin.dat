@@ -1,0 +1,44 @@
+# Assignable
+ 
+"role.twin.name" : "双子"
+"role.twin.generalBlurb" : "命运双生者"
+"role.twin.blurb" : "你与%NAME%是双子"
+ 
+# Document
+ 
+"role.twin.doc" : "双子两人一组，并且只能分配给船员阵营。<br>当该组合中有一方被击杀，该击杀会被阻止，而是让另一方<b>替死</b>。<br>双方都存在时，共同只能投出<b>一票</b>。"
+ 
+# Options
+ 
+"options.role.twin.detail" : "双子两人一组。<br>一方死亡，另一方替死。"
+"options.role.twin.numOfPairs" : "双子对数"
+"options.role.twin.selfSacrificeDelay" : "替死延迟时间"
+"options.role.twin.selfSacrificeDelayDispersion" : "替死延迟时间波动范围"
+"options.role.twin.selfSacrificeDelayDispersion.detail" : "触发替死时，将根据该值为替死延迟设置随机波动。"
+ 
+# Game
+ 
+"state.selfSacrifice" : "替死"
+ 
+# UI
+ 
+ 
+# Stats
+ 
+ 
+# Titles
+ 
+"achievement.twin.common1.title" : "不可饶恕"
+"achievement.twin.common1.goal" : "驱逐击杀双子搭档的凶手。"
+"achievement.twin.common1.splitted.1" : "饶恕"
+ 
+"achievement.twin.another1.title" : "悲惨命运"
+"achievement.twin.another1.goal" : "双子一方替死，另一方被驱逐。"
+
+"achievement.twin.challenge.title" : "全部だからね"
+"achievement.twin.challenge.goal" : "在失去搭档的情况下，亲手击杀所有非船员阵营玩家并获胜。"
+"achievement.twin.challenge.cond" : "提示：以 觉醒 身份开局并且至少击杀两名玩家以上。"
+
+# Team
+ 
+ 

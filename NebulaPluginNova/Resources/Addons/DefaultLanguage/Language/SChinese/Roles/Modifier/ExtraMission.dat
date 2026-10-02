@@ -44,3 +44,7 @@
 "achievement.extraMission.challenge.title" : "过多疑虑"
 "achievement.extraMission.challenge.goal" : "额外任务目标死亡，且自身为他人额外任务的情况下活到最后并获胜。"
 "achievement.extraMission.challenge.splitted.0" : "过多的"
+
+# Team
+ 
+"end.detail.extraMission.blocked" : "因目标存活而被阻止胜利"

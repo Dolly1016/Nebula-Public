@@ -1,15 +1,15 @@
 # Assignable
 
-"role.tieBreaker.name" : "破平者"
-"role.tieBreaker.generalBlurb" : "我将是破局之人"
+"role.tieBreaker.name" : "破平"
+"role.tieBreaker.generalBlurb" : "破局之人"
 
 # Document
 
-"role.tieBreaker.doc" : "破平者在出现平票时，会为投票目标额外追加一票。"
+"role.tieBreaker.doc" : "破平在出现平票时，会为投票目标额外追加一票。"
 
 # Options
 
-"options.role.tieBreaker.detail" : "破平者在出现平票时，会为投票目标额外追加一票。"
+"options.role.tieBreaker.detail" : "破平在出现平票时，会为投票目标额外追加一票。"
 
 # Game
 

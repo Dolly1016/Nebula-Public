@@ -30,6 +30,29 @@ public static class UpdateGameOptionRegionTextPatch
     }
 }
 
+/// <summary>
+/// 起動して最初の <see cref="ServerManager.LoadServers"/> の後に、前回のリージョンを選び直す。
+/// </summary>
+/// <remarks>
+/// バニラの regionInfo.json は Nebula のリージョンを添字 -1 でしか残せず、
+/// 読み込むと他 Mod のリージョンが選ばれてしまうため、読み込み直後に上書きする。
+/// リージョンの一覧がまだ組まれていない呼び出しでは復元済みにしない。
+/// </remarks>
+[HarmonyPatch(typeof(ServerManager), nameof(ServerManager.LoadServers))]
+public static class RestoreLastRegionPatch
+{
+    static private bool restored = false;
+
+    public static void Postfix(ServerManager __instance)
+    {
+        if (restored) return;
+        if (!CustomServerLoader.TryGetRegionToRestore(out var region)) return;
+
+        restored = true;
+        __instance.SetRegion(region);
+    }
+}
+
 [HarmonyPatch(typeof(ServerDropdown), nameof(ServerDropdown.FillServerOptions))]
 public static class ServerDropdownPatch
 {

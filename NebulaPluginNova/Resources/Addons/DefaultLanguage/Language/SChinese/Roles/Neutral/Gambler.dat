@@ -86,6 +86,8 @@
 
 # Team
 
+"end.detail.gambler.win" : "赌徒胜利"
+
 "teams.gambler" : "赌徒"
 "end.gambler" : "赌徒%EXTRA%胜利"
 

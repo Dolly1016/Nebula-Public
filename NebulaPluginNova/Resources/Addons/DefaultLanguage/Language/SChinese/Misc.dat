@@ -13,6 +13,7 @@
 "title.buttons.stats" : "统计"
 "title.buttons.form" : "Bug反馈"
 "title.buttons.migration" : "数据继承"
+"title.buttons.history" : "历史对局"
 
 "ui.update.waitFinishing" : "等待更新"
 "ui.update.finishUpdate" : "更新完成！<br>请重启游戏！"
@@ -99,6 +100,7 @@
 
 "notification.lobby.noTitleForFreeplay" : "自由游戏中无法获得成就。"
 "notification.lobby.noTitleForOP" : "在主持人拥有管理员权限的游戏中无法获得成就。"
+"notification.server.systemRole" : "服务器通知"
 
 # Inventory
 
@@ -153,7 +155,7 @@
 "regions.Niko233(EU)" : "欧洲（Niko）" 
 "regions.Niko233(AS)" : "亚洲（Niko）"
 "regions.Modded Shanghai (MSH FK)" : "上海（方块）"
-"regions.Modded Beijing (MBJ FK)" : "北京（方块）"
+"regions.Modded Beijing (MBJ FK)" : "北京 (方块)"
 "regions.Modded Beijing (MBJ MXYX)" : "北京（沫夏）"
 "regions.Modded HongKong (MHK HU)" : "香港（林梅）"
 

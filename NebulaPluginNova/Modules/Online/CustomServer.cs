@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
@@ -107,25 +108,40 @@ internal class CustomServerLoader
     }
 
     /// <summary>
-    /// 使えるリージョンを組み直し、前回と同じ名前のものを選び直す。
+    /// 起動時に選び直すリージョンを返す。前回と同じ名前のものを探す。
     /// </summary>
     /// <remarks>
     /// 選んでよいのは <see cref="CurrentAvailableRegions"/> が返すものだけ。
-    /// バニラは Nebula のリージョンを覚えられないので、起動のたびにここで選び直す。
+    /// バニラは Nebula のリージョンを覚えられないので、起動のたびに選び直す。
     /// 前回の名前が配信リストから消えていれば先頭に落とす。
+    /// リージョンの一覧がまだ組まれていなければ false を返す。
+    /// </remarks>
+    internal static bool TryGetRegionToRestore([MaybeNullWhen(false)] out IRegionInfo region)
+    {
+        var available = CurrentAvailableRegions().ToArray();
+        if (available.Length == 0)
+        {
+            region = null;
+            return false;
+        }
+
+        region = available.FirstOrDefault(r => r.Name == LastRegionName.Value) ?? available[0];
+        return true;
+    }
+
+    /// <summary>
+    /// 使えるリージョンを組み直す。
+    /// </summary>
+    /// <remarks>
+    /// 前回のリージョンの復元は <see cref="ServerManager.LoadServers"/> のパッチが行う。
+    /// <see cref="ServerManager"/> がすでに読み込みを終えていれば、ここで読み込み直して復元させる。
+    /// まだ無いときに Instance を触ると使い捨てのオブジェクトが作られてしまうので触らない。
     /// </remarks>
     private static void UpdateRegions()
     {
-        ServerManager serverManager = DestroyableSingleton<ServerManager>.Instance;
-
         currentRegions = defaultRegions.Concat(addonRegions).Concat(suppliedRegions.Select(info => GenerateRegion(info.Name, info.Address, info.Port))).DistinctBy(info => info.Name).ToArray();
-        serverManager.LoadServers();
 
-        var available = CurrentAvailableRegions().ToArray();
-        if (available.Length == 0) return;
-
-        var region = available.FirstOrDefault(r => r.Name == LastRegionName.Value) ?? available[0];
-        serverManager.StartCoroutine(ManagedEffects.Sequence(ManagedEffects.Wait(3f), ManagedEffects.Action(() => serverManager.SetRegion(region))).WrapToIl2Cpp());
+        if (DestroyableSingleton<ServerManager>.InstanceExists) DestroyableSingleton<ServerManager>.Instance.LoadServers();
     }
 
     static internal IEnumerable<IRegionInfo> CurrentAvailableRegions() => currentRegions.Where(r => r.TranslateName == StringNames.NoTranslation && (!suppliedRegions.Find(info => info.Name == r.Name, out var found) || found.Cond.Length == 0 || found.Cond.Contains(Language.GetCurrentLanguage())));

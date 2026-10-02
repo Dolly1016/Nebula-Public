@@ -18,8 +18,8 @@
 
 "options.role.cleaner.detail" : "清理者可以让场上的尸体消失。"
 "options.role.cleaner.cleanCoolDown" : "清理尸体冷却时间"
-"options.role.cleaner.syncKillAndCleanCoolDown" : "清理与击杀共用冷却时间"
-"options.role.cleaner.syncKillAndCleanCoolDown.detail" : "开启后，使用击杀或技能时，都会重置另一个的冷却。"
+"options.role.cleaner.syncKillAndCleanCoolDown" : "清理与击杀共用冷却"
+"options.role.cleaner.syncKillAndCleanCoolDown.detail" : "开启后，使用击杀或清理时，两个能力都会进入冷却状态。"
 
 # Game
 

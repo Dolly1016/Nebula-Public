@@ -104,7 +104,7 @@ public class SpectatorsAbility : IGameOperator
                 float rate = NebulaGameManager.Instance!.WideCamera.TargetRate;
                 if (axis < 0f) rate -= 0.25f;
                 if (axis > 0f) rate += 0.25f;
-                rate = Mathn.Clamp(rate, 1f, 6f);
+                rate = Mathn.Clamp(rate, 1f, 6.5f);
 
                 NebulaGameManager.Instance!.WideCamera.TargetRate = rate;
             }

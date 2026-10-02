@@ -558,9 +558,9 @@ public static class Helpers
 
     static private readonly Image whiteCircleSprite = SpriteLoader.FromResource("Nebula.Resources.WhiteCircle.png", 100f);
     static private Image whiteBoxSprite => NebulaAsset.WhiteImage;
-    static public void DisplayDot(Vector2 position, string rawText, Color color, Vector2 size)
+    static public void DisplayDot(Vector2 position, string rawText, Color color, Vector2 size, Transform? parent = null)
     {
-        var renderer = UnityHelper.CreateSpriteRenderer("Dot", null, position.AsVector3(-10f));
+        var renderer = UnityHelper.CreateSpriteRenderer("Dot", parent, position.AsVector3(-10f));
         renderer.sprite = whiteCircleSprite.GetSprite();
         renderer.color = color;
         var button = renderer.gameObject.SetUpButton();

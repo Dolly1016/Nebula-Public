@@ -299,6 +299,7 @@ public static class ShipExtension
         if (GeneralConfigurations.AirshipElectricalVentOption.CurrentValue) CreateVent(SystemTypes.Electrical, "ElectricalVent", new Vector2(-0.275f, -1.7f)).transform.localPosition += new Vector3(0, 0, 1);
 
         if (GeneralConfigurations.AirshipOneWayMeetingRoomOption.CurrentValue) ModifyMeetingRoom();
+        if (!GeneralConfigurations.AirshipOneWayMeetingRoomOption.CurrentValue && GeneralConfigurations.PlatformCooldownOption > 0f) ModifyMovingPlatformConsole();
 
         if (!GeneralConfigurations.AirshipCockpitAdminOption.CurrentValue)
         {
@@ -843,6 +844,25 @@ public static class ShipExtension
         airship.GapPlatform.SetSide(true);
         airship.outOfOrderPlat.SetActive(true);
         airship.GapPlatform.transform.localPosition = airship.GapPlatform.DisabledPosition;
+    }
+
+    static private void ModifyMovingPlatformConsole() {
+        var ship = AmongUsLLImpl.ShipStatusInstance;
+        var gapRoom = ship.FastRooms[SystemTypes.GapRoom];
+        var consoles = gapRoom.gameObject.GetComponentsInChildren<PlatformConsole>();
+        List<AirshipPlatformConsoleWithCooldown> modifiedConsoles = [];
+        foreach(var console in consoles)
+        {
+            var modified = console.gameObject.AddComponent<AirshipPlatformConsoleWithCooldown>();
+            modified.SetUp(console);
+            GameObject.Destroy(console);
+            modifiedConsoles.Add(modified);
+        }
+        GameOperatorManager.Instance.Subscribe<PlayerUseMovingPlatformEvent>(ev =>
+        {
+            if (!ev.Player.AmOwner) return;
+            foreach (var console in modifiedConsoles) console.CoolDown = console.MaxCoolDown;
+        }, NebulaAPI.CurrentGame!);
     }
 
     static private SpriteLoader customLaboratorySprite = SpriteLoader.FromResource("Nebula.Resources.FungleCustomLaboratory.png", 100f);

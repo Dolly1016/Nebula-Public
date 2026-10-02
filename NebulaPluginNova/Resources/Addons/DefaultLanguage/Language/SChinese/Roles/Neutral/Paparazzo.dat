@@ -75,6 +75,11 @@
 
 # Team
 
+"end.detail.paparazzo.win" : "摄影师胜利"
+"end.detail.paparazzo.missed.subjects" : "拍摄玩家数不足"
+"end.detail.paparazzo.missed.disclosed" : "展示玩家数不足"
+"end.detail.paparazzo.missed.photos" : "展示次数不足"
+
 "teams.paparazzo" : "摄影师"
 "end.paparazzo" : "摄影师%EXTRA%胜利"
 

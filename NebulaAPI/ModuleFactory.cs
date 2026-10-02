@@ -150,7 +150,26 @@ public interface IModuleFactory
     /// <returns></returns>
     ObjectTracker<Player> KillTracker(ILifespan lifespan, Player player, Func<Player, bool>? filter = null, Func<Player, bool>? filterHeavier = null, bool canTrackInVentPlayer = false);
 
+    /// <summary>
+    /// プレイヤーを選択するトラッカーを返します。
+    /// </summary>
+    /// <param name="lifespan">寿命。</param>
+    /// <param name="player">追跡者。通常、自分自身を指定します。</param>
+    /// <param name="filter">さらにプレイヤーを限定するフィルタ。</param>
+    /// <param name="filterHeavier">さらにプレイヤーを限定するフィルタ。コストの高い計算をここに記述してください。</param>
+    /// <param name="canTrackInVentPlayer">ベント内のプレイヤーを追跡できるようにするなら、true。</param>
+    /// <returns></returns>
     ObjectTracker<Player> PlayerTracker(ILifespan lifespan, Player player, Func<Player, bool>? filter = null, Func<Player, bool>? filterHeavier = null, bool canTrackInVentPlayer = false);
+
+    /// <summary>
+    /// 死体を選択するトラッカーを返します。
+    /// </summary>
+    /// <param name="lifespan">寿命。</param>
+    /// <param name="player">追跡者。通常、自分自身を指定します。</param>
+    /// <param name="filter">さらに死体を限定するフィルタ。</param>
+    /// <param name="filterHeavier">さらに死体を限定するフィルタ。コストの高い計算をここに記述してください。</param>
+    /// <returns></returns>
+    ObjectTracker<Virial.Game.DeadBody> DeadBodyTracker(ILifespan lifespan, Player player, Func<Virial.Game.DeadBody, bool>? filter = null, Func<Virial.Game.DeadBody, bool>? filterHeavier = null);
 
     /// <summary>
     /// キル対象を選択するトラッカーを返します。

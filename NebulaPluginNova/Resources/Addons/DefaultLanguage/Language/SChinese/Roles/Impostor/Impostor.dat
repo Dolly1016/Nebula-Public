@@ -27,6 +27,8 @@
 
 # Team
 
+"end.detail.impostor.win" : "伪装者胜利"
+
 "teams.impostor" : "伪装者"
 "end.impostor" : "伪装者%EXTRA%胜利"
 

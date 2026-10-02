@@ -30,13 +30,13 @@
  
 "achievement.niceSlip.common1.title" : "柔韧之躯"
 "achievement.niceSlip.common1.goal" : "在同一局游戏中穿过3次以上的门。"
-"achievement.niceSlip.common1.splitted.0" : "柔韧"
  
-"achievement.niceSlip.common2.title" : "厚脸皮"
+"achievement.niceSlip.common2.title" : "肮脏的入侵者"
 "achievement.niceSlip.common2.goal" : "穿过去污室的门。"
 "achievement.niceSlip.common2.flavor" : "“你怎么那么不卫生……”"
-"achievement.niceSlip.common2.splitted.1" : "脸"
+"achievement.niceSlip.common2.splitted.1" : "肮脏"
  
-"achievement.niceSlip.challenge.title" : "风雨无阻"
+"achievement.niceSlip.challenge.title" : "溜了溜了"
 "achievement.niceSlip.challenge.goal" : "穿过关闭的门后，在10秒内发起紧急会议并驱逐伪装者。"
- 
+"achievement.niceSlip.challenge.flavor" : "“跑路了兄弟！”"
+"achievement.niceSlip.challenge.splitted.0" : "滑溜溜"

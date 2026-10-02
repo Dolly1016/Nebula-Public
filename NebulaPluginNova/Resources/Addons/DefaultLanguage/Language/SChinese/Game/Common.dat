@@ -5,6 +5,26 @@
 
 "end.status.noWinners" : "无人胜利" 
 
+# Game End
+ 
+"end.reason.task" : "任务"
+"end.reason.situation" : "局势"
+"end.reason.specialSituation" : "特殊局势"
+"end.reason.special" : "特殊"
+"end.reason.sabotage" : "破坏"
+"end.phase.checkWin" : "判定胜利"
+"end.phase.blockWin" : "阻止胜利"
+"end.phase.extraWin0" : "追加胜利阶段 1"
+"end.phase.extraWin1" : "追加胜利阶段 2"
+"end.phase.extraWin2" : "追加胜利阶段 3"
+"end.phase.extraWin3" : "追加胜利阶段 4"
+"end.phase.extraWin4" : "追加胜利阶段 5"
+"end.phase.extraWin5" : "追加胜利阶段 6"
+"end.phase.extraWin6" : "追加胜利阶段 7"
+"end.phase.extraWin7" : "追加胜利阶段 8"
+"end.browser" : "打开浏览器查看详细结果"
+"end.browser.steam" : "打开浏览器查看详细结果<br><b>左Shift + 点击</b>打开Steam内置浏览器。"
+
 # No Team Statictics
 
 "statistics.events.startGame" : "游戏开始"

@@ -41,6 +41,9 @@
 
 # Team
 
+"end.detail.jackal.win" : "豺狼胜利"
+"end.detail.jackal.blocked" : "阻止了豺狼阵营胜利"
+
 "teams.jackal" : "豺狼"
 "end.jackal" : "豺狼%EXTRA%胜利"
 

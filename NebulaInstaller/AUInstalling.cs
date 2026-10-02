@@ -105,9 +105,12 @@ static public class AUInstalling
             }
         }
 
+        /*
         string zipResourceName = platform == GamePlatform.Epic
             ? "NebulaInstaller.Resources.Nebula_Epic.zip"
             : "NebulaInstaller.Resources.Nebula_Steam.zip";
+        */
+        string zipResourceName = "NebulaInstaller.Resources.Nebula.zip";
 
         await Task.Run(() =>
         {

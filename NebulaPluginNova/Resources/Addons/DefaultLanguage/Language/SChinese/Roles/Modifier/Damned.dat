@@ -1,27 +1,27 @@
 # Assignable
 
-"role.damned.name" : "受诅咒者"
+"role.damned.name" : "诅咒"
 "role.damnedImpostor.name" : "受诅咒者"
-"role.damned.short" : "受"
+"role.damned.short" : "诅"
 "role.damnedImpostor.short" : "受"
-"role.damned.prefix" : "受诅咒者"
+"role.damned.prefix" : "诅咒"
 "role.damned.generalBlurb" : "身负诅咒的人"
 
 # Document
 
-"role.damned.doc" : "受诅咒者不会察觉自己是受诅咒者。<br>仅能防止第一次攻击，并向施加诅咒。"
+"role.damned.doc" : "拥有诅咒附加的玩家不会察觉自己是诅咒。<br>仅能防止第一次攻击，并向凶手施加诅咒。"
 
 # Options
 
-"options.role.damned.detail" : "受诅咒者受到第一次伤害是无效的。<br>根据设置不同，效果也不同。"
+"options.role.damned.detail" : "拥有诅咒附加的玩家受到第一次伤害是无效的。<br>根据设置不同，向凶手施加的效果也不同。"
 "options.role.damned.takeOverRoleOfKiller" : "成为凶手职业"
 "options.role.damned.damnedMurderMyKiller" : "反杀凶手"
 "options.role.damned.killDelay" : "延迟凶手死亡"
-"options.role.damned.damnedAction" : "诅咒逻辑"
+"options.role.damned.damnedAction" : "诅咒效果"
 "options.role.damned.damnedAction.impostor" : "晋级为伪装者"
 "options.role.damned.damnedAction.madmate" : "晋级为叛徒"
 "options.role.damned.damnedAction.takeOver" : "成为凶手职业"
-"options.role.damned.canBecomeAwareOfDamned" : "可觉醒认知职业"
+"options.role.damned.canBecomeAwareOfDamned" : "可觉醒认知"
 "options.role.damned.taskProgressRequiredForSelfAdmission" : "觉醒所需完成任务进度"
 "options.role.damned.group.task" : "自我认知设定"
 

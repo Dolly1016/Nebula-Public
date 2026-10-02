@@ -119,6 +119,7 @@ public static class GeneralConfigurations
     static internal BoolConfiguration NonCrewmateCanUseTeleporterImmediatelyOption = NebulaAPI.Configurations.Configuration("options.map.nonCrewmateCanUseTeleporterImmediately", true, () => NumOfTeleportationPortalOption > 0);
     static internal FloatConfiguration LadderCoolDownOption = NebulaAPI.Configurations.Configuration("options.map.ladderCoolDown", (0f, 20f, 1f), 3f, FloatConfigurationDecorator.Second);
     static internal FloatConfiguration ZiplineCoolDownOption = NebulaAPI.Configurations.Configuration("options.map.ziplineCoolDown", (0f, 20f, 1f), 3f, FloatConfigurationDecorator.Second);
+    static internal FloatConfiguration PlatformCooldownOption = NebulaAPI.Configurations.Configuration("options.map.platformCooldown", (0f, 20f, 1f), 0f, FloatConfigurationDecorator.Second);
     static internal IConfiguration MapEditorOption = NebulaAPI.Configurations.Configuration(() => null, () => NebulaAPI.GUI.LocalizedButton(Virial.Media.GUIAlignment.Center, NebulaAPI.GUI.GetAttribute(Virial.Text.AttributeAsset.OptionsTitleHalf), "options.map.customization", _ => OpenMapEditor(null)));
     static internal BoolConfiguration MapFlipXOption = NebulaAPI.Configurations.Configuration("options.map.flipX", false);
     static internal BoolConfiguration MapFlipYOption = NebulaAPI.Configurations.Configuration("options.map.flipY", false);
@@ -127,7 +128,7 @@ public static class GeneralConfigurations
     static internal BoolConfiguration HideFarKillerOption = NebulaAPI.Configurations.Configuration("options.map.hideFarKiller", false);
     static internal IConfigurationHolder MapOptions = NebulaAPI.Configurations.Holder("options.map", [ConfigurationTab.Settings], [GameModes.FreePlay, GameModes.Standard]).AppendConfigurations([
         Group("options.map.group.spawning", SpawnMethodOption, SpawnCandidatesOption, SpawnCandidateFilterOption),
-        Group("options.map.group.utilities", SilentVentOption, CanOpenMapWhileUsingUtilityOption, LadderCoolDownOption, ZiplineCoolDownOption),
+        Group("options.map.group.utilities", SilentVentOption, CanOpenMapWhileUsingUtilityOption, LadderCoolDownOption, ZiplineCoolDownOption, PlatformCooldownOption),
         Group("options.map.group.footstep", CanHearOthersFootstepOption, OthersFootstepRangeOption),
         Group("options.map.group.teleporter", NumOfTeleportationPortalOption, NonCrewmateCanUseTeleporterImmediatelyOption),
         Group("options.map.group.flip", MapFlipXOption, MapFlipYOption),
@@ -236,6 +237,12 @@ public static class GeneralConfigurations
         Group("options.task.group.noGuide", NoGuideWiringOption, NoGuideUploadOption, NoGuideDivertPowerOption, NoGuideGarbageOption, NoGuideSortRecordsOption, NoGuideMarshmallowOption, NoGuideHelpCritterOption, NoGuideReplacePartsOption, NoGuideCollectSamplesOption),
         FakeScanOption
         ]);
+
+    static internal ValueConfiguration<int> ReportRangeOption = NebulaAPI.Configurations.Configuration("options.report.reportRange", ["options.report.reportRange.default", "options.report.reportRange.fixed", "options.report.reportRange.eyesight"], 0);
+    static internal FloatConfiguration ReportFixedRangeOption = NebulaAPI.Configurations.Configuration("options.report.reportRange.fixed.range", (1f, 8f, 1f), 5f, FloatConfigurationDecorator.Ratio, () => ReportRangeOption.GetValue() == 1);
+    static internal IConfigurationHolder ReportOptions = NebulaAPI.Configurations.Holder("options.report", [ConfigurationTab.Settings], [GameModes.FreePlay, GameModes.Standard]).AppendConfigurations([
+        Group("options.report.group.range", ReportRangeOption, ReportFixedRangeOption),
+    ]);
 
     static public IntegerConfiguration NumOfPlantsOption = NebulaAPI.Configurations.Configuration("options.perk.numOfPlants", (0, 5), 0);
     static public IntegerConfiguration NumOfWarpedPlantsOption = NebulaAPI.Configurations.Configuration("options.perk.numOfWarpedPlants", (0, 5), 0);
