@@ -87,7 +87,7 @@ internal class DevCommand : ICommand
                 points = AeroGuesserQuizData.GetAllEntry(NebulaAPI.AmongUs.MapId, 1).Select(p => (p.position, p.comment, p.viewport));
                 break;
             case "opportunist":
-                points = Roles.Neutral.Opportunist.GetTaskPositions().Select(p => ((VVector2)p.center, "", (VVector2)p.size));
+                points = Roles.Neutral.Opportunist.GetRawTaskPositions().Select(p => ((VVector2)p.center, "", (VVector2)p.size));
                 break;
             case "temp":
                 if (parsedArgs.Count < 7) return new CoImmediateErrorTask<ICommandToken>(null, $"7 arguments required for \"{kind}\" option in displaydot command.");

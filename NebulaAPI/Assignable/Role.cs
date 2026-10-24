@@ -823,7 +823,7 @@ public interface RuntimeAssignable : ILifespan, IBindPlayer, IGameOperator, IRel
     {
         get
         {
-            return string.Join(", ", MyAbilities.Select(a => a.MoreInformation).Where(a => a != null));
+            return string.Join(", ", MyAbilities.Select(a => a?.MoreInformation).Where(t => t != null));
         }
     }
 }

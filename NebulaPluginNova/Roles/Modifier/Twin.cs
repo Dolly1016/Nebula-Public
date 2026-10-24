@@ -1,5 +1,6 @@
 ﻿using Nebula.Game.Statistics;
 using Nebula.Roles.Complex;
+using Nebula.VoiceChat;
 using System.Linq;
 using Virial;
 using Virial.Assignable;
@@ -109,7 +110,12 @@ public class Twin : DefinedModifierTemplate, DefinedAllocatableModifier, RoleFil
         private Instance? MyTwinModifier => MyTwin.Get()?.GetModifiers<Instance>().FirstOrDefault(twin => twin.twinId == twinId);
         public bool IsMyTwin(GamePlayer? player) => player != null && player.PlayerId == (MyTwin.Get()?.PlayerId ?? byte.MaxValue);
 
-        void RuntimeAssignable.OnActivated() { }
+        void RuntimeAssignable.OnActivated() {
+            if (AmOwner)
+            {
+                ModSingleton<RadioManager>.Instance?.Register(RadioKind.Twins, Language.Translate("voiceChat.info.twinsRadio"), p => p == MyTwin.Get(), this, MyRole.Color);
+            }
+        }
 
         void RuntimeAssignable.DecorateNameConstantly(ref string name, bool canSeeAllInfo, bool inEndScene)
         {

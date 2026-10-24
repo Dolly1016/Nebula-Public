@@ -78,7 +78,9 @@ public static class ReactorSabotagePatch
     {
         if (NebulaGameManager.Instance?.LocalFakeSabotage?.HasFakeSabotage(SystemTypes.Reactor, SystemTypes.Laboratory) ?? false)
         {
-            if(!(__instance.reactor.Countdown > 0f))
+            var countdown = __instance.reactor.Countdown;
+
+            if (!(countdown > 0f))
             {
                 var localPlayer = GamePlayer.LocalPlayer;
                 if(!localPlayer.IsDead) localPlayer.Suicide(PlayerState.Deranged, EventDetail.FakeSabotage, KillParameter.NormalKill);
@@ -199,7 +201,7 @@ public static class ReactorSystemTypeDeterioratePatch
     {
         if (NebulaGameManager.Instance?.LocalFakeSabotage?.HasFakeSabotage(SystemTypes.Reactor, SystemTypes.Laboratory) ?? false)
         {
-            __instance.Countdown -= Time.deltaTime;
+            if(__instance.IsActive) __instance.Countdown -= Time.deltaTime;
             return false;
         }
         return true;
@@ -213,7 +215,7 @@ public static class LifeSuppSystemTypeDeterioratePatch
     {
         if (NebulaGameManager.Instance?.LocalFakeSabotage?.HasFakeSabotage(SystemTypes.LifeSupp) ?? false)
         {
-            __instance.Countdown -= Time.deltaTime;
+            if (__instance.IsActive) __instance.Countdown -= Time.deltaTime;
             return false;
         }
         return true;
@@ -227,7 +229,7 @@ public static class HeliSystemTypeDeterioratePatch
     {
         if (NebulaGameManager.Instance?.LocalFakeSabotage?.HasFakeSabotage(SystemTypes.HeliSabotage) ?? false)
         {
-            __instance.Countdown -= Time.deltaTime;
+            if (__instance.IsActive) __instance.Countdown -= Time.deltaTime;
             return false;
         }
         return true;
@@ -292,10 +294,48 @@ public static class InvalidDoorAutoOpenPatch
 {
     static bool Prefix(AutoOpenDoor __instance, [HarmonyArgument(0)] bool open)
     {
+        //ほんとにやりたいのはこれだけ。なんか不正なメモリアクセスが出る。
+        /*
         if (!open && __instance.TryGetComponent<InvalidDoor>(out _)) return false;
         return true;
+        */
+
+        if (!open && __instance.TryGetComponent<InvalidDoor>(out _)) return false;
+
+        if (!open)
+        {
+            __instance.ClosedTimer = 10f;
+            __instance.CooldownTimer = 30f;
+        }
+
+        if (__instance.Open == open) return false;
+
+        __instance.Open = open;
+        __instance.myCollider.isTrigger = open;
+        __instance.UpdateShadow();
+        __instance.animator.Play(open ? __instance.OpenDoorAnim : __instance.CloseDoorAnim, 1f);
+        __instance.StopAllCoroutines();
+        if (!open)
+        {
+            Vector2 vector = __instance.myCollider.size;
+            __instance.StartCoroutine(__instance.CoCloseDoorway(vector.x > vector.y));
+            if (Constants.ShouldPlaySfx())
+            {
+                SoundManager.Instance.PlayDynamicSound(__instance.name, __instance.CloseSound, false, (DynamicSound.GetDynamicsFunction)(__instance.DoorDynamics), SoundManager.Instance.SfxChannel);
+            }
+            VibrationManager.Vibrate(2.5f, __instance.transform.position, 3f, 0f, VibrationManager.VibrationFalloff.None, __instance.CloseSound, false);
+            return false;
+        }
+        if (Constants.ShouldPlaySfx())
+        {
+            SoundManager.Instance.PlayDynamicSound(__instance.name, __instance.OpenSound, false, (DynamicSound.GetDynamicsFunction)(__instance.DoorDynamics), SoundManager.Instance.SfxChannel);
+        }
+        VibrationManager.Vibrate(2.5f, __instance.transform.position, 3f, 0f, VibrationManager.VibrationFalloff.None, __instance.OpenSound, false);
+
+        return false;
     }
 }
+
 
 [HarmonyPatch(typeof(MushroomWallDoor), nameof(MushroomWallDoor.SetDoorway))]
 public static class InvalidDoorMushroomPatch

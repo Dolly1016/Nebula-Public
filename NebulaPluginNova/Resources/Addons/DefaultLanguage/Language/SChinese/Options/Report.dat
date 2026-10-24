@@ -1,0 +1,16 @@
+# Header
+ 
+"options.report" : "报告设置"
+"options.report.detail" : "关于报告尸体相关的选项"
+ 
+# Groups
+ 
+# Options
+ 
+"options.report.group.range" : "报告距离详细设定"
+"options.report.reportRange" : "报告距离"
+"options.report.reportRange.detail" : "设置玩家可以报告多远的尸体距离。<br><b>默认</b>: 使用默认的距离。<br><b>固定值</b>: 直接设置距离。5x与默认相等。<br><b>视野范围</b>: 使可报告距离与可见范围相等。会受到停电破坏的影响。"
+"options.report.reportRange.default" : "默认"
+"options.report.reportRange.fixed" : "固定值"
+"options.report.reportRange.eyesight" : "视野范围"
+"options.report.reportRange.fixed.range" : "最大报告距离"

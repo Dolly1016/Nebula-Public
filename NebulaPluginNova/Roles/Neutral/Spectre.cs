@@ -380,7 +380,7 @@ internal class Spectre : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             center.transform.localScale = new(gaugeScale, gaugeScale, 1f);
 
             var gaugeRenderer = UnityHelper.CreateObject<SpriteRenderer>("GaugeSprite", center.transform, new(0f, 0f, 0f));
-            gaugeRenderer.sprite = AbilityGauge.GuageBackgroundSprite.GetSprite();
+            gaugeRenderer.sprite = AbilityGaugeAssets.GuageBackgroundSprite.GetSprite();
             gaugeRenderer.drawMode = SpriteDrawMode.Sliced;
             gaugeRenderer.tileMode = SpriteTileMode.Continuous;
             gaugeRenderer.size = new(gaugeWidth, 0.75f);

@@ -28,8 +28,9 @@
 "options.map.numOfTeleporter.detail" : "地图上会出现几对能够传送的宝石。<br>玩家可以通过擦亮宝石传送到相对宝石的位置。"
 "options.map.nonCrewmateCanUseTeleporterImmediately" : "（非船员阵营）瞬间传送"
 "options.map.nonCrewmateCanUseTeleporterImmediately.detail" : "开启后，除船员阵营以外的玩家不需要进行擦亮宝石小游戏进行传送。"
-"options.map.ladderCoolDown" : "使用梯子冷却"
-"options.map.ziplineCoolDown" : "使用滑索冷却"
+"options.map.ladderCoolDown" : "梯子使用冷却"
+"options.map.ziplineCoolDown" : "滑索使用冷却"
+"options.map.platformCooldown" : "升降梯使用冷却"
 "options.map.flipX" : "地图水平翻转"
 "options.map.flipY" : "地图垂直翻转"
 "options.map.canHearOthersFootstep" : "可以听到其他玩家脚步声"
@@ -97,6 +98,11 @@
 "options.map.customization.fungle.blackOutMiningPit" : "配电箱（矿坑）"
 "options.map.customization.fungle.forClassicGame" : "专属装饰包"
 "options.map.customization.fungle.forClassicGame.detail" : "修改地图中的建筑，使其变的更适合推理。包含以下改动：<br>・将核反应堆区域附近的梯子改为单行道。<br>・封锁会议室前往下方的通道。<br>・封锁实验室与温室左下方门口之间的通道<br>・封锁高台中间宝石上方的通道。<br>・矿坑附近新增2处通风口。"
+"options.map.customization.fungle.inMapId" : "变体"
+"options.map.customization.fungle.inMapId.0" : "夜暮"
+"options.map.customization.fungle.inMapId.1" : "午夜"
+"options.map.customization.fungle.inMapId.2" : "毒雾"
+
 "options.map.customization.admin.editor" : "右键点击：打开房间显示设置"
 "options.map.customization.admin.viewer" : "左键点击：显示房间设置"
 

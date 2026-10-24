@@ -331,6 +331,7 @@ public record ArchivedMapObject(
 public interface IArchivedGameData
 {
     byte MapId { get; }
+    int InMapId { get; }
     DateTime? StartedAtUtc { get; }
     DateTime? EndedAtUtc { get; }
     ArchivedGameEnd? EndInfo { get; }

@@ -178,6 +178,11 @@ public static class PlayerAttributes
     /// 名前表示には役職名も含まれます。
     /// </summary>
     static public IPlayerAttribute HiddenName { get; internal set; }
+
+    /// <summary>
+    /// 通報および緊急会議の開始を抑制します。
+    /// </summary>
+    static public IPlayerAttribute Suppressed { get; internal set; }
 }
 
 public class Outfit

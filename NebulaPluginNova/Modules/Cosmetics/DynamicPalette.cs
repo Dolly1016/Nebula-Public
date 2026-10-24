@@ -23,7 +23,7 @@ public class DynamicPalette
     static public readonly VColor[] ShadowColors = new VColor[ColorsLength];
 
     static public readonly ColorPalette[] AllColorPalette = [new DefaultColorPalette()];
-    static public readonly ShadowPattern[] AllShadowPattern = [new DefaultShadowPattern()];
+    static public readonly ShadowPattern[] AllShadowPattern = [new DefaultShadowPattern(), new TwoToneShadowPattern()];
 
     static public readonly Dictionary<int, (int h, int d, string? name)> ColorNameDic = [];
 
@@ -513,6 +513,17 @@ public class DynamicPalette
         public bool AllowEditShadowColor => true;
     }
 
+    public class TwoToneShadowPattern : ShadowPattern
+    {
+        public void GetShadowColor(VColor mainColor, VColor shadowColor, out VColor resultMain, out VColor resultShadow)
+        {
+            resultMain = mainColor;
+            resultShadow = shadowColor;
+        }
+
+        public bool AllowEditShadowColor => true;
+    }
+
     public static string HDToTranslationKey(int h, int d) => "color." + h + "." + d;
     public static string GetColorName(int colorId)
     {
@@ -705,7 +716,7 @@ public class NebulaPlayerTab : MonoBehaviour
 
     static readonly XOnlyDividedSpriteLoader spriteColorIcons = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.ColorIcon.png", 100f, 50, true);
 
-    static readonly XOnlyDividedSpriteLoader spriteSwitches = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.PaletteSwitches.png", 100f, 2);
+    static readonly XOnlyDividedSpriteLoader spriteSwitches = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.PaletteSwitches.png", 100f, 3);
     static NebulaPlayerTab()
     {
         ClassInjector.RegisterTypeInIl2Cpp<NebulaPlayerTab>();
@@ -913,7 +924,7 @@ public class NebulaPlayerTab : MonoBehaviour
             }
             else
             {
-                if (DynamicPalette.MyColor.GetShadowPattern() == byte.MaxValue) DynamicPalette.MyColor.SetShadowPattern(0);
+                DynamicPalette.MyColor.SetShadowPattern((byte)(editingShadowColor ? 1 : 0));
 
                 ToColorParam(GetOnPalettePosition(), out var h, out var d);
 
@@ -1025,10 +1036,24 @@ public class NebulaPlayerTab : MonoBehaviour
         var SwitchButton = SwitchRenderer.gameObject.SetUpButton(true, SwitchRenderer);
         SwitchButton.OnClick.AddListener(() =>
         {
-            editingVisorColor = !editingVisorColor;
-            if (editingVisorColor)
+            if (editingShadowColor)
             {
                 editingShadowColor = false;
+                editingVisorColor = true;
+            }
+            else if (editingVisorColor)
+            {
+                editingShadowColor = false;
+                editingVisorColor = false;
+            }
+            else
+            {
+                editingShadowColor = true;
+                editingVisorColor = false;
+            }
+
+            if (editingVisorColor)
+            {
                 TargetRenderer.gameObject.SetActive(false);
             }
             else
@@ -1036,7 +1061,7 @@ public class NebulaPlayerTab : MonoBehaviour
                 SetTargetRendererPos();
             }
 
-            SwitchRenderer.sprite = spriteSwitches.GetSprite(editingVisorColor ? 0 : 1);
+            SwitchRenderer.sprite = spriteSwitches.GetSprite(editingVisorColor ? 0 : editingShadowColor ? 2 : 1);
 
             BrightnessRenderer.gameObject.SetActive(!editingVisorColor);
         });
@@ -1127,7 +1152,7 @@ public class NebulaPlayerTab : MonoBehaviour
             }
             else
             {
-                PreviewColor(h, d, null);
+                PreviewColor(h, d, null, (byte)(editingShadowColor ? 1 : 0));
             }
         }
     }
@@ -1214,7 +1239,7 @@ public class NebulaPlayerTab : MonoBehaviour
         }
     }
 
-    private void PreviewColor(byte? concernedHue, byte? concernedDistance, float? concernedBrightness)
+    private void PreviewColor(byte? concernedHue, byte? concernedDistance, float? concernedBrightness, byte? shadowPattern = null)
     {
 
         DynamicPalette.MyColor.GetParam(editingShadowColor, out byte h, out byte d, out var b);
@@ -1227,10 +1252,11 @@ public class NebulaPlayerTab : MonoBehaviour
             BrightnessRenderer.color = DynamicPalette.AllColorPalette[currentPalette].GetColor((byte)concernedHue, (byte)concernedDistance, 1f).ToUnityColor();
         }
 
-        if (DynamicPalette.MyColor.GetShadowPattern() != byte.MaxValue)
+        var shadowId = (shadowPattern ?? DynamicPalette.MyColor.GetShadowPattern());
+        if (shadowId != byte.MaxValue)
         {
             VColor color = DynamicPalette.AllColorPalette[currentPalette].GetColor(concernedHue.Value, concernedDistance.Value, concernedBrightness.Value);
-            DynamicPalette.AllShadowPattern[DynamicPalette.MyColor.GetShadowPattern()].GetShadowColor(
+            DynamicPalette.AllShadowPattern[shadowId].GetShadowColor(
                 editingShadowColor ? DynamicPalette.MyColor.MainColor : color,
                 editingShadowColor ? color : DynamicPalette.MyColor.ShadowColor,
                 out var resultMain, out var resultShadow

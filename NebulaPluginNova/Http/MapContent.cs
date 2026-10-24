@@ -9,8 +9,8 @@ namespace Nebula.Http;
 internal static class MapContent
 {
     private static readonly object Gate = new();
-    private static readonly Dictionary<byte, byte[]> images = [];
-    private static readonly Dictionary<byte, MapView> views = [];
+    private static readonly Dictionary<(byte mapId, int inMapId), byte[]> images = [];
+    private static readonly Dictionary<(byte mapId, int inMapId), MapView> views = [];
 
     private static readonly Virial.Logging.ILogger Logger = NebulaAPI.Logging.NebulaLogger("HttpServer");
 
@@ -30,14 +30,20 @@ internal static class MapContent
 
             for (byte mapId = 0; mapId < VanillaAsset.MapAsset.Length; mapId++)
             {
-                try
+                //マップ内のバリエーションごとに1枚ずつ撮る。設定で変わるので、後から選べるようにしておく。
+                var variations = mapId < NebulaAsset.DivMap.Length ? NebulaAsset.DivMap[mapId]?.Length ?? 0 : 0;
+
+                for (int inMapId = 0; inMapId < variations; inMapId++)
                 {
-                    Capture(mapId);
-                }
-                catch (Exception e)
-                {
-                    //一枚失敗しても他のマップは配れるように
-                    Logger.Warning($"Failed to capture a minimap. (map {mapId})\n" + e.Message);
+                    try
+                    {
+                        Capture(mapId, inMapId);
+                    }
+                    catch (Exception e)
+                    {
+                        //一枚失敗しても他のマップは配れるように
+                        Logger.Warning($"Failed to capture a minimap. (map {mapId}-{inMapId})\n" + e.Message);
+                    }
                 }
             }
 
@@ -45,12 +51,12 @@ internal static class MapContent
         }
     }
 
-    private static void Capture(byte mapId)
+    private static void Capture(byte mapId, int inMapId)
     {
         var ship = VanillaAsset.MapAsset[mapId];
         if (ship == null) return;
 
-        var sprite = NebulaAsset.GetMapSprite(mapId, AllRooms);
+        var sprite = NebulaAsset.GetMapSprite(mapId, AllRooms, inMapId: inMapId);
         if (sprite == null) return;
 
         var png = ImageConversion.EncodeToPNG(sprite.texture);
@@ -60,10 +66,11 @@ internal static class MapContent
 
         var bounds = sprite.bounds;
 
-        images[mapId] = png;
-        views[mapId] = new MapView
+        images[(mapId, inMapId)] = png;
+        views[(mapId, inMapId)] = new MapView
         {
             MapId = mapId,
+            InMapId = inMapId,
             Width = sprite.texture.width,
             Height = sprite.texture.height,
             PixelsPerUnit = PixelsPerUnit,
@@ -76,9 +83,9 @@ internal static class MapContent
         };
     }
 
-    public static bool TryGetImage(byte mapId, out byte[] png)
+    public static bool TryGetImage(byte mapId, int inMapId, out byte[] png)
     {
-        lock (Gate) return images.TryGetValue(mapId, out png!);
+        lock (Gate) return images.TryGetValue((mapId, inMapId), out png!);
     }
 
     public static string Manifest
@@ -103,6 +110,10 @@ internal static class MapContent
     private sealed class MapView
     {
         public byte MapId { get; set; }
+
+        /// <summary>マップ内のバリエーション。</summary>
+        public int InMapId { get; set; }
+
         public int Width { get; set; }
         public int Height { get; set; }
         public float PixelsPerUnit { get; set; }

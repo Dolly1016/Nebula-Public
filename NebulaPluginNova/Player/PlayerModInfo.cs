@@ -155,6 +155,7 @@ public class PlayerAttributeImpl : IPlayerAttribute
         //いずれも見た目にのみ作用する効果なので、他プレイヤーからは認識できないようにする
         PlayerAttributes.VisibleThroughWall = new PlayerAttributeImpl(2, "$visibleThroughWall") { Cognizable = _ => false };
         PlayerAttributes.HiddenName = new PlayerAttributeImpl(2, "$hiddenName") { Cognizable = _ => false };
+        PlayerAttributes.Suppressed = new PlayerAttributeImpl(13, "suppressed");
     }
 }
 
@@ -417,6 +418,15 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
             footStep.maxDistance = GeneralConfigurations.OthersFootstepRangeOption;
             footStep.rolloffMode = AudioRolloffMode.Linear;
             footStep.spatialBlend = 1f;
+        }
+
+        if (MyVanillaData.Disconnected)
+        {
+            IsDisconnected = true;
+            MyState = PlayerState.Disconnected;
+            
+            GameOperatorManager.Instance?.Run(new PlayerDisconnectEvent(this), true);
+            NebulaGameManager.Instance?.GameStatistics.RecordEvent(new GameStatistics.Event(GameStatistics.EventVariation.Disconnect, PlayerId, 0) { RelatedTag = EventDetail.Disconnect });
         }
     }
 
@@ -1516,7 +1526,9 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     // Virial::ReportAPI
     void GamePlayer.ReportDeadBody(GamePlayer deadBody, bool canInvokeInSabo, bool consumeEmergencyButton)
     {
-        if (!(NebulaGameManager.Instance?.LocalStatus.CanReport ?? false)) return;
+        var localStatus = NebulaGameManager.Instance?.LocalStatus;
+        if (NebulaGameManager.Instance?.LocalStatus?.CannotReportOrSuppressed ?? false) return;
+
         MeetingHudExtension.ModCmdReportDeadBody(this, deadBody, MeetingHudExtension.ReportType.ReportDeadBody, canInvokeInSabo, consumeEmergencyButton);
     }
     void GamePlayer.RequestEmergencyMeeting(bool canInvokeInSabo, bool consumeEmergencyButton) => MeetingHudExtension.ModCmdReportDeadBody(this, null, MeetingHudExtension.ReportType.EmergencyMeeting, canInvokeInSabo, consumeEmergencyButton);

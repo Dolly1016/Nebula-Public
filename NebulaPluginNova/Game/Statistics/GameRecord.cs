@@ -24,7 +24,7 @@ namespace Nebula.Game.Statistics;
 internal sealed class GameRecord : IArchivedGameData
 {
     /// <summary>この形式の版番号。</summary>
-    public const int CurrentVersion = 15;
+    public const int CurrentVersion = 16;
 
     /// <summary>
     /// 読み書きに使う設定。プロパティ名はキャメルケース、列挙子は名前で書く。
@@ -46,6 +46,9 @@ internal sealed class GameRecord : IArchivedGameData
     public string Id { get; set; } = "";
 
     public byte MapId { get; set; }
+
+    /// <summary>マップ内のどのバリエーションで遊んだか。</summary>
+    public int InMapId { get; set; }
     public DateTime? StartedAtUtc { get; set; }
     public DateTime? EndedAtUtc { get; set; }
     public ArchivedGameEnd? EndInfo { get; set; }
@@ -94,6 +97,7 @@ internal sealed class GameRecord : IArchivedGameData
         PlayerResults = game.PlayerResults.ToArray(),
         Movement = CompressedJson.Compress(game.MovementPhases.ToArray(), SerializerOptions),
         Events = game.Events.ToArray(),
+        InMapId = game.InMapId,
         MapObjects = game.MapObjects.ToArray(),
         VoteResults = game.VoteResults.ToArray(),
     };

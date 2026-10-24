@@ -337,6 +337,21 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
         public bool InLongNeckMode => !(CurrentLongNeckMode?.IsDeadObject ?? true) && (CurrentLongNeckMode?.IsActive ?? false);
         public LongNeckMode? CurrentLongNeckMode = null;
 
+        //首の現在の長さ。伸ばし始めの瞬間が0で、最大でNeckMaxLengthまで伸びる。
+        //身体のスケールは掛かっていない。実際の長さはLongNeckMode.ActualHeightと同様にスケールを掛けて求める。
+        public float NeckLength
+        {
+            get
+            {
+                //首はLongの身体にしか存在しない。切り替わった後に古い値を拾わないようにする。
+                var cosmetics = MyPlayer.VanillaCosmetics;
+                if (!cosmetics.AsBoolFast() || cosmetics.CurrentBodyType != PlayerBodyTypes.Long) return 0f;
+
+                var longBoi = GetLongBody(MyPlayer);
+                return longBoi.AsBoolFast() ? longBoi.calculatedNeckHeight : 0f;
+            }
+        }
+
         int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
         private int neckEpoch = 0;
         public int GetNeckEpoch() => neckEpoch;

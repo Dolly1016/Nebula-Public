@@ -231,12 +231,12 @@ public class MetaWidgetOld : IMetaWidgetOld, IMetaParallelPlacableOld
             return mySize.y + 0.1f;
         }
 
-        public static Image AsMapImage(byte mapId,float width,IEnumerable<(IMetaParallelPlacableOld widget, Vector2 pos)> contents, int mapMask = 0xFFFFFFF)
+        public static Image AsMapImage(byte mapId,float width,IEnumerable<(IMetaParallelPlacableOld widget, Vector2 pos)> contents, int mapMask = 0xFFFFFFF, int? inMapId = null)
         {
             if (mapId == 1) width *= 0.96f;
             if (mapId == 4) width *= 1.2f;
             if (mapId == 5) width *= 1.1f;
-            return new Image(NebulaAsset.GetMapSprite(mapId, mapMask))
+            return new Image(NebulaAsset.GetMapSprite(mapId, mapMask, inMapId: inMapId))
             {
                 Width = width,
                 Alignment = AlignmentOption.Center,

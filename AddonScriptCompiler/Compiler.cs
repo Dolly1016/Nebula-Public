@@ -21,10 +21,20 @@ public static class Compiler
         string[] references,
         string sourceDir,
         string outputPath,
-        bool useHiddenMembers)
+        bool useHiddenMembers,
+        int virialVersion)
     {
         List<SyntaxTree> trees = new();
-        
+
+        var myParseOption = ParseOptions;
+
+
+        for (int i = 1; i <= virialVersion; i++)
+        {
+            myParseOption = myParseOption.WithPreprocessorSymbols($"VIRIAL_{i}_OR_GREATER");
+        }
+        myParseOption = myParseOption.WithPreprocessorSymbols($"VIRIAL_{virialVersion}");
+
         if (Directory.Exists(sourceDir))
         {
             var files = Directory.GetFiles(sourceDir, "*.cs", SearchOption.AllDirectories);
@@ -59,9 +69,9 @@ public static class Compiler
             .Where(r => !string.IsNullOrWhiteSpace(r) && File.Exists(r))
             .Select(r => MetadataReference.CreateFromFile(r))
             .ToList();
-
+        
         var compilation = CSharpCompilation.Create(moduleName, trees, metadataReferences, myCompilationOptions);
-
+        
         using var dllStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write);
         var emitResult = compilation.Emit(dllStream);
         dllStream.Flush();

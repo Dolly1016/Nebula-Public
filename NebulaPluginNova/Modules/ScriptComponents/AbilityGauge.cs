@@ -5,11 +5,15 @@ using Virial.Media;
 
 namespace Nebula.Modules.ScriptComponents;
 
-internal class AbilityGauge : FlexibleLifespan, IGameOperator
+internal class AbilityGaugeAssets
 {
     static internal readonly ResourceExpandableSpriteLoader GuageBackgroundSprite = new("Nebula.Resources.SpectreGuageBackground.png", 100f, 10, 10);
-    static private readonly MultiImage GaugeSprites = DividedExpandableSpriteLoader.FromResource("Nebula.Resources.VerticalGauge.png", 100f, 18, 5, new(0.5f, 0f), 3, 1);
-    static private readonly Image GaugeScaleSprite = SpriteLoader.FromResource("Nebula.Resources.VerticalGaugeScale.png", 100f);
+    static internal readonly MultiImage GaugeSprites = DividedExpandableSpriteLoader.FromResource("Nebula.Resources.VerticalGauge.png", 100f, 18, 5, new(0.5f, 0f), 4, 1);
+    static internal readonly Image GaugeScaleSprite = SpriteLoader.FromResource("Nebula.Resources.VerticalGaugeScale.png", 100f);
+}
+
+internal class AbilityGauge : FlexibleLifespan, IGameOperator
+{
     private readonly Func<float> value;
     private readonly Func<bool> isInProgress;
     private const float GaugeMargin = 0.08f;
@@ -37,7 +41,7 @@ internal class AbilityGauge : FlexibleLifespan, IGameOperator
     }
 
     GameObject GaugeObject;
-    public AbilityGauge(float max, float threshold, float hue, Image lowIconSprite, Image highIconSprite, Func<float> value, Func<bool> isInProgress)
+    public AbilityGauge(float max, float threshold, float hue, Image lowIconSprite, Image highIconSprite, Func<float> value, Func<bool> isInProgress, bool iconShouldBeBack = false)
     {
         this.Threshold = threshold;
         this.LowIconSprite = lowIconSprite;
@@ -56,34 +60,34 @@ internal class AbilityGauge : FlexibleLifespan, IGameOperator
 
         var background = UnityHelper.CreateObject<SpriteRenderer>("Background", Adjuster, new(0f, -0.37f, 0.01f));
         background.SetAsExpandableRenderer();
-        background.sprite = GuageBackgroundSprite.GetSprite();
+        background.sprite = AbilityGaugeAssets.GuageBackgroundSprite.GetSprite();
         background.size = new(0.8f,0.2f);
         
 
         GaugeBaseRenderer = UnityHelper.CreateObject<SpriteRenderer>("BaseSprite", Scaler.transform, new(0f,0f,0f));
         GaugeBaseRenderer.SetAsExpandableRenderer();
-        GaugeBaseRenderer.sprite = GaugeSprites.GetSprite(0);
+        GaugeBaseRenderer.sprite = AbilityGaugeAssets.GaugeSprites.GetSprite(0);
         GaugeBaseRenderer.size = new(GaugeWidth, GaugeHeight);
 
         var gaugeBackRenderer = UnityHelper.CreateObject<SpriteRenderer>("BackSprite", Scaler.transform, new(0f, 0f, -0.01f));
         gaugeBackRenderer.SetAsExpandableRenderer();
-        gaugeBackRenderer.sprite = GaugeSprites.GetSprite(1);
+        gaugeBackRenderer.sprite = AbilityGaugeAssets.GaugeSprites.GetSprite(1);
         gaugeBackRenderer.size = new(GaugeWidth, GaugeHeight);
         gaugeBackRenderer.material = new(NebulaAsset.HSVShader);
         gaugeBackRenderer.material.SetFloat("_Hue", 360 - hue);
 
         GaugeRenderer = UnityHelper.CreateObject<SpriteRenderer>("FrontSprite", Scaler.transform, new(0f, 0f, -0.02f));
         GaugeRenderer.SetAsExpandableRenderer();
-        GaugeRenderer.sprite = GaugeSprites.GetSprite(2);
+        GaugeRenderer.sprite = AbilityGaugeAssets.GaugeSprites.GetSprite(2);
         GaugeRenderer.size = new(GaugeWidth, GaugeMargin + 0f);
         GaugeRenderer.material = new(NebulaAsset.HSVShader);
         GaugeRenderer.material.SetFloat("_Hue", 360 - hue);
 
-        IconRenderer = UnityHelper.CreateObject<SpriteRenderer>("Icon", Adjuster, new(-0.12f, -0.46f, -0.03f));
+        IconRenderer = UnityHelper.CreateObject<SpriteRenderer>("Icon", Adjuster, new(-0.12f, -0.46f, iconShouldBeBack  ? 0.01f : -0.03f));
         IconRenderer.sprite = lowIconSprite.GetSprite();
 
         var scaleRenderer = UnityHelper.CreateObject<SpriteRenderer>("Scale", Scaler.transform, new(0f, GaugeMargin + (threshold / max) * GaugeValueActualHeight, -0.025f));
-        scaleRenderer.sprite = GaugeScaleSprite.GetSprite();
+        scaleRenderer.sprite = AbilityGaugeAssets.GaugeScaleSprite.GetSprite();
     }
 
     void OnUpdate(GameUpdateEvent ev)
@@ -100,7 +104,7 @@ internal class AbilityGauge : FlexibleLifespan, IGameOperator
             Adjuster.localPosition = Vector3.zero;
         }
 
-            float currentVal = Math.Clamp(Value, 0f, Max);
+            float currentVal = Mathn.Clamp(Value, 0f, Max);
         bool lastLow = lastValue < Threshold;
         bool low = currentVal < Threshold;
 
@@ -122,7 +126,109 @@ internal class AbilityGauge : FlexibleLifespan, IGameOperator
             GaugeBaseRenderer.color = new(0.5f, 0.5f, 0.5f, 1f);
             Scaler.transform.localScale = Vector3.one;
         }
+    }
+}
 
+internal class DiscreteAbilityGauge : FlexibleLifespan, IGameOperator
+{
+    private readonly Func<int> value;
+    private const float GaugeMargin = 0.08f;
+
+    private int lastValue = -1;
+    public int Value => value.Invoke();
+    public int Max { get; private set; }
+
+    private const float GaugeWidth = 0.4f;
+    private float GaugeHeight { get; init; } = 0.2f;
+    private const float GaugeArrangeHeightDiff = 0.041f;
+    private float GaugeArrangeHeight => GaugeHeight - GaugeArrangeHeightDiff;
+    private float GaugeValueHeight => GaugeHeight - GaugeMargin; //ゲージの画像は上の余剰部分を含む高さを必要とするため、これで計算すればよい。
+    private float GaugeValueActualHeight => GaugeHeight - GaugeMargin * 2f; //実際の閾値の位置を知るためにはこちらが良い。
+    public float Threshold { get; private set; }
+
+    private static Vector2 RendererLocalPos = new(0.36f, -0.47f);
+    private SpriteRenderer IconRenderer;
+    private record RendererTuple(SpriteRenderer Gauge, SpriteRenderer Back, SpriteRenderer Base);
+    private RendererTuple[] Renderers;
+    private GameObject Scaler;
+    private Transform Adjuster;
+    private bool isActive = true;
+    public void SetActive(bool active)
+    {
+        this.isActive = active;
+    }
+
+    GameObject GaugeObject;
+    public DiscreteAbilityGauge(int max, float hue, Image iconSprite, Func<int> value, bool iconShouldBeBack = false)
+    {
+        this.value = value;
+        this.Max = max;
+        this.Renderers = new RendererTuple[max];
+        if (max > 5) GaugeHeight = (1f / max) + GaugeArrangeHeightDiff;
+
+        var gauge = HudContent.InstantiateContent("Gauge", true, false, false, true);
+        Adjuster = gauge.gameObject.AddAdjuster();
+        GaugeObject = gauge.gameObject;
+        this.BindGameObject(GaugeObject);
+
+        Scaler = UnityHelper.CreateObject("Scaler", Adjuster, RendererLocalPos);
+        Scaler.transform.localScale = new Vector3(0.85f, 0.85f, 1f);
+
+        var background = UnityHelper.CreateObject<SpriteRenderer>("Background", Adjuster, new(0f, -0.37f, 0.01f));
+        background.SetAsExpandableRenderer();
+        background.sprite = AbilityGaugeAssets.GuageBackgroundSprite.GetSprite();
+        background.size = new(0.8f, 0.2f);
+
+        for(int i = 0; i < max; i++)
+        {
+            var gaugeBaseRenderer = UnityHelper.CreateObject<SpriteRenderer>("BaseSprite", Scaler.transform, new(0f, i * GaugeArrangeHeight, 0f - i * 0.01f));
+            gaugeBaseRenderer.SetAsExpandableRenderer();
+            gaugeBaseRenderer.sprite = AbilityGaugeAssets.GaugeSprites.GetSprite(i == 0 ? 0 : 3);
+            gaugeBaseRenderer.size = new(GaugeWidth, GaugeHeight);
+
+            var gaugeBackRenderer = UnityHelper.CreateObject<SpriteRenderer>("BackSprite", Scaler.transform, new(0f, i * GaugeArrangeHeight, -0.01f - i * 0.01f));
+            gaugeBackRenderer.SetAsExpandableRenderer();
+            gaugeBackRenderer.sprite = AbilityGaugeAssets.GaugeSprites.GetSprite(1);
+            gaugeBackRenderer.size = new(GaugeWidth, GaugeHeight);
+            gaugeBackRenderer.material = new(NebulaAsset.HSVShader);
+            gaugeBackRenderer.material.SetFloat("_Hue", 360 - hue);
+
+            var gaugeRenderer = UnityHelper.CreateObject<SpriteRenderer>("FrontSprite", Scaler.transform, new(0f, i * GaugeArrangeHeight, -0.02f - i * 0.01f));
+            gaugeRenderer.SetAsExpandableRenderer();
+            gaugeRenderer.sprite = AbilityGaugeAssets.GaugeSprites.GetSprite(2);
+            gaugeRenderer.size = new(GaugeWidth, GaugeHeight);
+            gaugeRenderer.material = new(NebulaAsset.HSVShader);
+            gaugeRenderer.material.SetFloat("_Hue", 360 - hue);
+            gaugeRenderer.gameObject.SetActive(false);
+
+            Renderers[i] = new(gaugeRenderer, gaugeBackRenderer, gaugeBaseRenderer);
+        }
         
+
+        IconRenderer = UnityHelper.CreateObject<SpriteRenderer>("Icon", Adjuster, new(-0.12f, -0.46f, iconShouldBeBack  ? 0.005f : -0.1f));
+        IconRenderer.sprite = iconSprite.GetSprite();
+    }
+
+    void OnUpdate(GameUpdateEvent ev)
+    {
+        GaugeObject.SetActive(isActive && !AmongUsUtil.MapIsOpen && !ExileController.Instance.AsBoolFast());
+        if (MeetingHud.Instance.AsBoolFast())
+        {
+            Adjuster.localScale = new(0.8f, 0.8f, 1f);
+            Adjuster.localPosition = new(-0.3f, -0.2f);
+        }
+        else
+        {
+            Adjuster.localScale = Vector3.one;
+            Adjuster.localPosition = Vector3.zero;
+        }
+
+        int currentVal = Mathn.Clamp(Value, 0, Max);
+
+        for(int i = 0; i < Max; i++)
+        {
+            Renderers[i].Gauge.gameObject.SetActive(i < currentVal);
+            Renderers[i].Base.color = i < currentVal ? Color.white : new(0.5f, 0.5f, 0.5f);
+        }
     }
 }

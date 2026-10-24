@@ -332,11 +332,14 @@ public static class MeetingHudExtension
         if (modReporter.IsDead) return;
         if (!AmongUsLLImpl.AmongUsClientInstance.AmHost) return;
 
-        HudManager.Instance.OpenMeetingRoom(reporter);
-
-        RpcStartMeeting.Invoke((modReporter, GamePlayer.GetPlayer(deadBody ? deadBody!.PlayerId : (byte)255), reportType));
-
-        MeetingModRpc.RpcNoticeStartMeeting.Invoke((modReporter.PlayerId, deadBody?.PlayerId ?? 255));
+        var reported = GamePlayer.GetPlayer(deadBody ? deadBody!.PlayerId : (byte)255);
+        using (RPCRouter.CreateSection("StartMeeting"))
+        {
+            GameOperatorManager.Instance?.Run<MeetingRequestAcceptedHostEvent>(new(modReporter, reported));
+            new NebulaRPCInvoker(() => HudManager.Instance.OpenMeetingRoom(reporter)).InvokeSingle();
+            RpcStartMeeting.Invoke((modReporter, reported, reportType));
+            MeetingModRpc.RpcNoticeStartMeeting.Invoke((modReporter.PlayerId, deadBody?.PlayerId ?? 255));
+        }
 
         if (consumeEmergencyButton)
         {

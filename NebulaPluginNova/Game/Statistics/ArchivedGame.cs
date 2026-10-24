@@ -38,11 +38,13 @@ internal class ArchivedGameImpl : IArchivedGame
     private ArchivedGameEventRecord[] eventRecords;
     private ArchivedMapObject[] mapObjects;
     private ArchivedVoteResult[] voteResults;
+    private int inMapId;
     IReadOnlyList<RoleHistory> IArchivedGame.RoleHistory => roleHistory;
 
     IArchivedEvent[] IArchivedGame.ArchivedEvents => events;
 
     byte IArchivedGameData.MapId => mapId;
+    int IArchivedGameData.InMapId => inMapId;
 
     DateTime? IArchivedGameData.StartedAtUtc => startedAtUtc;
 
@@ -78,6 +80,7 @@ internal class ArchivedGameImpl : IArchivedGame
         voteResults = [.. game.GameStatistics.VoteResults];
         roleHistory = game.RoleHistory;
         mapId = NebulaAPI.AmongUs.MapId;
+        inMapId = NebulaAsset.GetInMapId(mapId);
         startedAtUtc = game.StartedAtUtc;
         endedAtUtc = game.EndedAtUtc;
         endInfo = game.EndState != null ? ArchivedGameEnd.FromEndState(game.EndState, game.AllPlayerInfo) : null;
@@ -108,6 +111,7 @@ internal class ArchivedGameImpl : IArchivedGame
         events = [];
         roleHistory = [];
         mapId = data.MapId;
+        inMapId = data.InMapId;
         startedAtUtc = data.StartedAtUtc;
         endedAtUtc = data.EndedAtUtc;
         endInfo = data.EndInfo;

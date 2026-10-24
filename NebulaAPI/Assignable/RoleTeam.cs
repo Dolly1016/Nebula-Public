@@ -44,4 +44,7 @@ public static class NebulaTeams
     public static RoleTeam ArsonistTeam { get; internal set; } = null!;
     public static RoleTeam PaparazzoTeam { get; internal set; } = null!;
     public static RoleTeam ChainShifterTeam { get; internal set; } = null!;
+    public static RoleTeam PlagueTeam { get; internal set; } = null!;
+    public static RoleTeam TyrantTeam { get; internal set; } = null!;
+    public static RoleTeam HavocTeam { get; internal set; } = null!;
 }

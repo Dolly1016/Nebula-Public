@@ -1,4 +1,5 @@
-﻿using Nebula.Roles.Abilities;
+﻿using Nebula.Map;
+using Nebula.Roles.Abilities;
 using Nebula.Roles.Scripts;
 using Virial;
 using Virial.Assignable;
@@ -107,9 +108,11 @@ public class Necromancer : DefinedSingleAbilityRoleTemplate<Necromancer.Ability>
                     {
                         //復活部屋を計算
                         List<Tuple<float, PlainShipRoom>> cand = new();
+                        HashSet<SystemTypes> unusedRooms = new(MapData.GetCurrentMapData().UnusedRooms);
                         foreach (var entry in fastRooms)
                         {
                             if (entry.Key == SystemTypes.Ventilation) continue;
+                            if (unusedRooms.Contains(entry.key)) continue;
 
                             var pos = MyPlayer.Position;
                             float d = Vector2.Distance(pos, Physics2D.ClosestPoint_Collider(pos, entry.Value.roomArea));

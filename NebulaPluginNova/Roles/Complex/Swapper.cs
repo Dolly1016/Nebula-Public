@@ -181,12 +181,9 @@ public class Swapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
                                 {
                                     GameOperatorManager.Instance?.Subscribe<GameEndEvent>(ev => {
                                         var roles = GamePlayer.AllPlayers.Aggregate<GamePlayer, (bool justice, bool madmate, bool mayor)>((false, false, false), (val, p) => {
-                                            val.mayor |= p.Role.Role == Crewmate.Mayor.MyRole;
-                                            val.justice |= p.Role.Role == Crewmate.Justice.MyRole;
-                                            val.madmate |= p.Role.Role == Crewmate.Madmate.MyRole;
-                                            return val;
+                                            return (val.mayor || p.Role.Role == Crewmate.Mayor.MyRole, val.justice || p.Role.Role == Crewmate.Justice.MyRole, val.madmate || p.Role.Role == Crewmate.Madmate.MyRole);
                                         });
-                                        if (!(roles.madmate && roles.mayor && roles.justice)) return;
+                                        if (!(roles.madmate || roles.mayor || roles.justice)) return;
                                         if (ev.EndState.EndReason != GameEndReason.Situation) return;
                                         if (!ev.CheckWin(MyPlayer)) return;
                                         new StaticAchievementToken("evilSwapper.challenge");

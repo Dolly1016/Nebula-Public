@@ -82,7 +82,7 @@ internal class Creeping : DefinedSingleAbilityRoleTemplate<Creeping.Ability>, Ha
                     if (lastDead == null) return;
                     if (lastDead.MyKiller?.AmOwner ?? false) return;
                     if (lastDead.PlayerState != PlayerState.Poisoned) return;
-                    if (GamePlayer.AllPlayers.All(p => p.AmOwner == p.IsAlive) && (poisonedInPoison.Contains(lastDead) || (ModSingleton<DepoisonBoxManager>.Instance?.AmPoisoned ?? false)))
+                    if (GamePlayer.AllPlayers.All(p => p.AmOwner == p.IsAlive) && (ModSingleton<DepoisonBoxManager>.Instance?.AmPoisoned ?? false))
                     {   
                         new StaticAchievementToken("creeping.challenge");
                     }

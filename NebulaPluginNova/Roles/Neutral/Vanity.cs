@@ -166,7 +166,7 @@ internal class Vanity : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             }
         }
 
-        void ClaimJackalRemaining(KillerTeamCallback callback)
+        void ClaimVanityRemaining(KillerTeamCallback callback)
         {
             if (callback.ExcludedTeam == MyTeam) return;
             if (!IndependentTeamOption) return;

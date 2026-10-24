@@ -11,7 +11,7 @@
 # Options
 
 "options.role.bait.detail" : "キルされると、あなたのキラーは即座にその死体を通報します。"
-"options.role.bait.showKillFlash" : "キルフラッシュの表示"
+"options.role.bait.showKillFlash" : "ベイトキルのフラッシュの表示"
 "options.role.bait.showKillFlash.detail" : "オンに設定すると、キラーがベイトをキルしたとき、キラーの画面で水色のフラッシュが光ります。"
 "options.role.bait.reportDelay" : "通報までの遅延"
 "options.role.bait.reportDelay.detail" : "通報までに遅延を設けると、キルとレポートの時間差によるベイトレポートの判断が難しくなります。<br>シアやサイキック、ドクターがいるゲームで特に有効です。"

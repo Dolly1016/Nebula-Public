@@ -113,19 +113,19 @@ public class MiraData : MapData
     }
     override public bool IsSealableDoor(OpenableDoor door) => false;
 
-    public override (SystemTypes room, Vector2 pos)[] AdminRooms { get; } = [
-        (SystemTypes.Launchpad, new(-4.4f, 2.1f)),
-        (SystemTypes.MedBay, new(15.8f,-0.4f)),
-        (SystemTypes.Comms, new(15.8f, 4.0f)),
-        (SystemTypes.LockerRoom, new(7.0f, 1.3f)),
-        (SystemTypes.Decontamination, new(6.1f, 6.2f)),
-        (SystemTypes.Laboratory, new(9.9f,12.0f)),
-        (SystemTypes.Reactor, new(2.4f,13.2f)),
-        (SystemTypes.Admin, new(21.5f, 19.0f)),
-        (SystemTypes.Office, new(14f, 20.1f)),
-        (SystemTypes.Greenhouse, new(17.8f, 23.5f)),
-        (SystemTypes.Storage, new(19.9f, 4.0f)),
-        (SystemTypes.Cafeteria, new(25.5f, 3.2f)),
-        (SystemTypes.Balcony, new(24.7f, -1.9f)),
+    public override (SystemTypes room, Vector2 pos, int inMapIdMask)[] AdminRooms { get; } = [
+        (SystemTypes.Launchpad, new(-4.4f, 2.1f), 0xFF),
+        (SystemTypes.MedBay, new(15.8f,-0.4f), 0xFF),
+        (SystemTypes.Comms, new(15.8f, 4.0f), 0xFF),
+        (SystemTypes.LockerRoom, new(7.0f, 1.3f), 0xFF),
+        (SystemTypes.Decontamination, new(6.1f, 6.2f), 0xFF),
+        (SystemTypes.Laboratory, new(9.9f,12.0f), 0xFF),
+        (SystemTypes.Reactor, new(2.4f,13.2f), 0xFF),
+        (SystemTypes.Admin, new(21.5f, 19.0f), 0xFF),
+        (SystemTypes.Office, new(14f, 20.1f), 0xFF),
+        (SystemTypes.Greenhouse, new(17.8f, 23.5f), 0xFF),
+        (SystemTypes.Storage, new(19.9f, 4.0f), 0xFF),
+        (SystemTypes.Cafeteria, new(25.5f, 3.2f), 0xFF),
+        (SystemTypes.Balcony, new(24.7f, -1.9f), 0xFF),
         ];
 }

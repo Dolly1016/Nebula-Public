@@ -15,7 +15,7 @@ public static class FootprintHelpers
 {
     static public VVector2? GetFootprintPosition(GamePlayer player, bool isLeft, out float? angle)
     {
-        if (player.VanillaPlayer.inVent || player.IsDead)
+        if (player.VanillaPlayer.inVent || player.IsDead || player.VanillaPlayer.onLadder || player.VanillaPlayer.inMovingPlat)
         {
             angle = null;
             return null;

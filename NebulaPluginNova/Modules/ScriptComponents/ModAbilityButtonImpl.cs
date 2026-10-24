@@ -155,32 +155,8 @@ public class ModAbilityButtonImpl : DependentLifespan, ModAbilityButton, IGameOp
 
     public Func<ModAbilityButtonImpl, bool>? PlayFlashWhile { get; set; } = null;
     private float playFlashTimer = 0f;
-    
-    private IEnumerator CoFlash()
-    {
-        var renderer = UnityHelper.CreateObject<SpriteRenderer>("Flash", VanillaButton.transform, new(0f, 0f, -1f));
-        renderer.sprite = VanillaButton.graphic.sprite;
-        renderer.material = new(NebulaAsset.WhiteShader);
-        renderer.material.SetColor("_Color", new(1f, 1f, 1f, 1f));
-        yield return null;
 
-        float a = 1f;
-        while (a > 0f)
-        {
-            if (!renderer) yield break;
-            renderer.transform.localScale = UnityEngine.Vector3.one * (2f - a);
-            renderer.material.SetColor("_Color", new(1f, 1f, 1f, a * 0.85f));
-            a -= Time.deltaTime * 1.5f;
-            yield return null;
-        }
-
-        GameObject.Destroy(renderer.gameObject);
-    }
-
-    public void PlayFlashOnce()
-    {
-        NebulaManager.Instance.StartCoroutine(CoFlash().WrapToIl2Cpp());
-    }
+    public void PlayFlashOnce() => VanillaButton.PlayFlashOnce();
 
     void PlayFlashUpdate(GameHudUpdateEvent ev)
     {
@@ -665,7 +641,27 @@ public static class ButtonEffect
     private static readonly SpriteLoader lockedButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.LockedButton.png", 100f);
     internal static Image LockedImage => lockedButtonSprite;
     static public SpriteRenderer AddLockedOverlay(this ActionButton button) => AddOverlay(button, lockedButtonSprite.GetSprite(), 0f);
+    static internal void PlayFlashOnce(this ActionButton button) => NebulaManager.Instance.StartCoroutine(CoFlash(button).WrapToIl2Cpp());
+    static internal IEnumerator CoFlash(ActionButton button)
+    {
+        var renderer = UnityHelper.CreateObject<SpriteRenderer>("Flash", button.transform, new(0f, 0f, -1f));
+        renderer.sprite = button.graphic.sprite;
+        renderer.material = new(NebulaAsset.WhiteShader);
+        renderer.material.SetColor("_Color", new(1f, 1f, 1f, 1f));
+        yield return null;
 
+        float a = 1f;
+        while (a > 0f)
+        {
+            if (!renderer) yield break;
+            renderer.transform.localScale = UnityEngine.Vector3.one * (2f - a);
+            renderer.material.SetColor("_Color", new(1f, 1f, 1f, a * 0.85f));
+            a -= Time.deltaTime * 1.5f;
+            yield return null;
+        }
+
+        GameObject.Destroy(renderer.gameObject);
+    }
 
     static readonly MultiImage keyBindBackgroundSprite = DividedSpriteLoader.FromResource("Nebula.Resources.KeyBindBackground.png", 100f, 2, 1);
     static readonly Image mouseActionSprite = SpriteLoader.FromResource("Nebula.Resources.MouseActionIcon.png", 100f);

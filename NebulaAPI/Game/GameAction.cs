@@ -24,6 +24,7 @@ public static class GameActionTypes
     static public GameActionType CannonMarkPlacementAction { get; internal set; }
     static public GameActionType CleanCorpseAction { get; internal set; }
     static public GameActionType EatCorpseAction { get; internal set; }
+    static public GameActionType DevourCorpseAction { get; internal set; }
     static public GameActionType ThuriferActivateAction { get; internal set; }
     static public GameActionType ThuriferImputeAction { get; internal set; }
     static public GameActionType BuskerRevivingAction { get; internal set; }

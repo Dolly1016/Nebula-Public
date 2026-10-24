@@ -13,6 +13,7 @@ internal enum RadioKind
     Impostor,
     Jackal,
     Lovers,
+    Twins,
 }
 
 internal class RadioChannel

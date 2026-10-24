@@ -149,7 +149,7 @@ public static class KillButtonClickPatch
         if (__instance.enabled && NebulaGameManager.Instance?.KillButtonTracker?.CurrentTarget != null && !__instance.isCoolingDown && __instance.graphic.color.a > 0.9f && !AmongUsLLImpl.LocalPlayer.Data.IsDead && AmongUsLLImpl.LocalPlayer.CanMove)
         {
             var target = NebulaGameManager.Instance?.KillButtonTracker?.CurrentTarget!;
-            var cancelable = GameOperatorManager.Instance?.Run(new PlayerTryVanillaKillLocalEventAbstractPlayerEvent(GamePlayer.LocalPlayer!, target));
+            var cancelable = GameOperatorManager.Instance?.Run(new PlayerTryVanillaKillLocalEvent(GamePlayer.LocalPlayer!, target));
             if (!(cancelable?.IsCanceled ?? false))
             {
                 //キャンセルされなければキルを実行する
@@ -221,6 +221,8 @@ public static class ReportButtonClickPatch
     {
         var info = GamePlayer.LocalPlayer;
         if (info == null) return true;
+
+        if (NebulaGameManager.Instance?.LocalStatus?.CannotReportOrSuppressed ?? false) return false;
 
         if (info.IsDived || info.IsBlown) return false;
         return true;

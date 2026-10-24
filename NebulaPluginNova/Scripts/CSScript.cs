@@ -166,8 +166,9 @@ internal static class AddonScriptManager
         string referencesPath = Path.Combine(PathHelpers.DllCacheDirPath, "references.txt");
         File.WriteAllLines(referencesPath, AddonScriptManagerLoader.ReferenceAssemblies);
 
-       
+
 #endif
+
 
         bool triedChecking = false;
 

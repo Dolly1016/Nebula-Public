@@ -393,7 +393,7 @@ public class Thurifer : DefinedSingleAbilityRoleTemplate<Thurifer.Ability>, Defi
         }
 
         [Local]
-        void OnKillAnyone(PlayerTryVanillaKillLocalEventAbstractPlayerEvent ev)
+        void OnKillAnyone(PlayerTryVanillaKillLocalEvent ev)
         {
             if (ev.Target is GamePlayer gp)
             {

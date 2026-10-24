@@ -16,6 +16,7 @@
 # Emergency Button
 
 "game.meeting.cannotUseEmergencyButton" : "緊急会議はロックされている"
+"game.meeting.suppressedEmergencyButton" : "緊急会議を開始できない..."
 
 # Exile Scene
 

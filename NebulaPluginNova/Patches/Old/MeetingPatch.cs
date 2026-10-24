@@ -444,6 +444,7 @@ class MeetingStartPatch
         //色の明暗を表示
         foreach (var player in __instance.playerStates)
         {
+            //名前テキストのサイズ調整
             player.NameText.rectTransform.sizeDelta = new(2.0942f, 0.3879f);
             player.NameText.fontSizeMax = 2f;
             player.NameText.fontSizeMin = 1.5f;
@@ -545,6 +546,7 @@ class MeetingStartPatch
                 catch { }
             };
         }
+        GameOperatorManager.Instance?.Run<MeetingSetUpVoteAreaEvent>(new(__instance.playerStates.GetFastEnumerator()));
 
         //会議開始時に死亡したプレイヤーを考慮したソート
         __instance.StartCoroutine(Effects.Sequence(Effects.Wait(2f), ManagedEffects.Action(() =>

@@ -90,11 +90,6 @@ internal class CustomServerLoader
     /// <summary>
     /// 今選ばれているリージョンの名前を控える。次回の起動でこの名前を探す。
     /// </summary>
-    /// <remarks>
-    /// 控えるのは <see cref="CurrentAvailableRegions"/> に載っているものだけ。
-    /// 他 Mod が残したリージョンや、部屋コード検索中の一時的な切り替えで
-    /// 前回の選択を失わないようにする。
-    /// </remarks>
     internal static void UpdateLastRegion()
     {
         if (!DestroyableSingleton<ServerManager>.InstanceExists) return;
@@ -110,12 +105,6 @@ internal class CustomServerLoader
     /// <summary>
     /// 起動時に選び直すリージョンを返す。前回と同じ名前のものを探す。
     /// </summary>
-    /// <remarks>
-    /// 選んでよいのは <see cref="CurrentAvailableRegions"/> が返すものだけ。
-    /// バニラは Nebula のリージョンを覚えられないので、起動のたびに選び直す。
-    /// 前回の名前が配信リストから消えていれば先頭に落とす。
-    /// リージョンの一覧がまだ組まれていなければ false を返す。
-    /// </remarks>
     internal static bool TryGetRegionToRestore([MaybeNullWhen(false)] out IRegionInfo region)
     {
         var available = CurrentAvailableRegions().ToArray();

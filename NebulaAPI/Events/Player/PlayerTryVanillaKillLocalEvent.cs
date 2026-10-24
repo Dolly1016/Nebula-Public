@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace Virial.Events.Player;
 
-public class PlayerTryVanillaKillLocalEventAbstractPlayerEvent : AbstractPlayerEvent, ICancelableEvent
+public class PlayerTryVanillaKillLocalEvent : AbstractPlayerEvent, ICancelableEvent
 {
     public Virial.Game.IPlayerlike Target { get; private init; }
-    internal PlayerTryVanillaKillLocalEventAbstractPlayerEvent(Virial.Game.Player killer, Virial.Game.IPlayerlike target) : base(killer)
+    internal PlayerTryVanillaKillLocalEvent(Virial.Game.Player killer, Virial.Game.IPlayerlike target) : base(killer)
     {
         this.Target = target;
     }

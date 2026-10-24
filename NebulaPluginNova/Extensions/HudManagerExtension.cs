@@ -79,6 +79,8 @@ public static class HudManagerExtension
         {
             actionMap = actionArray[0];
             ButtonEffect.SetKeyGuideForVanillaButton(bridge.ReportButtonObj, actionMap.keyCode);
+            bridge.ReportButton.graphic.material = new(NebulaAsset.ButtonShader);
+            CooldownHelpers.SetCooldownNormalizedUvs(bridge.ReportButton.graphic);
         }
 
         //キル

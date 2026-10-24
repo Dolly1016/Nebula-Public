@@ -16,6 +16,7 @@
 # Emergency Button
 
 "game.meeting.cannotUseEmergencyButton" : "Emergency Button is LOCKED."
+"game.meeting.suppressedEmergencyButton" : "Emergency Button is SUPPRESSED."
 
 # Exile Scene
 

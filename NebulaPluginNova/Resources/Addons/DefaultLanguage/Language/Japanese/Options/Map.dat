@@ -98,6 +98,11 @@
 "options.map.customization.fungle.blackOutMiningPit" : "配電盤 (採掘場)"
 "options.map.customization.fungle.forClassicGame" : "クラシックゲーム用ファングル"
 "options.map.customization.fungle.forClassicGame.detail" : "クラシックゲームの推理に適したマップに改変します。以下の改変が含まれます。<br>- はしご(下部)の一方通行化<br>- ミーティングルーム下の封鎖<br>- 温室・実験室間の封鎖<br>- 高台の宝石上部の封鎖<br>- 採掘場周辺にベント(2箇所)追加"
+"options.map.customization.fungle.inMapId" : "バリエーション"
+"options.map.customization.fungle.inMapId.0" : "トワイライト"
+"options.map.customization.fungle.inMapId.1" : "ミッドナイト"
+"options.map.customization.fungle.inMapId.2" : "ポイズンド"
+
 "options.map.customization.admin.editor" : "右クリックで部屋表示設定"
 "options.map.customization.admin.viewer" : "クリックで部屋表示設定を確認"
 

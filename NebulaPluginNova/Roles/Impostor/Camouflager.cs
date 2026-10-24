@@ -73,7 +73,7 @@ public class Camouflager : DefinedSingleAbilityRoleTemplate<Camouflager.Ability>
             }
         }
 
-        [OnlyHost]
+        [OnlyHost, OnlyMyPlayer]
         void OnPlayerDisconnect(PlayerDisconnectEvent ev)
         {
             RpcCamouflage.Invoke(new(MyPlayer.PlayerId, false));

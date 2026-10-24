@@ -261,13 +261,15 @@ const RouteViewer = (() => {
 
   // ---------------------------------------------------------------- 読み込み
 
+  const mapKeyOf = (mapId, inMapId) => `${mapId}-${inMapId}`;
+
   async function loadMaps() {
     if (maps) return maps;
 
     try {
       const response = await fetch('/api/maps');
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      maps = new Map((await response.json()).map((m) => [m.mapId, m]));
+      maps = new Map((await response.json()).map((m) => [mapKeyOf(m.mapId, m.inMapId ?? 0), m]));
     } catch (error) {
       console.warn('ミニマップの情報を読み込めませんでした。', error);
       maps = new Map();
@@ -328,7 +330,8 @@ const RouteViewer = (() => {
     //表示中のゲームが切り替わっていたら、遅れて届いた結果は捨てる。
     if (record !== current) return;
 
-    mapInfo = all.get(record.mapId) ?? null;
+    const inMapId = record.inMapId ?? 0;
+    mapInfo = all.get(mapKeyOf(record.mapId, inMapId)) ?? all.get(mapKeyOf(record.mapId, 0)) ?? null;
 
     const usable = phases.filter(hasSamples);
     //出来事が無い記録では、最初のターンの始まりを代用する。
@@ -437,7 +440,7 @@ const RouteViewer = (() => {
   async function drawMap() {
     canvasEl.style.aspectRatio = `${mapInfo.width} / ${mapInfo.height}`;
 
-    const src = `/maps/${mapInfo.mapId}.png`;
+    const src = `/maps/${mapInfo.mapId}-${mapInfo.inMapId ?? 0}.png`;
     //会議用の色違いも先に作っておく。切り替えるたびに描き直さずに済む。
     images.normal = await MapImage.render(src, mapInfo.color);
     images.meeting = await MapImage.render(src, MEETING_COLOR);

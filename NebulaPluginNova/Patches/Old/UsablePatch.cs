@@ -689,14 +689,11 @@ public static class MapConsoleUsePatch
 {
     public static void Prefix(MapConsole __instance)
     {
+        MapBehaviourExtension.InitializeModOption();
+
         int mapId = NebulaAPI.AmongUs.MapId;
         int consoleId = 0;
         if (mapId == 4 && __instance.transform.position.x > 10f) consoleId = 1;
         MapBehaviourExtension.RestrictRoom(GeneralConfigurations.AdminRoomOptions[mapId][consoleId].Value << 1);
-    }
-
-    public static void Postfix()
-    {
-        MapBehaviourExtension.InitializeModOption();
     }
 }

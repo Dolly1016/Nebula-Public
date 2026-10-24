@@ -32,7 +32,8 @@ public static class GeneralConfigurations
         Light = 4,
         BlackOut = 6,
         Door = 7,
-        Float = -1
+        Float = -1,
+        InMapId = -2,
     }
 
     static GeneralConfigurations()
@@ -120,7 +121,7 @@ public static class GeneralConfigurations
     static internal FloatConfiguration LadderCoolDownOption = NebulaAPI.Configurations.Configuration("options.map.ladderCoolDown", (0f, 20f, 1f), 3f, FloatConfigurationDecorator.Second);
     static internal FloatConfiguration ZiplineCoolDownOption = NebulaAPI.Configurations.Configuration("options.map.ziplineCoolDown", (0f, 20f, 1f), 3f, FloatConfigurationDecorator.Second);
     static internal FloatConfiguration PlatformCooldownOption = NebulaAPI.Configurations.Configuration("options.map.platformCooldown", (0f, 20f, 1f), 0f, FloatConfigurationDecorator.Second);
-    static internal IConfiguration MapEditorOption = NebulaAPI.Configurations.Configuration(() => null, () => NebulaAPI.GUI.LocalizedButton(Virial.Media.GUIAlignment.Center, NebulaAPI.GUI.GetAttribute(Virial.Text.AttributeAsset.OptionsTitleHalf), "options.map.customization", _ => OpenMapEditor(null)));
+    static internal IConfiguration MapEditorOption = NebulaAPI.Configurations.Configuration(() => null, () => NebulaAPI.GUI.LocalizedButton(Virial.Media.GUIAlignment.Center, NebulaAPI.GUI.GetAttribute(Virial.Text.AttributeAsset.OptionsTitleHalf), "options.map.customization", _ => OpenMapEditor(null, considerInMapId: false)));
     static internal BoolConfiguration MapFlipXOption = NebulaAPI.Configurations.Configuration("options.map.flipX", false);
     static internal BoolConfiguration MapFlipYOption = NebulaAPI.Configurations.Configuration("options.map.flipY", false);
     static internal BoolConfiguration CanHearOthersFootstepOption = NebulaAPI.Configurations.Configuration("options.map.canHearOthersFootstep", false);
@@ -136,15 +137,15 @@ public static class GeneralConfigurations
         MapEditorOption
         ]);
 
-    static private T MapCustomization<T>(byte mapId, MapOptionType mapOptionType, Vector2 pos,T config, int adminIndex = -1) where T : ISharableEntry
+    static private T MapCustomization<T>(byte mapId, MapOptionType mapOptionType, Vector2 pos,T config, int adminIndex = -1, bool requiresReopening = false, int inMapMask = 0xFFFFFF) where T : ISharableEntry
     {
-        MapCustomizations[mapId].Add(new(config, pos, mapOptionType, adminIndex));
+        MapCustomizations[mapId].Add(new(config, pos, mapOptionType, adminIndex, requiresReopening, inMapMask));
         return config;
     }
 
     internal static List<MapConfiguration>[] MapCustomizations = [[], [], [], [], [], []];
 
-    internal record MapConfiguration(ISharableEntry Entry, Vector2 Position, MapOptionType OptionType, int AdminIndex = -1);
+    internal record MapConfiguration(ISharableEntry Entry, Vector2 Position, MapOptionType OptionType, int AdminIndex = -1, bool RequiresReopening = false, int InMapMask = 0xFFFFFF);
         
     static internal ISharableVariable<bool> SkeldAdminOption = MapCustomization(0, MapOptionType.Console, new(4.7f,-8.6f), NebulaAPI.Configurations.SharableVariable("options.map.customization.skeld.useAdmin", true), 0);
     static internal ISharableVariable<bool> SkeldCafeVentOption = MapCustomization(0, MapOptionType.Vent, new(-2.4f, 5f), NebulaAPI.Configurations.SharableVariable("options.map.customization.skeld.cafeVent", false));
@@ -179,16 +180,18 @@ public static class GeneralConfigurations
     static internal ISharableVariable<bool> AirshipSecurityDeckDoorOption = MapCustomization(4, MapOptionType.Door, new(9.09f, -13.8182f), NebulaAPI.Configurations.SharableVariable("options.map.customization.airship.securityDeckDoor", false));
     static internal ISharableVariable<bool> AirshipMeetingDoorOption = MapCustomization(4, MapOptionType.Door, new(14.595f, 17f), NebulaAPI.Configurations.SharableVariable("options.map.customization.airship.meetingDoor", false));
 
-    static internal ISharableVariable<bool> FungleSimpleLaboratoryOption = MapCustomization(5, MapOptionType.Blueprint, new(-3.2f, -11f), NebulaAPI.Configurations.SharableVariable("options.map.customization.fungle.simpleLaboratory", false));
+    // Fungle InMapId 0: normal, 1: normal + labo, 2: classic, 3: classic + labo, 4: midnight, 5: midnight + labo, 6: poisoned, 7: poisoned + labo
+    static internal ISharableVariable<bool> FungleSimpleLaboratoryOption = MapCustomization(5, MapOptionType.Blueprint, new(-3.2f, -11f), NebulaAPI.Configurations.SharableVariable("options.map.customization.fungle.simpleLaboratory", false), requiresReopening: true);
     static internal ISharableVariable<bool> FungleThinFogOption = MapCustomization(5, MapOptionType.Blueprint, new(3.1f, -14f), NebulaAPI.Configurations.SharableVariable("options.map.customization.fungle.thinFog", false));
-    static internal ISharableVariable<bool> FungleGlowingCampfireOption = MapCustomization(5, MapOptionType.Light, new(-9.8f, 1.5f), NebulaAPI.Configurations.SharableVariable("options.map.customization.fungle.glowingCampfire", false));
-    static internal ISharableVariable<bool> FungleGlowingMushroomOption = MapCustomization(5, MapOptionType.Light, new(14.7f, -12.5f), NebulaAPI.Configurations.SharableVariable("options.map.customization.fungle.glowingMushroom", false));
+    static internal ISharableVariable<bool> FungleGlowingCampfireOption = MapCustomization(5, MapOptionType.Light, new(-9.8f, 1.5f), NebulaAPI.Configurations.SharableVariable("options.map.customization.fungle.glowingCampfire", false), inMapMask: 0x3F);
+    static internal ISharableVariable<bool> FungleGlowingMushroomOption = MapCustomization(5, MapOptionType.Light, new(14.7f, -12.5f), NebulaAPI.Configurations.SharableVariable("options.map.customization.fungle.glowingMushroom", false), inMapMask: 0xCF);
     static internal ISharableVariable<bool> FungleQuickPaceDoorMinigameOption = MapCustomization(5, MapOptionType.Console, new(-21f, -15f), NebulaAPI.Configurations.SharableVariable("options.map.customization.fungle.quickPaceDoorMinigame", false));
-    static internal ISharableVariable<bool> FungleLightDropshipOption = MapCustomization(5, MapOptionType.BlackOut, new(-7.8f, 13.46f), NebulaAPI.Configurations.SharableVariable("options.map.customization.fungle.blackOutDropship", false));
+    static internal ISharableVariable<bool> FungleLightDropshipOption = MapCustomization(5, MapOptionType.BlackOut, new(-7.8f, 13.46f), NebulaAPI.Configurations.SharableVariable("options.map.customization.fungle.blackOutDropship", false), inMapMask: 0x3F);
     static internal ISharableVariable<bool> FungleLightJungleOption = MapCustomization(5, MapOptionType.BlackOut, new(-6.9618f, -5.9982f), NebulaAPI.Configurations.SharableVariable("options.map.customization.fungle.blackOutJungle", false));
-    static internal ISharableVariable<bool> FungleLightMiningPitOption = MapCustomization(5, MapOptionType.BlackOut, new(13.68f, 7.83f), NebulaAPI.Configurations.SharableVariable("options.map.customization.fungle.blackOutMiningPit", false));
-    static internal ISharableVariable<bool> FungleForClassicGameOption = MapCustomization(5, MapOptionType.Blueprint, new(11.0f, -4.5f), NebulaAPI.Configurations.SharableVariable("options.map.customization.fungle.forClassicGame", false));
-
+    static internal ISharableVariable<bool> FungleLightMiningPitOption = MapCustomization(5, MapOptionType.BlackOut, new(13.68f, 7.83f), NebulaAPI.Configurations.SharableVariable("options.map.customization.fungle.blackOutMiningPit", false), inMapMask: 0xCF);
+    static internal ISharableVariable<bool> FungleForClassicGameOption = MapCustomization(5, MapOptionType.Blueprint, new(11.0f, -4.5f), NebulaAPI.Configurations.SharableVariable("options.map.customization.fungle.forClassicGame", false), requiresReopening: true, inMapMask: 0x0F);
+    static private ISharableVariable<int> FungleInMapIdOption = MapCustomization(5, MapOptionType.InMapId, new(-26.0f, 15.0f), NebulaAPI.Configurations.SharableVariable("options.map.customization.fungle.inMapId", 0, 3), requiresReopening: true);
+    static internal int FungleVariation => FungleInMapIdOption.CurrentValue;
 
     static IEnumerable<float> SabotageSelections()
     {
@@ -218,7 +221,8 @@ public static class GeneralConfigurations
     static public ISharableVariable<float> MiraO2DurationOption = MapCustomization(1, MapOptionType.Float, new(17.8f, 24.2f), NebulaAPI.Configurations.SharableVariable("options.map.customization.mira.lifeSupportDuration", SabotageCoolDown, 45f));
     static public ISharableVariable<float> PolusReactorDurationOption = MapCustomization(2, MapOptionType.Float, new(23f, -2.7f), NebulaAPI.Configurations.SharableVariable("options.map.customization.polus.reactorDuration", SabotageCoolDown, 60f));
     static public ISharableVariable<float> AirshipHeliDurationOption = MapCustomization(4, MapOptionType.Float, new(1.7f, 6.2f), NebulaAPI.Configurations.SharableVariable("options.map.customization.airship.heliDuration", SabotageCoolDown, 60f));
-    static public ISharableVariable<float> FungleReactorDurationOption = MapCustomization(5, MapOptionType.Float, new(22.4f, -6.8f), NebulaAPI.Configurations.SharableVariable("options.map.customization.fungle.reactorDuration", SabotageCoolDown, 60f));
+    static public ISharableVariable<float> FungleReactorDurationOption = MapCustomization(5, MapOptionType.Float, new(22.4f, -6.8f), NebulaAPI.Configurations.SharableVariable("options.map.customization.fungle.reactorDuration", SabotageCoolDown, 60f), inMapMask: 0xCF);
+    static public ISharableVariable<float> FungleMovedReactorDurationOption = MapCustomization(5, MapOptionType.Float, new(4.4f, -10.0f), FungleReactorDurationOption, inMapMask: 0x30);
 
     static internal BoolConfiguration RandomizedWiringOption = NebulaAPI.Configurations.Configuration("options.map.randomizedWiring", false);
     static internal IntegerConfiguration StepsOfWiringGameOption = NebulaAPI.Configurations.Configuration("options.map.stepsOfWiringGame", (1, 12), 3);
@@ -478,7 +482,7 @@ public static class GeneralConfigurations
 
     static private readonly XOnlyDividedSpriteLoader mapCustomizationSprite = XOnlyDividedSpriteLoader.FromResource("Nebula.Resources.MapCustomizations.png", 100f, 50, true);
     
-    static MetaScreen OpenMapConfigurationEditor(MetaScreen? screen, byte? mapId, Func<byte,IEnumerable<(IMetaParallelPlacableOld button, Vector2 pos)>> widgetBuilder, int mapMask = 0xFFFFFFF, string? altanativeText = null)
+    static MetaScreen OpenMapConfigurationEditor(MetaScreen? screen, byte? mapId, Func<byte,IEnumerable<(IMetaParallelPlacableOld button, Vector2 pos)>> widgetBuilder, int mapMask = 0xFFFFFFF, string? altanativeText = null, bool considerInMapId = true)
     {
         if (screen == null) screen = MetaScreen.GenerateWindow(new(7.5f, 4.5f), HudManager.Instance.transform, Vector3.zero, true, false);
 
@@ -515,10 +519,17 @@ public static class GeneralConfigurations
 
         if (altanativeText == null)
         {
+            var mapName = Constants.MapNames[mapId.Value];
+            if (considerInMapId)
+            {
+                var inMapId = NebulaAsset.GetInMapId(mapId.Value);
+                mapName = NebulaAsset.MapNamesConsideredInMapId[mapId.Value][inMapId];
+            }
+
             widget.Append(new CombinedWidgetOld(
-                new MetaWidgetOld.Button(() => OpenMapConfigurationEditor(screen, Lessen(), widgetBuilder), new(TextAttributeOld.BoldAttr) { Size = new(0.2f, 0.2f) }) { RawText = "<<" },
-                new MetaWidgetOld.Text(TextAttributeOld.BoldAttr) { RawText = Constants.MapNames[mapId.Value] },
-                new MetaWidgetOld.Button(() => OpenMapConfigurationEditor(screen, Increase(), widgetBuilder), new(TextAttributeOld.BoldAttr) { Size = new(0.2f, 0.2f) }) { RawText = ">>" }
+                new MetaWidgetOld.Button(() => OpenMapConfigurationEditor(screen, Lessen(), widgetBuilder, considerInMapId: considerInMapId), new(TextAttributeOld.BoldAttr) { Size = new(0.2f, 0.2f) }) { RawText = "<<" },
+                new MetaWidgetOld.Text(TextAttributeOld.BoldAttr) { RawText = mapName },
+                new MetaWidgetOld.Button(() => OpenMapConfigurationEditor(screen, Increase(), widgetBuilder, considerInMapId: considerInMapId), new(TextAttributeOld.BoldAttr) { Size = new(0.2f, 0.2f) }) { RawText = ">>" }
                 ));
         }
         else
@@ -534,66 +545,94 @@ public static class GeneralConfigurations
         return screen;
     }
 
-    static public void OpenMapEditor(MetaScreen? screen, byte? mapId = null, bool asEditor = true) => OpenMapConfigurationEditor(screen, mapId, mapId =>
-        MapCustomizations[mapId].Select(
-            c =>
-            {
-                if (c.OptionType is MapOptionType.Float)
+    static public void OpenMapEditor(MetaScreen? screen, byte? mapId = null, bool asEditor = true, bool considerInMapId = true)
+    {
+        screen = OpenMapConfigurationEditor(screen, mapId, mapId =>
+        {
+            var inMapId = NebulaAsset.GetInMapId(mapId);
+            return MapCustomizations[mapId].Where(c => (c.InMapMask & (1 << inMapId)) != 0).Select(
+                c =>
                 {
-                    TMPro.TextMeshPro valueText = null!;
-                    IOrderedSharableVariable<float> variable = (c.Entry as IOrderedSharableVariable<float>)!;
-                    return ((IMetaParallelPlacableOld)new CombinedWidgetOld(new MetaWidgetOld(
-                        new MetaWidgetOld.Text(new(TextAttributeOld.BoldAttrLeft) { Size = new(0.55f, 0.15f) }) { MyText = new TranslateTextComponent(c.Entry.Name) },
-                        new MetaWidgetOld.Text(new(TextAttributeOld.BoldAttr) { Size = new(0.55f, 0.28f) }) { RawText = variable.Value.ToString() + Language.Translate("options.sec"), PostBuilder = text => valueText = text }
-                        ), asEditor ? MetaWidgetOld.Button.GetTwoWayButton(increment => { variable.ChangeValue(increment); valueText.text = variable.Value.ToString() + Language.Translate("options.sec"); }) : new MetaWidgetOld.VerticalMargin(0f))
-                    { PostBuilder = obj => obj.AddComponent<SortingGroup>().sortingOrder = 12 }, c.Position);
-                }
-                else
-                {
-                    IOrderedSharableVariable<bool> variable = (c.Entry as IOrderedSharableVariable<bool>)!;
-                    return ((IMetaParallelPlacableOld)new MetaWidgetOld.Image(mapCustomizationSprite.GetSprite((int)c.OptionType))
+                    if (c.OptionType is MapOptionType.Float)
                     {
-                        Width = 0.5f,
-                        PostBuilder = (renderer) =>
+                        TMPro.TextMeshPro valueText = null!;
+                        IOrderedSharableVariable<float> variable = (c.Entry as IOrderedSharableVariable<float>)!;
+                        return ((IMetaParallelPlacableOld)new CombinedWidgetOld(new MetaWidgetOld(
+                            new MetaWidgetOld.Text(new(TextAttributeOld.BoldAttrLeft) { Size = new(0.55f, 0.15f) }) { TranslationKey = c.Entry.Name },
+                            new MetaWidgetOld.Text(new(TextAttributeOld.BoldAttr) { Size = new(0.55f, 0.28f) }) { RawText = variable.Value.ToString() + Language.Translate("options.sec"), PostBuilder = text => valueText = text }
+                            ), asEditor ? MetaWidgetOld.Button.GetTwoWayButton(increment => { variable.ChangeValue(increment); valueText.text = variable.Value.ToString() + Language.Translate("options.sec"); }) : new MetaWidgetOld.VerticalMargin(0f))
+                        { PostBuilder = obj => obj.AddComponent<SortingGroup>().sortingOrder = 12 }, c.Position);
+                    }
+                    else if (c.OptionType is MapOptionType.InMapId)
+                    {
+                        IOrderedSharableVariable<int> variable = (c.Entry as IOrderedSharableVariable<int>)!;
+                        return ((IMetaParallelPlacableOld)new CombinedWidgetOld(
+                            new MetaWidgetOld.Text(new(TextAttributeOld.BoldAttr) { Size = new(1.2f, 0.28f) }) { TranslationKey = c.Entry.Name },
+                            new MetaWidgetOld.Text(new(TextAttributeOld.BoldAttr) { Size = new(0.2f, 0.28f) }) { RawText = ": " },
+                            asEditor ? new MetaWidgetOld.Button(() => { variable.ChangeValue(true); OpenMapEditor(screen, mapId, asEditor, considerInMapId: considerInMapId); }, new(TextAttributeOld.BoldAttr) { Size = new(1.2f, 0.28f) }) { TranslationKey = c.Entry.Name + "." + c.Entry.RpcValue } : new MetaWidgetOld.Text(new(TextAttributeOld.BoldAttr) { Size = new(1.2f, 0.28f) }) { TranslationKey = c.Entry.Name + "." + c.Entry.RpcValue })
+                        { PostBuilder = obj => obj.AddComponent<SortingGroup>().sortingOrder = 12 }, c.Position);
+                    }
+                    else
+                    {
+                        IOrderedSharableVariable<bool> variable = (c.Entry as IOrderedSharableVariable<bool>)!;
+                        return ((IMetaParallelPlacableOld)new MetaWidgetOld.Image(mapCustomizationSprite.GetSprite((int)c.OptionType))
                         {
-                            renderer.color = variable.CurrentValue ? Color.white : Color.red.RGBMultiplied(0.45f);
-                            var button = renderer.gameObject.SetUpButton(true);
-                            button.OnMouseOver.AddListener(() =>
+                            Width = 0.5f,
+                            PostBuilder = (renderer) =>
                             {
-                                MetaWidgetOld widget = new();
-                                widget.Append(new MetaWidgetOld.VariableText(TextAttributeOld.BoldAttr) { Alignment = IMetaWidgetOld.AlignmentOption.Left, TranslationKey = c.Entry.Name });
-                                widget.Append(new MetaWidgetOld.WrappedWidget(ConfigurationAssets.GetOptionOverlay(c.Entry.Name)?.Invoke() ?? new GUIEmptyWidget()));
-                                if (c.AdminIndex != -1) widget.Append(new MetaWidgetOld.VariableText(TextAttributeOld.ContentAttr) { Alignment = IMetaWidgetOld.AlignmentOption.Left, TranslationKey = "options.map.customization.admin." + (asEditor ? "editor" : "viewer") });
-                                NebulaManager.Instance.SetHelpWidget(button, widget);
-                            });
-                            button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
-                            if (asEditor) {
-                                button.OnClick.AddListener(() => { variable.ChangeValue(true); renderer.color = variable.CurrentValue ? Color.white : Color.red.RGBMultiplied(0.45f); });
+                                renderer.color = variable.CurrentValue ? Color.white : Color.red.RGBMultiplied(0.45f);
+                                var button = renderer.gameObject.SetUpButton(true);
+                                button.OnMouseOver.AddListener(() =>
+                                {
+                                    MetaWidgetOld widget = new();
+                                    widget.Append(new MetaWidgetOld.VariableText(TextAttributeOld.BoldAttr) { Alignment = IMetaWidgetOld.AlignmentOption.Left, TranslationKey = c.Entry.Name });
+                                    widget.Append(new MetaWidgetOld.WrappedWidget(ConfigurationAssets.GetOptionOverlay(c.Entry.Name)?.Invoke() ?? new GUIEmptyWidget()));
+                                    if (c.AdminIndex != -1) widget.Append(new MetaWidgetOld.VariableText(TextAttributeOld.ContentAttr) { Alignment = IMetaWidgetOld.AlignmentOption.Left, TranslationKey = "options.map.customization.admin." + (asEditor ? "editor" : "viewer") });
+                                    NebulaManager.Instance.SetHelpWidget(button, widget);
+                                });
+                                button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
+                                if (asEditor)
+                                {
+                                    button.OnClick.AddListener(() =>
+                                    {
+                                        variable.ChangeValue(true);
+                                        if (c.RequiresReopening)
+                                        {
+                                            OpenMapEditor(screen, mapId, asEditor, considerInMapId: considerInMapId);
+                                        }
+                                        else
+                                        {
+                                            renderer.color = variable.CurrentValue ? Color.white : Color.red.RGBMultiplied(0.45f);
+                                        }
+                                    });
 
-                                if (c.AdminIndex != -1)
-                                {
-                                    button.gameObject.AddComponent<ExtraPassiveBehaviour>().OnRightClicked = () => {
-                                        OpenAdminEditor(null, mapId, c.AdminIndex, true);
-                                    };
+                                    if (c.AdminIndex != -1)
+                                    {
+                                        button.gameObject.AddComponent<ExtraPassiveBehaviour>().OnRightClicked = () =>
+                                        {
+                                            OpenAdminEditor(null, mapId, c.AdminIndex, true);
+                                        };
+                                    }
                                 }
-                            }
-                            else
-                            {
-                                if(c.AdminIndex != -1)
+                                else
                                 {
-                                    button.OnClick.AddListener(() => { OpenAdminEditor(null, mapId, c.AdminIndex, false); });
+                                    if (c.AdminIndex != -1)
+                                    {
+                                        button.OnClick.AddListener(() => { OpenAdminEditor(null, mapId, c.AdminIndex, false); });
+                                    }
                                 }
-                            }
                                 var collider = button.gameObject.AddComponent<BoxCollider2D>();
-                            collider.isTrigger = true;
-                            collider.size = new(0.5f, 0.5f);
+                                collider.isTrigger = true;
+                                collider.size = new(0.5f, 0.5f);
 
-                            
-                        }
-                    }, c.Position);
-                };
-            })
-    );
+
+                            }
+                        }, c.Position);
+                    }
+                    ;
+                });
+        }, considerInMapId: considerInMapId);
+    }
 
     static public readonly ISharableVariable<int>[][] AdminRoomOptions = [
         [NebulaAPI.Configurations.SharableVariable("options.map.customization.skeld.adminRooms", 0xFFFFFFF, 0xFFFFFFF)],
@@ -612,10 +651,11 @@ public static class GeneralConfigurations
             {
                 var rooms = MapData.GetMapData(mapId).AdminRooms;
                 var option = AdminRoomOptions[mapId][adminIndex];
-
+                var inMapId = NebulaAsset.GetInMapId(mapId);
+                var inMapIdMaskTester = 1 << inMapId;
                 if (asEditor)
                 {
-                    return Helpers.Sequential(rooms.Length).Select(i => ((IMetaParallelPlacableOld button, Vector2 pos))(new MetaWidgetOld.WrappedWidget(GUI.API.Button(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OverlayContent), GUI.API.RawTextComponent(TranslationController.Instance.GetString(rooms[i].room)),
+                    return Helpers.Sequential(rooms.Length).Where(i => (rooms[i].inMapIdMask & inMapIdMaskTester) != 0).Select(i => ((IMetaParallelPlacableOld button, Vector2 pos))(new MetaWidgetOld.WrappedWidget(GUI.API.Button(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OverlayContent), GUI.API.RawTextComponent(TranslationController.Instance.GetString(rooms[i].room)),
                         _ =>
                         {
                             option.CurrentValue ^= 1 << i;
@@ -624,35 +664,38 @@ public static class GeneralConfigurations
                 }
                 else
                 {
-                    return Helpers.Sequential(rooms.Length).Where(i => (option.Value & (1 << i)) != 0).Select(i => ((IMetaParallelPlacableOld button, Vector2 pos))(new MetaWidgetOld.WrappedWidget(GUI.API.RawText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OverlayContent), TranslationController.Instance.GetString(rooms[i].room))), rooms[i].pos));
+                    return Helpers.Sequential(rooms.Length).Where(i => (rooms[i].inMapIdMask & inMapIdMaskTester) != 0 && (option.Value & (1 << i)) != 0).Select(i => ((IMetaParallelPlacableOld button, Vector2 pos))(new MetaWidgetOld.WrappedWidget(GUI.API.RawText(GUIAlignment.Center, GUI.API.GetAttribute(AttributeAsset.OverlayContent), TranslationController.Instance.GetString(rooms[i].room))), rooms[i].pos));
                 }
             }, (AdminRoomOptions[mapId][adminIndex].Value << 1), Language.Translate("options.map.admin." + AmongUsUtil.ToMapName(mapId) + "." + adminIndex)
             );
     }
     
 
-    static public void OpenCandidatesFilter(MetaScreen? screen, byte? mapId = null, bool asEditor = true) => OpenMapConfigurationEditor(screen, mapId, mapId =>
-            NebulaPreSpawnLocation.Locations[mapId].Where(l => asEditor || l.Configuration.Value).Select(
-                l => ((IMetaParallelPlacableOld)new MetaWidgetOld.Image(mapCustomizationSprite.GetSprite(5))
+    static public void OpenCandidatesFilter(MetaScreen? screen, byte? mapId = null, bool asEditor = true) => OpenMapConfigurationEditor(screen, mapId, mapId => {
+        var inMapId = NebulaAsset.GetInMapId(mapId);
+        var inMapIdMask = 1 << inMapId;
+        return NebulaPreSpawnLocation.Locations[mapId].Where(l => (asEditor || l.Configuration.Value) && (l.InMapIdMask & inMapIdMask) != 0).Select(
+            l => ((IMetaParallelPlacableOld)new MetaWidgetOld.Image(mapCustomizationSprite.GetSprite(5))
+            {
+                Width = 0.5f,
+                PostBuilder = (renderer) =>
                 {
-                    Width = 0.5f,
-                    PostBuilder = (renderer) =>
+                    renderer.color = l.Configuration.Value ? Color.white : Color.red.RGBMultiplied(0.65f);
+                    var button = renderer.gameObject.SetUpButton(true);
+                    button.OnMouseOver.AddListener(() =>
                     {
-                        renderer.color = l.Configuration.Value ? Color.white : Color.red.RGBMultiplied(0.65f);
-                        var button = renderer.gameObject.SetUpButton(true);
-                        button.OnMouseOver.AddListener(() =>
-                        {
-                            MetaWidgetOld widget = new();
-                            widget.Append(new MetaWidgetOld.VariableText(TextAttributeOld.BoldAttr) { Alignment = IMetaWidgetOld.AlignmentOption.Left, TranslationKey = l.GetDisplayName(mapId) });
-                            NebulaManager.Instance.SetHelpWidget(button, widget);
-                        });
-                        button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
-                        if(asEditor) button.OnClick.AddListener(() => { l.Configuration.ChangeValue(true); renderer.color = l.Configuration.Value ? Color.white : Color.red.RGBMultiplied(0.65f); });
-                        var collider = button.gameObject.AddComponent<BoxCollider2D>();
-                        collider.isTrigger = true;
-                        collider.size = new(0.5f, 0.5f);
-                    }
-                }, l.FixedPosition!.Value))
+                        MetaWidgetOld widget = new();
+                        widget.Append(new MetaWidgetOld.VariableText(TextAttributeOld.BoldAttr) { Alignment = IMetaWidgetOld.AlignmentOption.Left, TranslationKey = l.GetDisplayName(mapId) });
+                        NebulaManager.Instance.SetHelpWidget(button, widget);
+                    });
+                    button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
+                    if (asEditor) button.OnClick.AddListener(() => { l.Configuration.ChangeValue(true); renderer.color = l.Configuration.Value ? Color.white : Color.red.RGBMultiplied(0.65f); });
+                    var collider = button.gameObject.AddComponent<BoxCollider2D>();
+                    collider.isTrigger = true;
+                    collider.size = new(0.5f, 0.5f);
+                }
+            }, l.FixedPosition!.Value));
+    }
     );
 }
 

@@ -137,6 +137,9 @@ public abstract class CustomCosmicItem : CustomItemGrouped
 
     public string SubholderPath => Author.ToByteString() + "/" + Name.ToByteString();
 
+    //このアイテムの画像が置かれているディスク上のディレクトリ。zip内のものはnullです。
+    public string? RelatedRawLocalPath => MyBundle?.GetRawLocalAddress(Category, SubholderPath, "");
+
     private bool? hasAnimationCache = null;
     public bool HasAnimation
     {
@@ -1027,6 +1030,14 @@ public class CustomItemBundle : CostumePermissionHolder
     }
 
 
+    //ディスク上の生のアドレスを返します。RelatedLocalAddressが無い場合、またzip内のデータは見ないためRelatedZipがある場合はnullです。
+    public string? GetRawLocalAddress(string category, string subholder, string address)
+    {
+        if (RelatedLocalAddress == null || RelatedZip != null) return null;
+        if (RelatedRemoteAddress == null) return RelatedLocalAddress + category + "/" + address;
+        return RelatedLocalAddress + category + "/" + subholder + "/" + address;
+    }
+
     public ITextureLoader GetTextureLoader(string category, string subholder, string address)
     {
         if (RelatedZip != null)
@@ -1066,7 +1077,7 @@ public class CustomItemBundle : CostumePermissionHolder
         {
             bundle.RelatedMarketplaceItem = item;
             bundle.RelatedRemoteAddress = url;
-            bundle.RelatedLocalAddress = PathHelpers.GameRootPath + Path.DirectorySeparatorChar + "MoreCosmic" + Path.DirectorySeparatorChar;
+            bundle.RelatedLocalAddress = PathHelpers.BepInExRootPath + "/MoreCosmic/";
             bundle.BundleName ??= url;
 
             yield return bundle.CoLoad();
@@ -1289,6 +1300,9 @@ public static class MoreCosmic
             {
                 ActivateQueue.Dequeue();
 
+                //全てのコスチュームの読み込みが終わったので一覧を書き出す
+                if (ActivateQueue.Count == 0) LoadedContentsExporter.Export();
+
                 //ゲーム内ならば見た目を更新する
                 if (LobbyBehaviour.Instance.AsBoolFast())
                 {
@@ -1305,7 +1319,13 @@ public static class MoreCosmic
 
     private static IEnumerator CoLoadAll()
     {
-        yield return CoLoadLocal();
+#if PC
+        if(Directory.Exists(PathHelpers.GameRootPath + Path.DirectorySeparatorChar + "MoreCosmic")){
+            Directory.Move(PathHelpers.GameRootPath + Path.DirectorySeparatorChar + "MoreCosmic", PathHelpers.BepInExRootPath + Path.DirectorySeparatorChar + "MoreCosmic");
+        }
+#endif
+
+            yield return CoLoadLocal();
         yield return CoLoadOnline();
     }
 

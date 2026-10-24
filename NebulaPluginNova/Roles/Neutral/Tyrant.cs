@@ -113,7 +113,7 @@ internal class Tyrant : DefinedRoleTemplate, DefinedRole
                     KillCooldown, "kill", ModAbilityButton.LabelType.Impostor, null!,
                     (target, _) =>
                     {
-                        var cancelable = GameOperatorManager.Instance?.Run(new PlayerTryVanillaKillLocalEventAbstractPlayerEvent(MyPlayer, target));
+                        var cancelable = GameOperatorManager.Instance?.Run(new PlayerTryVanillaKillLocalEvent(MyPlayer, target));
                         if (!(cancelable?.IsCanceled ?? false))
                         {
                             //キャンセルされなければキルを実行する
@@ -169,7 +169,6 @@ internal class Tyrant : DefinedRoleTemplate, DefinedRole
         [OnlyMyPlayer]
         void CheckWins(PlayerCheckWinEvent ev)
         {
-            //キルできる者が誰も生き残らなかったなら、必要なキル数には二度と届かない。
             if (killingTotal < RequiredKillingToWin && !GamePlayer.AllPlayers.Any(p => p.IsAlive && p.IsKiller))
                 ev.Recorder.AddReason(ev.Player.PlayerId, TyrantDetails.Missed);
         }

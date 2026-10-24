@@ -51,8 +51,8 @@
 "location.polus.comms" : "通信室"
 "location.polus.boilerRoom" : "ボイラー室"
 "location.polus.decontamination" : "除染室"
-"location.polus.decontamination2" : "除染室"
-"location.polus.decontamination3" : "除染室"
+"location.polus.decontamination2" : "上部除染室"
+"location.polus.decontamination3" : "下部除染室"
 "location.polus.drill" : "ドリル"
 "location.polus.dropship" : "ドロップシップ"
 "location.polus.ejection" : "追放の地"
@@ -162,6 +162,7 @@
 
 "sabotage.reactor" : "リアクター"
 "sabotage.laboratory" : "耐震装置"
+"sabotage.lifeSupp" : "O2"
 "sabotage.lifeSupport" : "O2"
 "sabotage.heliSabotage" : "ヘリ衝突"
 "sabotage.comms" : "コミュサボ"

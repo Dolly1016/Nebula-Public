@@ -376,6 +376,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
     IEnumerable<IArchivedPlayer> IArchivedGame.GetAllPlayers() => AllPlayerInfo;
     IArchivedEvent[] IArchivedGame.ArchivedEvents => GameStatistics.Sealed;
     byte IArchivedGameData.MapId => NebulaAPI.AmongUs.MapId;
+    int IArchivedGameData.InMapId => NebulaAsset.GetInMapId(NebulaAPI.AmongUs.MapId);
     DateTime? IArchivedGameData.StartedAtUtc => StartedAtUtc;
     DateTime? IArchivedGameData.EndedAtUtc => EndedAtUtc;
     ArchivedGameEnd? IArchivedGameData.EndInfo => EndState != null ? ArchivedGameEnd.FromEndState(EndState, AllPlayerInfo) : null;
@@ -774,7 +775,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
                 /* 自陣営2人以上で仲間が全員生存 */
     MetChallengeCond(allModPlayers.Values.Aggregate((0, true), AggregateFunc)) &&
                 /*キル数2以上*/ allModPlayers.Values.Count(p => p.MyKiller?.AmOwner ?? false) >= 2 &&
-                /*最後の死亡者をキルしている*/ (allModPlayers.Values.MaxBy(p => p.DeathTime)?.MyKiller?.AmOwner ?? false))
+                /*最後の死亡者をキルしている*/ (allModPlayers.Values.MaxBy(p => (float)p.DeathTime)?.MyKiller?.AmOwner ?? false))
                 new StaticAchievementToken("challenge.impostor");
 
             //各役職・終了条件の勝利回数に加算
@@ -847,11 +848,10 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
 
     public IEnumerator CoWaitAndEndGame()
     {
-        if(GameState != NebulaGameStates.Finished) GameState = NebulaGameStates.WaitGameResult;
+        if (GameState != NebulaGameStates.Finished) GameState = NebulaGameStates.WaitGameResult;
 
         while (ExileController.Instance.AsBoolFast() && !Minigame.Instance.AsBoolFast()) yield return null;
         while ((HudManager.Instance.shhhEmblem.isActiveAndEnabled || IntroCutscene.Instance.AsBoolFast()) && !Minigame.Instance.AsBoolFast()) yield return null;
-
         yield return DestroyableSingleton<HudManager>.Instance.CoFadeFullScreen(Color.clear, Color.black, 0.5f, false);
         if (AmongUsLLImpl.AmongUsClientInstance.AmHost) AmongUsLLImpl.GameManagerInstance.RpcEndGame(EndState?.EndCondition == NebulaGameEnd.CrewmateWin ? GameOverReason.CrewmatesByTask : GameOverReason.ImpostorsByKill, false);
 
@@ -868,6 +868,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
 
     public void ToGameEnd()
     {
+        LogUtils.WriteToConsole("ToGameEnd 1");
         var minigame = Minigame.Instance;
         if (minigame.AsBoolFast())
         {
@@ -881,7 +882,8 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
             }
         }
 
-        HudManager.Instance.StartCoroutine(CoWaitAndEndGame().WrapToIl2Cpp());
+        LogUtils.WriteToConsole("ToGameEnd 2");
+        NebulaManager.Instance.StartCoroutine(CoWaitAndEndGame().WrapToIl2Cpp());
     }
 
     public IEnumerable<GamePlayer> AllPlayerInfo => allModPlayers.Values;
@@ -943,7 +945,15 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
 
         );
 
-    public GamePlayer? LastDead => allModPlayers.Values.MaxBy(p => p.DeathTime);
+    public GamePlayer? LastDead
+    {
+        get
+        {
+            var dead = allModPlayers.Values.MaxBy(p => (float)p.DeathTime);
+            if ((float)dead.DeathTime > 0f) return dead;
+            return null;
+        }
+    }
 
     // Virial.Game.Game
     Virial.Game.Player? Virial.Game.Game.GetPlayer(byte playerId)=>GetPlayer(playerId);

@@ -35,7 +35,7 @@ public class Poltergeist : DefinedGhostRoleTemplate, DefinedGhostRole
         {
             if (AmOwner)
             {
-                var deadBodyTracker = ObjectTrackers.ForDeadBody(this, null, MyPlayer, (d) => GamePlayer.AllPlayers.All(p => p.HoldingDeadBody != d));
+                var deadBodyTracker = ObjectTrackers.ForDeadBody(this, null, MyPlayer, (d) => d.CanDrag && GamePlayer.AllPlayers.All(p => p.HoldingDeadBody != d));
 
                 var poltergeistButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
                     PoltergeistCoolDownOption, "poltergeist", buttonSprite, _ => deadBodyTracker.CurrentTarget != null, null, true);

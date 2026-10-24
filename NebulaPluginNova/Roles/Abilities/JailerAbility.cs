@@ -55,6 +55,7 @@ public class JailerAbility : IGameOperator, ILifespan
             {
                 var map = MapBehaviour.Instance;
                 var countOverlay = map.countOverlay;
+                MapBehaviourExtension.InitializeModOption();
                 countOverlay.gameObject.SetActive(true);
                 countOverlay.SetModOption(canIdentifyImpostors && (GamePlayer.LocalPlayer?.IsImpostor ?? false), canIdentifyDeadBodies, false, false);
                 countOverlay.SetOptions(true, true);
@@ -73,6 +74,7 @@ public class JailerAbility : IGameOperator, ILifespan
     {
         var map = MapBehaviour.Instance;
         var countOverlay = map.countOverlay;
+        MapBehaviourExtension.InitializeModOption();
         countOverlay.gameObject.SetActive(true);
         countOverlay.SetModOption(canIdentifyImpostors && (GamePlayer.LocalPlayer?.IsImpostor ?? false), canIdentifyDeadBodies, false, false, true, Palette.ImpostorRed);
         countOverlay.SetOptions(true, true);

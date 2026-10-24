@@ -40,7 +40,7 @@ internal class DeadBodyManager : AbstractModule<Virial.Game.Game>, IGameOperator
 
     public Virial.Game.DeadBody RegisterDeadBody(global::DeadBody deadBody, int id, GamePlayer player)
     {
-        var wrapped = new Virial.Game.DeadBody(deadBody, id, player);
+        var wrapped = new DeadBodyImpl(deadBody, id, player);
         deadBodies[id] = wrapped;
         return wrapped;
     }

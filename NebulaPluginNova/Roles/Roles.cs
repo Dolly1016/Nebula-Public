@@ -43,6 +43,9 @@ internal class NoSRoleSetUp
         Virial.Assignable.NebulaTeams.JesterTeam = Neutral.Jester.MyTeam;
         Virial.Assignable.NebulaTeams.PaparazzoTeam = Neutral.Paparazzo.MyTeam;
         Virial.Assignable.NebulaTeams.VultureTeam = Neutral.Vulture.MyTeam;
+        Virial.Assignable.NebulaTeams.PlagueTeam = Neutral.Plague.MyTeam;
+        Virial.Assignable.NebulaTeams.TyrantTeam = Neutral.Tyrant.MyTeam;
+        Virial.Assignable.NebulaTeams.HavocTeam = Neutral.Havoc.MyTeam;
     }
 
 

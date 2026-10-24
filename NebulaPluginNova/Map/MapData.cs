@@ -165,10 +165,12 @@ public abstract class MapData
     abstract public IReadOnlyList<VVector2> NonMapArea { get; }
     abstract protected (AdditionalRoomArea area, string key, bool detailRoom)[] AdditionalRooms { get; }
     abstract protected (SystemTypes room, AdditionalRoomArea area, string key)[] OverrideRooms { get; }
-    abstract public (SystemTypes room, Vector2 pos)[] AdminRooms { get; } //DivMapと同じ順序で並べること。(Outsideを除いた順序)
+    abstract public (SystemTypes room, Vector2 pos, int inMapIdMask)[] AdminRooms { get; } //DivMapと同じ順序で並べること。(Outsideを除いた順序)
     virtual public Vector2[][] RaiderIgnoreArea { get => []; }
     abstract protected SystemTypes[] SabotageTypes { get; }
     abstract public MapObjectPoint[] MapObjectPoints { get; }
+    public virtual SystemTypes[] UnusedRooms => [];
+    public virtual SystemTypes[] UnrecommendedRooms => [];
     public virtual NavVerticesStructure MapNavData { get {
             if (field == null)
             {

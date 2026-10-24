@@ -257,7 +257,7 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignable
                     KillCooldown, "kill", ModAbilityButton.LabelType.Impostor, null!,
                     (target, _) =>
                     {
-                        var cancelable = GameOperatorManager.Instance?.Run(new PlayerTryVanillaKillLocalEventAbstractPlayerEvent(MyPlayer, target));
+                        var cancelable = GameOperatorManager.Instance?.Run(new PlayerTryVanillaKillLocalEvent(MyPlayer, target));
                         if (!(cancelable?.IsCanceled ?? false))
                         {
                             //キャンセルされなければキルを実行する
@@ -645,7 +645,7 @@ internal class JackalCriteria : AbstractModule<IGameModeStandard>, IGameOperator
         bool sidekickShouldBeCountKillers = Sidekick.SidekickShouldBeCountAsKillers;
 
         int totalAlive = 0;
-        bool leftOtherKillers = GameOperatorManager.Instance?.Run(new KillerTeamCallback(NebulaTeams.JackalTeam)).RemainingOtherTeam ?? false; //帆かキラーが残っていても殲滅勝利は可能
+        bool leftOtherKillers = GameOperatorManager.Instance?.Run(new KillerTeamCallback(NebulaTeams.JackalTeam)).RemainingOtherTeam ?? false; //他キラーが残っていても殲滅勝利は可能
 
         //全生存者数を数え、生存しているジャッカルチームを発見する。
         allAliveJackals.Clear();

@@ -154,8 +154,7 @@ public class Secret : DefinedRoleTemplate, DefinedRole
         [OnlyMyPlayer]
         public void OnTaskCompleteLocal(PlayerTaskCompleteLocalEvent ev)
         {
-            if (MyPlayer.Tasks.IsCompletedCurrentTasks)
-                ScheduleSendArousalRpc(MyPlayer.Unbox(), savedRoleArgs, savedTasks);
+            if (MyPlayer.Tasks.TotalCompleted >= ShownSecret.NiceConditionOption) ScheduleSendArousalRpc(MyPlayer.Unbox(), savedRoleArgs, savedTasks);
         }
 
         string? RuntimeAssignable.OverrideRoleName(string lastRoleName, bool isShort, bool canSeeAllInfo)

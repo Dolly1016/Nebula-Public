@@ -1,6 +1,8 @@
 ﻿using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using System.Runtime.CompilerServices;
 using Virial;
 using Virial.Events.Game.Meeting;
+using Virial.Game;
 using xCloud;
 
 namespace Nebula.Patches;
@@ -183,11 +185,30 @@ public static class RandomTaskPatch
 
         if (!GeneralConfigurations.RandomizedWiringOption) result.Sort((console1, console2) => { return console1.ConsoleId - console2.ConsoleId; });
 
-        //得られた並び順を返
-        //す
         for (int i = 0; i < consoleIdsLength; i++) consoleIds[i] = (byte)result[i].ConsoleId;
 
         return false;
+    }
+}
+
+//マップ改変に合わせたタスクの矢印と行き先（Fungle の Midnight / Poisoned）
+//NoGuideArrowPatch のあとに走らせ、そちらが元の処理を止めたときは何もしない
+[HarmonyPatch(typeof(NormalPlayerTask), nameof(NormalPlayerTask.UpdateArrowAndLocation))]
+[HarmonyPriority(Priority.Low)]
+public static class TaskArrowAndLocationPatch
+{
+    public static bool Prefix(NormalPlayerTask __instance, bool __runOriginal)
+    {
+        if (!__runOriginal) return false;
+
+        var mapId = NebulaAPI.AmongUs.MapId;
+        if (mapId != 5) return true;
+        return NebulaAsset.GetInMapId(mapId) switch
+        {
+            4 or 5 => Modifications.Map.FungleMidnight.UpdateTaskArrowAndLocation(__instance),
+            6 or 7 => Modifications.Map.FunglePoisoned.UpdateTaskArrowAndLocation(__instance),
+            _ => true,
+        };
     }
 }
 
@@ -198,6 +219,43 @@ public static class TaskStepPatch
     public static void Prefix(NormalPlayerTask __instance)
     {
         if (__instance.TaskType == TaskTypes.FixWiring && NebulaAPI.AmongUs.MapId != 5) __instance.MaxStep = GeneralConfigurations.StepsOfWiringGameOption;
+    }
+
+    //マップ改変に合わせて、配られたタスクのインスタンスを直接書き換える（Fungle の Midnight / Poisoned）
+    public static void Postfix(NormalPlayerTask __instance)
+    {
+        var mapId = NebulaAPI.AmongUs.MapId;
+        if (mapId != 5) return;
+        switch (NebulaAsset.GetInMapId(mapId))
+        {
+            case 4 or 5:
+                Modifications.Map.FungleMidnight.OnTaskInitialized(__instance);
+                break;
+            case 6 or 7:
+                Modifications.Map.FunglePoisoned.OnTaskInitialized(__instance);
+                break;
+        }
+    }
+}
+
+//タスクのステップ数改変
+[HarmonyPatch(typeof(CatchFishMinigame._CoUpdateProgress_d__42), nameof(CatchFishMinigame._CoUpdateProgress_d__42.MoveNext))]
+public static class CatchFishMinigamePatch
+{
+    public static bool Prefix(CatchFishMinigame._CoUpdateProgress_d__42 __instance, ref bool __result)
+    {
+        if (__instance.__4__this.numCaughtFish >= 3)
+        {
+            var inMapId = NebulaAsset.GetInMapId(5);
+            if (NebulaAPI.AmongUs.MapId == 5 && (inMapId == 4 || inMapId == 5))
+            {
+                __instance.__4__this.MyNormTask.NextStep();
+                __result = false;
+                Minigame.Instance.Close();
+                return false;
+            }
+        }
+        return true;
     }
 }
 
@@ -295,6 +353,8 @@ public static class EmergencyUpdatePatch
                 (NebulaGameManager.Instance?.LocalFakeSabotage?.MyFakeTasks.All(
                     type => AmongUsLLImpl.ShipStatusInstance.GetSabotageTask(type)?.TaskType != task.TaskType) ?? true)))
             ClosedButtonUpdate(__instance);
+        else if (GamePlayer.LocalPlayer?.HasAttribute(PlayerAttributes.Suppressed) ?? false)
+            ClosedForModOptionButtonUpdate(__instance, "game.meeting.suppressedEmergencyButton");
         else if (!checkCanPushEv.CanPushButton)
             ClosedForModOptionButtonUpdate(__instance, checkCanPushEv.CannotPushReason);
         else

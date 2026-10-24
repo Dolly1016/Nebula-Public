@@ -70,9 +70,10 @@ public class Psychic : DefinedSingleAbilityRoleTemplate<Psychic.Ability>, Define
         [Local]
         void OnReportedDead(PlayerDieEvent ev)
         {
-            if (lastReported == ev.Player && (ev.Player.PlayerState == PlayerState.Guessed || ev.Player.PlayerState == PlayerState.Exiled)) new StaticAchievementToken("psychic.challenge");
+            if (lastReported?.MyKiller == ev.Player && (ev.Player.PlayerState == PlayerState.Guessed || ev.Player.PlayerState == PlayerState.Exiled)) new StaticAchievementToken("psychic.challenge");
         }
 
+        [Local]
         void OnMeetingEnd(MeetingEndEvent ev) => lastReported = null;
 
         [Local]
@@ -87,8 +88,8 @@ public class Psychic : DefinedSingleAbilityRoleTemplate<Psychic.Ability>, Define
 
                 //死亡時間(5秒単位)
                 {
-                    float elapsedTime = (NebulaGameManager.Instance!.CurrentTime - ev.Reported!.DeathTime);
-                    if (elapsedTime > 20) lastReported = ev.Reported;
+                    float elapsedTime = (NebulaGameManager.Instance!.CurrentTime - (float)(ev.Reported.DeathTime));
+                    if (elapsedTime > 20f) lastReported = ev.Reported;
                     int aboutTime = (int)(elapsedTime + 2.5f);
                     aboutTime -= aboutTime % 5;
 

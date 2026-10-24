@@ -17,7 +17,7 @@ namespace Nebula.Http;
 /// GET  /api/role-icons         役職アイコンの対応表
 /// GET  /role-icons/{名前}.png  役職アイコンのアトラス
 /// GET  /api/maps               ミニマップの一覧と座標の変換に要る値
-/// GET  /maps/{マップID}.png    ミニマップの画像
+/// GET  /maps/{マップID}-{バリエーション}.png    ミニマップの画像
 /// GET  /api/map-objects        マップに現れる物の種類と、その性質
 /// GET  /map-objects.png        その絵が並んだ画像
 /// GET  /api/games              記録の一覧。新しい順
@@ -167,14 +167,28 @@ internal static class GameRecordApi
         }
 
         if (!fileName.EndsWith(".png", StringComparison.OrdinalIgnoreCase)
-            || !byte.TryParse(fileName.Substring(0, fileName.Length - 4), out var mapId)
-            || !MapContent.TryGetImage(mapId, out var png))
+            || !TryParseMapName(fileName.Substring(0, fileName.Length - 4), out var mapId, out var inMapId)
+            || !MapContent.TryGetImage(mapId, inMapId, out var png))
         {
             exchange.RespondStatus(404);
             return;
         }
 
         exchange.Respond(200, MapContent.PngContentType, png);
+    }
+
+    /// <summary>
+    /// "{マップID}-{バリエーション}" を読む。バリエーションを省いた古い形も受ける。
+    /// </summary>
+    private static bool TryParseMapName(string name, out byte mapId, out int inMapId)
+    {
+        inMapId = 0;
+
+        var separator = name.IndexOf('-');
+        if (separator < 0) return byte.TryParse(name, out mapId);
+
+        return byte.TryParse(name.Substring(0, separator), out mapId)
+            && int.TryParse(name.Substring(separator + 1), out inMapId);
     }
 
     // ------------------------------------------------------------------ 文言

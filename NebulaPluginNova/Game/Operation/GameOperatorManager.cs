@@ -212,7 +212,7 @@ public class GameOperatorManager
                     o.action.Invoke(e);
                 }catch (Exception ex)
                 {
-                    Logger.Error(ex.ToString());
+                    Logger.Error("An error occurred in DoSingleOperation: " + ex.ToString());
                 }
                 return false;
             });

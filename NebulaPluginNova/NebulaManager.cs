@@ -1,42 +1,13 @@
 ﻿using Il2CppInterop.Runtime.Injection;
-using Il2CppInterop.Runtime.Runtime;
-using Il2CppSystem.Xml.Schema;
-using InnerNet;
-using Nebula.Behavior;
-using Nebula.Dev;
-using Nebula.Map;
 using Nebula.Modules.Cosmetics;
-using Nebula.Modules.GUIWidget;
-using Nebula.Patches;
-using Nebula.Roles.Crewmate;
-using Nebula.VisualProgramming;
-using Nebula.VisualProgramming.UI;
 using Nebula.VoiceChat;
-using Rewired.UI.ControlMapper;
-using Sentry.Unity.NativeUtils;
-using System.Data;
-using System.Runtime.Loader;
-using TMPro;
-using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
-using UnityEngine.UIElements;
 using Virial;
 using Virial.Common;
-using Virial.DI;
-using Virial.Events.Game;
-using Virial.Game;
-using Virial.Game.Object;
-using Virial.Helpers;
 using Virial.Media;
 using Virial.Runtime;
-using Virial.VisualProgramming;
-using static FilterPopUp.FilterInfoUI;
-using static Il2CppSystem.Linq.Expressions.Interpreter.CastInstruction.CastInstructionNoT;
-using static Il2CppSystem.Uri;
 using static Nebula.Modules.Cosmetics.RingMenu;
-using static Nebula.Modules.INebulaAchievement;
-using static Nebula.Roles.Neutral.Spectre;
 
 namespace Nebula;
 
@@ -576,9 +547,6 @@ public class NebulaManager : MonoBehaviour
 
                 if (Input.GetKeyDown(KeyCode.K))
                 {
-                    LogUtils.WriteToConsole("BepInExRootPath: " + BepInEx.Paths.BepInExRootPath);
-                    LogUtils.WriteToConsole("GameRootPath: " + BepInEx.Paths.GameRootPath);
-                    LogUtils.WriteToConsole("GameDataPath: " + BepInEx.Paths.GameDataPath);
                     /*
                     IEnumerator CoCheck()
                     {

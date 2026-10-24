@@ -1,4 +1,5 @@
-﻿using Nebula.Roles.Modifier;
+﻿using Nebula.Map;
+using Nebula.Roles.Modifier;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -228,7 +229,7 @@ internal class Opportunist : DefinedRoleTemplate, HasCitation, DefinedRole
 
     private static IEnumerable<TaskArea> GetTaskArea(int num)
     {
-        var positions = TaskPositions[NebulaAPI.AmongUs.MapId];
+        var positions = GetValidTaskPositions(NebulaAPI.AmongUs.MapId).ToArray();
         var randomArray = Helpers.GetRandomArray(positions.Length);
         SystemTypes lastType = SystemTypes.Doors;
         int count = 0;
@@ -244,7 +245,14 @@ internal class Opportunist : DefinedRoleTemplate, HasCitation, DefinedRole
         }
     }
 
-    internal static IEnumerable<(Vector2 center, Vector2 size)> GetTaskPositions() => TaskPositions[NebulaAPI.AmongUs.MapId].Select(t => ((t.Min + t.Max) * 0.5f, t.Max - t.Min));
+    internal static IEnumerable<(Vector2 center, Vector2 size)> GetRawTaskPositions() => GetValidTaskPositions(NebulaAPI.AmongUs.MapId).Select(t => ((t.Min + t.Max) * 0.5f, t.Max - t.Min));
+
+    private static IEnumerable<TaskArea> GetValidTaskPositions(byte mapId)
+    {
+        var mapData = MapData.GetCurrentMapData();
+        HashSet<SystemTypes> excludedRooms = [.. mapData.UnrecommendedRooms, .. mapData.UnusedRooms];
+        return TaskPositions[mapId].Where(t => !excludedRooms.Contains(t.Room));
+    }
     private static TaskArea[][] TaskPositions = [
         [
             TaskArea.Create(SystemTypes.Nav, null, new(18f, -4.6f), 2.5f),
@@ -326,6 +334,8 @@ internal class Opportunist : DefinedRoleTemplate, HasCitation, DefinedRole
             TaskArea.Create(SystemTypes.FishingDock, null, new(-22.5f, -6.8f), 1.5f),
             TaskArea.Create(SystemTypes.RecRoom, null, new(-19.9f, -0.4f), 2f),
             TaskArea.Create(SystemTypes.Cafeteria, null, new(-16.4f, 6.8f), 3f),
+            TaskArea.Create(SystemTypes.Dropship, null, new(-9f, 15f), 5f),
+            TaskArea.Create(SystemTypes.Beach, null, new(-9.7f, 1.7f), 2.5f),
         ],
         ];
 }

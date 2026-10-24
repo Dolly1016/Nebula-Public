@@ -1,0 +1,70 @@
+# Assignable
+
+"role.havoc.name" : "ハボック"
+"role.havoc.short" : "ハ"
+"role.havoc.blurb" : "終末のメイヘム"
+
+# Document
+
+"role.havoc.doc" : "死体を貪り、能力を強化していく第三陣営です。"
+"role.havoc.winCond" : "会議で追放される。"
+"role.havoc.ability.title" : "固有能力 "破滅の呼び声""
+"role.havoc.ability.main" : "死体を貪り、自身の能力を強化します。遠吠えによって貪食やキルのための時間を稼げます。"
+"role.havoc.ability.devour" : "<title>貪食</title>死体を食い荒らします。1回貪るごとにキルクールダウンが<var>%REDUC%</var>秒短縮します。<br><var>%VENT%</var>回貪るとベントを使用できるようになります。"
+"role.havoc.ability.devouredCorpse" : "<title>食い荒らされた死体</title>食い荒らされた死体は見た目が変わります。<br>この死体は通報できますが、掴んで運べません。"
+"role.havoc.ability.havoc" : "<title>遠吠え</title><var>%DURATION%</var>秒間、死体通報や緊急ボタンをブロックします。<br>遠吠えはマップ全体に響き渡りますが、指向性はありません。"
+
+# Options
+
+"options.role.havoc.detail" : "ハボックは死体を貪り、キル能力を強化します。<br>暴れまわり始めるまでに議論の力で始末しましょう！"
+"options.role.havoc.killCooldown" : "初期キルクールダウン"
+"options.role.havoc.killCooldownReduction" : "貪食によるキルクールダウン短縮"
+"options.role.havoc.devourCooldown" : "貪食クールダウン"
+"options.role.havoc.havocCooldown" : "遠吠えクールダウン"
+"options.role.havoc.havocDuration" : "遠吠え効果時間"
+"options.role.havoc.requiredKillingForVent" : "ベント使用に必要なキル数"
+"options.role.havoc.clearHavocSEDistance" : "明瞭な遠吠えSE可聴範囲"
+"options.role.havoc.clearHavocSEDistance.detail" : "指定した範囲内では遠吠えのSEが明瞭に聞こえます。<br>範囲外ではSEがぼやけて聴こえます。"
+
+# Game
+
+
+# UI
+
+"button.label.devour" : "貪食"
+"button.label.havoc" : "遠吠え"
+
+# Stats
+
+"stats.label.devour" : "死体を食い荒らした回数"
+"stats.label.havoc" : "遠吠えの回数"
+
+# Titles
+
+"achievement.havoc.common1.title" : "猛獣の冬"
+"achievement.havoc.common1.goal" : "遠吠えしながら死体を貪る。"
+
+"achievement.havoc.another1.title" : "ハヴォックご乱神しません"
+"achievement.havoc.another1.goal" : "死体を食い荒らせないか、キルできないまま死亡する。"
+"achievement.havoc.another1.flavor" : "そもそも使っていません。"
+
+"achievement.havoc.common2.title" : "冒涜"
+"achievement.havoc.common2.goal" : "通算で10体の死体を貪る。"
+
+"achievement.havoc.challenge.title" : "ジャガーノート"
+"achievement.havoc.challenge.goal" : "1回の遠吠え中に2人以上キルしてゲームを終了させ、勝利する。"
+"achievement.havoc.challenge.flavor" : ""もう誰にも止められない" ―破られた議事録より"
+
+# Team
+
+"end.detail.havoc.win" : "ハボック勝利"
+
+"teams.havoc" : "ハボック"
+"end.havoc" : "ハボック%EXTRA%勝利"
+
+# Document
+
+"document.tip.winCond.teams.havoc" : "ハボック"
+
+"document.tip.winCond.havoc.title" : "キル勝利"
+"document.tip.winCond.havoc" : "自陣営の生存者が全生存者の半数以上を占めると勝利します。<br>他のキル陣営が全滅している必要があります。"

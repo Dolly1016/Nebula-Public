@@ -1,6 +1,7 @@
 ﻿using Hazel;
 using Nebula.Behavior;
 using Nebula.Map;
+using Nebula.Modifications.Map;
 using Nebula.Modules.CustomMap;
 using Virial;
 using Virial.Game;
@@ -32,23 +33,29 @@ public class ShipStatusPatch
 
         //ModdedMap
         //ModShipStatus.CleanOriginalShip(__instance);
-
+        ModifyEarliest(__instance);
     }
 
     static public void Postfix(ShipStatus __instance)
     {
         if (__instance.Type == (ShipStatus.MapType)6) return;
-        ModifyEarlier();
-        __instance.StartCoroutine(Effects.Sequence(Effects.Wait(0.1f),ManagedEffects.Action(Modify).WrapToIl2Cpp()));
+        ModifyEarlier(__instance);
+        __instance.StartCoroutine(Effects.Sequence(Effects.Wait(0.1f),ManagedEffects.Action(()=>Modify(__instance)).WrapToIl2Cpp()));
     }
 
-    static private void ModifyEarlier()
+    static private void ModifyEarliest(ShipStatus ship)
     {
-        ShipExtension.PatchEarlierModification(cachedMapId);
+        ShipModification.PatchEarliestModification(cachedMapId, ship);
     }
 
-    static private void Modify() { 
-        ShipExtension.PatchModification(cachedMapId);
+
+    static private void ModifyEarlier(ShipStatus ship)
+    {
+        ShipModification.PatchEarlierModification(cachedMapId, ship);
+    }
+
+    static private void Modify(ShipStatus ship) { 
+        ShipModification.PatchModification(cachedMapId, ship);
         if (GeneralConfigurations.SilentVentOption)
         {
             //ベントを見えなくする

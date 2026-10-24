@@ -145,18 +145,20 @@ public class PolusData : MapData
     protected override IDividedSpriteLoader SealedVentSprite => SealedVentSpritePolus;
     override public bool IsSealableDoor(OpenableDoor door) => !(door.name is "DeconDoorOuter" or "DeconDoorInner");
 
-    public override (SystemTypes room, Vector2 pos)[] AdminRooms { get; } = [
-        (SystemTypes.Office, new(22.5f, -17.6f)),
-        (SystemTypes.Admin, new(21.1f,-22.7f)),
-        (SystemTypes.Specimens, new(36.5f, -21.2f)),
-        (SystemTypes.Laboratory, new(34.8f, -8.0f)),
-        (SystemTypes.Dropship, new(16.6f, -1.5f)),
-        (SystemTypes.Storage, new(20.6f,-11.7f)),
-        (SystemTypes.Weapons, new(12.2f,-23.3f)),
-        (SystemTypes.Comms, new(11.4f, -16.7f)),
-        (SystemTypes.BoilerRoom, new(2.4f, -24.2f)),
-        (SystemTypes.LifeSupp, new(2.5f, -17.5f)),
-        (SystemTypes.Security, new(2.4f, -13.0f)),
-        (SystemTypes.Electrical, new(8.5f, -9.6f)),
+    public override (SystemTypes room, Vector2 pos, int inMapIdMask)[] AdminRooms { get; } = [
+        (SystemTypes.Office, new(22.5f, -17.6f), 0xFF),
+        (SystemTypes.Admin, new(21.1f,-22.7f), 0xFF),
+        (SystemTypes.Specimens, new(36.5f, -21.2f), 0xFF),
+        (SystemTypes.Laboratory, new(34.8f, -8.0f), 0xFF),
+        (SystemTypes.Dropship, new(16.6f, -1.5f), 0xFF),
+        (SystemTypes.Storage, new(20.6f,-11.7f), 0xFF),
+        (SystemTypes.Weapons, new(12.2f,-23.3f), 0xFF),
+        (SystemTypes.Comms, new(11.4f, -16.7f), 0xFF),
+        (SystemTypes.BoilerRoom, new(2.4f, -24.2f), 0xFF),
+        (SystemTypes.LifeSupp, new(2.5f, -17.5f), 0xFF),
+        (SystemTypes.Security, new(2.4f, -13.0f), 0xFF),
+        (SystemTypes.Electrical, new(8.5f, -9.6f), 0xFF),
+        (SystemTypes.Decontamination2, new(39.2f, -13.8f), 0xFF),
+        (SystemTypes.Decontamination3, new(29.2f, -22.6f), 0xFF),
         ];
 }

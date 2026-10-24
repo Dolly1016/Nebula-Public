@@ -193,15 +193,24 @@ public static class PlayerUpdatePatch
         {
             NebulaGameManager.Instance.OnFixedUpdate(deltaTime);
 
-            //ペット・レポートボタンの使用可否
-            if (AmongUsLLImpl.TryGetHudManager(out var hudManager) && modPlayer.IsDived)
+            if (AmongUsLLImpl.TryGetHudManager(out var hudManager))
             {
-                hudManager.ReportButton.SetDisabled();
-                hudManager.PetButton.SetDisabled();
-            }
-            else if (!NebulaGameManager.Instance.LocalStatus.CanReport)
-            {
-                hudManager.ReportButton.SetDisabled();
+                {
+                    var suppressed = GamePlayer.LocalPlayer?.HasAttribute(PlayerAttributes.Suppressed) ?? false;
+                    hudManager.ReportButton.graphic.material.SetFloat("_Static", suppressed ? 1f : 0f);
+                    if(suppressed) hudManager.ReportButton.SetDisabled();
+                }
+
+                //ペット・レポートボタンの使用可否
+                if (modPlayer.IsDived)
+                {
+                    hudManager.ReportButton.SetDisabled();
+                    hudManager.PetButton.SetDisabled();
+                }
+                else if (!NebulaGameManager.Instance.LocalStatus.CanReport)
+                {
+                    hudManager.ReportButton.SetDisabled();
+                }
             }
 
             if (__instance.inVent && Vent.currentVent.AsBoolFast(out var currentVent))
@@ -331,7 +340,7 @@ class OverlayKillAnimationPatch
 }
 
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.SetTasks))]
-class SetTaskPAtch
+class SetTaskPatch
 {
     public static bool Prefix(PlayerControl __instance, [HarmonyArgument(0)] Il2CppSystem.Collections.Generic.List<NetworkedPlayerInfo.TaskInfo> tasks)
     {
@@ -382,6 +391,8 @@ class PlayerDisconnectPatch
         if (NebulaGameManager.Instance?.GameState == NebulaGameStates.NotStarted) return;
 
         var unboxed = player.GetModInfo()!.Unbox();
+        if (unboxed == null) return;
+
         unboxed.IsDisconnected = true;
         unboxed.MyState = PlayerState.Disconnected;
 
@@ -1005,7 +1016,8 @@ public class DissolvedDeadBodyClickPatch
         if((__instance.ParentId & DissolvedDeadBodyMask) != 0)
         {
             if (__instance.Reported) return false;
-            if (!(NebulaGameManager.Instance?.LocalStatus.CanReport ?? false)) return false;
+            var localStatus = NebulaGameManager.Instance?.LocalStatus;
+            if (NebulaGameManager.Instance?.LocalStatus?.CannotReportOrSuppressed ?? false) return false;
 
             var localPlayer = AmongUsLLImpl.LocalPlayer;
             Vector2 truePosition = localPlayer.GetTruePosition();

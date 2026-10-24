@@ -13,8 +13,6 @@ public static class OpenMapCountOverlayPatch
 
     static void Prefix(MapCountOverlay __instance)
     {
-        MapBehaviourExtension.InitializeModOption();
-
         var timer = NebulaGameManager.Instance?.ConsoleRestriction?.ShowTimerIfNecessary(ConsoleRestriction.ConsoleType.Admin, __instance.transform, new Vector3(4.8f, 2f, -50f));
         if (timer != null) timer.transform.localScale = Vector3.one / __instance.transform.localScale.x;
     }
@@ -78,11 +76,12 @@ public static class CountOverlayUpdatePatch
         var roomFlags = MapData.GetCurrentMapData().AdminRooms;
         var fastRooms = AmongUsLLImpl.ShipStatusInstance.FastRooms;
         var inMeeting = MeetingHud.Instance.AsBoolFast();
+        var inMapId = NebulaAsset.GetInMapId(NebulaAPI.AmongUs.MapId);
 
         foreach (var counterArea in __instance.CountAreas)
         {
             var index = roomFlags.FindIndex(e => e.room == counterArea.RoomType);
-            if (index != -1 && (MapBehaviourExtension.RoomFlag & (0b10 << index)) == 0)
+            if (index == -1 || (MapBehaviourExtension.RoomFlag & (0b10 << index)) == 0 || (roomFlags[index].inMapIdMask & (1 << inMapId)) == 0)
             {
                 counterArea.UpdateCount(0, 0, 0);
             }
@@ -225,6 +224,7 @@ static class MapBehaviourGenericShowPatch
     static void Postfix(MapBehaviour __instance)
     {
         __instance.transform.localPosition = new Vector3(0, 0, -50f);
+        GameOperatorManager.Instance?.Run(new MapOpenInternalEvent(__instance));
         MapBehaviourExtension.UpdateScale(__instance);
     }
 }

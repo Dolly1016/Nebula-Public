@@ -60,6 +60,9 @@ public enum NebulaAudioClip {
     QuizScore,
     Slip,
     SlipPop,
+    HavocDevour,
+    HavocHowling,
+    HavocHowlingFar,
 }
 
 public static class SoundManagerHelper
@@ -128,13 +131,23 @@ public static class NebulaAsset
         LineEdgeShader = Load<Shader>("Line-Edge");
         RoleIconShader = Load<Shader>("Sprites-RoleIcon");
         TransColorGameShader = Load<Shader>("Sprites-TransColorBody");
+        ButtonShader = Load<Shader>("CooldownStaticShader");
 
         DivMap[0] = [Load<GameObject>("SkeldDivMap")];
         DivMap[1] = [Load<GameObject>("MIRADivMap")];
         DivMap[2] = [Load<GameObject>("PolusDivMap")];
         DivMap[3] = null!;
         DivMap[4] = [Load<GameObject>("AirshipDivMap")];
-        DivMap[5] = [Load<GameObject>("FungleDivMap"), Load<GameObject>("FungleDivMapLab"), Load<GameObject>("FungleDivMapModified"), Load<GameObject>("FungleDivMapModifiedLab")];
+        DivMap[5] = [
+            Load<GameObject>("FungleDivMap"), 
+            Load<GameObject>("FungleDivMapLab"), 
+            Load<GameObject>("FungleDivMapModified"), 
+            Load<GameObject>("FungleDivMapModifiedLab"),
+            Load<GameObject>("FungleDivMapMidnight"),
+            Load<GameObject>("FungleDivMapMidnightLab"),
+            Load<GameObject>("FungleDivMapPoisoned"),
+            Load<GameObject>("FungleDivMapPoisonedLab"),
+            ];
 
         audioMap[NebulaAudioClip.ThrowAxe] = Load<AudioClip>("RaiderThrow.wav");
         audioMap[NebulaAudioClip.SniperShot] = Load<AudioClip>("SniperShot.wav");
@@ -185,11 +198,15 @@ public static class NebulaAsset
         audioMap[NebulaAudioClip.QuizScore] = Load<AudioClip>("QuizScore.ogg");
         audioMap[NebulaAudioClip.Slip] = Load<AudioClip>("Slip.mp3");
         audioMap[NebulaAudioClip.SlipPop] = Load<AudioClip>("SlipPop.mp3");
+        audioMap[NebulaAudioClip.HavocDevour] = Load<AudioClip>("HavocDevour.ogg");
+        audioMap[NebulaAudioClip.HavocHowling] = Load<AudioClip>("Howling.ogg");
+        audioMap[NebulaAudioClip.HavocHowlingFar] = Load<AudioClip>("HowlingFar.ogg");
         BrokenShaderMat = Load<Material>("BrokenShaderMat");
 
         PaparazzoShot = Load<GameObject>("PhotoObject");
         FriesMinigame = Load<GameObject>("SpectreFriedMinigame");
         SlingshotInMinigame = Load<GameObject>("Slingshot");
+        HavocWave = Load<GameObject>("HavocWave");
 
         using var fontStream = StreamHelper.OpenFromResource("Nebula.Resources.JusticeFont.json");
         JusticeFont = new FontAssetNoS(JsonStructure.Deserialize<FontAssetNoSInfo>(fontStream!)!, new ResourceTextureLoader("Nebula.Resources.JusticeFont.png"));
@@ -205,19 +222,31 @@ public static class NebulaAsset
         return AssetBundle.LoadAsset(name, Il2CppType.Of<T>())?.Cast<T>()!;
     }
 
-    private static int GetInMapId(byte mapId) { 
+    public static string[][] MapNamesConsideredInMapId = [
+        [Constants.MapNames[0]],
+        [Constants.MapNames[1]],
+        [Constants.MapNames[2]],
+        [Constants.MapNames[3]],
+        [Constants.MapNames[4]],
+        ["The Fungle T.", "The Fungle T.", "The Fungle T.", "The Fungle T.", "The Fungle M.", "The Fungle M.", "The Fungle P.", "The Fungle P."],
+        ];
+    public static int GetInMapId(byte mapId) { 
         if(mapId == 5)
         {
+            int variation = GeneralConfigurations.FungleVariation;
             int num = 0;
-            if (GeneralConfigurations.FungleForClassicGameOption.Value) num += 2;
+            if (variation == 0 && GeneralConfigurations.FungleForClassicGameOption.Value) num += 2;
+            if (variation == 1) num += 4;
+            if (variation == 2) num += 6;
+
             if (GeneralConfigurations.FungleSimpleLaboratoryOption.Value) num += 1;
             return num;
         }
         return 0;
     }
-    public static Sprite GetMapSprite(byte mapId, Int32 mask, Vector2? size = null)
+    public static Sprite GetMapSprite(byte mapId, Int32 mask, Vector2? size = null, int? inMapId = null)
     {
-        GameObject prefab = DivMap[mapId][GetInMapId(mapId)];
+        GameObject prefab = DivMap[mapId][inMapId ?? GetInMapId(mapId)];
         if (prefab == null) return null!;
         if (size == null) size = prefab.transform.GetChild(0).GetComponent<SpriteRenderer>().sprite.bounds.size * 100f;
         var obj = GameObject.Instantiate(prefab);
@@ -237,7 +266,7 @@ public static class NebulaAsset
             {
                 var c = obj.transform.GetChild(i);
                 bool enable = (mask & 1) == 1;
-                c.GetComponent<Renderer>().material.SetFloat("_Coeff", enable ? 1f : 0.4f);
+                if(c.TryGetComponent<Renderer>(out var renderer)) renderer.material.SetFloat("_Coeff", enable ? 1f : 0.4f);
                 c.transform.localPosition += new Vector3(0, 0, 1);
                 mask >>= 1;
             }
@@ -292,6 +321,7 @@ public static class NebulaAsset
     static public Shader LineEdgeShader { get; private set; } = null!;
     static public Shader RoleIconShader { get; private set; } = null!;
     static public Shader TransColorGameShader { get; private set; } = null!;
+    static public Shader ButtonShader { get; private set; } = null!;
 
     static public readonly Image WhiteImage = SpriteLoader.FromResource("Nebula.Resources.White.png", 100f);
     static public ResourceExpandableSpriteLoader SharpWindowBackgroundSprite = new("Nebula.Resources.StatisticsBackground.png", 100f,5,5);
@@ -299,6 +329,7 @@ public static class NebulaAsset
     static public GameObject PaparazzoShot { get; private set; } = null!;
     static public GameObject FriesMinigame { get; private set; } = null!;
     static public GameObject SlingshotInMinigame { get; private set; } = null!;
+    static public GameObject HavocWave { get; private set; } = null!;
 
 
     static public SpriteRenderer CreateSharpBackground(VVector2 size, Virial.Color color, Transform transform)

@@ -24,7 +24,7 @@ internal partial class NebulaGameEventListeners
         {
             GameOperatorManager.Instance?.Subscribe<GameUpdateEvent>(ev =>
             {
-                PlayerControl.LocalPlayer.MaxReportDistance = LightPatch.LastCalculatedRange + 0.75f;
+                PlayerControl.LocalPlayer.MaxReportDistance = Mathn.Min(4.5f, LightPatch.LastCalculatedRange + 0.75f);
             }, NebulaAPI.CurrentGame!);
         }
     }

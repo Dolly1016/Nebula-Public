@@ -34,9 +34,10 @@ public class NebulaGameEnd
     static public readonly GameEnd SpectreWin = new(33, "spectre", Roles.Neutral.Spectre.MyRole.Color, 62);
     static public readonly GameEnd TrilemmaWin = new(34, "trilemma", Roles.Modifier.Trilemma.MyRole.Color, 61);
     static public readonly GameEnd GamblerWin = new(35, "gambler", Roles.Neutral.Gambler.MyRole.Color, 29);
-    static public readonly GameEnd TyrantWin = new(36, "tyrant", Roles.Neutral.Tyrant.MyRole.Color, 32);
+    static public readonly GameEnd TyrantWin = new(36, "tyrant", Roles.Neutral.Tyrant.MyRole.Color, 20);
     static public readonly GameEnd VanityWin = new(37, "vanity", Roles.Neutral.Vanity.MyRole.Color, 18);
-    static public readonly GameEnd PlagueWin = new(38, "plague", Roles.Neutral.Plague.MyRole.Color, 32);
+    static public readonly GameEnd PlagueWin = new(38, "plague", Roles.Neutral.Plague.MyRole.Color, 31);
+    static public readonly GameEnd HavocWin = new(39, "havoc", Roles.Neutral.Havoc.MyRole.Color, 18);
     static public readonly GameEnd GameEnd = new(62, "gameEnd", VColor.CrewmateColor, 128) { AlternativeClip = () => NebulaAsset.GetAudioClip(NebulaAudioClip.AeroGuesserGameEnd)};
     static public readonly GameEnd NoGame = new(63, "nogame", InvalidColor, 128) { AllowWin = false };
 
@@ -85,6 +86,7 @@ public class NebulaGameEnd
         RegisterWinCondTip(VanityWin, () => (Roles.Neutral.Vanity.MyRole as ISpawnable).CanSpawnInCurrentGame && Roles.Neutral.Vanity.IndependentTeamOption, "vanity.extra.crewOnly", text => { if (!Roles.Neutral.Vanity.CanExtraWinEvenIfVanityDied) text += "<br>" + Language.Translate("document.tip.winCond.vanity.extra.surviveCond"); return text; });
         RegisterWinCondTip(VanityWin, () => (Roles.Neutral.Vanity.MyRole as ISpawnable).CanSpawnInCurrentGame && !Roles.Neutral.Vanity.IndependentTeamOption, "vanity.extra", text => { if (!Roles.Neutral.Vanity.CanExtraWinEvenIfVanityDied) text += "<br>" + Language.Translate("document.tip.winCond.vanity.extra.surviveCond"); return text; });
         RegisterWinCondTip(PlagueWin, () => (Roles.Neutral.Plague.MyRole as ISpawnable).CanSpawnInCurrentGame, "plague");
+        RegisterWinCondTip(PlagueWin, () => (Roles.Neutral.Havoc.MyRole as ISpawnable).CanSpawnInCurrentGame, "havoc");
     }
 
     private static void RegisterWinCondTip(GameEnd gameEnd, Func<bool> predicate, string name, Func<string,string>? decorator = null)
@@ -113,7 +115,13 @@ public class NebulaGameEnd
                }).ToArray();
 
                NebulaGameManager.Instance.EndState ??= new EndState(stages);
-               NebulaGameManager.Instance.OnGameEnd();
+               try
+               {
+                   NebulaGameManager.Instance.OnGameEnd();
+               }catch(Exception ex)
+               {
+                   LogUtils.WriteToConsole(ex.ToString());
+               }
                GameOperatorManager.Instance?.Run(new GameEndEvent(NebulaGameManager.Instance, NebulaGameManager.Instance.EndState));
                NebulaGameManager.Instance.ToGameEnd();
            }
@@ -122,7 +130,9 @@ public class NebulaGameEnd
 
     public static bool RpcSendGameEnd(IEnumerable<(byte winConditionId, int winnersMask, ulong extraWinMask, GameEndReason endReason, GameEndDetail detail)> endInfo)
     {
+        LogUtils.WriteToConsole("RpcSendGameEnd 1");
         if (NebulaGameManager.Instance?.EndState != null) return false;
+        LogUtils.WriteToConsole("RpcSendGameEnd 2");
         RpcEndGame.Invoke(endInfo.ToArray());
         return true;
     }

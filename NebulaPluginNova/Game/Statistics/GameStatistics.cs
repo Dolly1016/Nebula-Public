@@ -384,6 +384,7 @@ public class GameStatisticsViewer : MonoBehaviour
         var scaledMinimap = UnityHelper.CreateObject("Scaled", minimap.transform, new Vector3(0, 0, 0));
         scaledMinimap.transform.localScale = new Vector3(0.45f, 0.45f, 1);
         var minimapRenderer = Instantiate(mapObjPrefab, scaledMinimap.transform);
+        minimapRenderer.GetComponent<SpriteRenderer>().sprite = NebulaAsset.GetMapSprite(archivedGame.MapId, 0xFFFFFFF, inMapId: archivedGame.InMapId);
         minimapRenderer.gameObject.name = "MapGraphic";
         minimapRenderer.transform.localScale = new Vector3(1f, 1f, 1f);
         minimapRenderer.transform.localPosition = Vector3.zero;

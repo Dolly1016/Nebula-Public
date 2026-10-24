@@ -82,20 +82,20 @@ public class NebulaPreSpawnLocation
             new("ViewingDeck", new Vector2(-13.9798f, -15.8316f), "panel_beverageLand")
         ],
         [
-            new("Campfire", new Vector2(-9.79f, 3.0949f), "task_roast_burnt"), 
-            new("Comms", new Vector2(24.0248f, 13.625f), "panel_enterIDBad"),
-            new("Laboratory", new Vector2(-5.2573f, -9.1099f), "task_samples_pickupmush"), 
-            new("Greenhouse", new Vector2(9.3125f, -11.8004f), "panel_storageWaterplant"),
-            new("MeetingRoom", new Vector2(-1.2941f, -1.5503f), "panel_safespin"), 
-            new("Cafeteria", new Vector2(-16.2874f, 7.1993f), "FootstepSand01"),
-            new("Dropship", new Vector2(-9.4613f, 13.3676f), "rollover_brig"),
-            new("SplashZone", new Vector2(-16.9936f, -0.2838f), "task_sandcastle_grab"),
-            new("Kitchen", new Vector2(-17.0477f, -7.7723f), "task_fish_onhook"),
-            new("Storage", new Vector2(1.2842f, 4.2345f), "rollover_storage"),
-            new("UpperEngine", new Vector2(21.9515f, 2.8107f), "rollover_engine"),
-            new("MiningPit", new Vector2(11.9868f, 9.4421f), "task_mine_rockrelease2"),
-            new("Lookout", new Vector2(7.1789f, 1.5662f), "utility_security_close"),
-            new("Reactor", new Vector2(21.9125f, -7.0967f), "panel_reactorhand"),
+            new("Campfire", new Vector2(-9.79f, 3.0949f), "task_roast_burnt", 0x3F), 
+            new("Comms", new Vector2(24.0248f, 13.625f), "panel_enterIDBad", 0xCF),
+            new("Laboratory", new Vector2(-5.2573f, -9.1099f), "task_samples_pickupmush", 0xFF), 
+            new("Greenhouse", new Vector2(9.3125f, -11.8004f), "panel_storageWaterplant", 0xCF),
+            new("MeetingRoom", new Vector2(-1.2941f, -1.5503f), "panel_safespin", 0xFF), 
+            new("Cafeteria", new Vector2(-16.2874f, 7.1993f), "FootstepSand01", 0x0F),
+            new("Dropship", new Vector2(-9.4613f, 13.3676f), "rollover_brig", 0x3F),
+            new("SplashZone", new Vector2(-16.9936f, -0.2838f), "task_sandcastle_grab", 0x0F),
+            new("Kitchen", new Vector2(-17.0477f, -7.7723f), "task_fish_onhook", 0x0F),
+            new("Storage", new Vector2(1.2842f, 4.2345f), "rollover_storage", 0x3F),
+            new("UpperEngine", new Vector2(21.9515f, 2.8107f), "rollover_engine", 0xCF),
+            new("MiningPit", new Vector2(11.9868f, 9.4421f), "task_mine_rockrelease2", 0xCF),
+            new("Lookout", new Vector2(7.1789f, 1.5662f), "utility_security_close", 0xCF),
+            new("Reactor", new Vector2(21.9125f, -7.0967f), "panel_reactorhand", 0xCF),
             new("Jungle", new Vector2[]{
                 new Vector2(-0.3278f, -10.797f),//グリーンハウス・ラボ間
                 new Vector2(18.44f, -12.3383f),//リアクター左下
@@ -103,7 +103,7 @@ public class NebulaPreSpawnLocation
                 new Vector2(3.8322f, -6.0519f),//グリーンハウス左上
                 new Vector2(-4.2053f, -14.8184f),//ラボ下
                 new Vector2(15.2272f, -6.1833f)//リアクター左
-                }, "sporemushroom_respawn")
+                }, "sporemushroom_respawn", 0xCF)
         ],
         []
         ];
@@ -132,18 +132,21 @@ public class NebulaPreSpawnLocation
     public string AssetImagePath(byte mapId) => "assets/SpawnCandidates/" + MapName[mapId] + "/" + LocationName + ".png";
     public IDividedSpriteLoader GetSprite(byte mapId) => new DividedSpriteLoader(new AssetTextureLoader(AssetImagePath(mapId)), 115f, ImageSize, ImageSize, true) { Pivot = new(0.5f, 0f) };
     private int ImageSize { get; set; } = 200;
+    public int InMapIdMask { get; private init; }
     public IOrderedSharableVariable<bool> Configuration { get; set; }
-    public NebulaPreSpawnLocation(string locationName,Vector2 pos,string? audioClip = null) { 
+    public NebulaPreSpawnLocation(string locationName,Vector2 pos,string? audioClip = null, int inMapIdMask = 0xFFFF) { 
         this.LocationName = locationName;
         this.Positions = new Vector2[] { pos };
         this.AudioClip = audioClip;
+        this.InMapIdMask = inMapIdMask;
     }
 
-    public NebulaPreSpawnLocation(string locationName, Vector2[] pos, string? audioClip = null)
+    public NebulaPreSpawnLocation(string locationName, Vector2[] pos, string? audioClip = null, int inMapIdMask = 0xFFFF)
     {
         this.LocationName = locationName;
         this.Positions = pos;
         this.AudioClip = audioClip;
+        this.InMapIdMask = inMapIdMask;
     }
 
     public NebulaPreSpawnLocation(string locationName, int vanillaIndex,int imageSize,Vector2 tempPosition)
@@ -152,6 +155,7 @@ public class NebulaPreSpawnLocation
         this.VanillaIndex= vanillaIndex;
         this.ImageSize = imageSize;
         this.Positions = new Vector2[] { tempPosition };
+        this.InMapIdMask = 0xFF;
     }
 }
 
@@ -172,16 +176,16 @@ public class NebulaPreSpawnMinigame : Minigame
         {
             byte mapId = NebulaAPI.AmongUs.MapId;
             var cand = NebulaPreSpawnLocation.Locations[mapId];
-
+            var inMapMaskTester = 1 << NebulaAsset.GetInMapId(mapId);
             //スポーンポイントを抽出する
             if (GeneralConfigurations.SpawnMethodOption.GetValue() == 0)
             {
-                //Default
+                //Default (現状Airshipのみ)
                 cand = cand.Where(l => l.VanillaIndex.HasValue).ToArray();
             }
             else
             {
-                cand = cand.Where(l => l.Configuration.Value).ToArray();
+                cand = cand.Where(l => l.Configuration.Value && (l.InMapIdMask & inMapMaskTester) != 0).ToArray();
             }
 
             if(cand.Length == 0) cand = NebulaPreSpawnLocation.Locations[mapId].Where(l => l.VanillaIndex.HasValue).ToArray();

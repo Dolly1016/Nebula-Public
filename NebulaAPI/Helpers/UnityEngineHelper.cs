@@ -33,24 +33,24 @@ internal static class UnityEngineHelper
     static private Virial.Logging.ILogger logger { get { field ??= NebulaAPI.Logging.CombinedLogger(NebulaAPI.Logging.NebulaLogger("UnityHelper"), NebulaAPI.Logging.BepInExLogger()); return field; } }
     static internal bool TryFindChild(this UnityEngine.Transform transform, out UnityEngine.Transform found, params ChildInfo[] route)
     {
+        if (!transform.AsBoolFast())
+        {
+            found = null!;
+            logger.Error("Tried to search child for invalid transform.");
+            return false;
+        }
         var firstTransform = transform;
         found = null!;
         int num = 0;
         foreach(var info in route)
         {
+            transform = info.TryGetChild(transform);
             if (!transform.AsBoolFast())
             {
-                if (firstTransform.AsBoolFast())
-                {
-                    logger.Error($"No child is found. (route: [{string.Join(", ", route)}], failed at: {num}, {info})");
-                }
-                else
-                {
-                    logger.Error("Tried to search child for invalid transform.");
-                }
+                logger.Error($"No child is found. (route: [{string.Join(", ", route)}], failed at: {num}, {info})");
                 return false;
             }
-            transform = info.TryGetChild(transform);
+
             num++;
         }
         found = transform;

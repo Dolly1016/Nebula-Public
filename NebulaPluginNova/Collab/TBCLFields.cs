@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Nebula.Modules.Cosmetics;
+using Nebula.Roles.Impostor;
 using Nebula.VoiceChat;
 using Virial.Events.VoiceChat;
 
@@ -30,9 +31,24 @@ internal unsafe static class TBCLFields
         public float BodyRateX;
         public float BodyRateY;
 
+        //Among UsのPlayerBodyTypesの値
+        public int BodyType;
+        //ろくろ首の長さ。伸ばしていない間は0。
+        public float NeckLength;
+
         public byte NameLength;
         public fixed char Name[32];
         public float ColorR, ColorG, ColorB;
+
+        public CostumeData Skin;
+        public CostumeData Hat;
+        public CostumeData Visor;
+    }
+
+    internal struct CostumeData
+    {
+        public byte NameLength;
+        public fixed char Name[128];
     }
 
     internal struct RadioData
@@ -58,11 +74,12 @@ internal unsafe static class TBCLFields
         public RadioData* Radios;
     }
 
-    const int Version = 20260928;
+    const int Version = 20261009;
     const int SnapshotCapacity = 64;
     const int PlayersCapacity = 24;
     const int RadiosCapacity = 8;
     const int NameCapacity = 32;
+    const int CostumeNameCapacity = 128;
 
     static private Snapshot* snapshots = null;
     static private int nextIndex = 0;
@@ -103,19 +120,41 @@ internal unsafe static class TBCLFields
 
     static private void SetName(ref PlayerData data, string name)
     {
-        fixed (char* buffer = data.Name) data.NameLength = SetName(buffer, name);
+        fixed (char* buffer = data.Name) data.NameLength = SetText(buffer, NameCapacity, name);
     }
 
     static private void SetName(ref RadioData data, string name)
     {
-        fixed (char* buffer = data.Name) data.NameLength = SetName(buffer, name);
+        fixed (char* buffer = data.Name) data.NameLength = SetText(buffer, NameCapacity, name);
     }
 
-    static private byte SetName(char* buffer, string name)
+    static private void SetName(ref CostumeData data, string? name)
     {
-        int length = Math.Min(name.Length, NameCapacity);
-        for (int i = 0; i < length; i++) buffer[i] = name[i];
+        fixed (char* buffer = data.Name) data.NameLength = SetText(buffer, CostumeNameCapacity, name);
+    }
+
+    //容量は255以下であること。書き込んだ文字数を返す。
+    static private byte SetText(char* buffer, int capacity, string? text)
+    {
+        if (text == null) return 0;
+
+        int length = Math.Min(text.Length, capacity);
+        for (int i = 0; i < length; i++) buffer[i] = text[i];
         return (byte)length;
+    }
+
+    static private int GetBodyType(GamePlayer player)
+    {
+        var cosmetics = player.VanillaCosmetics;
+        if (!cosmetics.AsBoolFast() || cosmetics.currentBodySprite == null) return (int)PlayerBodyTypes.Normal;
+        return (int)cosmetics.CurrentBodyType;
+    }
+
+    static private void SetCostumes(ref PlayerData data, NetworkedPlayerInfo.PlayerOutfit outfit)
+    {
+        SetName(ref data.Skin, outfit.SkinId);
+        SetName(ref data.Hat, outfit.HatId);
+        SetName(ref data.Visor, outfit.VisorId);
     }
 
     static private int UpdateRadios(RadioData* radios)
@@ -183,9 +222,13 @@ internal unsafe static class TBCLFields
             data.BodyRateX = bodyRate.x;
             data.BodyRateY = bodyRate.y;
 
+            data.BodyType = GetBodyType(player);
+            data.NeckLength = player.TryGetAbility<Rokurokubi.Ability>(out var rokurokubi) ? rokurokubi.NeckLength : 0f;
+
             var outfit = (AmongUsUtil.InMeeting ? player.DefaultOutfit : player.CurrentOutfit).outfit;
 
             SetName(ref data, outfit.PlayerName ?? "");
+            SetCostumes(ref data, outfit);
 
             int colorId = outfit.ColorId;
             if (colorId < 0 || colorId >= DynamicPalette.ColorsLength) colorId = 0;

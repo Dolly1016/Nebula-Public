@@ -52,6 +52,7 @@ internal static class GameRecordView
             EndedAt = record.EndedAtUtc,
             Marked = stored.Marked,
             MapId = record.MapId,
+            InMapId = record.InMapId,
             MapName = MapName(record.MapId),
             Players = record.PlayerResults.Select(PlayerOf).ToArray(),
             Movement = record.Movement,
@@ -301,6 +302,10 @@ internal sealed class GameDetailView
     public DateTime? EndedAt { get; set; }
     public bool Marked { get; set; }
     public byte MapId { get; set; }
+
+    /// <summary>マップ内のどのバリエーションで遊んだか。</summary>
+    public int InMapId { get; set; }
+
     public string MapName { get; set; } = "";
     public PlayerView[] Players { get; set; } = [];
     public GameEndView? End { get; set; }

@@ -61,15 +61,32 @@ public static class GameStartClientPatch
     }
 }
 
+[NebulaRPCHolder]
+file static class RoleRpcs
+{
+    readonly internal static RemoteProcess RpcRemoveDisconnected = new("RemoveDisconnectedPlayers", m =>
+    {
+        GameData.Instance.RemoveDisconnectedPlayers();
+    }, false);
+}
+
 [HarmonyPatch(typeof(RoleManager), nameof(RoleManager.SelectRoles))]
 public static class InitializeRolePatch
 {
     //AlternativeRoutineを使用しない場合ここに到達する。
     static bool Prefix(RoleManager __instance)
     {
+        if (!GameData.Instance.AsBoolFast(out var gameData)) return false; // 例外パターン
+
+        bool anyoneDisconnected = gameData.AllPlayers.GetFastEnumerator().Any(p => p.AsBoolFast(out var data) && data.Disconnected);
+
+        if (anyoneDisconnected) RoleRpcs.RpcRemoveDisconnected.Invoke();
+        
+
         //ロール割り当て
         var players = PlayerControl.AllPlayerControls.GetFastEnumerator().OrderBy(p => Guid.NewGuid()).ToList();
-        
+        //var players = PlayerControl.AllPlayerControls.GetFastEnumerator().OrderBy(p => p.AmOwner ? 0 : (p.PlayerId + 1)).ToList();
+
         int adjustedNumImpostors = GameOptionsManager.Instance.CurrentGameOptions.GetAdjustedNumImpostorsModded(PlayerControl.AllPlayerControls.Count);
 
         List<byte> impostors = new();
