@@ -10,7 +10,7 @@
 
 # Options
 
-"options.role.tyrant.detail" : "タイラントは指定数キルすると勝利します。<br>キルを重ねられる前に追放しましょう！"
+"options.role.tyrant.detail" : "タイラントは指定数キルすると勝利します。<br>キルを重ねられる前に追放しましょう！<br>タイラントはキラーとしてカウントされません。"
 "options.role.tyrant.killCooldown" : "キルクールダウン"
 "options.role.tyrant.numOfKillingToWin" : "勝利に必要なキル数"
 "options.role.tyrant.useImpostorAbility" : "インポスター能力の使用"

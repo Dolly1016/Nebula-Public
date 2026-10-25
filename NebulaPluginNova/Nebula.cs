@@ -63,11 +63,11 @@ public class NebulaPlugin
     public const string PluginVersion = "3.5.3.8";
 
     //public const string VisualVersion = "v3.5.3.8";
-    public const string VisualVersion = "Snapshot 26.10.24a";
+    public const string VisualVersion = "Snapshot 26.10.25d";
     //public const string VisualVersion = "Fungle Project 1";
 
     public const string PluginEpochStr = "110";
-    public const string PluginBuildNumStr = "1654";
+    public const string PluginBuildNumStr = "1659";
     public static readonly int PluginEpoch = int.Parse(PluginEpochStr);
     public static readonly int PluginBuildNum = int.Parse(PluginBuildNumStr);
     public const bool GuardVanillaLangData = false;

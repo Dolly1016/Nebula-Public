@@ -9,3 +9,8 @@ public class NonHostPlayerException : Exception
 {
     public NonHostPlayerException(string? message, Exception? innerException = null) : base(message ?? "Non-host client cannot do such operation.", innerException) { }
 }
+
+public class NebulaInitializationException : Exception
+{
+    public NebulaInitializationException(string message, Exception? innerException = null) : base(message, innerException) { }
+}

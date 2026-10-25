@@ -68,7 +68,7 @@ public class ExtraMission : DefinedAllocatableModifierTemplate, DefinedAllocatab
         [Local]
         void OnPlayerExiled(PlayerExiledEvent ev)
         {
-            if (MyPlayer.IsCrewmate && ev.Player.IsCrewmate && ev.Player == target && MeetingHudExtension.LastVotedForMap.TryGetValue(MyPlayer.PlayerId, out var votedFor) && votedFor == ev.Player.PlayerId)
+            if (MyPlayer.IsCrewmate && ev.Player.IsCrewmate && ev.Player == target && MeetingHudExtension.TryGetLastSwappedVotedFor(MyPlayer.PlayerId, out var votedFor) && votedFor == ev.Player.PlayerId)
             {
                 new StaticAchievementToken("extraMission.common3");
             }

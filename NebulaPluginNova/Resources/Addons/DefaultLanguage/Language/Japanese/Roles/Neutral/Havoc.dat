@@ -7,7 +7,7 @@
 # Document
 
 "role.havoc.doc" : "死体を貪り、能力を強化していく第三陣営です。"
-"role.havoc.winCond" : "会議で追放される。"
+"role.havoc.winCond" : "他のキラーを殲滅したうえで最後の2人まで生き残る。"
 "role.havoc.ability.title" : "固有能力 "破滅の呼び声""
 "role.havoc.ability.main" : "死体を貪り、自身の能力を強化します。遠吠えによって貪食やキルのための時間を稼げます。"
 "role.havoc.ability.devour" : "<title>貪食</title>死体を食い荒らします。1回貪るごとにキルクールダウンが<var>%REDUC%</var>秒短縮します。<br><var>%VENT%</var>回貪るとベントを使用できるようになります。"

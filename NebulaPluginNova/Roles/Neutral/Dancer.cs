@@ -467,7 +467,7 @@ public class Dancer : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             {
                 if (ev is PlayerMurderedEvent pme && pme.Player.PlayerState == PlayerState.Guessed && danceLooked.Contains(pme.Murderer))
                     new StaticAchievementToken("dancer.another1");
-                if (ev is PlayerExiledEvent pee && danceLooked.Any(p => MeetingHudExtension.LastVotedForMap.TryGetValue(p.PlayerId, out var voteFor) && voteFor == MyPlayer.PlayerId))
+                if (ev is PlayerExiledEvent pee && danceLooked.Any(p => MeetingHudExtension.TryGetLastSwappedVotedFor(p.PlayerId, out var voteFor) && voteFor == MyPlayer.PlayerId))
                     new StaticAchievementToken("dancer.another1");
             }
 

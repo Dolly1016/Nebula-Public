@@ -513,11 +513,11 @@ public static class NavVerticesHelpers
         }
     }
 
-    static public NavPath? CalcPath(Vector2 from, Vector2 to)
+    static public NavPath? CalcPath(Vector2 from, Vector2 to, float radius = 0.15f)
     {
-        if (Helpers.AnyCustomNonTriggersBetweenThick(from, to, 0.15f, null, null, true))
+        if (Helpers.AnyCustomNonTriggersBetweenThick(from, to, radius, null, null, true))
         {
-            MapData.GetCurrentMapData().MapNavData.GetPathfindingNode(from, to, 0.15f, 8f, 3.2f, out var positions, out var nextNodes, out var conds);
+            MapData.GetCurrentMapData().MapNavData.GetPathfindingNode(from, to, radius, 8f, 3.2f, out var positions, out var nextNodes, out var conds);
             var indexPath = Pathfinding.FindPath(positions, nextNodes, positions.Length - 2, positions.Length - 1);
             if (indexPath.Length == 0) return null;
 

@@ -319,7 +319,7 @@ internal class Oracle : DefinedSingleAbilityRoleTemplate<Oracle.Ability>, Define
         [Local]
         void OnMeetingEnd(MeetingEndEvent ev)
         {
-            if (MeetingHudExtension.LastVotedForMap.TryGetValue(MyPlayer.PlayerId, out var voteTo) && ev.Exiled.Find(p => p.PlayerId == voteTo, out var exiled) && divideResults.ContainsKey((byte)voteTo))
+            if (MeetingHudExtension.TryGetLastSwappedVotedFor(MyPlayer.PlayerId, out var voteTo) && ev.Exiled.Find(p => p.PlayerId == voteTo, out var exiled) && divideResults.ContainsKey((byte)voteTo))
             {
                 //占ったプレイヤーを追放したとき
                 if(exiled.IsTrueCrewmate) new StaticAchievementToken("oracle.another1");

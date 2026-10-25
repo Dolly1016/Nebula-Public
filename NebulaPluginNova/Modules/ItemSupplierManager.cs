@@ -64,8 +64,10 @@ internal class ItemSupplierManager : AbstractModule<Virial.Game.Game>, IGameOper
         foreach(var supplier in allSuppliers) supplier.TryGrow();
     }
 
-    public bool WarpedPlantsAreSpawnable => GeneralConfigurations.NumOfWarpedPlantsOption > 0 && Roles.Roles.AllPerks.Any(p => p.PerkCategory == PerkFunctionalDefinition.Category.NoncrewmateOnly && p.SpawnRate.Value > 0);
-    public bool PlantsAreSpawnable => GeneralConfigurations.NumOfPlantsOption > 0 && Roles.Roles.AllPerks.Any(p => p.PerkCategory == PerkFunctionalDefinition.Category.Standard && p.SpawnRate.Value > 0);
+    //ゲームモードがパークを許可しない場合は、植物もパーク枠も出さない
+    static private bool PerksAreAllowed => NebulaAPI.CurrentGame?.GameMode?.AllowPerks ?? true;
+    public bool WarpedPlantsAreSpawnable => PerksAreAllowed && GeneralConfigurations.NumOfWarpedPlantsOption > 0 && Roles.Roles.AllPerks.Any(p => p.PerkCategory == PerkFunctionalDefinition.Category.NoncrewmateOnly && p.SpawnRate.Value > 0);
+    public bool PlantsAreSpawnable => PerksAreAllowed && GeneralConfigurations.NumOfPlantsOption > 0 && Roles.Roles.AllPerks.Any(p => p.PerkCategory == PerkFunctionalDefinition.Category.Standard && p.SpawnRate.Value > 0);
     void OnRoleChanged(PlayerUpdateCrewRecognitionEvent ev)
     {
         if (!ev.Player.AmOwner) return;

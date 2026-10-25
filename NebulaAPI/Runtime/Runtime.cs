@@ -102,6 +102,27 @@ public interface NebulaPreprocessor
     UseButtonAlternative RegisterUseButtonAlternative(Virial.Media.Image buttonImage, Action onUsed);
 
     /// <summary>
+    /// ゲームモードを登録します。
+    /// </summary>
+    /// <param name="translationKey">ゲームモードの翻訳キー。</param>
+    /// <param name="minPlayers">最小プレイヤー数。</param>
+    /// <param name="gameModeType">ゲームモード。</param>
+    /// <param name="roleAllocator">役職割り当て。</param>
+    /// <returns></returns>
+    GameModeDefinition RegisterGameMode(string translationKey, int minPlayers, Type gameModeType, Func<IRoleAllocator> roleAllocator);
+
+    /// <summary>
+    /// ゲームモードを登録します。
+    /// </summary>
+    /// <param name="translationKey">ゲームモードの翻訳キー。</param>
+    /// <param name="minPlayers">最小プレイヤー数。</param>
+    /// <param name="gameModeType">ゲームモード。</param>
+    /// <param name="alternativeRoutine">代替のゲーム開始ルーチン。</param>
+    /// <param name="withRoleSettings">役職設定を表示する場合、true。</param>
+    /// <returns></returns>
+    GameModeDefinition RegisterGameMode(string translationKey, int minPlayers, Type gameModeType, Func<bool, IEnumerator> alternativeRoutine, bool withRoleSettings);
+
+    /// <summary>
     /// 称号を登録するAPI群を返します。
     /// </summary>
     ITitlesRegister Titles { get; }

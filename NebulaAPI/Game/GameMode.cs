@@ -36,6 +36,11 @@ public interface IGameModeModule : IModuleContainer, IModule
     bool CanGetTitle => true;
     bool CanOpenHelpScreen => true;
 
+    /// <summary>
+    /// パーク(植物とパーク枠)を出現させる場合、trueを返します。
+    /// </summary>
+    bool AllowPerks => true;
+
     string? GetAlternativeWinOrLoseText() => null;
     string? GetAlternativePlayerStatusText() => null;
 }

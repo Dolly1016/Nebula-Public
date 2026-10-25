@@ -32,7 +32,7 @@ internal class Havoc : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
 
-    static private IRelativeCooldownConfiguration KillCooldownOption = NebulaAPI.Configurations.KillConfiguration("options.role.havoc.killCooldown", CoolDownType.Immediate, (5f, 60f, 5f), 30f, (-40f, 20f, 5f), -5f, (0.125f, 2f, 0.125f), 0.875f);
+    static private IRelativeCooldownConfiguration KillCooldownOption = NebulaAPI.Configurations.KillConfiguration("options.role.havoc.killCooldown", CoolDownType.Immediate, (5f, 60f, 5f), 40f, (-40f, 20f, 5f), +10f, (0.125f, 2f, 0.125f), 1.25f);
     static private FloatConfiguration KillCooldownReductionOption = NebulaAPI.Configurations.Configuration("options.role.havoc.killCooldownReduction", (2.5f, 20f, 2.5f), 5f, FloatConfigurationDecorator.Second);
     static private IRelativeCooldownConfiguration DevourCooldownOption = NebulaAPI.Configurations.KillConfiguration("options.role.havoc.devourCooldown", CoolDownType.Immediate, (5f, 60f, 5f), 20f, (-40f, 20f, 5f), -10f, (0.125f, 2f, 0.125f), 0.75f);
     static private FloatConfiguration HavocCooldownOption = NebulaAPI.Configurations.Configuration("options.role.havoc.havocCooldown", (5f, 60f, 5f), 20f, FloatConfigurationDecorator.Second);
@@ -336,6 +336,6 @@ file class HavocCriteria : AbstractModule<IGameModeStandard>, IGameOperator
             totalAlive++;
         }
 
-        if(allAliveHavocs == 1 && totalAlive <= 2) NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.HavocWin, GameEndReason.Situation);
+        if(allAliveHavocs == 1 && totalAlive <= 2) NebulaAPI.CurrentGame?.TriggerGameEnd(NebulaGameEnd.HavocWin, GameEndReason.Situation, BitMasks.AsPlayer(lastFoundHavoc!.MyPlayer));
     }
 };

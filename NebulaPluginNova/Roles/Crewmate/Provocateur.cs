@@ -13,9 +13,9 @@ public static class ExtraExileRoleSystem
 {
     public static void MarkExtraVictim(GamePlayer player, bool includeImpostors = true, bool expandTargetWhenNobodyCanBeMarked = false, GamePlayer[]? cand = null)
     {
-        var voters = (cand ?? MeetingHudExtension.LastVotedForMap
-                .Where(entry => entry.Value == player.PlayerId && entry.Key != player.PlayerId)
-                .Select(entry => NebulaGameManager.Instance!.GetPlayer(entry.Key)))
+        var voters = (cand ?? MeetingHudExtension.GetLastSwappedVotedFor()
+                .Where(entry => entry.voteTo == player.PlayerId && entry.voter != player.PlayerId)
+                .Select(entry => NebulaGameManager.Instance!.GetPlayer(entry.voter)))
                 .Where(p => !p!.IsDead && (includeImpostors || p.Role.Role.Category != RoleCategory.ImpostorRole))
                 .ToArray();
         

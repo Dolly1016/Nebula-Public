@@ -174,14 +174,27 @@ public static class MeetingHudExtension
         if (AmongUsLLImpl.AmongUsClientInstance.AmHost) meetingHud.CheckForEndVoting();
     }
 
-    public static Dictionary<byte, int> WeightMap= new();
-    public static Dictionary<byte, int> LastVotedForMap = new();
+    public static Dictionary<byte, int> WeightMap= [];
+    public static Dictionary<byte, int> LastVotedForMap = [];
+    public static Dictionary<int, int> LastSwapMap = [];
+    public static IEnumerable<(byte voter, int voteTo)> GetLastSwappedVotedFor() => LastVotedForMap.Select(entry => LastSwapMap.TryGetValue(entry.Key, out var val) ? (entry.Key, val) : (entry.Key, entry.Value));
+    public static bool TryGetLastVotedFor(byte voter, out int voteTo) => LastVotedForMap.TryGetValue(voter, out voteTo);
+    public static bool TryGetLastSwappedVotedFor(byte voter, out int voteTo)
+    {
+        if(LastVotedForMap.TryGetValue(voter, out voteTo))
+        {
+            if (LastSwapMap.TryGetValue(voteTo, out var swappedVoteTo)) voteTo = swappedVoteTo;
+            return true;
+        }
+        return false;
+    }
     public static List<GameObject> LeftContents = new();
     public static List<(byte exiledId, byte sourceId, CommunicableTextTag playerState, CommunicableTextTag eventTag)> ExtraVictims = new();
 
     public static void Reset()
     {
         LastVotedForMap.Clear();
+        LastSwapMap.Clear();
         WeightMap.Clear();
         ExtraVictims.Clear();
     }

@@ -28,6 +28,7 @@ internal class NebulaPreprocessorImpl : NebulaPreprocessor
 {
     static public bool Finished => Instance.FinishPreprocess;
     private PreprocessPhase currentPhase = PreprocessPhase.BuildNoSModuleContainer;
+    public PreprocessPhase CurrentPhase => currentPhase;
     static internal NebulaPreprocessor Instance { get; private set; } = new NebulaPreprocessorImpl();
 
     DIManager NebulaPreprocessor.DIManager => DIManager.Instance;
@@ -122,6 +123,16 @@ internal class NebulaPreprocessorImpl : NebulaPreprocessor
     ExtraWin NebulaPreprocessor.CreateExtraWin(string localizedName, Virial.Color color) => new(localizedName, color);
     ExtraWin NebulaPreprocessor.CreateExtraWin(string immutableId, TextComponent displayText, Virial.Color color) => new(immutableId, displayText, color);
     UseButtonAlternative NebulaPreprocessor.RegisterUseButtonAlternative(Virial.Media.Image buttonImage, Action onUsed) => new(buttonImage, () => true, _ => onUsed.Invoke(), false);
+    GameModeDefinition NebulaPreprocessor.RegisterGameMode(string translationKey, int minPlayers, Type gameModeType, Func<IRoleAllocator> roleAllocator)
+    {
+        if (CurrentPhase >= PreprocessPhase.Roles) throw new NebulaInitializationException("GameMode should be registered before starting PreprocessPhase.Roles phase.");
+        return new GameModeDefinitionImpl(translationKey, minPlayers, gameModeType, roleAllocator);
+    }
+    GameModeDefinition NebulaPreprocessor.RegisterGameMode(string translationKey, int minPlayers, Type gameModeType, Func<bool, IEnumerator> alternativeRoutine, bool withRoleSettings)
+    {
+        if (CurrentPhase >= PreprocessPhase.Roles) throw new NebulaInitializationException("GameMode should be registered before starting PreprocessPhase.Roles phase.");
+        return new GameModeDefinitionImpl(translationKey, minPlayers, gameModeType, alternativeRoutine, withRoleSettings);
+    }
 
     private List<Func<IEnumerator>>[] preprocessList;
 

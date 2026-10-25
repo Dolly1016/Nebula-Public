@@ -231,6 +231,10 @@ public static class MeetingModRpc
         meetingHud.SkippedVoting.gameObject.SetActive(MeetingHudExtension.CanSkip);
         AmongUsLLImpl.AmongUsClientInstance.DisconnectHandlers.Remove(meetingHud.TryCast<IDisconnectHandler>());
         meetingHud.PopulateResults(firstStates.ToArray());
+        
+        MeetingHudExtension.LastSwapMap.Clear();
+        foreach (var entry in mapList) MeetingHudExtension.LastSwapMap[entry.playerFrom] = entry.playerTo;
+        
         AnimateSwapping(meetingHud, mapList);
         meetingHud.SetupProceedButton();
 

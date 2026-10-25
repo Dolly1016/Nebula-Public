@@ -48,6 +48,32 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
 
         [JsonSerializableField]
         public bool Hidden = false;
+
+        [JsonSerializableField(true)]
+        public string? AvailableFrom = null;
+        [JsonSerializableField(true)]
+        public string? AvailableUntil = null;
+    }
+
+    public class AddonOutOfPeriodException : Exception
+    {
+        public AddonOutOfPeriodException(string message) : base(message) { }
+    }
+
+    static private void CheckAvailablePeriod(AddonMeta meta, string id)
+    {
+        DateTimeOffset? Parse(string? text, string fieldName)
+        {
+            if (text == null) return null;
+            if (DateTimeOffset.TryParse(text, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AssumeLocal, out var result)) return result;
+            throw new Exception($"Invalid {fieldName} \"{text}\" in addon \"{id}\".");
+        }
+
+        var from = Parse(meta.AvailableFrom, nameof(AddonMeta.AvailableFrom));
+        var until = Parse(meta.AvailableUntil, nameof(AddonMeta.AvailableUntil));
+        var now = DateTimeOffset.Now;
+        if (from.HasValue && now < from.Value) throw new AddonOutOfPeriodException($"Addon \"{id}\" is not loaded because it is available from {from.Value:o}.");
+        if (until.HasValue && now >= until.Value) throw new AddonOutOfPeriodException($"Addon \"{id}\" is not loaded because it was available until {until.Value:o}.");
     }
 
     public class GitHubReleaseContent
@@ -223,6 +249,11 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
                 using var md5Stream = assembly.GetManifestResourceStream(file)!;
                 addon.HandshakeHash = System.BitConverter.ToString(md5.ComputeHash(md5Stream)).ComputeConstantHash();
             }
+            catch (AddonOutOfPeriodException e)
+            {
+                zip?.Dispose();
+                NebulaLogger.Instance.Message(e.Message);
+            }
             catch
             {
                 zip?.Dispose();
@@ -256,6 +287,12 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
                         var mMeta = JsonStructure.Deserialize<MarketplaceAddonMeta>(mmStream);
                         addon.HandshakeHash = mMeta?.Hash ?? 0;
                     }
+                }
+                catch (AddonOutOfPeriodException e)
+                {
+                    //期間外のアドオンは一覧に加えない
+                    zip.Dispose();
+                    NebulaLogger.Instance.Message(e.Message);
                 }
                 catch (Exception e)
                 {
@@ -310,6 +347,10 @@ public class NebulaAddon : VariableResourceAllocator, IDisposable, IResourceAllo
             if (meta == null) throw new Exception();
 
             Id = meta.Id ?? Path.GetFileNameWithoutExtension(path);
+            
+            //期間チェック
+            CheckAvailablePeriod(meta, Id);
+
             AddonName = meta.Name;
             Author = meta.Author;
             Build = Mathn.Max(0, meta.Build);

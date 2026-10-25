@@ -47,7 +47,7 @@ public abstract class AbstractModule<Container> : IGenericModule<Container>, IIn
     virtual protected void OnInjected(Container container) { }
 }
 
-internal abstract class AbstractModuleContainer : IModuleContainer
+public abstract class AbstractModuleContainer : IModuleContainer
 {
     private List<object> allModules = new();
     private Dictionary<Type, object> fastModulesMap = new();
