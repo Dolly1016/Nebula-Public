@@ -848,29 +848,20 @@ public class SyncTransformPatch
 class CustomNetworkTransformPatch
 {
     
-    public static void Prefix(CustomNetworkTransform __instance)
+    public static bool Prefix(CustomNetworkTransform __instance)
     {
         var amOwner = __instance.AmOwner;
         if (__instance.isPaused && amOwner && __instance.sendQueue.Count > 0) __instance.sendQueue.Clear();
         if(amOwner && __instance.sendQueue.Count == 0) __instance.lastPosSent = __instance.ModGameObject(false).Position.AsVector2();
 
+        //rpcによる位置同期を使っている場合はそちらに任せる
+        bool runVanilla = PlayerPositionSync.OnFixedUpdate(__instance);
+
         if (__instance.isPaused && __instance.incomingPosQueue.Count > 0) __instance.incomingPosQueue.Clear();
         if (__instance.incomingPosQueue.Count == 0) __instance.lastPosition = __instance.ModGameObject(false).Position.AsVector2();
-
-        //rubberbandModifierをいじる関数にフックできないのでここで変更(バニラの変更を考慮して大きめな値にしておく)
-        if (GeneralConfigurations.LowLatencyPlayerSyncOption && (AmongUsUtil.IsCustomServer() || AmongUsUtil.IsLocalServer()))
-        {
-            float num = __instance.incomingPosQueue.Count switch
-            {
-                < 2 => 1.3f, //0.5にしようとしてくるやつを抑制するので大きめに
-                3 => 1.8f, //0.5にしようとしてくるやつを抑制するので大きめに
-                4 or 5 => 2.5f, //0.5にしようとしてくるやつを抑制するので大きめに
-                _ => 1.8f
-            };
-            __instance.rubberbandModifier = Mathn.Lerp(__instance.rubberbandModifier, num, FastMethods.GetFixedDeltaTimeFast() * 3f);
-        }
+        return runVanilla;
     }
-    
+
 }
 
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.PlayStepSound))]

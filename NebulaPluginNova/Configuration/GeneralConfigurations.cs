@@ -342,9 +342,9 @@ public static class GeneralConfigurations
     static internal readonly IConfigurationHolder VoiceChatOptions = NebulaAPI.Configurations.Holder("options.voiceChat", [ConfigurationTab.Settings], [GameModes.FreePlay, GameModes.Standard], () => !AmongUsUtil.IsLocalServer()).AppendConfigurations([
         UseVoiceChatOption, CanTalkInWanderingPhaseOption, KillersHearDeadOption, AffectedByCommsSabOption, IsolateGhostsStrictlyOption, DistanceDecayInGhostOption]);
 
-    static public readonly BoolConfiguration LowLatencyPlayerSyncOption = NebulaAPI.Configurations.Configuration("options.quality.lowLatencyPlayerSync", true);
+    static public readonly BoolConfiguration RpcPlayerSyncOption = NebulaAPI.Configurations.Configuration("options.quality.rpcPlayerSync", true);
     static internal readonly IConfigurationHolder QualityOptions = NebulaAPI.Configurations.Holder("options.quality", [ConfigurationTab.Settings], [GameModes.FreePlay, GameModes.Standard]).AppendConfigurations([
-        LowLatencyPlayerSyncOption
+        RpcPlayerSyncOption
         ]);
     static IEnumerable<float> RestrictionSelections()
     {

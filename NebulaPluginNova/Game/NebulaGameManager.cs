@@ -736,11 +736,6 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         new StaticAchievementToken("stats.gamePlay");
         new StaticAchievementToken("stats.role." + LocalPlayer.Role.Role.InternalName + ".assigned");
         LocalPlayer.Modifiers.Do(m => new StaticAchievementToken("stats.modifier." + m.Modifier.InternalName + ".assigned"));
-
-        if (GeneralConfigurations.LowLatencyPlayerSyncOption && (AmongUsUtil.IsCustomServer() || AmongUsUtil.IsLocalServer()))
-        {
-            AmongUsClient.Instance.MinSendInterval = 0.05f;
-        }
     }
 
     public void OnGameEnd()

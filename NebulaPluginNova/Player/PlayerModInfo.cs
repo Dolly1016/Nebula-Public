@@ -397,19 +397,6 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         //PlayerScaler.gameObject.AddComponent<SortingGroup>();
         //PlayerScaler.gameObject.GetComponentsInChildren<SpriteRenderer>(true).Do(r => r.sortingOrder = 10);
 
-        if (myPlayer.AmOwner)
-        {
-            float lastUpdated = 0f;
-            GameOperatorManager.Instance?.Subscribe<GameUpdateEvent>(ev =>
-            {
-                if (NebulaGameManager.Instance!.CurrentTime - lastUpdated > 0.8f)
-                {
-                    RpcShareFlipX.Invoke((PlayerId, MyLayer.FlipX));
-                    lastUpdated = NebulaGameManager.Instance.CurrentTime;
-                }
-            }, NebulaGameManager.Instance);
-        }
-
         if (!AmOwner)
         {
             var footStep = myPlayer.FootSteps;
@@ -1091,16 +1078,6 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
        }
        );
 
-    public bool CachedFlipX { get; private set; }
-    public readonly static RemoteProcess<(byte playerId, bool flipX)> RpcShareFlipX = new(
-       "CacheFlipX", (message, _) =>
-       {
-           var playerInfo = NebulaGameManager.Instance!.GetPlayer(message.playerId)?.Unbox();
-           if (playerInfo == null) return;
-
-           playerInfo.CachedFlipX = message.flipX;
-       }, false);
-
     //////////////////////////////////////////
     //                                      //
     //              速度の計算              //
@@ -1424,13 +1401,15 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     //              情報の更新              //
     //                                      //
     //////////////////////////////////////////
-    private void UpdateFlipX()
+    /// <summary>
+    /// 位置同期で受け取った向きを反映する。(PlayerPositionSyncから、向きを速度で決められない場合のみ呼ばれる)
+    /// </summary>
+    internal void ApplySyncedFlipX(bool flipX)
     {
         if (AmOwner) return;
-        if (MyPhysics.Velocity.sqrMagnitude > 0) return;
-        if (MyPhysics.FlipX != CachedFlipX)
+        if (MyPhysics.FlipX != flipX)
         {
-            MyPhysics.FlipX = CachedFlipX;
+            MyPhysics.FlipX = flipX;
             if (MyAnimations.Animations.IsPlayingRunAnimation()) MyAnimations.Animations.PlayRunAnimation();
             else if (MyAnimations.Animator.GetCurrentAnimation() == MyAnimations.Group.IdleAnim) MyAnimations.Animations.PlayIdleAnimation();
         }
@@ -1472,7 +1451,6 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
         LightInfo.UpdateLightInfo();
         UpdateVisibility(deltaTime, true, !NebulaGameManager.Instance.WideCamera.DrawShadow);
-        UpdateFlipX();
     }
 
     public void HudUpdate()

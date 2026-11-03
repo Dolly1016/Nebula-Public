@@ -7,5 +7,5 @@
 
 # Options
 
-"options.quality.lowLatencyPlayerSync" : "Low Latency Player Sync"
-"options.quality.lowLatencyPlayerSync.detail" : "<b>Custom Server Only</b><br>Shorten the timing of synchronizing players' positions."
+"options.quality.rpcPlayerSync" : "Use Dedicated Position Sync"
+"options.quality.rpcPlayerSync.detail" : "<b>Custom Server Only</b><br>Sends player positions frequently through a separate channel from vanilla synchronization, and interpolates them without accumulating delay."

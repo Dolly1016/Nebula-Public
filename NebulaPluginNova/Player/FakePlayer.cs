@@ -287,22 +287,8 @@ internal class FakePlayerNetTransform : IGameOperator
 
     private void SetMovementSmoothingModifier()
     {
-        if (GeneralConfigurations.LowLatencyPlayerSyncOption && (AmongUsUtil.IsCustomServer() || AmongUsUtil.IsLocalServer()))
-        {
-            float num = incomingPosQueue.Count switch
-            {
-                < 2 => 0.7f, 
-                3 => 0.85f, 
-                4 or 5 => 0.9f, 
-                _ => 1.2f
-            };
-            rubberbandModifier = Mathn.Lerp(rubberbandModifier, num, FastMethods.GetFixedDeltaTimeFast() * 3f);
-        }
-        else
-        {
-            float num = ((incomingPosQueue.Count <= QUEUE_THRESHOLD_FOR_SMOOTHING) ? SMOOTHING_BAND_MODIFIER : NEUTRAL_BAND_MODIFIER);
-            rubberbandModifier = Mathn.Lerp(rubberbandModifier, num, FastMethods.GetFixedDeltaTimeFast() * SMOOTHING_LERP_RATE);
-        }
+        float num = ((incomingPosQueue.Count <= QUEUE_THRESHOLD_FOR_SMOOTHING) ? SMOOTHING_BAND_MODIFIER : NEUTRAL_BAND_MODIFIER);
+        rubberbandModifier = Mathn.Lerp(rubberbandModifier, num, FastMethods.GetFixedDeltaTimeFast() * SMOOTHING_LERP_RATE);
     }
 
     private const float SEND_MOVEMENT_THRESHOLD = 0.0001f;
