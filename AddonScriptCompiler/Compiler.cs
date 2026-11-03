@@ -29,11 +29,13 @@ public static class Compiler
         var myParseOption = ParseOptions;
 
 
+        List<string> preprocessors = [];
         for (int i = 1; i <= virialVersion; i++)
         {
-            myParseOption = myParseOption.WithPreprocessorSymbols($"VIRIAL_{i}_OR_GREATER");
+            preprocessors.Add($"VIRIAL_{i}_OR_GREATER");
         }
-        myParseOption = myParseOption.WithPreprocessorSymbols($"VIRIAL_{virialVersion}");
+        preprocessors.Add($"VIRIAL_{virialVersion}");
+        myParseOption = myParseOption.WithPreprocessorSymbols(preprocessors);
 
         if (Directory.Exists(sourceDir))
         {
@@ -43,7 +45,7 @@ public static class Compiler
                 string source = File.ReadAllText(file, Encoding.UTF8);
                 // Make the path relative to sourceDir for diagnostic clarity
                 string relativePath = Path.GetRelativePath(sourceDir, file);
-                trees.Add(CSharpSyntaxTree.ParseText(source, ParseOptions, relativePath, Encoding.UTF8));
+                trees.Add(CSharpSyntaxTree.ParseText(source, myParseOption, relativePath, Encoding.UTF8));
             }
         }
 

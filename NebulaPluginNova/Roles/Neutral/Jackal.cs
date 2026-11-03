@@ -377,7 +377,7 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignable
 
             if (ev.EndState.EndReason != GameEndReason.Situation) return;
 
-            var lastDead = NebulaGameManager.Instance!.AllPlayerInfo.MaxBy(p => p.DeathTime);
+            var lastDead = NebulaGameManager.Instance?.LastDead;
             if (lastDead == null || lastDead.MyKiller == null || !lastDead.MyKiller.AmOwner) return;
 
             if ( /*インポスターが最後に死亡*/ (lastDead as GamePlayer).IsImpostor &&

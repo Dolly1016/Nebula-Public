@@ -32,7 +32,7 @@ internal class GameModeDefinitionImpl : GameModeDefinition
         if (!shouldNotAdd) GameModes.allGameModes.Add(this);
     }
 
-    public GameModeDefinitionImpl(string translationKey, int minPlayers, Type gameModeType, Func<IRoleAllocator> roleAllocator) : this(translationKey, minPlayers, gameModeType, roleAllocator, null, true) { }
+    public GameModeDefinitionImpl(string translationKey, int minPlayers, Type gameModeType, Func<IRoleAllocator> roleAllocator, bool withRoleSettings = true) : this(translationKey, minPlayers, gameModeType, roleAllocator, null, withRoleSettings) { }
     public GameModeDefinitionImpl(string translationKey, int minPlayers, Type gameModeType, Func<bool, IEnumerator> alternativeRoutine, bool withRoleSettings = true, bool shouldNotAdd = false) : this(translationKey, minPlayers, gameModeType, null!, alternativeRoutine, withRoleSettings, shouldNotAdd) { }
 
     private bool withRoleSettings;

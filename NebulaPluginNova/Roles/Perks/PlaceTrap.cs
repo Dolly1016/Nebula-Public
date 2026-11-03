@@ -19,7 +19,7 @@ internal class PlaceTrap : PerkFunctionalInstance
     private Vector2 pos = Vector2.zero;
     private bool isAccel;
     static PerkFunctionalDefinition AccelTrap = new("accelTrap", PerkFunctionalDefinition.Category.Standard, new PerkDefinition("accelTrap", 5, 41, new(65, 122, 186)), (def, instance) => new PlaceTrap(def, instance, true));
-    static PerkFunctionalDefinition DecelTrap = new("decelTrap", PerkFunctionalDefinition.Category.NoncrewmateOnly, new PerkDefinition("decelTrap", 5, 42, new(184, 45, 51), Virial.Color.ImpostorColor), (def, instance) => new PlaceTrap(def, instance, false));
+    static internal PerkFunctionalDefinition DecelTrap = new("decelTrap", PerkFunctionalDefinition.Category.NoncrewmateOnly, new PerkDefinition("decelTrap", 5, 42, new(184, 45, 51), Virial.Color.ImpostorColor), (def, instance) => new PlaceTrap(def, instance, false));
     
 
     private PlaceTrap(PerkDefinition def, PerkInstance instance, bool isAccel) : base(def, instance)

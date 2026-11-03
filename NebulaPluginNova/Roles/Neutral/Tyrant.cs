@@ -179,7 +179,7 @@ internal class Tyrant : DefinedRoleTemplate, DefinedRole
             if (killingTotal == RequiredKillingToWin - 1) new StaticAchievementToken("tyrant.another1");
         }
 
-        float RuntimeRole.WinningOpportunity => killingTotal / RequiredKillingToWin * 0.6f + 0.4f;
+        float RuntimeRole.WinningOpportunity => killingTotal / (float)RequiredKillingToWin * 0.6f + 0.4f;
 
         [Local]
         void OnGameEnd(GameEndEvent ev)
@@ -193,7 +193,7 @@ internal class Tyrant : DefinedRoleTemplate, DefinedRole
                 //Lovers単独勝利を考慮に入れる
                 if (GamePlayer.AllPlayers.Any(p => p.TryGetModifier<Lover.Instance>(out var lover) && !(lover.MyLover.Get()?.IsDead ?? true) && !p.IsDead) && GamePlayer.AllPlayers.Count(p => !p.IsDead) <= 4) teamsCount++;
                 
-                if (teams.Count >= 3) new StaticAchievementToken("tyrant.challenge");
+                if (teamsCount >= 3) new StaticAchievementToken("tyrant.challenge");
                 
             }
         }

@@ -171,7 +171,7 @@ public class EvilTracker : DefinedSingleAbilityRoleTemplate<EvilTracker.Ability>
         List<TrackingArrowAbility> impostorArrows = new();
 
         private void TryRegisterArrow(GamePlayer player) {
-            if (!MyPlayer.IsImpostor) return;
+            if (!MyPlayer.IsImpostorlike) return;
             if(!impostorArrows.Any(a => a.MyPlayer == player)) impostorArrows.Add(new TrackingArrowAbility(player.Unbox(), 0f, VColor.ImpostorColor).Register(this));
         }
 
@@ -181,7 +181,7 @@ public class EvilTracker : DefinedSingleAbilityRoleTemplate<EvilTracker.Ability>
         {
             if (TrackImpostorsOption && MyPlayer.IsImpostor)
             {
-                if (!ev.Player.AmOwner && ev.Player.IsImpostor)
+                if (!ev.Player.AmOwner && ev.Player.IsImpostorlike)
                     TryRegisterArrow(ev.Player);
                 else
                 {

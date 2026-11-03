@@ -20,6 +20,7 @@
 "options.role.comet.blazeDuration" : "ブースト効果時間"
 "options.role.comet.blazeVisionRate" : "ブースト中の視界倍率"
 "options.role.comet.blazeScreenRate" : "ブースト中の画面倍率"
+"options.role.comet.affectedByBlackout" : "停電による視野縮小"
 
 # Game
 

@@ -7,7 +7,7 @@
 # Document
 
 "role.scarlet.doc" : "A neutral aiming for victory with the favorite.<br>Make good use of the deceived keeps."
-"role.scarlet.winCond" : "The favorite survives and wins the game. Overwrites it as the Scarlet victory and wins."
+"role.scarlet.winCond" : "The favorite survives and wins the game. Overwrites it as the Scarlet victory and wins.<br>However, regarding the Avenger victory, it will be not overwritten unless the favorite is the Avenger.<br>The Scarlet is required to be alive."
 "role.scarlet.ability.title" : "Inherent Ability [Charm]"
 "role.scarlet.ability.main" : "Make good use of the deceived keeps to support the favorite's victory."
 "role.scarlet.ability.favorite" : "<title>Favorite</title>Designate a player as your favorite.<br>If either the Scarlet or the favorite dies, the other dies following them."

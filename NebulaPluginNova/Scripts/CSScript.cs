@@ -293,7 +293,7 @@ internal static class AddonScriptManager
                     srcStream.CopyTo(dstStream);
                 }
 
-                var args = $"--module-name \"{moduleName}\" --source-dir \"{tempDir}\" --output \"{outputPath}\" --config \"{referencesPath}\"";
+                var args = $"--module-name \"{moduleName}\" --source-dir \"{tempDir}\" --output \"{outputPath}\" --config \"{referencesPath}\" --virial-version {NebulaAPI.APIVersion.Major}";
                 if (loadedLibs.Count > 0) args += " " + string.Join(" ", loadedLibs.Select(entry => $" --reference \"{entry.LibPath}\""));
                 var psi = new System.Diagnostics.ProcessStartInfo()
                 {
@@ -345,6 +345,56 @@ internal static class AddonScriptManager
         }
 
         yield break;
+    }
+
+    /// <summary>
+    /// 指定したディレクトリ内のスクリプトをコンパイルします。PC版でのみ使用できます。
+    /// コンパイルログは出力先の隣(出力先のパス + ".log")に出力されます。
+    /// </summary>
+    /// <param name="moduleName">モジュール名。</param>
+    /// <param name="sourceDir">スクリプトのあるディレクトリ。サブディレクトリ内のスクリプトも対象になります。</param>
+    /// <param name="extraReferences">追加で参照するDLLのパス。</param>
+    /// <param name="outputPath">出力先のDLLのパス。</param>
+    /// <param name="useHiddenMembers">NebulaとNebulaAPIの非公開メンバへのアクセスを許可するかどうか。</param>
+    /// <param name="callback">コンパイルに成功し、DLLが出力された場合にtrueを受け取ります。</param>
+    static public IEnumerator CoCompileDirectory(string moduleName, string sourceDir, IEnumerable<string> extraReferences, string outputPath, bool useHiddenMembers, Action<bool> callback)
+    {
+#if PC
+        string referencesPath = Path.Combine(PathHelpers.DllCacheDirPath, "references.txt");
+
+        var args = $"--module-name \"{moduleName}\" --source-dir \"{sourceDir}\" --output \"{outputPath}\" --config \"{referencesPath}\" --virial-version {NebulaAPI.APIVersion.Major}";
+        foreach (var reference in extraReferences) args += $" --reference \"{reference}\"";
+        if (useHiddenMembers) args += " --use-hidden-members";
+
+        var psi = new System.Diagnostics.ProcessStartInfo()
+        {
+            FileName = Path.Combine(BepInEx.Paths.BepInExRootPath, "tools", "AddonScriptCompiler.exe"),
+            Arguments = args,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            WorkingDirectory = PathHelpers.GameRootPath
+        };
+
+        var process = System.Diagnostics.Process.Start(psi);
+        if (process == null)
+        {
+            Log.Error("Failed to start AddonScriptCompiler.exe (Module: " + moduleName + ")");
+            callback.Invoke(false);
+            yield break;
+        }
+
+        while (!process.HasExited)
+        {
+            yield return null;
+        }
+
+        callback.Invoke(process.ExitCode == 0 && File.Exists(outputPath));
+#else
+        callback.Invoke(false);
+        yield break;
+#endif
     }
 
 }

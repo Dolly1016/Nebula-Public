@@ -53,6 +53,7 @@
 "config.client.smallHud" : "Compact Hud"
 "config.client.smallHud.detail" : "The buttons at the bottom of the screen are displayed smaller and more compact."
 "config.client.arrowRework" : "Arrow Rework"
+"config.client.arrowRework.detail" : "Improve the issue which the arrows overlap with UI buttons and other elements."
 
 # Discord Webhook
 

@@ -16,6 +16,7 @@
 # Emergency Button
 
 "game.meeting.cannotUseEmergencyButton" : "紧急会议已锁定"
+"game.meeting.suppressedEmergencyButton" : "无法召开紧急会议……"
 
 # Exile Scene
 

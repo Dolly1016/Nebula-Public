@@ -162,6 +162,7 @@
 
 "sabotage.reactor" : "核反应堆"
 "sabotage.laboratory" : "抗震稳定器"
+"sabotage.lifeSupp" : "氧气"
 "sabotage.lifeSupport" : "氧气"
 "sabotage.heliSabotage" : "路线异常"
 "sabotage.comms" : "通讯"

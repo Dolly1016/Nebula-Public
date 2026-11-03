@@ -13,7 +13,8 @@
 "role.amalgam.ability.main.selection" : "<var>Can amalgamate role abilities.</var>"
 "role.amalgam.ability.main.random" : "<var>The abilities of several roles are combined.</var><br>You can easily check the combined roles by opening the "My Role" tab on the help screen."
 "role.amalgam.ability.amalgam" : "<title>Select</title>Select abilities to amalgamate.<br>Once amalgamated, abilities cannot be removed."
-"role.amalgam.tips" : "・You can amalgamate to one <b>kill/aim ability</b> and one <b>mini map ability</b> at the same time.<br>・Key assignments are only valid for kill and aim abilities."
+"role.amalgam.tips" : "・You can amalgamate to one <b>kill/aim ability</b> and one <b>mini map ability</b> at the same time.<br>・Key assignments are only valid for kill and aim abilities.<br>・Roles which can be amalgamated under the current options are as follows.<br>　<b>Kill & Aim Roles</b><br>　%KILLAIM%<br>　<b>Map Roles</b><br>　%MAP%<br>　<b>Other Roles</b><br>　%OTHERS%"
+"role.amalgam.tips.indent" : "　"
 
 # Options
 
@@ -28,9 +29,10 @@
 
 # Game
 
-"role.amalgam.tabs.kill" : "Kill Roles"
+"role.amalgam.tabs.kill" : "Kill & Aim Roles"
 "role.amalgam.tabs.map" : "Map Roles"
 "role.amalgam.tabs.others" : "Other Roles"
+"role.amalgam.ui.title" : "Today's Amalgam"
 
 # UI
 

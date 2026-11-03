@@ -27,6 +27,7 @@
 # Game
 
 "role.creeping.minigame.depoison" : "Depoison"
+"ui.action.creeping.poison" : "Poison the nearby player."
 
 # UI
 
@@ -62,4 +63,4 @@
 "achievement.creeping.common3.flavor" : ""I wanted to live." —An unsigned memoir"
 
 "achievement.creeping.challenge.title" : "Poisoned Spaceship"
-"achievement.creeping.challenge.goal" : "Poison while being affected by poison yourself, or get a kill with poison while being affected by poison,<br>and become the sole survivor to win."
+"achievement.creeping.challenge.goal" : "While being poisoned, get a poison kill and be the sole survivor to win."

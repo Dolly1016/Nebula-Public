@@ -101,7 +101,7 @@ public class Agent : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             int extempts = NumOfExemptedTasksOption;
             for (int i = 0; i < extempts; i++)
             {
-                if (ev.Tasks.Count == 0) break;
+                if (ev.Tasks.Count <= 1) break;
                 ev.Tasks.RemoveAt(System.Random.Shared.Next(ev.Tasks.Count));
             }
         }

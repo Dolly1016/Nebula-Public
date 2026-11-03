@@ -150,6 +150,6 @@ public class CustomConsole : MonoBehaviour
         collider.radius = 0.4f;
         collider.isTrigger = true;
 
-        ModSingleton<CustomConsoleManager>.Instance.AllCustomConsoles.Add(this);
+        ModSingleton<CustomConsoleManager>.Instance?.AllCustomConsoles.Add(this);
     }
 }

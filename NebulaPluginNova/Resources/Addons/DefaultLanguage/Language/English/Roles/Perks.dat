@@ -70,7 +70,10 @@
 "perk.hookshot.detail" : "You can use the hookshot once.<br>The hookshot will shoot in the direction of your cursor."
 
 "perk.doubleVote.name" : "Insistence"
-"perk.doubleVote.detail" : "Only once, double the number of votes other than blank votes or skip votes."
+"perk.doubleVote.detail" : "Excluding skipping, abstaining, and casting 0 votes.<br>Double the number of votes you cast once."
+
+"perk.handOfMercy.name" : "There, There"
+"perk.handOfMercy.detail" : "Pat the selected player on the head.<br>If you are on the Crewmate team, your task progress advances each time you pat 3 different players.<br>This perk has a %CD% second cooldown."
 
 "perk.monowayX.name" : "Crab Walking"
 "perk.monowayX.detail" : "When activated, vertical movement is prohibited for %D% seconds.<br>This perk has a %CD% second cooldown."

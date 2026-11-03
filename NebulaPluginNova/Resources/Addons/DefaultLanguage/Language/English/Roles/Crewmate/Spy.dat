@@ -31,14 +31,15 @@
 
 # Titles
 
-"achievement.spy.common1.title" : ""
-"achievement.spy.common1.goal" : ""
+"achievement.spy.common1.title" : "The Trip Isn't Over Until We Make It Back Alive"
+"achievement.spy.common1.goal" : "Win as a crewmate while staying alive."
+"achievement.spy.common1.flavor" : ""Let's head straight back, no detours." ―Field Trip (Reconnaissance) Handbook"
 
-"achievement.spy.another1.title" : ""
-"achievement.spy.another1.goal" : ""
+"achievement.spy.common2.title" : "Gotcha!"
+"achievement.spy.common2.goal" : "Witness an impostor's kill up close."
 
-"achievement.spy.another2.title" : ""
-"achievement.spy.another2.goal" : ""
+"achievement.spy.another1.title" : "Death to the traitor"
+"achievement.spy.another1.goal" : "Get killed by an impostor or be voted out and die."
 
-"achievement.spy.challenge.title" : ""
-"achievement.spy.challenge.goal" : ""
+"achievement.spy.challenge.title" : "Spy Who Sows Chaos"
+"achievement.spy.challenge.goal" : "Win via a crewmate victory after at least 1 impostor has been killed by another impostor."

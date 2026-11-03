@@ -180,7 +180,7 @@ public class PaparazzoShot : MonoBehaviour
         {
             if (collider.OverlapPoint(body.Position))
             {
-                if (body.Player.MyKiller != null && (playerMask & (1 << body.Player.PlayerId)) != 0)
+                if (body.Player.MyKiller != null && (playerMask & (1 << body.Player.MyKiller.PlayerId)) != 0)
                 {
                     //死体とそのキラーが映っているならば
                     new StaticAchievementToken("paparazzo.common4");
@@ -562,6 +562,7 @@ public class Paparazzo : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                     button.OnClick.AddListener(() =>
                     {
                         if (MyPlayer.IsDead) return;
+                        if (MeetingHud.Instance.state >= MeetingHud.MeetingStates.Results) return;
 
                         int aliveMask = 0;
                         foreach (var p in NebulaGameManager.Instance!.AllPlayerInfo) if (!p.IsDead) aliveMask |= 1 << p.PlayerId;

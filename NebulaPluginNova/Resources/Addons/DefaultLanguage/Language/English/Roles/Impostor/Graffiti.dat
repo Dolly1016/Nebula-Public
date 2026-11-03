@@ -27,14 +27,11 @@
 
 # Titles
 
-"achievement.graffiti.common1.title" : ""
-"achievement.graffiti.common1.goal" : ""
-"achievement.graffiti.common1.cond" : ""
+"achievement.graffiti.common1.title" : "Art Has Meaning"
+"achievement.graffiti.common1.goal" : "Scribble."
+"achievement.graffiti.common1.flavor" : ""It is art that stirs the world.""
 
-"achievement.graffiti.common2.title" : ""
-"achievement.graffiti.common2.goal" : ""
-"achievement.graffiti.common2.cond" : ""
-
-"achievement.graffiti.challenge.title" : ""
-"achievement.graffiti.challenge.goal" : ""
-"achievement.graffiti.challenge.cond" : ""
+"achievement.graffiti.challenge.title" : "Love In The Trash Can"
+"achievement.graffiti.challenge.goal" : "In a game where a player has a dying message,<br>win with all allies still alive while a genuine dying message appears."
+"achievement.graffiti.challenge.cond" : "Num of allies: At least one other besides yourself"
+"achievement.graffiti.challenge.splitted.1" : "Trash Can's "

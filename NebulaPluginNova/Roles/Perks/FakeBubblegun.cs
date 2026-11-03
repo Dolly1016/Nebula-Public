@@ -14,7 +14,7 @@ namespace Nebula.Roles.Perks;
 internal class FakeBubblegun : PerkFunctionalInstance
 {
     const float CoolDown = 10f;
-    static PerkFunctionalDefinition Def = new("fakeBubble", PerkFunctionalDefinition.Category.NoncrewmateOnly, new PerkDefinition("fakeBubble", 3, 59, Virial.Color.ImpostorColor, Virial.Color.ImpostorColor).CooldownText("%CD%", () => CoolDown), (def, instance) => new FakeBubblegun(def, instance));
+    static internal PerkFunctionalDefinition Def = new("fakeBubble", PerkFunctionalDefinition.Category.NoncrewmateOnly, new PerkDefinition("fakeBubble", 3, 59, Virial.Color.ImpostorColor, Virial.Color.ImpostorColor).CooldownText("%CD%", () => CoolDown), (def, instance) => new FakeBubblegun(def, instance));
 
     private GameTimer cooldownTimer;
     private FakeBubblegun(PerkDefinition def, PerkInstance instance) : base(def, instance)

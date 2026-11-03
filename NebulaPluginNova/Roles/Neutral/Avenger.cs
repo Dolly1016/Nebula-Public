@@ -151,6 +151,7 @@ public class Avenger : DefinedRoleTemplate, DefinedRole, IAssignableDocument
         {
             if (ev.Dead == this.target)
             {
+                ModSingleton<IWinningOpportunity>.Instance.RpcSetOpportunity(MyTeam, 0.9f);
                 new StaticAchievementToken("avenger.common1");
                 StatsKillTarget.Progress();
             }

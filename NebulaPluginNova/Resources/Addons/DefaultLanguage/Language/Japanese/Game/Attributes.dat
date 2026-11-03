@@ -26,3 +26,5 @@
 "ui.attribute.thurifer.detail" : "香炉の煙を吸入しました。<br>吸入量が増すほどサリファーによるキル遅延が大きくなります。"
 "ui.attribute.cooldown" : "クールダウン変速"
 "ui.attribute.cooldown.detail" : "クールダウンの進行速度が変化します。"
+"ui.attribute.suppressed" : "通報/ボタン不可能"
+"ui.attribute.suppressed.detail" : "しばらくの間、死体通報や緊急ボタンを使用できません。"

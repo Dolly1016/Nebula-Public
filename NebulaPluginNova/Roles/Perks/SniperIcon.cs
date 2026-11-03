@@ -13,7 +13,7 @@ namespace Nebula.Roles.Perks;
 internal class SniperIcon : PerkFunctionalInstance
 {
     const float CoolDown = 10f;
-    static PerkFunctionalDefinition Def = new("sniperIcon", PerkFunctionalDefinition.Category.NoncrewmateOnly, new PerkDefinition("sniperIcon", 3, 1, Virial.Color.ImpostorColor, Virial.Color.ImpostorColor).CooldownText("%CD%", ()=>CoolDown), (def, instance) => new SniperIcon(def, instance));
+    static internal PerkFunctionalDefinition Def = new("sniperIcon", PerkFunctionalDefinition.Category.NoncrewmateOnly, new PerkDefinition("sniperIcon", 3, 1, Virial.Color.ImpostorColor, Virial.Color.ImpostorColor).CooldownText("%CD%", ()=>CoolDown), (def, instance) => new SniperIcon(def, instance));
 
     public SniperIcon(PerkDefinition def, PerkInstance instance) : base(def, instance) {
         cooldownTimer = NebulaAPI.Modules.Timer(this, CoolDown);

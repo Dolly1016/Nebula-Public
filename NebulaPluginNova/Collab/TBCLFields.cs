@@ -33,7 +33,6 @@ internal unsafe static class TBCLFields
 
         //Among UsのPlayerBodyTypesの値
         public int BodyType;
-        //ろくろ首の長さ。伸ばしていない間は0。
         public float NeckLength;
 
         public byte NameLength;
@@ -43,6 +42,9 @@ internal unsafe static class TBCLFields
         public CostumeData Skin;
         public CostumeData Hat;
         public CostumeData Visor;
+
+        //アドオンが自由に扱える領域
+        public int AddonData;
     }
 
     internal struct CostumeData
@@ -72,9 +74,13 @@ internal unsafe static class TBCLFields
 
         public int RadiosLength;
         public RadioData* Radios;
+        public bool LocalIsPseudocide;
+
+        //アドオンが自由に扱える領域
+        public int AddonData;
     }
 
-    const int Version = 20261009;
+    const int Version = 20261103;
     const int SnapshotCapacity = 64;
     const int PlayersCapacity = 24;
     const int RadiosCapacity = 8;
@@ -192,6 +198,12 @@ internal unsafe static class TBCLFields
         snapshot->LocalMicPositionX = micPosition?.x ?? 0f;
         snapshot->LocalMicPositionY = micPosition?.y ?? 0f;
 
+        snapshot->LocalIsPseudocide = NebulaGameManager.Instance?.LocalStatus.InBuskerPseudocide ?? false;
+
+        //アドオンが扱う値はこのイベントで集める。
+        var addonEvent = GameOperatorManager.Instance?.Run<TBCLEvent>(new(), true);
+        snapshot->AddonData = addonEvent?.Read() ?? 0;
+
         var allPlayers = GamePlayer.AllOrderedPlayers;
         int length = Math.Min(allPlayers.Count, PlayersCapacity);
         var players = snapshot->Players;
@@ -236,6 +248,8 @@ internal unsafe static class TBCLFields
             data.ColorR = color.R;
             data.ColorG = color.G;
             data.ColorB = color.B;
+
+            data.AddonData = addonEvent != null && player.PlayerId < PlayersCapacity ? addonEvent.Read(player.PlayerId) : 0;
         }
 
         snapshot->PlayersLength = length;

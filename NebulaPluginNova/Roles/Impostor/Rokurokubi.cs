@@ -690,8 +690,8 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
             }
         }
 
-        [OnlyMyPlayer]
-        void OnFixMicPosition(FixSpeakerPositionEvent ev)
+        [NonEventListener]
+        void OnFixMicAndSpeakerPosition(AbstractFixVCPositionEvent ev)
         {
             if (ev.Player.VanillaCosmetics.bodyType == PlayerBodyTypes.Long)
             {
@@ -702,6 +702,12 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
                 }
             }
         }
+
+        [OnlyMyPlayer]
+        void OnFixMicPosition(FixMicPositionEvent ev) => OnFixMicAndSpeakerPosition(ev);
+
+        [OnlyMyPlayer]
+        void OnFixSpeakerPosition(FixSpeakerPositionEvent ev) => OnFixMicAndSpeakerPosition(ev);
 
         bool IPlayerAbility.HideKillButton => InLongNeckMode;
         bool IPlayerAbility.BlockUsingUtility => !InLongNeckMode && MyPlayer.VanillaCosmetics.bodyType == PlayerBodyTypes.Long;

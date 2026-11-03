@@ -12,6 +12,9 @@ namespace Virial.Events.Game.Meeting;
 /// </summary>
 public class MeetingPreEndEvent : Event
 {
+    public IReadOnlyList<Virial.Game.Player> Exiled => exiled;
+    private Virial.Game.Player[] exiled;
+
     internal List<IEnumerator> Coroutines = new();
 
     /// <summary>
@@ -20,7 +23,8 @@ public class MeetingPreEndEvent : Event
     /// <param name="coroutine"></param>
     public void PushCoroutine(IEnumerator coroutine) => Coroutines.Add(coroutine);
 
-    internal MeetingPreEndEvent()
+    internal MeetingPreEndEvent(Virial.Game.Player[] exiled)
     {
+        this.exiled = exiled;
     }
 }

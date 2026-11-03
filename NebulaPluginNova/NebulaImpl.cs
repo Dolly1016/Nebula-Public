@@ -88,6 +88,9 @@ public class NebulaImpl : INebula
     bool INebula.IsAndroid =>  NebulaPlugin.IsAndroid;
 
     AmongUsLL INebula.AmongUs => AmongUsLLImpl.Instance;
+
+    IEnumerator INebula.CoCompileDirectory(string moduleName, string sourceDir, IEnumerable<string> extraReferences, string outputPath, bool useHiddenMembers, Action<bool> callback)
+        => AddonScriptManager.CoCompileDirectory(moduleName, sourceDir, extraReferences, outputPath, useHiddenMembers, callback);
 }
 
 internal static class UnboxExtension

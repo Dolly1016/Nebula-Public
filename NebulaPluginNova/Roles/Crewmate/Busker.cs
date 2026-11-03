@@ -59,7 +59,11 @@ public class Busker : DefinedSingleAbilityRoleTemplate<Busker.Ability>, DefinedR
 
         void IGameOperator.OnReleased()
         {
-            if(AmOwner) PlayerModInfo.RpcRemoveAttr.Invoke((MyPlayer.PlayerId, PlayerAttributes.BuskerEffect.Id));
+            if(AmOwner)
+            {
+                PlayerModInfo.RpcRemoveAttr.Invoke((MyPlayer.PlayerId, PlayerAttributes.BuskerEffect.Id));
+                if (NebulaGameManager.Instance != null) NebulaGameManager.Instance.LocalStatus.InBuskerPseudocide = false;
+            }
         }
 
         int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt(), shouldNotArrangeAsKillButton.AsInt()];
@@ -91,6 +95,7 @@ public class Busker : DefinedSingleAbilityRoleTemplate<Busker.Ability>, DefinedR
                         using (RPCRouter.CreateSection("BuskerPseudocide"))
                         {
                             if (HidePseudocideFromVitalsOption) MyPlayer.GainAttribute(PlayerAttributes.BuskerEffect, 10000f, false, 0);
+                            if (NebulaGameManager.Instance != null) NebulaGameManager.Instance.LocalStatus.InBuskerPseudocide = true;
                             MyPlayer.MurderPlayer(MyPlayer, PlayerState.Pseudocide, null, KillParameter.WithDeadBody, KillCondition.NormalKill);
                             StatsPseudocide.Progress();
                         }
@@ -109,6 +114,7 @@ public class Busker : DefinedSingleAbilityRoleTemplate<Busker.Ability>, DefinedR
                     {
                         NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, BuskerRevivingAction);
                         PlayerModInfo.RpcRemoveAttr.Invoke((MyPlayer.PlayerId, PlayerAttributes.BuskerEffect.Id));
+                        if (NebulaGameManager.Instance != null) NebulaGameManager.Instance.LocalStatus.InBuskerPseudocide = false;
                         MyPlayer.Revive(null, MyPlayer.Position, true, false);
                         MyPlayer.VanillaPlayer.ModDive(false);
                     }
@@ -123,7 +129,8 @@ public class Busker : DefinedSingleAbilityRoleTemplate<Busker.Ability>, DefinedR
                     if (MyPlayer.IsDead)
                     {
                         PlayerModInfo.RpcRemoveAttr.Invoke((MyPlayer.PlayerId, PlayerAttributes.BuskerEffect.Id));
-                        NebulaGameManager.Instance!.GameStatistics.RpcRecordEvent(GameStatistics.EventVariation.Kill, EventDetail.Accident, null, 1 << MyPlayer.PlayerId);
+                        NebulaGameManager.Instance?.LocalStatus.InBuskerPseudocide = false;
+                        NebulaGameManager.Instance?.GameStatistics.RpcRecordEvent(GameStatistics.EventVariation.Kill, EventDetail.Accident, null, 1 << MyPlayer.PlayerId);
                         new StaticAchievementToken("busker.another1");
                         StatsMissed.Progress();
                         MyPlayer.GetModule<Impostor.BalloonHolder>()?.OnDeadFinally();

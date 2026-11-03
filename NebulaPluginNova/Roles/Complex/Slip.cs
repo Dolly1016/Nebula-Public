@@ -291,7 +291,7 @@ public class Slip : DefinedSingleAbilityRoleTemplate<Slip.Ability>, DefinedRole,
         int[] IPlayerAbility.AbilityArguments => [IsUsurped.AsInt()];
         bool amEvil;
 
-        TimeMoment lastSlipTime;
+        TimeMoment? lastSlipTime;
         public Ability(GamePlayer player, bool isUsurped, bool isEvil) : base(player, isUsurped)
         {
             amEvil = isEvil;
@@ -332,15 +332,16 @@ public class Slip : DefinedSingleAbilityRoleTemplate<Slip.Ability>, DefinedRole,
         [Local]
         void OnMeetingCalled(CalledEmergencyMeetingEvent ev)
         {
-            if(ev.Reporter == MyPlayer && lastSlipTime.ElapsedLessThan(10f))
+            if(!amEvil && ev.Reporter == MyPlayer && lastSlipTime.ElapsedLessThan(10f))
             {
+                LogUtils.WriteToConsole("OnMeetingCalled");
                 GameOperatorManager.Instance?.SubscribeSingleListener<MeetingEndEvent>(ev => {
                     if (ev.Exiled.Any(p => p.IsImpostor)) new StaticAchievementToken("niceSlip.challenge");
                 }, this);
             }
         }
 
-        TimeMoment lastKillTime;
+        TimeMoment? lastKillTime;
         [Local]
         void OnKillPlayer(PlayerKillPlayerEvent ev)
         {
@@ -352,7 +353,8 @@ public class Slip : DefinedSingleAbilityRoleTemplate<Slip.Ability>, DefinedRole,
         {
             if(amEvil && lastSlipTime.ElapsedLessThan(10f))
             {
-                var p = GamePlayer.AllPlayers.MaxBy(p => p.DeathTime);
+                LogUtils.WriteToConsole("GameEnd");
+                var p = GamePlayer.AllPlayers.MaxBy(p => (float)p.DeathTime);
                 if (p?.MyKiller == MyPlayer && ev.CheckWin(MyPlayer)) new StaticAchievementToken("evilSlip.challenge");
             }
         }

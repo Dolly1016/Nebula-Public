@@ -97,6 +97,9 @@
 "perk.ketchupMessage.name" : "涂鸦"
 "perk.ketchupMessage.detail" : "在原地留下涂鸦。"
 
+"perk.eraseBody.name" : "销赃"
+"perk.eraseBody.detail" : "清理尸体。此特技只能发动一次。"
+
 # Game Statictics
 
 "statistics.events.meteor" : "陨石砸落"

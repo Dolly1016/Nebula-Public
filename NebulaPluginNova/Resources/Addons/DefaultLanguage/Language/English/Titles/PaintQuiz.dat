@@ -1,0 +1,24 @@
+"achievement.paintQuiz.oneGame.title" : "Take A Short Break"
+"achievement.paintQuiz.oneGame.goal" : "Play the Paint Quiz once."
+"achievement.paintQuiz.oneGame.splitted.0" : "Short Break "
+
+"achievement.paintQuiz.tenGame.title" : "Defy The Forgetting Curve"
+"achievement.paintQuiz.tenGame.goal" : "Play the Paint Quiz a total of 10 times."
+"achievement.paintQuiz.tenGame.flavor" : "Even Ebbinghaus would smile at this."
+"achievement.paintQuiz.tenGame.splitted.1" : "Defy "
+
+"achievement.paintQuiz.tenHostGame.title" : "Master Host"
+"achievement.paintQuiz.tenHostGame.goal" : "Host the Paint Quiz 10 times."
+"achievement.paintQuiz.tenHostGame.splitted.0" : "Master "
+
+"achievement.paintQuiz.badAnswer.title" : "Wayward Answer"
+"achievement.paintQuiz.badAnswer.goal" : "Get -1 point."
+"achievement.paintQuiz.badAnswer.flavor" : "Reflect on your mistake!"
+"achievement.paintQuiz.badAnswer.splitted.0" : "Wayward "
+
+"achievement.paintQuiz.goodAnswer.title" : "Right-Hand Man"
+"achievement.paintQuiz.goodAnswer.goal" : "Earn 2 points a total of 5 times."
+
+"achievement.paintQuiz.goodAnswer.2.title" : "Face Of The Long-Running Show"
+"achievement.paintQuiz.goodAnswer.2.goal" : "Earn 2 points a total of 10 times."
+"achievement.paintQuiz.goodAnswer.2.splitted.0" : "Long-Running "

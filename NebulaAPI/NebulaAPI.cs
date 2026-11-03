@@ -72,6 +72,9 @@ internal interface INebula
 
     bool IsAndroid { get; }
     bool IsPC => !IsAndroid;
+
+    //Scripting
+    internal System.Collections.IEnumerator CoCompileDirectory(string moduleName, string sourceDir, IEnumerable<string> extraReferences, string outputPath, bool useHiddenMembers, Action<bool> callback);
 }
 
 public static class NebulaAPI
@@ -187,6 +190,20 @@ public static class NebulaAPI
     /// <param name="label"></param>
     /// <returns>RPCセクション。戻り値をusingステートメントで使用すると一括でまとめられるRPCを視覚的に把握しやすくなります。</returns>
     static public IDisposable CreateRPCSection(string? label = null) => instance.CreateRPCSection(label);
+
+    /// <summary>
+    /// 指定したディレクトリ内のスクリプトをコンパイルします。PC版でのみ使用できます。
+    /// コンパイルログは出力先の隣(出力先のパス + ".log")に出力されます。
+    /// </summary>
+    /// <param name="moduleName">モジュール名。</param>
+    /// <param name="sourceDir">スクリプトのあるディレクトリ。サブディレクトリ内のスクリプトも対象になります。</param>
+    /// <param name="extraReferences">追加で参照するDLLのパス。</param>
+    /// <param name="outputPath">出力先のDLLのパス。</param>
+    /// <param name="useHiddenMembers">NebulaとNebulaAPIの非公開メンバへのアクセスを許可するかどうか。</param>
+    /// <param name="callback">コンパイルに成功し、DLLが出力された場合にtrueを受け取ります。</param>
+    /// <returns>コンパイルが終わるまで待機するコルーチン。</returns>
+    static internal System.Collections.IEnumerator CoCompileDirectory(string moduleName, string sourceDir, IEnumerable<string> extraReferences, string outputPath, bool useHiddenMembers, Action<bool> callback)
+        => instance.CoCompileDirectory(moduleName, sourceDir, extraReferences, outputPath, useHiddenMembers, callback);
 
 
 }

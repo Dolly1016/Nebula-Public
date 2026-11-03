@@ -1,0 +1,16 @@
+# Header
+
+"options.report" : "Report Options"
+"options.report.detail" : "About reporting the body"
+
+# Groups
+
+# Options
+
+"options.report.group.range" : "Report Range Setting"
+"options.report.reportRange" : "Report Range"
+"options.report.reportRange.detail" : "Sets the range at which bodies can be reported.<br><b>Default</b>: Use the standard range.<br><b>Fixed</b>: Specify the range directly. 5x equals the standard distance.<br><b>Eyesight</b>: Synchronize the range with eyesight. Affected by power outages."
+"options.report.reportRange.default" : "Default"
+"options.report.reportRange.fixed" : "Fixed"
+"options.report.reportRange.eyesight" : "Eyesight"
+"options.report.reportRange.fixed.range" : "Max Report Range"

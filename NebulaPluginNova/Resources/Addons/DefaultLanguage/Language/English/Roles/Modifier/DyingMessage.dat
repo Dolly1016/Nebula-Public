@@ -27,3 +27,18 @@
 # Stats
 
 # Titles
+
+"achievement.dyingMessage.common1.title" : "Last Messages"
+"achievement.dyingMessage.common1.goal" : "Leave a dying message."
+
+"achievement.dyingMessage.another1.title" : "Fading Consciousness"
+"achievement.dyingMessage.another1.goal" : "Fail to leave a dying message."
+
+"achievement.dyingMessage.common2.title" : "Dining Message"
+"achievement.dyingMessage.common2.goal" : "Leave a dying message in the cafeteria or kitchen."
+"achievement.dyingMessage.common2.flavor" : ""Dinner's ready~""
+"achievement.dyingMessage.common2.splitted.2" : "Message"
+
+"achievement.dyingMessage.challenge.title" : "The Bloom of Humanity Scatters Yet Blossoms Again"
+"achievement.dyingMessage.challenge.goal" : "After leaving a dying message, have the player who killed you get exiled in the immediately following meeting."
+"achievement.dyingMessage.challenge.splitted.1" : "Human "

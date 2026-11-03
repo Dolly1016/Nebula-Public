@@ -108,8 +108,9 @@ public interface NebulaPreprocessor
     /// <param name="minPlayers">最小プレイヤー数。</param>
     /// <param name="gameModeType">ゲームモード。</param>
     /// <param name="roleAllocator">役職割り当て。</param>
+    /// <param name="withRoleSettings">役職設定を表示する場合、true。</param>
     /// <returns></returns>
-    GameModeDefinition RegisterGameMode(string translationKey, int minPlayers, Type gameModeType, Func<IRoleAllocator> roleAllocator);
+    GameModeDefinition RegisterGameMode(string translationKey, int minPlayers, Type gameModeType, Func<IRoleAllocator> roleAllocator, bool withRoleSettings = true);
 
     /// <summary>
     /// ゲームモードを登録します。

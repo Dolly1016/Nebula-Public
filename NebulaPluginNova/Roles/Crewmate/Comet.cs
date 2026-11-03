@@ -15,7 +15,7 @@ namespace Nebula.Roles.Crewmate;
 
 public class Comet : DefinedSingleAbilityRoleTemplate<Comet.Ability>, DefinedRole, IAssignableDocument
 {
-    public Comet() : base("comet", new(121,175,206), RoleCategory.CrewmateRole, Crewmate.MyTeam, [BlazeCoolDownOption, BlazeDurationOption, BlazeSpeedOption, BlazeVisionOption, BlazeScreenOption])
+    public Comet() : base("comet", new(121,175,206), RoleCategory.CrewmateRole, Crewmate.MyTeam, [BlazeCoolDownOption, BlazeDurationOption, BlazeSpeedOption, BlazeVisionOption, BlazeScreenOption, AffectedByBlackoutOption])
     {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Comet.png");
@@ -29,6 +29,7 @@ public class Comet : DefinedSingleAbilityRoleTemplate<Comet.Ability>, DefinedRol
     static private readonly FloatConfiguration BlazeDurationOption = NebulaAPI.Configurations.Configuration("options.role.comet.blazeDuration", (5f, 60f, 2.5f), 15f, FloatConfigurationDecorator.Second);
     static private readonly FloatConfiguration BlazeVisionOption = NebulaAPI.Configurations.Configuration("options.role.comet.blazeVisionRate", (1f, 3f, 0.125f), 1.5f, FloatConfigurationDecorator.Ratio);
     static private readonly FloatConfiguration BlazeScreenOption = NebulaAPI.Configurations.Configuration("options.role.comet.blazeScreenRate", (1f, 2f, 0.125f), 1.125f, FloatConfigurationDecorator.Ratio);
+    static private readonly BoolConfiguration AffectedByBlackoutOption = NebulaAPI.Configurations.Configuration("options.role.comet.affectedByBlackout", false);
 
     static public readonly Comet MyRole = new();
     static private readonly GameStatsEntry StatsBlazing = NebulaAPI.CreateStatsEntry("stats.comet.blazing", GameStatsCategory.Roles, MyRole);
@@ -93,7 +94,7 @@ public class Comet : DefinedSingleAbilityRoleTemplate<Comet.Ability>, DefinedRol
             }
         }
 
-        bool IPlayerAbility.IgnoreBlackout => true;
+        bool IPlayerAbility.IgnoreBlackout => !AffectedByBlackoutOption;
 
         [Local]
         void OnPlayerMurdered(PlayerMurderedEvent ev)

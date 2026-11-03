@@ -6,7 +6,7 @@
 
 # Document
 
-"role.twin.doc" : "A modifier for pairs of 2. Twins are chosen only from among Crewmates.<br>When either twin is about to be killed, the kill is prevented and the other one dies instead by <var>self-sacrifice</var>.<br>Only the killer can see the guard effect when a kill is prevented.<br>While both twins are alive, they can cast only <var>one vote between the two of them</var>.<br>Being a Twin grants no victory condition of its own."
+"role.twin.doc" : "A modifier for pairs of 2. Twins are chosen only from among Crewmates.<br>When either twin is about to be killed, the kill is prevented and the other one dies instead by <var>self-sacrifice</var>.<br>Only the killer can see the guard effect when a kill is prevented.<br>While both twins are alive, they can cast only <var>one vote between the two of them</var>.<br>Being a Twin grants no victory condition of its own.<br>Furthermore, if one is exiled, the other will follow and commit suicide."
 
 # Options
 
@@ -28,6 +28,16 @@
 
 # Titles
 
+"achievement.twin.common1.title" : "Unforgivable Feud"
+"achievement.twin.common1.goal" : "Exile the killer which killed the one of the Twins."
+"achievement.twin.common1.splitted.1" : "Feud "
+
+"achievement.twin.another1.title" : "Miserable Fate"
+"achievement.twin.another1.goal" : "The one of the Twins was killed, and another was exiled."
+
+"achievement.twin.challenge.title" : "Twin Will"
+"achievement.twin.challenge.goal" : "Kill the enemies personally after your partner is dead and win."
+"achievement.twin.challenge.cond" : "Start as the Secret + Non-crews: kill 2 or more"
 
 # Team
 

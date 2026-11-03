@@ -14,7 +14,7 @@ namespace Nebula.Roles.Perks;
 internal class RaiderEvidence : PerkFunctionalInstance, IGameOperator
 {
     const float CoolDown = 10f;
-    static PerkFunctionalDefinition Def = new("raiderEvidence", PerkFunctionalDefinition.Category.NoncrewmateOnly, new PerkDefinition("raiderEvidence", 3, 38, Virial.Color.ImpostorColor, Virial.Color.ImpostorColor).CooldownText("%CD%", () => CoolDown), (def, instance) => new RaiderEvidence(def, instance));
+    static internal PerkFunctionalDefinition Def = new("raiderEvidence", PerkFunctionalDefinition.Category.NoncrewmateOnly, new PerkDefinition("raiderEvidence", 3, 38, Virial.Color.ImpostorColor, Virial.Color.ImpostorColor).CooldownText("%CD%", () => CoolDown), (def, instance) => new RaiderEvidence(def, instance));
 
     public RaiderEvidence(PerkDefinition def, PerkInstance instance) : base(def, instance)
     {

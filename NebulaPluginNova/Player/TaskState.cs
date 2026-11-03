@@ -47,6 +47,12 @@ public class PlayerTaskState : AbstractModule<GamePlayer>, PlayerTasks
         if (acTokenGhostTask != null) acTokenGhostTask.Value &= MyContainer.IsDead;
     }
 
+    //所持タスクやノルマには触れずに、タスクの進捗(TotalCompleted)だけを1つ進めます。ノルマを超えることもあります。
+    public void GainTotalCompleted()
+    {
+        RpcUpdateTaskState.Invoke((MyContainer.PlayerId, TaskUpdateMessage.GainTotalCompleted));
+    }
+
     public void BecomeToOutsider()
     {
         RpcUpdateTaskState.Invoke((MyContainer.PlayerId, TaskUpdateMessage.BecomeToOutsider));
@@ -313,7 +319,8 @@ public class PlayerTaskState : AbstractModule<GamePlayer>, PlayerTasks
         CompleteTask,
         BecomeToCrewmate,
         BecomeToOutsider,
-        WaiveTasks
+        WaiveTasks,
+        GainTotalCompleted
     }
 
     private static RemoteProcess<(byte playerId, TaskUpdateMessage type)> RpcUpdateTaskState = new(
@@ -329,7 +336,7 @@ public class PlayerTaskState : AbstractModule<GamePlayer>, PlayerTasks
                     case TaskUpdateMessage.CompleteTask:
                         task.CurrentCompleted++;
                         task.TotalCompleted++;
-                        GameOperatorManager.Instance?.Run(new PlayerTaskCompleteEvent(player));
+                        GameOperatorManager.Instance?.Run(new PlayerTaskCompleteEvent(player, false));
                         break;
                     case TaskUpdateMessage.BecomeToCrewmate:
                         task.IsCrewmateTask = true;
@@ -339,6 +346,10 @@ public class PlayerTaskState : AbstractModule<GamePlayer>, PlayerTasks
                         break;
                     case TaskUpdateMessage.WaiveTasks:
                         task.Quota = 0;
+                        break;
+                    case TaskUpdateMessage.GainTotalCompleted:
+                        task.TotalCompleted++;
+                        GameOperatorManager.Instance?.Run(new PlayerTaskCompleteEvent(player, true));
                         break;
                 }
             }

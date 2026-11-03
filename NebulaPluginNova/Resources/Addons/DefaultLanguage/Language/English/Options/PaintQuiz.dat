@@ -1,0 +1,30 @@
+# Header
+"options.paintQuiz" : "Paint Quiz Options"
+"options.paintQuiz.detail" : "About Paint Quiz mode"
+
+# Groups
+"options.paintQuiz.group.stamps" : "Rating Stamp Settings"
+
+# Options
+"options.paintQuiz.numOfQuiz" : "# Quizzes"
+"options.paintQuiz.category" : "Quiz Style"
+"options.paintQuiz.category.detail" : "Choose the quiz format (what you're given vs. what you guess)."
+"options.paintQuiz.category.blurbToRole" : "Flavor Blurb → Role"
+"options.paintQuiz.category.blurbToRole.detail" : "<b>Recommended!</b> A role's flavor blurb is shown.<br>Guess the correct role."
+"options.paintQuiz.category.roleToIcon" : "Role → Role Icon"
+"options.paintQuiz.category.roleToIcon.detail" : "<b>Recommended!</b> A role is shown. Draw its icon!<br>Feel free to get creative."
+"options.paintQuiz.category.titleToRole" : "Title → Role"
+"options.paintQuiz.category.titleToRole.detail" : "<b>Recommended!</b> A title held by someone in the lobby is shown.<br>Guess the related role."
+"options.paintQuiz.category.challengeToRole" : "Challenge → Role"
+"options.paintQuiz.category.challengeToRole.detail" : "A challenge title held by someone in the lobby is shown.<br>Guess the related role."
+"options.paintQuiz.category.roleToBlurb" : "Role → Flavor Blurb"
+"options.paintQuiz.category.roleToBlurb.detail" : "A role is shown. Guess its flavor blurb.<br>Stuck? Get creative!"
+"options.paintQuiz.category.roleToChallenge" : "Role → Challenge"
+"options.paintQuiz.category.roleToChallenge.detail" : "A role whose challenge title is held by someone in the lobby is shown.<br>Guess that role's challenge title."
+"options.paintQuiz.category.playerToBlurb" : "Player → Flavor"
+"options.paintQuiz.category.playerToBlurb.detail" : "A participant is shown.<br>Write a flavor text that fits them."
+"options.paintQuiz.category.playerToTitle" : "Player → Title"
+"options.paintQuiz.category.playerToTitle.detail" : "A participant is shown. Grant them a fitting title.<br>'Isn't this just a roast contest?' Yep. Exactly."
+
+"options.paintQuiz.restrictToSpawnables" : "Restrict To Spawnables"
+"options.paintQuiz.restrictToSpawnables.detail" : "When turned on, only spawnable roles under your current options are quizzed.<br>If the pool runs dry, it expands to all roles and resets."

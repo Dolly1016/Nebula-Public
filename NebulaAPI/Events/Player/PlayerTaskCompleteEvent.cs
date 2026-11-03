@@ -9,7 +9,10 @@ namespace Virial.Events.Player;
 
 public class PlayerTaskCompleteEvent : AbstractPlayerEvent
 {
-    internal PlayerTaskCompleteEvent(Virial.Game.Player player) : base(player) { }
+    public bool IsVirtualTask { get; private init; }
+    internal PlayerTaskCompleteEvent(Virial.Game.Player player, bool isVirtualTask) : base(player) {
+        this.IsVirtualTask = isVirtualTask;
+    }
 }
 
 public class PlayerTaskCompleteLocalEvent : AbstractPlayerEvent

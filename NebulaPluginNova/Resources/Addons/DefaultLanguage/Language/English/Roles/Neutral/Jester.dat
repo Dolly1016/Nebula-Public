@@ -56,3 +56,10 @@
 
 "document.tip.winCond.jester.title" : "Special Trigger"
 "document.tip.winCond.jester" : "The jester wins if jester is exiled in an emergency meeting."
+
+# Perk
+
+"button.label.jesterPerk" : "Perk"
+"perk.empty.jester.name" : "Jester's Perk Slot"
+"perk.empty.jester.detail" : "Choose a perk with the ability button."
+"role.jester.perk.guide" : "Choose your perks!"

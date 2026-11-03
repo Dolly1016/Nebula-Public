@@ -15,4 +15,6 @@ internal class LocalStatus
     public bool IsSuppressed => GamePlayer.LocalPlayer?.HasAttribute(PlayerAttributes.Suppressed) ?? true;
 
     public bool CannotReportOrSuppressed => !CanReport || IsSuppressed;
+
+    public bool InBuskerPseudocide { get; set; } = false;
 }

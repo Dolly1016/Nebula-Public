@@ -22,6 +22,8 @@
 "end.phase.extraWin5" : "Extra Win Phase"
 "end.phase.extraWin6" : "Extra Win Phase"
 "end.phase.extraWin7" : "Extra Win Phase"
+"end.browser" : "Check the detailed results in the web browser"
+"end.browser.steam" : "Check the detailed results in the web browser<br><b>Left Shift + Click</b> to open it from the in-game browser."
 
 # No Team Statictics
 
@@ -68,6 +70,8 @@
 "help.overview.simulate" : "Specify the number of people for the simulation."
 "help.search.search" : "Search"
 "help.search.hint" : "Enter text to search"
+"help.search.tooManyResults" : "More than 100 matches, only the first 100 items are displayed."
+"help.search.config" : "Click to open the option editing screen."
 "help.command" : "Commands"
 "help.command.nogame" : "No Game"
 "help.command.quickStart" : "Quick Start"

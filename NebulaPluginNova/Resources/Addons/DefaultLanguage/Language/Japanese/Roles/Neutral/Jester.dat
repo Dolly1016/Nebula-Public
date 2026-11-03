@@ -11,6 +11,7 @@
 "role.jester.ability.title" : "固有能力 "道化のいたずら""
 "role.jester.ability.main" : ""
 "role.jester.ability.drag" : "<title>掴む/離す</title>死体を運べます。"
+"role.jester.ability.perk" : "<title>パーク</title>パークを獲得します。"
 
 # Options
 
@@ -18,7 +19,10 @@
 "options.role.jester.canDragDeadBody" : "死体掴みと移動"
 "options.role.jester.canFixComms" : "通信障害を修理可能"
 "options.role.jester.canFixLight" : "停電を修理可能"
-"options.role.jester.task" : "勝利にタスクが必要"
+"options.role.jester.task" : "勝利に必要なタスク数"
+"options.role.jester.perk" : "ジェスターパーク"
+"options.role.jester.numOfPerks" : "最大パーク数"
+"options.role.jester.group.perk" : "ジェスターパークの設定"
 
 # Game
 
@@ -56,3 +60,10 @@
 
 "document.tip.winCond.jester.title" : "特殊勝利"
 "document.tip.winCond.jester" : "緊急会議で追放されると勝利します。"
+
+# Perk
+
+"button.label.jesterPerk" : "パーク"
+"perk.empty.jester.name" : "ジェスターパーク枠"
+"perk.empty.jester.detail" : "パークボタンからパークを選んで獲得できます。"
+"role.jester.perk.guide" : "パークを選択しよう！"

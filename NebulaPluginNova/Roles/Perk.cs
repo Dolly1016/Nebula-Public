@@ -19,10 +19,15 @@ file static class PerkUtils
     static private Image IconFrameSprite = SpriteLoader.FromResource("Nebula.Resources.Perks.Frame.png", 100f);
     static private Image IconFrameSpecialSprite = SpriteLoader.FromResource("Nebula.Resources.Perks.FrameSpecial.png", 100f);
     static private Image IconFrameSpecialGemSprite = SpriteLoader.FromResource("Nebula.Resources.Perks.FrameSpecialGem.png", 100f);
+    static private Image IconFrameNonPlantSprite = SpriteLoader.FromResource("Nebula.Resources.Perks.FrameNonPlant.png", 100f);
 
-    static public void SetSprite(SpriteRenderer icon, SpriteRenderer back, ref Color backColor, Color perkColor, Sprite? iconSprite, Sprite? backSprite, Color? color = null)
+    static public void SetSprite(SpriteRenderer icon, SpriteRenderer back, ref Color backColor, Color perkColor, Sprite? iconSprite, float iconSize, Sprite? backSprite, Color? color = null)
     {
-        if (icon) icon.sprite = iconSprite;
+        if (icon)
+        {
+            icon.sprite = iconSprite;
+            icon.transform.localScale = new(iconSize, iconSize, 1f);
+        }
         if (back)
         {
             if (backSprite != null)
@@ -39,19 +44,47 @@ file static class PerkUtils
         }
     }
 
-    public static void GeneratePerkObject(PerkDefinition definition, Transform parent, out GameObject obj, out SpriteRenderer back, out SpriteRenderer gem, out SpriteRenderer icon)
+    /// <summary>
+    /// パークの表示オブジェクトを生成する。
+    /// </summary>
+    /// <param name="frameInfo">パーク枠の情報。指定した場合はパーク枠の種類から枠画像を決める。nullの場合はパークの情報から決める。</param>
+    public static void GeneratePerkObject(PerkDefinition definition, Transform parent, out GameObject obj, out SpriteRenderer back, out SpriteRenderer gem, out SpriteRenderer icon, PerkFrameInfo? frameInfo = null)
     {
         obj = UnityHelper.CreateObject("PerkDisplay", parent, UnityEngine.Vector3.zero, LayerExpansion.GetUILayer());
         back = UnityHelper.CreateObject<SpriteRenderer>("Back", obj.transform, new(0f, 0f, 0f));
         back.sprite = IconFrameBackSprite.GetSprite();
         back.color = new(0.4f, 0.4f, 0.4f, 0.5f);
+
+        Image frameSprite;
+        Color? gemColor;
+        switch (frameInfo?.Category)
+        {
+            case PerkFunctionalDefinition.Category.Standard:
+                frameSprite = IconFrameSprite;
+                gemColor = null;
+                break;
+            case PerkFunctionalDefinition.Category.NoncrewmateOnly:
+                //宝石の色はパークの指定を優先し、指定が無ければ枠の色を使う。
+                frameSprite = IconFrameSpecialSprite;
+                gemColor = definition.specialColor ?? frameInfo.Color ?? Color.white;
+                break;
+            case PerkFunctionalDefinition.Category.Plain:
+                frameSprite = IconFrameNonPlantSprite;
+                gemColor = null;
+                break;
+            default:
+                frameSprite = definition.specialColor.HasValue ? IconFrameSpecialSprite : IconFrameSprite;
+                gemColor = definition.specialColor;
+                break;
+        }
+
         var frame = UnityHelper.CreateObject<SpriteRenderer>("Frame", obj.transform, new(0f, 0f, -0.6f));
-        frame.sprite = definition.specialColor.HasValue ? IconFrameSpecialSprite.GetSprite() : IconFrameSprite.GetSprite();
-        if (definition.specialColor.HasValue)
+        frame.sprite = frameSprite.GetSprite();
+        if (gemColor.HasValue)
         {
             gem = UnityHelper.CreateObject<SpriteRenderer>("Gem", obj.transform, new(0f, 0f, -0.8f));
             gem.sprite = IconFrameSpecialGemSprite.GetSprite();
-            gem.color = definition.specialColor.Value;
+            gem.color = gemColor.Value;
         }
         else
         {
@@ -67,6 +100,7 @@ public class PerkFunctionalDefinition
     {
         Standard,
         NoncrewmateOnly,
+        Plain,
     }
     public PerkDefinition PerkDefinition { get; private set; }
     public string Id { get; private init; }
@@ -138,15 +172,16 @@ public abstract class PerkFunctionalInstance : DependentLifespan, IGameOperator
     
 }
 
-public record PerkDefinition(string localizedName, Image? backSprite, Image? iconSprite, Color perkColor, Color? specialColor)
+public record PerkDefinition(string localizedName, Image? backSprite, Image? iconSprite, Color perkColor, Color? specialColor, float iconSize = 1f)
 {
     private List<(string orig, Func<string> replaced)> allReplacement = new();
     
-    public PerkDefinition(string localizedName, int backId, int iconId, Virial.Color perkColor, Virial.Color? specialColor = null) : this(localizedName, GetPerkBackIcon(backId), GetPerkIcon(iconId), perkColor.ToUnityColor(), specialColor?.ToUnityColor()) { }
+    public PerkDefinition(string localizedName, int backId, int iconId, Virial.Color perkColor, Virial.Color? specialColor = null) : this(localizedName, GetPerkBackIcon(backId), GetPerkIcon(iconId, out var size), perkColor.ToUnityColor(), specialColor?.ToUnityColor(), size) { }
     public PerkDefinition(string localizedName) : this(localizedName, null, null, Color.white, null) { }
-    public PerkInstance? Instantiate(ILifespan? lifespan = null)
+    /// <param name="frameInfo">表示先のパーク枠の情報。枠画像はこれをもとに決める。</param>
+    public PerkInstance? Instantiate(ILifespan? lifespan = null, PerkFrameInfo? frameInfo = null)
     {
-        var perk = NebulaAPI.CurrentGame?.GetModule<PerkHolder>()?.RegisterPerk(this);
+        var perk = NebulaAPI.CurrentGame?.GetModule<PerkHolder>()?.RegisterPerk(this, frameInfo);
         if (perk != null)
         {
             perk.Register(lifespan ?? NebulaAPI.CurrentGame!);
@@ -164,7 +199,16 @@ public record PerkDefinition(string localizedName, Image? backSprite, Image? ico
     public PerkDefinition DurationText(string orig, Func<float> duration) => AppendReplacement(orig, () => duration.Invoke().ToString().Color(VColor.Yellow).Bold());
     public PerkDefinition RateText(string orig, Func<float> rate) => AppendReplacement(orig, () => rate.Invoke().ToString().Color(VColor.Cyan).Bold());
 
-    static public Image GetPerkIcon(int id) => SpriteLoader.FromResource("Nebula.Resources.Perks.Front" + id + ".png", 100f);
+    static public Image GetPerkIcon(int id, out float size)
+    {
+        if (id >= 10000)
+        {
+            size = 0.38f;
+            return new WrapSpriteLoader(() => VanillaAsset.MapAsset[0].socialMediumFeedSystemPrefab.possibleSprites[id % 10000]);
+        }
+        size = 1f;
+        return SpriteLoader.FromResource("Nebula.Resources.Perks.Front" + id + ".png", 100f);
+    }
     static public Image GetPerkBackIcon(int id) => SpriteLoader.FromResource("Nebula.Resources.Perks.Back" + id + ".png", 100f);
 
     public string DisplayNameTranslationKey => "perk." + localizedName + ".name";
@@ -189,18 +233,31 @@ public record PerkDefinition(string localizedName, Image? backSprite, Image? ico
         GUI.API.Text(Virial.Media.GUIAlignment.Left, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OverlayContent), DetailTextComponent));
     }
 
-    public GUIWidget GetPerkImageWidget(bool masked = false, Action? action = null, GUIWidgetSupplier? overlay = null)
+    /// <param name="color">表示全体に乗算する色。</param>
+    /// <param name="withHighlight">trueの場合、カーソルを合わせている間ハイライトを表示する。</param>
+    /// <param name="frameInfo">枠の見た目。nullの場合はパークの情報から決める。</param>
+    public GUIWidget GetPerkImageWidget(bool masked = false, Action? action = null, GUIWidgetSupplier? overlay = null, Color? color = null, bool withHighlight = false, PerkFrameInfo? frameInfo = null)
     {
         return new NoSGameObjectGUIWrapper(Virial.Media.GUIAlignment.Center, () =>
         {
-            PerkUtils.GeneratePerkObject(this, null!, out var obj, out var back, out _, out var icon);
+            PerkUtils.GeneratePerkObject(this, null!, out var obj, out var back, out _, out var icon, frameInfo);
             Color backColor = Color.white;
-            PerkUtils.SetSprite(icon, back, ref backColor, Color.white, iconSprite?.GetSprite(), backSprite?.GetSprite(), perkColor);
+            PerkUtils.SetSprite(icon, back, ref backColor, Color.white, iconSprite?.GetSprite(), iconSize, backSprite?.GetSprite(), perkColor);
             obj.transform.localScale = new(0.45f, 0.45f, 1f);
+
+            if (color.HasValue) obj.GetComponentsInChildren<SpriteRenderer>().Do(r => r.color *= color.Value);
+
+            SpriteRenderer? highlight = null;
+            if (withHighlight)
+            {
+                highlight = UnityHelper.CreateObject<SpriteRenderer>("Highlight", obj.transform, new(0f, 0f, -0.5f));
+                highlight.sprite = PerkInstance.IconHighlightSprite.GetSprite();
+                highlight.gameObject.SetActive(false);
+            }
 
             if (masked) obj.GetComponentsInChildren<SpriteRenderer>().Do(r => r.maskInteraction = SpriteMaskInteraction.VisibleInsideMask);
             
-            if(action != null || overlay != null)
+            if(action != null || overlay != null || highlight != null)
             {
                 var button = obj.SetUpButton(true);
                 var collider = button.gameObject.AddComponent<CircleCollider2D>();
@@ -211,6 +268,11 @@ public record PerkDefinition(string localizedName, Image? backSprite, Image? ico
                 {
                     button.OnMouseOver.AddListener(() => NebulaManager.Instance.SetHelpWidget(button, overlay.Invoke()));
                     button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
+                }
+                if (highlight != null)
+                {
+                    button.OnMouseOver.AddListener(() => highlight.gameObject.SetActive(true));
+                    button.OnMouseOut.AddListener(() => highlight.gameObject.SetActive(false));
                 }
             }
 
@@ -224,7 +286,7 @@ public record PerkDefinition(string localizedName, Image? backSprite, Image? ico
 public class PerkInstance : FlexibleLifespan, IGameOperator
 {
     static public Image IconMaskSprite = SpriteLoader.FromResource("Nebula.Resources.Perks.PerkMask.png", 100f);
-    static private Image IconHighlightSprite = SpriteLoader.FromResource("Nebula.Resources.Perks.Highlight.png", 100f);
+    static internal Image IconHighlightSprite = SpriteLoader.FromResource("Nebula.Resources.Perks.Highlight.png", 100f);
 
     internal ModGameObject RelatedGameObject => modObj;
     private GameObject obj;
@@ -241,9 +303,9 @@ public class PerkInstance : FlexibleLifespan, IGameOperator
 
 
     
-    public PerkInstance(PerkDefinition definition, Transform parent)
+    public PerkInstance(PerkDefinition definition, Transform parent, PerkFrameInfo? frameInfo = null)
     {
-        PerkUtils.GeneratePerkObject(definition, parent, out obj, out back, out gem, out icon);
+        PerkUtils.GeneratePerkObject(definition, parent, out obj, out back, out gem, out icon, frameInfo);
         modObj = obj.ModGameObject(true);
         highlight = UnityHelper.CreateObject<SpriteRenderer>("Highlight", obj.transform, new(0f, 0f, -0.5f));
         highlight.sprite = IconHighlightSprite.GetSprite();
@@ -268,7 +330,7 @@ public class PerkInstance : FlexibleLifespan, IGameOperator
         collider.radius = 0.62f;
 
         SetCoolDownColor(Color.red);
-        PerkUtils.SetSprite(icon, back, ref backColor, perkColor, definition.iconSprite?.GetSprite(), definition.backSprite?.GetSprite(), definition.perkColor);
+        PerkUtils.SetSprite(icon, back, ref backColor, perkColor, definition.iconSprite?.GetSprite(), definition.iconSize, definition.backSprite?.GetSprite(), definition.perkColor);
         SetHighlight(false);
     }
 
@@ -297,6 +359,37 @@ public class PerkInstance : FlexibleLifespan, IGameOperator
     void Update(GameUpdateEvent ev)
     {
         if (MyTimer != null) SetCoolDown(MyTimer.Percentage);
+    }
+
+    /// <summary>
+    /// パークの形(PerkMask)で、ボタンのフラッシュと同様のエフェクトを1回再生する。
+    /// </summary>
+    public void PlayFlashOnce()
+    {
+        if (IsDeadObject) return;
+        NebulaManager.Instance.StartCoroutine(CoFlash().WrapToIl2Cpp());
+    }
+
+    private IEnumerator CoFlash()
+    {
+        var renderer = UnityHelper.CreateObject<SpriteRenderer>("Flash", obj.transform, new(0f, 0f, -1f));
+        renderer.gameObject.layer = LayerExpansion.GetUILayer();
+        renderer.sprite = IconMaskSprite.GetSprite();
+        renderer.material = new(NebulaAsset.WhiteShader);
+        renderer.material.SetColor("_Color", new(1f, 1f, 1f, 1f));
+        yield return null;
+
+        float a = 1f;
+        while (a > 0f)
+        {
+            if (!renderer) yield break;
+            renderer.transform.localScale = UnityEngine.Vector3.one * (2f - a);
+            renderer.material.SetColor("_Color", new(1f, 1f, 1f, a * 0.85f));
+            a -= Time.deltaTime * 1.5f;
+            yield return null;
+        }
+
+        if (renderer) GameObject.Destroy(renderer.gameObject);
     }
 
     public void SetCoolDown(float rate)

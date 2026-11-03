@@ -72,6 +72,9 @@
 "perk.doubleVote.name" : "声高な主張"
 "perk.doubleVote.detail" : "スキップや投票放棄、0票投票以外で<br>投じる票数を一度だけ2倍にする。"
 
+"perk.handOfMercy.name" : "いい子、いい子"
+"perk.handOfMercy.detail" : "選択したプレイヤーの頭を撫でる。<br>クルーメイト陣営なら、3人の異なるプレイヤーを撫でるたびにタスクの進捗が進む。<br>このパークには%CD%秒のクールダウンがある。"
+
 "perk.monowayX.name" : "風見鶏 -赤-"
 "perk.monowayX.detail" : "発動すると%D%秒間、<b>自身以外</b>の縦方向移動を禁止する。<br>このパークには%CD%秒のクールダウンがある。<br>クールダウンはタスクフェイズの間のみ進み、会議が始まるたびにリセットされない。"
 
@@ -96,6 +99,9 @@
 
 "perk.ketchupMessage.name" : "ケチャップメッセージ"
 "perk.ketchupMessage.detail" : "その場にダイイングメッセージのような文字を描く。"
+
+"perk.eraseBody.name" : "証拠隠滅"
+"perk.eraseBody.detail" : "死体を消去する。一度だけ使用できる。"
 
 # Game Statictics
 

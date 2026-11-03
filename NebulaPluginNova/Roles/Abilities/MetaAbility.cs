@@ -94,6 +94,23 @@ public class MetaAbility : DependentLifespan, IGameOperator, IModule
 
             GUIWidget inner = GUIEmptyWidget.Default;
 
+            void SetUpIcon(PassiveButton button, SpriteRenderer renderer, TMPro.TextMeshPro text, DefinedAssignable assignable)
+            {
+                text.transform.localPosition += new Vector3(0.07f, 0f, 0f);
+                text.transform.localScale *= 0.905f;
+                button.transform.localPosition -= new Vector3(0.07f, 0f, 0f);
+
+                var roleIcon = assignable.GetRoleIcon()?.GetSprite();
+                if (roleIcon)
+                {
+                    var icon = UnityHelper.CreateObject<SpriteRenderer>("Icon", button.transform, new(-0.73f, 0f, -0.01f));
+                    icon.sprite = roleIcon;
+                    icon.material = RoleIcon.GetRoleIconMaterial(assignable, 0.8f);
+                    icon.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                    icon.transform.localScale = new(0.27f, 0.27f, 1f);
+                }
+            }
+
             if (tab == 0)
             {
                 inner = GUI.API.Arrange(Virial.Media.GUIAlignment.Center, Roles.AllRoles.Where(r => r.ShowOnFreeplayScreen).Select(r => new GUIButton(Virial.Media.GUIAlignment.Center, roleMaskedTittleAttr, GUI.API.RawTextComponent(r.DisplayColoredName)){
@@ -102,19 +119,7 @@ public class MetaAbility : DependentLifespan, IGameOperator, IModule
                         window.CloseScreen();
                     }, ButtonPostBuilder = (button, renderer, text) =>
                     {
-                        text.transform.localPosition += new Vector3(0.07f, 0f, 0f);
-                        text.transform.localScale *= 0.905f;
-                        button.transform.localPosition -= new Vector3(0.07f, 0f, 0f);
-
-                        var roleIcon = r.GetRoleIcon()?.GetSprite();
-                        if (roleIcon)
-                        {
-                            var icon = UnityHelper.CreateObject<SpriteRenderer>("Icon", button.transform, new(-0.73f, 0f, -0.01f));
-                            icon.sprite = roleIcon;
-                            icon.material = RoleIcon.GetRoleIconMaterial(r, 0.8f);
-                            icon.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
-                            icon.transform.localScale = new(0.27f, 0.27f, 1f);
-                        }
+                        SetUpIcon(button, renderer, text, r);
                     }
                 })
                     /*
@@ -135,26 +140,35 @@ public class MetaAbility : DependentLifespan, IGameOperator, IModule
             {
                 inner = GUI.API.VerticalHolder(Virial.Media.GUIAlignment.Center,
                     GUI.API.LocalizedText(Virial.Media.GUIAlignment.Center, roleMaskedTittleAttr, "game.metaAbility.equipped"),
-                    GUI.API.Arrange(Virial.Media.GUIAlignment.Center, Roles.AllModifiers.Where(r => GamePlayer.LocalPlayer!.Modifiers.Any(m => m.Modifier == r)).Select(r => GUI.API.RawButton(Virial.Media.GUIAlignment.Center, roleMaskedTittleAttr, r.DisplayColoredName, button =>
+                    GUI.API.Arrange(Virial.Media.GUIAlignment.Center, Roles.AllModifiers.Where(r => GamePlayer.LocalPlayer!.Modifiers.Any(m => m.Modifier == r)).Select(r => new GUIButton(Virial.Media.GUIAlignment.Center, roleMaskedTittleAttr, GUI.API.RawTextComponent(r.DisplayColoredName))
                     {
-                        GamePlayer.LocalPlayer?.RemoveModifier(r);
-                        SetWidget(1);
-                    })), 4),
+                        OnClick = b =>
+                        {
+                            GamePlayer.LocalPlayer?.RemoveModifier(r);
+                            SetWidget(1);
+                        },
+                        ButtonPostBuilder = (button, renderer, text) => SetUpIcon(button, renderer, text, r)
+                    }), 4),
                     GUI.API.LocalizedText(Virial.Media.GUIAlignment.Center, roleMaskedTittleAttr, "game.metaAbility.unequipped"),
-                    GUI.API.Arrange(Virial.Media.GUIAlignment.Center, Roles.AllModifiers.Where(r => r.ShowOnFreeplayScreen && !GamePlayer.LocalPlayer!.Modifiers.Any(m => m.Modifier == r)).Select(r => GUI.API.RawButton(Virial.Media.GUIAlignment.Center, roleMaskedTittleAttr, r.DisplayColoredName, button =>
-                    {
-                        GamePlayer.LocalPlayer?.AddModifier(r);
-                        SetWidget(1);
-                    })), 4)
-                    );
+                    GUI.API.Arrange(Virial.Media.GUIAlignment.Center, Roles.AllModifiers.Where(r => r.ShowOnFreeplayScreen && !GamePlayer.LocalPlayer!.Modifiers.Any(m => m.Modifier == r)).Select(r => new GUIButton(Virial.Media.GUIAlignment.Center, roleMaskedTittleAttr, GUI.API.RawTextComponent(r.DisplayColoredName)) { 
+                        OnClick = b =>
+                        {
+                            GamePlayer.LocalPlayer?.AddModifier(r);
+                            SetWidget(1);
+                        },
+                        ButtonPostBuilder = (button, renderer, text) => SetUpIcon(button, renderer, text, r)
+                    }), 4));
             }
             else if (tab == 2)
             {
-                inner = GUI.API.Arrange(Virial.Media.GUIAlignment.Center, Roles.AllGhostRoles.Where(r => r.ShowOnFreeplayScreen).Select(r => GUI.API.RawButton(Virial.Media.GUIAlignment.Center, roleMaskedTittleAttr, r.DisplayColoredName, button =>
-                {
-                    GamePlayer.LocalPlayer?.SetGhostRole(r);
-                    window.CloseScreen();
-                })), 4);
+                inner = GUI.API.Arrange(Virial.Media.GUIAlignment.Center, Roles.AllGhostRoles.Where(r => r.ShowOnFreeplayScreen).Select(r => new GUIButton(Virial.Media.GUIAlignment.Center, roleMaskedTittleAttr, GUI.API.RawTextComponent(r.DisplayColoredName)) { 
+                    OnClick = b =>
+                    {
+                        GamePlayer.LocalPlayer?.SetGhostRole(r);
+                        window.CloseScreen();
+                    },
+                    ButtonPostBuilder = (button, renderer, text) => SetUpIcon(button, renderer, text, r)
+                }), 4);
             }
             else if (tab == 3)
             {

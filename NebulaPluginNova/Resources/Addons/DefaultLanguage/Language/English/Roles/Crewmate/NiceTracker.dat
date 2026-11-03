@@ -33,3 +33,14 @@
 "stats.niceTracker.track" : "Num of Tracking"
 
 # Titles
+
+"achievement.niceTracker.common1.title" : "Overbearing Interference"
+"achievement.niceTracker.common1.goal" : "Track a total of 5 players."
+"achievement.niceTracker.common1.flavor" : ""I'm not a kid anymore! Get it!!""
+
+"achievement.niceTracker.common2.title" : "Every Move"
+"achievement.niceTracker.common2.goal" : "A tracked player moves more than 5 meters in an instant."
+
+"achievement.niceTracker.challenge.title" : "Review The Crime Scene"
+"achievement.niceTracker.challenge.goal" : "Track all impostors, witness the kill moment equal to the num of impostors, then<br>eject only non-crews in the meeting and win as the crewmate."
+"achievement.niceTracker.challenge.splitted.1" : "There "

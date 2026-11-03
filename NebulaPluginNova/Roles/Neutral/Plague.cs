@@ -460,6 +460,7 @@ internal class Plague : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             internal IEnumerable<GamePlayer> GetInfected() => GamePlayer.AllPlayers.Where(p => !p.AmOwner && !(GetProgress(p) < 1f));
 
             public bool CanWin => GamePlayer.AllPlayers.All(p => p.AmOwner || p.IsDead || IsInfectedFully(p));
+            public int NumOfUninfectedAlives => GamePlayer.AllPlayers.Count(p => !p.AmOwner && p.IsAlive && !IsInfectedFully(p));
         }
 
         private Bottles currentBottles;
@@ -559,6 +560,8 @@ internal class Plague : DefinedRoleTemplate, DefinedRole, IAssignableDocument
         float afterMeetingCooldown = 0f;
         bool sentWinningRequest = false;
 
+        int lastLeftUninfected = -1;
+
         [Local]
         void OnUpdate(GameUpdateEvent ev)
         {
@@ -599,6 +602,13 @@ internal class Plague : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                         }
 
                         if (spreader != null && infectedDistance < maxSpreadDistance) progress.AddProgress(p, 1f / requiredTimeToInfect * Time.deltaTime, spreader);
+                    }
+
+                    var leftUninfected = progress.NumOfUninfectedAlives;
+                    if(lastLeftUninfected != leftUninfected)
+                    {
+                        lastLeftUninfected = leftUninfected;
+                        ModSingleton<IWinningOpportunity>.Instance.RpcSetOpportunity(MyTeam, 1f - (lastLeftUninfected) * 0.1f);
                     }
 
                     if(!sentWinningRequest && progress.CanWin)

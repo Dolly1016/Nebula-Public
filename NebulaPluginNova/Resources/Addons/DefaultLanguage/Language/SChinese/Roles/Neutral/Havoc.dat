@@ -1,0 +1,73 @@
+# Assignable
+ 
+"role.havoc.name" : "猎狼"
+"role.havoc.short" : "猎"
+"role.havoc.blurb" : "终末盛宴"
+ 
+# Document
+ 
+"role.havoc.doc" : "猎狼可以吞噬尸体以强化自身能力。"
+"role.havoc.winCond" : "杀死其他所有玩家。"
+"role.havoc.ability.title" : "固有能力【混乱无序】"
+"role.havoc.ability.main" : "可以啃食尸体以强化自身能力。<br>合理使用嚎鸣争取吞噬更多尸体或击杀更多玩家。"
+"role.havoc.ability.devour" : "<title>啃食</title>啃食尸体。每啃食1具尸体，击杀冷却缩短<var>%REDUC%</var>秒。<br>啃食<var>%VENT%</var>具后获得使用通风口能力。<br>啃食<var>%PING%</var>具后，使用嚎鸣可以知晓附近玩家的位置。"
+"role.havoc.ability.devouredCorpse" : "<title>被啃食的尸体</title>被啃食后的尸体外观会发生变化。<br>该尸体仍然可以报告，但不能拖动。"
+"role.havoc.ability.havoc" : "<title>嚎鸣</title>发动后，在<var>%DURATION%</var>秒期间，不能报告尸体与发起紧急会议。<br>嚎鸣会响彻整个地图，但没有具体指向。"
+ 
+# Options
+ 
+"options.role.havoc.detail" : "猎狼可以吞噬尸体以强化自身能力。<br>注：要在还未成长之前驱逐！"
+"options.role.havoc.killCooldown" : "初始击杀冷却时间"
+"options.role.havoc.killCooldownReduction" : "啃食后击杀缩短秒数"
+"options.role.havoc.devourCooldown" : "啃食冷却时间"
+"options.role.havoc.maxDevourLevel" : "最大啃食次数"
+"options.role.havoc.maxDevourLevel.detail" : "配置可以啃食尸体的最大次数。<br>达到上限后，能力将强化到最大。"
+"options.role.havoc.havocCooldown" : "嚎鸣冷却时间"
+"options.role.havoc.havocDuration" : "嚎鸣持续时间"
+"options.role.havoc.requiredKillingForVent" : "解锁通风口使用能力所需啃食数"
+"options.role.havoc.requiredDevourForSearch" : "解锁感知能力所需啃食数"
+"options.role.havoc.clearHavocSEDistance" : "可清晰听到嚎鸣音效范围"
+"options.role.havoc.clearHavocSEDistance.detail" : "在指定范围内的玩家可以清晰听到嚎鸣的声音。<br>范围外音效会变得模糊。"
+ 
+# Game
+ 
+ 
+# UI
+ 
+"button.label.devour" : "啃食"
+"button.label.havoc" : "嚎鸣"
+ 
+# Stats
+ 
+"stats.label.devour" : "啃食尸体次数"
+"stats.label.havoc" : "使用嚎鸣次数"
+ 
+# Titles
+ 
+"achievement.havoc.common1.title" : "猛兽之夜"
+"achievement.havoc.common1.goal" : "嚎鸣期间进行一次啃食。"
+ 
+"achievement.havoc.another1.title" : "并非猛兽"
+"achievement.havoc.another1.goal" : "没有进行啃食，也没有进行击杀便死亡。"
+"achievement.havoc.another1.flavor" : "“谁家宠物？”"
+ 
+"achievement.havoc.common2.title" : "贪婪之餐"
+"achievement.havoc.common2.goal" : "累计啃食10具尸体。"
+ 
+"achievement.havoc.challenge.title" : "癫狂巨兽"
+"achievement.havoc.challenge.goal" : "在嚎鸣期间击杀2人以上后结束游戏并胜利。"
+"achievement.havoc.challenge.flavor" : "“警告，控制失效！即将失控！！”"
+ 
+# Team
+ 
+"end.detail.havoc.win" : "猎狼胜利"
+ 
+"teams.havoc" : "猎狼"
+"end.havoc" : "猎狼%EXTRA%胜利"
+ 
+# Document
+ 
+"document.tip.winCond.teams.havoc" : "猎狼"
+ 
+"document.tip.winCond.havoc.title" : "击杀胜利"
+"document.tip.winCond.havoc" : "当自身阵营的幸存者占所有幸存者半数以上时获胜。<br>需要其他独立杀戮型阵营全部死亡。"

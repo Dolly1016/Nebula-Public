@@ -11,7 +11,7 @@
 # Options
 
 "options.role.bait.detail" : "诱饵被杀后，凶手会立刻报告诱饵的尸体"
-"options.role.bait.showKillFlash" : "击杀诱饵的凶手有闪光提醒"
+"options.role.bait.showKillFlash" : "击杀诱饵时闪光显示"
 "options.role.bait.showKillFlash.detail" : "开启后，杀死诱饵的凶手会有淡蓝色闪光提示。"
 "options.role.bait.reportDelay" : "报告延迟"
 "options.role.bait.reportDelay.detail" : "设置击杀延迟报告可以会更难判断是否击杀诱饵。"

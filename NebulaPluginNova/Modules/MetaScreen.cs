@@ -1277,8 +1277,8 @@ public class MetaScreen : MonoBehaviour, GUIScreen
         return screen;
     }
 
-    static public MetaScreen GenerateWindow(VVector2 size, Transform? parent, VVector3 localPos, bool withBlackScreen, bool closeOnClickOutside, bool withMask, bool withBackground)
-        => GenerateWindow(size, parent, localPos, withBlackScreen, closeOnClickOutside, withMask, withBackground ? BackgroundSetting.Old : BackgroundSetting.Off);
+    static public MetaScreen GenerateWindow(VVector2 size, Transform? parent, VVector3 localPos, bool withBlackScreen, bool closeOnClickOutside, bool withMask, bool withBackground, bool withCloseButton = true)
+        => GenerateWindow(size, parent, localPos, withBlackScreen, closeOnClickOutside, withMask, withBackground ? BackgroundSetting.Old : BackgroundSetting.Off, withCloseButton);
     static public MetaScreen GenerateWindow(VVector2 size, Transform? parent, VVector3 localPos, bool withBlackScreen, bool closeOnClickOutside, bool withMask = false, BackgroundSetting background = BackgroundSetting.Old, bool withCloseButton = true)
     {
         var screen = GenerateScreen(size, parent, localPos, background, withBlackScreen, true);

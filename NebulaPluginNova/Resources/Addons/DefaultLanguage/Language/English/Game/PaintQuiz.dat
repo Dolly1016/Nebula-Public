@@ -1,0 +1,49 @@
+# UI
+
+"paintQuiz.ui.canvas.clear" : "Clear"
+"paintQuiz.ui.canvas.submit" : "Submit"
+"paintQuiz.ui.done" : "Submitted"
+"paintQuiz.ui.waitScoring" : "Waiting for the host to score"
+
+# Quiz
+
+"paintQuiz.category.blurbToRole.quiz" : "Which role says "%BLURB%"?"
+"paintQuiz.category.roleToIcon.quiz" : "Draw the icon for %ROLE%!"
+"paintQuiz.category.roleToBlurb.quiz" : "What's the flavor text for %ROLE%?"
+"paintQuiz.category.titleToRole.quiz" : "Which role holds the title "%TITLE%"?"
+"paintQuiz.category.roleToChallenge.quiz" : "What's the challenge title for %ROLE%?"
+"paintQuiz.category.playerToBlurb.quiz" : "Write a flavor text for %PLAYER%!"
+"paintQuiz.category.playerToTitle.quiz" : "Make up a title for %PLAYER%!"
+
+"paintQuiz.hint.title" : "Earned by %PLAYERS%"
+"paintQuiz.hint.title.moreThan2" : "Earned by %PLAYERS% and %OTHERS% others"
+"paintQuiz.hint.role" : "Recently played by %PLAYERS%!"
+"paintQuiz.hint.role.moreThan2" : "Recently played by %PLAYERS% and %OTHERS% others!"
+"paintQuiz.hint.comma" : ", "
+
+"paintQuiz.category.hint" : "~How this round works~"
+"paintQuiz.category.blurbToRole.hint" : "A flavor text will be shown.<br>Guess the role!"
+"paintQuiz.category.roleToIcon.hint" : "A role will be shown.<br>Draw its role icon!"
+"paintQuiz.category.titleToRole.hint" : "A title will be shown.<br>Guess the related role!"
+"paintQuiz.category.challengeToRole.hint" : "A challenge title will be shown.<br>Guess the related role!"
+"paintQuiz.category.roleToBlurb.hint" : "A role will be shown.<br>Guess its flavor text!"
+"paintQuiz.category.roleToChallenge.hint" : "A role will be shown.<br>Guess its challenge title!"
+"paintQuiz.category.playerToBlurb.hint" : "A player will be shown. Write them a flavor text!<br>%RANDOM%"
+"paintQuiz.category.playerToBlurb.hint.random.0" : "Make it cool as hell."
+"paintQuiz.category.playerToBlurb.hint.random.1" : "Hit it out of the park."
+"paintQuiz.category.playerToBlurb.hint.random.2" : "No opening punchlines. Ever."
+"paintQuiz.category.playerToTitle.hint" : "A player will be shown. Make them a title!<br>%RANDOM%"
+"paintQuiz.category.playerToTitle.hint.random.0" : "Gotta fire up the stage, right?"
+"paintQuiz.category.playerToTitle.hint.random.1" : "Titles are an honor, you know."
+"paintQuiz.category.playerToTitle.hint.random.2" : "Come up with the unlock condition too — it's way more fun!"
+
+# ForHost
+
+"paintQuiz.ui.proceed" : "Next"
+"paintQuiz.ui.noScore" : "No Points"
+"paintQuiz.ui.answer" : "Correct Answer"
+"paintQuiz.ui.noAnswer" : "A great painter come from here lol."
+"paintQuiz.ui.hint.leftClick" : "Left-click to assign a score"
+"paintQuiz.ui.hint.rightClick" : "Right-click to score the same"
+"paintQuiz.ui.finishReview" : "Finish Scoring"
+"paintQuiz.ui.resetToDefault" : "<b>No questions left to ask</b>, so the<br>question pool was expanded and reset."

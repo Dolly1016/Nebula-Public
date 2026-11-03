@@ -63,7 +63,7 @@
 # Document
 
 "document.tip.winCond.vanity.kill.title" : "击杀胜利"
-"document.tip.winCond.vanity.kill" : "若已击杀船员，需要完全歼灭其他阵营或自身阵营占据全体幸存玩家的一半以上。"
+"document.tip.winCond.vanity.kill" : "若已击杀船员，需要完全歼灭其他杀戮型阵营，同时自身阵营占据全体幸存玩家的一半以上。"
 "document.tip.winCond.vanity.extra.crewOnly.title" : "跟随船员胜利"
 "document.tip.winCond.vanity.extra.crewOnly" : "若未击杀船员，当船员阵营获得胜利时跟随船员胜利。"
 "document.tip.winCond.vanity.extra.title" : "跟随胜利"

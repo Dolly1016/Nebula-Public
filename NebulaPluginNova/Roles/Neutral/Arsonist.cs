@@ -218,6 +218,12 @@ public class Arsonist : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignab
                 acTokenChallenge = new("arsonist.challenge", false, (val, _) => val);
         }
 
+        [Local]
+        void OnGameEnd(GameEndEvent ev)
+        {
+            if (acTokenChallenge != null) acTokenChallenge.Value = ev.EndState.Winners.Test(MyPlayer) && ev.EndState.EndCondition == NebulaGameEnd.ArsonistWin;
+        }
+
         static private readonly RemoteProcess<GamePlayer> RpcFireEffect = new("ArsonistFire", (arsonist, _) =>
         {
             foreach(var player in GamePlayer.AllPlayers)

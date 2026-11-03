@@ -644,6 +644,7 @@ public class Justice : DefinedSingleAbilityRoleTemplate<Justice.Ability>, HasCit
                 new StaticAchievementToken("justice.common1");
                 if(p1.IsImpostor || p2.IsImpostor) new StaticAchievementToken("justice.common2");
                 UpdateState.RpcSync(MyPlayer, 1);
+                isMyJusticeMeeting = true;
             }
 
             if (!usedBalance)

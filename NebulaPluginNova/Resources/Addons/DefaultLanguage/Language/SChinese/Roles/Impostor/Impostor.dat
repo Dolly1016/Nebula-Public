@@ -37,7 +37,7 @@
 "document.tip.winCond.teams.impostor" : "伪装者"
 
 "document.tip.winCond.impostor.kill.title" : "击杀胜利"
-"document.tip.winCond.impostor.kill" : "当伪装者阵营幸存玩家数占所有幸存玩家数一半时获胜。<br>需要其他独立阵营全部死亡，同时队友不属于%LOVER%阵营。"
+"document.tip.winCond.impostor.kill" : "当伪装者阵营幸存玩家数占所有幸存玩家数一半时获胜。<br>需要其他独立杀戮型阵营全部死亡，同时队友不属于%LOVER%阵营。"
 "document.tip.winCond.impostor.extinction.title" : "完全歼灭胜利"
 "document.tip.winCond.impostor.extinction" : "当所有幸存玩家都是相同阵营时，那么就获胜了。<br>需要队友中不存在%LOVER%阵营。"
 "document.tip.winCond.impostor.sabotage.title" : "破坏胜利"

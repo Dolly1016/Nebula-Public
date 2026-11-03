@@ -51,8 +51,8 @@
 "location.polus.comms" : "Comms."
 "location.polus.boilerRoom" : "Boiler Room"
 "location.polus.decontamination" : "Decontamination"
-"location.polus.decontamination2" : "Decontamination"
-"location.polus.decontamination3" : "Decontamination"
+"location.polus.decontamination2" : "Upper Decontamination"
+"location.polus.decontamination3" : "Lower Decontamination"
 "location.polus.drill" : "Drill"
 "location.polus.dropship" : "Dropship"
 "location.polus.ejection" : "Ejection"
@@ -162,6 +162,7 @@
 
 "sabotage.reactor" : "Reactor"
 "sabotage.laboratory" : "Seismic"
+"sabotage.lifeSupp" : "O2"
 "sabotage.lifeSupport" : "O2"
 "sabotage.heliSabotage" : "Heli"
 "sabotage.comms" : "Comms"

@@ -6,11 +6,11 @@
 
 # Document
 
-"role.fixer.doc" : "A crewmate who mediates power relations by restricting ability activation and voting during meetings."
+"role.fixer.doc" : "A crewmate who adjust the wind direction by restricting ability activation and voting during meetings.<br>Players blocked <b>cannot vote or use their abilities</b>, and furthermore <b>cannot be voted for by others</b>!"
 "role.fixer.ability.title" : "Inherent Ability [Mediator of Emergency Meetings]"
 "role.fixer.ability.main" : ""
 "role.fixer.ability.jamming" : "<title>Jamming</title>Block the tablet communication of the selected player.<br>There is a limit to the number of times this ability can be activated."
-"role.fixer.ability.blocked" : "<title>Blocked Player</title>Players whose communication is blocked will have the mark on the left.<br>Players with blocked communication lose their right to vote and cannot use abilities during that meeting.<br>Additionally, players with blocked communication cannot be voted for by others and cannot use abilities."
+"role.fixer.ability.blocked" : "<title>Blocked Player</title>Players whose communication is blocked will have the mark on the left.<br>Players blocked lose their right to vote and cannot use abilities during that meeting.<br>Additionally, players blocked cannot be voted for by others and cannot be target."
 
 # Options
 

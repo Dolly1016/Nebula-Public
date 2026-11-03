@@ -155,7 +155,7 @@ public class PlayerAttributeImpl : IPlayerAttribute
         //いずれも見た目にのみ作用する効果なので、他プレイヤーからは認識できないようにする
         PlayerAttributes.VisibleThroughWall = new PlayerAttributeImpl(2, "$visibleThroughWall") { Cognizable = _ => false };
         PlayerAttributes.HiddenName = new PlayerAttributeImpl(2, "$hiddenName") { Cognizable = _ => false };
-        PlayerAttributes.Suppressed = new PlayerAttributeImpl(13, "suppressed");
+        PlayerAttributes.Suppressed = new PlayerAttributeImpl(13, "suppressed", "suppressed");
     }
 }
 
@@ -957,7 +957,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         directionalPlayerSpeed.y = 0f;
         directionalPlayerSpeed.z = 0f;
         directionalPlayerSpeed.w = 1f;
-        MyControl.MyPhysics.Speed = CalcSpeed(ref directionalPlayerSpeed);
+        MyControl.MyPhysics.Speed = Mathn.Max(CalcSpeed(ref directionalPlayerSpeed), 0.0001f);
 
         //移動できない称号のチェック
         if (!speedAchievementChecked && Mathn.Abs(directionalPlayerSpeed.x) + Mathn.Abs(directionalPlayerSpeed.y) + Mathn.Abs(directionalPlayerSpeed.z) + Mathn.Abs(directionalPlayerSpeed.w) == 0f)

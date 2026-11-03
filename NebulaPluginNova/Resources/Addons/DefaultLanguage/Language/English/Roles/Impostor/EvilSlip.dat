@@ -2,16 +2,18 @@
 
 "role.evilSlip.name" : "Evil Slip"
 "role.evilSlip.short" : "Sl"
+"role.evilSlip.blurb" : "Locked-room Murderer"
+"role.evilSlip.hint" : "Try to move through the door."
 
 # Document
 
-"role.evilSlip.doc" : "An impostor who can squeeze through closed doors."
+"role.evilSlip.doc" : "An impostor who can slip through closed doors."
 "role.evilSlip.ability.title" : "Inherent Ability [Slip]"
 "role.evilSlip.ability.main" : "The ability can only be used next to a closed door."
 
 # Options
 
-"options.role.evilSlip.detail" : "The Evil Slip is an impostor who can squeeze through closed doors."
+"options.role.evilSlip.detail" : "The Evil Slip is an impostor who can slip through closed doors."
 "options.role.evilSlip.slipCoolDown" : "Slip Cooldown"
 
 # Game
@@ -26,3 +28,8 @@
 
 # Titles
 
+"achievement.evilSlip.common1.title" : "Vivid Escape"
+"achievement.evilSlip.common1.goal" : "Slip through a door within 5 seconds after a kill."
+
+"achievement.evilSlip.challenge.title" : "Elastic Stalker"
+"achievement.evilSlip.challenge.goal" : "Kill the last survivor within 10 seconds after slipping through and win."

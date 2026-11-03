@@ -381,7 +381,49 @@ public class ChatNotificationSetUpPatch
     }
 }
 
-//Lobbyコンソール
+public static class LobbyConsoles
+{
+    static private readonly List<(OptionsConsole console, Action onUse)> allConsoles = [];
+
+    static internal OptionsConsole? GetWardrobeConsole(LobbyBehaviour lobby)
+    {
+        var panel = lobby.transform.FindChild("panel_Wardrobe");
+        if (!panel.AsBoolFast() || panel.childCount == 0) return null;
+        return panel.GetChild(0).gameObject.TryGetComponent<OptionsConsole>(out var console) ? console : null;
+    }
+
+    static public OptionsConsole? Create(LobbyBehaviour lobby, Vector2 position, Action onUse, ImageNames useIcon = ImageNames.UseButton)
+    {
+        var wardrobeConsole = GetWardrobeConsole(lobby);
+        if (wardrobeConsole == null) return null;
+
+        var console = GameObject.Instantiate(wardrobeConsole, lobby.transform);
+        console.MenuPrefab = null; //MenuPrefabが無いコンソールは、使ったときにonUseを呼び出す
+        console.Outline = null;
+        console.transform.position = position.AsVector3(0f);
+
+        var renderer = console.gameObject.AddComponent<SpriteRenderer>();
+        renderer.material = wardrobeConsole.Outline.material;
+        console.Outline = renderer;
+        console.CustomUseIcon = useIcon;
+
+        allConsoles.RemoveAll(entry => !entry.console.AsBoolFast());
+        allConsoles.Add((console, onUse));
+        return console;
+    }
+
+    static internal void Use(OptionsConsole console)
+    {
+        foreach (var entry in allConsoles)
+        {
+            if (entry.console.AsBoolFast() && entry.console.Pointer == console.Pointer)
+            {
+                entry.onUse.Invoke();
+                return;
+            }
+        }
+    }
+}
 
 [HarmonyPatch(typeof(LobbyBehaviour), nameof(LobbyBehaviour.Start))]
 public class MarketplaceConsolePatch
@@ -399,19 +441,14 @@ public class MarketplaceConsolePatch
             transform.position = pos;
         }
 
-        var wardrobe = __instance.transform.FindChild("panel_Wardrobe").GetChild(0);
-        if(wardrobe.gameObject.TryGetComponent<OptionsConsole>(out var wardrobeConsole))
+        var wardrobeConsole = LobbyConsoles.GetWardrobeConsole(__instance);
+        if(wardrobeConsole != null)
         {
             MainMenuManagerInstance.SetPrefab(wardrobeConsole.MenuPrefab);
 
-            var marketPlace = GameObject.Instantiate(wardrobeConsole, __instance.transform);
-            marketPlace.MenuPrefab = null;
-            marketPlace.Outline = null;
+            var marketPlace = LobbyConsoles.Create(__instance, new(-1.44f, 0.53f), Marketplace.OpenInLobby, (ImageNames)ModImageNames.Marketplace)!;
 
-            marketPlace.transform.position = new Vector3(-1.44f,0.53f);
-
-            var renderer = marketPlace.gameObject.AddComponent<SpriteRenderer>();
-            renderer.material = wardrobeConsole.Outline.material;
+            var renderer = marketPlace.Outline;
             renderer.transform.localScale = new(0.7f, 0.7f, 1f);
             System.Collections.IEnumerator CoAnim()
             {
@@ -480,7 +517,7 @@ public class OptionsConsoleUsePatch
 
         if (__instance.MenuPrefab == null)
         {
-            Marketplace.OpenInLobby();
+            LobbyConsoles.Use(__instance);
             return false;
         }
 

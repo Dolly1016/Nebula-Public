@@ -6,11 +6,11 @@
 
 # Document
 
-"role.tyrant.doc" : "A neutral who wins by getting a specified number of kills."
+"role.tyrant.doc" : "A neutral who wins by getting a specified number of kills.<br>During the meeting, players killed by the Tyrant are shaded black for clear distinction."
 
 # Options
 
-"options.role.tyrant.detail" : "The Tyrant will win by killing some players.<br>Get rid of them quickly!"
+"options.role.tyrant.detail" : "The Tyrant will win by killing some players.<br>Get rid of them quickly!<br>The Tyrant is not counted as a Killer."
 "options.role.tyrant.killCooldown" : "Kill Cooldown"
 "options.role.tyrant.numOfKillingToWin" : "# Killing to Win"
 "options.role.tyrant.useImpostorAbility" : "Use Impostor Ability"

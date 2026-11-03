@@ -130,9 +130,7 @@ public class NebulaGameEnd
 
     public static bool RpcSendGameEnd(IEnumerable<(byte winConditionId, int winnersMask, ulong extraWinMask, GameEndReason endReason, GameEndDetail detail)> endInfo)
     {
-        LogUtils.WriteToConsole("RpcSendGameEnd 1");
         if (NebulaGameManager.Instance?.EndState != null) return false;
-        LogUtils.WriteToConsole("RpcSendGameEnd 2");
         RpcEndGame.Invoke(endInfo.ToArray());
         return true;
     }

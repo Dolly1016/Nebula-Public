@@ -73,74 +73,56 @@ internal class ItemSupplierManager : AbstractModule<Virial.Game.Game>, IGameOper
         if (!ev.Player.AmOwner) return;
 
         bool isCrewmate = ev.Player.FeelBeTrueCrewmate;
-        if (isCrewmate) SetPerk(null, null, true);
-        else if (ActiveNoncrewPerk == null)
+        if (isCrewmate)
         {
-            if (WarpedPlantsAreSpawnable) SetPerk(null, EmptyNoncrewPerk, true);
-            else SetPerk(null, null, true);
+            //クルーメイトになったら人外専用パーク枠を中身ごと破棄する
+            NoncrewPerkSlot?.Release();
+            NoncrewPerkSlot = null;
+        }
+        else if (NoncrewPerkSlot == null && WarpedPlantsAreSpawnable)
+        {
+            NoncrewPerkSlot = CreateSlot(true);
         }
     }
 
     void OnGameStartClient(GameStartEvent ev)
     {
-        if(PlantsAreSpawnable) SetPerk(null, EmptyPerk, false);
+        if (PlantsAreSpawnable) StandardPerkSlot ??= CreateSlot(false);
     }
 
-    public void SetPerk(PerkFunctionalDefinition perk) => SetPerk(perk, perk.PerkDefinition, perk.PerkCategory is PerkFunctionalDefinition.Category.NoncrewmateOnly);
-    private void SetPerk(PerkFunctionalDefinition? perk, PerkDefinition? perkDefinition, bool noncrewmate)
+    //プラント由来のパークは、パークと同じ種類のパーク枠に入れる。(これはプラント側の仕様であり、パーク枠そのものは種類を問わずパークを保持できる)
+    public void SetPerk(PerkFunctionalDefinition perk)
     {
-        void SetPerkInner(ref PerkInstanceEntry? instance, int priority)
+        switch (perk.PerkCategory)
         {
-            instance?.instance?.Release();
-            var newInstance = perkDefinition?.Instantiate();
-            if (newInstance != null)
-            {
-                var functional = perk?.Instantiate(newInstance).Register(newInstance);
-                if (functional?.HasAction ?? false)
-                {
-                    var obj = ButtonEffect.AddKeyGuide(newInstance.RelatedGameObject.GetUnityObject(), NebulaInput.GetInput(noncrewmate ? VirtualKeyInput.PerkAction2 : VirtualKeyInput.PerkAction1).TypicalKey, new(0f, -0.75f), false);
-                    if(obj != null) obj.transform.localScale = new(1f / 0.42f, 1 / 0.42f, 1f);
-                    newInstance.Button.OnClick.AddListener(functional.OnClick);
-                }
-                newInstance.Priority = priority;
-                
-                instance = new(newInstance, functional);
-            }
-            else
-            {
-                instance = null;
-            }
+            case PerkFunctionalDefinition.Category.Standard:
+                (StandardPerkSlot ??= CreateSlot(false)).SetPerk(perk);
+                break;
+            case PerkFunctionalDefinition.Category.NoncrewmateOnly:
+                (NoncrewPerkSlot ??= CreateSlot(true)).SetPerk(perk);
+                break;
+            default:
+                return;
         }
-        if (noncrewmate)
-            SetPerkInner(ref ActiveNoncrewPerk, 50);
-        else
-            SetPerkInner(ref ActivePerk, 100);
 
-        if (perk != null && achTokenOmikuji != null) achTokenOmikuji.Value++;
-    }
-
-    private VirtualInput perkInput1 = NebulaInput.GetInput(VirtualKeyInput.PerkAction1)!;
-    private VirtualInput perkInput2 = NebulaInput.GetInput(VirtualKeyInput.PerkAction2)!;
-    void OnHudUpdate(GameHudUpdateEvent ev)
-    {
-        static void HandleKeyInput(PerkInstanceEntry? entry, VirtualInput input)
-        {
-            if (entry != null && entry.instance.RelatedGameObject.ActiveSelf && (entry.functionalInstance?.HasAction ?? false) && input.KeyDownInGame) entry.functionalInstance.OnClick();
-        }
-        HandleKeyInput(ActivePerk, perkInput1);
-        HandleKeyInput(ActiveNoncrewPerk, perkInput2);
-
+        if (achTokenOmikuji != null) achTokenOmikuji.Value++;
     }
 
     static private PerkDefinition EmptyPerk = new("empty");
     static private PerkDefinition EmptyNoncrewPerk = new("empty.noncrewmate");
-    private record PerkInstanceEntry(PerkInstance instance, PerkFunctionalInstance? functionalInstance);
-    PerkInstanceEntry? ActivePerk = null;
-    PerkInstanceEntry? ActiveNoncrewPerk = null;
+
+    /// <summary>プラントから得たパークを入れる枠。</summary>
+    PerkSlot? StandardPerkSlot = null;
+    /// <summary>歪んだプラントから得たパークを入れる枠。</summary>
+    PerkSlot? NoncrewPerkSlot = null;
+
+    static private PerkSlot CreateSlot(bool noncrewmate) => noncrewmate ?
+        new(PerkFunctionalDefinition.Category.NoncrewmateOnly, EmptyNoncrewPerk, 500, VirtualKeyInput.PerkAction2, Virial.Color.White.ToUnityColor()) :
+        new(PerkFunctionalDefinition.Category.Standard, EmptyPerk, 501, VirtualKeyInput.PerkAction1);
 
     public bool HasPerk(bool nonCrewmate)
     {
-        return (nonCrewmate ? ActiveNoncrewPerk : ActivePerk)?.functionalInstance != null;
+        return (nonCrewmate ? NoncrewPerkSlot : StandardPerkSlot)?.HasPerk ?? false;
     }
 
     public PerkFunctionalDefinition? SelectPerk(bool nonCrewmateOnly)

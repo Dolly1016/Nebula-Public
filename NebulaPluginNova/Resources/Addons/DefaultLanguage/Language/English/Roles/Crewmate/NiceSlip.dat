@@ -5,13 +5,13 @@
 
 # Document
 
-"role.niceSlip.doc" : "A crewmate who can squeeze through closed doors."
+"role.niceSlip.doc" : "A crewmate who can slip through closed doors."
 "role.niceSlip.ability.title" : "Inherent Ability [Slip]"
 "role.niceSlip.ability.main" : "The ability can only be used next to a closed door."
 
 # Options
 
-"options.role.niceSlip.detail" : "The Nice Slip is a crewmate who can squeeze through closed doors."
+"options.role.niceSlip.detail" : "The Nice Slip is a crewmate who can slip through closed doors."
 "options.role.niceSlip.slipCoolDown" : "Slip Cooldown"
 
 # Game
@@ -25,4 +25,18 @@
 "stats.niceSlip.slip" : "Number of door slips"
 
 # Titles
+
+"achievement.niceSlip.common1.title" : "Supple Movement"
+"achievement.niceSlip.common1.goal" : "Slip through doors at least 3 times in a single game."
+
+"achievement.niceSlip.common2.title" : "Filthy Intruder"
+"achievement.niceSlip.common2.goal" : "Slip through the decontamination room door."
+"achievement.niceSlip.common2.detail" : "Polus only"
+"achievement.niceSlip.common2.flavor" : ""Hey you! Wash up properly!""
+"achievement.niceSlip.common2.splitted.0" : "Filthy "
+
+"achievement.niceSlip.challenge.title" : "Slimy Sensei's Moment"
+"achievement.niceSlip.challenge.goal" : "Start an emergency meeting by pressing the button within 10 seconds after slipping through<br>and eject the Impostor."
+"achievement.niceSlip.challenge.flavor" : ""If you hit a door you can't pass through, that's where I come in!""
+"achievement.niceSlip.challenge.splitted.0" : "Slimy "
 

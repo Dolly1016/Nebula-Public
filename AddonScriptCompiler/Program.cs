@@ -34,6 +34,7 @@ internal static class Program
         bool useHiddenMembers = false;
         string? configPath = null;
         bool hello = false;
+        int? virialVersion = null;
 
         // Parse CLI arguments
         for (int i = 0; i < args.Length; i++)
@@ -60,6 +61,9 @@ internal static class Program
                     break;
                 case "--config":
                     if (i + 1 < args.Length) configPath = args[++i];
+                    break;
+                case "--virial-version":
+                    if (i + 1 < args.Length) virialVersion = int.Parse(args[++i]);
                     break;
             }
         }
@@ -100,7 +104,7 @@ internal static class Program
 
         try
         {
-            bool success = Compiler.Compile(moduleName, references.ToArray(), sourceDir, outputPath, useHiddenMembers);
+            bool success = Compiler.Compile(moduleName, references.ToArray(), sourceDir, outputPath, useHiddenMembers, virialVersion ?? 0);
             Console.WriteLine($"Finished!");
             return success ? 0 : 1;
         }

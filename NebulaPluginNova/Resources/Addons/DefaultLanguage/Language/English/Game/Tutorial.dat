@@ -13,3 +13,5 @@
 "tutorial.variations.ambienceOnMeeting.caption" : "Instead you can use the "Mute Ambience On Meeting" option."
 "tutorial.variations.meetingTool.line.title" : "The shortcut for generating player icons"
 "tutorial.variations.meetingTool.line.caption" : "Draw a line on the minimap and right-click <b>just before</b> releasing the mouse to<br>generate icons of all players in the game."
+"tutorial.variations.paintQuiz.review.title" : "Paint Quiz Review"
+"tutorial.variations.paintQuiz.review.caption" : "Click on the answers to assign scores! <b>Right-click</b> to assign the same score you gave last time.<br>For especially terrible answers among the incorrect ones, let's deduct points!<br>Also, don't make things awkward lol."

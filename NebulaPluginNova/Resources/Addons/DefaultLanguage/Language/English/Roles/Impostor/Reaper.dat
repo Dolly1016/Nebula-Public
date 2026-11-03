@@ -16,7 +16,7 @@
 
 # Options
 
-"options.role.reaper.detail" : "The Reaper can drag dead bodies."
+"options.role.reaper.detail" : "The Reaper can drag the dead body and move between vents with the body according to options."
 "options.role.reaper.useVentWhileHoldingDeadbody" : "Use Vent While Holding Deadbody"
 "options.role.reaper.connectAllVents" : "Connect All Vents"
 

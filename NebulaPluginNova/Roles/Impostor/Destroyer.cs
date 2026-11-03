@@ -78,7 +78,6 @@ public class Destroyer : DefinedSingleAbilityRoleTemplate<Destroyer.Ability>, De
                    null, (player, _) =>
                    {
                        //左右どちらでキルすればよいか考える
-                       var targetTruePos = player.RealPlayer.TruePosition;
                        var targetPos = player.Position;
                        var myPos = MyPlayer.Position;
                        var canMoveToLeft = CheckCanMove(MyPlayer.VanillaPlayer, myPos, GetDestroyKillPosition(targetPos, true), out var leftDis);
@@ -89,7 +88,7 @@ public class Destroyer : DefinedSingleAbilityRoleTemplate<Destroyer.Ability>, De
 
                        lastKilling = player.RealPlayer;
 
-                       RpcCoDestroyKill.Invoke((MyPlayer, player!.RealPlayer, targetTruePos, moveToLeft));
+                       RpcCoDestroyKill.Invoke((MyPlayer, player!.RealPlayer, targetPos, moveToLeft));
 
                        new StaticAchievementToken("destroyer.common1");
                        new StaticAchievementToken("destroyer.common2");
@@ -140,8 +139,8 @@ public class Destroyer : DefinedSingleAbilityRoleTemplate<Destroyer.Ability>, De
 
             //自身が動いている間は相手側もうまいこと動かそうとさせる。
             bool myDone = false;
-            var myAnim = Effects.Sequence(myPlayer.MyPhysics.WalkPlayerTo(GetDestroyKillPosition(targetPos, moveToLeft), 0.001f, 1f, false), ManagedEffects.Action(()=>myDone = true).WrapToIl2Cpp());
-            var targetAnim = target.MyPhysics.WalkPlayerTo(targetPos, 0.001f, 1f, false);
+            var myAnim = Effects.Sequence(myPlayer.MyPhysics.WalkPlayerTo(GetDestroyKillPosition(targetPos, moveToLeft), 0.001f, 1f, true), ManagedEffects.Action(()=>myDone = true).WrapToIl2Cpp());
+            var targetAnim = target.MyPhysics.WalkPlayerTo(targetPos, 0.001f, 1f, true);
 
             var targetCoroutine = NebulaManager.Instance.StartCoroutine(targetAnim);
             var myCoroutine = NebulaManager.Instance.StartCoroutine(myAnim);
@@ -163,7 +162,8 @@ public class Destroyer : DefinedSingleAbilityRoleTemplate<Destroyer.Ability>, De
             }
             catch { }
 
-            target.NetTransform.SnapTo((Vector2)targetPos - target.Collider.offset);
+            target.NetTransform.SnapTo((Vector2)targetPos);
+            targetPos += (VVector2)target.Collider.offset;
             myPlayer.MyPhysics.body.velocity = Vector2.zero;
             target.MyPhysics.body.velocity = Vector2.zero;
 

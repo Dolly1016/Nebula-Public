@@ -1,8 +1,10 @@
-﻿using Nebula.Bridge;
+﻿using Nebula.Behavior;
+using Nebula.Bridge;
 using Nebula.Game.Statistics;
 using Nebula.Modules.GUIWidget;
 using Nebula.Roles.Abilities;
 using Nebula.Roles.Modifier;
+using Sentry.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,7 +27,7 @@ internal class Havoc : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 {
     static readonly public RoleTeam MyTeam = NebulaAPI.Preprocessor!.CreateTeam("teams.havoc", new(181, 66, 0), TeamRevealType.OnlyMe);
 
-    private Havoc() : base("havoc", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [KillCooldownOption, KillCooldownReductionOption, DevourCooldownOption, HavocCooldownOption, HavocDurationOption, RequiredKillingForVentOption, ClearHavocSEDistanceOption])
+    private Havoc() : base("havoc", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [KillCooldownOption, KillCooldownReductionOption, DevourCooldownOption, MaxDevourLevelOption, HavocCooldownOption, HavocDurationOption, RequiredKillingForVentOption, RequiredKillingForSearchOption,ClearHavocSEDistanceOption])
     {
         GameActionTypes.DevourCorpseAction = new("havoc.devour", this);
     }
@@ -35,9 +37,11 @@ internal class Havoc : DefinedRoleTemplate, DefinedRole, IAssignableDocument
     static private IRelativeCooldownConfiguration KillCooldownOption = NebulaAPI.Configurations.KillConfiguration("options.role.havoc.killCooldown", CoolDownType.Immediate, (5f, 60f, 5f), 40f, (-40f, 20f, 5f), +10f, (0.125f, 2f, 0.125f), 1.25f);
     static private FloatConfiguration KillCooldownReductionOption = NebulaAPI.Configurations.Configuration("options.role.havoc.killCooldownReduction", (2.5f, 20f, 2.5f), 5f, FloatConfigurationDecorator.Second);
     static private IRelativeCooldownConfiguration DevourCooldownOption = NebulaAPI.Configurations.KillConfiguration("options.role.havoc.devourCooldown", CoolDownType.Immediate, (5f, 60f, 5f), 20f, (-40f, 20f, 5f), -10f, (0.125f, 2f, 0.125f), 0.75f);
+    static private IntegerConfiguration MaxDevourLevelOption = NebulaAPI.Configurations.Configuration("options.role.havoc.maxDevourLevel", (1, 10), 5);
     static private FloatConfiguration HavocCooldownOption = NebulaAPI.Configurations.Configuration("options.role.havoc.havocCooldown", (5f, 60f, 5f), 20f, FloatConfigurationDecorator.Second);
     static private FloatConfiguration HavocDurationOption = NebulaAPI.Configurations.Configuration("options.role.havoc.havocDuration", (2.5f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second);
-    static private IntegerConfiguration RequiredKillingForVentOption = NebulaAPI.Configurations.Configuration("options.role.havoc.requiredKillingForVent", (0, 10), 2);
+    static private IntegerConfiguration RequiredKillingForVentOption = NebulaAPI.Configurations.Configuration("options.role.havoc.requiredDevourForVent", (0, 10), 2);
+    static private IntegerConfiguration RequiredKillingForSearchOption = NebulaAPI.Configurations.Configuration("options.role.havoc.requiredDevourForSearch", (0, 10), 4);
     static private FloatConfiguration ClearHavocSEDistanceOption = NebulaAPI.Configurations.Configuration("options.role.havoc.clearHavocSEDistance", (2.5f, 30f, 2.5f), 7.5f, FloatConfigurationDecorator.Ratio);
 
     static public Havoc MyRole = new Havoc();
@@ -59,6 +63,7 @@ internal class Havoc : DefinedRoleTemplate, DefinedRole, IAssignableDocument
     {
         yield return new("%REDUC%", KillCooldownReductionOption.GetValue().ToString());
         yield return new("%VENT%", RequiredKillingForVentOption.GetValue().ToString());
+        yield return new("%PING%", RequiredKillingForSearchOption.GetValue().ToString());
         yield return new("%DURATION%", HavocDurationOption.GetValue().ToString());
     }
     
@@ -69,6 +74,7 @@ internal class Havoc : DefinedRoleTemplate, DefinedRole, IAssignableDocument
     static private ITextureLoader gaugeIconTexture = new ResourceTextureLoader("Nebula.Resources.HavocGuageIcon.png");
     static private Image gaugeIconImage = new SpriteLoader(gaugeIconTexture, 100f).SetPivot(new(0.35f, 0.145f));
     static private Image devouredCorpseForHelpImage = new SpriteLoader(gaugeIconTexture, 100f);
+    bool DefinedRole.IsKiller => true;
 
     [NebulaRPCHolder]
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
@@ -105,7 +111,7 @@ internal class Havoc : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 
             var eatButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability,
                 DevourCooldownOption.Cooldown, "devour", buttonSprite,
-                _ => devourTracker.CurrentTarget != null);
+                _ => devourTracker.CurrentTarget != null, _ => ate < MaxDevourLevelOption);
             eatButton.OnClick = (button) => {
                 var deadBody = devourTracker.CurrentTarget;
                 if (deadBody != null)
@@ -115,8 +121,9 @@ internal class Havoc : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                     RpcDevour.Invoke((MyPlayer.PlayerId, deadBody.Id));
                     StatsDevour.Progress();
                     myAte++;
+                    eatButton.UpdateUsesIcon((MaxDevourLevelOption - ate).ToString());
 
-                    if(killButton.CoolDownTimer is GameTimer timer)
+                    if (killButton.CoolDownTimer is GameTimer timer)
                     {
                         var percentage = timer.Percentage;
                         timer.SetRange(0f, KillCooldown);
@@ -128,11 +135,11 @@ internal class Havoc : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                 }
                 eatButton.StartCoolDown();
             };
+            eatButton.ShowUsesIcon(0, (MaxDevourLevelOption - ate).ToString());
 
-            var Gauge = new DiscreteAbilityGauge(8, 27, gaugeIconImage, () => ate, true).Register(this);
+            var Gauge = new DiscreteAbilityGauge(MaxDevourLevelOption, 27, gaugeIconImage, () => ate, true).Register(this);
         }
 
-        static private DebugVariable<float> distance = new("havocDistance", 15f, t => float.TryParse(t, out var v) ? v : 0f, f => f.ToString());
         private void PlayHavocEffect(bool amHavoc, VVector2 position)
         {
             if (amHavoc)
@@ -190,6 +197,48 @@ internal class Havoc : DefinedRoleTemplate, DefinedRole, IAssignableDocument
             return killButton;
         }
 
+        private IEnumerator CoPingNearPlayers()
+        {
+            var pos = MyPlayer.Position;
+            float t = 0f;
+            float distance = 0f;
+            HashSet<byte> foundPlayers = [];
+
+            while (t < 0.8f)
+            {
+                yield return null;
+                t += FastMethods.GetDeltaTimeFast();
+
+                if (MyPlayer.IsDead) break;
+
+                distance = t * 14f;
+
+                var nearPlayers = GamePlayer.AllPlayers.Where(p => !foundPlayers.Contains(p.PlayerId) && p.IsAlive && p != MyPlayer && pos.Distance(MyPlayer.Position) < distance);
+                foreach (var p in nearPlayers)
+                {
+                    AmongUsUtil.Ping([p.Position], false, foundPlayers.Count == 0, postProcess: ping => ping.gameObject.SetHue(340));
+                    foundPlayers.Add(p.PlayerId);
+                }
+            }
+        }
+
+        private IEnumerator CoRepeatToPing(ModAbilityButton button)
+        {
+            while (button.IsInEffect)
+            {
+                CoPingNearPlayers().StartOnScene();
+                yield return null;
+
+                float t = 0f;
+                while(t < 1.3f)
+                {
+                    t += FastMethods.GetDeltaTimeFast();
+                    if (!button.IsInEffect) yield break;
+                    yield return null;
+                }
+            }
+        }
+
         private ModAbilityButton SetUpHavocButton()
         {
             var havocButton = NebulaAPI.Modules.EffectButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.SecondaryAbility, null,
@@ -204,11 +253,13 @@ internal class Havoc : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                     MyPlayer.GainSpeedAttribute(0f, 1.2f, false, 100);
                     b.StartEffect();
 
+                    if (ate >= RequiredKillingForSearchOption) CoRepeatToPing(b).StartOnScene();
+
                     int killed = 0;
                     GameOperatorManager.Instance?.Subscribe<PlayerKillPlayerEvent>(ev => {
                         if (ev.Murderer == MyPlayer && ev.Dead != MyPlayer) killed++;
 
-                        if (killed == 2)
+                        if (killed >= 2)
                         {
                             var lastDead = ev.Dead;
                             GameOperatorManager.Instance?.Subscribe<GameEndEvent>(ev =>
@@ -279,6 +330,11 @@ internal class Havoc : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                 havoc.PlayHavocEffect(message.player.AmOwner, message.position);
             }
         });
+
+        void OnPlayerDie(PlayerDieEvent ev)
+        {
+            ModSingleton<IWinningOpportunity>.Instance.SetOpportunity(NebulaTeams.HavocTeam, Impostor.KillerOpportunityHelpers.CalcTeamOpportunity(p => MyPlayer == p, _ => false, 0.15f - (ate * 0.02f)));
+        }
     }
 }
 

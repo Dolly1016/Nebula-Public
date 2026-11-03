@@ -126,7 +126,7 @@ internal class VentRelocate : PerkFunctionalInstance
     static private float Duration => DurationOption;
     static private FloatConfiguration DurationOption = NebulaAPI.Configurations.Configuration("perk.ventRelocate.duration", (2.5f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second);
 
-    static PerkFunctionalDefinition def = new("ventRelocate", PerkFunctionalDefinition.Category.Standard, new PerkDefinition("ventRelocate", 7, 56, new(230, 30, 30)).DurationText("%D%", ()=>Duration), (def, instance) => new VentRelocate(def, instance), [DurationOption]);
+    static internal PerkFunctionalDefinition Def = new("ventRelocate", PerkFunctionalDefinition.Category.Standard, new PerkDefinition("ventRelocate", 7, 56, new(230, 30, 30)).DurationText("%D%", ()=>Duration), (def, instance) => new VentRelocate(def, instance), [DurationOption]);
     private GameTimer? durationTimer = null;
     private bool canUse => durationTimer == null;
     private Vent? holdingVent = null;

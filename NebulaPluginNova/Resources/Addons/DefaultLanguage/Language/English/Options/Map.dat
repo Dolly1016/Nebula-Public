@@ -14,7 +14,7 @@
 # Options
 
 "options.map.spawnMethod" : "Spawning Method"
-"options.map.spawnMethod.detail" : "Set the spawn method when players spawn.<br> -<b>Default</b>: The conventional spawn method for each map.<br> -<b>Selective</b>: Choose a spawn location from multiple spawn points like Airship.<br> -<b>Random</b>: Each player spawns at a random location selected for them."
+"options.map.spawnMethod.detail" : "Set the spawn method when players spawn.<br>・<b>Default</b>: The conventional spawn method for each map.<br>・<b>Selective</b>: Choose a spawn location from multiple spawn points like Airship.<br>・<b>Random</b>: Each player spawns at a random location selected for them."
 "options.map.spawnMethod.default" : "Default"
 "options.map.spawnMethod.selective" : "Selective"
 "options.map.spawnMethod.random" : "Random"
@@ -30,6 +30,7 @@
 "options.map.nonCrewmateCanUseTeleporterImmediately.detail" : "When turned on, impostors and third factions can teleport without the gem polishing minigame."
 "options.map.ladderCoolDown" : "Ladder Cooldown"
 "options.map.ziplineCoolDown" : "Zipline Cooldown"
+"options.map.platformCooldown" : "Platform Cooldown"
 "options.map.flipX" : "Flip X"
 "options.map.flipY" : "Flip Y"
 "options.map.canHearOthersFootstep" : "Can Hear Others Footstep"
@@ -97,6 +98,11 @@
 "options.map.customization.fungle.blackOutMiningPit" : "Blackout Console (Mining Pit)"
 "options.map.customization.fungle.forClassicGame" : "Classic Game Modification"
 "options.map.customization.fungle.forClassicGame.detail" : "Modify the map to be suitable for classic game reasoning. Includes the following modifications:<br>- One-way ladder (lower part)<br>- Blockade under the meeting room<br>- Blockade between greenhouse and laboratory<br>- Blockade above the gem on the high ground<br>- Add 2 vents around the mining area"
+"options.map.customization.fungle.inMapId" : "Variant"
+"options.map.customization.fungle.inMapId.0" : "Twilight"
+"options.map.customization.fungle.inMapId.1" : "Midnight"
+"options.map.customization.fungle.inMapId.2" : "Poisoned"
+
 "options.map.customization.admin.editor" : "Right Click: Open room settings"
 "options.map.customization.admin.viewer" : "Click: Show room settings"
 

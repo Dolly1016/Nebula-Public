@@ -868,7 +868,6 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
 
     public void ToGameEnd()
     {
-        LogUtils.WriteToConsole("ToGameEnd 1");
         var minigame = Minigame.Instance;
         if (minigame.AsBoolFast())
         {
@@ -882,7 +881,6 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
             }
         }
 
-        LogUtils.WriteToConsole("ToGameEnd 2");
         NebulaManager.Instance.StartCoroutine(CoWaitAndEndGame().WrapToIl2Cpp());
     }
 
@@ -950,7 +948,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         get
         {
             var dead = allModPlayers.Values.MaxBy(p => (float)p.DeathTime);
-            if ((float)dead.DeathTime > 0f) return dead;
+            if ((float)dead?.DeathTime > 0f) return dead;
             return null;
         }
     }

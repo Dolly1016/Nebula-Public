@@ -21,7 +21,7 @@
 "options.role.stirrer.sabotageMaxCharge" : "Sabotage Max Charge"
 "options.role.stirrer.sabotageCoolDown" : "Sabotage Cooldown"
 "options.role.stirrer.sabotageInterval" : "Sabotage Interval"
-"options.role.stirrer.sabotageInterval.detail" : "After activating fake sabotage, an additional cooldown is set before<br>fake sabotage can be activated again.<br><br>"
+"options.role.stirrer.sabotageInterval.detail" : "After activating fake sabotage, an additional cooldown is set before<br>fake sabotage can be activated again."
 
 # Game
 

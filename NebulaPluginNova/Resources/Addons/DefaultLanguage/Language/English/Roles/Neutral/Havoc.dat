@@ -1,0 +1,73 @@
+# Assignable
+
+"role.havoc.name" : "Havoc"
+"role.havoc.short" : "H"
+"role.havoc.blurb" : "Final HAVOC"
+
+# Document
+
+"role.havoc.doc" : "A neutral who can gnaws the dead body to strengthen themself."
+"role.havoc.winCond" : "Annihilate the other killers and survive until only 2 players alived."
+"role.havoc.ability.title" : "Inherent Ability [Call of Ruin]"
+"role.havoc.ability.main" : "Gnaw bodies to strengthen themself. At the time of howl, Take the opportunity to kill or gnaw."
+"role.havoc.ability.devour" : "<title>Gnaw</title>Gnaw the body. Each time gnawed, the kill cooldown is reduced by <var>%REDUC%</var> seconds.<br>Can use the vent after <var>%VENT%</var> times.<br>You will be able to see the positions of nearby players while howling after gnawing and <var>%PING%</var> times."
+"role.havoc.ability.devouredCorpse" : "<title>Gnawed Body</title>A body that has been gnawed will change in appearance.<br>This body can be reported, but it cannot be grabbed and moved."
+"role.havoc.ability.havoc" : "<title>Howl</title><var>Block the report and emergency buttons for %DURATION% seconds</var>.<br>The howl echoes across the entire map but has no directionality."
+
+# Options
+
+"options.role.havoc.detail" : "The Havoc can gnaw bodies to evolution own abilities.<br>Discuss solutions to the problem as much as you want before things get out of hand!"
+"options.role.havoc.killCooldown" : "Initial Kill Cooldown"
+"options.role.havoc.killCooldownReduction" : "Kill Cooldown Reduction For Gnawing"
+"options.role.havoc.devourCooldown" : "Gnaw Cooldown"
+"options.role.havoc.maxDevourLevel" : "Max Gnaw Level"
+"options.role.havoc.maxDevourLevel.detail" : "This is the max of times bodies can be gnawed.<br>Once the max of bodies gnawed, the ability will be boosted to its fullest extent."
+"options.role.havoc.havocCooldown" : "Howl Cooldown"
+"options.role.havoc.havocDuration" : "Howl Duration"
+"options.role.havoc.requiredDevourForVent" : "Num Required For Vent"
+"options.role.havoc.requiredDevourForSearch" : "Num Required For Search"
+"options.role.havoc.clearHavocSEDistance" : "Clear Howl SE Distance"
+"options.role.havoc.clearHavocSEDistance.detail" : "The howling SE can be heard clearly within the specified range.<br>Outside the range, the SE sounds muffled."
+
+# Game
+
+
+# UI
+
+"button.label.devour" : "gnaw"
+"button.label.havoc" : "howl"
+
+# Stats
+
+"stats.label.devour" : "Num of Gnaw"
+"stats.label.havoc" : "Num of Howl"
+
+# Titles
+
+"achievement.havoc.common1.title" : "Havoc Winter"
+"achievement.havoc.common1.goal" : "Gnaw while howling."
+
+"achievement.havoc.another1.title" : "Unfinished Havoc"
+"achievement.havoc.another1.goal" : "Die without gnawing or killing once."
+"achievement.havoc.another1.flavor" : "Died because the plan was too secretive."
+
+"achievement.havoc.common2.title" : "Desecrate"
+"achievement.havoc.common2.goal" : "Gnawing bodies a total of 10 times."
+
+"achievement.havoc.challenge.title" : "Juggernaut"
+"achievement.havoc.challenge.goal" : "Kill 2 or more enemies while a howl. Then get the win."
+"achievement.havoc.challenge.flavor" : ""It can no longer be stopped by anyone" —From the breached minutes"
+
+# Team
+
+"end.detail.havoc.win" : "Havoc wins"
+
+"teams.havoc" : "Havoc"
+"end.havoc" : "Havoc Wins%EXTRA%"
+
+# Document
+
+"document.tip.winCond.teams.havoc" : "Havoc"
+
+"document.tip.winCond.havoc.title" : "Kill Trigger"
+"document.tip.winCond.havoc" : "Win if the survivors of own team account for more than half of all survivors.<br>All other killing teams must be dead."
