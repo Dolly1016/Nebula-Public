@@ -31,37 +31,41 @@ internal class CustomShadow : MonoBehaviour
         }
         Renderer.enabled = true;
 
+        //影カメラのビュー射影行列を渡し、シェーダ側でワールド座標から影テクスチャを参照させる。
+        //メッシュのUVに依存しないため、Tiled/分割スプライト/回転していても影がずれない。
         var cam = ShadowCollab.ShadowCamera;
-        //最初は半分の大きさ
-        var height = cam.orthographicSize;
-        var width = height * cam.aspect;
-        VVector2 orig = cam.ModGameObject(false).Position;
-        orig.x -= width;
-        orig.y -= height;
-        //2倍にしておく
-        height *= 2f;
-        width *= 2f;
+        Renderer.material.SetMatrix(ShadowVPId, cam.projectionMatrix * cam.worldToCameraMatrix);
+        Renderer.material.SetFloat(BlendId, 1f);
+    }
 
-        float ConvertX(float x) => (x - orig.x) / width;
-        float ConvertY(float y) => (y - orig.y) / height;
+    private static readonly int ShadowVPId = Shader.PropertyToID("_ShadowVP");
+    private static readonly int BlendId = Shader.PropertyToID("_Blend");
 
-        var rendererSprite = Renderer.sprite;
-        var rendererSpriteRect = rendererSprite.rect;
-        var rendererTransform = Renderer.ModGameObject(false);
-        var rendererPosition = rendererTransform.Position;
-        var rendererLocalScale = rendererTransform.LocalScale;
+    /// <summary>
+    /// 影を構成する全てのレンダラの描画モードを切り替えます。
+    /// Tiled/Slicedを正しく描画するため、スプライトはFullRectで生成されている必要があります。
+    /// </summary>
+    /// <param name="drawMode">描画モード</param>
+    /// <param name="size">描画サイズ (Tiled/Slicedのとき有効)</param>
+    /// <param name="tileMode">タイルの敷き詰め方 (Tiledのとき有効)</param>
+    public void SetDrawMode(SpriteDrawMode drawMode, Vector2 size, SpriteTileMode tileMode = SpriteTileMode.Continuous)
+    {
+        foreach (var r in new SpriteRenderer[] { Renderer, MulRenderer, DefaultRenderer })
+        {
+            r.drawMode = drawMode;
+            r.tileMode = tileMode;
+            r.size = size;
+        }
+    }
 
-        var spriteWidthHalf = rendererSpriteRect.width / rendererSprite.pixelsPerUnit * 0.5f * rendererLocalScale.x;
-        var spriteHeightHalf = rendererSpriteRect.height / rendererSprite.pixelsPerUnit * 0.5f * rendererLocalScale.y;
-        var rendererX = rendererPosition.x;
-        var rendererY = rendererPosition.y;
-        Renderer.material.SetVector("_ShadowRange", new(
-            ConvertX(rendererX - spriteWidthHalf),
-            ConvertX(rendererX + spriteWidthHalf),
-            ConvertY(rendererY - spriteHeightHalf),
-            ConvertY(rendererY + spriteHeightHalf)
-            ));
-        Renderer.material.SetFloat("_Blend", 1f);
+    /// <summary>
+    /// Tiled/Sliced描画時のサイズを変更します。
+    /// </summary>
+    public void SetSize(Vector2 size)
+    {
+        Renderer.size = size;
+        MulRenderer.size = size;
+        DefaultRenderer.size = size;
     }
 
     private float lastBlend = 0f;

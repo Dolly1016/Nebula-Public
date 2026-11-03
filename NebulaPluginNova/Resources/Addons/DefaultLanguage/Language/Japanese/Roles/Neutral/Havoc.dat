@@ -40,8 +40,8 @@
 
 # Stats
 
-"stats.label.devour" : "死体を食い荒らした回数"
-"stats.label.havoc" : "遠吠えの回数"
+"stats.havoc.devour" : "死体を食い荒らした回数"
+"stats.havoc.havoc" : "遠吠えの回数"
 
 # Titles
 

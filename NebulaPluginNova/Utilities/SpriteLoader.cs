@@ -130,9 +130,9 @@ public static class GraphicsHelper
 
     public static Sprite ToSprite(this Texture2D texture, float pixelsPerUnit) => ToSprite(texture, new Rect(0, 0, texture.width, texture.height),pixelsPerUnit);
 
-    public static Sprite ToSprite(this Texture2D texture, Vector2 pivot, float pixelsPerUnit)
+    public static Sprite ToSprite(this Texture2D texture, Vector2 pivot, float pixelsPerUnit, SpriteMeshType meshType = SpriteMeshType.Tight)
     {
-        return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), pivot, pixelsPerUnit);
+        return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), pivot, pixelsPerUnit, 0, meshType);
     }
 
     public static Sprite ToSprite(this Texture2D texture, Rect rect, float pixelsPerUnit)
@@ -140,9 +140,9 @@ public static class GraphicsHelper
         return Sprite.Create(texture, rect, new Vector2(0.5f, 0.5f), pixelsPerUnit);
     }
 
-    public static Sprite ToSprite(this Texture2D texture, Rect rect, Vector2 pivot,float pixelsPerUnit)
+    public static Sprite ToSprite(this Texture2D texture, Rect rect, Vector2 pivot,float pixelsPerUnit, SpriteMeshType meshType = SpriteMeshType.Tight)
     {
-        return Sprite.Create(texture, rect, pivot, pixelsPerUnit);
+        return Sprite.Create(texture, rect, pivot, pixelsPerUnit, 0, meshType);
     }
 
     public static Sprite ToExpandableSprite(this Texture2D texture, float pixelsPerUnit,int x,int y)
@@ -158,6 +158,15 @@ public static class GraphicsHelper
     public static Sprite ToExpandableSprite(this Texture2D texture, Rect rect, Vector2 pivot, float pixelsPerUnit, int x, int y)
     {
         return Sprite.CreateSprite(texture, rect, pivot, pixelsPerUnit, 0, SpriteMeshType.FullRect, new Vector4(x, y, x, y), false, new(0L));
+    }
+
+    /// <summary>
+    /// 上下左右で異なる幅の枠を持つ9分割スプライトを生成します。Sliced/Tiled描画で使用します。
+    /// </summary>
+    /// <param name="border">枠のピクセル数 (左, 下, 右, 上)</param>
+    public static Sprite ToSlicedSprite(this Texture2D texture, Vector2 pivot, float pixelsPerUnit, Vector4 border)
+    {
+        return Sprite.CreateSprite(texture, new Rect(0, 0, texture.width, texture.height), pivot, pixelsPerUnit, 0, SpriteMeshType.FullRect, border, false, new(0L));
     }
 
     internal delegate bool d_LoadImage(IntPtr tex, IntPtr data, bool markNonReadable);
@@ -443,6 +452,7 @@ public class SpriteLoader : Image
     float pixelsPerUnit;
     ITextureLoader textureLoader;
     Vector2 Pivot = new(0.5f, 0.5f);
+    SpriteMeshType meshType = SpriteMeshType.Tight;
     public SpriteLoader(ITextureLoader textureLoader, float pixelsPerUnit)
     {
         this.textureLoader=textureLoader;
@@ -451,7 +461,7 @@ public class SpriteLoader : Image
 
     public Sprite GetSprite()
     {
-        if (!sprite.AsBoolFast()) sprite = textureLoader.GetTexture().ToSprite(Pivot, pixelsPerUnit);
+        if (!sprite.AsBoolFast()) sprite = textureLoader.GetTexture().ToSprite(Pivot, pixelsPerUnit, meshType);
         sprite.hideFlags = textureLoader.GetTexture().hideFlags;
         return sprite;
     }
@@ -461,6 +471,15 @@ public class SpriteLoader : Image
     public SpriteLoader SetPivot(Vector2 pivot)
     {
         this.Pivot = pivot;
+        return this;
+    }
+
+    /// <summary>
+    /// スプライトをFullRectで生成します。Tiled描画に使うスプライトはFullRectである必要があります。
+    /// </summary>
+    public SpriteLoader SetFullRect()
+    {
+        this.meshType = SpriteMeshType.FullRect;
         return this;
     }
 
@@ -526,22 +545,36 @@ public class ResourceExpandableSpriteLoader : Image
     Texture2D texture = null!;
     string address;
     float pixelsPerUnit;
-    //端のピクセル数
-    int x, y;
-    public ResourceExpandableSpriteLoader(string address, float pixelsPerUnit,int xSidePixels,int ySidePixels)
+    //端のピクセル数 (左, 下, 右, 上)
+    Vector4 border;
+    Vector2 pivot = new(0.5f, 0.5f);
+    public ResourceExpandableSpriteLoader(string address, float pixelsPerUnit,int xSidePixels,int ySidePixels) : this(address, pixelsPerUnit, new Vector4(xSidePixels, ySidePixels, xSidePixels, ySidePixels)) { }
+
+    /// <summary>
+    /// 上下左右で異なる幅の枠を持つ9分割スプライトを読み込みます。
+    /// </summary>
+    /// <param name="border">枠のピクセル数 (左, 下, 右, 上)</param>
+    public ResourceExpandableSpriteLoader(string address, float pixelsPerUnit, Vector4 border)
     {
         this.address = address;
         this.pixelsPerUnit = pixelsPerUnit;
-        this.x = xSidePixels;
-        this.y = ySidePixels;
+        this.border = border;
     }
+
+    public ResourceExpandableSpriteLoader SetPivot(Vector2 pivot)
+    {
+        this.pivot = pivot;
+        return this;
+    }
+
+    private Sprite CreateSprite() => texture.ToSlicedSprite(pivot, pixelsPerUnit, border);
 
     public Sprite GetSprite()
     {
         if (!sprite.AsBoolFast())
         {
             if (!texture.AsBoolFast()) texture = GraphicsHelper.LoadTextureFromResources(address);
-            sprite = texture.ToExpandableSprite(pixelsPerUnit, x, y);
+            sprite = CreateSprite();
         }
         return sprite;
     }
@@ -567,7 +600,7 @@ public class ResourceExpandableSpriteLoader : Image
 
                     if (!sprite)
                     {
-                        sprite = texture.ToExpandableSprite(pixelsPerUnit, x, y);
+                        sprite = CreateSprite();
                     }
                 });
             }
@@ -584,6 +617,7 @@ public class DividedSpriteLoader : Virial.Media.MultiImage, Image, IDividedSprit
     ITextureLoader texture;
     Tuple<int, int>? division, size;
     public Vector2 Pivot = new Vector2(0.5f, 0.5f);
+    SpriteMeshType meshType = SpriteMeshType.Tight;
 
     public DividedSpriteLoader(ITextureLoader textureLoader, float pixelsPerUnit, int x, int y, bool isSize = false)
     {
@@ -605,6 +639,15 @@ public class DividedSpriteLoader : Virial.Media.MultiImage, Image, IDividedSprit
     public DividedSpriteLoader SetPivot(Vector2 pivot)
     {
         Pivot = pivot;
+        return this;
+    }
+
+    /// <summary>
+    /// スプライトをFullRectで生成します。Tiled描画に使うスプライトはFullRectである必要があります。
+    /// </summary>
+    public DividedSpriteLoader SetFullRect()
+    {
+        meshType = SpriteMeshType.FullRect;
         return this;
     }
 
@@ -637,7 +680,7 @@ public class DividedSpriteLoader : Virial.Media.MultiImage, Image, IDividedSprit
             var texture2D = texture!.GetTexture();
             int _x = index % division!.Item1;
             int _y = index / division!.Item1;
-            sprites[index] = texture2D.ToSprite(new Rect(_x * size.Item1, (division.Item2 - _y - 1) * size.Item2, size.Item1, size.Item2), Pivot, pixelsPerUnit);
+            sprites[index] = texture2D.ToSprite(new Rect(_x * size.Item1, (division.Item2 - _y - 1) * size.Item2, size.Item1, size.Item2), Pivot, pixelsPerUnit, meshType);
         }
         return sprites[index];
     }

@@ -350,18 +350,40 @@ public static class AmongUsUtil
         RpcCleanDeadBodyDef.Invoke(new() { TargetId = deadbody.Id, SourceId = sourceId, RelatedTag = relatedTag });
     }
 
-    static private SpriteLoader lightMaskSprite = SpriteLoader.FromResource("Nebula.Resources.LightMask.png", 100f);
-    public static SpriteRenderer GenerateCustomLight(Vector2 position,Sprite? lightSprite = null)
+    /// <summary>
+    /// 影を打ち消す光源を生成します。
+    /// 色・透明度はrenderer.colorではなくmaterial.colorで指定してください。
+    /// </summary>
+    /// <param name="position">位置</param>
+    /// <param name="lightSprite">光源の形状。nullの場合は既定の円形光源</param>
+    /// <param name="drawSize">指定した場合、このサイズでdrawModeに従って描画します。スプライトはFullRectで生成されている必要があります。</param>
+    /// <param name="drawMode">drawSizeを指定したときの描画モード (Tiled または Sliced)</param>
+    /// <returns></returns>
+    public static SpriteRenderer GenerateCustomLight(Vector2 position,Sprite? lightSprite = null, Vector2? drawSize = null, SpriteDrawMode drawMode = SpriteDrawMode.Tiled)
     {
         var renderer = UnityHelper.CreateObject<SpriteRenderer>("Light", null, (Vector3)position + new Vector3(0, 0, -10f), LayerExpansion.GetDrawShadowsLayer());
-        renderer.sprite = lightSprite ?? lightMaskSprite.GetSprite();
+        renderer.sprite = lightSprite ?? ShadowLightHelpers.LightMaskImage.GetSprite();
         renderer.material.shader = NebulaAsset.MultiplyBackShader;
+        if (drawSize.HasValue)
+        {
+            renderer.drawMode = drawMode;
+            renderer.size = drawSize.Value;
+        }
         new LightInfo(renderer);
 
         return renderer;
     }
 
-    internal static CustomShadow GenerateCustomShadow(Vector2 position, Sprite shadowSprite, Color? shadowColor = null)
+    /// <summary>
+    /// 影の中でも見える物体を生成します。
+    /// </summary>
+    /// <param name="position">位置</param>
+    /// <param name="shadowSprite">物体のスプライト</param>
+    /// <param name="shadowColor">影の中での色</param>
+    /// <param name="drawSize">指定した場合、このサイズでdrawModeに従って描画します。スプライトはFullRectで生成されている必要があります。</param>
+    /// <param name="drawMode">drawSizeを指定したときの描画モード (Tiled または Sliced)</param>
+    /// <returns></returns>
+    internal static CustomShadow GenerateCustomShadow(Vector2 position, Sprite shadowSprite, Color? shadowColor = null, Vector2? drawSize = null, SpriteDrawMode drawMode = SpriteDrawMode.Tiled)
     {
         var shadowCam = NebulaGameManager.Instance!.WideCamera.SubShadowCam;
         var renderer = UnityHelper.CreateObject<SpriteRenderer>("Shadow", null, position.AsVector3(-5.001f), LayerExpansion.GetDrawShadowsLayer());
@@ -382,6 +404,7 @@ public static class AmongUsUtil
         assist.ShadowCollab = AmongUsUtil.GetShadowCollab();
         renderer.material.SetColor("_ShadowColor", shadowColor ?? new(0.2745f, 0.2745f, 0.2745f));
         renderer.material.SetTexture("_ShadowTex", shadowCam.targetTexture);
+        if (drawSize.HasValue) assist.SetDrawMode(drawMode, drawSize.Value);
         assist.SetBlend(1f);
         return assist;
     }
