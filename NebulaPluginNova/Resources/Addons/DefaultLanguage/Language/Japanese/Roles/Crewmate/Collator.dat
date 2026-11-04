@@ -53,6 +53,7 @@
 "stats.collator.collating" : "照合回数"
 "stats.collator.matched" : "適合した回数"
 "stats.collator.unmatched" : "不適合の回数"
+"stats.collator.sample" : "サンプルの採取回数"
 
 # Titles
 

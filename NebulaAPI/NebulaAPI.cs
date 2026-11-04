@@ -54,8 +54,10 @@ internal interface INebula
     Logging.Logging Logging { get; }
 
     //GameStatsAPI
-    GameStatsEntry CreateStatsEntry(string id, GameStatsCategory category, DefinedAssignable? assignable, TextComponent? displayTitle, int innerPriority = 0);
+    GameStatsEntry CreateStatsEntry(string id, GameStatsCategory category, DefinedAssignable? assignable, TextComponent? displayTitle, int innerPriority = 0, GameStatsAnnotation annotation = GameStatsAnnotation.None, GameStatsUnit unit = GameStatsUnit.None);
+    DecimalGameStatsEntry CreateDecimalStatsEntry(string id, GameStatsCategory category, DefinedAssignable? assignable, TextComponent? displayTitle, int innerPriority = 0, GameStatsAnnotation annotation = GameStatsAnnotation.None, int digits = 1, GameStatsUnit unit = GameStatsUnit.None);
     void IncrementStatsEntry(string id, int num);
+    void IncrementDecimalStatsEntry(DecimalGameStatsEntry entry, float value);
 
     //DocumentTipAPI
     void RegisterTip(IDocumentTip tip);
@@ -164,8 +166,20 @@ public static class NebulaAPI
     /// <returns></returns>
     static public E RunEvent<E>(E ev) where E : class, Virial.Events.Event => instance.RunEvent(ev);
     static public void RegisterExtension<T, E>(Action<T, E> operation, int priority = 0) where E : Virial.Events.Event => instance.RegisterExtension(operation, priority);
-    static public GameStatsEntry CreateStatsEntry(string id, GameStatsCategory category, DefinedAssignable? assignable = null, TextComponent? displayTitle = null, int innerPriority = 0) => instance.CreateStatsEntry(id, category, assignable, displayTitle, innerPriority);
+    static public GameStatsEntry CreateStatsEntry(string id, GameStatsCategory category, DefinedAssignable? assignable = null, TextComponent? displayTitle = null, int innerPriority = 0, GameStatsAnnotation annotation = GameStatsAnnotation.None, GameStatsUnit unit = GameStatsUnit.None) => instance.CreateStatsEntry(id, category, assignable, displayTitle, innerPriority, annotation, unit);
+    /// <summary>
+    /// 小数の値を記録する統計を生成します。
+    /// </summary>
+    /// <param name="digits">表示する小数点以下の桁数。値は10^digits倍した整数として記録されます。</param>
+    /// <returns></returns>
+    static public DecimalGameStatsEntry CreateDecimalStatsEntry(string id, GameStatsCategory category, DefinedAssignable? assignable = null, TextComponent? displayTitle = null, int innerPriority = 0, GameStatsAnnotation annotation = GameStatsAnnotation.None, int digits = 1, GameStatsUnit unit = GameStatsUnit.None) => instance.CreateDecimalStatsEntry(id, category, assignable, displayTitle, innerPriority, annotation, digits, unit);
     static public void Progress(this GameStatsEntry entry, int num = 1) => instance.IncrementStatsEntry(entry.Id, num);
+    /// <summary>
+    /// 小数の統計を進めます。値はゲーム中は小数のまま合算され、ゲーム終了時に整数化して記録されます。
+    /// </summary>
+    /// <param name="entry"></param>
+    /// <param name="value">実際の値</param>
+    static public void Progress(this DecimalGameStatsEntry entry, float value) => instance.IncrementDecimalStatsEntry(entry, value);
     static public void IncrementStatsEntry(string  entryId, int num = 1) => instance.IncrementStatsEntry(entryId, num);
 
     /// <summary>

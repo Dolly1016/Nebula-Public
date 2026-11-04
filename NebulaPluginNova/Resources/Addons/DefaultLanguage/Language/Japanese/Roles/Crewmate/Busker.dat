@@ -40,6 +40,7 @@
 
 "stats.busker.pseudocide" : "偽装死の発動回数"
 "stats.busker.missed" : "復活失敗回数"
+"stats.busker.pseudocideDistance" : "偽装死中の移動距離"
 
 # Titles
 

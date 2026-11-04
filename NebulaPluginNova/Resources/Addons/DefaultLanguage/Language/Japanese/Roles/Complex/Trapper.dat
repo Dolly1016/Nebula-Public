@@ -26,3 +26,12 @@
 # Status
 
 "state.trapped" : "トラップ死"
+
+"stats.niceTrapper.placeAccel" : "加速トラップの設置回数"
+"stats.niceTrapper.placeDecel" : "減速トラップの設置回数"
+"stats.niceTrapper.placeComm" : "探知トラップの設置回数"
+"stats.niceTrapper.detect" : "探知トラップによる探知回数"
+"stats.evilTrapper.placeAccel" : "加速トラップの設置回数"
+"stats.evilTrapper.placeDecel" : "減速トラップの設置回数"
+"stats.evilTrapper.placeKill" : "キルトラップの設置回数"
+"stats.evilTrapper.killTrap" : "キルトラップの発動回数"

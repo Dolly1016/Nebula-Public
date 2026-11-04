@@ -74,6 +74,7 @@ public class GhostAndFlashAbility : IGameOperator
     public VColor FlashColor { get; set; } = VColor.White;
     public AchievementToken<bool>? CommonToken;
     public float GhostDuration { get; set; } = 60f;
+    public GameStatsEntry? FlashStats { get; set; } = null;
 
     void OnPlayerMurdered(PlayerMurderedEvent ev)
     {
@@ -84,6 +85,7 @@ public class GhostAndFlashAbility : IGameOperator
         {
             new Ghost(ev.DeadBodyPos ?? ev.Dead.Position, GhostDuration, CommonToken, CanSeeGhostInShadow).RegisterPermanently();
             AmongUsUtil.PlayFlash(FlashColor);
+            FlashStats?.Progress();
         }
     }
 }
@@ -102,6 +104,7 @@ public class Seer : DefinedSingleAbilityRoleTemplate<Seer.Ability>, HasCitation,
     static public readonly BoolConfiguration CanSeeGhostsInShadowOption = NebulaAPI.Configurations.Configuration("options.role.seer.canSeeGhostsInShadow", false);
 
     static public readonly Seer MyRole = new();
+    static private readonly GameStatsEntry StatsFlash = NebulaAPI.CreateStatsEntry("stats.seer.flash", GameStatsCategory.Roles, MyRole, annotation: GameStatsAnnotation.From2611);
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
     public class Ability : AbstractPlayerUsurpableAbility, IPlayerAbility
     {
@@ -115,7 +118,7 @@ public class Seer : DefinedSingleAbilityRoleTemplate<Seer.Ability>, HasCitation,
                 AchievementToken<bool> acTokenCommon = new("seer.common1", false, (val, _) => val);
                 acTokenChallenge = new AchievementToken<(bool noMissFlag, int meetings)>("seer.challenge2", (true, 0), (val, _) => val.noMissFlag && val.meetings >= 3);
 
-                new GhostAndFlashAbility() { CanSeeGhostInShadow = CanSeeGhostsInShadowOption, FlashColor = MyRole.RoleColor, GhostDuration = GhostDurationOption, CommonToken = acTokenCommon }.Register(new FunctionalLifespan(() => !this.IsDeadObject && !this.IsUsurped));
+                new GhostAndFlashAbility() { CanSeeGhostInShadow = CanSeeGhostsInShadowOption, FlashColor = MyRole.RoleColor, GhostDuration = GhostDurationOption, CommonToken = acTokenCommon, FlashStats = StatsFlash }.Register(new FunctionalLifespan(() => !this.IsDeadObject && !this.IsUsurped));
             }
         }
 

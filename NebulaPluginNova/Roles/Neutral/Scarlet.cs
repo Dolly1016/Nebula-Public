@@ -49,6 +49,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 
     static public Scarlet MyRole = new Scarlet();
     static private GameStatsEntry StatsKept = NebulaAPI.CreateStatsEntry("stats.scarlet.kept", GameStatsCategory.Roles, MyRole);
+    static private GameStatsEntry StatsCommand = NebulaAPI.CreateStatsEntry("stats.scarlet.command", GameStatsCategory.Roles, MyRole, annotation: GameStatsAnnotation.From2611);
 
     bool IAssignableDocument.HasTips => false;
     bool IAssignableDocument.HasAbility => true;
@@ -233,6 +234,7 @@ internal class Scarlet : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                 {
                     RpcCommand.Invoke(MyPlayer);
                     usedInTheMeeting = true;
+                    StatsCommand.Progress();
                 };
                 meetingButton.OnMeeting = _ =>
                 {

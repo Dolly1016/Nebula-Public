@@ -33,6 +33,7 @@ public class Busker : DefinedSingleAbilityRoleTemplate<Busker.Ability>, DefinedR
     static public readonly Busker MyRole = new();
     static private readonly GameStatsEntry StatsPseudocide = NebulaAPI.CreateStatsEntry("stats.busker.pseudocide", GameStatsCategory.Roles, MyRole);
     static private readonly GameStatsEntry StatsMissed = NebulaAPI.CreateStatsEntry("stats.busker.missed", GameStatsCategory.Roles, MyRole);
+    static private readonly DecimalGameStatsEntry StatsPseudocideDistance = NebulaAPI.CreateDecimalStatsEntry("stats.busker.pseudocideDistance", GameStatsCategory.Roles, MyRole, annotation: GameStatsAnnotation.From2611, unit: GameStatsUnit.Distance);
     bool AssignableFilterHolder.CanLoadDefault(DefinedAssignable assignable) => CanLoadDefaultTemplate(assignable) && assignable is not Lover;
 
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
@@ -90,12 +91,15 @@ public class Busker : DefinedSingleAbilityRoleTemplate<Busker.Ability>, DefinedR
                 pseudocideButton.CoolDownTimer = NebulaAPI.Modules.Timer(this, PseudocideCoolDownOption)
                     .SetAsAbilityTimer()
                     .Start();
+                //偽装死した位置(復活時に移動距離を記録する)
+                Vector2 pseudocidePosition = Vector2.zero;
                 pseudocideButton.OnClick = (button) => {
                     NebulaManager.Instance.ScheduleDelayAction(() => {
                         using (RPCRouter.CreateSection("BuskerPseudocide"))
                         {
                             if (HidePseudocideFromVitalsOption) MyPlayer.GainAttribute(PlayerAttributes.BuskerEffect, 10000f, false, 0);
                             if (NebulaGameManager.Instance != null) NebulaGameManager.Instance.LocalStatus.InBuskerPseudocide = true;
+                            pseudocidePosition = MyPlayer.Position.ToUnityVector();
                             MyPlayer.MurderPlayer(MyPlayer, PlayerState.Pseudocide, null, KillParameter.WithDeadBody, KillCondition.NormalKill);
                             StatsPseudocide.Progress();
                         }
@@ -110,6 +114,7 @@ public class Busker : DefinedSingleAbilityRoleTemplate<Busker.Ability>, DefinedR
                 reviveButton.EffectTimer = NebulaAPI.Modules.Timer(this, PseudocideDurationOption);
                 reviveButton.PlayFlashWhile = button => true;
                 reviveButton.OnClick = (button) => {
+                    StatsPseudocideDistance.Progress(pseudocidePosition.Distance(MyPlayer.Position.ToUnityVector()));
                     using (RPCRouter.CreateSection("ReviveBusker"))
                     {
                         NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, MyPlayer.Position, BuskerRevivingAction);

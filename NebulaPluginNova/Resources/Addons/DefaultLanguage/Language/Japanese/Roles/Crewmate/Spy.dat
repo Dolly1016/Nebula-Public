@@ -43,3 +43,5 @@
 
 "achievement.spy.challenge.title" : "動乱を呼ぶ密偵"
 "achievement.spy.challenge.goal" : "1人以上のインポスターがインポスターにキルされたうえで<br>クルーメイト勝利によって勝利する。"
+
+"stats.spy.friendlyFire" : "インポスターの同士討ち回数"

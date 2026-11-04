@@ -40,6 +40,7 @@
 
 "stats.busker.pseudocide" : "Num of Pseudocide"
 "stats.busker.missed" : "Num of Missed"
+"stats.busker.pseudocideDistance" : "Distance Moved While Pseudocided"
 
 # Titles
 

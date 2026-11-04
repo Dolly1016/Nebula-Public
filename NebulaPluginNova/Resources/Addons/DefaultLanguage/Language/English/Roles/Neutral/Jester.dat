@@ -63,3 +63,5 @@
 "perk.empty.jester.name" : "Jester's Perk Slot"
 "perk.empty.jester.detail" : "Choose a perk with the ability button."
 "role.jester.perk.guide" : "Choose your perks!"
+
+"stats.jester.perk" : "Num of Perks Gained"

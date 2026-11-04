@@ -40,7 +40,7 @@ internal class Climber : DefinedSingleAbilityRoleTemplate<Climber.Ability>, Defi
 
     static public readonly Climber MyRole = new();
     static private readonly GameStatsEntry StatsGust = NebulaAPI.CreateStatsEntry("stats.climber.gust", GameStatsCategory.Roles, MyRole);
-    static private readonly GameStatsEntry StatsDistance = NebulaAPI.CreateStatsEntry("stats.climber.distance", GameStatsCategory.Roles, MyRole);
+    static private readonly GameStatsEntry StatsDistance = NebulaAPI.CreateStatsEntry("stats.climber.distance", GameStatsCategory.Roles, MyRole, unit: GameStatsUnit.Distance);
 
     static private readonly Image hookSprite = SpriteLoader.FromResource("Nebula.Resources.GustHook.png", 100f);
     static private readonly Image ropeSprite = SpriteLoader.FromResource("Nebula.Resources.GustRope.png", 100f);

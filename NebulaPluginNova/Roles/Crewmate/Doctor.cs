@@ -25,6 +25,8 @@ public class Doctor : DefinedUsurpableAdvancedRoleTemplate<Doctor.Ability, Docto
     static private readonly FloatConfiguration ChargesPerTasksOption = NebulaAPI.Configurations.Configuration("options.role.doctor.chargesPerTasks", (0.5f, 10f, 0.5f), 1f, FloatConfigurationDecorator.Second);
 
     static public readonly Doctor MyRole = new();
+    static private readonly DecimalGameStatsEntry StatsPortableVitalTime = NebulaAPI.CreateDecimalStatsEntry("stats.doctor.portableVitalTime", GameStatsCategory.Roles, MyRole, annotation: GameStatsAnnotation.From2611, unit: GameStatsUnit.Second);
+    static private readonly GameStatsEntry StatsWitness = NebulaAPI.CreateStatsEntry("stats.doctor.witness", GameStatsCategory.Roles, MyRole, annotation: GameStatsAnnotation.From2611);
     bool IAssignableDocument.HasTips => false;
     bool IAssignableDocument.HasAbility => true;
     IEnumerable<AssignableDocumentImage> IAssignableDocument.GetDocumentImages()
@@ -165,10 +167,12 @@ public class Doctor : DefinedUsurpableAdvancedRoleTemplate<Doctor.Ability, Docto
                         acTokenCommon ??= new("doctor.common1");
 
                         int lastAliveCount = NebulaGameManager.Instance!.AllPlayerInfo.Count(p => !p.IsDead);
+                        float vitalTimerAtStart = this.vitalTimer;
 
                         while (vitalsMinigame.amClosing != Minigame.CloseState.Closing)
                         {
                             this.vitalTimer -= Time.deltaTime;
+
                             if (this.vitalTimer < 0f)
                             {
                                 batteryText.gameObject.SetActive(false);
@@ -180,8 +184,13 @@ public class Doctor : DefinedUsurpableAdvancedRoleTemplate<Doctor.Ability, Docto
                             yield return null;
                         }
 
+                        //消費したポータブルバイタルの残り使用時間を記録する
+                        StatsPortableVitalTime.Progress(Mathn.Max(0f, vitalTimerAtStart - Mathn.Max(0f, this.vitalTimer)));
+
                         //生存者の数に変化がある
-                        if (lastAliveCount != NebulaGameManager.Instance!.AllPlayerInfo.Count(p => !p.IsDead))
+                        int aliveCount = NebulaGameManager.Instance!.AllPlayerInfo.Count(p => !p.IsDead);
+                        if (lastAliveCount > aliveCount) StatsWitness.Progress(lastAliveCount - aliveCount);
+                        if (lastAliveCount != aliveCount)
                         {
                             if(!(PortableVitalsChargeOption > 10f || ChargesPerTasksOption > 2f)) acTokenChallenge ??= new("doctor.challenge");
                         }

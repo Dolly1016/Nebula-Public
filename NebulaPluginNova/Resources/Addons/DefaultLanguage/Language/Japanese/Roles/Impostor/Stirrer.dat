@@ -45,6 +45,7 @@
 
 "stats.stirrer.stir" : "幻惑回数"
 "stats.stirrer.sabo" : "偽サボタージュ発動回数"
+"stats.stirrer.emergencySabo" : "偽の緊急サボタージュ発動回数"
 
 # Titles
 

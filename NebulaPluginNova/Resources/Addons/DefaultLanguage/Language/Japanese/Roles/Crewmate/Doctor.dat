@@ -36,3 +36,6 @@
 "achievement.doctor.challenge.cond" : "初期使用可能時間: 10秒以下+タスクによるチャージ: 2秒以下"
 "achievement.doctor.challenge.flavor" : ""白い天井に、無機質な音" ―戦場の独白"
 "achievement.doctor.challenge.splitted.1" : "奴は"
+
+"stats.doctor.portableVitalTime" : "ポータブルバイタルの使用時間"
+"stats.doctor.witness" : "死亡の瞬間を目撃した回数"

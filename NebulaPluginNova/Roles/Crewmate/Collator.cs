@@ -42,6 +42,7 @@ public class Collator : DefinedSingleAbilityRoleTemplate<Collator.Ability>, HasC
     static private readonly GameStatsEntry StatsCollating = NebulaAPI.CreateStatsEntry("stats.collator.collating", GameStatsCategory.Roles, MyRole);
     static private readonly GameStatsEntry StatsMatched = NebulaAPI.CreateStatsEntry("stats.collator.matched", GameStatsCategory.Roles, MyRole);
     static private readonly GameStatsEntry StatsUnmatched = NebulaAPI.CreateStatsEntry("stats.collator.unmatched", GameStatsCategory.Roles, MyRole);
+    static private readonly GameStatsEntry StatsSample = NebulaAPI.CreateStatsEntry("stats.collator.sample", GameStatsCategory.Roles, MyRole, annotation: GameStatsAnnotation.From2611);
 
     bool IAssignableDocument.HasTips => true;
     bool IAssignableDocument.HasAbility => true;
@@ -261,6 +262,7 @@ public class Collator : DefinedSingleAbilityRoleTemplate<Collator.Ability>, HasC
                     NebulaManager.Instance.StartCoroutine(CoShakeTube(sampledPlayers.Count - 1).WrapToIl2Cpp());
                     UpdateSamples();
                     button.StartCoolDown();
+                    StatsSample.Progress();
 
                     achCommon1Token.Value++;
                     achCommon2Token.Value++;

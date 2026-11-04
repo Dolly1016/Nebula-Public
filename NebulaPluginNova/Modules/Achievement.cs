@@ -283,6 +283,18 @@ public interface INebulaAchievement
     string PrefixTranslationKey => "achievement." + Id + ".splitted.0";
     string InfixTranslationKey => "achievement." + Id + ".splitted.1";
     string SuffixTranslationKey => "achievement." + Id + ".splitted.2";
+    string GetPartTranslationKey(TitlePartType type) => type switch
+    {
+        TitlePartType.Prefix => PrefixTranslationKey,
+        TitlePartType.Infix => InfixTranslationKey,
+        _ => SuffixTranslationKey
+    };
+    bool HasPart(TitlePartType type) => type switch
+    {
+        TitlePartType.Prefix => HasPrefix,
+        TitlePartType.Infix => HasInfix,
+        _ => HasSuffix
+    };
 
     int Trophy { get; }
     bool IsHidden { get; }
@@ -297,6 +309,7 @@ public interface INebulaAchievement
     internal bool HasPrefix { get; set; }
     internal bool HasInfix { get; set; }
     internal bool HasSuffix { get; set; }
+    internal bool HasGlue { get; set; }
     internal bool IsAddonTitle => Group != null;
 
     IEnumerable<string> GetKeywords()
@@ -349,14 +362,16 @@ public interface INebulaAchievement
         if (showCraftingParts)
         {
             List<Virial.Media.GUIWidget> parts = [];
-            if (HasPrefix) parts.Add(GUI.API.LocalizedText(GUIAlignment.Center, AttributeAsset.OverlayContent, IsCleared ? PrefixTranslationKey : "achievement.part.unachieved"));
-            if (HasInfix) parts.Add(GUI.API.LocalizedText(GUIAlignment.Center, AttributeAsset.OverlayContent, IsCleared ?  InfixTranslationKey : "achievement.part.unachieved"));
-            if (HasSuffix) parts.Add(GUI.API.LocalizedText(GUIAlignment.Center, AttributeAsset.OverlayContent, IsCleared ? SuffixTranslationKey : "achievement.part.unachieved"));
+            Virial.Media.GUIWidget PartWidget(string translationKey, TitlePartType type) => new GUITitlePart(GUIAlignment.Center, new TranslateTextComponent(translationKey), type);
+            if (HasPrefix) parts.Add(PartWidget(PrefixTranslationKey, TitlePartType.Prefix));
+            if (HasInfix) parts.Add(PartWidget(InfixTranslationKey, TitlePartType.Infix));
+            if (HasSuffix) parts.Add(PartWidget(SuffixTranslationKey, TitlePartType.Suffix));
+            if (HasGlue) parts.Add(new NoSGUIImage(GUIAlignment.Center, GUITitlePart.GlueIcon, new(0.32f, 0.32f)));
 
             if (parts.Count > 0)
             {
                 list.Add(GUI.API.VerticalMargin(0.04f));
-                list.Add(GUI.API.HorizontalHolder(GUIAlignment.Left, parts.Join(GUI.API.RawText(GUIAlignment.Center, AttributeAsset.OverlayContent, ", ")).Prepend(GUI.API.LocalizedText(GUIAlignment.Center, AttributeAsset.OverlayContent, "achievement.ui.bonusParts"))));
+                list.Add(GUI.API.HorizontalHolder(GUIAlignment.Left, parts.Join(GUI.API.HorizontalMargin(0.03f)).Prepend(GUI.API.LocalizedText(GUIAlignment.Center, AttributeAsset.OverlayContent, "achievement.ui.bonusParts"))));
             }
         }
 
@@ -520,6 +535,7 @@ public class AbstractAchievement : ProgressRecord, INebulaAchievement
     public bool HasPrefix { get; set; }
     public bool HasSuffix { get; set; }
     public bool HasInfix { get; set; }
+    public bool HasGlue { get; set; }
     public bool IsHidden { get => (isSecret || !(preAchievement?.Get()?.IsCleared ?? true)) && !IsCleared; }
     string? INebulaAchievement.Group => GroupId;
 
@@ -573,6 +589,7 @@ public class InnerslothAchievement : INebulaAchievement
     public bool HasPrefix { get; set; }
     public bool HasSuffix { get; set; }
     public bool HasInfix { get; set; }
+    public bool HasGlue { get; set; }
     public bool IsAddonTitle => false;
     string? INebulaAchievement.Group => null;
 #if PC
@@ -653,6 +670,7 @@ public class SumUpReferenceAchievement : INebulaAchievement
     public bool HasPrefix { get; set; }
     public bool HasSuffix { get; set; }
     public bool HasInfix { get; set; }
+    public bool HasGlue { get; set; }
     public string? Group { get; private set; }
     private ProgressRecord? referenceRecord = null;
     private readonly IEnumerable<AchievementType> achievementType =[];
@@ -872,55 +890,71 @@ static public class NebulaAchievementManager
             return [title];
         } 
     }
+
+    static internal string EncodeTitlePart(INebulaAchievement? achievement, TitlePartType partType, TitlePartType slotType)
+        => achievement == null ? "-" : (partType == slotType ? achievement.Id : achievement.Id + TitlePartSeparator + (int)partType);
+
+    static internal bool DecodeTitlePart(string entry, [MaybeNullWhen(false)] out INebulaAchievement achievement, out TitlePartType? partType)
+    {
+        partType = null;
+        var separator = entry.LastIndexOf(TitlePartSeparator);
+        if (separator >= 0 && int.TryParse(entry.AsSpan(separator + 1), out var typeNum) && typeNum >= 0 && typeNum <= 2)
+        {
+            partType = (TitlePartType)typeNum;
+            entry = entry.Substring(0, separator);
+        }
+        return GetAchievement(entry, out achievement);
+    }
+    private const char TitlePartSeparator = '#';
+
     internal class CustomAchievement
     {
-        internal record TitleTip(INebulaAchievement achievement, string localizedTip);
-        private StringDataEntry prefixEntry, infixEntry1, infixEntry2, suffixEntry;
+        internal record TitleTip(INebulaAchievement achievement, string localizedTip, TitlePartType partType);
+        private StringDataEntry[] entries;
         public string Id { get; }
         public CustomAchievement(string id)
         {
             this.Id = id;
-            prefixEntry = new(id + ".prefix", AchievementDataSaver, "-");
-            infixEntry1 = new(id + ".infix1", AchievementDataSaver, "-");
-            infixEntry2 = new(id + ".infix2", AchievementDataSaver, "-");
-            suffixEntry = new(id + ".suffix", AchievementDataSaver, "-");
+            entries = [
+                new(id + ".prefix", AchievementDataSaver, "-"),
+                new(id + ".infix1", AchievementDataSaver, "-"),
+                new(id + ".infix2", AchievementDataSaver, "-"),
+                new(id + ".suffix", AchievementDataSaver, "-"),
+                ];
         }
 
-        public string LocalizedTitle => 
-            (GetPrefix()?.localizedTip ?? "") + 
-            (GetInfix1()?.localizedTip ?? "") + 
-            (GetInfix2()?.localizedTip ?? "") + 
-            (GetSuffix()?.localizedTip ?? "");
+        /// <summary>枠本来のパーツの種類(0:接頭、1,2:中間、3:接尾)</summary>
+        static internal TitlePartType SlotType(int slot) => slot switch { 0 => TitlePartType.Prefix, 3 => TitlePartType.Suffix, _ => TitlePartType.Infix };
+
+        public string LocalizedTitle => string.Concat(Enumerable.Range(0, entries.Length).Select(i => Get(i)?.localizedTip ?? ""));
         public bool IsEmpty => LocalizedTitle.Length == 0;
 
-        public TitleTip? GetPrefix() => NebulaAchievementManager.GetAchievement(prefixEntry.Value, out var ach) ? new(ach, Language.Translate(ach.PrefixTranslationKey)) : null;
-        public TitleTip? GetInfix1() => NebulaAchievementManager.GetAchievement(infixEntry1.Value, out var ach) ? new(ach, Language.Translate(ach.InfixTranslationKey)) : null;
-        public TitleTip? GetInfix2() => NebulaAchievementManager.GetAchievement(infixEntry2.Value, out var ach) ? new(ach, Language.Translate(ach.InfixTranslationKey)) : null;
-        public TitleTip? GetSuffix() => NebulaAchievementManager.GetAchievement(suffixEntry.Value, out var ach) ? new(ach, Language.Translate(ach.SuffixTranslationKey)) : null;
-        public TitleTip? Get(int index) => index switch
+        public TitleTip? GetPrefix() => Get(0);
+        public TitleTip? GetInfix1() => Get(1);
+        public TitleTip? GetInfix2() => Get(2);
+        public TitleTip? GetSuffix() => Get(3);
+        public TitleTip? Get(int index)
         {
-            0 => GetPrefix(),
-            1 => GetInfix1(),
-            2 => GetInfix2(),
-            _ => GetSuffix()
-        };
-        public string[] ToArray() => [prefixEntry.Value, infixEntry1.Value, infixEntry2.Value, suffixEntry.Value];
-
-        public IEnumerable<INebulaAchievement> Achievements => GetAchievements();
-        private IEnumerable<INebulaAchievement> GetAchievements()
-        {
-            if (NebulaAchievementManager.GetAchievement(prefixEntry.Value, out var ach0)) yield return ach0;
-            if (NebulaAchievementManager.GetAchievement(infixEntry1.Value, out var ach1)) yield return ach1;
-            if (NebulaAchievementManager.GetAchievement(infixEntry2.Value, out var ach2)) yield return ach2;
-            if (NebulaAchievementManager.GetAchievement(suffixEntry.Value, out var ach3)) yield return ach3;
+            index = Math.Clamp(index, 0, entries.Length - 1);
+            if (!DecodeTitlePart(entries[index].Value, out var ach, out var partType)) return null;
+            var type = partType ?? SlotType(index);
+            return new(ach, Language.Translate(ach.GetPartTranslationKey(type)), type);
         }
+        public string[] ToArray() => entries.Select(e => e.Value).ToArray();
 
-        public void Update(INebulaAchievement? prefix, INebulaAchievement? infix1, INebulaAchievement? infix2, INebulaAchievement? suffix)
+        public IEnumerable<INebulaAchievement> Achievements => Enumerable.Range(0, entries.Length).Select(i => Get(i)?.achievement).Where(a => a != null)!;
+
+        /// <summary>のりを使って枠本来とは異なる種類のパーツを使っている枠の数</summary>
+        public int UsedGlues => Enumerable.Range(0, entries.Length).Count(i => Get(i) is { } tip && tip.partType != SlotType(i));
+
+        /// <param name="parts">各枠のパーツ(接頭、中間1、中間2、接尾の順)と、そのパーツとして使う種類</param>
+        public void Update(IReadOnlyList<(INebulaAchievement? achievement, TitlePartType partType)> parts)
         {
-            prefixEntry.Value = prefix?.Id ?? "-";
-            infixEntry1.Value = infix1?.Id ?? "-";
-            infixEntry2.Value = infix2?.Id ?? "-";
-            suffixEntry.Value = suffix?.Id ?? "-";
+            for (int i = 0; i < entries.Length; i++)
+            {
+                var (ach, type) = i < parts.Count ? parts[i] : (null, SlotType(i));
+                entries[i].Value = EncodeTitlePart(ach, type, SlotType(i));
+            }
         }
     }
 
@@ -1072,7 +1106,7 @@ static public class NebulaAchievementManager
             bool isNotChallenge = false;
             bool isRecord = false;
             bool innersloth = false;
-            bool hasPrefix = false, hasPostfix = false, hasInfix = false;
+            bool hasPrefix = false, hasPostfix = false, hasInfix = false, hasGlue = false;
             string? reference = null;
             string? defaultSource = null;
             string? preAchievement = null;
@@ -1141,6 +1175,9 @@ static public class NebulaAchievementManager
                     case "sp2":
                         hasPostfix = true;
                         break;
+                    case "glue":
+                        hasGlue = true;
+                        break;
                     case string a when a.StartsWith("record-"):
                         if (allRecords.TryGetValue(a.Substring(7), out var r))
                             recordsList.Add(r);
@@ -1207,17 +1244,17 @@ static public class NebulaAchievementManager
             }
 
             if (innersloth)
-                new InnerslothAchievement(noHint, args[0], specifiedImage) { HasInfix = hasInfix, HasPrefix = hasPrefix, HasSuffix = hasPostfix };
+                new InnerslothAchievement(noHint, args[0], specifiedImage) { HasInfix = hasInfix, HasPrefix = hasPrefix, HasSuffix = hasPostfix, HasGlue = hasGlue };
             else if (isRecord)
                 new DisplayProgressRecord(null, args[0], goal, "record." + args[0], defaultSource);
             else if (!records.IsEmpty())
-                new CompleteAchievement(null, records.ToArray(), secret, noHint, args[0], relatedRoles, types.ToArray(), rarity, attention, specifiedImage, preAchievement) { HasInfix = hasInfix, HasPrefix = hasPrefix, HasSuffix = hasPostfix };
+                new CompleteAchievement(null, records.ToArray(), secret, noHint, args[0], relatedRoles, types.ToArray(), rarity, attention, specifiedImage, preAchievement) { HasInfix = hasInfix, HasPrefix = hasPrefix, HasSuffix = hasPostfix, HasGlue = hasGlue };
             else if (reference != null)
-                new SumUpReferenceAchievement(null, secret, args[0], reference, goal, relatedRoles, types.ToArray(), rarity, attention, specifiedImage, preAchievement) { HasInfix = hasInfix, HasPrefix = hasPrefix, HasSuffix = hasPostfix };
+                new SumUpReferenceAchievement(null, secret, args[0], reference, goal, relatedRoles, types.ToArray(), rarity, attention, specifiedImage, preAchievement) { HasInfix = hasInfix, HasPrefix = hasPrefix, HasSuffix = hasPostfix, HasGlue = hasGlue };
             else if (goal > 1)
-                new SumUpAchievement(null, secret, noHint, args[0], goal, relatedRoles, types.ToArray(), rarity, attention, specifiedImage, preAchievement) { HasInfix = hasInfix, HasPrefix = hasPrefix, HasSuffix = hasPostfix };
+                new SumUpAchievement(null, secret, noHint, args[0], goal, relatedRoles, types.ToArray(), rarity, attention, specifiedImage, preAchievement) { HasInfix = hasInfix, HasPrefix = hasPrefix, HasSuffix = hasPostfix, HasGlue = hasGlue };
             else
-                new StandardAchievement(clearOnce, secret, noHint, args[0], goal, relatedRoles, types.ToArray(), rarity, attention, specifiedImage, preAchievement) { HasInfix = hasInfix, HasPrefix = hasPrefix, HasSuffix = hasPostfix };
+                new StandardAchievement(clearOnce, secret, noHint, args[0], goal, relatedRoles, types.ToArray(), rarity, attention, specifiedImage, preAchievement) { HasInfix = hasInfix, HasPrefix = hasPrefix, HasSuffix = hasPostfix, HasGlue = hasGlue };
 
             if (recordsList.Count > 0) recordsList.Clear();
         }
@@ -1246,12 +1283,28 @@ static public class NebulaAchievementManager
         long hash = ach.Id.ComputeConstantLongHash();
         if (!fastAchievements.TryAdd(hash, ach)) NebulaLogger.Instance.Warning($"Duplicated Achievement! (Hash: {hash}, Achievement: {ach.Id} & {fastAchievements[hash].Id})");
     }
-    static internal GameStatsEntry RegisterStats(string id, GameStatsCategory category, DefinedAssignable? relatedAssignable, TextComponent? displayName = null, int innerPriority = 0, Func<int, string>? valueDecorator = null, bool allowMinus = false)
+    static internal GameStatsEntry RegisterStats(string id, GameStatsCategory category, DefinedAssignable? relatedAssignable, TextComponent? displayName = null, int innerPriority = 0, Func<int, string>? valueDecorator = null, bool allowMinus = false, GameStatsAnnotation annotation = GameStatsAnnotation.None, GameStatsUnit unit = GameStatsUnit.None)
     {
         var record = new ProgressRecord(null, id, 800000000, false) {  AllowMinus = allowMinus };
-        var statsEntry = new GameStatsEntryImpl(record, category, relatedAssignable, displayName, innerPriority, valueDecorator);
+        var statsEntry = new GameStatsEntryImpl(record, category, relatedAssignable, displayName, innerPriority, valueDecorator, annotation, unit);
         allStats.Add(statsEntry);
         return statsEntry;
+    }
+
+    static internal string GetUnitText(GameStatsUnit unit) => unit switch
+    {
+        GameStatsUnit.Second => Language.Translate("stats.unit.second"),
+        GameStatsUnit.Distance => Language.Translate("stats.unit.distance"),
+        _ => ""
+    };
+
+    static internal DecimalGameStatsEntry RegisterDecimalStats(string id, GameStatsCategory category, DefinedAssignable? relatedAssignable, TextComponent? displayName = null, int innerPriority = 0, int digits = 1, bool allowMinus = false, GameStatsAnnotation annotation = GameStatsAnnotation.None, GameStatsUnit unit = GameStatsUnit.None)
+    {
+        digits = Math.Max(0, digits);
+        float scale = MathF.Pow(10f, digits);
+        string format = "N" + digits;
+        var entry = RegisterStats(id, category, relatedAssignable, displayName, innerPriority, val => (val / scale).ToString(format), allowMinus, annotation, unit);
+        return new DecimalGameStatsEntryImpl(entry, digits);
     }
     static internal void SortStats()
     {
@@ -1563,8 +1616,12 @@ file class GameStatsEntryImpl : GameStatsEntry
     private TextComponent? displayName;
     private Func<int, string>? valueDecorator = null;
     private int innerPriority = 0;
-    public GameStatsEntryImpl(ProgressRecord record, GameStatsCategory category, DefinedAssignable? relatedAssignable, TextComponent? displayName, int innerPriority, Func<int, string>? valueDecorator = null)
+    private GameStatsAnnotation annotation;
+    private GameStatsUnit unit;
+    public GameStatsEntryImpl(ProgressRecord record, GameStatsCategory category, DefinedAssignable? relatedAssignable, TextComponent? displayName, int innerPriority, Func<int, string>? valueDecorator = null, GameStatsAnnotation annotation = GameStatsAnnotation.None, GameStatsUnit unit = GameStatsUnit.None)
     {
+        this.annotation = annotation;
+        this.unit = unit;
         this.myRecord = record;
         this.category = category;
         this.relatedAssignable = relatedAssignable;
@@ -1579,5 +1636,41 @@ file class GameStatsEntryImpl : GameStatsEntry
     DefinedAssignable? GameStatsEntry.RelatedAssignable => relatedAssignable;
     int GameStatsEntry.InnerPriority => innerPriority;
     string GameStatsEntry.DisplayValue => valueDecorator?.Invoke(myRecord.Progress) ?? myRecord.Progress.ToString("N0");
+    GameStatsAnnotation GameStatsEntry.Annotation => annotation;
+    GameStatsUnit GameStatsEntry.Unit => unit;
+}
+
+internal class DecimalGameStatsEntryImpl : DecimalGameStatsEntry
+{
+    private readonly GameStatsEntry entry;
+    private readonly int digits;
+    private readonly float scale;
+
+    //トークンはゲームごとに登録されるため、どのゲームで生成したトークンかを併せて保持する。
+    private AchievementToken<float>? token = null;
+    private NebulaGameManager? tokenGame = null;
+
+    public DecimalGameStatsEntryImpl(GameStatsEntry entry, int digits)
+    {
+        this.entry = entry;
+        this.digits = digits;
+        this.scale = MathF.Pow(10f, digits);
+    }
+
+    GameStatsEntry DecimalGameStatsEntry.Entry => entry;
+    int DecimalGameStatsEntry.Digits => digits;
+
+    public void Increment(float value)
+    {
+        var game = NebulaGameManager.Instance;
+        if (game == null) return;
+
+        if (token == null || tokenGame != game)
+        {
+            token = new(entry.Id, 0f, (val, _) => (int)MathF.Round(val * scale));
+            tokenGame = game;
+        }
+        token.Value += value;
+    }
 }
 

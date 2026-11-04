@@ -60,3 +60,6 @@
 "achievement.alien.challenge.cond" : "Kills by yourself: 3 or more"
 "achievement.alien.challenge.flavor" : ""Didn't you say that at least you wouldn't be here!"<br>The cornered crewmate had a face crushed by despair."
 "achievement.alien.challenge.splitted.0" : "Alien "
+
+"stats.alien.invalidate" : "Num of Invalidations"
+"stats.alien.emi" : "Num of E.M.I."

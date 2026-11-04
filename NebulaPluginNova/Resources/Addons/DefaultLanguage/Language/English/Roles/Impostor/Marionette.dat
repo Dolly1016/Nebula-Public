@@ -50,6 +50,7 @@
 
 "stats.marionette.decoy" : "Num of Placing Decoy"
 "stats.marionette.swap" : "Num of Swapping"
+"stats.marionette.swapDistance" : "Total Distance Moved by Swapping"
 
 # Titles
 

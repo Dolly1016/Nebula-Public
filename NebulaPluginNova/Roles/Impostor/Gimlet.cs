@@ -42,6 +42,8 @@ internal class Gimlet : DefinedSingleAbilityRoleTemplate<Gimlet.Ability>, Define
     AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.Killers;
     static public readonly Gimlet MyRole = new();
     static private readonly GameStatsEntry StatsDrill = NebulaAPI.CreateStatsEntry("stats.gimlet.drill", GameStatsCategory.Roles, MyRole);
+    static private readonly DecimalGameStatsEntry StatsFrictionDistance = NebulaAPI.CreateDecimalStatsEntry("stats.gimlet.frictionDistance", GameStatsCategory.Roles, MyRole, annotation: GameStatsAnnotation.From2611, unit: GameStatsUnit.Distance);
+    static private readonly DecimalGameStatsEntry StatsDrillDistance = NebulaAPI.CreateDecimalStatsEntry("stats.gimlet.drillDistance", GameStatsCategory.Roles, MyRole, annotation: GameStatsAnnotation.From2611, unit: GameStatsUnit.Distance);
 
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.AsUniqueKillAbility;
 
@@ -230,6 +232,8 @@ internal class Gimlet : DefinedSingleAbilityRoleTemplate<Gimlet.Ability>, Define
         
         float frictionResistance = DrillFrictionResistanceOption;
         float frictionTime = 0f;
+        float drillDistance = 0f;
+        float frictionDistance = 0f;
 
         player.VanillaPlayer.MyPhysics.body.isKinematic = false;
         while (walkTo.MoveNext())
@@ -237,6 +241,7 @@ internal class Gimlet : DefinedSingleAbilityRoleTemplate<Gimlet.Ability>, Define
             count++;
             var currentPos = player.Position;
             if (MeetingHud.Instance.AsBoolFast() || player.IsDead) break;
+            var stepDistance = currentPos.Distance(lastPos);
             if (count > 5)
             {
                 if (currentPos.Distance(lastPos) < 0.005f)
@@ -252,9 +257,14 @@ internal class Gimlet : DefinedSingleAbilityRoleTemplate<Gimlet.Ability>, Define
 
                 fricVolume -= (fricVolume - (dotProd < 0.995f ? 1f : 0f)).Delta(dotProd < 0.995f ? 2f : 3f, 0.001f);
                 drillFricSE.volume = fricVolume;
-                if (dotProd < 0.995f) frictionTime += FastMethods.GetDeltaTimeFast();
+                if (dotProd < 0.995f)
+                {
+                    frictionTime += FastMethods.GetDeltaTimeFast();
+                    frictionDistance += stepDistance;
+                }
             }
 
+            drillDistance += stepDistance;
             lastPos = currentPos;
 
 
@@ -287,6 +297,12 @@ internal class Gimlet : DefinedSingleAbilityRoleTemplate<Gimlet.Ability>, Define
         player.VanillaPlayer.moveable = true;
 
         tracker?.Despawn();
+
+        if (player.AmOwner)
+        {
+            StatsDrillDistance.Progress(drillDistance);
+            StatsFrictionDistance.Progress(frictionDistance);
+        }
 
         if (player.AmOwner && player.TryGetAbility<Ability>(out var ability))
         {

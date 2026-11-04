@@ -189,6 +189,8 @@
 
 "stats.ui.title" : "Stats"
 "stats.ui.caption" : "*Statistics from v2.13 onwards has been aggregated."
+"stats.unit.second" : "s"
+"stats.unit.distance" : "m"
 "stats.group.kill" : "Kills"
 "stats.group.death" : "Deaths"
 "stats.group.game" : "Game"

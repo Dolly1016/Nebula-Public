@@ -40,6 +40,8 @@
 # Stats
 
 "stats.gimlet.drill" : "ドリルの使用回数"
+"stats.gimlet.frictionDistance" : "壁を擦った距離"
+"stats.gimlet.drillDistance" : "ドリルの突進距離"
 "ui.action.gimlet.drill" : "ドリルに変身して発進します。"
 "role.gimlet.soundRange" : "ギムレット: <color=white>SEの可聴範囲</color>"
 "role.gimlet.drillSize" : "ギムレット: <color=white>ドリルの当たり判定</color>"

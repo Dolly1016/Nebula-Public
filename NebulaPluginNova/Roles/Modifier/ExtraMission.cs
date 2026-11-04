@@ -1,4 +1,5 @@
-﻿using Virial.Assignable;
+﻿using Virial;
+using Virial.Assignable;
 using Virial.Events.Game;
 using Virial.Events.Player;
 using Virial.Game;
@@ -14,6 +15,7 @@ public class ExtraMission : DefinedAllocatableModifierTemplate, DefinedAllocatab
 
 
     static public ExtraMission MyRole = new ExtraMission();
+    static private readonly GameStatsEntry StatsBlocked = NebulaAPI.CreateStatsEntry("stats.extraMission.blocked", GameStatsCategory.Roles, MyRole, annotation: GameStatsAnnotation.From2611);
     RuntimeModifier RuntimeAssignableGenerator<RuntimeModifier>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
     public class Instance : RuntimeAssignableTemplate, RuntimeModifier
     {
@@ -79,6 +81,10 @@ public class ExtraMission : DefinedAllocatableModifierTemplate, DefinedAllocatab
             if (AmOwner)
             {
                 if(!(target?.IsDead ?? true)) new StaticAchievementToken("extraMission.another2");
+
+                //本来勝利していたにもかかわらず、ミッション失敗によって勝利がブロックされた (ブロック理由はブロックによって勝利を逃した場合にのみ付与される)
+                if (ev.EndState.FinalStage.Detail?.Phases.Any(phase => phase.Reasons.Any(r => r.reason == ExtraMissionDetails.Blocked && r.players.Test(MyPlayer))) ?? false)
+                    StatsBlocked.Progress();
             }
             if ((target?.AmOwner ?? false) && !target.IsDead)
             {

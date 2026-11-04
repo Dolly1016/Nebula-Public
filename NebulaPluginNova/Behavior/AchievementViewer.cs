@@ -87,47 +87,41 @@ internal class AchievementViewer : MonoBehaviour
 
     private class EdittingCustomAchivemenet
     {
+        public INebulaAchievement?[] Parts { get; } = new INebulaAchievement?[4];
+        public TitlePartType[] Types { get; } = new TitlePartType[4];
 
-        public INebulaAchievement? Prefix { get; set; }
-        public INebulaAchievement? Infix1 { get; set; }
-        public INebulaAchievement? Infix2 { get; set; }
-        public INebulaAchievement? Suffix { get; set; }
+        static public TitlePartType SlotType(int slot) => NebulaAchievementManager.CustomAchievement.SlotType(slot);
 
         public EdittingCustomAchivemenet(NebulaAchievementManager.CustomAchievement achievement)
         {
-            Prefix = achievement.GetPrefix()?.achievement;
-            Infix1 = achievement.GetInfix1()?.achievement;
-            Infix2 = achievement.GetInfix2()?.achievement;
-            Suffix = achievement.GetSuffix()?.achievement;
+            for (int i = 0; i < 4; i++)
+            {
+                var tip = achievement.Get(i);
+                Parts[i] = tip?.achievement;
+                Types[i] = tip?.partType ?? SlotType(i);
+            }
         }
         public void ReflectTo(NebulaAchievementManager.CustomAchievement achievement)
         {
-            achievement.Update(Prefix, Infix1, Infix2, Suffix);
+            achievement.Update(Enumerable.Range(0, 4).Select(i => (Parts[i], Types[i])).ToArray());
         }
 
-        public string? GetTranslationKey(int index)
+        public void Set(int slot, INebulaAchievement? achievement, TitlePartType type)
         {
-            switch(index){
-                case 0:
-                    return Prefix?.PrefixTranslationKey;
-                case 1:
-                    return Infix1?.InfixTranslationKey;
-                case 2:
-                    return Infix2?.InfixTranslationKey;
-                case 3:
-                    return Suffix?.SuffixTranslationKey;
-            }
-            return null;
+            Parts[slot] = achievement;
+            Types[slot] = achievement == null ? SlotType(slot) : type;
         }
 
-        public bool CanReflect()
+        public string? GetTranslationKey(int index) => Parts[index]?.GetPartTranslationKey(Types[index]);
+
+        /// <summary>その枠でのりを使っているか</summary>
+        public bool IsGlued(int slot) => Parts[slot] != null && Types[slot] != SlotType(slot);
+        /// <summary>のりを使っている枠の数</summary>
+        public int UsedGlues => Enumerable.Range(0, 4).Count(IsGlued);
+
+        public bool CanReflect(int maxGlues)
         {
-            int num = 0;
-            if (Prefix != null) num++;
-            if (Infix1 != null) num++;
-            if (Infix2 != null) num++;
-            if (Suffix != null) num++;
-            return num >= 2;
+            return Parts.Count(p => p != null) >= 2 && UsedGlues <= maxGlues;
         }
 
     }
@@ -156,6 +150,9 @@ internal class AchievementViewer : MonoBehaviour
         void AddCustomTitle()
         {
             int gainedAchievements = NebulaAchievementManager.AllAchievements.Count(a => a.IsCleared && !a.IsAddonTitle);
+            //のり報酬(定義の"glue")を持つ称号の獲得数だけ、のりを使える
+            int gainedGlues = NebulaAchievementManager.AllAchievements.Count(a => a.IsCleared && a.HasGlue);
+
             inner.Add(new(GUIAlignment.Left, new NoSGUIText(GUIAlignment.Left, groupAttr, new TranslateTextComponent("achievement.group.custom")), 0.5f));
 
             void TryAddContent(NebulaAchievementManager.CustomAchievement a, int requiredAchievements, int minAchievements)
@@ -217,27 +214,37 @@ internal class AchievementViewer : MonoBehaviour
                     var window = MetaScreen.GenerateWindow(new(8.6f, 4.3f), HudManager.InstanceExists ? HudManager.Instance.transform : null, new(0f, 0f, 0f), true, false, false, BackgroundSetting.Modern);
                     var crafting = new EdittingCustomAchivemenet(a);
 
-                    TextAttribute UnmaskedAttr = GUI.API.GetAttribute(AttributeAsset.CenteredBoldFixed);
-                    TextAttribute HeaderAttr = new(UnmaskedAttr) { Size =  new(1.85f, 0.32f) };
-                    TextAttribute ApplyAttr = new(UnmaskedAttr) { Size = new(1.1f, 0.24f) };
-                    TextAttribute ButtonAttr = new(GUI.API.GetAttribute(AttributeAsset.OptionsButtonLonger)) { Size = new(1.4f, 0.33f) };
+                    TextAttribute ApplyAttr = new(GUI.API.GetAttribute(AttributeAsset.CenteredBoldFixed)) { Size = new(1.1f, 0.24f) };
+                    TextAttribute PartAttr = GUITitlePart.ScaledAttribute(1.4f);
+                    TextAttribute GlueCountAttr = new(GUI.API.GetAttribute(AttributeParams.StandardBaredBoldLeft)) { FontSize = new(1.8f) };
+                    TextAttribute GlueCaptionAttr = new(GUI.API.GetAttribute(AttributeParams.StandardBoldLeft)) { FontSize = new(1.4f) };
+                    VColor EditingSlotColor = new(255, 235, 140);
+                    VColor LockedSlotColor = new(120, 120, 120);
+                    TitlePartType[] AllPartTypes = [TitlePartType.Prefix, TitlePartType.Infix, TitlePartType.Suffix];
+
+                    //選択状態が変わるたびに作り直す。スクロール位置はタグで保持される。
                     void SetWidget(int index)
                     {
-                        TextMeshPro headText = null!;
-                        List<GUIWidget> header = [];
+                        var slotType = EdittingCustomAchivemenet.SlotType(index);
+                        int remainingGlues = gainedGlues - crafting.UsedGlues;
+
+                        //各枠。噛み合ったひと続きのパーツとして並べ、編集中の枠は色付きで表示する。
+                        List<TitlePartEntry> header = [];
                         void AddHeader(int myIndex, int requiredAchievements, int minAchievements)
                         {
                             if (minAchievements > gainedAchievements) return;
-                            if(requiredAchievements > gainedAchievements)
+                            var mySlotType = EdittingCustomAchivemenet.SlotType(myIndex);
+                            if (requiredAchievements > gainedAchievements)
                             {
-                                header.Add(new GUIButton(GUIAlignment.Center, HeaderAttr, GUI.API.RawTextComponent(Language.Translate("achievement.ui.craft.unavailable").Replace("%NUM%", requiredAchievements.ToString()))) { Color = VColor.Gray, TextMargin = 0.15f });
+                                header.Add(new(GUI.API.RawTextComponent(Language.Translate("achievement.ui.craft.unavailable").Replace("%NUM%", requiredAchievements.ToString())), mySlotType) { BackgroundColor = LockedSlotColor });
                             }
                             else
                             {
-                                header.Add(new GUIButton(GUIAlignment.Center, HeaderAttr, GUI.API.RawTextComponent(Language.TranslateIfNotNull(crafting.GetTranslationKey(myIndex), null!) ?? Language.Translate("achievement.ui.craft.empty").Color(VColor.Gray))){ OnClick = _ =>
+                                header.Add(new(GUI.API.RawTextComponent(Language.TranslateIfNotNull(crafting.GetTranslationKey(myIndex), null!) ?? Language.Translate("achievement.ui.craft.empty").Color(VColor.Gray)), crafting.Parts[myIndex] != null ? crafting.Types[myIndex] : mySlotType)
                                 {
-                                    SetWidget(myIndex);
-                                }, Color = myIndex == index ? VColor.Yellow : null, PostBuilder = myIndex == index ? t => headText = t : null, TextMargin = 0.15f });
+                                    BackgroundColor = myIndex == index ? EditingSlotColor : null,
+                                    OnClick = _ => SetWidget(myIndex)
+                                });
                             }
                         }
                         AddHeader(0, 0, -10);
@@ -245,59 +252,54 @@ internal class AchievementViewer : MonoBehaviour
                         AddHeader(2, 200, 150);
                         AddHeader(3, 0, -10);
 
-                        Func<INebulaAchievement, bool> IsAvailableAchievement = index switch
-                        {
-                            0 => a => a != null && a.IsCleared && a.HasPrefix,
-                            3 => a => a != null && a.IsCleared && a.HasSuffix,
-                            _ => a => a != null && a.IsCleared && a.HasInfix
-                        };
-                        Func<INebulaAchievement, string?> ConvertToTranslationKey = index switch
-                        {
-                            0 => a => a?.PrefixTranslationKey,
-                            3 => a => a?.SuffixTranslationKey,
-                            _ => a => a?.InfixTranslationKey
-                        };
-                        INebulaAchievement? firstSelected = index switch
-                        {
-                            0 => crafting.Prefix,
-                            1 => crafting.Infix1,
-                            2 => crafting.Infix2,
-                            3 => crafting.Suffix,
-                            _ => null
-                        };
+                        //残りのり数
+                        var headerWidget = GUI.API.HorizontalHolder(GUIAlignment.Center,
+                            new GUITitlePartSequence(GUIAlignment.Center, PartAttr, header),
+                            GUI.API.HorizontalMargin(0.25f),
+                            new NoSGUIImage(GUIAlignment.Center, GUITitlePart.GlueIcon, new(0.42f, 0.42f), overlay: GUI.API.LocalizedText(GUIAlignment.Left, AttributeAsset.OverlayContent, "achievement.ui.craft.glue.detail")),
+                            new NoSGUIText(GUIAlignment.Center, GlueCountAttr, GUI.API.RawTextComponent("x" + remainingGlues)));
 
+                        var currentSelected = crafting.Parts[index];
+                        var currentType = crafting.Types[index];
                         var unsetText = Language.Translate("achievement.ui.unset").Color(VColor.Gray);
-                        var selector = GUI.API.ScrollView(GUIAlignment.Center, new(8.4f, 3f), null, new GUIButtonGroup(GUI.API.Arrange(GUIAlignment.Center, NebulaAchievementManager.AllAchievements.Where(IsAvailableAchievement).Prepend(null).Select(a =>
-                        {
-                            return new GUIModernButton(GUIAlignment.Center, ButtonAttr, GUI.API.RawTextComponent(Language.TranslateIfNotNull(ConvertToTranslationKey(a), unsetText)))
-                            {
-                                OnClick = button =>
-                                {
-                                    switch (index)
-                                    {
-                                        case 0:
-                                            crafting.Prefix = a;
-                                            break;
-                                        case 1:
-                                            crafting.Infix1 = a;
-                                            break;
-                                        case 2:
-                                            crafting.Infix2 = a;
-                                            break;
-                                        case 3:
-                                            crafting.Suffix = a;
-                                            break;
-                                    }
-                                    if (headText) headText.text = Language.TranslateIfNotNull(ConvertToTranslationKey.Invoke(a), null) ?? Language.Translate("achievement.ui.craft.empty").Color(VColor.Gray);
-                                },
-                                SelectedDefault = a == firstSelected
-                            };
-                        }), 5)), out _);
 
-                        window.SetWidget(GUI.API.VerticalHolder(GUIAlignment.Center, GUI.API.HorizontalHolder(GUIAlignment.Center, header), selector, 
+                        //選択肢。パーツはこの枠の種類として使うときの形で表示し、選択中のパーツには右上にチェックマークが付く。
+                        GUIWidget PartButton(INebulaAchievement? achievement, TitlePartType partType) => new GUITitlePart(GUIAlignment.Center, PartAttr, GUI.API.RawTextComponent(Language.TranslateIfNotNull(achievement?.GetPartTranslationKey(partType), unsetText)), partType, slotType)
+                        {
+                            Selected = achievement == currentSelected && (achievement == null || partType == currentType),
+                            IsMasked = true,
+                            OnClick = _ =>
+                            {
+                                crafting.Set(index, achievement, partType);
+                                SetWidget(index);
+                            }
+                        };
+
+                        List<GUIWidget> selectorContents = [
+                            GUI.API.Arrange(GUIAlignment.Center, NebulaAchievementManager.AllAchievements.Where(a => a.IsCleared && a.HasPart(slotType)).Prepend(null).Select(a => PartButton(a, slotType)), 5)
+                            ];
+
+                        //のりが使えるうちは、他の種類のパーツものり付きで並べる(この枠で既にのりを使っている場合は付け替えられる)
+                        if (remainingGlues > 0 || crafting.IsGlued(index))
+                        {
+                            var gluedParts = AllPartTypes.Where(t => t != slotType).SelectMany(t => NebulaAchievementManager.AllAchievements.Where(a => a.IsCleared && a.HasPart(t)).Select(a => PartButton(a, t))).ToArray();
+                            if (gluedParts.Length > 0)
+                            {
+                                selectorContents.Add(GUI.API.VerticalMargin(0.15f));
+                                selectorContents.Add(GUI.API.HorizontalHolder(GUIAlignment.Left,
+                                    new NoSGUIImage(GUIAlignment.Center, GUITitlePart.GlueIcon, new(0.32f, 0.32f)) { IsMasked = true },
+                                    GUI.API.HorizontalMargin(0.05f),
+                                    new NoSGUIText(GUIAlignment.Center, GlueCaptionAttr, GUI.API.LocalizedTextComponent("achievement.ui.craft.glued"))));
+                                selectorContents.Add(GUI.API.Arrange(GUIAlignment.Center, gluedParts, 5));
+                            }
+                        }
+
+                        var selector = GUI.API.ScrollView(GUIAlignment.Center, new(8.4f, 3f), "TitleCraft" + index, GUI.API.VerticalHolder(GUIAlignment.Center, selectorContents), out _);
+
+                        window.SetWidget(GUI.API.VerticalHolder(GUIAlignment.Center, headerWidget, GUI.API.VerticalMargin(0.05f), selector,
                             GUI.API.LocalizedButton(GUIAlignment.Center, ApplyAttr, "achievement.ui.craft.determine", _ =>
                             {
-                                if (crafting.CanReflect())
+                                if (crafting.CanReflect(gainedGlues))
                                 {
                                     window.CloseScreen();
                                     crafting.ReflectTo(a);

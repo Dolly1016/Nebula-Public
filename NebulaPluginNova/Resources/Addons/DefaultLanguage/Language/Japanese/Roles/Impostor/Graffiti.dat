@@ -33,6 +33,10 @@
 "achievement.graffiti.common1.goal" : "落書きする。"
 "achievement.graffiti.common1.flavor" : ""世界を掻き立てるのは、芸術だ。""
 
+"achievement.graffiti.common2.title" : "無名の巨匠"
+"achievement.graffiti.common2.goal" : "通算で100回落書きする。"
+"achievement.graffiti.common2.splitted.0" : "無名の"
+
 "achievement.graffiti.challenge.title" : "愛はごみ箱の中に"
 "achievement.graffiti.challenge.goal" : "ダイイングメッセージを持つプレイヤーがいるゲームで、<br>本物のダイイングメッセージが出現しながらも味方が全員生存したまま勝利する。"
 "achievement.graffiti.challenge.cond" : "味方の人数: 自身のほか1人以上"

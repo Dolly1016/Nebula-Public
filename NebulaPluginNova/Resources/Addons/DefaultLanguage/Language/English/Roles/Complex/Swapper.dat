@@ -13,3 +13,8 @@
 # UI
 
 # Status
+
+"stats.niceSwapper.swap" : "Num of Swapping Votes"
+"stats.niceSwapper.swapExile" : "Num of Swapping Exiled Players"
+"stats.evilSwapper.swap" : "Num of Swapping Votes"
+"stats.evilSwapper.swapExile" : "Num of Swapping Exiled Players"

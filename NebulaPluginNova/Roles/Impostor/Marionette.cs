@@ -34,6 +34,7 @@ public class Marionette : DefinedSingleAbilityRoleTemplate<Marionette.Ability>, 
     static public Marionette MyRole = new Marionette();
     static private GameStatsEntry StatsDecoy = NebulaAPI.CreateStatsEntry("stats.marionette.decoy", GameStatsCategory.Roles, MyRole);
     static private GameStatsEntry StatsSwap = NebulaAPI.CreateStatsEntry("stats.marionette.swap", GameStatsCategory.Roles, MyRole);
+    static private DecimalGameStatsEntry StatsSwapDistance = NebulaAPI.CreateDecimalStatsEntry("stats.marionette.swapDistance", GameStatsCategory.Roles, MyRole, annotation: GameStatsAnnotation.From2611, unit: GameStatsUnit.Distance);
 
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
 
@@ -259,6 +260,7 @@ public class Marionette : DefinedSingleAbilityRoleTemplate<Marionette.Ability>, 
                 swapButton.Availability = (button) => (MyPlayer.CanMove || HudManager.Instance.PlayerCam.Target == (this as IDecoyController).CamBehaviour) && (!MyPlayer.VanillaPlayer.inVent && !MyPlayer.VanillaPlayer.onLadder && !MyPlayer.VanillaPlayer.inMovingPlat && !MyPlayer.IsBlown);
                 swapButton.OnClick = (button) =>
                 {
+                    StatsSwapDistance.Progress(((Vector2)MyPlayer.VanillaPlayer.transform.localPosition).Distance((this as IDecoyController).DecoyPosition));
                     DecoySwap.Invoke((MyPlayer.PlayerId, (this as IDecoyController).DecoyId));
                     button.StartCoolDown();
                     AmongUsUtil.SetCamTarget();

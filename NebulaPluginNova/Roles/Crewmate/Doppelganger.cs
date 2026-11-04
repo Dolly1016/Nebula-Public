@@ -42,6 +42,9 @@ internal class Doppelganger : DefinedSingleAbilityRoleTemplate<Doppelganger.Abil
 
 
     static public readonly Doppelganger MyRole = new();
+    static private readonly GameStatsEntry StatsSummon = NebulaAPI.CreateStatsEntry("stats.doppelganger.summon", GameStatsCategory.Roles, MyRole, annotation: GameStatsAnnotation.From2611);
+    static private readonly DecimalGameStatsEntry StatsSwapDistance = NebulaAPI.CreateDecimalStatsEntry("stats.doppelganger.swapDistance", GameStatsCategory.Roles, MyRole, annotation: GameStatsAnnotation.From2611, unit: GameStatsUnit.Distance);
+    static private readonly GameStatsEntry StatsSwap = NebulaAPI.CreateStatsEntry("stats.doppelganger.swap", GameStatsCategory.Roles, MyRole, annotation: GameStatsAnnotation.From2611);
     AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.CanLoadToMadmate;
 
     //static private readonly GameStatsEntry StatsBait = NebulaAPI.CreateStatsEntry("stats.bait.bait", GameStatsCategory.Roles, MyRole);
@@ -146,7 +149,10 @@ internal class Doppelganger : DefinedSingleAbilityRoleTemplate<Doppelganger.Abil
                 {
                     if (fakePlayer != null)
                     {
-                        if (MyPlayer.Position.Distance(fakePlayer!.Position) > 20f) new StaticAchievementToken("doppelganger.common1");
+                        float swapDistance = MyPlayer.Position.Distance(fakePlayer!.Position);
+                        if (swapDistance > 20f) new StaticAchievementToken("doppelganger.common1");
+                        StatsSwap.Progress();
+                        StatsSwapDistance.Progress(swapDistance);
                         using (RPCRouter.CreateSection("DoppelgangerSwap"))
                         {
                             RpcDoppelSwap.Invoke((MyPlayer, fakePlayer));
@@ -198,7 +204,11 @@ internal class Doppelganger : DefinedSingleAbilityRoleTemplate<Doppelganger.Abil
 
         internal bool Command(Vector2 to, Action? onStartWalking = null)
         {
-            if (fakePlayer == null) SummonDoppelganger(MyPlayer.Position, MyPlayer.VanillaCosmetics.FlipX);
+            if (fakePlayer == null)
+            {
+                SummonDoppelganger(MyPlayer.Position, MyPlayer.VanillaCosmetics.FlipX);
+                StatsSummon.Progress();
+            }
             if (IsUsurped) return false;
             if (swapButton?.IsInEffect ?? false) return false; //スワップ待ちの場合は移動を命令できない。
 

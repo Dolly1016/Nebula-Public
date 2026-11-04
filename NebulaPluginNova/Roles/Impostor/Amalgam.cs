@@ -53,6 +53,7 @@ internal class Amalgam : DefinedRoleTemplate, DefinedRole, DefinedSingleAbilityR
     static private readonly SimpleRoleFilterConfiguration RoleFilterOption = new("options.role.amalgam.abilityFilter") { RolePredicate = r => r.MultipleAssignment != MultipleAssignmentType.NotAllowed, ScrollerTag = "amalgamFilter", InvertOption = true, PreviewOnlySpawnableRoles = false };
     static private readonly BoolConfiguration AmalgamBreakdownOption = NebulaAPI.Configurations.Configuration("options.role.amalgam.breakdownAmalgam", false, () => RandomAssignmentOption);
     static public readonly Amalgam MyRole = new();
+    static private readonly GameStatsEntry StatsFused = NebulaAPI.CreateStatsEntry("stats.amalgam.fused", GameStatsCategory.Roles, MyRole, annotation: GameStatsAnnotation.From2611);
 
     static Amalgam()
     {
@@ -286,6 +287,12 @@ internal class Amalgam : DefinedRoleTemplate, DefinedRole, DefinedSingleAbilityR
                 };
                 selectButton.SetAsUsurpableButton(this);
             }
+        }
+
+        [Local]
+        void OnGameEnd(GameEndEvent ev)
+        {
+            if (abilities.Count > 0) StatsFused.Progress(abilities.Count);
         }
 
         public override bool Usurp()

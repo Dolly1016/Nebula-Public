@@ -52,6 +52,7 @@
 # Stats
 
 "stats.scarlet.kept" : "Num of Kept"
+"stats.scarlet.command" : "Num of Using Command"
 
 # Titles
 

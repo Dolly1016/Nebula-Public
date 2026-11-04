@@ -190,6 +190,8 @@
 
 "stats.ui.title" : "統計"
 "stats.ui.caption" : "※ v2.13 (2024/12/25公開) 以降のプレイデータが集計されています。"
+"stats.unit.second" : "秒"
+"stats.unit.distance" : "m"
 "stats.group.kill" : "死因別キル回数"
 "stats.group.death" : "死因別死亡回数"
 "stats.group.game" : "ゲーム"

@@ -40,6 +40,7 @@
 
 "stats.cannon.fire" : "Num of Cannon Firing"
 "stats.cannon.players" : "Num of the Blown by Cannon"
+"stats.cannon.mark" : "Num of Marking Landing Points"
 
 # Titles
 

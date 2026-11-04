@@ -60,3 +60,6 @@
 "achievement.alien.challenge.cond" : "自身によるキル: 3回以上"
 "achievement.alien.challenge.flavor" : ""少なくともアンタは無いって話だったじゃないか！"<br>追い詰められた船員は、絶望に打ちひしがれた顔をしていた。"
 "achievement.alien.challenge.splitted.0" : "異形の"
+
+"stats.alien.invalidate" : "無効化の使用回数"
+"stats.alien.emi" : "E.M.I.の使用回数"

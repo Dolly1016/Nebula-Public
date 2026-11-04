@@ -43,3 +43,5 @@
 
 "achievement.spy.challenge.title" : "Spy Who Sows Chaos"
 "achievement.spy.challenge.goal" : "Win via a crewmate victory after at least 1 impostor has been killed by another impostor."
+
+"stats.spy.friendlyFire" : "Num of Impostors' Friendly Fire"

@@ -38,6 +38,7 @@ internal class Viper : DefinedSingleAbilityRoleTemplate<Viper.Ability>, HasCitat
     AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.Killers;
 
     static public Viper MyRole = new Viper();
+    static private readonly GameStatsEntry StatsDissolved = NebulaAPI.CreateStatsEntry("stats.viper.dissolved", GameStatsCategory.Roles, MyRole, annotation: GameStatsAnnotation.From2611);
 
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.AsUniqueKillAbility;
 
@@ -73,7 +74,7 @@ internal class Viper : DefinedSingleAbilityRoleTemplate<Viper.Ability>, HasCitat
             {
                 if (ev.DeadBody.VanillaDeadBody.gameObject.TryGetComponent<ModViperDeadBody>(out var deadBody))
                 {
-                    deadBody.SetUp(DissolveDurationOption, AcidLeavesBoneOption, !AcidLeavesBoneOption || CanReportBoneOption);
+                    deadBody.SetUp(DissolveDurationOption, AcidLeavesBoneOption, !AcidLeavesBoneOption || CanReportBoneOption, AmOwner ? () => StatsDissolved.Progress() : null);
 
                     if(AmOwner) HookCommon2Achievement(ev.DeadBody);
                 }
@@ -159,6 +160,9 @@ public class  ModViperDeadBody : MonoBehaviour
         this.dissolveTimer -= Time.fixedDeltaTime;
         if (this.dissolveTimer < 0f && !shouldLeftBone)
         {
+            //骨を残さない場合は、溶けて消えた時点で完全に溶解したとみなす
+            onFullyDissolved?.Invoke();
+            onFullyDissolved = null;
             GameObject.Destroy(this.gameObject);
         }
         else
@@ -180,6 +184,12 @@ public class  ModViperDeadBody : MonoBehaviour
             else if (nextStage == 2)
             {
                 currentStage = 2;
+                //骨を残す場合は、骨になった時点で完全に溶解したとみなす
+                if (shouldLeftBone)
+                {
+                    onFullyDissolved?.Invoke();
+                    onFullyDissolved = null;
+                }
                 viperDeadBody.spriteAnim.Play(viperDeadBody.dissolveAnims[1], 1f);
                 if (!canReportBone)
                 {
@@ -200,9 +210,11 @@ public class  ModViperDeadBody : MonoBehaviour
         }
     }
 
-    internal void SetUp(float maxDissolveTimer, bool shouldLeftBone, bool canReportBone)
+    private Action? onFullyDissolved = null;
+    internal void SetUp(float maxDissolveTimer, bool shouldLeftBone, bool canReportBone, Action? onFullyDissolved = null)
     {
         isActive = true;
+        this.onFullyDissolved = onFullyDissolved;
         this.maxDissolveTimer = maxDissolveTimer;
         dissolveTimer = maxDissolveTimer;
         currentStage = 0;

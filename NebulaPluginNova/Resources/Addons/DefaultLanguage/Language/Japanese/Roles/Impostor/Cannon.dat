@@ -40,6 +40,7 @@
 
 "stats.cannon.fire" : "空気砲の発砲回数"
 "stats.cannon.players" : "空気砲で吹き飛ばした人数"
+"stats.cannon.mark" : "着弾地点のマーク回数"
 
 # Titles
 

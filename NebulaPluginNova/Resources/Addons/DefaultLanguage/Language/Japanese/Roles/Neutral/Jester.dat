@@ -67,3 +67,5 @@
 "perk.empty.jester.name" : "ジェスターパーク枠"
 "perk.empty.jester.detail" : "パークボタンからパークを選んで獲得できます。"
 "role.jester.perk.guide" : "パークを選択しよう！"
+
+"stats.jester.perk" : "獲得パーク数"

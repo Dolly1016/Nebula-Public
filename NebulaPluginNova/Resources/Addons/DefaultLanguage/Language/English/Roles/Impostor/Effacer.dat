@@ -29,6 +29,9 @@
 # Stats
 
 "stats.effacer.efface" : "Num of Effaced Players"
+"stats.effacer.effaceImpostor" : "Num of Effacing Impostors"
+"stats.effacer.effaceNonImpostor" : "Num of Effacing Non-Impostors"
+"stats.effacer.effaceSpy" : "Num of Effacing Spies"
 
 # Titles
 

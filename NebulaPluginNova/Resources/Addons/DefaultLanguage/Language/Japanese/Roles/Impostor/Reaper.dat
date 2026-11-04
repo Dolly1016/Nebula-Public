@@ -35,6 +35,10 @@
 "achievement.reaper.common1.title" : "船中引き回し"
 "achievement.reaper.common1.goal" : "死体を掴み、ベントに入る。"
 
+"achievement.reaper.common2.title" : "地獄に行こうぜ"
+"achievement.reaper.common2.goal" : "累計50回、死体と共にベントに入る。"
+"achievement.reaper.common2.splitted.2" : "行こうぜ"
+
 "achievement.reaper.challenge.title" : "死神隠し"
 "achievement.reaper.challenge.goal" : "5人の死体を通報されないまま闇に葬る。"
 "achievement.reaper.challenge.splitted.1" : "神"

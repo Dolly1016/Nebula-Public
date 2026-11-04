@@ -24,6 +24,9 @@ public class Effacer : DefinedSingleAbilityRoleTemplate<Effacer.Ability>, HasCit
     AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.CanLoadToMadmate;
     static public readonly Effacer MyRole = new();
     static private readonly GameStatsEntry StatsEfface = NebulaAPI.CreateStatsEntry("stats.effacer.efface", GameStatsCategory.Roles, MyRole);
+    static private readonly GameStatsEntry StatsEffaceImpostor = NebulaAPI.CreateStatsEntry("stats.effacer.effaceImpostor", GameStatsCategory.Roles, MyRole, annotation: GameStatsAnnotation.From2611);
+    static private readonly GameStatsEntry StatsEffaceNonImpostor = NebulaAPI.CreateStatsEntry("stats.effacer.effaceNonImpostor", GameStatsCategory.Roles, MyRole, annotation: GameStatsAnnotation.From2611);
+    static private readonly GameStatsEntry StatsEffaceSpy = NebulaAPI.CreateStatsEntry("stats.effacer.effaceSpy", GameStatsCategory.Roles, MyRole, annotation: GameStatsAnnotation.From2611);
 
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
 
@@ -59,6 +62,11 @@ public class Effacer : DefinedSingleAbilityRoleTemplate<Effacer.Ability>, HasCit
                         new StaticAchievementToken("effacer.common1");
                         StatsEfface.Progress();
                         if (p.RealPlayer.IsImpostor) new StaticAchievementToken("effacer.common2");
+
+                        //インポスター以外とスパイは重複してカウントする
+                        if (p.RealPlayer.IsImpostor) StatsEffaceImpostor.Progress();
+                        else StatsEffaceNonImpostor.Progress();
+                        if (p.RealPlayer.Role.Role == Crewmate.Spy.MyRole) StatsEffaceSpy.Progress();
 
                         achChallengeToken.Value.Add(p.RealPlayer);
                     }).SetAsUsurpableButton(this);

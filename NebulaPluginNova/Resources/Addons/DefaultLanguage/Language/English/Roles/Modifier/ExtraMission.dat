@@ -48,3 +48,5 @@
 # Team
 
 "end.detail.extraMission.blocked" : "Target survived"
+
+"stats.extraMission.blocked" : "Num of Wins Lost by Mission Failure"

@@ -54,3 +54,6 @@
 "achievement.rokurokubi.challenge.goal" : "首を伸ばして、仲間によるキルから間もなくキルし、ダブルキルを決める。"
 "achievement.rokurokubi.challenge.cond" : "既に物の怪っぽい仲間を除く"
 "achievement.rokurokubi.challenge.splitted.1" : "混合"
+
+"stats.rokurokubi.neckLength" : "首の総伸長距離"
+"stats.rokurokubi.longNeckKill" : "首伸長中のキル回数"

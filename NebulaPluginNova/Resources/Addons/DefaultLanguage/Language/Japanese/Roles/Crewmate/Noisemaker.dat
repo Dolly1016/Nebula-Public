@@ -28,8 +28,16 @@
 "achievement.noisemaker.common1.goal" : "死亡してアラートを発生させる。"
 "achievement.noisemaker.common1.flavor" : ""防犯ブザーは、命を失う前に鳴らしましょう" ―『クルーメイト 命のあんぜん講習』抜粋"
 
+"achievement.noisemaker.common2.title" : "大人のひとが来たよ"
+"achievement.noisemaker.common2.goal" : "自身の死体が累計で20回通報される。"
+"achievement.noisemaker.common2.splitted.0" : "大人の"
+"achievement.noisemaker.common2.splitted.2" : "来たよ"
+
 "achievement.noisemaker.challenge.title" : "よい子のひっさつ戦法"
 "achievement.noisemaker.challenge.goal" : "アラートが発生した直後の会議で、自身をキルしたプレイヤーが追放される。"
 "achievement.noisemaker.challenge.splitted.0" : "よい子の"
 "achievement.noisemaker.challenge.splitted.1" : "ひっさつ"
 "achievement.noisemaker.challenge.splitted.2" : "戦法"
+
+"stats.noisemaker.reported" : "死体を通報された回数"
+"stats.noisemaker.alert" : "アラートの発生回数"

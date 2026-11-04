@@ -10,6 +10,7 @@ using Virial.Assignable;
 using Virial.Configuration;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
+using Virial.Game;
 using Virial.Media;
 
 namespace Nebula.Roles.Modifier;
@@ -25,6 +26,7 @@ public class DyingMessage : DefinedAllocatableModifierTemplate, DefinedAllocatab
     static private FloatConfiguration MessageDurationOption = NebulaAPI.Configurations.Configuration("options.role.dyingMessage.messageDuration", (0.5f, 10f, 0.5f), 2f, FloatConfigurationDecorator.Second);
 
     static public DyingMessage MyRole = new DyingMessage();
+    static private readonly GameStatsEntry StatsMessage = NebulaAPI.CreateStatsEntry("stats.dyingMessage.message", GameStatsCategory.Roles, MyRole, annotation: GameStatsAnnotation.From2611);
     RuntimeModifier RuntimeAssignableGenerator<RuntimeModifier>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     bool IAssignableDocument.HasTips => true;
@@ -53,7 +55,8 @@ public class DyingMessage : DefinedAllocatableModifierTemplate, DefinedAllocatab
                 var pos = ev.DeadBodyPos.Value;
 
                 NebulaManager.Instance.StartDelayAction(1f, () => DyingMessages.GenerateCanvas(pos, MessageDuration, MyRole, _ => { 
-                    new StaticAchievementToken("dyingMessage.common1"); 
+                    new StaticAchievementToken("dyingMessage.common1");
+                    StatsMessage.Progress();
                     if(AmongUsLLImpl.ShipStatusInstance.AllRooms.Find(room => room.roomArea.OverlapPoint(pos), out var found) && (found.RoomId == SystemTypes.Cafeteria || found.RoomId == SystemTypes.Kitchen))
                     {
                         new StaticAchievementToken("dyingMessage.common2");

@@ -53,6 +53,7 @@
 "stats.collator.collating" : "Num of Collations"
 "stats.collator.matched" : "Num of Matched Collations"
 "stats.collator.unmatched" : "Num of Unmatched Collations"
+"stats.collator.sample" : "Num of Samples Taken"
 
 # Titles
 

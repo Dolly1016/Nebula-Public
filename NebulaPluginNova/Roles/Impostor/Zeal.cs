@@ -33,6 +33,7 @@ internal class Zeal : DefinedSingleAbilityRoleTemplate<Zeal.Ability>, DefinedRol
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new Ability(player, arguments.GetAsBool(0));
     static public readonly Zeal MyRole = new();
+    static private readonly GameStatsEntry StatsKillButton = NebulaAPI.CreateStatsEntry("stats.zeal.killButton", GameStatsCategory.Roles, MyRole, annotation: GameStatsAnnotation.From2611);
 
     static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.ZealButton.png", 115f);
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.AsUniqueKillAbility;
@@ -140,6 +141,7 @@ internal class Zeal : DefinedSingleAbilityRoleTemplate<Zeal.Ability>, DefinedRol
                         {
                             GenerateKillButton();
                             AddPlayerIcon(interactTracker.CurrentTarget.RealPlayer);
+                            StatsKillButton.Progress();
                         }
                     }
                     button.StartCoolDown();

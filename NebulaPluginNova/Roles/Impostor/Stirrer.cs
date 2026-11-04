@@ -29,6 +29,7 @@ public class Stirrer : DefinedSingleAbilityRoleTemplate<Stirrer.Ability>, Define
     static public Stirrer MyRole = new Stirrer();
     static private GameStatsEntry StatsStir = NebulaAPI.CreateStatsEntry("stats.stirrer.stir", GameStatsCategory.Roles, MyRole);
     static private GameStatsEntry StatsSabotage = NebulaAPI.CreateStatsEntry("stats.stirrer.sabo", GameStatsCategory.Roles, MyRole);
+    static private GameStatsEntry StatsEmergencySabotage = NebulaAPI.CreateStatsEntry("stats.stirrer.emergencySabo", GameStatsCategory.Roles, MyRole, annotation: GameStatsAnnotation.From2611);
 
     bool IAssignableDocument.HasTips => true;
     bool IAssignableDocument.HasAbility => true;
@@ -75,6 +76,7 @@ public class Stirrer : DefinedSingleAbilityRoleTemplate<Stirrer.Ability>, Define
                 sabotageButton.CoolDownTimer!.Start(SabotageCoolDownOption);
                 sabotageButton.OnClick = (button) => {
                     int count = 0;
+                    bool anyEmergency = false;
                     foreach (var entry in sabotageChargeMap)
                     {
                         if (entry.Value > 0)
@@ -84,7 +86,9 @@ public class Stirrer : DefinedSingleAbilityRoleTemplate<Stirrer.Ability>, Define
 
                             if (!(p?.IsDead ?? false))
                             {
-                                FakeSabotageStatus.RpcPushFakeSabotage(p!, MapData.GetCurrentMapData().GetSabotageSystemTypes().Random());
+                                var sabotageType = MapData.GetCurrentMapData().GetSabotageSystemTypes().Random();
+                                FakeSabotageStatus.RpcPushFakeSabotage(p!, sabotageType);
+                                anyEmergency |= sabotageType is SystemTypes.Reactor or SystemTypes.Laboratory or SystemTypes.LifeSupp or SystemTypes.HeliSabotage;
                                 count++;
                             }
                         }
@@ -95,6 +99,7 @@ public class Stirrer : DefinedSingleAbilityRoleTemplate<Stirrer.Ability>, Define
                     acTokenCommon ??= new("stirrer.common1");
                     if (count >= 7 && SabotageChargeOption <= 3 && !(StirCoolDownOption > 10f)) acTokenChallenge ??= new("stirrer.challenge");
                     StatsSabotage.Progress();
+                    if (anyEmergency) StatsEmergencySabotage.Progress();
 
                 };
                 sabotageButton.SetLabel("fakeSabotage");

@@ -85,6 +85,11 @@ public class Swapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
     static public readonly Swapper MyNiceRole = new(false);
     static public readonly Swapper MyEvilRole = new(true);
 
+    static private readonly GameStatsEntry StatsNiceSwap = NebulaAPI.CreateStatsEntry("stats.niceSwapper.swap", GameStatsCategory.Roles, MyNiceRole, annotation: GameStatsAnnotation.From2611);
+    static private readonly GameStatsEntry StatsNiceSwapExile = NebulaAPI.CreateStatsEntry("stats.niceSwapper.swapExile", GameStatsCategory.Roles, MyNiceRole, annotation: GameStatsAnnotation.From2611);
+    static private readonly GameStatsEntry StatsEvilSwap = NebulaAPI.CreateStatsEntry("stats.evilSwapper.swap", GameStatsCategory.Roles, MyEvilRole, annotation: GameStatsAnnotation.From2611);
+    static private readonly GameStatsEntry StatsEvilSwapExile = NebulaAPI.CreateStatsEntry("stats.evilSwapper.swapExile", GameStatsCategory.Roles, MyEvilRole, annotation: GameStatsAnnotation.From2611);
+
     bool IAssignableDocument.HasTips => false;
     bool IAssignableDocument.HasAbility => true;
     Citation? HasCitation.Citation => IsEvil ? Citations.TheOtherRolesGM : Citations.TheOtherRoles;
@@ -156,6 +161,9 @@ public class Swapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
                             bool player2IsExiled = ev.Exiled.Contains(player2);
                             bool oneIsExiled = player1IsExiled || player2IsExiled;
 
+                            //スワップが成立し、スワップした2人のうち一方のみが追放された場合
+                            if (swapEnsured && (player1IsExiled ^ player2IsExiled)) (AmEvil ? StatsEvilSwapExile : StatsNiceSwapExile).Progress();
+
                             if (!AmEvil)
                             {
                                 if (oneIsExiled && ((!player1IsExiled && player1.IsTrueCrewmate) || (!player2IsExiled && player2.IsTrueCrewmate))) new StaticAchievementToken("niceSwapper.common1");
@@ -216,7 +224,11 @@ public class Swapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
         static private readonly RoleRPC.Definition RpcEnsureSwap = RoleRPC.Get<Ability>("swapper.ensureSwap", (ability, num, calledByMe) =>
         {
             ability.leftSwap = num;
-            if (ability.AmOwner) ability.swapEnsured = true;
+            if (ability.AmOwner)
+            {
+                ability.swapEnsured = true;
+                (ability.AmEvil ? StatsEvilSwap : StatsNiceSwap).Progress();
+            }
         });
         static private readonly RemoteProcess<(GamePlayer swapper, GamePlayer swap1, GamePlayer swap2, int currentLeftSwap)> RpcSwap = new("VoteSwap", (message, _) => {
             ModSingleton<SwapperSystem>.Instance.ReceiveSwapRequest(message.swapper, message.swap1, message.swap2, message.currentLeftSwap);

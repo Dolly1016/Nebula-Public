@@ -28,6 +28,8 @@ public class Alien : DefinedSingleAbilityRoleTemplate<Alien.Ability>, HasCitatio
     MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
 
     static public readonly Alien MyRole = new();
+    static private readonly GameStatsEntry StatsInvalidate = NebulaAPI.CreateStatsEntry("stats.alien.invalidate", GameStatsCategory.Roles, MyRole, annotation: GameStatsAnnotation.From2611);
+    static private readonly GameStatsEntry StatsEMI = NebulaAPI.CreateStatsEntry("stats.alien.emi", GameStatsCategory.Roles, MyRole, annotation: GameStatsAnnotation.From2611);
 
     bool IAssignableDocument.HasTips => true;
     bool IAssignableDocument.HasAbility => true;
@@ -62,6 +64,7 @@ public class Alien : DefinedSingleAbilityRoleTemplate<Alien.Ability>, HasCitatio
                         FakeInformation.RpcFakeAdmin.Invoke((FakeInformation.Instance!.CurrentAdmin.Players, EMIDurationOption));
                         FakeInformation.RpcFakeVitals.Invoke((FakeInformation.Instance!.CurrentVitals.Players, EMIDurationOption));
                     }
+                    StatsEMI.Progress();
 
                     IEnumerator CoNoise()
                     {
@@ -97,6 +100,7 @@ public class Alien : DefinedSingleAbilityRoleTemplate<Alien.Ability>, HasCitatio
                         button.UpdateUsesIcon(LeftInvalidation.ToString());
 
                         new StaticAchievementToken("alien.common2");
+                        StatsInvalidate.Progress();
                         achCommon4Token.Value.playerMask |= 1 << invalidateTracker.CurrentTarget!.RealPlayer.PlayerId;
 
                         invalidateButton.StartCoolDown();

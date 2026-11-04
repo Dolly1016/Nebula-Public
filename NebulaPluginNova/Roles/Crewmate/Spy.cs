@@ -30,6 +30,7 @@ internal class Spy : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignableD
     RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
 
     static public readonly Spy MyRole = new();
+    static private readonly GameStatsEntry StatsFriendlyFire = NebulaAPI.CreateStatsEntry("stats.spy.friendlyFire", GameStatsCategory.Roles, MyRole, annotation: GameStatsAnnotation.From2611);
 
     bool IAssignableDocument.HasTips => true;
     bool IAssignableDocument.HasAbility => true;
@@ -81,6 +82,7 @@ internal class Spy : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignableD
         {
             if(ev.Dead.IsImpostor && ev.Murderer.IsImpostor && ev.Dead != ev.Murderer)
             {
+                StatsFriendlyFire.Progress();
                 GameOperatorManager.Instance?.Subscribe<GameEndEvent>(ev => {
                     if (ev.EndState.EndCondition == NebulaGameEnd.CrewmateWin && ev.CheckWin(MyPlayer)) new StaticAchievementToken("spy.challenge");
                 }, this);

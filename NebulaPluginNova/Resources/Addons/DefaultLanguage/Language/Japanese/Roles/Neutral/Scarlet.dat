@@ -52,6 +52,7 @@
 # Stats
 
 "stats.scarlet.kept" : "キープを誑かした回数"
+"stats.scarlet.command" : "号令の使用回数"
 
 # Titles
 

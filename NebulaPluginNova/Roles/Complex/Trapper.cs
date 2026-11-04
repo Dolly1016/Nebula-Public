@@ -52,6 +52,7 @@ file static class TrapperSystem
             Trapper.RpcPlaceTrap.Invoke((placed.ObjectId, placed.TypeId, placed.Position));
             leftCost -= buttonVariation[buttonIndex].cost;
             button.UpdateUsesIcon(leftCost.ToString());
+            Trapper.GetPlaceStats(isEvil, buttonVariation[buttonIndex].id)?.Progress();
 
             if (Trapper.KillTrapSoundDistanceOption > 0f)
             {
@@ -142,6 +143,24 @@ public class Trapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
 
     static public readonly Trapper MyNiceRole = new(false);
     static public readonly Trapper MyEvilRole = new(true);
+
+    static private readonly GameStatsEntry StatsNicePlaceAccel = NebulaAPI.CreateStatsEntry("stats.niceTrapper.placeAccel", GameStatsCategory.Roles, MyNiceRole, annotation: GameStatsAnnotation.From2611);
+    static private readonly GameStatsEntry StatsNicePlaceDecel = NebulaAPI.CreateStatsEntry("stats.niceTrapper.placeDecel", GameStatsCategory.Roles, MyNiceRole, annotation: GameStatsAnnotation.From2611);
+    static private readonly GameStatsEntry StatsNicePlaceComm = NebulaAPI.CreateStatsEntry("stats.niceTrapper.placeComm", GameStatsCategory.Roles, MyNiceRole, annotation: GameStatsAnnotation.From2611);
+    static private readonly GameStatsEntry StatsNiceDetect = NebulaAPI.CreateStatsEntry("stats.niceTrapper.detect", GameStatsCategory.Roles, MyNiceRole, annotation: GameStatsAnnotation.From2611);
+    static private readonly GameStatsEntry StatsEvilPlaceAccel = NebulaAPI.CreateStatsEntry("stats.evilTrapper.placeAccel", GameStatsCategory.Roles, MyEvilRole, annotation: GameStatsAnnotation.From2611);
+    static private readonly GameStatsEntry StatsEvilPlaceDecel = NebulaAPI.CreateStatsEntry("stats.evilTrapper.placeDecel", GameStatsCategory.Roles, MyEvilRole, annotation: GameStatsAnnotation.From2611);
+    static private readonly GameStatsEntry StatsEvilPlaceKill = NebulaAPI.CreateStatsEntry("stats.evilTrapper.placeKill", GameStatsCategory.Roles, MyEvilRole, annotation: GameStatsAnnotation.From2611);
+    static private readonly GameStatsEntry StatsEvilKillTrap = NebulaAPI.CreateStatsEntry("stats.evilTrapper.killTrap", GameStatsCategory.Roles, MyEvilRole, annotation: GameStatsAnnotation.From2611);
+
+    static internal GameStatsEntry? GetPlaceStats(bool isEvil, int trapId) => trapId switch
+    {
+        0 => isEvil ? StatsEvilPlaceAccel : StatsNicePlaceAccel,
+        1 => isEvil ? StatsEvilPlaceDecel : StatsNicePlaceDecel,
+        2 => isEvil ? null : StatsNicePlaceComm,
+        3 => isEvil ? StatsEvilPlaceKill : null,
+        _ => null
+    };
 
     bool IAssignableDocument.HasTips => true;
     bool IAssignableDocument.HasAbility => true;
@@ -311,6 +330,7 @@ public class Trapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
                         var arrow = new Arrow().SetColorByOutfit(p.GetOutfit(OutfitPriority.TransformedThrethold).outfit).RegisterSelf();
                         arrow.TargetPos = commTrap.Position;
                         NebulaManager.Instance.StartCoroutine(arrow.CoWaitAndDisappear(3f).WrapToIl2Cpp());
+                        StatsNiceDetect.Progress();
 
                         acTokenChallenge!.Value.playerMask |= 1 << p.PlayerId;
                         if(!acTokenChallenge.Value.cleared && NebulaGameManager.Instance.AllPlayerInfo.Count(p => (acTokenChallenge!.Value.playerMask & (1 << p.PlayerId)) != 0) >= 8)
@@ -371,6 +391,7 @@ public class Trapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
                                     NebulaAPI.CurrentGame?.KillButtonLikeHandler.StartCooldown();
                                     RpcTrapKill.Invoke(killTrap.ObjectId);
                                     acTokenChallenge!.Value++;
+                                    StatsEvilKillTrap.Progress();
                                 }
                                 fired = true;
                                 return true;

@@ -13,3 +13,8 @@
 # UI
 
 # Status
+
+"stats.niceSwapper.swap" : "票をスワップした回数"
+"stats.niceSwapper.swapExile" : "追放先をスワップした回数"
+"stats.evilSwapper.swap" : "票をスワップした回数"
+"stats.evilSwapper.swapExile" : "追放先をスワップした回数"

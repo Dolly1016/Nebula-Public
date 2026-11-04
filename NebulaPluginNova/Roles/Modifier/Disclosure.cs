@@ -27,6 +27,7 @@ internal class Disclosure : DefinedAllocatableModifierTemplate, DefinedAllocatab
 
 
     static public Disclosure MyRole = new Disclosure();
+    static private readonly GameStatsEntry StatsShowCursor = NebulaAPI.CreateStatsEntry("stats.disclosure.showCursor", GameStatsCategory.Roles, MyRole, annotation: GameStatsAnnotation.From2611);
     RuntimeModifier RuntimeAssignableGenerator<RuntimeModifier>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
     [NebulaRPCHolder]
     public class Instance : RuntimeAssignableTemplate, RuntimeModifier
@@ -82,6 +83,8 @@ internal class Disclosure : DefinedAllocatableModifierTemplate, DefinedAllocatab
             if(MyPlayer.AmOwner) ShareMousePoint.Invoke((MyPlayer.PlayerId, MouseToHudPos(Input.mousePosition), 0f, ++sentSequentialId));
 
             if (MyPlayer.IsDead) return;
+
+            if (MyPlayer.AmOwner) StatsShowCursor.Progress();
 
             var renderer = UnityHelper.CreateObject<SpriteRenderer>("DisclosurePointer", HudManager.Instance.transform, Vector3.zero);
             renderer.sprite = IconSprite.GetSprite();

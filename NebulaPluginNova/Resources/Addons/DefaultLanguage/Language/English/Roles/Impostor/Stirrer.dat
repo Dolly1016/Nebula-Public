@@ -45,6 +45,7 @@
 
 "stats.stirrer.stir" : "Num of Stirring"
 "stats.stirrer.sabo" : "Num of Fake Sabotage"
+"stats.stirrer.emergencySabo" : "Num of Fake Emergency Sabotage"
 
 # Titles
 

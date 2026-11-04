@@ -9,10 +9,18 @@ namespace Nebula.Behavior;
 public class PlayerTitle
 {
     INebulaAchievement?[] achievements;
+    Nebula.Modules.GUIWidget.TitlePartType?[] partTypes;
 
-    public PlayerTitle(INebulaAchievement?[] achievements)
+    public PlayerTitle(INebulaAchievement?[] achievements, Nebula.Modules.GUIWidget.TitlePartType?[]? partTypes = null)
     {
         this.achievements = achievements;
+        this.partTypes = partTypes ?? new Nebula.Modules.GUIWidget.TitlePartType?[achievements.Length];
+    }
+
+    private string? GetPartTranslationKey(int index, Nebula.Modules.GUIWidget.TitlePartType positionalType)
+    {
+        var type = (index < partTypes.Length ? partTypes[index] : null) ?? positionalType;
+        return achievements[index]?.GetPartTranslationKey(type);
     }
 
     public GUIWidget? GetDetailWidget()
@@ -35,12 +43,12 @@ public class PlayerTitle
         }
         else
         {
-            string text = Language.TranslateIfNotNull(achievements[0]?.PrefixTranslationKey);
+            string text = Language.TranslateIfNotNull(GetPartTranslationKey(0, Nebula.Modules.GUIWidget.TitlePartType.Prefix));
             for(int i = 1; i < achievements.Length - 1; i++)
             {
-                text += Language.TranslateIfNotNull(achievements[i]?.InfixTranslationKey);
+                text += Language.TranslateIfNotNull(GetPartTranslationKey(i, Nebula.Modules.GUIWidget.TitlePartType.Infix));
             }
-            text += Language.TranslateIfNotNull(achievements[^1]?.SuffixTranslationKey);
+            text += Language.TranslateIfNotNull(GetPartTranslationKey(achievements.Length - 1, Nebula.Modules.GUIWidget.TitlePartType.Suffix));
             return text;
         }
     }
@@ -117,7 +125,9 @@ public class ModTitleShower : MonoBehaviour
         }
         else
         {
-            return SetTitle(new(achievement.Select(a => NebulaAchievementManager.GetAchievement(a, out var ach) ? ach : null).ToArray()));
+            //各要素は「称号ID」または、のりを使った場合「称号ID#種類番号」
+            var decoded = achievement.Select(a => NebulaAchievementManager.DecodeTitlePart(a, out var ach, out var type) ? ((INebulaAchievement?)ach, type) : ((INebulaAchievement?)null, (Nebula.Modules.GUIWidget.TitlePartType?)null)).ToArray();
+            return SetTitle(new(decoded.Select(d => d.Item1).ToArray(), decoded.Select(d => d.Item2).ToArray()));
         }
     }
     public PlayerTitle? SetTitle(PlayerTitle? title)

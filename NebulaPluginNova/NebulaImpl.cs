@@ -62,7 +62,12 @@ public class NebulaImpl : INebula
 
     E INebula.RunEvent<E>(E ev) => GameOperatorManager.Instance?.Run(ev)!;
     void INebula.RegisterExtension<T, E>(Action<T, E> operation, int priority) => GameOperatorManager.RegisterExtension(operation, priority);
-    GameStatsEntry INebula.CreateStatsEntry(string id, GameStatsCategory category, DefinedAssignable? assignable, TextComponent? displayTitle, int innerPriority) => NebulaAchievementManager.RegisterStats(id, category, assignable, displayTitle, innerPriority);
+    GameStatsEntry INebula.CreateStatsEntry(string id, GameStatsCategory category, DefinedAssignable? assignable, TextComponent? displayTitle, int innerPriority, GameStatsAnnotation annotation, GameStatsUnit unit) => NebulaAchievementManager.RegisterStats(id, category, assignable, displayTitle, innerPriority, annotation: annotation, unit: unit);
+    DecimalGameStatsEntry INebula.CreateDecimalStatsEntry(string id, GameStatsCategory category, DefinedAssignable? assignable, TextComponent? displayTitle, int innerPriority, GameStatsAnnotation annotation, int digits, GameStatsUnit unit) => NebulaAchievementManager.RegisterDecimalStats(id, category, assignable, displayTitle, innerPriority, digits, annotation: annotation, unit: unit);
+    void INebula.IncrementDecimalStatsEntry(DecimalGameStatsEntry entry, float value)
+    {
+        if (entry is DecimalGameStatsEntryImpl impl) impl.Increment(value);
+    }
 
     void INebula.IncrementStatsEntry(string id, int num) {
         if (num == 1)

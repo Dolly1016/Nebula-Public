@@ -28,8 +28,16 @@
 "achievement.noisemaker.common1.goal" : "Die and send out an alert."
 "achievement.noisemaker.common1.flavor" : ""Let's sound the security buzzer before losing our lives" —Excerpt from "Life Safety Training""
 
+"achievement.noisemaker.common2.title" : "A Grown-Up Has Come"
+"achievement.noisemaker.common2.goal" : "Have your corpse reported 20 times in total."
+"achievement.noisemaker.common2.splitted.0" : "Grown-Up "
+"achievement.noisemaker.common2.splitted.2" : "Has Come"
+
 "achievement.noisemaker.challenge.title" : "A Good Kid's Secret Strategy"
 "achievement.noisemaker.challenge.goal" : "The player who killed you is exiled in the meeting immediately after the alert is generated."
 "achievement.noisemaker.challenge.splitted.0" : "A Good Kid's "
 "achievement.noisemaker.challenge.splitted.1" : "Secret "
 "achievement.noisemaker.challenge.splitted.2" : "Strategy"
+
+"stats.noisemaker.reported" : "Num of Own Body Reported"
+"stats.noisemaker.alert" : "Num of Alerts"

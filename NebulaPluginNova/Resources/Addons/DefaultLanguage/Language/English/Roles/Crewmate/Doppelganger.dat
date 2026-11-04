@@ -48,3 +48,7 @@
 "achievement.doppelganger.challenge.cond" : "When tasks are completed, all crewmates have 4 or more task quotas remaining"
 "achievement.doppelganger.challenge.splitted.0" : "Reliable "
 "achievement.doppelganger.challenge.splitted.2" : "Partner"
+
+"stats.doppelganger.summon" : "Num of Summoning Doppelgangers"
+"stats.doppelganger.swapDistance" : "Total Distance Moved by Swapping"
+"stats.doppelganger.swap" : "Num of Swapping with Doppelgangers"

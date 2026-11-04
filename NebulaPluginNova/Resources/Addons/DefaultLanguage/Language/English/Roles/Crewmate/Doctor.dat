@@ -36,3 +36,6 @@
 "achievement.doctor.challenge.cond" : "Initial usable time: 10 seconds or less+Task charge time: 2 seconds or less"
 "achievement.doctor.challenge.flavor" : ""A white ceiling, an inorganic sound" —Monologue on the Battlefield"
 "achievement.doctor.challenge.splitted.1" : "They "
+
+"stats.doctor.portableVitalTime" : "Time Using Portable Vitals"
+"stats.doctor.witness" : "Num of Witnessing Deaths"

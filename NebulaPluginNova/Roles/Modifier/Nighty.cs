@@ -27,6 +27,8 @@ internal class Nighty : DefinedAllocatableModifierTemplate, DefinedAllocatableMo
     static private FloatConfiguration BlindDurationOption = NebulaAPI.Configurations.Configuration("options.role.nighty.blindDuration", (2.5f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second);
 
     static public Nighty MyRole = new Nighty();
+    static private readonly GameStatsEntry StatsBombPlaced = NebulaAPI.CreateStatsEntry("stats.nighty.bombPlaced", GameStatsCategory.Roles, MyRole, annotation: GameStatsAnnotation.From2611);
+    static private readonly GameStatsEntry StatsBombFired = NebulaAPI.CreateStatsEntry("stats.nighty.bombFired", GameStatsCategory.Roles, MyRole, annotation: GameStatsAnnotation.From2611);
     RuntimeModifier RuntimeAssignableGenerator<RuntimeModifier>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
 
     bool IAssignableDocument.HasTips => false;
@@ -57,6 +59,7 @@ internal class Nighty : DefinedAllocatableModifierTemplate, DefinedAllocatableMo
                 placeButton.OnClick = (button) =>
                 {
                     new StaticAchievementToken("nighty.common1");
+                    StatsBombPlaced.Progress();
                     var pos = AmongUsLLImpl.LocalPlayer.GetTruePosition();
                     NebulaGameManager.Instance?.RpcDoGameAction(MyPlayer, pos, GameActionTypes.BlindTrapPlaceAction);
                     var objRef = NebulaSyncObject.RpcInstantiate(NightyBomb.MyTag, new float[] { pos.x, pos.y });
@@ -94,7 +97,11 @@ internal class Nighty : DefinedAllocatableModifierTemplate, DefinedAllocatableMo
 
         static internal readonly RemoteProcess<GamePlayer> RpcNoticeBomb = new("nightyNoticeBomb", (player, _) =>
         {
-            if (player.AmOwner && player.TryGetModifier<Instance>(out var nighty)) nighty.usedBombCounter++;
+            if (player.AmOwner && player.TryGetModifier<Instance>(out var nighty))
+            {
+                nighty.usedBombCounter++;
+                StatsBombFired.Progress();
+            }
         });
     }
 

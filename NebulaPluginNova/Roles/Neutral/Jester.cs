@@ -37,6 +37,7 @@ public class Jester : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignable
     static public bool RequiresTasksForWin => TaskConfiguration.RequiresTasks;
 
     static public Jester MyRole = new Jester();
+    static private readonly GameStatsEntry StatsPerk = NebulaAPI.CreateStatsEntry("stats.jester.perk", GameStatsCategory.Roles, MyRole, annotation: GameStatsAnnotation.From2611);
 
     bool IAssignableDocument.HasTips => false;
     bool IAssignableDocument.HasAbility => CanDragDeadBodyOption;
@@ -99,6 +100,7 @@ public class Jester : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignable
             if (!CanGainPerk(perk)) return;
             perkSlots.First(s => !s.HasPerk).SetPerk(perk);
             UpdateHasGainablePerk();
+            StatsPerk.Progress();
         }
 
         private void OpenPerkWindow()

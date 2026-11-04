@@ -29,6 +29,9 @@
 # Stats
 
 "stats.effacer.efface" : "透明化回数"
+"stats.effacer.effaceImpostor" : "インポスターを透明化した回数"
+"stats.effacer.effaceNonImpostor" : "インポスター以外を透明化した回数"
+"stats.effacer.effaceSpy" : "スパイを透明化した回数"
 
 # Titles
 

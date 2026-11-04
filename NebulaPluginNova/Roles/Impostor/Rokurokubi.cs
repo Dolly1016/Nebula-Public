@@ -30,6 +30,8 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new(player, arguments.GetAsBool(0));
     AbilityAssignmentStatus DefinedRole.AssignmentStatus => AbilityAssignmentStatus.Killers;
     static public readonly Rokurokubi MyRole = new();
+    static private readonly DecimalGameStatsEntry StatsNeckLength = NebulaAPI.CreateDecimalStatsEntry("stats.rokurokubi.neckLength", GameStatsCategory.Roles, MyRole, annotation: GameStatsAnnotation.From2611, unit: GameStatsUnit.Distance);
+    static private readonly GameStatsEntry StatsLongNeckKill = NebulaAPI.CreateStatsEntry("stats.rokurokubi.longNeckKill", GameStatsCategory.Roles, MyRole, annotation: GameStatsAnnotation.From2611);
 
     bool IAssignableDocument.HasTips => false;
     bool IAssignableDocument.HasAbility => true;
@@ -114,14 +116,25 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
 
         void IGameOperator.OnReleased()
         {
+            RecordNeckLength();
             ResetCamTarget();
             RpcCalmDown.Invoke((myPlayer, true));
+        }
+
+        //首を戻し始めるときに、その時点の首の長さを記録する。
+        bool neckLengthRecorded = false;
+        void RecordNeckLength()
+        {
+            if (neckLengthRecorded) return;
+            neckLengthRecorded = true;
+            if (LongBoi.AsBoolFast()) StatsNeckLength.Progress(ActualHeight);
         }
 
         bool calmDownInvoked = false;
         public void CalmDown()
         {
             if (calmDownInvoked) return;
+            RecordNeckLength();
             calmDownInvoked = true;
 
             ResetCamTarget();
@@ -141,6 +154,8 @@ internal class Rokurokubi : DefinedSingleAbilityRoleTemplate<Rokurokubi.Ability>
         [OnlyMyPlayer]
         void OnMurderPlayer(PlayerKillPlayerEvent ev)
         {
+            if (!calmDownInvoked) StatsLongNeckKill.Progress();
+
             if (NebulaGameManager.Instance != null) {
                 float currentTime = NebulaGameManager.Instance.CurrentTime;
                 if (lastStopped.HasValue && currentTime - lastStopped.Value > 3f)

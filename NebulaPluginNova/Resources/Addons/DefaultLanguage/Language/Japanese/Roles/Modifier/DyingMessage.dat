@@ -43,3 +43,5 @@
 "achievement.dyingMessage.challenge.title" : "散って咲くのは人の華"
 "achievement.dyingMessage.challenge.goal" : "ダイイングメッセージを遺した上で、自身をキルした相手が直後の会議で追放される。"
 "achievement.dyingMessage.challenge.splitted.1" : "人の"
+
+"stats.dyingMessage.message" : "遺したメッセージの数"

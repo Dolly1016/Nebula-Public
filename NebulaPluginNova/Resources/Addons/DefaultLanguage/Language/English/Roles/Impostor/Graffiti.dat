@@ -31,6 +31,10 @@
 "achievement.graffiti.common1.goal" : "Scribble."
 "achievement.graffiti.common1.flavor" : ""It is art that stirs the world.""
 
+"achievement.graffiti.common2.title" : "Nameless Master"
+"achievement.graffiti.common2.goal" : "Scribble 100 times in total."
+"achievement.graffiti.common2.splitted.0" : "Nameless "
+
 "achievement.graffiti.challenge.title" : "Love In The Trash Can"
 "achievement.graffiti.challenge.goal" : "In a game where a player has a dying message,<br>win with all allies still alive while a genuine dying message appears."
 "achievement.graffiti.challenge.cond" : "Num of allies: At least one other besides yourself"

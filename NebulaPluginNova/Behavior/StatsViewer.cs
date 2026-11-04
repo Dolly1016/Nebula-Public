@@ -34,6 +34,7 @@ internal class StatsViewer : MonoBehaviour
         var subGroupAttr = new Virial.Text.TextAttribute(gui.GetAttribute(AttributeParams.StandardBoldLeft)) { FontSize = new(1.8f) };
         var titleAttr = new Virial.Text.TextAttribute(gui.GetAttribute(AttributeParams.StandardLeft)) { FontSize = new(1.6f) };
         var numAttr = new Virial.Text.TextAttribute(gui.GetAttribute(AttributeParams.StandardLeftNonFlexible)) { FontSize = new(1.6f), Size = new(0.80f, 0.2f), Alignment = Virial.Text.TextAlignment.Right };
+        var unitAttr = new Virial.Text.TextAttribute(gui.GetAttribute(AttributeParams.StandardLeftNonFlexible)) { FontSize = new(1.6f), Size = new(0.3f, 0.2f), Alignment = Virial.Text.TextAlignment.Left };
         var semicolon = new NoSGUIText(GUIAlignment.Right, titleAttr, GUI.API.RawTextComponent(":"));
         var hyphen = new NoSGUIText(GUIAlignment.Right, subGroupAttr, GUI.API.RawTextComponent("-"));
         var hMargin = GUI.API.HorizontalMargin(0.05f);
@@ -69,7 +70,9 @@ internal class StatsViewer : MonoBehaviour
                     hMargin,
                     semicolon,
                     hMargin,
-                    new NoSGUIText(GUIAlignment.Right, numAttr, GUI.API.RawTextComponent(stats.DisplayValue))
+                    new NoSGUIText(GUIAlignment.Right, numAttr, GUI.API.RawTextComponent(stats.DisplayValue)),
+                    hMargin,
+                    new NoSGUIText(GUIAlignment.Left, unitAttr, GUI.API.RawTextComponent(NebulaAchievementManager.GetUnitText(stats.Unit)))
                     ));
         }
         

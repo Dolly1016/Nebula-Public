@@ -46,7 +46,13 @@
 "achievement.amalgam.common1.title" : "Second Blade"
 "achievement.amalgam.common1.goal" : "Amalgamate an ability."
 
+"achievement.amalgam.common2.title" : "Squishy Squashy"
+"achievement.amalgam.common2.goal" : "Amalgamate 50 abilities in total."
+"achievement.amalgam.common2.splitted.0" : "Squishy "
+
 "achievement.amalgam.challenge.title" : "Ultimate Amalgamated Life Form"
 "achievement.amalgam.challenge.goal" : "Achieve 2 or more challenge titles of combined roles."
 "achievement.amalgam.challenge.splitted.0" : "Ultimate "
 "achievement.amalgam.challenge.splitted.2" : "Life Form"
+
+"stats.amalgam.fused" : "Num of Fused Abilities"

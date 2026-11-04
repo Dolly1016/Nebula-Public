@@ -30,3 +30,5 @@
 "achievement.disclosure.challenge.title" : "Inciter Of Turbulent Times"
 "achievement.disclosure.challenge.goal" : "Have 3 or more players vote for the same target as you 5 seconds or more after your vote,<br>and exile players from a different team than you 3 or more times."
 "achievement.disclosure.challenge.splitted.2" : "Inciter"
+
+"stats.disclosure.showCursor" : "Num of Showing Cursor"

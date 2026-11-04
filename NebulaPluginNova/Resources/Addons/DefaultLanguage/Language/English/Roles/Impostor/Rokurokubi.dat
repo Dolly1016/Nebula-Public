@@ -54,3 +54,6 @@
 "achievement.rokurokubi.challenge.goal" : "Stretch the neck and kill shortly after an ally's kill to get a double kill."
 "achievement.rokurokubi.challenge.cond" : "Excluding allies who already look like monsters"
 "achievement.rokurokubi.challenge.splitted.1" : "I Wanna Be "
+
+"stats.rokurokubi.neckLength" : "Total Length of Neck Extension"
+"stats.rokurokubi.longNeckKill" : "Num of Kills with Extended Neck"

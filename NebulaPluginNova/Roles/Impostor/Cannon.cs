@@ -35,6 +35,7 @@ public class Cannon : DefinedSingleAbilityRoleTemplate<Cannon.Ability>, DefinedR
     static public readonly Cannon MyRole = new();
     static private readonly GameStatsEntry StatsFire = NebulaAPI.CreateStatsEntry("stats.cannon.fire", GameStatsCategory.Roles, MyRole);
     static private readonly GameStatsEntry StatsBlow = NebulaAPI.CreateStatsEntry("stats.cannon.players", GameStatsCategory.Roles, MyRole);
+    static private readonly GameStatsEntry StatsMark = NebulaAPI.CreateStatsEntry("stats.cannon.mark", GameStatsCategory.Roles, MyRole, annotation: GameStatsAnnotation.From2611);
 
     bool IAssignableDocument.HasTips => false;
     bool IAssignableDocument.HasAbility => true;
@@ -124,6 +125,7 @@ public class Cannon : DefinedSingleAbilityRoleTemplate<Cannon.Ability>, DefinedR
                     Marks.Add(mark!);
                     if (mapLayer.AsBoolFast()) mapLayer.AddMark(mark!, () => Marks.Remove(mark!));
                     markButton.StartCoolDown();
+                    StatsMark.Progress();
                 };
                 markButton.ShowUsesIcon(0, " ");
                 markButton.SetAsUsurpableButton(this);

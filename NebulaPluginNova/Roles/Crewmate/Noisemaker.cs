@@ -8,6 +8,7 @@ using Virial.Configuration;
 using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial;
+using Virial.Game;
 
 namespace Nebula.Roles.Crewmate;
 
@@ -25,6 +26,8 @@ public class Noisemaker : DefinedRoleTemplate, HasCitation, DefinedRole
     static public readonly FloatConfiguration NoiseDurationOption = NebulaAPI.Configurations.Configuration("options.role.noisemaker.noiseDuration", (1f, 10f, 1f), 3f, FloatConfigurationDecorator.Second);
 
     static public readonly Noisemaker MyRole = new();
+    static private readonly GameStatsEntry StatsReported = NebulaAPI.CreateStatsEntry("stats.noisemaker.reported", GameStatsCategory.Roles, MyRole, annotation: GameStatsAnnotation.From2611);
+    static private readonly GameStatsEntry StatsAlert = NebulaAPI.CreateStatsEntry("stats.noisemaker.alert", GameStatsCategory.Roles, MyRole, annotation: GameStatsAnnotation.From2611);
 
     [NebulaRPCHolder]
     public class Instance : RuntimeAssignableTemplate, RuntimeRole
@@ -43,12 +46,19 @@ public class Noisemaker : DefinedRoleTemplate, HasCitation, DefinedRole
             {
                 new StaticAchievementToken("noisemaker.common1");
                 isDeadAtLastTaskpPhase = true;
+                StatsAlert.Progress();
             }
 
             if (!GamePlayer.LocalPlayer.Role.IgnoreNoisemakerNotification)
             {
                 AmongUsUtil.InstantiateNoisemakerArrow(ev.Player.VanillaPlayer.transform.position, true).arrow.SetDuration(NoiseDurationOption);
             }
+        }
+
+        [Local]
+        void OnReported(ReportDeadBodyEvent ev)
+        {
+            if (ev.Reported == MyPlayer) StatsReported.Progress();
         }
 
         [Local]

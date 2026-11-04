@@ -48,3 +48,7 @@
 "achievement.doppelganger.challenge.cond" : "タスクを完遂した時点で全クルーメイトのタスクノルマが4つ以上残っていること"
 "achievement.doppelganger.challenge.splitted.0" : "頼れる"
 "achievement.doppelganger.challenge.splitted.2" : "相棒"
+
+"stats.doppelganger.summon" : "幻影の召喚回数"
+"stats.doppelganger.swapDistance" : "位置スワップによる総移動距離"
+"stats.doppelganger.swap" : "幻影との位置スワップ回数"

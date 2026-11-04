@@ -37,3 +37,5 @@
 "achievement.seer.challenge2.goal" : "Vote for non-crewmate team in all votes."
 "achievement.seer.challenge2.cond" : "Cannot clear if you skip voting or vote blank+Number of votes: 3 or more"
 "achievement.seer.challenge2.splitted.1" : "of the "
+
+"stats.seer.flash" : "Num of Flashes Seen"

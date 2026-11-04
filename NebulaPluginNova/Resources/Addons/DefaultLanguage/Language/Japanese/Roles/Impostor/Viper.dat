@@ -45,3 +45,5 @@
 
 "achievement.viper.challenge.title" : "蝕え尽く鼓動"
 "achievement.viper.challenge.goal" : "自身のキルによる死体を一切通報されずに<br>生きて勝利する。"
+
+"stats.viper.dissolved" : "完全に溶解した死体の数"

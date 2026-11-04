@@ -48,3 +48,5 @@
 # Team
 
 "end.detail.extraMission.blocked" : "ターゲット生存"
+
+"stats.extraMission.blocked" : "ミッション失敗で勝利を逃した回数"

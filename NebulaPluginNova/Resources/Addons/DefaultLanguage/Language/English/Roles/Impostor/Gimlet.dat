@@ -40,6 +40,8 @@
 # Stats
 
 "stats.gimlet.drill" : "Uses of Drill"
+"stats.gimlet.frictionDistance" : "Distance Scraped Along Walls"
+"stats.gimlet.drillDistance" : "Distance of Drill Charges"
 "ui.action.gimlet.drill" : "Transform into a drill and take off."
 "role.gimlet.soundRange" : "Sniper: <color=white>Sound Range</color>"
 "role.gimlet.drillSize" : "Sniper<color=white>: Drill Size</color>"

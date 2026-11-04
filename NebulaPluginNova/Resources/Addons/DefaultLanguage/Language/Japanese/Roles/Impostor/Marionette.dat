@@ -50,6 +50,7 @@
 
 "stats.marionette.decoy" : "人形の設置回数"
 "stats.marionette.swap" : "人形との位置スワップ回数"
+"stats.marionette.swapDistance" : "位置スワップによる総移動距離"
 
 # Titles
 

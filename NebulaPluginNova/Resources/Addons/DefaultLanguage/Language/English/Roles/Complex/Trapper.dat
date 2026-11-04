@@ -26,3 +26,12 @@
 # Status
 
 "state.trapped" : "Trapped"
+
+"stats.niceTrapper.placeAccel" : "Num of Placing Accel Traps"
+"stats.niceTrapper.placeDecel" : "Num of Placing Decel Traps"
+"stats.niceTrapper.placeComm" : "Num of Placing Comm Traps"
+"stats.niceTrapper.detect" : "Num of Detections by Comm Traps"
+"stats.evilTrapper.placeAccel" : "Num of Placing Accel Traps"
+"stats.evilTrapper.placeDecel" : "Num of Placing Decel Traps"
+"stats.evilTrapper.placeKill" : "Num of Placing Kill Traps"
+"stats.evilTrapper.killTrap" : "Num of Kill Trap Activations"

@@ -15,11 +15,11 @@
 # Options
 
 "options.role.comet.detail" : "あなたは迅速に、かつ隠密に移動できます。<br>能力使用中はあなたの姿は他人から視認されません。"
-"options.role.comet.blazeCoolDown" : "ブーストクールダウン"
-"options.role.comet.blazeSpeed" : "ブースト速度"
-"options.role.comet.blazeDuration" : "ブースト効果時間"
-"options.role.comet.blazeVisionRate" : "ブースト中の視界倍率"
-"options.role.comet.blazeScreenRate" : "ブースト中の画面倍率"
+"options.role.comet.blazeCoolDown" : "透明化クールダウン"
+"options.role.comet.blazeSpeed" : "透明化中の移動速度"
+"options.role.comet.blazeDuration" : "透明化効果時間"
+"options.role.comet.blazeVisionRate" : "透明化中の視界倍率"
+"options.role.comet.blazeScreenRate" : "透明化中の画面倍率"
 "options.role.comet.affectedByBlackout" : "停電による視野縮小"
 
 # Game
@@ -30,7 +30,7 @@
 
 # Stats
 
-"stats.comet.blazing" : "ブースト回数"
+"stats.comet.blazing" : "透明化回数"
 
 # Titles
 
