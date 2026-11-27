@@ -89,6 +89,7 @@ internal class AchievementViewer : MonoBehaviour
     {
         public INebulaAchievement?[] Parts { get; } = new INebulaAchievement?[4];
         public TitlePartType[] Types { get; } = new TitlePartType[4];
+        public HashSet<int>[] Filled { get; } = [[], [], [], []];
 
         static public TitlePartType SlotType(int slot) => NebulaAchievementManager.CustomAchievement.SlotType(slot);
 
@@ -99,25 +100,72 @@ internal class AchievementViewer : MonoBehaviour
                 var tip = achievement.Get(i);
                 Parts[i] = tip?.achievement;
                 Types[i] = tip?.partType ?? SlotType(i);
+                if (tip != null) Filled[i].UnionWith(tip.filled);
             }
         }
         public void ReflectTo(NebulaAchievementManager.CustomAchievement achievement)
         {
-            achievement.Update(Enumerable.Range(0, 4).Select(i => (Parts[i], Types[i])).ToArray());
+            achievement.Update(Enumerable.Range(0, 4).Select(i => (Parts[i], Types[i], (IEnumerable<int>)Filled[i])).ToArray());
         }
 
         public void Set(int slot, INebulaAchievement? achievement, TitlePartType type)
         {
+            type = achievement == null ? SlotType(slot) : type;
+            //パーツを取り替えたら塗りつぶしは解除し、使っていたのりを返却する
+            if (Parts[slot] != achievement || Types[slot] != type) Filled[slot].Clear();
             Parts[slot] = achievement;
-            Types[slot] = achievement == null ? SlotType(slot) : type;
+            Types[slot] = type;
         }
 
-        public string? GetTranslationKey(int index) => Parts[index]?.GetPartTranslationKey(Types[index]);
+        public bool ToggleFill(int slot, int charIndex, int maxGlues)
+        {
+            if (Parts[slot] == null) return true;
+            if (Filled[slot].Remove(charIndex)) return true;
+            if (UsedGlues >= maxGlues) return false;
+            Filled[slot].Add(charIndex);
+            return true;
+        }
 
-        /// <summary>その枠でのりを使っているか</summary>
+        public string? GetDisplayText(int slot)
+        {
+            var key = GetTranslationKey(slot);
+            if (key == null) return null;
+            var text = Language.Translate(key);
+            if (Filled[slot].Count == 0) return text;
+            return string.Concat(text.Select((c, i) => Filled[slot].Contains(i) ? "<alpha=#00>" + c + "<alpha=#FF>" : c.ToString()));
+        }
+
+        public string LocalizedTitle => string.Concat(Enumerable.Range(0, 4).Select(i => GetTranslationKey(i) is { } key ? NebulaAchievementManager.CustomAchievement.RemoveFilled(Language.Translate(key), Filled[i]) : ""));
+
+        public string? GetTranslationKey(int index) => Parts[index]?.GetPartTranslationKey(Types[index]);
         public bool IsGlued(int slot) => Parts[slot] != null && Types[slot] != SlotType(slot);
-        /// <summary>のりを使っている枠の数</summary>
-        public int UsedGlues => Enumerable.Range(0, 4).Count(IsGlued);
+        public int UsedGlues => Enumerable.Range(0, 4).Sum(GluesAt);
+        
+        public int GluesAt(int slot) => Parts[slot] == null ? 0 : (IsGlued(slot) ? 1 : 0) + Filled[slot].Count;
+
+        public bool HasBlockedWord()
+        {
+            if (!Enumerable.Range(0, 4).Any(i => Parts[i] != null && Filled[i].Count > 0)) return false;
+            var title = LocalizedTitle;
+            return new[] { title, ConvertKana(title, true), ConvertKana(title, false) }.Any(t => BlockedWords.CensorWords(t) != t);
+        }
+
+        static private string ConvertKana(string text, bool toKatakana)
+        {
+            const int Offset = 'ァ' - 'ぁ';
+            return string.Concat(text.Select(c =>
+            {
+                if (toKatakana)
+                {
+                    if ((c >= 'ぁ' && c <= 'ゖ') || c == 'ゝ' || c == 'ゞ') return (char)(c + Offset);
+                }
+                else
+                {
+                    if ((c >= 'ァ' && c <= 'ヶ') || c == 'ヽ' || c == 'ヾ') return (char)(c - Offset);
+                }
+                return c;
+            }));
+        }
 
         public bool CanReflect(int maxGlues)
         {
@@ -130,6 +178,7 @@ internal class AchievementViewer : MonoBehaviour
     {
         public SortRule SortRule { get; set; } = SortRule.Categorized;
         public int TrophyMask { get; set; } = TrophyFullMask;
+        public bool GlueOnly { get; set; } = false;
     }
     static public GUIWidget GenerateWidget(float scrollerHeight,float width, ViewerArguments argument, string? scrollerTag = null, bool showTrophySum = true, Predicate<INebulaAchievement>? predicate = null, string? shownText = null, Action? onClicked = null, Action? onUpdated = null, bool showCustomAchievement = true)
     {
@@ -150,8 +199,8 @@ internal class AchievementViewer : MonoBehaviour
         void AddCustomTitle()
         {
             int gainedAchievements = NebulaAchievementManager.AllAchievements.Count(a => a.IsCleared && !a.IsAddonTitle);
-            //のり報酬(定義の"glue")を持つ称号の獲得数だけ、のりを使える
             int gainedGlues = NebulaAchievementManager.AllAchievements.Count(a => a.IsCleared && a.HasGlue);
+            bool canSeal = gainedGlues >= 5;
 
             inner.Add(new(GUIAlignment.Left, new NoSGUIText(GUIAlignment.Left, groupAttr, new TranslateTextComponent("achievement.group.custom")), 0.5f));
 
@@ -211,24 +260,42 @@ internal class AchievementViewer : MonoBehaviour
 
                 void OpenEditorWindow()
                 {
-                    var window = MetaScreen.GenerateWindow(new(8.6f, 4.3f), HudManager.InstanceExists ? HudManager.Instance.transform : null, new(0f, 0f, 0f), true, false, false, BackgroundSetting.Modern);
+                    var window = MetaScreen.GenerateWindow(new(8.6f, 4.6f), HudManager.InstanceExists ? HudManager.Instance.transform : null, new(0f, 0f, 0f), true, false, false, BackgroundSetting.Modern);
                     var crafting = new EdittingCustomAchivemenet(a);
 
                     TextAttribute ApplyAttr = new(GUI.API.GetAttribute(AttributeAsset.CenteredBoldFixed)) { Size = new(1.1f, 0.24f) };
                     TextAttribute PartAttr = GUITitlePart.ScaledAttribute(1.4f);
-                    TextAttribute GlueCountAttr = new(GUI.API.GetAttribute(AttributeParams.StandardBaredBoldLeft)) { FontSize = new(1.8f) };
+                    //個数が変わっても位置がずれないよう、2桁の数字が入る固定の幅にする
+                    TextAttribute GlueCountAttr = new(GUI.API.GetAttribute(AttributeParams.StandardBaredBoldLeftNonFlexible)) { FontSize = new(1.8f), Size = new(0.45f, 0.3f) };
                     TextAttribute GlueCaptionAttr = new(GUI.API.GetAttribute(AttributeParams.StandardBoldLeft)) { FontSize = new(1.4f) };
                     VColor EditingSlotColor = new(255, 235, 140);
                     VColor LockedSlotColor = new(120, 120, 120);
                     TitlePartType[] AllPartTypes = [TitlePartType.Prefix, TitlePartType.Infix, TitlePartType.Suffix];
 
-                    //選択状態が変わるたびに作り直す。スクロール位置はタグで保持される。
-                    void SetWidget(int index)
+                    //上部の枠と選択肢は別々に差し替える。
+                    //選択肢はクリックのたびには作り直さず、編集する枠か、のり付きパーツの欄の有無が変わったときだけ作り直す。
+                    //選択中のチェックマークは各パーツが毎フレーム状態を見て切り替える。
+                    var headerView = new GUIReplaceableView(GUIAlignment.Center, new(8.4f, GUITitlePart.GetPieceHeight(PartAttr) + 0.3f));
+                    var selectorView = new GUIReplaceableView(GUIAlignment.Center, new(8.55f, 3.08f));
+                    (int index, bool showGlued)? builtSelector = null;
+
+                    bool ShowGluedParts(int index) => gainedGlues - crafting.UsedGlues > 0 || crafting.IsGlued(index);
+
+                    void Refresh(int index)
                     {
-                        var slotType = EdittingCustomAchivemenet.SlotType(index);
+                        headerView.SetWidget(BuildHeader(index));
+                        (int, bool) key = (index, ShowGluedParts(index));
+                        if (builtSelector != key)
+                        {
+                            builtSelector = key;
+                            selectorView.SetWidget(BuildSelector(index, key.Item2));
+                        }
+                    }
+
+                    GUIWidget BuildHeader(int index)
+                    {
                         int remainingGlues = gainedGlues - crafting.UsedGlues;
 
-                        //各枠。噛み合ったひと続きのパーツとして並べ、編集中の枠は色付きで表示する。
                         List<TitlePartEntry> header = [];
                         void AddHeader(int myIndex, int requiredAchievements, int minAchievements)
                         {
@@ -240,10 +307,26 @@ internal class AchievementViewer : MonoBehaviour
                             }
                             else
                             {
-                                header.Add(new(GUI.API.RawTextComponent(Language.TranslateIfNotNull(crafting.GetTranslationKey(myIndex), null!) ?? Language.Translate("achievement.ui.craft.empty").Color(VColor.Gray)), crafting.Parts[myIndex] != null ? crafting.Types[myIndex] : mySlotType)
+                                header.Add(new(GUI.API.RawTextComponent(crafting.GetDisplayText(myIndex) ?? Language.Translate("achievement.ui.craft.empty").Color(VColor.Gray)), crafting.Parts[myIndex] != null ? crafting.Types[myIndex] : mySlotType)
                                 {
                                     BackgroundColor = myIndex == index ? EditingSlotColor : null,
-                                    OnClick = _ => SetWidget(myIndex)
+                                    OnClick = _ => Refresh(myIndex),
+                                    SealedCharacters = crafting.Parts[myIndex] != null ? crafting.Filled[myIndex] : null,
+                                    GlueCount = crafting.GluesAt(myIndex),
+                                    //編集中の枠では、文字をクリックするとのりで塗りつぶす(もう一度クリックで解除)
+                                    //塗りつぶせない場合も、既に塗りつぶしてある文字の解除はできる
+                                    OnClickCharacter = myIndex == index && crafting.Parts[myIndex] != null && (canSeal || crafting.Filled[myIndex].Count > 0) ? charIndex =>
+                                    {
+                                        if (!canSeal && !crafting.Filled[myIndex].Contains(charIndex)) return;
+                                        if (crafting.ToggleFill(myIndex, charIndex, gainedGlues))
+                                        {
+                                            Refresh(myIndex);
+                                        }
+                                        else
+                                        {
+                                            DebugScreen.Push(Language.Translate("achievement.ui.craft.noGlue"), 3f);
+                                        }
+                                    } : null
                                 });
                             }
                         }
@@ -253,67 +336,88 @@ internal class AchievementViewer : MonoBehaviour
                         AddHeader(3, 0, -10);
 
                         //残りのり数
-                        var headerWidget = GUI.API.HorizontalHolder(GUIAlignment.Center,
-                            new GUITitlePartSequence(GUIAlignment.Center, PartAttr, header),
+                        return GUI.API.HorizontalHolder(GUIAlignment.Center,
+                            new GUITitlePartSequence(GUIAlignment.Center, PartAttr, header) { GlueBandHeight = 0.3f },
                             GUI.API.HorizontalMargin(0.25f),
                             new NoSGUIImage(GUIAlignment.Center, GUITitlePart.GlueIcon, new(0.42f, 0.42f), overlay: GUI.API.LocalizedText(GUIAlignment.Left, AttributeAsset.OverlayContent, "achievement.ui.craft.glue.detail")),
                             new NoSGUIText(GUIAlignment.Center, GlueCountAttr, GUI.API.RawTextComponent("x" + remainingGlues)));
+                    }
 
-                        var currentSelected = crafting.Parts[index];
-                        var currentType = crafting.Types[index];
+                    //選択肢。パーツはこの枠の種類として使うときの形で表示し、選択中のパーツには右上にチェックマークが付く。
+                    //見えている行だけを生成する。
+                    GUIWidget BuildSelector(int index, bool showGlued)
+                    {
+                        var slotType = EdittingCustomAchivemenet.SlotType(index);
                         var unsetText = Language.Translate("achievement.ui.unset").Color(VColor.Gray);
 
-                        //選択肢。パーツはこの枠の種類として使うときの形で表示し、選択中のパーツには右上にチェックマークが付く。
                         GUIWidget PartButton(INebulaAchievement? achievement, TitlePartType partType) => new GUITitlePart(GUIAlignment.Center, PartAttr, GUI.API.RawTextComponent(Language.TranslateIfNotNull(achievement?.GetPartTranslationKey(partType), unsetText)), partType, slotType)
                         {
-                            Selected = achievement == currentSelected && (achievement == null || partType == currentType),
+                            SelectedGetter = () => crafting.Parts[index] == achievement && (achievement == null || crafting.Types[index] == partType),
                             IsMasked = true,
                             OnClick = _ =>
                             {
                                 crafting.Set(index, achievement, partType);
-                                SetWidget(index);
+                                Refresh(index);
                             }
                         };
 
-                        List<GUIWidget> selectorContents = [
-                            GUI.API.Arrange(GUIAlignment.Center, NebulaAchievementManager.AllAchievements.Where(a => a.IsCleared && a.HasPart(slotType)).Prepend(null).Select(a => PartButton(a, slotType)), 5)
-                            ];
-
-                        //のりが使えるうちは、他の種類のパーツものり付きで並べる(この枠で既にのりを使っている場合は付け替えられる)
-                        if (remainingGlues > 0 || crafting.IsGlued(index))
+                        float rowHeight = GUITitlePart.GetPieceHeight(PartAttr);
+                        List<GUIScrollDynamicInnerContent> rows = [];
+                        void AddRows(IEnumerable<(INebulaAchievement? achievement, TitlePartType type)> parts)
                         {
-                            var gluedParts = AllPartTypes.Where(t => t != slotType).SelectMany(t => NebulaAchievementManager.AllAchievements.Where(a => a.IsCleared && a.HasPart(t)).Select(a => PartButton(a, t))).ToArray();
-                            if (gluedParts.Length > 0)
+                            foreach (var chunk in parts.Chunk(5))
                             {
-                                selectorContents.Add(GUI.API.VerticalMargin(0.15f));
-                                selectorContents.Add(GUI.API.HorizontalHolder(GUIAlignment.Left,
-                                    new NoSGUIImage(GUIAlignment.Center, GUITitlePart.GlueIcon, new(0.32f, 0.32f)) { IsMasked = true },
-                                    GUI.API.HorizontalMargin(0.05f),
-                                    new NoSGUIText(GUIAlignment.Center, GlueCaptionAttr, GUI.API.LocalizedTextComponent("achievement.ui.craft.glued"))));
-                                selectorContents.Add(GUI.API.Arrange(GUIAlignment.Center, gluedParts, 5));
+                                rows.Add(new(GUIAlignment.Center, () => GUI.API.HorizontalHolder(GUIAlignment.Center, chunk.Select(p => PartButton(p.achievement, p.type)).ToArray()), rowHeight));
                             }
                         }
 
-                        var selector = GUI.API.ScrollView(GUIAlignment.Center, new(8.4f, 3f), "TitleCraft" + index, GUI.API.VerticalHolder(GUIAlignment.Center, selectorContents), out _);
+                        AddRows(NebulaAchievementManager.AllAchievements.Where(a => a.IsCleared && a.HasPart(slotType)).Prepend(null).Select(a => (a, slotType)));
 
-                        window.SetWidget(GUI.API.VerticalHolder(GUIAlignment.Center, headerWidget, GUI.API.VerticalMargin(0.05f), selector,
-                            GUI.API.LocalizedButton(GUIAlignment.Center, ApplyAttr, "achievement.ui.craft.determine", _ =>
+                        //のりが使えるうちは、他の種類のパーツものり付きで並べる(この枠で既にのりを使っている場合は付け替えられる)
+                        if (showGlued)
+                        {
+                            var gluedParts = AllPartTypes.Where(t => t != slotType).SelectMany(t => NebulaAchievementManager.AllAchievements.Where(a => a.IsCleared && a.HasPart(t)).Select(a => ((INebulaAchievement?)a, t))).ToArray();
+                            if (gluedParts.Length > 0)
                             {
-                                if (crafting.CanReflect(gainedGlues))
-                                {
-                                    window.CloseScreen();
-                                    crafting.ReflectTo(a);
-                                    NebulaAchievementManager.SetCustomTitle(a, false);
-                                    onUpdated?.Invoke();
-                                    onClicked?.Invoke();
-                                }
-                                else
-                                {
-                                    DebugScreen.Push(Language.Translate("achievement.ui.cannotReflect"), 3f);
-                                }
-                            })), new Vector2(0.5f, 1f), out _);
+                                rows.Add(new(GUIAlignment.Left, () => GUI.API.VerticalHolder(GUIAlignment.Left,
+                                    GUI.API.VerticalMargin(0.15f),
+                                    GUI.API.HorizontalHolder(GUIAlignment.Left,
+                                        GUI.API.HorizontalMargin(0.2f),
+                                        new NoSGUIImage(GUIAlignment.Center, GUITitlePart.GlueIcon, new(0.32f, 0.32f)) { IsMasked = true },
+                                        GUI.API.HorizontalMargin(0.05f),
+                                        new NoSGUIText(GUIAlignment.Center, GlueCaptionAttr, GUI.API.LocalizedTextComponent("achievement.ui.craft.glued")))), 0.5f));
+                                AddRows(gluedParts);
+                            }
+                        }
+
+                        return new GUIScrollDynamicView(GUIAlignment.Center, new(8.4f, 3f), rows) { ScrollerTag = "TitleCraft" + index, WithMask = true };
                     }
-                    SetWidget(0);
+
+                    window.SetWidget(GUI.API.VerticalHolder(GUIAlignment.Center, headerView, GUI.API.VerticalMargin(0.05f), selectorView,
+                        GUI.API.LocalizedButton(GUIAlignment.Center, ApplyAttr, "achievement.ui.craft.determine", _ =>
+                        {
+                            if (crafting.CanReflect(gainedGlues) && crafting.LocalizedTitle.Length == 0)
+                            {
+                                DebugScreen.Push(Language.Translate("achievement.ui.craft.allFilled"), 3f);
+                            }
+                            else if (crafting.CanReflect(gainedGlues) && crafting.HasBlockedWord())
+                            {
+                                DebugScreen.Push(Language.Translate("achievement.ui.craft.blockedWord"), 3f);
+                            }
+                            else if (crafting.CanReflect(gainedGlues))
+                            {
+                                window.CloseScreen();
+                                crafting.ReflectTo(a);
+                                NebulaAchievementManager.SetCustomTitle(a, false);
+                                onUpdated?.Invoke();
+                                onClicked?.Invoke();
+                            }
+                            else
+                            {
+                                DebugScreen.Push(Language.Translate("achievement.ui.cannotReflect"), 3f);
+                            }
+                        })), new Vector2(0.5f, 1f), out _);
+                    Refresh(0);
                     //onClicked
                 }
             }
@@ -326,7 +430,7 @@ internal class AchievementViewer : MonoBehaviour
         void AddGroup(string? group, IEnumerable<INebulaAchievement> achievements)
         {
             bool first = true;
-            foreach (var a in achievements.Where(a => (predicate?.Invoke(a) ?? true) && !a.IsHidden && (((1 << a.Trophy) & argument.TrophyMask) != 0)))
+            foreach (var a in achievements.Where(a => (predicate?.Invoke(a) ?? true) && !a.IsHidden && (((1 << a.Trophy) & argument.TrophyMask) != 0) && (!argument.GlueOnly || a.HasGlue)))
             {
                 if (first)
                 {
@@ -406,9 +510,10 @@ internal class AchievementViewer : MonoBehaviour
                 int copiedIndex = i;
                 if (footerList.Count != 0) footerList.Add(new NoSGUIMargin(GUIAlignment.Center, new(0.2f, 0f)));
 
-                footerList.Add(new NoSGUIImage(GUIAlignment.Left, new WrapSpriteLoader(() => AbstractAchievement.TrophySprite.GetSprite(copiedIndex)), new(0.5f, 0.5f),
-                    ((1 << i) & argument.TrophyMask) != 0 ? VColor.White : new(0.25f,0.25f,0.25f,0.95f), _ =>
+                footerList.Add(new NoSGUIImage(GUIAlignment.Left, new WrapSpriteLoader(() => AbstractAchievement.TrophySprite.GetSprite(copiedIndex)), new(0.45f, 0.45f),
+                    !argument.GlueOnly && ((1 << i) & argument.TrophyMask) != 0 ? VColor.White : new(0.25f,0.25f,0.25f,0.95f), _ =>
                     {
+                        argument.GlueOnly = false;
                         if (argument.TrophyMask != 1 << copiedIndex)
                             argument.TrophyMask = 1 << copiedIndex;
                         else
@@ -418,6 +523,19 @@ internal class AchievementViewer : MonoBehaviour
                 footerList.Add(new NoSGUIMargin(GUIAlignment.Center, new(0.05f, 0f)));
                 footerList.Add(new NoSGUIText(GUIAlignment.Left, detailDetailAttr, new RawTextComponent(cul[i].num + "/" + cul[i].max)));
             }
+
+            //報酬がのりの称号。押すとのりの称号だけに絞り込む(もう一度押すと解除)。
+            var glueAchievements = NebulaAchievementManager.AllAchievements.Where(a => !a.IsAddonTitle && !a.IsHidden && a.HasGlue && (predicate?.Invoke(a) ?? true)).ToArray();
+            footerList.Add(new NoSGUIMargin(GUIAlignment.Center, new(0.2f, 0f)));
+            footerList.Add(new NoSGUIImage(GUIAlignment.Left, GUITitlePart.GlueIcon, new(0.45f, 0.45f),
+                argument.GlueOnly || argument.TrophyMask == TrophyFullMask ? VColor.White : new(0.25f, 0.25f, 0.25f, 0.95f), _ =>
+                {
+                    argument.GlueOnly = !argument.GlueOnly;
+                    argument.TrophyMask = TrophyFullMask;
+                    onUpdated?.Invoke();
+                }));
+            footerList.Add(new NoSGUIMargin(GUIAlignment.Center, new(0.05f, 0f)));
+            footerList.Add(new NoSGUIText(GUIAlignment.Left, detailDetailAttr, new RawTextComponent(glueAchievements.Count(a => a.IsCleared) + "/" + glueAchievements.Length)));
             var footer = new HorizontalWidgetsHolder(GUIAlignment.Center, footerList.ToArray());
 
             return new VerticalWidgetsHolder(Virial.Media.GUIAlignment.Left, scroller, new NoSGUIMargin(GUIAlignment.Center, new(0f, 0.15f)), footer,

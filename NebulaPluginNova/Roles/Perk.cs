@@ -446,4 +446,43 @@ public class PerkInstance : FlexibleLifespan, IGameOperator
 
         this.modObj.LocalPosition = pos;
     }
+
+    private Action? action = null;
+    /// <summary>
+    /// 発動できる動作を持つ場合true。キーの割り当てはパークホルダが行う。
+    /// </summary>
+    public bool HasAction => action != null;
+
+    /// <summary>
+    /// パークの動作を設定する。クリックおよびパークホルダが割り当てたキーで発動する。
+    /// </summary>
+    public PerkInstance SetAction(Action? action)
+    {
+        if (this.action == null && action != null) Button.OnClick.AddListener(() => this.action?.Invoke());
+        this.action = action;
+        return this;
+    }
+
+    internal void Activate() => action?.Invoke();
+
+    private KeyCode? guidedKey = null;
+    /// <summary>
+    /// キーガイドを表示する。表示中のキーと異なる場合のみ作り直す。nullの場合は消す。
+    /// </summary>
+    internal void SetKeyGuide(KeyCode? key)
+    {
+        if (IsDeadObject) return;
+        if (guidedKey == key) return;
+        guidedKey = key;
+
+        if (key.HasValue)
+        {
+            var guide = ButtonEffect.AddKeyGuide(obj, key.Value, new(0f, -0.75f), true);
+            if (guide != null) guide.transform.localScale = new(1f / 0.42f, 1f / 0.42f, 1f);
+        }
+        else
+        {
+            obj.ForEachChild((Il2CppSystem.Action<GameObject>)(child => { if (child.name == "HotKeyGuide") GameObject.Destroy(child); }));
+        }
+    }
 }

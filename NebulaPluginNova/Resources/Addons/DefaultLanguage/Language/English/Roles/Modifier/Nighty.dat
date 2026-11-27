@@ -37,6 +37,12 @@
 "achievement.nighty.challenge.title" : "A Thousand And One Nights Of Sleep"
 "achievement.nighty.challenge.goal" : "Your placed Sleep Bombs activate 8 or more times, players die by 8 or more types of causes,<br>and impostors win with all allies surviving."
 "achievement.nighty.challenge.cond" : "Impostors: 2 or more"
+"achievement.nighty.challenge.splitted.0" : "Thousand And One Nights "
+
+"achievement.nighty.common2.title" : "Good Night!"
+"achievement.nighty.common2.goal" : "Activate Sleep Bombs a total of 50 times."
+"achievement.nighty.common2.flavor" : ""Forever, okay?" ―In someone's memory"
+"achievement.nighty.common2.splitted.0" : "Good Night "
 
 "stats.nighty.bombPlaced" : "Num of Placing Night Bombs"
 "stats.nighty.bombFired" : "Num of Night Bomb Activations"

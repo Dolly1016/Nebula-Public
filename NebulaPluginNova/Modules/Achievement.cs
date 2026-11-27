@@ -362,7 +362,7 @@ public interface INebulaAchievement
         if (showCraftingParts)
         {
             List<Virial.Media.GUIWidget> parts = [];
-            Virial.Media.GUIWidget PartWidget(string translationKey, TitlePartType type) => new GUITitlePart(GUIAlignment.Center, new TranslateTextComponent(translationKey), type);
+            Virial.Media.GUIWidget PartWidget(string translationKey, TitlePartType type) => new GUITitlePart(GUIAlignment.Center, new TranslateTextComponent(IsCleared ? translationKey : "achievement.part.unachieved"), type);
             if (HasPrefix) parts.Add(PartWidget(PrefixTranslationKey, TitlePartType.Prefix));
             if (HasInfix) parts.Add(PartWidget(InfixTranslationKey, TitlePartType.Infix));
             if (HasSuffix) parts.Add(PartWidget(SuffixTranslationKey, TitlePartType.Suffix));
@@ -510,6 +510,12 @@ public interface INebulaAchievement
 
     //他のレコードの進捗によって勝手にクリアする場合にここから進捗を確認する。副作用のある関数。
     ClearDisplayState CheckClear() { return ClearDisplayState.None; }
+
+    /// <summary>
+    /// 他の称号のクリア数によってクリアするコレクター系の称号の場合、true。
+    /// コレクター系の称号は、他の全ての称号の判定が済んだ後で判定されます。
+    /// </summary>
+    bool IsCollectorAchievement => false;
 }
 
 public class AbstractAchievement : ProgressRecord, INebulaAchievement
@@ -720,7 +726,7 @@ public class SumUpReferenceAchievement : INebulaAchievement
             colored.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
             colored.sortingOrder = 2;
 
-            var text = new NoSGUIText(GUIAlignment.Center, OblongAttribute, new RawTextComponent((referenceRecord?.Progress ?? 0) + "  /  " + goal)).Instantiate(new(1f, 0.2f), out _);
+            var text = new NoSGUIText(GUIAlignment.Center, OblongAttribute, new RawTextComponent(NebulaAchievementManager.FormatRecordValue(reference, referenceRecord?.Progress ?? 0) + "  /  " + NebulaAchievementManager.FormatRecordValue(reference, goal))).Instantiate(new(1f, 0.2f), out _);
             text!.transform.SetParent(obj.transform);
 
             OnWidgetGenerated(obj);
@@ -808,6 +814,46 @@ public class CompleteAchievement : SumUpAchievement, INebulaAchievement
     }
 }
 
+/// <summary>
+/// 条件を満たす他の称号のクリア数によってクリアする称号です。
+/// </summary>
+public class CollectorAchievement : SumUpAchievement, INebulaAchievement
+{
+    private readonly Predicate<INebulaAchievement> predicate;
+    public CollectorAchievement(string? group, bool isSecret, bool noHint, string key, int goal, Predicate<INebulaAchievement> predicate, IEnumerable<DefinedAssignable> role, IEnumerable<AchievementType> type, int trophy, int attention, Image? specifiedImage, string? preAchievement)
+        : base(group, isSecret, noHint, key, goal, role, type, trophy, attention, specifiedImage, preAchievement)
+    {
+        this.predicate = predicate;
+    }
+
+    bool INebulaAchievement.IsCollectorAchievement => true;
+
+    /// <summary>
+    /// collect-の後に続く文字列から、数える対象の条件を生成します。
+    /// </summary>
+    static public Predicate<INebulaAchievement>? GetPredicate(string target) => target switch
+    {
+        "challenge" => a => a.AchievementType().Contains(global::Nebula.Modules.AchievementType.Challenge),
+        "trophy0" => a => a.Trophy == 0,
+        "trophy1" => a => a.Trophy == 1,
+        "trophy2" => a => a.Trophy == 2,
+        _ => null
+    };
+
+    ClearDisplayState INebulaAchievement.CheckClear()
+    {
+        bool wasCleared = IsCleared;
+
+        //コレクター系の称号(自身を含む)は数えない
+        int count = 0;
+        foreach (var a in NebulaAchievementManager.AllAchievements) if (!a.IsCollectorAchievement && predicate(a) && a.IsCleared) count++;
+        UpdateProgress(count);
+
+        if (!wasCleared && IsCleared) return ClearDisplayState.FirstClear;
+        return ClearDisplayState.None;
+    }
+}
+
 public class TitleRegisterImpl : ITitlesRegister
 {
     static public TitleRegisterImpl Instance
@@ -873,6 +919,16 @@ static public class NebulaAchievementManager
     static private readonly CustomAchievement[] customAchievements = [new("custom.0"), new("custom.1"), new("custom.2")];
     static private readonly List<INebulaAchievement> allAchievements = [];
     static private readonly List<GameStatsEntry> allStats = [];
+    static private readonly Dictionary<string, int> decimalStatsDigits = [];
+
+    /// <summary>
+    /// レコードの値を表示用の文字列に変換します。小数の統計は小数として表示します。
+    /// </summary>
+    static internal string FormatRecordValue(string id, int value)
+    {
+        if (decimalStatsDigits.TryGetValue(id, out var digits) && digits > 0) return (value / MathF.Pow(10f, digits)).ToString("N" + digits);
+        return value.ToString();
+    }
 
     static internal CustomAchievement GetCustomAchievement(int index) => customAchievements[index];
 
@@ -883,9 +939,9 @@ static public class NebulaAchievementManager
             var title = myTitleEntry.Value;
             if (title.StartsWith("custom."))
             {
-                if (title == "custom.0") return customAchievements[0].ToArray();
-                if (title == "custom.1") return customAchievements[1].ToArray();
-                if (title == "custom.2") return customAchievements[2].ToArray();
+                if (title == "custom.0") return customAchievements[0].ToSharedData();
+                if (title == "custom.1") return customAchievements[1].ToSharedData();
+                if (title == "custom.2") return customAchievements[2].ToSharedData();
             }
             return [title];
         } 
@@ -909,54 +965,64 @@ static public class NebulaAchievementManager
 
     internal class CustomAchievement
     {
-        internal record TitleTip(INebulaAchievement achievement, string localizedTip, TitlePartType partType);
+        internal record TitleTip(INebulaAchievement achievement, string localizedTip, TitlePartType partType, IReadOnlySet<int> filled)
+        {
+            /// <summary>のりで塗りつぶした文字を除いた文字列</summary>
+            public string VisibleTip => RemoveFilled(localizedTip, filled);
+        }
         private StringDataEntry[] entries;
+        //各枠でのりで塗りつぶした文字の位置(カンマ区切り)
+        private StringDataEntry[] fillEntries;
         public string Id { get; }
         public CustomAchievement(string id)
         {
             this.Id = id;
-            entries = [
-                new(id + ".prefix", AchievementDataSaver, "-"),
-                new(id + ".infix1", AchievementDataSaver, "-"),
-                new(id + ".infix2", AchievementDataSaver, "-"),
-                new(id + ".suffix", AchievementDataSaver, "-"),
-                ];
+            string[] slotNames = ["prefix", "infix1", "infix2", "suffix"];
+            entries = slotNames.Select(n => new StringDataEntry(id + "." + n, AchievementDataSaver, "-")).ToArray();
+            fillEntries = slotNames.Select(n => new StringDataEntry(id + "." + n + ".fill", AchievementDataSaver, "")).ToArray();
         }
 
         /// <summary>枠本来のパーツの種類(0:接頭、1,2:中間、3:接尾)</summary>
         static internal TitlePartType SlotType(int slot) => slot switch { 0 => TitlePartType.Prefix, 3 => TitlePartType.Suffix, _ => TitlePartType.Infix };
 
-        public string LocalizedTitle => string.Concat(Enumerable.Range(0, entries.Length).Select(i => Get(i)?.localizedTip ?? ""));
+        static internal string RemoveFilled(string text, IReadOnlySet<int> filled) => filled.Count == 0 ? text : string.Concat(text.Where((_, i) => !filled.Contains(i)));
+        static private HashSet<int> DecodeFill(string value) => value.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(v => int.TryParse(v, out var i) ? i : -1).Where(i => i >= 0).ToHashSet();
+        static private string EncodeFill(IEnumerable<int> filled) => string.Join(",", filled.Distinct().OrderBy(i => i));
+
+        public string LocalizedTitle => string.Concat(Enumerable.Range(0, entries.Length).Select(i => Get(i)?.VisibleTip ?? ""));
         public bool IsEmpty => LocalizedTitle.Length == 0;
 
-        public TitleTip? GetPrefix() => Get(0);
-        public TitleTip? GetInfix1() => Get(1);
-        public TitleTip? GetInfix2() => Get(2);
-        public TitleTip? GetSuffix() => Get(3);
         public TitleTip? Get(int index)
         {
             index = Math.Clamp(index, 0, entries.Length - 1);
             if (!DecodeTitlePart(entries[index].Value, out var ach, out var partType)) return null;
             var type = partType ?? SlotType(index);
-            return new(ach, Language.Translate(ach.GetPartTranslationKey(type)), type);
+            var tip = Language.Translate(ach.GetPartTranslationKey(type));
+            //言語の切り替えなどで文字数が変わった場合に備えて、範囲外の位置は無視する
+            var filled = DecodeFill(fillEntries[index].Value).Where(i => i < tip.Length).ToHashSet();
+            return new(ach, tip, type, filled);
         }
-        public string[] ToArray() => entries.Select(e => e.Value).ToArray();
 
         public IEnumerable<INebulaAchievement> Achievements => Enumerable.Range(0, entries.Length).Select(i => Get(i)?.achievement).Where(a => a != null)!;
 
-        /// <summary>のりを使って枠本来とは異なる種類のパーツを使っている枠の数</summary>
-        public int UsedGlues => Enumerable.Range(0, entries.Length).Count(i => Get(i) is { } tip && tip.partType != SlotType(i));
+        /// <summary>共有用のデータ。先頭に共有用の目印と翻訳済みの称号名、続いて使用している称号のID</summary>
+        public string[] ToSharedData() => [SharedCustomTitleMarker, LocalizedTitle, .. Achievements.Select(a => a.Id).Distinct()];
 
-        /// <param name="parts">各枠のパーツ(接頭、中間1、中間2、接尾の順)と、そのパーツとして使う種類</param>
-        public void Update(IReadOnlyList<(INebulaAchievement? achievement, TitlePartType partType)> parts)
+        /// <param name="parts">各枠のパーツ(接頭、中間1、中間2、接尾の順)と、そのパーツとして使う種類、のりで塗りつぶした文字の位置</param>
+        public void Update(IReadOnlyList<(INebulaAchievement? achievement, TitlePartType partType, IEnumerable<int> filled)> parts)
         {
             for (int i = 0; i < entries.Length; i++)
             {
-                var (ach, type) = i < parts.Count ? parts[i] : (null, SlotType(i));
+                var (ach, type, filled) = i < parts.Count ? parts[i] : (null, SlotType(i), []);
                 entries[i].Value = EncodeTitlePart(ach, type, SlotType(i));
+                fillEntries[i].Value = ach == null ? "" : EncodeFill(filled);
             }
         }
     }
+
+    /// <summary>共有されたカスタム称号であることを表す目印。称号IDとして使われない文字列にする。</summary>
+    internal const string SharedCustomTitleMarker = "$custom";
+    internal const int MaxSharedCustomTitleLength = 64;
 
     static private INebulaAchievement[] LastFirstClearedArchive = [];
     static private List<INebulaAchievement> ClearedAllOrderedArchive = [];
@@ -1110,6 +1176,7 @@ static public class NebulaAchievementManager
             string? reference = null;
             string? defaultSource = null;
             string? preAchievement = null;
+            Predicate<INebulaAchievement>? collectPredicate = null;
             int attention = 0;
             IEnumerable<ProgressRecord>? records = recordsList;
 
@@ -1210,6 +1277,10 @@ static public class NebulaAchievementManager
                     case string a when a.StartsWith("pre-"):
                         preAchievement = a.Substring(4);
                         break;
+                    case string a when a.StartsWith("collect-"):
+                        collectPredicate = CollectorAchievement.GetPredicate(a.Substring(8));
+                        if (collectPredicate == null) NebulaLogger.Instance.Error("The collect target \"" + a.Substring(8) + "\" was not found.");
+                        break;
                 }
             }
 
@@ -1249,6 +1320,8 @@ static public class NebulaAchievementManager
                 new DisplayProgressRecord(null, args[0], goal, "record." + args[0], defaultSource);
             else if (!records.IsEmpty())
                 new CompleteAchievement(null, records.ToArray(), secret, noHint, args[0], relatedRoles, types.ToArray(), rarity, attention, specifiedImage, preAchievement) { HasInfix = hasInfix, HasPrefix = hasPrefix, HasSuffix = hasPostfix, HasGlue = hasGlue };
+            else if (collectPredicate != null)
+                new CollectorAchievement(null, secret, noHint, args[0], goal, collectPredicate, relatedRoles, types.ToArray(), rarity, attention, specifiedImage, preAchievement) { HasInfix = hasInfix, HasPrefix = hasPrefix, HasSuffix = hasPostfix, HasGlue = hasGlue };
             else if (reference != null)
                 new SumUpReferenceAchievement(null, secret, args[0], reference, goal, relatedRoles, types.ToArray(), rarity, attention, specifiedImage, preAchievement) { HasInfix = hasInfix, HasPrefix = hasPrefix, HasSuffix = hasPostfix, HasGlue = hasGlue };
             else if (goal > 1)
@@ -1264,8 +1337,11 @@ static public class NebulaAchievementManager
         for(int i = 0;i < allAchievements.Count;i++)
         {
             allAchievements[i].NumId = i;
-            allAchievements[i].CheckClear();
+            if (!allAchievements[i].IsCollectorAchievement) allAchievements[i].CheckClear();
         }
+
+        //コレクター系の称号は、他の称号の判定が済んだ後で判定する
+        foreach (var achievement in allAchievements) if (achievement.IsCollectorAchievement) achievement.CheckClear();
 
         //進捗を記録する。 
         SendOnlineProgress(true).StartOnProcess();
@@ -1303,6 +1379,7 @@ static public class NebulaAchievementManager
         digits = Math.Max(0, digits);
         float scale = MathF.Pow(10f, digits);
         string format = "N" + digits;
+        decimalStatsDigits[id] = digits;
         var entry = RegisterStats(id, category, relatedAssignable, displayName, innerPriority, val => (val / scale).ToString(format), allowMinus, annotation, unit);
         return new DecimalGameStatsEntryImpl(entry, digits);
     }
@@ -1373,15 +1450,24 @@ static public class NebulaAchievementManager
             if(token.Achievement is AbstractAchievement ach && result.All(a => a.achievement != ach)) result.Add(new(ach, state));
         }
 
-        //他レコードの更新によるクリア
-        foreach(var achievement in AllAchievements)
+        void CheckAchievements(bool collector)
         {
-            var state = achievement.CheckClear();
-            if (state == AbstractAchievement.ClearDisplayState.None) continue;
-            mayChangeClearState |= state == AbstractAchievement.ClearDisplayState.FirstClear;
+            foreach (var achievement in AllAchievements)
+            {
+                if (achievement.IsCollectorAchievement != collector) continue;
 
-            result.Add(new(achievement, state));
+                var state = achievement.CheckClear();
+                if (state == AbstractAchievement.ClearDisplayState.None) continue;
+                mayChangeClearState |= state == AbstractAchievement.ClearDisplayState.FirstClear;
+
+                result.Add(new(achievement, state));
+            }
         }
+
+        //他レコードの更新によるクリア
+        //コレクター系の称号は、他の称号の判定が済んだ後で判定する
+        CheckAchievements(false);
+        CheckAchievements(true);
 
         result.Sort((val1, val2) => val1.clearState - val2.clearState);//昇順
 

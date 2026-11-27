@@ -80,6 +80,10 @@ public class VanillaAsset
     public record MapInfo(MapNames Name, Sprite MapIcon, Sprite MapImage, Sprite NameImage);
     public static MapInfo[] MapImages = null!;
     public static Sprite TitleBackgroundSprite = null!;
+    /// <summary>
+    /// タイトル画面のプレイボタンの複製です。非アクティブなので、複製して使うときはアクティブにしてください。
+    /// </summary>
+    public static PassiveButton TitleButtonPrefab = null!;
 
     static public Material GetMapMaterial()
     {
@@ -119,6 +123,18 @@ public class VanillaAsset
     {
         if (VanillaAsset.MapImages == null) VanillaAsset.MapImages = mainMenu.createGameScreen.mapPicker.AllMapIcons.ToArray().Select(m => new VanillaAsset.MapInfo(m.Name, m.MapIcon.MarkDontUnload(), m.MapImage.MarkDontUnload(), m.NameImage.MarkDontUnload())).ToArray();
         if (VanillaAsset.TitleBackgroundSprite == null) VanillaAsset.TitleBackgroundSprite = mainMenu.transform.GetChild(5).GetChild(1).GetChild(2).GetComponent<SpriteRenderer>().sprite.MarkDontUnload();
+        if (!VanillaAsset.TitleButtonPrefab)
+        {
+            //画面の端に合わせる配置や、画面の比率に合わせた伸縮は取り除く
+            var button = GameObject.Instantiate(mainMenu.playButton, null);
+            button.gameObject.SetActive(false);
+            button.gameObject.name = "TitleButtonPrefab";
+            foreach (var aspectPos in button.GetComponentsInChildren<AspectPosition>(true)) GameObject.DestroyImmediate(aspectPos);
+            foreach (var aspectScaled in button.GetComponentsInChildren<AspectScaledAsset>(true)) GameObject.DestroyImmediate(aspectScaled);
+            button.OnClick = new();
+            GameObject.DontDestroyOnLoad(button.gameObject);
+            VanillaAsset.TitleButtonPrefab = button;
+        }
     }
     static public IEnumerator CoLoadAssetOnTitle()
     {

@@ -57,3 +57,8 @@
 "achievement.oracle.challenge.title" : "Our Opinion"
 "achievement.oracle.challenge.goal" : "One or more impostors you divined are guessed by crewmates,<br>and win without exiling any crewmates except madmates."
 "achievement.oracle.challenge.splitted.0" : "Our "
+
+"achievement.oracle.common2.title" : "People Watching"
+"achievement.oracle.common2.goal" : "Divine players a total of 30 times."
+"achievement.oracle.common2.flavor" : ""The secret of divination is to look at people.<br>For it is in people's hearts that God dwells.""
+"achievement.oracle.common2.splitted.2" : "Watching"

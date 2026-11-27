@@ -51,10 +51,5 @@ static internal class PolusModification
 
         //崩壊したオブジェクトの前後関係を修正
         ship.FastRooms[SystemTypes.Electrical].transform.FindChild("fencebot").SetLocalZ(-1.0136f);
-
-        if (GeneralConfigurations.UseVoiceChatOption)
-        {
-            CameraVC.Activate((new(29.04f, -15.44f), 0), (new(15.54f, -15.44f), 1), (new(24.51f, -8.61f), 2), (new(17.09f, -20.39f), 3), (new(4.96f, -22.63f), 4), (new(11.41f, -8.31f), 5));
-        }
     }
 }

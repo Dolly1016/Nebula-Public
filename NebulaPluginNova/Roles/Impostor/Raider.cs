@@ -19,7 +19,7 @@ namespace Nebula.Roles.Impostor;
 [NebulaRPCHolder]
 public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedRole, IAssignableDocument
 {
-    private Raider() : base("raider", VColor.ImpostorColor, RoleCategory.ImpostorRole, Impostor.MyTeam, [ThrowCoolDownOption, AxeSizeOption, AxeSpeedOption,CanKillImpostorOption]) {
+    private Raider() : base("raider", VColor.ImpostorColor, RoleCategory.ImpostorRole, Impostor.MyTeam, [ThrowCoolDownOption, AxeSizeOption, AxeSpeedOption,CanKillInvisiblePlayerOption,CanKillImpostorOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny, ConfigurationTags.TagDifficult);
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Raider.png");
 
@@ -33,6 +33,7 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
     static private IRelativeCooldownConfiguration ThrowCoolDownOption = NebulaAPI.Configurations.KillConfiguration("options.role.raider.throwCoolDown", CoolDownType.Immediate, (10f, 60f, 2.5f), 20f, (-40f, 40f, 2.5f), -10f, (0.125f, 2f, 0.125f), 1f);
     static private FloatConfiguration AxeSizeOption = NebulaAPI.Configurations.Configuration("options.role.raider.axeSize", (0.25f, 4f, 0.25f), 1f, FloatConfigurationDecorator.Ratio);
     static private FloatConfiguration AxeSpeedOption = NebulaAPI.Configurations.Configuration("options.role.raider.axeSpeed", (0.5f, 4f, 0.25f), 1f, FloatConfigurationDecorator.Ratio);
+    static private BoolConfiguration CanKillInvisiblePlayerOption = NebulaAPI.Configurations.Configuration("options.role.raider.canKillInvisiblePlayer", false);
     static private BoolConfiguration CanKillImpostorOption = NebulaAPI.Configurations.Configuration("options.role.raider.canKillImpostor", false);
 
     public override Ability CreateAbility(GamePlayer player, int[] arguments) => new(player, arguments.GetAsBool(0));
@@ -68,6 +69,8 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
         private int killedNum = 0;
         private float thrownTime = 0f;
         private float thrownDistance = 0f;
+        //壁を無視して飛ぶエリアを斧が通過したかどうか
+        private bool passedIgnoreArea = false;
         AchievementToken<int>? acTokenChallenge = null;
         HashSet<IPlayerlike> tryKillSet = [];
         private bool fakeLocal = false;
@@ -95,6 +98,13 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
             }
 
             MyRenderer.transform.eulerAngles = new Vector3(0f, 0f, thrownAngle * 180f / Mathn.PI);
+        }
+
+        private bool CheckOverlapAxeIgnoreArea(Vector2 pos)
+        {
+            bool result = OverlapAxeIgnoreArea(pos);
+            passedIgnoreArea |= result;
+            return result;
         }
 
         void HudUpdate(GameHudUpdateEvent ev)
@@ -142,7 +152,7 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
                             if (!Helpers.AnyNonTriggersBetween(p.TruePosition,pos,out var diff,Constants.ShipAndAllObjectsMask) && diff.Magnitude < size * 0.4f)
                             {
                                 //不可視なプレイヤーは無視
-                                if (p.IsInvisible) continue;
+                                if (!CanKillInvisiblePlayerOption && p.IsInvisible) continue;
 
                                 if(GameOperatorManager.Instance?.Run(new PlayerInteractPlayerLocalEvent(Owner, p, new(IsKillInteraction: true))).IsCanceled ?? false) continue;
 
@@ -151,6 +161,7 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
                                     if(result == KillResult.Kill)
                                     {
                                         if (p.Logic.InMovingPlat && Helpers.CurrentMonth == 7) new StaticAchievementToken("tanabata");
+                                        if (passedIgnoreArea) new StaticAchievementToken("raider.common2");
 
                                         killedMask |= 1 << p.RealPlayer.PlayerId;
                                         killedNum++;
@@ -180,7 +191,7 @@ public class Raider : DefinedSingleAbilityRoleTemplate<Raider.Ability>, DefinedR
                     MyRenderer.gameObject.SetActive(false);
                     NebulaManager.Instance.StartCoroutine(ManagedEffects.CoDisappearEffect(MyRenderer.gameObject.layer, null, MyTransform.GetPositionFast(), 0.8f).WrapToIl2Cpp());
                 }
-                else if (!OverlapAxeIgnoreArea(MyTransform.GetPositionFast()) && NebulaPhysicsHelpers.AnyNonTriggersBetween(MyTransform.GetPositionFast(), vec, speed * 4f * ev.DeltaTime, Constants.ShipAndAllObjectsMask | (1 << LayerExpansion.GetHookshotWallLayer()), out d))
+                else if (!CheckOverlapAxeIgnoreArea(MyTransform.GetPositionFast()) && NebulaPhysicsHelpers.AnyNonTriggersBetween(MyTransform.GetPositionFast(), vec, speed * 4f * ev.DeltaTime, Constants.ShipAndAllObjectsMask | (1 << LayerExpansion.GetHookshotWallLayer()), out d))
                 {
                     state = 2;
                     MyRenderer.sprite = stuckAxeSprite.GetSprite();

@@ -37,5 +37,9 @@
 "achievement.doctor.challenge.flavor" : ""白い天井に、無機質な音" ―戦場の独白"
 "achievement.doctor.challenge.splitted.1" : "奴は"
 
+"achievement.doctor.common2.title" : "人をこそ診よ"
+"achievement.doctor.common2.goal" : "ポータブルバイタルを累計で100秒使用する。"
+"achievement.doctor.common2.flavor" : ""あのお医者さん、画面ばっか見て<br>話を聞いてンのか分からないわ" ―で、どこか悪いの？"
+
 "stats.doctor.portableVitalTime" : "ポータブルバイタルの使用時間"
 "stats.doctor.witness" : "死亡の瞬間を目撃した回数"

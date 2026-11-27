@@ -7,7 +7,9 @@ using Virial;
 using Virial.Assignable;
 using Virial.Components;
 using Virial.Configuration;
+using Virial.Events.Game;
 using Virial.Events.Game.Meeting;
+using Virial.Events.Player;
 using Virial.Game;
 using Virial.Helpers;
 using static UnityEngine.ProBuilder.AutoUnwrapSettings;
@@ -351,6 +353,32 @@ public class Destroyer : DefinedSingleAbilityRoleTemplate<Destroyer.Ability>, De
         }
 
         private GamePlayer? lastKilling = null;
+
+        //キルの瞬間に近くにいた目撃者が、会議までずっと近くに居続けたうえで自身の手によって死亡すれば称号獲得
+        [Local]
+        void OnKillPlayer(PlayerKillPlayerEvent ev)
+        {
+            if (ev.Murderer != MyPlayer || ev.Dead.PlayerState != PlayerState.Crushed) return;
+
+            var lifespan = new FunctionalLifespan(() => !this.IsDeadObject && !MeetingHud.Instance.AsBoolFast());
+            foreach (var witness in GamePlayer.AllPlayers.Where(p => !p.IsDead && !p.AmOwner && p.Position.Distance(MyPlayer.Position) < 2f))
+            {
+                bool finished = false;
+                GameOperatorManager.Instance?.Subscribe<GameUpdateEvent>(_ =>
+                {
+                    if (finished) return;
+                    if (witness.IsDead)
+                    {
+                        if (witness.MyKiller == MyPlayer) new StaticAchievementToken("destroyer.common3");
+                        finished = true;
+                    }
+                    else if (MyPlayer.IsDead || witness.Position.Distance(MyPlayer.Position) >= 4f)
+                    {
+                        finished = true;
+                    }
+                }, lifespan);
+            }
+        }
 
         [Local]
         void OnReported(ReportDeadBodyEvent ev)

@@ -20,6 +20,7 @@
 "options.role.raider.axeSize" : "斧头大小"
 "options.role.raider.axeSpeed" : "斧头飞行速度"
 "options.role.raider.canKillImpostor" : "可以击杀伪装者"
+"options.role.raider.canKillInvisiblePlayer" : "可以击杀隐身玩家"
 
 # Game
 

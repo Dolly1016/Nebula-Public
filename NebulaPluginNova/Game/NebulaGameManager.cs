@@ -45,7 +45,13 @@ public class RuntimeGameAsset
     public void SetHandle(AsyncOperationHandle<GameObject> handle) => this.handle = handle;
     public void Abandon()
     {
-        if (handle?.IsValid() ?? false) handle.Release();
+        try
+        {
+            if (handle?.IsValid() ?? false) handle.Release();
+        }catch(Exception e)
+        {
+            NebulaAPI.Logging.BepInExLogger().Error(e.ToString());
+        }
     }
 }
 
@@ -404,18 +410,7 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
         HudGrid = HudManager.Instance.gameObject.AddComponent<HudGrid>();
 
         ModSingleton<VanillaTranslationCache>.Instance = new();
-#if PC
         RuntimeAsset = new();
-
-        
-        var vcConnectButton = new Modules.ScriptComponents.ModAbilityButtonImpl(true).Register(this);
-        vcConnectButton.Visibility = (_) => ModSingleton<NoSVCRoom>.Instance != null && GameState == NebulaGameStates.NotStarted;
-        vcConnectButton.Availability = (_) =>true;
-        vcConnectButton.SetSprite(vcConnectSprite.GetSprite());
-        vcConnectButton.OnClick = (_) => ModSingleton<NoSVCRoom>.Instance.Rejoin();
-        vcConnectButton.SetLabel("rejoin");
-        
-#endif
 
 #if ANDROID
         var joystickSpaceL = HudContent.InstantiateContent("JoystickSpaceL");
@@ -807,7 +802,6 @@ internal class NebulaGameManager : AbstractModuleContainer, IRuntimePropertyHold
 #endif
                     if (asNormalGame)
                     {
-                        ModSingleton<NoSVCRoom>.Instance?.OnGameStart();
                         DestroyableSingleton<HudManager>.Instance.StartCoroutine(DestroyableSingleton<HudManager>.Instance.CoShowIntro());
                         DestroyableSingleton<HudManager>.Instance.HideGameLoader();
                     }

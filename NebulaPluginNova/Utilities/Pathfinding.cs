@@ -67,7 +67,9 @@ public static class NavVerticesHelpers
     /// <param name="detailRange"></param>
     /// <param name="positions"></param>
     /// <param name="nextNodes"></param>
-    public static void GetPathfindingNode(this NavVerticesStructure structure, Vector2 from, Vector2 to, float radius, float detailRange, float defaultNearbyRange, out Virial.Compat.Vector2[] positions, out int[][] nextNodes, out (int from, int to, NavPathStopCondition stopCond)[] conds)
+    /// <param name="ignoreObstaclesRangeAtStart">始点からこの距離未満にあるノードには、障害物を無視してつなぎます。nullなら常に障害物を考慮します。</param>
+    /// <param name="ignoreObstaclesRangeAtEnd">終点からこの距離未満にあるノードには、障害物を無視してつなぎます。nullなら常に障害物を考慮します。</param>
+    public static void GetPathfindingNode(this NavVerticesStructure structure, Vector2 from, Vector2 to, float radius, float detailRange, float defaultNearbyRange, out Virial.Compat.Vector2[] positions, out int[][] nextNodes, out (int from, int to, NavPathStopCondition stopCond)[] conds, int? ignoreObstaclesRangeAtStart = null, int? ignoreObstaclesRangeAtEnd = null)
     {
         List<(int from, int to, NavPathStopCondition stopCond)> condsList = [];
 
@@ -80,6 +82,14 @@ public static class NavVerticesHelpers
         //現在のゲーム空間で移動の可能性を調べます。
         bool CanMove(Vector2 from, float toX, float toY) => !Helpers.AnyCustomNonTriggersBetweenThick(from, new(toX, toY), radius, null, null, true);
 
+        //端点とノードをつなげるか調べます。障害物を無視する範囲内のノードは、障害物によらずつなぎます。
+        bool CanConnect(Vector2 point, float nodeX, float nodeY, float? customNearbyRange, int? ignoreObstaclesRange)
+        {
+            float distance = point.Distance(new(nodeX, nodeY));
+            if (ignoreObstaclesRange.HasValue && distance < ignoreObstaclesRange.Value) return true;
+            return distance < (customNearbyRange ?? defaultNearbyRange) && CanMove(point, nodeX, nodeY);
+        }
+
         foreach (var node in structure.MainNodes)
         {
             positionsList.Add(new(node.X, node.Y));
@@ -87,12 +97,12 @@ public static class NavVerticesHelpers
             mainNextNodes.Add(myNextNodes);
 
             //相対的な位置は後で正しいものに直す
-            if (from.Distance(new(node.X, node.Y)) < (node.CustomNearbyRange ?? defaultNearbyRange) && CanMove(from, node.X, node.Y))
+            if (CanConnect(from, node.X, node.Y, node.CustomNearbyRange, ignoreObstaclesRangeAtStart))
             {
                 myNextNodes.Add(-2);
                 fromNearby.Add(positionsList.Count - 1);
             }
-            if (to.Distance(new(node.X, node.Y)) < (node.CustomNearbyRange ?? defaultNearbyRange) && CanMove(to, node.X, node.Y))
+            if (CanConnect(to, node.X, node.Y, node.CustomNearbyRange, ignoreObstaclesRangeAtEnd))
             {
                 myNextNodes.Add(-1);
                 toNearby.Add(positionsList.Count - 1);
@@ -109,12 +119,12 @@ public static class NavVerticesHelpers
 
                 IEnumerable<int> myNextNodes = node.Nodes;
                 //相対的な位置は後で正しいものに直す
-                if (from.Distance(new(node.X, node.Y)) < (node.CustomNearbyRange ?? defaultNearbyRange) && CanMove(from, node.X, node.Y))
+                if (CanConnect(from, node.X, node.Y, node.CustomNearbyRange, ignoreObstaclesRangeAtStart))
                 {
                     myNextNodes = myNextNodes.Append(-2);
                     fromNearby.Add(positionsList.Count - 1);
                 }
-                if (to.Distance(new(node.X, node.Y)) < (node.CustomNearbyRange ?? defaultNearbyRange) && CanMove(to, node.X, node.Y))
+                if (CanConnect(to, node.X, node.Y, node.CustomNearbyRange, ignoreObstaclesRangeAtEnd))
                 {
                     myNextNodes = myNextNodes.Append(-1);
                     toNearby.Add(positionsList.Count - 1);
@@ -152,6 +162,9 @@ public static class NavVerticesHelpers
                         break;
                     case "FungleLaboratory":
                         if (GeneralConfigurations.FungleSimpleLaboratoryOption.Value) AddBidirectionalEdge();
+                        break;
+                    case "InvFungleLaboratory":
+                        if (!GeneralConfigurations.FungleSimpleLaboratoryOption.Value) AddBidirectionalEdge();
                         break;
                     case "FungleLowerLadderLeft":
                         AddSingleEdge();
@@ -214,6 +227,25 @@ public static class NavVerticesHelpers
     }
 
     private const float VHMovementInitCoeff = 0.8f;
+
+    //そのうち消える障害物(NonMap)を待つための設定
+    private const int NonMapWaitThresholdFrames = 2;
+    private const float NonMapCheckDistance = 0.4f;
+    private const float NonMapCheckRadius = 0.15f;
+
+    /// <summary>
+    /// 進行方向の目の前にある、NonMapの障害物を探します。
+    /// </summary>
+    private static Collider2D? FindNonMapObstacle(VVector2 from, VVector2 dir)
+    {
+        int num = Physics2D.CircleCastNonAlloc(from, NonMapCheckRadius, dir, PhysicsHelpers.castHits, NonMapCheckDistance, Constants.ShipAndAllObjectsMask);
+        for (int i = 0; i < num; i++)
+        {
+            var collider = PhysicsHelpers.castHits[i].collider;
+            if (!collider.isTrigger && collider.name == MapData.NonMapColliderName) return collider;
+        }
+        return null;
+    }
 
 
     internal static IEnumerator CoInteractManualDoor(IPlayerLogics player, ManualDoor door)
@@ -411,6 +443,24 @@ public static class NavVerticesHelpers
                 noMoveCount++;
             else
                 noMoveCount = 0;
+
+            //動けていないとき、目の前にそのうち消える障害物(NonMap)があれば、消えるまで待つ。
+            if (noMoveCount >= NonMapWaitThresholdFrames && diff.Magnitude > 0f)
+            {
+                var obstacle = FindNonMapObstacle(player.TruePosition, diff.Normalized);
+                if (obstacle != null)
+                {
+                    player.SetNormalizedVelocity(VVector2.Zero);
+                    player.Body.velocity = VVector2.Zero;
+                    while (obstacle.AsBoolFast() && player.IsActive && !player.Player.IsDead && !(interrupter?.Invoke() ?? false)) yield return null;
+
+                    noMoveCount = 0;
+                    VHMovementCoeff = VHMovementInitCoeff;
+                    lastPos = player.Position;
+                    continue; //中断・死亡はループの先頭で処理する。
+                }
+            }
+
             if (noMoveCount > 80)
             {
                 VVector2 snapTo = (currentGoal - (VVector2)player.GroundCollider.offset);
@@ -513,11 +563,16 @@ public static class NavVerticesHelpers
         }
     }
 
-    static public NavPath? CalcPath(Vector2 from, Vector2 to, float radius = 0.15f)
+    /// <summary>
+    /// 2点間の経路を求めます。
+    /// </summary>
+    /// <param name="ignoreObstaclesRangeAtStart">始点からこの距離未満のノードには、障害物を無視してつなぎます。nullなら常に障害物を考慮します。</param>
+    /// <param name="ignoreObstaclesRangeAtEnd">終点からこの距離未満のノードには、障害物を無視してつなぎます。nullなら常に障害物を考慮します。</param>
+    static public NavPath? CalcPath(Vector2 from, Vector2 to, float radius = 0.15f, int? ignoreObstaclesRangeAtStart = null, int? ignoreObstaclesRangeAtEnd = null)
     {
         if (Helpers.AnyCustomNonTriggersBetweenThick(from, to, radius, null, null, true))
         {
-            MapData.GetCurrentMapData().MapNavData.GetPathfindingNode(from, to, radius, 8f, 3.2f, out var positions, out var nextNodes, out var conds);
+            MapData.GetCurrentMapData().MapNavData.GetPathfindingNode(from, to, radius, 8f, 3.2f, out var positions, out var nextNodes, out var conds, ignoreObstaclesRangeAtStart, ignoreObstaclesRangeAtEnd);
             var indexPath = Pathfinding.FindPath(positions, nextNodes, positions.Length - 2, positions.Length - 1);
             if (indexPath.Length == 0) return null;
 

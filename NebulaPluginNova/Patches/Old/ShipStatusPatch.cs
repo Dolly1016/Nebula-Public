@@ -4,6 +4,7 @@ using Nebula.Map;
 using Nebula.Modifications.Map;
 using Nebula.Modules.CustomMap;
 using Virial;
+using Virial.Events.Game.Map;
 using Virial.Game;
 
 namespace Nebula.Patches.Old;
@@ -46,16 +47,19 @@ public class ShipStatusPatch
     static private void ModifyEarliest(ShipStatus ship)
     {
         ShipModification.PatchEarliestModification(cachedMapId, ship);
+        GameOperatorManager.Instance?.Run<ModifyMapEarliestEvent>(new());
     }
 
 
     static private void ModifyEarlier(ShipStatus ship)
     {
         ShipModification.PatchEarlierModification(cachedMapId, ship);
+        GameOperatorManager.Instance?.Run<ModifyMapEarlierEvent>(new());
     }
 
     static private void Modify(ShipStatus ship) { 
         ShipModification.PatchModification(cachedMapId, ship);
+        GameOperatorManager.Instance?.Run<ModifyMapEvent>(new());
         if (GeneralConfigurations.SilentVentOption)
         {
             //ベントを見えなくする

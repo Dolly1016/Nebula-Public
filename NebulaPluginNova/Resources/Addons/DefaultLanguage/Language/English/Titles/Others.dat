@@ -40,6 +40,26 @@
 "achievement.challenge.crewmate.title" : "The Ordinary"
 "achievement.challenge.crewmate.goal" : "Win by tasks without anyone dying."
 
+"achievement.manyNegativeEffects.title" : "Quartet of Suffering"
+"achievement.manyNegativeEffects.goal" : "Suffer 4 or more types of negative effects at the same time."
+
+"achievement.collector.challenge1.title" : "Path to the Pinnacle"
+"achievement.collector.challenge1.goal" : "Earn 20 different challenge titles in total."
+
+"achievement.collector.challenge2.title" : "The Real Deal"
+"achievement.collector.challenge2.goal" : "Earn 50 different challenge titles in total."
+
+"achievement.collector.challenge3.title" : "Quintessence"
+"achievement.collector.challenge3.goal" : "Earn 100 different challenge titles in total."
+
+"achievement.collector.silver.title" : "Silver Collector"
+"achievement.collector.silver.goal" : "Earn 100 different silver titles."
+"achievement.collector.silver.splitted.0" : "Silver "
+
+"achievement.collector.gold.title" : "Gold Collector"
+"achievement.collector.gold.goal" : "Earn 100 different gold titles."
+"achievement.collector.gold.splitted.0" : "Gold "
+
 "achievement.speedAttribute.title" : "Is It Good or Bad?"
 "achievement.speedAttribute.goal" : "Receive both movement speed increase and movement speed decrease effects at the same time."
 
@@ -129,3 +149,8 @@
 "achievement.costume.partyCamo.cond" : "Gather with 3 or more party members"
 "achievement.costume.partyCamo.flavor" : ""I thought we could get through any pinch." ―Probably written by a non-gal"
 "achievement.costume.partyCamo.splitted.1" : "☆ "
+
+"achievement.costume.boy.title" : "Boys, Be Ambitious"
+"achievement.costume.boy.goal" : "Dressed as a boy, win as Crewmate while letting<br>2 or more non-Crewmate players win additionally."
+"achievement.costume.boy.cond" : "At least one of the additional non-Crew winners must be an Impostor+You must be on the Crewmate team"
+"achievement.costume.boy.splitted.0" : "Boys, "

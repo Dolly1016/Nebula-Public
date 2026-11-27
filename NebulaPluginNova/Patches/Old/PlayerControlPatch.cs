@@ -346,20 +346,23 @@ class SetTaskPatch
     {
         if (!__instance.AmOwner) return true;
 
-        var info = __instance.GetModInfo();
-        int num = tasks.Count;
-
-        GameOperatorManager.Instance?.Update(); //イベントがあれば追加する(ゲーム開始の瞬間と被って、ホストでは通常のタイミングでの作用素の追加では間に合わない)
-        var result = GameOperatorManager.Instance!.Run(new PlayerTasksTrySetLocalEvent(info, tasks.ToArray()));
-        var tasksList = result.VanillaTasks.ToArray();
-        
-        if (num != tasksList.Length || result.ExtraQuota > 0) info?.Tasks.Unbox().ReplaceTasks(tasksList.Length, result.ExtraQuota);
-
-        __instance.StartCoroutine(CoSetTasks().WrapToIl2Cpp());
+        var tasksArray = tasks.ToArray().ToArray();
+        CoSetTasks().StartOnScene();
 
         IEnumerator CoSetTasks()
         {
             while (!AmongUsLLImpl.ShipStatusInstance.AsBoolFast()) yield return null;
+            while (NebulaGameManager.Instance?.GameState < NebulaGameStates.Initialized) yield return null;
+            //1フレーム追加で待つ
+            yield return null;
+
+            var info = __instance.GetModInfo();
+            int num = tasksArray.Length;
+
+            var result = GameOperatorManager.Instance!.Run(new PlayerTasksTrySetLocalEvent(info, tasksArray));
+            var tasksList = result.VanillaTasks.ToArray();
+
+            if (num != tasksList.Length || result.ExtraQuota > 0) info?.Tasks.Unbox().ReplaceTasks(tasksList.Length, result.ExtraQuota);
 
             HudManager.Instance.TaskStuff.SetActive(true);
 

@@ -49,6 +49,10 @@
 "achievement.doppelganger.challenge.splitted.0" : "Reliable "
 "achievement.doppelganger.challenge.splitted.2" : "Partner"
 
+"achievement.doppelganger.common2.title" : "Which One Is Real?"
+"achievement.doppelganger.common2.goal" : "Move a total of 200m by swapping positions with your phantom."
+"achievement.doppelganger.common2.flavor" : ""Over here!! Over here!!" ―Roman Giga"
+
 "stats.doppelganger.summon" : "Num of Summoning Doppelgangers"
 "stats.doppelganger.swapDistance" : "Total Distance Moved by Swapping"
 "stats.doppelganger.swap" : "Num of Swapping with Doppelgangers"

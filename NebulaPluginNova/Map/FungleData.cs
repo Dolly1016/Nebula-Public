@@ -18,7 +18,7 @@ public class FungleData : MapData
         //スプラッシュゾーン
         (new(-20.2f,-0.3f), 0x0F), (new(-19.8f,-2.1f), 0x0F), (new(-16.1f,-0.1f), 0x0F), (new(-15.6f,-1.8f), 0x0F),
         //キャンプファイア周辺
-        (new(-11.3f,2.0f), 0x3F), (new(-0.83f,2.4f), 0x3F), (new(-9.4f,0.2f), 0x3F), (new(-6.9f,0.2f), 0x3F),
+        (new(-11.3f,2.0f), 0x3F), (new(-0.83f,2.4f), 0x3F), (new(-9.4f,0.2f), 0x3F), (new(-6.9f,0.2f), 0x0F),
         //スプラッシュゾーン下
         (new(-17.3f,-4.5f), 0x0F),
         //キッチン
@@ -28,9 +28,9 @@ public class FungleData : MapData
         //ミーティング上
         (new(-2.8f,2.2f), 0x3F), (new(2.2f,1.0f), 0x3F),
         //ストレージ
-        (new(-0.6f,4.2f), 0x3F), (new(2.3f,6.2f), 0x3F), (new(3.3f,6.7f), 0x3F),
+        (new(-0.6f,4.2f), 0x3F), (new(2.3f,6.2f), 0x0F), (new(3.3f,6.7f), 0x3F),
         //ミーティング・ドーム
-        (new(-0.15f,-1.77f), 0xFF), (new(-4.65f,1.58f), 0xFF), (new(-4.8f,-1.44f), 0xFF),
+        (new(-0.15f,-1.77f), 0xFF), (new(-4.65f,1.58f), 0x3F), (new(-4.8f,-1.44f), 0xFF),
         //ラボ
         (new(-2.7f, -12.1f), 0xFF), (new(-7.3f, -9.1f), 0xFF), (new(-4.5f,-6.8f), 0xFF), (new(-3.3f,-8.9f), 0xFF), (new(-5.4f,-10.2f), 0xFF),
         //ジャングル(左)
@@ -38,7 +38,7 @@ public class FungleData : MapData
         //ジャングル(中)
         (new(11.6f,-14.3f), 0xCF), (new(10.78f, -15.96f), 0xCF),
         //ジャングル(上)
-        (new(2.7f,-6.0f), 0xFF),(new(12.1f,-7.3f), 0xCF),
+        (new(2.7f,-6.0f), 0xCF),(new(12.1f,-7.3f), 0xCF),
         //グリーンハウス・ジャングル
         (new(13.6f,-12.1f), 0xCF), (new(6.4f,-9.9f), 0xCF),
         //ジャングル(右)
@@ -48,7 +48,7 @@ public class FungleData : MapData
         //リアクター
         (new(21.1f,-6.7f), 0xCF),
         //高台
-        (new(15.9f,0.4f), 0xCF), (new(15.6f,4.3f), 0xCF), (new(19.2f,1.78f), 0xCF),
+        (new(15.9f,0.4f), 0xCF), (new(15.6f,4.3f), 0x0F), (new(19.2f,1.78f), 0xCF),
         //鉱山
         (new(12.5f,7.7f), 0xCF), (new(13.4f,9.7f), 0xCF),
         //ルックアウト
@@ -61,8 +61,17 @@ public class FungleData : MapData
         (new(3.8f,-12.5f), 0xC3),(new(7.08f,-15.3f), 0xC3),
         //Classic
         (new(0.35f, -10.8f), 0xCC), (new(12.65f, 4.00f), 0xCC),
+        //Midnight
+        (new(2.9f, -6.039f), 0x30), (new(-12.957f, 3.302f), 0x30), (new(-14.044f, -9.606f), 0x30),
+        (new(-7.94f, 9.36f), 0x30), (new(11.799f, -7.546f), 0x30), (new(5.655f, -11.515f), 0x30), (new(2.648f, -10.734f), 0x30),
+        //Poisoned
+        (new(-5.077f, -14.889f), 0xC0),
         ];
 
+    /// <summary>
+    /// MapAreaの代表点とその点を使用するマップバリエーション(inMapIdのビットフラグ)の組です。MapAreaEditorから参照されます。
+    /// </summary>
+    static internal IReadOnlyList<(VVector2 pos, int inMapFlag)> RawMapPositions => MapPositions;
     static private VVector2[] GetMapPos(int inMapId) => MapPositions.Where(entry => (entry.inMapFlag & (1 << inMapId)) != 0).Select(entry => entry.pos).ToArray();
     static private readonly VVector2[] combinedNonClassicMapPos = GetMapPos(0);
     static private readonly VVector2[] combinedClassicMapPos = GetMapPos(2);
@@ -203,15 +212,27 @@ public class FungleData : MapData
     protected override SystemTypes[] SabotageTypes => [SystemTypes.Reactor, SystemTypes.Comms];
     override public Vector2[][] RaiderIgnoreArea
     {
-        get => [
-            [new(26.9f, 10.9f),new(26.9f, 4.2f), new(15.9f,4.2f),new(15.9f, 10.9f)],//高台コミュ間
-            [new(19.0f, 0.0f),new(19.0f, -5.9f), new(15.1f,-5.9f),new(15.1f, 0.0f)],//高台下左
-            [new(11.9f, 0.0f),new(11.9f, -2.0f), new(11.1f, -2.0f),new(11.1f, 0.0f)],//高台下右
-            [new(11.9f, -5.0f),new(11.9f, -6.1f), new(10.5f, -6.1f),new(10.5f, -5.0f)],//高台下右ジャングル側
-            [new(4.9f, 2.1f),new(4.9f, 0.3f), new(3.2f,0.3f),new(3.2f, 2.1f)],//セキュ左下層側
-            [new(6.9f, 1.5f),new(6.9f, -1.2f), new(4.5f, -1.2f),new(4.5f, 1.5f)],//セキュ左上層側
-            [new(-19.5f, -7.35f),new(-24.5f, -7.1f),new(-24.5f, 1.48f),new(-20.5f, -4.0f)],//桟橋上側
-        ];
+        get {
+            var inMapId = NebulaAsset.GetInMapId(5);
+            if(inMapId >= 4)
+            {
+                return [
+                    [new(26.9f, 10.9f),new(26.9f, 4.2f), new(15.9f, 4.2f),new(15.9f, 10.9f)],//高台コミュ間
+                    [new(19.0f, 0.0f),new(19.0f, -5.9f), new(15.1f, -5.9f),new(15.1f, 0.0f)],//高台下左
+                    [new(11.9f, 0.0f),new(11.9f, -2.0f), new(11.1f, -2.0f),new(11.1f, 0.0f)],//高台下右
+                    [new(11.9f, -5.0f),new(11.9f, -6.1f), new(10.5f, -6.1f),new(10.5f, -5.0f)],//高台下右ジャングル側
+                ];
+            }
+            return [
+                [new(26.9f, 10.9f),new(26.9f, 4.2f), new(15.9f, 4.2f),new(15.9f, 10.9f)],//高台コミュ間
+                [new(19.0f, 0.0f),new(19.0f, -5.9f), new(15.1f, -5.9f),new(15.1f, 0.0f)],//高台下左
+                [new(11.9f, 0.0f),new(11.9f, -2.0f), new(11.1f, -2.0f),new(11.1f, 0.0f)],//高台下右
+                [new(11.9f, -5.0f),new(11.9f, -6.1f), new(10.5f, -6.1f),new(10.5f, -5.0f)],//高台下右ジャングル側
+                [new(4.9f, 2.1f),new(4.9f, 0.3f), new(3.2f, 0.3f),new(3.2f, 2.1f)],//セキュ左下層側
+                [new(6.9f, 1.5f),new(6.9f, -1.2f), new(4.5f, -1.2f),new(4.5f, 1.5f)],//セキュ左上層側
+                [new(-19.5f, -7.35f),new(-24.5f, -7.1f),new(-24.5f, 1.48f),new(-20.5f, -4.0f)],//桟橋上側
+            ];
+        }
     }
 
 
@@ -262,29 +283,19 @@ public class FungleData : MapData
         return WindType.NoWind;
     }
 
-    NavVerticesStructure? normalNav = null, modifiedNav = null;
+    string[] pathFile = ["fungle", "fungleModified", "fungleMidnight", "funglePoisoned"];
+    NavVerticesStructure?[] navs = new NavVerticesStructure?[4];
     public override NavVerticesStructure MapNavData
     {
         get
         {
-            if (GeneralConfigurations.FungleForClassicGameOption.Value)
+            var inMapId = NebulaAsset.GetInMapId(5) / 2;
+            if (navs[inMapId] == null)
             {
-                if (modifiedNav == null)
-                {
-                    using var stream = StreamHelper.OpenFromResource("Nebula.Resources.Pathfinding.fungleModified.json");
-                    if (stream != null) modifiedNav = JsonStructure.Deserialize<NavVerticesStructure>(stream);
-                }
-                return modifiedNav!;
+                using var stream = StreamHelper.OpenFromResource($"Nebula.Resources.Pathfinding.{pathFile[inMapId]}.json");
+                if (stream != null) navs[inMapId] = JsonStructure.Deserialize<NavVerticesStructure>(stream);
             }
-            else
-            {
-                if (normalNav == null)
-                {
-                    using var stream = StreamHelper.OpenFromResource("Nebula.Resources.Pathfinding.fungle.json");
-                    if (stream != null) normalNav = JsonStructure.Deserialize<NavVerticesStructure>(stream);
-                }
-                return normalNav!;
-            }
+            return navs[inMapId]!;
         }
     }
 

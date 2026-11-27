@@ -14,6 +14,8 @@ public class PlayerTaskState : AbstractModule<GamePlayer>, PlayerTasks
     public int TotalTasks { get; private set; } = 0;
     public int TotalCompleted { get; private set; } = 0;
     public int Quota { get; private set; } = 0;
+    //パークなどでノルマが減算された量。ノルマが新たに決め直されると0に戻る。
+    public int QuotaReductionAmount { get; private set; } = 0;
     public bool IsCrewmateTask { get; private set; } = true;
 
     AchievementToken<bool>? acTokenGhostTask = null;
@@ -31,6 +33,13 @@ public class PlayerTaskState : AbstractModule<GamePlayer>, PlayerTasks
     public string ToString(bool canSee)
     {
         return canSee ? (TotalCompleted + "/" + Quota) : "?/?";
+    }
+
+    //ゲーム終了時の表示用。ノルマが減算されていれば、元のノルマと最終的なノルマを併記する。
+    public string ToResultString()
+    {
+        if (QuotaReductionAmount > 0) return TotalCompleted + "/<size=80%>" + (Quota + QuotaReductionAmount) + "→" + Quota + "</size>";
+        return TotalCompleted + "/" + Quota;
     }
     public static void GetTasks(out int shortTasks, out int longTasks, out int commonTasks)
     {
@@ -66,6 +75,7 @@ public class PlayerTaskState : AbstractModule<GamePlayer>, PlayerTasks
     public void WaiveAndBecomeToCrewmate()
     {
         Quota = 0;
+        QuotaReductionAmount = 0;
         IsCrewmateTask = true;
         RpcSyncTaskState.Invoke(this);
     }
@@ -93,13 +103,16 @@ public class PlayerTaskState : AbstractModule<GamePlayer>, PlayerTasks
         TotalTasks = tasks;
         TotalCompleted = 0;
         Quota = tasks + unacquired;
+        QuotaReductionAmount = 0;
         RpcSyncTaskState.Invoke(this);
     }
 
     //タスクノルマを削減します。
     public void QuotaReduction(int reduction)
     {
-        Quota = Math.Max(Quota - reduction, 0);
+        int actual = Math.Clamp(reduction, 0, Quota);
+        Quota -= actual;
+        QuotaReductionAmount += actual;
         RpcSyncTaskState.Invoke(this);
     }
 
@@ -124,6 +137,7 @@ public class PlayerTaskState : AbstractModule<GamePlayer>, PlayerTasks
         CurrentCompleted = 0;
         CurrentTasks = 0;
         Quota = 0;
+        QuotaReductionAmount = 0;
         RpcSyncTaskState.Invoke(this);
         RecomputeTasks(0, 0, 0);
     }
@@ -227,6 +241,7 @@ public class PlayerTaskState : AbstractModule<GamePlayer>, PlayerTasks
         TotalTasks = quota;
         CurrentTasks = quota;
         Quota = quota;
+        QuotaReductionAmount = 0;
         IsCrewmateTask = asCrewmateTask;
         RpcSync();
     }
@@ -295,6 +310,7 @@ public class PlayerTaskState : AbstractModule<GamePlayer>, PlayerTasks
             writer.Write(message.TotalTasks);
             writer.Write(message.TotalCompleted);
             writer.Write(message.Quota);
+            writer.Write(message.QuotaReductionAmount);
             writer.Write(message.IsCrewmateTask);
         },
         (reader) =>
@@ -307,6 +323,7 @@ public class PlayerTaskState : AbstractModule<GamePlayer>, PlayerTasks
                 task.TotalTasks = reader.ReadInt32();
                 task.TotalCompleted = reader.ReadInt32();
                 task.Quota = reader.ReadInt32();
+                task.QuotaReductionAmount = reader.ReadInt32();
                 task.IsCrewmateTask = reader.ReadBoolean();
             }
             return task!;
@@ -346,6 +363,7 @@ public class PlayerTaskState : AbstractModule<GamePlayer>, PlayerTasks
                         break;
                     case TaskUpdateMessage.WaiveTasks:
                         task.Quota = 0;
+                        task.QuotaReductionAmount = 0;
                         break;
                     case TaskUpdateMessage.GainTotalCompleted:
                         task.TotalCompleted++;

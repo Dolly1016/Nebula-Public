@@ -45,7 +45,7 @@
 "perk.decelTrap.detail" : "Place an deceleration trap. <br>The placed traps will be activated after the meeting. "
 
 "perk.taskReduction.name" : "Recalculation"
-"perk.taskReduction.detail" : "Reduces task quota by 1.<br>For players without crewmate tasks, nothing happens."
+"perk.taskReduction.detail" : "Reduces task quota by 1.<br>For players without normal crewmate tasks, nothing happens."
 
 "perk.ventRelocate.name" : "Transforming Spaceship"
 "perk.ventRelocate.detail" : "You can relocate the vent only once. <br>You can drag the vent for %D% seconds after grabbing it. <br>If you use it again during the effect time, you will let go of the vent and the effect will end."

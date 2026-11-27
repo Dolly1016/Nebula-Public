@@ -18,22 +18,11 @@ class SurveillanceMinigameBeginPatch
         }
 
         NebulaGameManager.Instance?.ConsoleRestriction?.ShowTimerIfNecessary(ConsoleRestriction.ConsoleType.Camera, __instance.transform, new Vector3(3.4f, 2f, -50f));
-
-        if (ModSingleton<CameraVC>.Instance != null) CameraVC.RpcUseCamera.Invoke((GamePlayer.LocalPlayer!, 0));
     }
 
     public static void Postfix(SurveillanceMinigame __instance)
     {
         __instance.gameObject.GetComponentsInChildren<IgnoreShadowCamera>().Do(isc => isc.ShowNameText = false);
-    }
-}
-
-[HarmonyPatch(typeof(SurveillanceMinigame), nameof(SurveillanceMinigame.Close))]
-class SurveillanceMinigameClosePatch
-{
-    public static void Postfix(SurveillanceMinigame __instance)
-    {
-        if (ModSingleton<CameraVC>.Instance != null) CameraVC.RpcUseCamera.Invoke((GamePlayer.LocalPlayer!, -1));
     }
 }
 
@@ -109,15 +98,6 @@ class PlanetSurveillanceMinigameBeginPatch
 }
 
 
-[HarmonyPatch(typeof(PlanetSurveillanceMinigame), nameof(PlanetSurveillanceMinigame.Close))]
-class PlanetSurveillanceMinigameClosePatch
-{
-    public static void Postfix(PlanetSurveillanceMinigame __instance)
-    {
-        if (ModSingleton<CameraVC>.Instance != null) CameraVC.RpcUseCamera.Invoke((GamePlayer.LocalPlayer!, -1));
-    }
-}
-
 [HarmonyPatch(typeof(PlanetSurveillanceMinigame), nameof(PlanetSurveillanceMinigame.Update))]
 class PlanetSurveillanceMinigameUpdatePatch
 {
@@ -151,11 +131,6 @@ class PlanetSurveillanceMinigameNextCameraPatch
         __instance.LocationName.text = ((survCamera.NewName > StringNames.None) ? VanillaTranslationCache.GetString(survCamera.NewName) : survCamera.CamName);
         
         return false;
-    }
-
-    public static void Postfix(PlanetSurveillanceMinigame __instance)
-    {
-        if (ModSingleton<CameraVC>.Instance != null) CameraVC.RpcUseCamera.Invoke((GamePlayer.LocalPlayer!, __instance.currentCamera));
     }
 }
 

@@ -38,6 +38,8 @@ public class NebulaGameEnd
     static public readonly GameEnd VanityWin = new(37, "vanity", Roles.Neutral.Vanity.MyRole.Color, 18);
     static public readonly GameEnd PlagueWin = new(38, "plague", Roles.Neutral.Plague.MyRole.Color, 31);
     static public readonly GameEnd HavocWin = new(39, "havoc", Roles.Neutral.Havoc.MyRole.Color, 18);
+    static public readonly GameEnd SuperstarWin = new(40, "superstar", Roles.Neutral.Superstar.MyRole.Color, 32);
+    static public readonly GameEnd NemesisWin = new(41, "nemesis", Roles.Neutral.Nemesis.MyRole.Color, 32);
     static public readonly GameEnd GameEnd = new(62, "gameEnd", VColor.CrewmateColor, 128) { AlternativeClip = () => NebulaAsset.GetAudioClip(NebulaAudioClip.AeroGuesserGameEnd)};
     static public readonly GameEnd NoGame = new(63, "nogame", InvalidColor, 128) { AllowWin = false };
 
@@ -86,7 +88,9 @@ public class NebulaGameEnd
         RegisterWinCondTip(VanityWin, () => (Roles.Neutral.Vanity.MyRole as ISpawnable).CanSpawnInCurrentGame && Roles.Neutral.Vanity.IndependentTeamOption, "vanity.extra.crewOnly", text => { if (!Roles.Neutral.Vanity.CanExtraWinEvenIfVanityDied) text += "<br>" + Language.Translate("document.tip.winCond.vanity.extra.surviveCond"); return text; });
         RegisterWinCondTip(VanityWin, () => (Roles.Neutral.Vanity.MyRole as ISpawnable).CanSpawnInCurrentGame && !Roles.Neutral.Vanity.IndependentTeamOption, "vanity.extra", text => { if (!Roles.Neutral.Vanity.CanExtraWinEvenIfVanityDied) text += "<br>" + Language.Translate("document.tip.winCond.vanity.extra.surviveCond"); return text; });
         RegisterWinCondTip(PlagueWin, () => (Roles.Neutral.Plague.MyRole as ISpawnable).CanSpawnInCurrentGame, "plague");
-        RegisterWinCondTip(PlagueWin, () => (Roles.Neutral.Havoc.MyRole as ISpawnable).CanSpawnInCurrentGame, "havoc");
+        RegisterWinCondTip(HavocWin, () => (Roles.Neutral.Havoc.MyRole as ISpawnable).CanSpawnInCurrentGame, "havoc");
+        RegisterWinCondTip(SuperstarWin, () => GeneralConfigurations.NeutralSpawnable && (Roles.Neutral.Superstar.MyRole as ISpawnable).CanSpawnInCurrentGame, "superstar");
+        RegisterWinCondTip(NemesisWin, () => GeneralConfigurations.NeutralSpawnable && (Roles.Neutral.Nemesis.MyRole as ISpawnable).CanSpawnInCurrentGame, "nemesis", text => text.Replace("%NUM%", Roles.Neutral.Nemesis.NumOfGuessToWinOption.GetValue().ToString()));
     }
 
     private static void RegisterWinCondTip(GameEnd gameEnd, Func<bool> predicate, string name, Func<string,string>? decorator = null)

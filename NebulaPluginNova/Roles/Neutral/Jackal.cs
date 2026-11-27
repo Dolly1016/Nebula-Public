@@ -11,6 +11,7 @@ using Virial.Components;
 using Virial.Configuration;
 using Virial.DI;
 using Virial.Events.Game;
+using Virial.Events.Game.Meeting;
 using Virial.Events.Player;
 using Virial.Events.Role;
 using Virial.Game;
@@ -368,6 +369,17 @@ public class Jackal : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignable
 
         bool RuntimeRole.HasImpostorVision => true;
         bool RuntimeRole.IgnoreBlackout => true;
+
+        [Local]
+        void OnMeetingPreEnd(MeetingPreEndEvent ev)
+        {
+            if (MyPlayer.IsDead || !ev.Exiled.IsEmpty()) return;
+
+            int maxVotes = MeetingHudExtension.GetMaxLastVoteCount();
+            int myVotes = MeetingHudExtension.GetLastVoteCount(MyPlayer.PlayerId);
+            if (myVotes < 2 || maxVotes != myVotes) return;
+            if (GamePlayer.AllPlayers.Any(p => p.IsImpostor && MeetingHudExtension.GetLastVoteCount(p) == maxVotes)) new StaticAchievementToken("jackal.common2");
+        }
 
         [Local]
         void OnGameEnd(GameEndEvent ev)

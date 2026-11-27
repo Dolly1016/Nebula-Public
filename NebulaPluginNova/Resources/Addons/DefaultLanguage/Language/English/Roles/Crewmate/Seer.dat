@@ -33,6 +33,9 @@
 "achievement.seer.another1.title" : "Seer of the World"
 "achievement.seer.another1.goal" : "Become the first victim."
 
+"achievement.seer.common2.title" : "Seer of the Moment"
+"achievement.seer.common2.goal" : "See flashes a total of 100 times."
+
 "achievement.seer.challenge2.title" : "Seer of the Truth"
 "achievement.seer.challenge2.goal" : "Vote for non-crewmate team in all votes."
 "achievement.seer.challenge2.cond" : "Cannot clear if you skip voting or vote blank+Number of votes: 3 or more"

@@ -37,6 +37,12 @@
 "achievement.nighty.challenge.title" : "千一夜のおやすみを"
 "achievement.nighty.challenge.goal" : "自身が仕掛けたおやすみボムが8回以上発動し、8種類以上の死因でプレイヤーが死亡し、<br>味方が全員生存したままインポスター勝利する。"
 "achievement.nighty.challenge.cond" : "インポスター: 2人以上"
+"achievement.nighty.challenge.splitted.0" : "千一夜"
+
+"achievement.nighty.common2.title" : "ぐんない！"
+"achievement.nighty.common2.goal" : "通算で50回おやすみボムを発動させる。"
+"achievement.nighty.common2.flavor" : ""ずーっと、ね" ―誰かの記憶の中で"
+"achievement.nighty.common2.splitted.0" : "ぐんない"
 
 "stats.nighty.bombPlaced" : "おやすみボムの設置回数"
 "stats.nighty.bombFired" : "おやすみボムの発動回数"

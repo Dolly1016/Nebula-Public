@@ -104,7 +104,11 @@ public static class MapBehaviourExtension
         Vector3 scale = new(1f, 1f, 1f);
         if (localPlayer.CountAttribute(PlayerAttributes.FlipX) % 2 == 1) scale.x *= -1f;
         if (localPlayer.CountAttribute(PlayerAttributes.FlipY) % 2 == 1) scale.y *= -1f;
-        if (localPlayer.CountAttribute(PlayerAttributes.FlipXY) % 2 == 1) scale *= -1f;
+        if (localPlayer.CountAttribute(PlayerAttributes.FlipXY) % 2 == 1)
+        {
+            scale.x *= -1f;
+            scale.y *= -1f;
+        }
 
         return scale;
     }

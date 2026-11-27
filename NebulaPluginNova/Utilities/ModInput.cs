@@ -179,10 +179,12 @@ public class NebulaInput
         modInput[Virial.Compat.VirtualKeyInput.AidAction] = new(GetModKeyCodeGetter("aidAction", KeyCode.LeftShift));
         modInput[Virial.Compat.VirtualKeyInput.PerkAction1] = new(GetModKeyCodeGetter("perkAction1", KeyCode.Alpha1));
         modInput[Virial.Compat.VirtualKeyInput.PerkAction2] = new(GetModKeyCodeGetter("perkAction2", KeyCode.Alpha2));
+        modInput[Virial.Compat.VirtualKeyInput.PerkAction3] = new(GetModKeyCodeGetter("perkAction3", KeyCode.Alpha3));
+        modInput[Virial.Compat.VirtualKeyInput.PerkAction4] = new(GetModKeyCodeGetter("perkAction4", KeyCode.Alpha4));
+        modInput[Virial.Compat.VirtualKeyInput.PerkAction5] = new(GetModKeyCodeGetter("perkAction5", KeyCode.Alpha5));
+        modInput[Virial.Compat.VirtualKeyInput.PerkAction6] = new(GetModKeyCodeGetter("perkAction6", KeyCode.Alpha6));
         modInput[Virial.Compat.VirtualKeyInput.Command] = new(GetModKeyCodeGetter("command", KeyCode.LeftControl));
         modInput[Virial.Compat.VirtualKeyInput.Screenshot] = new(GetModKeyCodeGetter("screenshot", KeyCode.P));
-        modInput[Virial.Compat.VirtualKeyInput.Mute] = new(GetModKeyCodeGetter("mute", KeyCode.M));
-        modInput[Virial.Compat.VirtualKeyInput.VCRadio] = new(GetModKeyCodeGetter("radio", KeyCode.N));
         modInput[Virial.Compat.VirtualKeyInput.Help] = new(GetModKeyCodeGetter("help", KeyCode.H));
         modInput[Virial.Compat.VirtualKeyInput.Spectator] = new(GetModKeyCodeGetter("spectator", KeyCode.C));
         modInput[Virial.Compat.VirtualKeyInput.SpectatorRight] = new(GetModKeyCodeGetter("spectatorRight", KeyCode.Period));

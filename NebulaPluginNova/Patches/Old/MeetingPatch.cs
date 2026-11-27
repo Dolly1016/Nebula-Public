@@ -184,6 +184,9 @@ public static class MeetingModRpc
 
         var readonlyStates = finalStates.ToArray();
 
+        //入れ替え後の得票数をキャッシュする (投票開示のイベントより先に用意しておく)
+        MeetingHudExtension.LastVoteCountMap = finalStates.GroupBy(s => s.VotedForId).ToDictionary(g => g.Key, g => g.Count());
+
         var localPlayerId = AmongUsLLImpl.LocalPlayer.PlayerId;
         var votedLocal = NebulaGameManager.Instance!.GetPlayer(((VoterState?)finalStates.FirstOrDefault(s => s.VoterId == localPlayerId))?.VotedForId ?? 255);
         var votedLocalOriginal = NebulaGameManager.Instance!.GetPlayer(((VoterState?)firstStates.FirstOrDefault(s => s.VoterId == localPlayerId))?.VotedForId ?? 255);
@@ -326,6 +329,16 @@ class MeetingCalledAnimationPatch
         {
             bool isEmergency = __instance.Stinger == AmongUsLLImpl.ShipStatusInstance.EmergencyOverlay.Stinger;
             __instance.Stinger = (isEmergency ? VanillaAsset.MapAsset[0].EmergencyOverlay : VanillaAsset.MapAsset[0].ReportOverlay).Stinger;
+        }
+
+        //通報者の身体を隠す。身体(killstabplayerstill)の子にある手とボタンは残すため、身体のレンダラだけを無効にする。
+        if (MeetingHudExtension.HideReporterBodyOnNextCutIn)
+        {
+            MeetingHudExtension.HideReporterBodyOnNextCutIn = false;
+            foreach (var renderer in __instance.GetComponentsInChildren<SpriteRenderer>(true))
+            {
+                if (renderer.gameObject.name.StartsWith("killstabplayerstill")) renderer.enabled = false;
+            }
         }
     }
 }
@@ -714,61 +727,6 @@ class VoteMaskPatch
     }
 }
 
-[HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.PopulateButtons))]
-class VoteAreaVCPatch
-{
-    private static SpriteLoader VCFrameSprite = SpriteLoader.FromResource("Nebula.Resources.MeetingVCFrame.png", 119f);
-    public static void Postfix(MeetingHud __instance)
-    {
-        try
-        {
-
-            if (GeneralConfigurations.UseVoiceChatOption)
-            {
-                foreach (var pva in __instance.playerStates)
-                {
-                    var frame = UnityHelper.CreateObject<SpriteRenderer>("VCFrame", pva.transform, new Vector3(0, 0, -0.5f));
-                    frame.sprite = VCFrameSprite.GetSprite();
-                    frame.color = Color.clear;
-                    var col = DynamicPalette.PlayerColors[pva.PlayerId.Value];
-                    if (Mathn.Max((int)col.R, (int)col.G, (int)col.B) < 100) col = VColor.Lerp(col, VColor.White, 0.4f);
-
-                    if (ModSingleton<NoSVCRoom>.Instance != null)
-                    {
-                        float alpha = 0f;
-
-                        var script = frame.gameObject.AddComponent<ScriptBehaviour>();
-
-                        bool isLocal = GamePlayer.LocalPlayer?.PlayerId == pva.PlayerId.Value;
-                        script.UpdateHandler += () =>
-                        {
-                            float level = 0f;
-                            if (ModSingleton<NoSVCRoom>.Instance?.TryGetPlayer(pva.PlayerId.Value, out var vcPlayer) ?? false)
-                            {
-                                level = vcPlayer.Level;
-                            }
-                            else if (isLocal)
-                            {
-                                level = ModSingleton<NoSVCRoom>.Instance?.LocalMicLevel ?? 0f;
-                            }
-
-                            if (level > 0.12f)
-                                alpha = Mathn.Clamp(alpha + Time.deltaTime * 8f, 0f, 1f);
-                            else
-                                alpha = Mathn.Clamp(alpha - Time.deltaTime * 8f, 0f, 1f);
-                            col.A = alpha;
-                            frame.color = col.ToUnityColor();
-                        };
-
-                    }
-                }
-            }
-        }
-        catch { }
-    }
-}
-
-
 [HarmonyPatch(typeof(PlayerVoteArea), nameof(PlayerVoteArea.Start))]
 class VoteAreaPatch
 {
@@ -1085,7 +1043,7 @@ class VoteSpreaderUpdatePatch
         for (int i = 0; i < num; i++) {
             var renderer = __instance.Votes[i];
             if (!renderer || !renderer.enabled) continue;
-            renderer.transform.SetLocalZ((float)(-(float)i) / 50f - 0.05f);
+            renderer.transform.SetLocalZ((float)(-(float)i) / 50f - 0.1f);
         }
     }
 }

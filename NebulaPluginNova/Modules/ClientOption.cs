@@ -418,16 +418,6 @@ public static class StartOptionMenuPatch
                     });
             }
 
-            if(ModSingleton<NoSVCRoom>.Instance != null)
-            {
-                AddBottomButton("vcSettings", () => NoSVCRoom.VCSettings.OpenSettingScreen(__instance));
-                AddBottomButton("vcRejoin", () => ModSingleton<NoSVCRoom>.Instance?.Rejoin());
-            }
-            if (!AmongUsClient.Instance.AsBoolFast() || AmongUsClient.Instance.GameState < InnerNet.InnerNetClient.GameStates.Joined)
-            {
-                AddBottomButton("vcServerSettings", () => NoSVCRoom.VCSettings.OpenServerSettingScreen(__instance));
-            }
-
             if (!AmongUsClient.Instance.AsBoolFast() || AmongUsClient.Instance.GameState != InnerNet.InnerNetClient.GameStates.Started)
             {
                 AddBottomButton("keyBindings", () =>
@@ -466,7 +456,7 @@ public static class StartOptionMenuPatch
                 currentAssignment = assignment;
                 SetKeyBindingWidget();
             }, new(TextAttributeOld.NormalAttr) { Size = new Vector2(2.2f, 0.21f) })
-            { RawText = assignment.DisplayName + " : " + (currentAssignment == assignment ? Language.Translate("input.recording") : ButtonEffect.KeyCodeInfo.GetKeyDisplayName(assignment.KeyInput)), PostBuilder = (_, _, t) => text = t }, 2, -1, 0, 0.48f);
+            { RawText = assignment.DisplayName + " : " + (currentAssignment == assignment ? Language.Translate("input.recording") : ButtonEffect.KeyCodeInfo.GetKeyDisplayName(assignment.KeyInput)), PostBuilder = (_, _, t) => text = t, TextMargin = 0.14f }, 2, -1, 0, 0.48f * 0.8f);
             keyBindingScreen.SetWidget(keyBindingWidget);
         }
 

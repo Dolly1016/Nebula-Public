@@ -172,4 +172,21 @@ internal class AchievementManagerModule : AbstractModule<Virial.Game.Game>, IGam
             }
         }
     }
+
+    //ハットかバイザーに指定のタグを持つコスチュームを着ているか
+    static private bool HasCostumeTag(GamePlayer player, string tag) => MoreCosmic.GetTags(player.DefaultOutfit.outfit).Any(t => t == "hat." + tag || t == "visor." + tag);
+
+    void OnGameEnd(GameEndEvent ev)
+    {
+        var myPlayer = GamePlayer.LocalPlayer;
+        if (myPlayer == null || !ev.CheckWin(myPlayer)) return;
+
+        //コスチューム (ゲーム終了時に判定するもの)
+        if (HasCostumeTag(myPlayer, "boy") && ev.EndState.EndCondition == NebulaGameEnd.CrewmateWin && myPlayer.Role.Role.Team == Nebula.Roles.Crewmate.Crewmate.MyTeam)
+        {
+            //追加勝利した非クルーメイト
+            var extraWinners = NebulaGameManager.Instance!.AllPlayerInfo.Where(p => ev.CheckWin(p) && p.Role.Role.Team != Nebula.Roles.Crewmate.Crewmate.MyTeam).ToArray();
+            if (extraWinners.Length >= 2 && extraWinners.Any(p => p.IsImpostor)) new StaticAchievementToken("costume.boy");
+        }
+    }
 }

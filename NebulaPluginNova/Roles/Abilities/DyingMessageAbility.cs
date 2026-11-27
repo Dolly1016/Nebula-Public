@@ -67,9 +67,15 @@ public class DyingMessageCanvasRenderRequest : MonoBehaviour
     {
         this.brushRadius = brushRadius;
         myTexture = texture;
-        glMaterial = new(Shader.Find("Unlit/Color"));
+        //マテリアルはマネージド側でしか参照されないため、UnloadUnusedAssets(会議開始時など)で破棄されないようにする。破棄はOnDestroyで行う。
+        glMaterial = new Material(Shader.Find("Unlit/Color")).MarkDontUnload();
         //glMaterial.color = Color.red;
         ClearRenderTexture(myTexture, clearColor);
+    }
+
+    void OnDestroy()
+    {
+        if (glMaterial) GameObject.Destroy(glMaterial);
     }
     void OnPostRender()
     {
@@ -787,7 +793,7 @@ internal static class DyingMessages
     static public void GeneratePaintQuizDrawing((byte r, byte g, byte b, byte width, byte beginX, byte beginY, byte[] trajectory)[] encoded, Action<Texture2D> callback)
     {
         var request = Camera.main.gameObject.AddComponent<DyingMessageCanvasRenderRequest>();
-        var rt = new RenderTexture(PaintQuizTextureSize, PaintQuizTextureSize, 32, RenderTextureFormat.ARGB32);
+        var rt = new RenderTexture(PaintQuizTextureSize, PaintQuizTextureSize, 32, RenderTextureFormat.ARGB32).MarkDontUnload();
         request.SetUp(rt, DyingMessageCanvasRenderRequest.DefaultBrushRadius, new(200, 200, 200));
 
         int num = 0;
@@ -806,8 +812,10 @@ internal static class DyingMessages
             RenderTexture.active = rt;
             texture2D.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
             texture2D.Apply();
+            RenderTexture.active = null;
             callback.Invoke(texture2D);
             GameObject.Destroy(rt);
+            GameObject.Destroy(request);
         }
         request.StartCoroutine(CoWaitDrawing().WrapToIl2Cpp());
     }
@@ -815,7 +823,7 @@ internal static class DyingMessages
     static private void GenerateDyingMessage((byte beginX, byte beginY, byte[] trajectory)[] encoded, Action<Texture2D> callback)
     {
         var request = Camera.main.gameObject.AddComponent<DyingMessageCanvasRenderRequest>();
-        var rt = new RenderTexture(TextureSize, TextureSize, 32, RenderTextureFormat.ARGB32);
+        var rt = new RenderTexture(TextureSize, TextureSize, 32, RenderTextureFormat.ARGB32).MarkDontUnload();
         request.SetUp(rt, DyingMessageCanvasRenderRequest.DefaultBrushRadius, VColor.Clear);
 
         foreach (var entry in encoded) DecodeTrajectory(DyingMessageCanvas.DyingMessageSerializeScale, entry.beginX, entry.beginY, entry.trajectory, DyingMessageCanvas.DyingMessageMinDistance, request.AddPoint, request.AddLine);
@@ -827,9 +835,11 @@ internal static class DyingMessages
             RenderTexture.active = rt;
             texture2D.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
             texture2D.Apply();
+            RenderTexture.active = null;
             callback.Invoke(texture2D);
 
             GameObject.Destroy(rt);
+            GameObject.Destroy(request);
         }
         request.StartCoroutine(CoWaitDrawing().WrapToIl2Cpp());
         

@@ -24,6 +24,7 @@
 "location.skeld.commsAccess" : "通信室上通路"
 "location.skeld.rightAccess" : "右通路"
 "location.skeld.weaponsAccess" : "ウェポン左通路"
+"location.skeld.hallway" : "通路"
 
 # MIRA HQ
 
@@ -42,6 +43,7 @@
 "location.mira.rendezvous" : "三叉路"
 "location.mira.storage" : "保管庫"
 "location.mira.launchpad" : "発射台"
+"location.mira.hallway" : "通路"
 
 # Polus
 
@@ -80,6 +82,7 @@
 "location.polus.reactorRight.short" : "右リアクター"
 "location.polus.officeBuilding" : "オフィス建屋内"
 "location.polus.outside" : "屋外"
+"location.polus.hallway" : "通路"
 
 # The Airship
 

@@ -13,7 +13,7 @@ public class PolusData : MapData
         //エレクトリカル
         new(7.5f, -9.7f), new(3.1f, -11.7f), new(5.4f, -11.5f), new(9.6f, -12.1f),
         //O2
-        new(4.7f, -19f), new(2.4f, -17f), new(3.1f, -21.7f), new(1.9f, -19.4f), new(2.4f, -23.6f), new(6.3f, -21.3f),new(0.84f, -16.6f),
+        new(4.7f, -19f), new(2.4f, -17f), new(3.1f, -21.7f), new(2.4f, -23.6f), new(6.3f, -21.3f),new(0.84f, -16.6f),
         //ボイラー
         new(3.1f, -24.8f),
         //Elec,O2,Comm周辺外
@@ -49,7 +49,9 @@ public class PolusData : MapData
         //右リアクター
         new(24.2f, -4.5f),new(23.7712f, -2.8594f),new(24.5666f, -3.3163f),
         //ストレージ・ラボ下・オフィス右
-        new(24f, -14.6f), new(26f, -12.2f), new(29.8f, -15.7f)
+        new(24f, -14.6f), new(26f, -12.2f), new(29.8f, -15.7f),
+        //追加分
+        new(1.542f, -18.956f), new(1.224f, -20.328f), new(12.689f, -19.244f), new(5.21f, -16.021f), new(7.463f, -12.219f),
     ];
 
     static private (AdditionalRoomArea area, string key, bool detailRoom)[] additionalRooms = [

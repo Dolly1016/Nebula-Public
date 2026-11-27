@@ -20,6 +20,7 @@
 "options.role.raider.axeSize" : "斧の当たり判定"
 "options.role.raider.axeSpeed" : "斧の投擲速度"
 "options.role.raider.canKillImpostor" : "フレンドリーファイア"
+"options.role.raider.canKillInvisiblePlayer" : "透明なプレイヤーをキル可能"
 
 # Game
 
@@ -55,3 +56,6 @@
 "achievement.raider.challenge.flavor" : ""宇宙船はゴミ処理場ではないとあれほど言っただろう！" ―出典不明"
 "achievement.raider.challenge.splitted.0" : "宇宙一の"
 "achievement.raider.challenge.splitted.2" : "あばれん坊"
+
+"achievement.raider.common2.title" : "逃げられるとでも思ったか"
+"achievement.raider.common2.goal" : "直接手が届かない場所にいるプレイヤーを、<br>斧を用いて通算で10回キルする。"

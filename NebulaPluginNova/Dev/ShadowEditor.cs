@@ -12,13 +12,11 @@ namespace Nebula.Dev;
 
 
 [NebulaPreprocess(PreprocessPhase.FixStructure)]
-internal class ShadowEditor : AbstractModule<Virial.Game.Game>, IGameOperator
+internal class ShadowEditor : DevTool
 {
-    static public void Preprocess(NebulaPreprocessor preprocess) => DIManager.Instance.RegisterModule(() => DebugTools.UseShadowEditor ? new ShadowEditor() : null);
+    static public void Preprocess(NebulaPreprocessor preprocess) => RegisterButton("Shadow Editor", () => new ShadowEditor());
     private ShadowEditor()
     {
-        ModSingleton<ShadowEditor>.Instance = this;
-        this.RegisterPermanently();
 
         lineRenderer = UnityHelper.SetUpLineRenderer("Line", null, Vector3.zero, LayerExpansion.GetDefaultLayer(), 0.05f);
         lineRenderer.SetColors(Color.white, Color.white);
@@ -29,6 +27,12 @@ internal class ShadowEditor : AbstractModule<Virial.Game.Game>, IGameOperator
     LineRenderer lineRenderer;
     EdgeCollider2D collider;
     List<Vector2> points = [];
+
+    protected override void OnClosed()
+    {
+        if (lineRenderer) GameObject.Destroy(lineRenderer.gameObject);
+        if (collider) GameObject.Destroy(collider.gameObject);
+    }
 
     void AddPoint(Vector2 pos)
     {

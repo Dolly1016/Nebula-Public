@@ -1,4 +1,6 @@
-﻿using Nebula.Roles.Scripts;
+﻿using Nebula.Configuration;
+using Nebula.Modules.GUIWidget;
+using Nebula.Roles.Scripts;
 using Virial;
 using Virial.Assignable;
 using Virial.Components;
@@ -17,7 +19,7 @@ public class Jester : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignable
 
     private Jester() : base("jester", MyTeam.Color, RoleCategory.NeutralRole, MyTeam, [VentConfiguration, CanDragDeadBodyOption, CanFixLightOption, CanFixCommsOption,
         TaskConfiguration.AsGroup(GroupConfigurationColor.ToDarkenColor(MyTeam.Color)),
-        new GroupConfiguration("options.role.jester.group.perk", [JesterPerkOption, NumOfPerksOption], GroupConfigurationColor.ToDarkenColor(MyTeam.Color))
+        new GroupConfiguration("options.role.jester.group.perk", [JesterPerkOption, NumOfPerksOption, RandomPerkOption, OnlyPlantPerksOption, ..PerkEntries.Select(e => e.Configuration)], GroupConfigurationColor.ToDarkenColor(MyTeam.Color))
         ]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagBeginner);
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Jester.png");
@@ -25,13 +27,69 @@ public class Jester : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignable
 
     Citation? HasCitation.Citation => Citations.TheOtherRoles;
 
-    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player);
+    RuntimeRole RuntimeAssignableGenerator<RuntimeRole>.CreateInstance(GamePlayer player, int[] arguments) => new Instance(player, arguments);
 
     static private BoolConfiguration CanDragDeadBodyOption = NebulaAPI.Configurations.Configuration("options.role.jester.canDragDeadBody", true);
     static private BoolConfiguration CanFixLightOption = NebulaAPI.Configurations.Configuration("options.role.jester.canFixLight", false);
     static private BoolConfiguration CanFixCommsOption = NebulaAPI.Configurations.Configuration("options.role.jester.canFixComms", false);
     static private BoolConfiguration JesterPerkOption = NebulaAPI.Configurations.Configuration("options.role.jester.perk", false);
     static private IntegerConfiguration NumOfPerksOption = NebulaAPI.Configurations.Configuration("options.role.jester.numOfPerks", (1, 4), 2, () => JesterPerkOption);
+    static private BoolConfiguration RandomPerkOption = NebulaAPI.Configurations.Configuration("options.role.jester.randomPerk", false, () => JesterPerkOption);
+    static private BoolConfiguration OnlyPlantPerksOption = NebulaAPI.Configurations.Configuration("options.role.jester.onlyPlantPerks", true, () => JesterPerkOption);
+
+    private class JesterPerkEntry
+    {
+        private readonly Func<PerkFunctionalDefinition> perkGetter;
+        private readonly Func<bool> gainableCondition;
+        private readonly IOrderedSharableVariable<bool> enabled;
+        public PerkFunctionalDefinition Perk => perkGetter.Invoke();
+        public IConfiguration Configuration { get; }
+
+        public bool IsEnabled => enabled.CurrentValue;
+
+        public bool IsGainableInCurrentSettings => gainableCondition.Invoke();
+
+        public bool IsSpawnableFromPlants => Perk.SpawnRate.Value > 0;
+
+        public bool IsAllowedByPlantSettings => !OnlyPlantPerksOption || IsSpawnableFromPlants;
+
+        public JesterPerkEntry(string id, Func<PerkFunctionalDefinition> perk, Func<bool>? gainableCondition = null)
+        {
+            string configId = "options.role.jester.perkEnabled." + id;
+            this.perkGetter = perk;
+            this.gainableCondition = gainableCondition ?? (() => true);
+            this.enabled = NebulaAPI.Configurations.SharableVariable(configId, true);
+            this.Configuration = NebulaAPI.Configurations.Configuration(
+                () => IsShown ? "  " + Perk.PerkDefinition.DisplayName + ": " + BoolConfigurationImpl.GetDisplayValue(IsEnabled) : null,
+                () => GUI.API.HorizontalHolder(Virial.Media.GUIAlignment.Left,
+                    Perk.PerkDefinition.GetPerkImageWidget(true, overlay: () => Perk.PerkDefinition.GetPerkWidget()),
+                    new NoSGUIMargin(Virial.Media.GUIAlignment.Center, new(0.25f, 0f)),
+                    ConfigurationAssets.GetOptionTitle(GUI.API.LocalizedTextComponent(Perk.PerkDefinition.DisplayNameTranslationKey), configId),
+                    ConfigurationAssets.Semicolon,
+                    new NoSGUIMargin(Virial.Media.GUIAlignment.Center, new(0.1f, 0f)),
+                    new GUIButton(Virial.Media.GUIAlignment.Center, GUI.API.GetAttribute(Virial.Text.AttributeAsset.OptionsButtonMedium), new LazyTextComponent(() => BoolConfigurationImpl.GetDisplayValue(IsEnabled)))
+                    {
+                        OnClick = _ => { enabled.CurrentValue = !enabled.CurrentValue; NebulaAPI.Configurations.RequireUpdateSettingScreen(); },
+                        Color = VColor.Lerp(VColor.White, IsEnabled ? VColor.Cyan : VColor.Red, 0.65f)
+                    }),
+                () => IsShown);
+        }
+
+        private bool IsShown => JesterPerkOption && IsAllowedByPlantSettings;
+    }
+
+    static private bool IsSpawnable(DefinedRole role) => (role as ISpawnable)?.IsSpawnable ?? false;
+
+    static private readonly JesterPerkEntry[] PerkEntries = [
+        new("sniperIcon", () => Perks.SniperIcon.Def, () => IsSpawnable(Impostor.Sniper.MyRole)),
+        new("raiderEvidence", () => Perks.RaiderEvidence.Def, () => IsSpawnable(Impostor.Raider.MyRole)),
+        new("fakeBubblegun", () => Perks.FakeBubblegun.Def, () => IsSpawnable(Impostor.Bubblegun.MyRole)),
+        new("handOfMercy", () => Perks.HandOfMercy.Def),
+        new("decelTrap", () => Perks.PlaceTrap.DecelTrap, () => IsSpawnable(Complex.Trapper.MyEvilRole) || IsSpawnable(Complex.Trapper.MyNiceRole)),
+        new("ventRelocate", () => Perks.VentRelocate.Def),
+        new("monowayRotate", () => Perks.Monoway.DefRotate),
+        new("eraseBody", () => Perks.EraseBody.Def),
+        ];
     static private IVentConfiguration VentConfiguration = NebulaAPI.Configurations.NeutralVentConfiguration("role.jester.vent", true);
     static private ITaskConfiguration TaskConfiguration = NebulaAPI.Configurations.TaskConfiguration("options.role.jester.task", false, true, translationKey: "options.role.jester.task");
     static public bool RequiresTasksForWin => TaskConfiguration.RequiresTasks;
@@ -54,20 +112,14 @@ public class Jester : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignable
     private static int NumOfPerkSlots => NumOfPerksOption;
     private const float GuideTextY = -0.75f;
 
-    static private IEnumerable<PerkFunctionalDefinition> GetSelectablePerks()
-    {
-        static bool IsSpawnable(DefinedRole role) => (role as ISpawnable)?.IsSpawnable ?? false;
+    static private PerkFunctionalDefinition[] AllPerkCandidates => allPerkCandidates ??= PerkEntries.Select(e => e.Perk).ToArray();
+    static private PerkFunctionalDefinition[]? allPerkCandidates = null;
+    static private int GetPerkId(PerkFunctionalDefinition perk) => Array.IndexOf(AllPerkCandidates, perk);
+    static private PerkFunctionalDefinition? GetPerkById(int id) => 0 <= id && id < AllPerkCandidates.Length ? AllPerkCandidates[id] : null;
 
-        if (IsSpawnable(Impostor.Sniper.MyRole)) yield return Perks.SniperIcon.Def;
-        if (IsSpawnable(Impostor.Raider.MyRole)) yield return Perks.RaiderEvidence.Def;
-        if (IsSpawnable(Impostor.Bubblegun.MyRole)) yield return Perks.FakeBubblegun.Def;
-        if (IsSpawnable(Impostor.Destroyer.MyRole)) yield return Perks.HandOfMercy.Def;
-        if (IsSpawnable(Complex.Trapper.MyEvilRole) || IsSpawnable(Complex.Trapper.MyNiceRole)) yield return Perks.PlaceTrap.DecelTrap;
-        yield return Perks.VentRelocate.Def;
-        yield return Perks.Monoway.DefRotate;
-        yield return Perks.EraseBody.Def;
-    }
+    static private IEnumerable<PerkFunctionalDefinition> GetSelectablePerks() => PerkEntries.Where(e => e.IsEnabled && e.IsGainableInCurrentSettings && e.IsAllowedByPlantSettings).Select(e => e.Perk);
 
+    [NebulaRPCHolder]
     public class Instance : RuntimeVentRoleTemplate, RuntimeRole
     {
         public override DefinedRole Role => MyRole;
@@ -77,17 +129,45 @@ public class Jester : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignable
         private bool HasEmptyPerkSlot => perkSlots.Any(s => !s.HasPerk);
         private bool IsHoldingPerk(PerkFunctionalDefinition perk) => perkSlots.Any(s => s.CurrentPerk == perk);
 
-        /// <summary>まだ獲得できるパークが残っているか。活性化時とパーク獲得時に計算してキャッシュする。</summary>
         private bool hasGainablePerk = false;
         private void UpdateHasGainablePerk() => hasGainablePerk = GetSelectablePerks().Any(CanGainPerk);
 
-        public Instance(GamePlayer player) : base(player, VentConfiguration)
+        private readonly List<int> gainedPerks = [];
+
+        public Instance(GamePlayer player, int[]? arguments) : base(player, VentConfiguration)
         {
+            var numOfPerks = arguments?.Get(0, 0) ?? 0;
+            for(int i = 0; i < numOfPerks; i++)
+            {
+                var perkId = arguments?.Get(i + 1, -1) ?? -1;
+                var perk = GetPerkById(perkId);
+                if (perk != null) gainedPerks.Add(perkId);
+            }
         }
+
+        int[]? RuntimeAssignable.RoleArguments => [gainedPerks.Count, ..gainedPerks];
+
+        static private readonly RemoteProcess<(GamePlayer player, int perkId)> RpcGainPerk = new("JesterGainPerk", (message, _) =>
+        {
+            if (message.player.Role is Instance jester && !jester.gainedPerks.Contains(message.perkId)) jester.gainedPerks.Add(message.perkId);
+        });
 
         private void SetUpPerks()
         {
-            perkSlots = Helpers.Sequential(NumOfPerkSlots).Select(i => new PerkSlot(PerkFunctionalDefinition.Category.Plain, EmptyPerk, 100 - i, null, null, this)).ToArray();
+            perkSlots = Helpers.Sequential(NumOfPerkSlots).Select(i => new PerkSlot(PerkFunctionalDefinition.Category.Plain, EmptyPerk, 100 - i, null, this)).ToArray();
+
+            foreach (var perk in gainedPerks.Select(GetPerkById)) if (perk != null && CanGainPerk(perk)) perkSlots.First(s => !s.HasPerk).SetPerk(perk);
+
+            //ランダム割り当て
+            if (gainedPerks.Count == 0 && RandomPerkOption)
+            {
+                foreach (var perk in GetSelectablePerks().Shuffle())
+                {
+                    if (!HasEmptyPerkSlot) break;
+                    if (CanGainPerk(perk)) GainPerk(perk, false);
+                }
+            }
+
             UpdateHasGainablePerk();
 
             var perkButton = NebulaAPI.Modules.AbilityButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.SecondaryAbility, 0f, "jesterPerk", PerkButtonImage, visibility: _ => hasGainablePerk);
@@ -95,12 +175,13 @@ public class Jester : DefinedRoleTemplate, HasCitation, DefinedRole, IAssignable
         }
 
         private bool CanGainPerk(PerkFunctionalDefinition perk) => HasEmptyPerkSlot && !IsHoldingPerk(perk);
-        private void GainPerk(PerkFunctionalDefinition perk)
+        private void GainPerk(PerkFunctionalDefinition perk, bool byChoice = true)
         {
             if (!CanGainPerk(perk)) return;
             perkSlots.First(s => !s.HasPerk).SetPerk(perk);
+            RpcGainPerk.Invoke((MyPlayer, GetPerkId(perk)));
             UpdateHasGainablePerk();
-            StatsPerk.Progress();
+            if (byChoice) StatsPerk.Progress();
         }
 
         private void OpenPerkWindow()

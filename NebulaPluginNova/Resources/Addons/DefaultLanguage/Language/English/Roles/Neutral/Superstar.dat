@@ -1,0 +1,63 @@
+# Assignable
+
+"role.superstar.name" : "Superstar"
+"role.superstar.short" : "SS"
+"role.superstar.blurb" : "Tonight's star sweeps up the world"
+
+# Document
+
+"role.superstar.doc" : "A neutral role that sweeps every player into random effects with dances."
+"role.superstar.winCond" : "Dance successfully <var>%NUM%</var> times."
+"role.superstar.ability.title" : "Unique Ability "Stage Jack""
+"role.superstar.ability.main" : "The Superstar can dance by moving in small steps.<br>Every time the Superstar keeps dancing for <var>%TIME%</var> seconds, a random effect is triggered on all players."
+"role.superstar.ability.dance" : "<title>Dance</title>Keep moving in small steps on the spot to dance. It <b>cannot be activated</b> by clicking the button or pressing a key.<br>Dance until the button's timer fills up to trigger a random effect on all players."
+
+# Options
+
+"options.role.superstar.detail" : "The Superstar sweeps every player into a random effect with each dance,<br>and wins alone after dancing successfully the required number of times."
+"options.role.superstar.danceDuration" : "Dance Duration"
+"options.role.superstar.danceCoolDown" : "Dance Cooldown"
+"options.role.superstar.numOfDancesToWin" : "Dances Required to Win"
+"options.role.superstar.group.speedUp" : "Speed Up Effect Settings"
+"options.role.superstar.speedUp.duration" : "Duration"
+"options.role.superstar.speedUp.ratio" : "Speed Ratio"
+"options.role.superstar.group.speedDown" : "Speed Down Effect Settings"
+"options.role.superstar.speedDown.duration" : "Duration"
+"options.role.superstar.speedDown.ratio" : "Speed Ratio"
+"options.role.superstar.group.vision" : "Vision Reduction Effect Settings"
+"options.role.superstar.vision.duration" : "Duration"
+"options.role.superstar.vision.ratio" : "Vision Ratio"
+"options.role.superstar.group.flip" : "Flip Effect Settings"
+"options.role.superstar.flip.duration" : "Duration"
+"options.role.superstar.group.morph" : "Morph Effect Settings"
+"options.role.superstar.morph.duration" : "Duration"
+"options.role.superstar.group.screen" : "Screen Expansion Effect Settings"
+"options.role.superstar.screen.duration" : "Duration"
+"options.role.superstar.screen.ratio" : "Screen Ratio"
+"options.role.superstar.group.mosaic" : "Mosaic Effect Settings"
+"options.role.superstar.mosaic.duration" : "Duration"
+"options.role.superstar.mosaic.strength" : "Mosaic Strength"
+
+# Game
+
+"role.superstar.taskText" : "Dance successfully."
+
+# Stats
+
+"stats.superstar.dance" : "Successful dances"
+
+# Team
+
+"end.detail.superstar.win" : "Superstar win"
+
+"teams.superstar" : "Superstar"
+"end.superstar" : "Superstar Wins%EXTRA%"
+
+# Document
+
+"document.tip.winCond.teams.superstar" : "Superstar"
+
+"document.tip.winCond.superstar.title" : "Special Win"
+"document.tip.winCond.superstar" : "Wins after dancing successfully the specified number of times."
+
+"ui.action.superstar.pause" : "While holding down,<br>dancing does not progress."

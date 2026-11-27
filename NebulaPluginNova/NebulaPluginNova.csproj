@@ -65,10 +65,6 @@
 	<ItemGroup>
 		<EmbeddedResource Include="Resources\*\*.*" Exclude="Resources\Libs\*.*;Resources\Assets\Android\*.*" />
 		<EmbeddedResource Include="Resources\*.*" />
-		<EmbeddedResource Include="$(AmongUsRelease)\Interstellar.dll">
-			<LogicalName>Nebula.Resources.Interstellar.dll</LogicalName>
-			<Link>Resources\Interstellar.dll</Link>
-		</EmbeddedResource>
 	</ItemGroup>
 
 	<ItemGroup>

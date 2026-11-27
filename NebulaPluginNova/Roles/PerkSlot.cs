@@ -24,9 +24,6 @@ public class PerkSlot : FlexibleLifespan, IGameOperator
     public int Priority { get; private init; }
     
     private PerkDefinition emptyDefinition;
-    
-    private VirtualKeyInput? keyInput;
-    private VirtualInput? input;
 
     public Entry? Current { get; private set; } = null;
     
@@ -34,14 +31,12 @@ public class PerkSlot : FlexibleLifespan, IGameOperator
 
     public PerkFunctionalDefinition? CurrentPerk => IsDeadObject ? null : Current?.Definition;
 
-    public PerkSlot(PerkFunctionalDefinition.Category category, PerkDefinition emptyDefinition, int priority, VirtualKeyInput? keyInput, Color? frameColor = null, ILifespan? lifespan = null)
+    public PerkSlot(PerkFunctionalDefinition.Category category, PerkDefinition emptyDefinition, int priority, Color? frameColor = null, ILifespan? lifespan = null)
     {
         Category = category;
         FrameColor = frameColor;
         Priority = priority;
         this.emptyDefinition = emptyDefinition;
-        this.keyInput = keyInput;
-        input = keyInput.HasValue ? NebulaInput.GetInput(keyInput.Value) : null;
 
         this.Register(lifespan ?? NebulaAPI.CurrentGame!);
         SetPerk(null);
@@ -59,15 +54,8 @@ public class PerkSlot : FlexibleLifespan, IGameOperator
         if (newInstance == null) return;
 
         var functional = perk?.Instantiate(newInstance).Register(newInstance);
-        if (functional?.HasAction ?? false)
-        {
-            if (input != null)
-            {
-                var obj = ButtonEffect.AddKeyGuide(newInstance.RelatedGameObject.GetUnityObject(), input.TypicalKey, new(0f, -0.75f), false);
-                if (obj != null) obj.transform.localScale = new(1f / 0.42f, 1 / 0.42f, 1f);
-            }
-            newInstance.Button.OnClick.AddListener(functional.OnClick);
-        }
+        //キーの割り当てはパークホルダが表示位置に応じて行う。
+        if (functional?.HasAction ?? false) newInstance.SetAction(functional.OnClick);
         newInstance.Priority = Priority;
 
         Current = new(newInstance, functional, perk);
@@ -76,10 +64,4 @@ public class PerkSlot : FlexibleLifespan, IGameOperator
     }
 
     public void Clear() => SetPerk(null);
-
-    void OnHudUpdate(GameHudUpdateEvent ev)
-    {
-        if (input == null || Current == null) return;
-        if (Current.Instance.RelatedGameObject.ActiveSelf && (Current.FunctionalInstance?.HasAction ?? false) && input.KeyDownInGame) Current.FunctionalInstance.OnClick();
-    }
 }

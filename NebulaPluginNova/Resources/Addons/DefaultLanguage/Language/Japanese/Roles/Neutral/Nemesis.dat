@@ -1,0 +1,57 @@
+# Assignable
+
+"role.nemesis.name" : "ネメシス"
+"role.nemesis.short" : "ネ"
+"role.nemesis.blurb" : "神罰の執行者"
+
+# Document
+
+"role.nemesis.doc" : "会議中に他プレイヤーの役職を推察できる第三陣営です。<br>ミス許容回数を超えて推察に失敗すると死亡します。"
+"role.nemesis.winCond" : "推察を<var>%NUM%</var>回成功させる。"
+
+# Options
+
+"options.role.nemesis.detail" : "ネメシスは他のプレイヤーの役職を推察する第三陣営です。"
+"options.role.nemesis.numOfGuessToWin" : "勝利に必要な推察成功回数"
+"options.role.nemesis.numOfGuessPerMeeting" : "1回の会議での最大推察回数"
+"options.role.nemesis.numOfMissAllowed" : "ミス許容回数"
+"options.role.nemesis.disableGuessAfterMiss" : "ミス後の連続した推察"
+
+# Game
+
+"role.nemesis.leftGuess" : "勝利に必要な推察回数"
+"role.nemesis.leftMiss" : "残りミス許容回数"
+"role.nemesis.taskText" : "推察を成功させる"
+
+# Stats
+
+"stats.nemesis.guess" : "推察した回数"
+"stats.nemesis.misguess" : "推察を誤った回数"
+
+# Titles
+
+"achievement.nemesis.common1.title" : "因果応報"
+"achievement.nemesis.common1.goal" : "1回推察に成功する。"
+
+"achievement.nemesis.another1.title" : "自信はあった"
+"achievement.nemesis.another1.goal" : "推察に失敗し、死亡する。"
+"achievement.nemesis.another1.splitted.2" : "あった"
+
+"achievement.nemesis.challenge.title" : "迷いなき義憤の女神"
+"achievement.nemesis.challenge.goal" : "ゲッサーのいるゲームで、自身のみが推察に成功して勝利する。"
+"achievement.nemesis.challenge.cond" : "推察失敗したプレイヤーがいても獲得可能"
+"achievement.nemesis.challenge.splitted.0" : "迷いなき"
+
+# Team
+
+"end.detail.nemesis.win" : "ネメシス勝利"
+
+"teams.nemesis" : "ネメシス"
+"end.nemesis" : "ネメシス%EXTRA%勝利"
+
+# Document
+
+"document.tip.winCond.teams.nemesis" : "ネメシス"
+
+"document.tip.winCond.nemesis.title" : "特殊勝利"
+"document.tip.winCond.nemesis" : "推察を%NUM%回成功させると勝利します。"

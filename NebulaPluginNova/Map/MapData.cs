@@ -209,60 +209,60 @@ public abstract class MapData
         return CheckMapAreaInternal(position);
     }
 
-    public bool CheckMapAreaInternal(VVector2 position)
+    public bool CheckMapAreaInternal(VVector2 position) => CheckMapAreaInternal(position, MapArea, NonMapArea);
+
+    /// <summary>
+    /// NonMapAreaの代表点が影響を及ぼす最大距離です。
+    /// </summary>
+    public const float NonMapAreaRange = 6.0f;
+    /// <summary>
+    /// MapAreaの代表点が影響を及ぼす最大距離です。
+    /// </summary>
+    public const float MapAreaRange = 12.0f;
+
+    /// <summary>
+    /// 与えられた代表点をもとに、位置がマップエリア内にあるか判定します。
+    /// </summary>
+    public static bool CheckMapAreaInternal(VVector2 position, IReadOnlyList<VVector2> mapArea, IReadOnlyList<VVector2> nonMapArea)
     {
-        VVector2 vector;
-        float magnitude;
-
-        foreach (VVector2 p in NonMapArea)
-        {
-            vector = p - position;
-            magnitude = vector.Magnitude;
-            if (magnitude > 6.0f) continue;
-
-            if (!PhysicsHelpers.AnyNonTriggersBetween(position, vector.Normalized, magnitude, Constants.ShipAndAllObjectsMask)) return false;
-        }
-
-        foreach (VVector2 p in MapArea)
-        {
-            vector = p - position;
-            magnitude = vector.Magnitude;
-            if (magnitude > 12.0f) continue;
-
-            if (!Helpers.AnyCustomNonTriggersBetween(position, p, collider => collider.name != NonMapColliderName, Constants.ShipAndAllObjectsMask)) return true;
-            //if (!PhysicsHelpers.AnyNonTriggersBetween(position, vector.normalized, magnitude, Constants.ShipAndAllObjectsMask)) return true;
-        }
-
+        foreach (VVector2 p in nonMapArea) if (IsReachableFromNonMapAreaPoint(position, p)) return false;
+        foreach (VVector2 p in mapArea) if (IsReachableFromMapAreaPoint(position, p)) return true;
         return false;
     }
 
+    /// <summary>
+    /// NonMapAreaの代表点から位置まで障害物なしで到達できるか調べます。到達できる位置はマップエリア外になります。
+    /// </summary>
+    public static bool IsReachableFromNonMapAreaPoint(VVector2 position, VVector2 nonMapPoint)
+    {
+        var vector = nonMapPoint - position;
+        var magnitude = vector.Magnitude;
+        if (magnitude > NonMapAreaRange) return false;
+        return !PhysicsHelpers.AnyNonTriggersBetween(position, vector.Normalized, magnitude, Constants.ShipAndAllObjectsMask);
+    }
+
+    /// <summary>
+    /// MapAreaの代表点から位置まで障害物なしで到達できるか調べます。
+    /// </summary>
+    public static bool IsReachableFromMapAreaPoint(VVector2 position, VVector2 mapPoint)
+    {
+        var vector = mapPoint - position;
+        var magnitude = vector.Magnitude;
+        if (magnitude > MapAreaRange) return false;
+        return !Helpers.AnyCustomNonTriggersBetween(position, mapPoint, collider => collider.name != NonMapColliderName, Constants.ShipAndAllObjectsMask);
+    }
+
     public static string NonMapColliderName { get; } = "NonMap";
+
+    /// <summary>
+    /// 位置に到達できるMapAreaの代表点の数を返します。NonMapAreaの代表点から到達できる場合は0を返します。
+    /// </summary>
     public int CheckMapAreaDebug(VVector2 position)
     {
-        VVector2 vector;
-        float magnitude;
+        foreach (VVector2 p in NonMapArea) if (IsReachableFromNonMapAreaPoint(position, p)) return 0;
+
         int count = 0;
-
-        UnityEngine.Vector2 unityPosition = position;
-
-        foreach (VVector2 p in NonMapArea)
-        {
-            vector = p - position;
-            magnitude = vector.Magnitude;
-            if (magnitude > 6.0f) continue;
-
-            if (!PhysicsHelpers.AnyNonTriggersBetween(unityPosition, vector.Normalized, magnitude, Constants.ShipAndAllObjectsMask)) return 0;
-        }
-
-        foreach (VVector2 p in MapArea)
-        {
-            vector = p - position;
-            magnitude = vector.Magnitude;
-            if (magnitude > 12.0f) continue;
-
-            if (!PhysicsHelpers.AnyNonTriggersBetween(unityPosition, vector.Normalized, magnitude, Constants.ShipAndAllObjectsMask)) count++;
-        }
-
+        foreach (VVector2 p in MapArea) if (IsReachableFromMapAreaPoint(position, p)) count++;
         return count;
     }
 

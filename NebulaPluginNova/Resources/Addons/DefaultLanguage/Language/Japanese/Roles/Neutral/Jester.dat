@@ -22,6 +22,12 @@
 "options.role.jester.task" : "勝利に必要なタスク数"
 "options.role.jester.perk" : "ジェスターパーク"
 "options.role.jester.numOfPerks" : "最大パーク数"
+"options.role.jester.randomPerk" : "ランダムパーク割り当て"
+"options.role.jester.onlyPlantPerks" : "プラントから獲得可能なパークのみ出現"
+"options.role.jester.perkEnabled.sniperIcon.detail" : "スナイパーが出現しないゲームでは設定によらず獲得できません。"
+"options.role.jester.perkEnabled.raiderEvidence.detail" : "レイダーが出現しないゲームでは設定によらず獲得できません。"
+"options.role.jester.perkEnabled.fakeBubblegun.detail" : "バブルガンが出現しないゲームでは設定によらず獲得できません。"
+"options.role.jester.perkEnabled.decelTrap.detail" : "ナイストラッパーとイビルトラッパーがいずれも出現しないゲームでは<br>設定によらず獲得できません。"
 "options.role.jester.group.perk" : "ジェスターパークの設定"
 
 # Game

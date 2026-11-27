@@ -80,8 +80,9 @@ internal class Creeping : DefinedSingleAbilityRoleTemplate<Creeping.Ability>, Ha
                 GameOperatorManager.Instance?.Subscribe<GameEndEvent>(ev => {
                     var lastDead = NebulaGameManager.Instance?.LastDead;
                     if (lastDead == null) return;
-                    if (lastDead.MyKiller?.AmOwner ?? false) return;
+                    if (!(lastDead.MyKiller?.AmOwner ?? false)) return;
                     if (lastDead.PlayerState != PlayerState.Poisoned) return;
+                    if (!ev.CheckWin(MyPlayer)) return;
                     if (GamePlayer.AllPlayers.All(p => p.AmOwner == p.IsAlive) && (ModSingleton<DepoisonBoxManager>.Instance?.AmPoisoned ?? false))
                     {   
                         new StaticAchievementToken("creeping.challenge");

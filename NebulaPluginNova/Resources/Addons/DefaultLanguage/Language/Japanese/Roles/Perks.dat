@@ -45,7 +45,7 @@
 "perk.decelTrap.detail" : "その場に減速トラップを設置する。<br>設置したトラップは会議を挟んでから有効化する。"
 
 "perk.taskReduction.name" : "再計算"
-"perk.taskReduction.detail" : "タスクノルマを1だけ減少させる。<br>クルーメイトタスクを持たない場合は何も起こらない。"
+"perk.taskReduction.detail" : "タスクノルマを1だけ減少させる。<br>通常のクルーメイトタスクを持たない場合は何も起こらない。"
 
 "perk.ventRelocate.name" : "変容する宇宙船"
 "perk.ventRelocate.detail" : "一度だけ、ベントを移設できる。<br>ベントを掴んでから%D%秒間、ベントを引きずって移動させられる。<br>効果時間中にもう一度使用するとその場でベントを手放し、効果が終了する。"

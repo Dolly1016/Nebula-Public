@@ -29,8 +29,6 @@ public static class DebugTools
     private static readonly DebugValueEntry<bool> allowVanillaLog = new BooleanDataEntry("AllowVanillaLog", saver, false);
     private static readonly DebugValueEntry<bool> writeAllAchievementsData = new BooleanDataEntry("WriteAllAchievementsData", saver, false, shouldWrite: false);
     private static readonly DebugValueEntry<bool> showCostumeMetadata = new BooleanDataEntry("ShowCostumeMetadata", saver, false, shouldWrite: false);
-    private static readonly DebugValueEntry<bool> useRoomPointEditor = new BooleanDataEntry("UseRoomPointEditor", saver, false, shouldWrite: false);
-    private static readonly DebugValueEntry<bool> useShadowEditor = new BooleanDataEntry("UseShadowEditor", saver, false, shouldWrite: false);
     private static readonly DebugValueEntry<bool> useAudioPlayer = new BooleanDataEntry("UseAudioPlayer", saver, false, shouldWrite: false);
 
     public static bool ShowConfigurationId => DebugMode && showConfigurationId.Value;
@@ -39,12 +37,40 @@ public static class DebugTools
     public static bool LockAllAchievement => DebugMode && lockAllAchievement.Value;
     public static bool ShowCostumeMetadata => DebugMode && showCostumeMetadata.Value;
     public static bool AllowVanillaLog => allowVanillaLog.Value;
-    public static bool UseRoomPointEditor => DebugMode && useRoomPointEditor.Value;
-    public static bool UseShadowEditor => DebugMode && useShadowEditor.Value;
     public static bool UseAudioPlayer => DebugMode && useAudioPlayer.Value;
 
     internal static void RegisterDebugVariable(IDebugVariable variable) => debugVariables.Add(variable);
     internal static IEnumerable<IDebugVariable> DebugVariables => debugVariables;
+
+    private static readonly List<(Func<string> label, Action onClick)> debugTools = [];
+    /// <summary>
+    /// デバッグ用ウィンドウにボタンを追加します。
+    /// </summary>
+    /// <param name="label">ボタンに表示する文字列。ウィンドウを開くたびに評価されます。</param>
+    /// <param name="onClick">ボタンを押したときの処理。押した後、ウィンドウは閉じられます。</param>
+    internal static void RegisterDebugTool(Func<string> label, Action onClick) => debugTools.Add((label, onClick));
+
+    /// <summary>
+    /// デバッグ用ツールの起動ボタンを並べたウィジェットを返します。
+    /// </summary>
+    /// <param name="closeWindow">ボタンを押したときにウィンドウを閉じる処理</param>
+    public static Virial.Media.GUIWidget GetToolButtonsWidget(Action? closeWindow)
+    {
+        if (debugTools.Count == 0) return GUI.API.EmptyWidget;
+        return GUI.API.HorizontalHolder(Virial.Media.GUIAlignment.Center, debugTools.Select(t =>
+            GUI.API.RawButton(Virial.Media.GUIAlignment.Center, AttributeAsset.CenteredBoldFixed, t.label.Invoke(), _ =>
+            {
+                closeWindow?.Invoke();
+                try
+                {
+                    t.onClick.Invoke();
+                }
+                catch (Exception ex)
+                {
+                    NebulaLogger.Instance.Error("Failed to launch debug tool.\n" + ex.ToString());
+                }
+            })));
+    }
 
     public static Virial.Media.GUIWidget GetMetaControllWidget(bool script, Action<Virial.Media.GUIWidget> updater)
     {

@@ -107,6 +107,7 @@ public class PlayerAttributeImpl : IPlayerAttribute
     public Predicate<GamePlayer>? Cognizable { get; init; }
     public bool CanCognize(GamePlayer player) => Cognizable?.Invoke(player) ?? true;
     public IPlayerAttribute? IdenticalAttribute { get; init; } = null;
+    public PlayerAttributeValence Valence { get; init; } = PlayerAttributeValence.Positive;
     static private List<IPlayerAttribute> allAttributes = new();
     static public IEnumerable<IPlayerAttribute> AllAttributes => allAttributes;
 
@@ -125,37 +126,51 @@ public class PlayerAttributeImpl : IPlayerAttribute
         UIName = uiId;
     }
 
+    /// <summary>
+    /// 独自のアイコンで属性を作ります。アドオンから属性を追加するときに使います。
+    /// 属性のIDは作った順に振られるので、どのクライアントでも同じ順に作る必要があります。
+    /// 表示名と説明は "ui.attribute.{uiId}" と "ui.attribute.{uiId}.detail" で翻訳します。
+    /// </summary>
+    public PlayerAttributeImpl(Virial.Media.Image image, string name, string? uiId = null)
+    {
+        this.Id = allAttributes.Count;
+        this.Image = image;
+        allAttributes.Add(this);
+        Name = name;
+        UIName = uiId;
+    }
+
     static PlayerAttributeImpl()
     {
-        PlayerAttributes.Accel = new PlayerAttributeImpl(0, "$accel", "accel");
-        PlayerAttributes.Decel = new PlayerAttributeImpl(1, "$decel", "decel");
-        PlayerAttributes.Drunk = new PlayerAttributeImpl(5, "$inverse", "inverse");
-        PlayerAttributes.Size = new PlayerAttributeImpl(6, "$size", "size");
-        PlayerAttributes.Invisible = new PlayerAttributeImpl(2, "invisible", "invisible");
-        PlayerAttributes.InvisibleElseImpostor = new PlayerAttributeImpl(2, "$invisible") { Cognizable = p => p.IsImpostor, IdenticalAttribute = PlayerAttributes.Invisible };
-        PlayerAttributes.CurseOfBloody = new PlayerAttributeImpl(3, "curseOfBloody", "curseOfBloody");
-        PlayerAttributes.Footprint = new PlayerAttributeImpl(3, "footprint", "footprint") { Cognizable = _ => false };
-        PlayerAttributes.Isolation = new PlayerAttributeImpl(4, "$isolation", "isolation") { Cognizable = p => p.IsImpostor };
-        PlayerAttributes.IsolationAdmin = new PlayerAttributeImpl(4, "$isolationAdmin", "isolationAdmin") { Cognizable = p => p.IsImpostor, IdenticalAttribute = PlayerAttributes.Isolation };
-        PlayerAttributes.IsolationVitals = new PlayerAttributeImpl(4, "$isolationVitals", "isolationVitals") { Cognizable = p => p.IsImpostor, IdenticalAttribute = PlayerAttributes.Isolation };
-        PlayerAttributes.BuskerEffect = new PlayerAttributeImpl(4, "busker", "busker") { Cognizable = _ => false };
-        PlayerAttributes.InternalInvisible = new PlayerAttributeImpl(2, "$internalInvisible") { Cognizable = _ => false, IdenticalAttribute = PlayerAttributes.Invisible };
+        PlayerAttributes.Accel = new PlayerAttributeImpl(0, "$accel", "accel") { Valence = PlayerAttributeValence.Positive };
+        PlayerAttributes.Decel = new PlayerAttributeImpl(1, "$decel", "decel") { Valence = PlayerAttributeValence.Negative };
+        PlayerAttributes.Drunk = new PlayerAttributeImpl(5, "$inverse", "inverse") { Valence = PlayerAttributeValence.Negative };
+        PlayerAttributes.Size = new PlayerAttributeImpl(6, "$size", "size") { Valence = PlayerAttributeValence.Neutral };
+        PlayerAttributes.Invisible = new PlayerAttributeImpl(2, "invisible", "invisible") { Valence = PlayerAttributeValence.Positive };
+        PlayerAttributes.InvisibleElseImpostor = new PlayerAttributeImpl(2, "$invisible") { Cognizable = p => p.IsImpostor, IdenticalAttribute = PlayerAttributes.Invisible, Valence = PlayerAttributeValence.Positive };
+        PlayerAttributes.CurseOfBloody = new PlayerAttributeImpl(3, "curseOfBloody", "curseOfBloody") { Valence = PlayerAttributeValence.Negative };
+        PlayerAttributes.Footprint = new PlayerAttributeImpl(3, "footprint", "footprint") { Cognizable = _ => false, Valence = PlayerAttributeValence.Negative };
+        PlayerAttributes.Isolation = new PlayerAttributeImpl(4, "$isolation", "isolation") { Cognizable = p => p.IsImpostor, Valence = PlayerAttributeValence.Positive };
+        PlayerAttributes.IsolationAdmin = new PlayerAttributeImpl(4, "$isolationAdmin", "isolationAdmin") { Cognizable = p => p.IsImpostor, IdenticalAttribute = PlayerAttributes.Isolation, Valence = PlayerAttributeValence.Positive };
+        PlayerAttributes.IsolationVitals = new PlayerAttributeImpl(4, "$isolationVitals", "isolationVitals") { Cognizable = p => p.IsImpostor, IdenticalAttribute = PlayerAttributes.Isolation, Valence = PlayerAttributeValence.Positive };
+        PlayerAttributes.BuskerEffect = new PlayerAttributeImpl(4, "busker", "busker") { Cognizable = _ => false, Valence = PlayerAttributeValence.Positive };
+        PlayerAttributes.InternalInvisible = new PlayerAttributeImpl(2, "$internalInvisible") { Cognizable = _ => false, IdenticalAttribute = PlayerAttributes.Invisible, Valence = PlayerAttributeValence.Positive };
 
-        PlayerAttributes.FlipXY = new PlayerAttributeImpl(7, "$flip", "flip");
-        PlayerAttributes.FlipX = new PlayerAttributeImpl(7, "$flipX") { IdenticalAttribute = PlayerAttributes.FlipXY };
-        PlayerAttributes.FlipY = new PlayerAttributeImpl(7, "$flipY") { IdenticalAttribute = PlayerAttributes.FlipXY };
+        PlayerAttributes.FlipXY = new PlayerAttributeImpl(7, "$flip", "flip") { Valence = PlayerAttributeValence.Negative };
+        PlayerAttributes.FlipX = new PlayerAttributeImpl(7, "$flipX") { IdenticalAttribute = PlayerAttributes.FlipXY, Valence = PlayerAttributeValence.Negative };
+        PlayerAttributes.FlipY = new PlayerAttributeImpl(7, "$flipY") { IdenticalAttribute = PlayerAttributes.FlipXY, Valence = PlayerAttributeValence.Negative };
 
-        PlayerAttributes.ScreenSize = new PlayerAttributeImpl(8, "$screenSize", "screenSize");
-        PlayerAttributes.Eyesight = new PlayerAttributeImpl(9, "$eyesight", "eyesight");
-        PlayerAttributes.Roughening = new PlayerAttributeImpl(10, "$rough", "rough");
+        PlayerAttributes.ScreenSize = new PlayerAttributeImpl(8, "$screenSize", "screenSize") { Valence = PlayerAttributeValence.FollowRatio };
+        PlayerAttributes.Eyesight = new PlayerAttributeImpl(9, "$eyesight", "eyesight") { Valence = PlayerAttributeValence.FollowRatio };
+        PlayerAttributes.Roughening = new PlayerAttributeImpl(10, "$rough", "rough") { Valence = PlayerAttributeValence.Negative };
 
-        PlayerAttributes.Thurifer = new PlayerAttributeImpl(11, "$thurifer", "thurifer");
-        PlayerAttributes.CooldownSpeed = new PlayerAttributeImpl(12, "cooldown", "cooldown");
+        PlayerAttributes.Thurifer = new PlayerAttributeImpl(11, "$thurifer", "thurifer") { Valence = PlayerAttributeValence.Negative };
+        PlayerAttributes.CooldownSpeed = new PlayerAttributeImpl(12, "cooldown", "cooldown") { Valence = PlayerAttributeValence.FollowRatio };
 
         //いずれも見た目にのみ作用する効果なので、他プレイヤーからは認識できないようにする
-        PlayerAttributes.VisibleThroughWall = new PlayerAttributeImpl(2, "$visibleThroughWall") { Cognizable = _ => false };
-        PlayerAttributes.HiddenName = new PlayerAttributeImpl(2, "$hiddenName") { Cognizable = _ => false };
-        PlayerAttributes.Suppressed = new PlayerAttributeImpl(13, "suppressed", "suppressed");
+        PlayerAttributes.VisibleThroughWall = new PlayerAttributeImpl(2, "$visibleThroughWall") { Cognizable = _ => false, Valence = PlayerAttributeValence.Negative };
+        PlayerAttributes.HiddenName = new PlayerAttributeImpl(2, "$hiddenName") { Cognizable = _ => false, Valence = PlayerAttributeValence.Positive };
+        PlayerAttributes.Suppressed = new PlayerAttributeImpl(13, "suppressed", "suppressed") { Valence = PlayerAttributeValence.Negative };
     }
 }
 
@@ -254,7 +269,8 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     {
         get
         {
-            bool hasCrewmateTasks = Role.TaskType == RoleTaskType.CrewmateTask;
+            //役職固有のクルータスクも、クルータスクとして数える
+            bool hasCrewmateTasks = Role.TaskType == RoleTaskType.CrewmateTask || Role.TaskType == RoleTaskType.SpecialCrewmateTask;
             AssignableAction((assignable) => { hasCrewmateTasks &= !(assignable.InvalidateCrewmateTask || assignable.MyCrewmateTaskIsIgnored); });
             return hasCrewmateTasks;
         }
@@ -985,6 +1001,22 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
         }
     }
 
+    public int CountNegativeValidAttributes()
+    {
+        int count = 0;
+        foreach (var a in PlayerAttributeImpl.AllAttributes)
+        {
+            //自認できない属性
+            if (!a.CanCognize(this)) continue;
+            if (timeLimitedModulators.Any(m => m.IsNegative && m.HasCategorizedAttribute(a, this))) count++;
+        }
+
+        //香気の表示
+        if ((ModSingleton<Thurifer.ThuribulumManager>.Instance?.LocalInhalationPercentage ?? 0f) > 0f && !timeLimitedModulators.Any(m => m.HasCategorizedAttribute(PlayerAttributes.Thurifer, this))) count++;
+
+        return count;
+    }
+
     static private TimelimitedCache<bool> canSeeFootprint = new(() => GameOperatorManager.Instance!.Run(new UpdateFootprintVisibilityEvent(NebulaGameManager.Instance!)).Visible, 0.05f);
     private Cache<FootprintState> footprintStateCache = new(() => NebulaAPI.CurrentGame?.GetModule<FootprintState>()!);
     public void OnSetAttribute(IPlayerAttribute attribute)
@@ -1047,6 +1079,8 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
            modulators.Add(message.modulator);
            modulators.Sort((m1, m2) => m2.Priority - m1.Priority);
+
+           if (playerInfo.AmOwner && message.modulator.IsNegative && message.modulator.CanBeAware && playerInfo.CountNegativeValidAttributes() >= 4) new StaticAchievementToken("manyNegativeEffects");
        }
        );
 
@@ -1103,6 +1137,8 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
     //                                      //
     //////////////////////////////////////////
 
+    private VVector2 cachedSize = VVector2.One;
+    public VVector2 Size => cachedSize;
     public void CalcSize(float deltaTime)
     {
         VVector2 targetSize = VVector2.One;
@@ -1117,6 +1153,8 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
         var diff = smoothPlayerSize - targetSize;
         smoothPlayerSize -= diff * Mathn.Clamp01(deltaTime * 2f);
+
+        cachedSize = smoothPlayerSize * nonSmoothSize;
 
         PlayerScaler.transform.localScale = (smoothPlayerSize * nonSmoothSize).AsVector3(1f);
     }
@@ -1460,6 +1498,17 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
     public void UpdateTaskState()
     {
+        //役職固有のタスク進捗は役職自身がTasks.Customで設定しているため、ここで放棄して上書きしない。
+        if (Role.TaskType == RoleTaskType.SpecialRoleTask) return;
+        if (Role.TaskType == RoleTaskType.SpecialCrewmateTask)
+        {
+            //役職固有のクルータスクは、クルータスクを無効にする割り当てが無い限りクルータスクとして数える
+            bool invalidated = false;
+            AssignableAction(assignable => invalidated |= assignable.InvalidateCrewmateTask || assignable.MyCrewmateTaskIsIgnored);
+            if (invalidated) (this as GamePlayer).Tasks.Unbox().BecomeToOutsider();
+            return;
+        }
+
         if (!HasAnyTasks)
             (this as GamePlayer).Tasks.Unbox().WaiveAllTasksAsOutsider();
         else if (!HasCrewmateTasks)
@@ -1509,7 +1558,7 @@ internal class PlayerModInfo : AbstractModuleContainer, IRuntimePropertyHolder, 
 
         MeetingHudExtension.ModCmdReportDeadBody(this, deadBody, MeetingHudExtension.ReportType.ReportDeadBody, canInvokeInSabo, consumeEmergencyButton);
     }
-    void GamePlayer.RequestEmergencyMeeting(bool canInvokeInSabo, bool consumeEmergencyButton) => MeetingHudExtension.ModCmdReportDeadBody(this, null, MeetingHudExtension.ReportType.EmergencyMeeting, canInvokeInSabo, consumeEmergencyButton);
+    void GamePlayer.RequestEmergencyMeeting(bool canInvokeInSabo, bool consumeEmergencyButton, bool showReporterBody, bool ignoreReporterDeath) => MeetingHudExtension.ModCmdReportDeadBody(this, null, MeetingHudExtension.ReportType.EmergencyMeeting, canInvokeInSabo, consumeEmergencyButton, showReporterBody, ignoreReporterDeath);
 
     // Virial::HoldingAPI
     GamePlayer? GamePlayer.HoldingPlayer => null;

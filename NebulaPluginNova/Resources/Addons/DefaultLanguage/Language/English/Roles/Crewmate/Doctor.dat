@@ -37,5 +37,9 @@
 "achievement.doctor.challenge.flavor" : ""A white ceiling, an inorganic sound" —Monologue on the Battlefield"
 "achievement.doctor.challenge.splitted.1" : "They "
 
+"achievement.doctor.common2.title" : "Look at the Patient"
+"achievement.doctor.common2.goal" : "Use the Portable Vitals for a total of 100 seconds."
+"achievement.doctor.common2.flavor" : ""That doctor just keeps staring at the screen,<br>I can't tell if they're even listening." ―So, What's Wrong With You?"
+
 "stats.doctor.portableVitalTime" : "Time Using Portable Vitals"
 "stats.doctor.witness" : "Num of Witnessing Deaths"

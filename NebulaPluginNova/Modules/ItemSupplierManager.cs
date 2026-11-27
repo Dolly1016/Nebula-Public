@@ -117,8 +117,8 @@ internal class ItemSupplierManager : AbstractModule<Virial.Game.Game>, IGameOper
     PerkSlot? NoncrewPerkSlot = null;
 
     static private PerkSlot CreateSlot(bool noncrewmate) => noncrewmate ?
-        new(PerkFunctionalDefinition.Category.NoncrewmateOnly, EmptyNoncrewPerk, 500, VirtualKeyInput.PerkAction2, Virial.Color.White.ToUnityColor()) :
-        new(PerkFunctionalDefinition.Category.Standard, EmptyPerk, 501, VirtualKeyInput.PerkAction1);
+        new(PerkFunctionalDefinition.Category.NoncrewmateOnly, EmptyNoncrewPerk, 500, Virial.Color.White.ToUnityColor()) :
+        new(PerkFunctionalDefinition.Category.Standard, EmptyPerk, 501);
 
     public bool HasPerk(bool nonCrewmate)
     {

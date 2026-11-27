@@ -20,6 +20,7 @@
 "options.role.raider.axeSize" : "Axe Size"
 "options.role.raider.axeSpeed" : "Axe Speed"
 "options.role.raider.canKillImpostor" : "Can Kill Impostor"
+"options.role.raider.canKillInvisiblePlayer" : "Can Kill Invisible Player"
 
 # Game
 
@@ -55,3 +56,6 @@
 "achievement.raider.challenge.flavor" : "Here's Johnny!"
 "achievement.raider.challenge.splitted.0" : "The Wildest in the "
 "achievement.raider.challenge.splitted.2" : "Universe"
+
+"achievement.raider.common2.title" : "Did You Think You Could Escape?"
+"achievement.raider.common2.goal" : "Kill players out of your direct reach<br>with your axe a total of 10 times."

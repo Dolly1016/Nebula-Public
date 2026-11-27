@@ -40,6 +40,26 @@
 "achievement.challenge.crewmate.title" : "穏やかな航行"
 "achievement.challenge.crewmate.goal" : "誰も死んでいない状態でタスク勝利する。"
 
+"achievement.manyNegativeEffects.title" : "苦しみの死重奏"
+"achievement.manyNegativeEffects.goal" : "4種類以上の負の効果を同時に受ける。"
+
+"achievement.collector.challenge1.title" : "極致への道のり"
+"achievement.collector.challenge1.goal" : "異なるチャレンジ称号を通算20個獲得する。"
+
+"achievement.collector.challenge2.title" : "真骨頂"
+"achievement.collector.challenge2.goal" : "異なるチャレンジ称号を通算50個獲得する。"
+
+"achievement.collector.challenge3.title" : "神髄"
+"achievement.collector.challenge3.goal" : "異なるチャレンジ称号を通算100個獲得する。"
+
+"achievement.collector.silver.title" : "シルバーコレクター"
+"achievement.collector.silver.goal" : "異なる銀称号を通算100個獲得する。"
+"achievement.collector.silver.splitted.0" : "シルバー"
+
+"achievement.collector.gold.title" : "ゴールドコレクター"
+"achievement.collector.gold.goal" : "異なる金称号を通算100個獲得する。"
+"achievement.collector.gold.splitted.0" : "ゴールド"
+
 "achievement.speedAttribute.title" : "良いのか悪いのか"
 "achievement.speedAttribute.goal" : "移動速度上昇と移動速度低下の効果を同時に受ける。"
 
@@ -129,3 +149,8 @@
 "achievement.costume.partyCamo.cond" : "3人以上のパーティーメンバーで集まること"
 "achievement.costume.partyCamo.flavor" : ""どんなピンチでも乗り越えられるって、ウチはそー思った。" ―たぶん非ギャルの筆跡"
 "achievement.costume.partyCamo.splitted.1" : "☆"
+
+"achievement.costume.boy.title" : "少年よ、大志を抱け"
+"achievement.costume.boy.goal" : "男子の装いで、非クルーメイトのプレイヤーを<br>2人以上追加勝利させたうえでクルーメイト勝利する。"
+"achievement.costume.boy.cond" : "追加勝利する非クルーのうち少なくとも1人はインポスターであること+自身はクルーメイト陣営であること"
+"achievement.costume.boy.splitted.0" : "少年よ"

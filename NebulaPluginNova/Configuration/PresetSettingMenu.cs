@@ -18,7 +18,9 @@ public class PresetSettingMenu : MonoBehaviour
     public GameSettingMenu GameSettingMenu { get; set; }
     public void Start()
     {
-        var screen = new GUIScreenImpl(Virial.Media.Anchor.At(new(0.5f,0.5f)), new(2f, 3.6f),transform, new(-3.3f, -0.4f, -10f));
+        //ボタンの文字はsortingOrderが高いため、SortingGroupに入れないとヘルプ画面やウィンドウより手前に描画されてしまう
+        var buttonsGroup = UnityHelper.CreateObject<UnityEngine.Rendering.SortingGroup>("ButtonsGroup", transform, new(-3.3f, -0.4f, -10f), LayerExpansion.GetUILayer());
+        var screen = new GUIScreenImpl(Virial.Media.Anchor.At(new(0.5f,0.5f)), new(2f, 3.6f), buttonsGroup.transform, Vector3.zero);
 
         Virial.Compat.Artifact<GUIScreen> innerRef = null!;
         void ShowInner()

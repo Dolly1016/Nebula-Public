@@ -96,6 +96,11 @@ internal class VentRelocate : PerkFunctionalInstance
             {
                 if (currentLocalHolding != null)
                 {
+                    if (GamePlayer.LocalPlayer?.IsDived ?? false)
+                    {
+                        RequestReleaseVent(currentLocalHolding);
+                        return;
+                    }
                     VVector2 currentPos = currentLocalHolding.transform.GetPositionFast();
                     var targetPos = GamePlayer.LocalPlayer.TruePosition;
 

@@ -108,8 +108,49 @@ static public class MeetingRoleSelectWindow
     }
 }
 
+/// <summary>
+/// 会議中の推測の振る舞いを定めます。
+/// </summary>
+internal class GuessMeetingSetting(int leftGuess, int guessesPerMeeting)
+{
+    /// <summary>
+    /// 残りの推測回数。
+    /// </summary>
+    public int LeftGuess { get; } = leftGuess;
+    /// <summary>
+    /// 1回の会議で推測できる回数。
+    /// </summary>
+    public int GuessesPerMeeting { get; } = guessesPerMeeting;
+    public GameStatsEntry? StatsGuess { get; init; } = null;
+    public GameStatsEntry? StatsMisguess { get; init; } = null;
+    /// <summary>
+    /// 推測を行った後に呼び出されます。引数は推測が正解だったかどうかです。
+    /// </summary>
+    public Action<bool>? OnGuessed { get; init; } = null;
+    /// <summary>
+    /// 推測を有効に行えるとき<c>true</c>を返します。<c>false</c>を返した場合、推測は不発に終わり、この会議中は以降推測できません。
+    /// </summary>
+    public Func<bool>? GuessIf { get; init; } = null;
+    /// <summary>
+    /// 推測を誤った際に呼び出されます。推測者が死亡すべきとき<c>true</c>を返します。未設定の場合は常に死亡します。
+    /// </summary>
+    public Func<bool>? OnMisguess { get; init; } = null;
+    /// <summary>
+    /// 推測を誤った場合にも推測回数を消費するかどうか。
+    /// </summary>
+    public bool ConsumeOnMisguess { get; init; } = true;
+    /// <summary>
+    /// 推測ボタンを表示するための追加の条件。
+    /// </summary>
+    public Func<bool>? CanGuess { get; init; } = null;
+    /// <summary>
+    /// 推測ウィンドウの下部に表示するテキスト。引数はこの会議で残っている推測回数と、全体で残っている推測回数です。
+    /// </summary>
+    public Func<int, int, string>? UnderText { get; init; } = null;
+}
+
 [NebulaRPCHolder]
-static file class GuesserSystem
+static internal class GuesserSystem
 {
     private record MisguessedExtraDeadInfo(GamePlayer To, DefinedRole Role) : GamePlayer.ExtraDeadInfo(PlayerStates.Misguessed)
     {
@@ -123,26 +164,41 @@ static file class GuesserSystem
 
     public static MetaScreen LastGuesserWindow = null!;
 
-    static public MetaScreen OpenGuessWindow(int leftGuessPerMeeting, int leftGuess, Action<DefinedRole> onSelected)
+    static public string GetLeftGuessText(int leftGuessPerMeeting, int leftGuess)
     {
-        string leftStr;
         if (leftGuessPerMeeting < leftGuess)
-            leftStr = $"{leftGuessPerMeeting.ToString()} ({leftGuess.ToString()})";
+            return $"{leftGuessPerMeeting.ToString()} ({leftGuess.ToString()})";
         else
-            leftStr = leftGuess.ToString();
+            return leftGuess.ToString();
+    }
 
-        return MeetingRoleSelectWindow.OpenRoleSelectWindow(null, r => r.CanBeGuess, GamePlayer.LocalPlayer?.FeelBeTrueCrewmate ?? false, Language.Translate("role.guesser.leftGuess") + " : " + leftStr, onSelected);
+    static public MetaScreen OpenGuessWindow(string underText, Action<DefinedRole> onSelected)
+    {
+        return MeetingRoleSelectWindow.OpenRoleSelectWindow(null, r => r.CanBeGuess, GamePlayer.LocalPlayer?.FeelBeTrueCrewmate ?? false, underText, onSelected);
     }
 
     static public void OnMeetingStart(int leftGuess,Action guessDecrementer, Func<bool>? guessIf = null)
     {
+        OnMeetingStart(new GuessMeetingSetting(leftGuess, Guesser.NumOfGuessPerMeetingOption)
+        {
+            StatsGuess = GuesserModifier.StatsAllGuessed,
+            StatsMisguess = GuesserModifier.StatsMisguessed,
+            OnGuessed = _ => guessDecrementer.Invoke(),
+            GuessIf = guessIf,
+        });
+    }
+
+    static public void OnMeetingStart(GuessMeetingSetting setting)
+    {
         bool awareOfUsurpation = false;
-        int leftGuessPerMeeting = Guesser.NumOfGuessPerMeetingOption;
+        int leftGuess = setting.LeftGuess;
+        int leftGuessPerMeeting = setting.GuessesPerMeeting;
 
         NebulaAPI.CurrentGame?.GetModule<MeetingPlayerButtonManager>()?.RegisterMeetingAction(new(MeetingPlayerButtonManager.Icons.AsLoader(0),
             state => {
                 var p = state.MyPlayer;
-                LastGuesserWindow = OpenGuessWindow(leftGuessPerMeeting, leftGuess, (r) =>
+                string underText = setting.UnderText?.Invoke(leftGuessPerMeeting, leftGuess) ?? (Language.Translate("role.guesser.leftGuess") + " : " + GetLeftGuessText(leftGuessPerMeeting, leftGuess));
+                LastGuesserWindow = OpenGuessWindow(underText, (r) =>
                 {
                     if (GamePlayer.LocalPlayer?.IsDead ?? false) return;
                     var meetingHud = MeetingHud.Instance;
@@ -150,19 +206,24 @@ static file class GuesserSystem
                     if (!(meetingState == MeetingHud.MeetingStates.Voted || meetingState == MeetingHud.MeetingStates.NotVoted)) return;
                     if (!MeetingHudExtension.CanUseAbilityForLocal(p, true)) return;
 
-                    if (guessIf?.Invoke() ?? true)
+                    bool isCorrect = false;
+                    if (setting.GuessIf?.Invoke() ?? true)
                     {
                         var localPlayer = GamePlayer.LocalPlayer;
-                        GuesserModifier.StatsAllGuessed.Progress();
+                        setting.StatsGuess?.Progress();
                         if (Guesser.AbilityGuessOption ? p.Role.CheckGuessAbility(r) : (p.Role.ExternalRecognitionRole == r))
                         {
+                            isCorrect = true;
                             localPlayer?.MurderPlayer(p, PlayerState.Guessed, EventDetail.Guess, KillParameter.MeetingKill, KillCondition.BothAlive);
                         }
                         else
                         {
-                            GuesserModifier.StatsMisguessed.Progress();
-                            localPlayer?.MurderPlayer(localPlayer, PlayerState.Misguessed, EventDetail.Missed, KillParameter.MeetingKill, KillCondition.BothAlive);
-                            RpcShareExtraInfo.Invoke((localPlayer!, p!, r));
+                            setting.StatsMisguess?.Progress();
+                            if (setting.OnMisguess?.Invoke() ?? true)
+                            {
+                                localPlayer?.MurderPlayer(localPlayer, PlayerState.Misguessed, EventDetail.Missed, KillParameter.MeetingKill, KillCondition.BothAlive);
+                                RpcShareExtraInfo.Invoke((localPlayer!, p!, r));
+                            }
                         }
                     }
                     else
@@ -170,16 +231,19 @@ static file class GuesserSystem
                         NebulaAsset.PlaySE(NebulaAudioClip.ButtonBreaking, volume: 1f);
                         awareOfUsurpation = true;
                     }
+                    setting.OnGuessed?.Invoke(isCorrect);
                     //のこり推察数を減らす
-                    guessDecrementer.Invoke();
-                    leftGuess--;
-                    leftGuessPerMeeting--;
+                    if (isCorrect || setting.ConsumeOnMisguess)
+                    {
+                        leftGuess--;
+                        leftGuessPerMeeting--;
+                    }
 
                     if (LastGuesserWindow.AsBoolFast()) LastGuesserWindow.CloseScreen();
                     LastGuesserWindow = null!;
                 });
             },
-            p => !awareOfUsurpation && !p.MyPlayer.IsDead && !p.MyPlayer.AmOwner && leftGuess > 0 && leftGuessPerMeeting > 0 && !(GamePlayer.LocalPlayer?.IsDead ?? true) && GameOperatorManager.Instance!.Run(new PlayerCanGuessPlayerLocalEvent(GamePlayer.LocalPlayer, p.MyPlayer, true)).CanGuess
+            p => !awareOfUsurpation && (setting.CanGuess?.Invoke() ?? true) && !p.MyPlayer.IsDead && !p.MyPlayer.AmOwner && leftGuess > 0 && leftGuessPerMeeting > 0 && !(GamePlayer.LocalPlayer?.IsDead ?? true) && GameOperatorManager.Instance!.Run(new PlayerCanGuessPlayerLocalEvent(GamePlayer.LocalPlayer, p.MyPlayer, true)).CanGuess
             ));
         
         /*

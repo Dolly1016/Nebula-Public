@@ -41,3 +41,8 @@
 "achievement.camouflager.challenge.goal" : "カモフラージュ発動中に自他問わず合計4回以上のキルが発生する。"
 "achievement.camouflager.challenge.flavor" : ""鑑識作業は困難を極めていた。" ―署名の無い回顧録"
 "achievement.camouflager.challenge.splitted.0" : "見境のない"
+
+"achievement.camouflager.common2.title" : "黒昼堂々"
+"achievement.camouflager.common2.goal" : "カモフラージュ中、すぐ近くに5人以上いる場所でキルする。"
+"achievement.camouflager.common2.cond" : "カモフラージャー本人とキルされたプレイヤーを含む"
+"achievement.camouflager.common2.splitted.2" : "堂々"

@@ -60,14 +60,14 @@ public class NebulaPlugin
     public const string AmongUsVersion = "2023.7.12";
     public const string PluginGuid = "jp.dreamingpig.amongus.nebula";
     public const string PluginName = "NebulaOnTheShip";
-    public const string PluginVersion = "3.6.1.0";
+    public const string PluginVersion = "3.7.2.1";
 
-    //public const string VisualVersion = "v3.6.1";
-    public const string VisualVersion = "Snapshot 26.11.04b";
+    //public const string VisualVersion = "v3.8";
+    public const string VisualVersion = "Snapshot 26.11.27a";
     //public const string VisualVersion = "Fungle Project 1";
 
     public const string PluginEpochStr = "110";
-    public const string PluginBuildNumStr = "1665";
+    public const string PluginBuildNumStr = "1674";
     public static readonly int PluginEpoch = int.Parse(PluginEpochStr);
     public static readonly int PluginBuildNum = int.Parse(PluginBuildNumStr);
     public const bool GuardVanillaLangData = false;
@@ -130,12 +130,6 @@ public class NebulaPlugin
         LoadInternal(false);
     }
 
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    static private void LoadInterstellar()
-    {
-        InterstellarLoader.Load();
-    }
-
     static public bool IsAndroid { get; private set; }
     
     static internal void LoadInternal(bool android)
@@ -182,7 +176,6 @@ public class NebulaPlugin
         }
 
         LoadLibraryFromZip("Nebula.Resources.Libs.zip");
-        LoadLibraryFromResource("Nebula.Resources.Interstellar.dll", "Interstellar.dll");
 
 #if PC
         Assembly.LoadFrom(Path.Combine(PathHelpers.NebulaLibsPath, "NebulaAPI.dll"));
@@ -192,9 +185,6 @@ public class NebulaPlugin
         Assembly.LoadFrom(Path.Combine(PathHelpers.NebulaLibsPath, "Microsoft.CodeAnalysis.dll"));
         Assembly.LoadFrom(Path.Combine(PathHelpers.NebulaLibsPath, "Microsoft.CodeAnalysis.CSharp.dll"));
 #endif
-        Assembly.LoadFrom(Path.Combine(PathHelpers.NebulaLibsPath, "Interstellar.dll"));
-
-        LoadInterstellar();
 
         Harmony.PatchAll();
 

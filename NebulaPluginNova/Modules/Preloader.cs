@@ -156,7 +156,6 @@ public static class ToolsInstaller
             InstallTool("AddonScriptCompiler.exe", null, "tools");
             InstallTool("AddonScriptCompiler.runtimeconfig.json", null, "tools");
             InstallTool("AddonScriptCompiler.deps.json", null, "tools");
-            InstallTool(Environment.Is64BitProcess ? "opus_x64.dll" : "opus_x86.dll", "opus.dll", inBepInExDir: false);
             if(Constants.GetPlatformType() == Platforms.StandaloneSteamPC) InstallTool("NebulaPreloader.dll", null, "patchers", shouldNotOverwrite: true);
         }
 #else

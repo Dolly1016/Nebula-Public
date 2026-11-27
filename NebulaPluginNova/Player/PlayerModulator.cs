@@ -16,6 +16,31 @@ public abstract class TimeLimitedModulator
     public abstract bool CanBeAware { get; }
 
     /// <summary>
+    /// このモジュレータが与える効果の良し悪しです。Positive、Negative、Neutralのいずれかを返します。
+    /// </summary>
+    public abstract PlayerAttributeValence ActualValence { get; }
+
+    /// <summary>
+    /// 正の効果を与えるモジュレータかどうか。
+    /// </summary>
+    public bool IsPositive => ActualValence == PlayerAttributeValence.Positive;
+
+    /// <summary>
+    /// 負の効果を与えるモジュレータかどうか。
+    /// </summary>
+    public bool IsNegative => ActualValence == PlayerAttributeValence.Negative;
+
+    /// <summary>
+    /// 効果の良し悪しと倍率から、実際の効果の良し悪しを判定します。
+    /// </summary>
+    static protected PlayerAttributeValence ResolveValence(PlayerAttributeValence valence, float ratio) => valence switch
+    {
+        PlayerAttributeValence.FollowRatio => ratio > 1f ? PlayerAttributeValence.Positive : ratio < 1f ? PlayerAttributeValence.Negative : PlayerAttributeValence.Neutral,
+        PlayerAttributeValence.InvertRatio => ratio < 1f ? PlayerAttributeValence.Positive : ratio > 1f ? PlayerAttributeValence.Negative : PlayerAttributeValence.Neutral,
+        _ => valence
+    };
+
+    /// <summary>
     /// 指定の効果を持っているかどうか調べます。
     /// </summary>
     /// <param name="attribute">効果</param>
@@ -64,6 +89,8 @@ public class AttributeModulator : TimeLimitedModulator
     }
 
     public override bool HasAttribute(IPlayerAttribute attribute) => Attribute == attribute;
+    //倍率を持たないモジュレータは、倍率1として扱う。
+    public override PlayerAttributeValence ActualValence => ResolveValence(Attribute.Valence, 1f);
     public override bool HasCategorizedAttribute(IPlayerAttribute attribute, GamePlayer watcher) => Attribute.CategorizedAttribute == attribute && Attribute.CanCognize(watcher) && canBeAware;
 }
 
@@ -77,6 +104,8 @@ public class SizeModulator : AttributeModulator
         Size = size;
         Smooth = smooth;
     }
+
+    public override PlayerAttributeValence ActualValence => ResolveValence(Attribute.Valence, Size.x * Size.y);
 }
 
 public class FloatModulator : AttributeModulator
@@ -87,6 +116,8 @@ public class FloatModulator : AttributeModulator
     {
         Num = num;
     }
+
+    public override PlayerAttributeValence ActualValence => ResolveValence(Attribute.Valence, Num);
 }
 
 public class SpeedModulator : TimeLimitedModulator
@@ -152,6 +183,9 @@ public class SpeedModulator : TimeLimitedModulator
         this.IsMultiplier = isMultiplier;
         this.canBeAware = canBeAware;
     }
+
+    //減速や反転を含む速度変化は負の効果とみなす。
+    public override PlayerAttributeValence ActualValence => IsDecelModulator || IsInverseModulator ? PlayerAttributeValence.Negative : PlayerAttributeValence.Positive;
 
     public bool IsAccelModulator => (IsMultiplier ? AbsNum > 1f : AbsNum > 0f) || AbsDirectionalNum.x > 1f || AbsDirectionalNum.y > 1f;
     public bool IsDecelModulator => (IsMultiplier ? AbsNum < 1f : AbsNum < 0f) || AbsDirectionalNum.x < 1f || AbsDirectionalNum.y < 1f;

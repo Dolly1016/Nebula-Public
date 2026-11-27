@@ -149,7 +149,7 @@ public class UbiquitousDrone : MonoBehaviour
     }
 }
 
-public class UbiquitousDetachedDrone : MonoBehaviour, IVoiceComponent
+public class UbiquitousDetachedDrone : MonoBehaviour
 {
     SpriteRenderer droneRenderer = null!;
     static UbiquitousDetachedDrone() => ClassInjector.RegisterTypeInIl2Cpp<UbiquitousDetachedDrone>();
@@ -178,17 +178,6 @@ public class UbiquitousDetachedDrone : MonoBehaviour, IVoiceComponent
     }
 
     const float DroneHeight = 0.35f;
-
-    float IVoiceComponent.Radious => Ubiquitous.droneMicrophoneRadiousOption;
-
-    float IVoiceComponent.Volume => 0.95f;
-
-    Vector2 IVoiceComponent.Position => transform.GetPositionFast();
-
-    bool IVoiceComponent.CanPlaySoundFrom(IVoiceComponent mic)
-    {
-        return (mic != (this as IVoiceComponent)) && mic is UbiquitousDetachedDrone;
-    }
 
     public void Update()
     {
@@ -315,6 +304,34 @@ public class Ubiquitous : DefinedSingleAbilityRoleTemplate<Ubiquitous.Ability>, 
 
         private int droneId = 0;
 
+        //左下のドローン映像。持ち主のみ生成する
+        private HudContent? cameraObj = null;
+        private (MeshRenderer renderer, MeshFilter filter) cameraMesh;
+        private Camera? droneCam = null;
+        private int currentCameraSize = 1;
+
+        /// <summary>
+        /// 左下のドローン映像の表示状態と解像度を更新します。
+        /// ボタンの表示判定は死亡中に呼ばれなくなるため、ボタンとは独立して毎フレーム更新する。
+        /// </summary>
+        [Local]
+        void UpdateCameraView(GameHudUpdateEvent ev)
+        {
+            if (!cameraObj.AsBoolFast()) return;
+
+            bool shown = myDrone.AsBoolFast() && AmongUsUtil.CurrentCamTarget != myDrone && !MeetingHud.Instance && !ExileController.Instance && !MyPlayer.IsDead;
+            if (cameraObj!.gameObject.activeSelf != shown) cameraObj.gameObject.SetActive(shown);
+            if (!shown || !droneCam) return;
+
+            int level = Mathn.Max(2, myDrone!.CameraRoughness);
+            if (currentCameraSize != level)
+            {
+                currentCameraSize = level;
+                cameraMesh.renderer.sharedMaterial.mainTexture = droneCam!.SetCameraRenderTexture(134 / currentCameraSize * 2, 78 / currentCameraSize * 2);
+                cameraMesh.renderer.sharedMaterial.mainTexture.filterMode = FilterMode.Point;
+            }
+        }
+
         [OnlyMyPlayer]
         void OnInvokeDrone(PlayerDoGameActionEvent ev)
         {
@@ -375,34 +392,21 @@ public class Ubiquitous : DefinedSingleAbilityRoleTemplate<Ubiquitous.Ability>, 
         {
             if (AmOwner)
             {
-                int currentSize = 1;
-                var cameraObj = HudContent.InstantiateContent("UbiquitousCamera", true, true, false, true);
+                cameraObj = HudContent.InstantiateContent("UbiquitousCamera", true, true, false, true);
                 this.BindGameObject(cameraObj.gameObject);
+                //テクスチャの無い映像枠が見えないよう、ドローンを出すまでは隠しておく
+                cameraObj.gameObject.SetActive(false);
 
                 var mesh = UnityHelper.CreateMeshRenderer("MeshRenderer", cameraObj.transform, new(0, -0.08f, -1), LayerExpansion.GetUILayer());
                 mesh.filter.CreateRectMesh(new(1.34f, 0.78f), new(0.35f, 0f, 0f));
-                Camera droneCam = null!;
+                cameraMesh = (mesh.renderer, mesh.filter);
 
                 var backMesh = UnityHelper.CreateMeshRenderer("MeshBackRenderer", mesh.renderer.transform, new(0, 0, 0.1f), LayerExpansion.GetUILayer(), MyRole.UnityColor);
                 backMesh.filter.CreateRectMesh(new(1.34f + 0.05f, 0.78f + 0.05f), new(0.35f, 0f, 0f));
                 
                 var droneButton = NebulaAPI.Modules.EffectButton(this, MyPlayer, Virial.Compat.VirtualKeyInput.Ability, "ubiquitous.drone",
                     droneCoolDownOption, droneDurationOption, "drone", droneButtonSprite,
-                    null, _ => {
-                        cameraObj.gameObject.SetActive(myDrone && AmongUsUtil.CurrentCamTarget != myDrone && !MeetingHud.Instance);
-                        if (cameraObj.gameObject.active)
-                        {
-                            int level = Mathn.Max(2, myDrone!.CameraRoughness);
-                            if (currentSize != level)
-                            {
-                                currentSize = level;
-                                mesh.renderer.sharedMaterial.mainTexture = droneCam.SetCameraRenderTexture(134 / currentSize * 2, 78 / currentSize * 2);
-                                mesh.renderer.sharedMaterial.mainTexture.filterMode = FilterMode.Point;
-                            }
-                        }
-                        return !MyPlayer.IsDead;
-                    }
-                    );
+                    null, null);
                 droneButton.Availability = (button) => MyPlayer.CanMove || (myDrone.AsBoolFast() && AmongUsUtil.CurrentCamTarget == myDrone);
                 droneButton.OnClick = _ =>
                 {
@@ -422,6 +426,7 @@ public class Ubiquitous : DefinedSingleAbilityRoleTemplate<Ubiquitous.Ability>, 
                             droneCam.gameObject.AddComponent<ResetIgnoreShadowCamera>();
 
                             mesh.renderer.sharedMaterial.mainTexture = droneCam.SetCameraRenderTexture(134, 78);
+                            currentCameraSize = 1;
                         }
                         AmongUsUtil.ToggleCamTarget(myDrone, null);
                     }
@@ -528,9 +533,6 @@ public class Ubiquitous : DefinedSingleAbilityRoleTemplate<Ubiquitous.Ability>, 
     static RemoteProcess<(int droneId, Vector2 position)> RpcSpawnDetachedDrone = new("SpawnDetachedDrone",
         (message,_) => {
             var drone = UnityHelper.CreateObject<UbiquitousDetachedDrone>("DetachedDrone", null, message.position);
-            ModSingleton<NoSVCRoom>.Instance.AddVirtualMicrophone(drone);
-            ModSingleton<NoSVCRoom>.Instance.AddVirtualSpeaker(drone);
-
             ModSingleton<Nebula.Game.Statistics.MapObjectRecorder>.Instance?.Spawn(Nebula.Game.Statistics.MapObjectKinds.DetachedDrone, (VVector2)message.position, id: message.droneId);
         });
     

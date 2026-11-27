@@ -47,10 +47,28 @@ public class PerkHolder : AbstractModule<Virial.Game.Game>, IGameOperator
 
         myHolder.SetActive(myPerks.Count > 0);
         
+        PerkInstance? activated = null;
         for(int i = 0;i < myPerks.Count;i++)
         {
             var p = myPerks[i];
             p.UpdateLocalPos(ToPerkPos(i));
+
+            //表示位置に応じてキーを割り当てる。動作のないパークも番号を1つ使う。
+            var input = (p.HasAction && i < PerkInputs.Length) ? PerkInputs[i] : null;
+            p.SetKeyGuide(input?.TypicalKey);
+            if (activated == null && input != null && p.RelatedGameObject.ActiveSelf && input.KeyDownInGame) activated = p;
         }
+
+        //発動によってパークが入れ替わることがあるので、走査を終えてから発動する。
+        activated?.Activate();
     }
+
+    static private VirtualInput[] PerkInputs = [
+        NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.PerkAction1),
+        NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.PerkAction2),
+        NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.PerkAction3),
+        NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.PerkAction4),
+        NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.PerkAction5),
+        NebulaInput.GetInput(Virial.Compat.VirtualKeyInput.PerkAction6),
+    ];
 }

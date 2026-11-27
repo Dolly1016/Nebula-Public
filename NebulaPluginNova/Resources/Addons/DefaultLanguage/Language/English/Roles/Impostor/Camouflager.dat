@@ -41,3 +41,8 @@
 "achievement.camouflager.challenge.goal" : "A total of 4 or more kills occur regardless of friend or foe while camouflage is active."
 "achievement.camouflager.challenge.flavor" : ""The forensic work was extremely difficult." —An unsigned memoir"
 "achievement.camouflager.challenge.splitted.0" : "Unrestrained "
+
+"achievement.camouflager.common2.title" : "In Broad Black Daylight"
+"achievement.camouflager.common2.goal" : "During camouflage, kill at a spot with 5 or more people close by."
+"achievement.camouflager.common2.cond" : "Including yourself and the killed player"
+"achievement.camouflager.common2.splitted.2" : "Daylight"

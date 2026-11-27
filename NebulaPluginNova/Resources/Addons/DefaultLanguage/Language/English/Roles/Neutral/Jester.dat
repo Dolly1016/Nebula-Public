@@ -19,6 +19,12 @@
 "options.role.jester.canFixComms" : "Can Fix Comms"
 "options.role.jester.canFixLight" : "Can Fix Light"
 "options.role.jester.task" : "Requires Tasks For Winning"
+"options.role.jester.randomPerk" : "Random Perks Assignment"
+"options.role.jester.onlyPlantPerks" : "Only Perks Available From Plants"
+"options.role.jester.perkEnabled.sniperIcon.detail" : "Cannot be gained in games where Sniper does not appear."
+"options.role.jester.perkEnabled.raiderEvidence.detail" : "Cannot be gained in games where Raider does not appear."
+"options.role.jester.perkEnabled.fakeBubblegun.detail" : "Cannot be gained in games where Bubblegun does not appear."
+"options.role.jester.perkEnabled.decelTrap.detail" : "Cannot be gained in games where neither Nice Trapper nor Evil Trapper appears."
 
 # Game
 

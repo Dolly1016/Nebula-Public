@@ -180,11 +180,6 @@ static internal class AirshipModification
         }, NebulaAPI.CurrentGame!, 200);
 
         AddDoors(additionalDoors);
-
-        if (GeneralConfigurations.UseVoiceChatOption)
-        {
-            CameraVC.Activate((new(-8.24f, 0.0f), 0), (new(-4.06f, 9.43f), 1), (new(16.71f, 10.19f), 2), (new(4.92f, -11.20f), 3), (new(30.29f, -0.49f), 4), (new(3.20f, 16.20f), 5));
-        }
     }
 
     //Vert->左右通行のドア

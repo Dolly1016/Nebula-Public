@@ -19,13 +19,19 @@ using static Rewired.Demos.CustomPlatform.MyPlatformControllerExtension;
 namespace Nebula.Dev;
 
 [NebulaPreprocess(PreprocessPhase.FixStructure)]
-internal class RoomPointEditor : AbstractModule<Virial.Game.Game>, IGameOperator
+internal class RoomPointEditor : DevTool
 {
-    static public void Preprocess(NebulaPreprocessor preprocess) => DIManager.Instance.RegisterModule(() => DebugTools.UseRoomPointEditor ? new RoomPointEditor() : null);
+    static public void Preprocess(NebulaPreprocessor preprocess) => RegisterButton("Room Point Editor", () => new RoomPointEditor());
     public RoomPointEditor()
     {
-        ModSingleton<RoomPointEditor>.Instance = this;
-        this.RegisterPermanently();
+        Load(MapData.GetCurrentMapData().MapNavData);
+        DebugScreen.Push("現在のマップから読み込みました。", 2f);
+    }
+
+    protected override void OnClosed()
+    {
+        DestroyAll();
+        if (pathParent) GameObject.Destroy(pathParent.gameObject);
     }
 
     Transform nodeParent = null!, pathParent = null!;
@@ -149,8 +155,17 @@ internal class RoomPointEditor : AbstractModule<Virial.Game.Game>, IGameOperator
                 }
             });
 
+        //カーソルを合わせたノードのIDを表示する。IDは削除で変わるため、表示のたびに求める。
+        button.OnMouseOver.AddListener(() =>
+        {
+            int mainIndex = MainNodes.IndexOf(node);
+            NebulaManager.Instance.SetHelpWidget(button, mainIndex >= 0 ? $"Node ID: {mainIndex}" : $"Detail Node ID: {DetailNodes.IndexOf(node)}");
+        });
+        button.OnMouseOut.AddListener(() => NebulaManager.Instance.HideHelpWidgetIf(button));
+
         //右クリックでノードの削除
         button.gameObject.AddComponent<ExtraPassiveBehaviour>().OnRightClicked = () => {
+            NebulaManager.Instance.HideHelpWidgetIf(button);
             foreach (var relatedNodes in node.RelatedNodes)
             {
                 var targetNode = relatedNodes.Node1 == node ? relatedNodes.Node2 : relatedNodes.Node1;
@@ -206,12 +221,6 @@ internal class RoomPointEditor : AbstractModule<Virial.Game.Game>, IGameOperator
             DebugScreen.Push("JSONから読み込みました。", 2f);
         }
     }
-
-    void OnGameStart(GameStartEvent ev)
-    {
-        Load(MapData.GetCurrentMapData().MapNavData);
-        DebugScreen.Push("現在のマップから読み込みました。", 2f);
-    } 
 
     Vector2 fromCache;
     void OnUpdate(GameHudUpdateEvent ev)

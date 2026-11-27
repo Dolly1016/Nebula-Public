@@ -57,3 +57,6 @@
 "achievement.stirrer.challenge.cond" : "Max number of charges granted at once: 3 or less+Stir cooldown: 10 seconds or more"
 "achievement.stirrer.challenge.splitted.0" : "False "
 "achievement.stirrer.challenge.splitted.2" : "Big Dipper"
+
+"achievement.stirrer.common2.title" : "Disturbance"
+"achievement.stirrer.common2.goal" : "Trigger fake emergency sabotages a total of 30 times."

@@ -39,6 +39,10 @@
 "achievement.jackal.challenge.flavor" : ""アツい戦いをしようぜ！" ―破られた議事録より"
 "achievement.jackal.challenge.splitted.0" : "血の騒ぐ"
 
+"achievement.jackal.common2.title" : "仲良くしようぜ"
+"achievement.jackal.common2.goal" : "インポスターと同票投票になり、追放を免れる。"
+"achievement.jackal.common2.cond" : "互いに2票以上獲得していること"
+
 # Team
 
 "end.detail.jackal.win" : "ジャッカル勝利"

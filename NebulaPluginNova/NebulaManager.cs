@@ -1,4 +1,5 @@
 ﻿using Il2CppInterop.Runtime.Injection;
+using Il2CppSystem.Linq;
 using Nebula.Modules.Cosmetics;
 using Nebula.VoiceChat;
 using UnityEngine.Rendering;
@@ -453,11 +454,6 @@ public class NebulaManager : MonoBehaviour
             () => AmongUsLLImpl.TryGetAmongUsClientInstance(out var auClient) && auClient.AmHost && auClient.GameState == InnerNet.InnerNetClient.GameStates.Started && (ModSingleton<ShowUp>.Instance?.ShouldBeShownSocialSettings ?? false),
             () => ShowUp.RpcShareSocialSettings.Invoke((false, !ModSingleton<ShowUp>.Instance.CanAppealInGame, ModSingleton<ShowUp>.Instance.CanUseStamps, ModSingleton<ShowUp>.Instance.CanUseEmotes))
         ){ DefaultKeyInput = new(KeyCode.F4) });
-
-        commands.Add(new("help.command.vcState",
-            () => ModSingleton<NoSVCRoom>.Instance != null,
-            () => ModSingleton<NoSVCRoom>.Instance.ToggleDebugInfo()
-        ){ DefaultKeyInput = new(KeyCode.F9) });
     }
 
     public void ToggleConsole()
@@ -532,7 +528,10 @@ public class NebulaManager : MonoBehaviour
                 if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.RightShift))
                 {
                     var window = MetaScreen.GenerateWindow(new(8f, 4.7f), HudManager.InstanceExists ? HudManager.Instance.transform : null, new(0f, 0f, -400f), true, true, false, BackgroundSetting.Modern);
-                    window.SetWidget(new Nebula.Modules.GUIWidget.GUIScrollView(GUIAlignment.Center, new(7.8f, 4.5f), DebugTools.GetEditorWidget() /*DebugTools.GetMetaControllWidget(false, widget => window.SetWidget(widget, out _))*/), out _);
+                    window.SetWidget(GUI.API.VerticalHolder(GUIAlignment.Center,
+                        DebugTools.GetToolButtonsWidget(() => window.CloseScreen()),
+                        new Nebula.Modules.GUIWidget.GUIScrollView(GUIAlignment.Center, new(7.8f, 3.9f), DebugTools.GetEditorWidget() /*DebugTools.GetMetaControllWidget(false, widget => window.SetWidget(widget, out _))*/)
+                        ), out _);
                 }
             }
 
@@ -738,8 +737,6 @@ public class NebulaManager : MonoBehaviour
         MoreCosmic.Update();
 
         ringMenu.Update();
-
-        OnUpdate(SceneManager.GetActiveScene().name);
     }
 
     public void Awake()
@@ -751,30 +748,6 @@ public class NebulaManager : MonoBehaviour
         debugScreen = new DebugScreen(transform);
 
         PopupProviders = [];
-
-        OnSceneChanged(SceneManager.GetActiveScene().name);
-    }
-
-    private void OnSceneChanged(string sceneName)
-    {
-        switch (sceneName)
-        {
-            case "MainMenu":
-            case "MatchMaking":
-                NoSVCRoom.CloseCurrentRoom();
-                break;
-        }
-    }
-
-    private void OnUpdate(string sceneName)
-    {
-        switch (sceneName)
-        {
-            case "OnlineGame":
-            case "EndGame":
-                NoSVCRoom.Update();
-                break;
-        }
     }
 
 

@@ -39,7 +39,7 @@ public class MiraData : MapData
         //オフィス
         new(15.7f, 17.2f), new(13.7f, 20.4f), new(13.6f, 18.7f),
         //アドミン
-        new(20.6f, 20.8f), new(22.3f, 18.6f), new(21.2f, 17.3f), new(19.4f, 17.6f),
+        new(20.6f, 20.8f), new(22.3f, 18.6f), new(19.4f, 17.6f),
         //グリーンハウス
         new(13.2f, 22.3f), new(22.4f, 23.3f), new(20.2f, 24.3f), new(16.5f, 24.4f), new(20.7f, 22.2f), new(18f, 25.3f),
     };

@@ -184,7 +184,7 @@ public class Swapper : DefinedSingleAbilityRoleTemplate<IUsurpableAbility>, Defi
 
                             if (AmEvil)
                             {
-                                if (!swapEnsured) new StaticAchievementToken("evilSwapper.secret1");
+                                if (!swapEnsured) new StaticAchievementToken("evilSwapper.another1");
                                 else
                                 {
                                     GameOperatorManager.Instance?.Subscribe<GameEndEvent>(ev => {

@@ -31,6 +31,7 @@
 "options.role.sniper.aimAssist.detail" : "开启后，可以获得指向玩家的辅助线（这个辅助线可能会影响平衡）。"
 "options.role.sniper.delayInAimAssistActivation" : "辅助瞄准激活时间"
 "options.role.sniper.canKillImpostor" : "可以击杀伪装者"
+"options.role.sniper.canKillInvisiblePlayer" : "可以击杀隐身玩家"
 
 # Game
 

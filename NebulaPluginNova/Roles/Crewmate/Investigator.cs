@@ -297,7 +297,8 @@ internal class Investigator : DefinedRoleTemplate, DefinedRole, IAssignableDocum
             ModSingleton<NightVision>.Instance = this;
         }
 
-        public bool CanSeeFootprints => !(GamePlayer.LocalPlayer?.IsDead ?? false) && (preBlacklightVision ? t > 0.4f : postBlacklightVision ? t < 0.4f : true);
+        public bool InNightVision => (preBlacklightVision ? t > 0.4f : postBlacklightVision ? t < 0.4f : true);
+        public bool CanSeeFootprints => !(GamePlayer.LocalPlayer?.IsDead ?? false) && InNightVision;
         public bool CanInvestigateFootprints => !(GamePlayer.LocalPlayer?.IsDead ?? false) && (preBlacklightVision ? t > 0.8f : postBlacklightVision ? t < 0.4f : true);
         public void MarkReleased()
         {
@@ -418,7 +419,7 @@ internal class Investigator : DefinedRoleTemplate, DefinedRole, IAssignableDocum
         [OnlyMyPlayer, Local]
         void OnDied(PlayerDieEvent ev)
         {
-            if (CanSeeInvestigatorFootprints && ModSingleton<InvestigatorManager>.Instance.AnyFootprintsNearPosition(MyPlayer.Position)) new StaticAchievementToken("investigator.another1");
+            if ((ModSingleton<NightVision>.Instance?.InNightVision ?? false) && ModSingleton<InvestigatorManager>.Instance.AnyFootprintsNearPosition(MyPlayer.Position)) new StaticAchievementToken("investigator.another1");
         }
 
         [Local]

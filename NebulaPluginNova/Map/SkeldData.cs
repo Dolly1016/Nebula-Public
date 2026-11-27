@@ -37,7 +37,11 @@ public class SkeldData : MapData
         //メッドベイ
         new(-7.3f, -4.6f), new(-9.2f, -2.1f),
         //アドミン
-        new(2.6f, -7.1f), new(6.3f, -9.5f)
+        new(2.6f, -7.1f), new(6.3f, -9.5f),
+        //メッドベイ上通路
+        new(-9.0f, 0.9f),
+        //アドミン左通路
+        new(-0.7f, -7.2f),
     ];
 
     static private VVector2[] NonMapPositions = [

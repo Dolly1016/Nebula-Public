@@ -46,7 +46,7 @@ internal class Plague : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                 plague.CanGainPoison,
                 console =>
             {
-                if(NebulaSyncObject.GetObjects<PoisonPod>(MyTag).Find(obj => obj.MyRenderer.gameObject.GetInstanceIdFast() == console.gameObject.GetInstanceIdFast(), out var pod))
+                if(NebulaSyncObject.GetObjects<PoisonPod>(MyTag).Find(obj => obj.consoleObject.GetInstanceIdFast() == console.gameObject.GetInstanceIdFast(), out var pod))
                 {
                     if ((GamePlayer.LocalPlayer?.TryGetRole<Instance>(out var plague) ?? false) && plague.TryGainPoison()) pod.Use();
                 }
@@ -55,18 +55,19 @@ internal class Plague : DefinedRoleTemplate, DefinedRole, IAssignableDocument
         public PoisonPod(Vector2 pos) : base(pos, ZOption.Just, image.GetSprite(1), UnityEngine.Color.white)
         {
             SetBackRenderer(image.GetSprite(0));
+            ShadowRenderer.sprite = image.GetSprite(1);
             ModSingleton<PoisonPodManager>.Instance.RegisterPod(this);
             MyRenderer.material = VanillaAsset.GetHighlightMaterial();
 
             isFull = true;
 
-            var console = SystemConsolize(MyRenderer.gameObject, MyRenderer, useButtonAlternative.ImageNames, null!);
+            consoleObject = SystemConsolize(UnityHelper.CreateObject("Console", MyRenderer.transform, VVector3.Zero), MyRenderer, useButtonAlternative.ImageNames, null!).gameObject;
         }
 
         public const string MyTag = "PoisonPod";
 
         private Nebula.Game.Statistics.MapObjectTracker? tracker;
-
+        private GameObject consoleObject;
         public override void OnInstantiated()
         {
             base.OnInstantiated();
@@ -85,7 +86,8 @@ internal class Plague : DefinedRoleTemplate, DefinedRole, IAssignableDocument
 
                 //毒を蓄えている間だけ絵が変わる。
                 tracker?.SetStage(isFull ? 1 : 0);
-                if (MyRenderer.TryGetComponent<Collider2D>(out var collider))
+                //採取用のコンソールの当たり判定を切り替える
+                if (consoleObject.TryGetComponent<Collider2D>(out var collider))
                 {
                     collider.enabled = isFull;
                 }
@@ -610,15 +612,9 @@ internal class Plague : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                         lastLeftUninfected = leftUninfected;
                         ModSingleton<IWinningOpportunity>.Instance.RpcSetOpportunity(MyTeam, 1f - (lastLeftUninfected) * 0.1f);
                     }
-
-                    if(!sentWinningRequest && progress.CanWin)
-                    {
-                        var winners = BitMasks.AsPlayer(MyPlayer);
-                        progress.GetDirectlyInfected().Do(p => winners.Add(p));
-                        NebulaGameManager.Instance?.RpcInvokeSpecialWin(NebulaGameEnd.PlagueWin, (int)winners.AsRawPattern, PlagueDetails.Win);
-                        sentWinningRequest = true;
-                    }
                 }
+
+                TryRequestWin();
             }
             else
             {
@@ -632,6 +628,21 @@ internal class Plague : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                 updateInterval = 0.3f;
             }
         }
+
+        //勝利条件を満たしていれば勝利を要求する
+        void TryRequestWin()
+        {
+            if (sentWinningRequest || !progress.CanWin) return;
+
+            var winners = BitMasks.AsPlayer(MyPlayer);
+            progress.GetDirectlyInfected().Do(p => winners.Add(p));
+            NebulaGameManager.Instance?.RpcInvokeSpecialWin(NebulaGameEnd.PlagueWin, (int)winners.AsRawPattern, PlagueDetails.Win);
+            sentWinningRequest = true;
+        }
+
+        //会議終了時、会議後の同期より前に勝利を要求しておくことで、通信の遅延によって他の勝利条件に先を越されないようにする
+        [Local]
+        void OnMeetingPreEnd(MeetingPreEndEvent ev) => TryRequestWin();
 
         [Local]
         void OnGameEnd(GameEndEvent ev)

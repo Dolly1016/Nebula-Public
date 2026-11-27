@@ -188,6 +188,11 @@ public static class MeetingHudExtension
         }
         return false;
     }
+    
+    internal static Dictionary<byte, int> LastVoteCountMap = [];
+    internal static int GetLastVoteCount(byte votedFor) => LastVoteCountMap.GetValueOrDefault(votedFor);
+    public static int GetLastVoteCount(GamePlayer? votedFor) => LastVoteCountMap.GetValueOrDefault(votedFor?.PlayerId ?? PlayerVoteArea.SkippedVote);
+    public static int GetMaxLastVoteCount() => LastVoteCountMap.Values.Max();
     public static List<GameObject> LeftContents = new();
     public static List<(byte exiledId, byte sourceId, CommunicableTextTag playerState, CommunicableTextTag eventTag)> ExtraVictims = new();
 
@@ -195,6 +200,7 @@ public static class MeetingHudExtension
     {
         LastVotedForMap.Clear();
         LastSwapMap.Clear();
+        LastVoteCountMap.Clear();
         WeightMap.Clear();
         ExtraVictims.Clear();
     }
@@ -312,22 +318,29 @@ public static class MeetingHudExtension
         ReportDissolvedBody,
     }
 
-    internal static void ModCmdReportDeadBody(GamePlayer player, GamePlayer? deadBody, ReportType reportType, bool canInvokeInSabo, bool consumeEmergencyButton)
+    /// <param name="showReporterBody">会議のカットインに通報者の身体を表示するかどうか。</param>
+    /// <param name="ignoreReporterDeath">通報者が死亡していても会議を開くかどうか。</param>
+    internal static void ModCmdReportDeadBody(GamePlayer player, GamePlayer? deadBody, ReportType reportType, bool canInvokeInSabo, bool consumeEmergencyButton, bool showReporterBody = true, bool ignoreReporterDeath = false)
     {
-        RpcModCmdReportDeadBody.Invoke((player, deadBody, reportType, canInvokeInSabo, consumeEmergencyButton));
+        RpcModCmdReportDeadBody.Invoke((player, deadBody, reportType, canInvokeInSabo, consumeEmergencyButton, showReporterBody, ignoreReporterDeath));
     }
-    private static readonly RemoteProcess<(GamePlayer player, GamePlayer? deadBody, ReportType reportType, bool canInvokeInSabo, bool consumeEmergencyButton)> RpcModCmdReportDeadBody = new("ReportDissolvedDeadBody", (message, _) =>
+    private static readonly RemoteProcess<(GamePlayer player, GamePlayer? deadBody, ReportType reportType, bool canInvokeInSabo, bool consumeEmergencyButton, bool showReporterBody, bool ignoreReporterDeath)> RpcModCmdReportDeadBody = new("ReportDissolvedDeadBody", (message, _) =>
     {
-        if (AmongUsLLImpl.AmongUsClientInstance.AmHost) ModReportDeadBody(message.player.VanillaPlayer, GameData.Instance.GetPlayerById(message.deadBody?.PlayerId ?? 255), message.reportType, message.canInvokeInSabo, message.consumeEmergencyButton);
+        if (AmongUsLLImpl.AmongUsClientInstance.AmHost) ModReportDeadBody(message.player.VanillaPlayer, GameData.Instance.GetPlayerById(message.deadBody?.PlayerId ?? 255), message.reportType, message.canInvokeInSabo, message.consumeEmergencyButton, message.showReporterBody, message.ignoreReporterDeath);
     });
 
-    private static readonly RemoteProcess<(GamePlayer reporter, GamePlayer? dead, ReportType reportType)> RpcStartMeeting = new("ReportDeadBody", (message, _) =>
+    private static readonly RemoteProcess<(GamePlayer reporter, GamePlayer? dead, ReportType reportType, bool showReporterBody, bool consumeEmergencyButton)> RpcStartMeeting = new("ReportDeadBody", (message, _) =>
     {
-        ModStartMeeting(message.reporter.VanillaPlayer, GameData.Instance.GetPlayerById(message.dead?.PlayerId ?? 255), message.reportType);
+        ModStartMeeting(message.reporter.VanillaPlayer, GameData.Instance.GetPlayerById(message.dead?.PlayerId ?? 255), message.reportType, message.showReporterBody, message.consumeEmergencyButton);
     });
+
+    /// <summary>
+    /// 次に表示する会議のカットインで、通報者の身体を隠すかどうか。カットインの表示時に消費されます。
+    /// </summary>
+    internal static bool HideReporterBodyOnNextCutIn = false;
 
     //PlayerControl.ReportDeadBodyの代替メソッド
-    internal static void ModReportDeadBody(PlayerControl reporter, NetworkedPlayerInfo? deadBody, ReportType reportType, bool canInvokeInSabo, bool consumeEmergencyButton)
+    internal static void ModReportDeadBody(PlayerControl reporter, NetworkedPlayerInfo? deadBody, ReportType reportType, bool canInvokeInSabo, bool consumeEmergencyButton, bool showReporterBody = true, bool ignoreReporterDeath = false)
     {
         //会議室が開くか否かのチェック
         if (AmongUsLLImpl.AmongUsClientInstance.IsGameOver || MeetingHud.Instance.AsBoolFast()) return;
@@ -342,7 +355,7 @@ public static class MeetingHudExtension
         var modReporter = reporter.GetModInfo();
 
         if (modReporter == null) return;
-        if (modReporter.IsDead) return;
+        if (modReporter.IsDead && !ignoreReporterDeath) return;
         if (!AmongUsLLImpl.AmongUsClientInstance.AmHost) return;
 
         var reported = GamePlayer.GetPlayer(deadBody ? deadBody!.PlayerId : (byte)255);
@@ -350,7 +363,7 @@ public static class MeetingHudExtension
         {
             GameOperatorManager.Instance?.Run<MeetingRequestAcceptedHostEvent>(new(modReporter, reported));
             new NebulaRPCInvoker(() => HudManager.Instance.OpenMeetingRoom(reporter)).InvokeSingle();
-            RpcStartMeeting.Invoke((modReporter, reported, reportType));
+            RpcStartMeeting.Invoke((modReporter, reported, reportType, showReporterBody, consumeEmergencyButton));
             MeetingModRpc.RpcNoticeStartMeeting.Invoke((modReporter.PlayerId, deadBody?.PlayerId ?? 255));
         }
 
@@ -361,7 +374,7 @@ public static class MeetingHudExtension
         }
     }
 
-    private static IEnumerator ModCoStartMeeting(PlayerControl reporter, NetworkedPlayerInfo? deadBody, ReportType reportType)
+    private static IEnumerator ModCoStartMeeting(PlayerControl reporter, NetworkedPlayerInfo? deadBody, ReportType reportType, bool showReporterBody)
     {
         while (!MeetingHud.Instance.AsBoolFast()) yield return null;
         
@@ -381,11 +394,11 @@ public static class MeetingHudExtension
         GameData.TimeLastMeetingStarted = Time.realtimeSinceStartup;
 
         var meetingHud = MeetingHud.Instance;
-        meetingHud.StartCoroutine(ModCoMeetingHudIntro(meetingHud, reporter, deadBody, reportType).WrapToIl2Cpp());
+        meetingHud.StartCoroutine(ModCoMeetingHudIntro(meetingHud, reporter, deadBody, reportType, showReporterBody).WrapToIl2Cpp());
         yield break;
     }
 
-    private static IEnumerator ModCoMeetingHudIntro(MeetingHud meetingHud, PlayerControl reporter, NetworkedPlayerInfo? deadBody, ReportType reportType)
+    private static IEnumerator ModCoMeetingHudIntro(MeetingHud meetingHud, PlayerControl reporter, NetworkedPlayerInfo? deadBody, ReportType reportType, bool showReporterBody)
     {
         var hudManager = DestroyableSingleton<HudManager>.Instance;
 
@@ -405,8 +418,10 @@ public static class MeetingHudExtension
         NetworkedPlayerInfo? networkedPlayerInfo = isEmergencyMeeting ? reporterData : deadBody;
         NetworkedPlayerInfo.PlayerOutfit outfit = NebulaGameManager.Instance!.UnknownOutfit.outfit;
         if (reportType != ReportType.ReportDissolvedBody && networkedPlayerInfo != null) outfit = networkedPlayerInfo.DefaultOutfit;
+        HideReporterBodyOnNextCutIn = !showReporterBody;
         hudManager.KillOverlay.ShowMeeting(meetingCalledAnimation, outfit);
         yield return hudManager.KillOverlay.WaitForFinish();
+        HideReporterBodyOnNextCutIn = false;
         var orderedDeadBodies = Helpers.AllDeadBodies(true).OrderBy(b => b == null ? 64 : b.ParentId).ToArray();
         ModMeetingIntroInit(meetingHud.MeetingIntro, reporterData, orderedDeadBodies);
         foreach (var d in orderedDeadBodies) if (d) GameObject.Destroy(d.gameObject);
@@ -511,7 +526,8 @@ public static class MeetingHudExtension
         { RelatedTag = tag });
     }
 
-    internal static void ModStartMeeting(PlayerControl reporter, NetworkedPlayerInfo? deadBody, ReportType reportType)
+    /// <param name="consumeEmergencyButton">緊急会議のとき、通報者の緊急ボタンの使用回数を減らすかどうか。</param>
+    internal static void ModStartMeeting(PlayerControl reporter, NetworkedPlayerInfo? deadBody, ReportType reportType, bool showReporterBody = true, bool consumeEmergencyButton = true)
     {
         RecordMeetingStart(reporter, deadBody);
 
@@ -519,13 +535,13 @@ public static class MeetingHudExtension
         PlayerModInfo.RpcSharePreMeetingPoint.Invoke((AmongUsLLImpl.LocalPlayer.PlayerId, GamePlayer.LocalPlayer?.Position ?? VVector2.Zero));
 
         //ShipStatus.StartMeeting ここから
-        AmongUsLLImpl.ShipStatusInstance.StartCoroutine(ModCoStartMeeting(reporter, deadBody, reportType).WrapToIl2Cpp());
+        AmongUsLLImpl.ShipStatusInstance.StartCoroutine(ModCoStartMeeting(reporter, deadBody, reportType, showReporterBody).WrapToIl2Cpp());
         //ShipStatus.StartMeeting ここまで
         if (reporter.AmOwner)
         {
             if (reportType == ReportType.EmergencyMeeting)
             {
-                reporter.RemainingEmergencies--;
+                if (consumeEmergencyButton) reporter.RemainingEmergencies--;
                 DataManager.Player.Stats.IncrementStat(StatID.EmergenciesCalled);
                 return;
             }

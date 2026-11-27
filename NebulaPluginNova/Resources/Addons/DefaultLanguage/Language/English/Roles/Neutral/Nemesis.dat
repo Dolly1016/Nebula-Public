@@ -1,0 +1,57 @@
+# Assignable
+
+"role.nemesis.name" : "Nemesis"
+"role.nemesis.short" : "Nms"
+"role.nemesis.blurb" : "See through everything"
+
+# Document
+
+"role.nemesis.doc" : "A neutral role that can guess other players' roles during meetings.<br>A wrong guess does not kill the Nemesis as long as allowed misses remain."
+"role.nemesis.winCond" : "Guess correctly <var>%NUM%</var> times."
+
+# Options
+
+"options.role.nemesis.detail" : "The Nemesis guesses other players' roles,<br>and wins alone after guessing correctly the required number of times."
+"options.role.nemesis.numOfGuessToWin" : "Correct Guesses Required to Win"
+"options.role.nemesis.numOfGuessPerMeeting" : "Guesses per Meeting"
+"options.role.nemesis.numOfMissAllowed" : "Allowed Misses"
+"options.role.nemesis.disableGuessAfterMiss" : "Cannot Guess after a Miss in the Same Meeting"
+
+# Game
+
+"role.nemesis.leftGuess" : "Guesses to Win"
+"role.nemesis.leftMiss" : "Misses Left"
+"role.nemesis.taskText" : "Guess correctly"
+
+# Stats
+
+"stats.nemesis.guess" : "Guesses"
+"stats.nemesis.misguess" : "Wrong guesses"
+
+# Team
+
+"end.detail.nemesis.win" : "Nemesis Won"
+
+"teams.nemesis" : "Nemesis"
+"end.nemesis" : "Nemesis%EXTRA% Wins"
+
+# Document
+
+"document.tip.winCond.teams.nemesis" : "Nemesis"
+
+"document.tip.winCond.nemesis.title" : "Special Victory"
+"document.tip.winCond.nemesis" : "Wins after guessing correctly <var>%NUM%</var> times."
+
+# Titles
+
+"achievement.nemesis.common1.title" : "Retribution"
+"achievement.nemesis.common1.goal" : "Succeed in guessing once."
+
+"achievement.nemesis.another1.title" : "I Was Sure of It"
+"achievement.nemesis.another1.goal" : "Die from a failed guess."
+"achievement.nemesis.another1.splitted.2" : "Sure of It"
+
+"achievement.nemesis.challenge.title" : "Unwavering Goddess of Indignation"
+"achievement.nemesis.challenge.goal" : "In a game with a Guesser, win as the only player who guessed successfully."
+"achievement.nemesis.challenge.cond" : "Can be earned even if other players failed their guesses"
+"achievement.nemesis.challenge.splitted.0" : "Unwavering "

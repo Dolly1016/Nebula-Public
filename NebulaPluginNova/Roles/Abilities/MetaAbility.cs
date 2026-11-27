@@ -51,7 +51,6 @@ public class MetaAbility : DependentLifespan, IGameOperator, IModule
         circleButton.Visibility = (button) => true;
         circleButton.OnClick = (button) => OpenCircleWindow();
 
-        if (DebugTools.DebugMode) new DebugAbility().Register(this);
     }
 
     static private Image buttonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.MetaActionButton.png", 115f);

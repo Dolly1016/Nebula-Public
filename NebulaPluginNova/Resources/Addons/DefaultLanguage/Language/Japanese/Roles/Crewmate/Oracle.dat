@@ -57,3 +57,8 @@
 "achievement.oracle.challenge.title" : "我々の見解"
 "achievement.oracle.challenge.goal" : "占ったインポスターが1人以上クルーメイトに推察され、<br>マッドメイト除くクルーメイトを一人も追放せず勝利する。"
 "achievement.oracle.challenge.splitted.0" : "我々の"
+
+"achievement.oracle.common2.title" : "人間観察"
+"achievement.oracle.common2.goal" : "通算で30回プレイヤーを占う。"
+"achievement.oracle.common2.flavor" : ""占卜の秘訣は、ひとを見ることよ。<br>ひとの心の中にこそ、神がいるのだから。""
+"achievement.oracle.common2.splitted.2" : "観察"

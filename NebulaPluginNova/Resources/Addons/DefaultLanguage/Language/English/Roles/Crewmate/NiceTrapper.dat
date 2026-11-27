@@ -38,3 +38,6 @@
 "achievement.niceTrapper.challenge.cond" : "The number of tracked players resets each meeting"
 "achievement.niceTrapper.challenge.flavor" : ""But I really don't know where he died." —From the Torn Minutes"
 "achievement.niceTrapper.challenge.splitted.2" : "Detective"
+
+"achievement.niceTrapper.common2.title" : "Every Single Move"
+"achievement.niceTrapper.common2.goal" : "Detect players with Comm Traps a total of 100 times."

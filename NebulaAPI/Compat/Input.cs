@@ -47,13 +47,29 @@ public enum VirtualKeyInput
     /// </summary>
     AidAction,
     /// <summary>
-    /// パーク発動操作。
+    /// 1番目のパークアクション。
     /// </summary>
     PerkAction1,
     /// <summary>
-    /// パーク発動操作(人外専用パーク)。
+    /// 2番目のパークアクション。
     /// </summary>
     PerkAction2,
+    /// <summary>
+    /// 3番目のパークアクション。
+    /// </summary>
+    PerkAction3,
+    /// <summary>
+    /// 4番目のパークアクション。
+    /// </summary>
+    PerkAction4,
+    /// <summary>
+    /// 5番目のパークアクション。
+    /// </summary>
+    PerkAction5,
+    /// <summary>
+    /// 6番目のパークアクション。
+    /// </summary>
+    PerkAction6,
     /// <summary>
     /// メタアクション操作。
     /// </summary>
@@ -62,14 +78,6 @@ public enum VirtualKeyInput
     /// スクリーンショット操作。
     /// </summary>
     Screenshot,
-    /// <summary>
-    /// ボイスチャットのミュート操作。
-    /// </summary>
-    Mute,
-    /// <summary>
-    /// ボイスチャットのラジオ切り替え操作。
-    /// </summary>
-    VCRadio,
     /// <summary>
     /// ヘルプ画面を開く操作。
     /// </summary>

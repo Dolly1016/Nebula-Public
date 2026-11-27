@@ -39,6 +39,10 @@
 "achievement.jackal.challenge.flavor" : ""Let's have a heated battle!""
 "achievement.jackal.challenge.splitted.0" : "Bloody Fierce "
 
+"achievement.jackal.common2.title" : "Let's Get Along"
+"achievement.jackal.common2.goal" : "Tie the vote with an Impostor and escape exile."
+"achievement.jackal.common2.cond" : "Both must receive 2 or more votes"
+
 # Team
 
 "end.detail.jackal.win" : "Jackal win"

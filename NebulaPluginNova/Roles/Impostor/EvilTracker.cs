@@ -104,7 +104,7 @@ public class EvilTracker : DefinedSingleAbilityRoleTemplate<EvilTracker.Ability>
     static private readonly FloatConfiguration UpdateArrowIntervalOption = NebulaAPI.Configurations.Configuration("options.role.evilTracker.updateArrowInterval", (0f, 30f, 2.5f), 10f, FloatConfigurationDecorator.Second);
     static private readonly BoolConfiguration TrackImpostorsOption = NebulaAPI.Configurations.Configuration("options.role.evilTracker.trackImpostors", false);
     static private readonly BoolConfiguration ShowTrackingTargetOnMapOption = NebulaAPI.Configurations.Configuration("options.role.evilTracker.showTrackingTargetOnMap", false);
-    static private readonly BoolConfiguration CanCheckTrackingTasksInTaskPhaseOption = NebulaAPI.Configurations.Configuration("options.role.evilTracker.canCheckTrackingTasksInTaskPhase", false);
+    static private readonly BoolConfiguration CanCheckTrackingTasksInTaskPhaseOption = NebulaAPI.Configurations.Configuration("options.role.evilTracker.canCheckTrackingTasksInTaskPhase", false, () => TaskTrackingOption.GetValue() != 0);
     static private readonly BoolConfiguration ShowWhereTrackingIsOption = NebulaAPI.Configurations.Configuration("options.role.evilTracker.showWhereTrackingIs", false);
     //private NebulaConfiguration ShowRoomWhereTrackingTargetIsOption = null!;
 

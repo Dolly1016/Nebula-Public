@@ -1,0 +1,85 @@
+# Assignable
+
+"role.superstar.name" : "スーパースター"
+"role.superstar.short" : "ス"
+"role.superstar.blurb" : "世界中の目を奪う"
+
+# Document
+
+"role.superstar.doc" : "ダンスを踊ってプレイヤーにランダムな効果を与える第三陣営です。"
+"role.superstar.winCond" : "ダンスを<var>%NUM%</var>回成功させる。"
+"role.superstar.ability.title" : "固有能力 "スーパースターの忘れえぬステージ""
+"role.superstar.ability.main" : "スーパースターは体を小刻みに動かしてダンスを踊れます。<br><var>%TIME%</var>秒間ダンスを続けるたびに、全プレイヤーに共通してランダムな効果をもたらします。"
+"role.superstar.ability.dance" : "<title>ダンス</title>その場で小刻みに動き続けてダンスを踊ります。ボタンクリック/キー入力では<b>発動できません</b>。<br>ボタンのタイマーが上がりきるまでダンスを踊ると、全プレイヤーにランダムな効果をもたらします。"
+
+# Options
+
+"options.role.superstar.detail" : "スーパースターは踊ってプレイヤーにランダムな効果を与える第三陣営です。"
+"options.role.superstar.danceDuration" : "ダンスに必要な時間"
+"options.role.superstar.danceCoolDown" : "ダンスクールダウン"
+"options.role.superstar.numOfDancesToWin" : "勝利に必要なダンス回数"
+"options.role.superstar.group.speedUp" : "移動速度上昇効果の設定"
+"options.role.superstar.speedUp.duration" : "効果時間"
+"options.role.superstar.speedUp.ratio" : "移動速度倍率"
+"options.role.superstar.group.speedDown" : "移動速度低下効果の設定"
+"options.role.superstar.speedDown.duration" : "効果時間"
+"options.role.superstar.speedDown.ratio" : "移動速度倍率"
+"options.role.superstar.group.vision" : "視界縮小効果の設定"
+"options.role.superstar.vision.duration" : "効果時間"
+"options.role.superstar.vision.ratio" : "視界倍率"
+"options.role.superstar.group.flip" : "左右反転効果の設定"
+"options.role.superstar.flip.duration" : "効果時間"
+"options.role.superstar.group.morph" : "変身効果の設定"
+"options.role.superstar.morph.duration" : "効果時間"
+"options.role.superstar.group.screen" : "表示範囲拡大効果の設定"
+"options.role.superstar.screen.duration" : "効果時間"
+"options.role.superstar.screen.ratio" : "表示範囲倍率"
+"options.role.superstar.group.mosaic" : "モザイク効果の設定"
+"options.role.superstar.mosaic.duration" : "効果時間"
+"options.role.superstar.mosaic.strength" : "モザイクの強さ"
+
+# Game
+
+"role.superstar.taskText" : "ダンスを成功させる"
+
+# Stats
+
+"stats.superstar.dance" : "ダンスの成功回数"
+
+# Titles
+
+"achievement.superstar.common1.title" : "巨星の来臨"
+"achievement.superstar.common1.goal" : "1回のタスクフェイズで3回ダンスを踊る。"
+
+"achievement.superstar.common2.title" : "ルヴュ・デ・ヴィ"
+"achievement.superstar.common2.goal" : "自身のダンスによって1ゲームで全種類の効果を発動させる。"
+
+"achievement.superstar.another1.title" : "人類には早すぎた"
+"achievement.superstar.another1.goal" : "初めて踊った直後の会議で追放されるか推測されて死亡する。"
+"achievement.superstar.another1.flavor" : ""目が合ったら破裂しちゃう！この心臓が！" ―署名の無い回顧録"
+"achievement.superstar.another1.splitted.2" : "早すぎた"
+
+"achievement.superstar.common3.title" : "世界行脚"
+"achievement.superstar.common3.goal" : "通算で50回ダンスを踊る。"
+"achievement.superstar.common3.splitted.2" : "行脚"
+
+"achievement.superstar.challenge.title" : "銀河たるスターダム"
+"achievement.superstar.challenge.goal" : "自身を除く5人以上がダンスを踊り、<br>5人以上が自身のダンスを目撃した上で勝利する。"
+"achievement.superstar.challenge.flavor" : ""あの銀河の求心力こそ、彼の煌めきそのものだ" ―署名の無い回顧録"
+"achievement.superstar.challenge.splitted.0" : "銀河たる"
+
+# Team
+
+"end.detail.superstar.win" : "スーパースター勝利"
+
+"teams.superstar" : "スーパースター"
+"end.superstar" : "スーパースター%EXTRA%勝利"
+
+# Document
+
+"document.tip.winCond.teams.superstar" : "スーパースター"
+
+"document.tip.winCond.superstar.title" : "特殊勝利"
+"document.tip.winCond.superstar" : "指定回数のダンスを成功させると勝利します。"
+
+"ui.action.superstar.pause" : "押下している間、踊ってもダンスが進行しません。"

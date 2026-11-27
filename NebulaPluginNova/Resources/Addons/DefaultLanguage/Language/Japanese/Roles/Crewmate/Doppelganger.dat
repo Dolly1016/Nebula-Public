@@ -49,6 +49,10 @@
 "achievement.doppelganger.challenge.splitted.0" : "頼れる"
 "achievement.doppelganger.challenge.splitted.2" : "相棒"
 
+"achievement.doppelganger.common2.title" : "どっちが命だか"
+"achievement.doppelganger.common2.goal" : "幻影と位置をスワップして累計で200m移動する。"
+"achievement.doppelganger.common2.flavor" : ""こっちだよ!!こっち!!" ―浪漫戯画"
+
 "stats.doppelganger.summon" : "幻影の召喚回数"
 "stats.doppelganger.swapDistance" : "位置スワップによる総移動距離"
 "stats.doppelganger.swap" : "幻影との位置スワップ回数"

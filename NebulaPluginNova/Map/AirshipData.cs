@@ -157,7 +157,6 @@ public class AirshipData : MapData
         new(24.5f, 0.8f, MapObjectType.SmallOpened | MapObjectType.Reachable), //シャワー右
         new(17.9f, 4.9f, MapObjectType.SmallInCorner), //シャワー上
         new(21.0f, -2.2f, MapObjectType.SmallOrTabletopOutOfSight), //シャワー下
-        new(19.2f, -9.95f, MapObjectType.SmallOpened), //シャワー左
         new(23.0f, -2.1f, MapObjectType.SmallInCorner | MapObjectType.SmallOrTabletopOutOfSight), //シャワー右下
         new(20.7f, 2.5f, MapObjectType.SmallOrTabletopOutOfSight), //シャワー通路奥
         new(24.45f, 2.72f, MapObjectType.SmallInCorner), //シャワー通路奥右

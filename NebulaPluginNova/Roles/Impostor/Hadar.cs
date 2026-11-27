@@ -63,7 +63,7 @@ public class Hadar : DefinedSingleAbilityRoleTemplate<Hadar.Ability>, DefinedRol
         }
     }
 
-    //MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
+    MultipleAssignmentType DefinedRole.MultipleAssignment => MultipleAssignmentType.Allowed;
 
     static private readonly Image diveButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.HadarHideButton.png", 115f);
     static private readonly Image gushButtonSprite = SpriteLoader.FromResource("Nebula.Resources.Buttons.HadarAppearButton.png", 115f);
@@ -109,6 +109,8 @@ public class Hadar : DefinedSingleAbilityRoleTemplate<Hadar.Ability>, DefinedRol
                     acTokenAnother.Value.triggered = true;
                     StatsDive.Progress();
                     lastDivePoint = myPos;
+
+                    if (MyPlayer.HoldingAnyDeadBody) MyPlayer.ReleaseDeadBody();
 
                     MyPlayer.VanillaPlayer.ModDive(true);
                     MyPlayer.VanillaPlayer.gameObject.layer = LayerExpansion.GetGhostLayer();

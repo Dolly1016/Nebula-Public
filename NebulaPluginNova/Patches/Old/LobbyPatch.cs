@@ -487,9 +487,15 @@ public class MarketplaceConsolePatch
 [HarmonyPatch(typeof(OptionsConsole), nameof(OptionsConsole.CanUse))]
 public class OptionsConsoleCanUsePatch
 {
-    public static void Prefix(OptionsConsole __instance)
+    public static bool Prefix(OptionsConsole __instance, [HarmonyArgument(1)] ref bool canUse, [HarmonyArgument(2)] ref bool couldUse)
     {
+        if (NebulaManager.Instance.HasSomeUI)
+        {
+            canUse = couldUse = false;
+            return false;
+        }
         __instance.HostOnly = false;
+        return true;
     }
 }
 

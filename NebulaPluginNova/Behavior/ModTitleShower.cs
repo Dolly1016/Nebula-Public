@@ -9,23 +9,24 @@ namespace Nebula.Behavior;
 public class PlayerTitle
 {
     INebulaAchievement?[] achievements;
-    Nebula.Modules.GUIWidget.TitlePartType?[] partTypes;
+    string? localizedText;
 
-    public PlayerTitle(INebulaAchievement?[] achievements, Nebula.Modules.GUIWidget.TitlePartType?[]? partTypes = null)
+    public PlayerTitle(INebulaAchievement?[] achievements)
     {
         this.achievements = achievements;
-        this.partTypes = partTypes ?? new Nebula.Modules.GUIWidget.TitlePartType?[achievements.Length];
     }
 
-    private string? GetPartTranslationKey(int index, Nebula.Modules.GUIWidget.TitlePartType positionalType)
+    /// <summary>カスタム称号。送り手の翻訳済みの称号名をそのまま表示する。</summary>
+    /// <param name="achievements">称号の詳細表示に使う、パーツとして使われた称号</param>
+    public PlayerTitle(string localizedText, INebulaAchievement?[] achievements)
     {
-        var type = (index < partTypes.Length ? partTypes[index] : null) ?? positionalType;
-        return achievements[index]?.GetPartTranslationKey(type);
+        this.achievements = achievements;
+        this.localizedText = localizedText;
     }
 
     public GUIWidget? GetDetailWidget()
     {
-        if (achievements.Length == 1)
+        if (localizedText == null && achievements.Length == 1)
         {
             return achievements[0]?.GetOverlayWidget(false, true, false, true, true);
         }
@@ -37,20 +38,8 @@ public class PlayerTitle
 
     public string GetLocalizedText()
     {
-        if(achievements.Length == 1)
-        {
-            return Language.TranslateIfNotNull(achievements[0]?.TranslationKey);
-        }
-        else
-        {
-            string text = Language.TranslateIfNotNull(GetPartTranslationKey(0, Nebula.Modules.GUIWidget.TitlePartType.Prefix));
-            for(int i = 1; i < achievements.Length - 1; i++)
-            {
-                text += Language.TranslateIfNotNull(GetPartTranslationKey(i, Nebula.Modules.GUIWidget.TitlePartType.Infix));
-            }
-            text += Language.TranslateIfNotNull(GetPartTranslationKey(achievements.Length - 1, Nebula.Modules.GUIWidget.TitlePartType.Suffix));
-            return text;
-        }
+        if (localizedText != null) return localizedText;
+        return Language.TranslateIfNotNull(achievements.FirstOrDefault()?.TranslationKey);
     }
 }
 public class ModTitleShower : MonoBehaviour
@@ -123,12 +112,25 @@ public class ModTitleShower : MonoBehaviour
                 return SetTitle(null);
             }
         }
+        else if (achievement[0] == NebulaAchievementManager.SharedCustomTitleMarker && achievement.Length >= 2)
+        {
+            //カスタム称号は「目印, 翻訳済みの称号名, 使用している称号のID...」
+            var text = SanitizeCustomTitle(achievement[1]);
+            if (text.Length == 0) return SetTitle(null);
+            return SetTitle(new(text, achievement.Skip(2).Select(a => NebulaAchievementManager.GetAchievement(a, out var ach) ? ach : null).Where(a => a != null).ToArray()));
+        }
         else
         {
-            //各要素は「称号ID」または、のりを使った場合「称号ID#種類番号」
-            var decoded = achievement.Select(a => NebulaAchievementManager.DecodeTitlePart(a, out var ach, out var type) ? ((INebulaAchievement?)ach, type) : ((INebulaAchievement?)null, (Nebula.Modules.GUIWidget.TitlePartType?)null)).ToArray();
-            return SetTitle(new(decoded.Select(d => d.Item1).ToArray(), decoded.Select(d => d.Item2).ToArray()));
+            return SetTitle(null);
         }
+    }
+
+    /// <summary>リッチテキストのタグを無効にし、長すぎる称号名を切り詰める</summary>
+    static private string SanitizeCustomTitle(string text)
+    {
+        text = new string(text.Where(c => !char.IsControl(c) && c != '<' && c != '>').ToArray()).Trim();
+        if (text.Length > NebulaAchievementManager.MaxSharedCustomTitleLength) text = text.Substring(0, NebulaAchievementManager.MaxSharedCustomTitleLength);
+        return text;
     }
     public PlayerTitle? SetTitle(PlayerTitle? title)
     {

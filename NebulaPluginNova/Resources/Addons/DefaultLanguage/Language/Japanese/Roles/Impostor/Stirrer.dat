@@ -57,3 +57,6 @@
 "achievement.stirrer.challenge.cond" : "一度のチャージの付与数: 3以下+付与クールダウン: 10秒以上"
 "achievement.stirrer.challenge.splitted.0" : "偽りの"
 "achievement.stirrer.challenge.splitted.2" : "北斗七星"
+
+"achievement.stirrer.common2.title" : "擾乱"
+"achievement.stirrer.common2.goal" : "偽の緊急サボタージュを累計で30回発動する。"

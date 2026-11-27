@@ -33,6 +33,33 @@ public enum KillResult
     Rejected,
 }
 
+/// <summary>
+/// 効果の良し悪しを表します。
+/// </summary>
+public enum PlayerAttributeValence
+{
+    /// <summary>
+    /// 正の効果です。
+    /// </summary>
+    Positive,
+    /// <summary>
+    /// 負の効果です。
+    /// </summary>
+    Negative,
+    /// <summary>
+    /// 良くも悪くもない効果です。
+    /// </summary>
+    Neutral,
+    /// <summary>
+    /// 倍率が1より大きいときに正の効果、1より小さいときに負の効果です。
+    /// </summary>
+    FollowRatio,
+    /// <summary>
+    /// 倍率が1より小さいときに正の効果、1より大きいときに負の効果です。
+    /// </summary>
+    InvertRatio,
+}
+
 public interface IPlayerAttribute
 {
     internal int Id { get; }
@@ -43,6 +70,11 @@ public interface IPlayerAttribute
     /// 分類上の属性を取得します。
     /// </summary>
     IPlayerAttribute CategorizedAttribute { get; }
+
+    /// <summary>
+    /// 効果の良し悪しを取得します。
+    /// </summary>
+    PlayerAttributeValence Valence { get; }
 
     /// <summary>
     /// この属性のアイコンを指定します。
@@ -518,7 +550,18 @@ public interface Player : ICommandExecutor, IArchivedPlayer, IPlayerlike
 
     // ReportAPI
     void ReportDeadBody(Player deadBody, bool canInvokeInSabo = true, bool consumeEmergencyButton = false);
-    void RequestEmergencyMeeting(bool canInvokeInSabo = false, bool consumeEmergencyButton = true);
+    /// <summary>
+    /// 緊急会議を要求します。
+    /// </summary>
+    /// <param name="canInvokeInSabo">サボタージュ中でも会議を開けるかどうか。</param>
+    /// <param name="consumeEmergencyButton">緊急ボタンの使用回数を消費するかどうか。</param>
+    /// <param name="showReporterBody">会議のカットインに通報者の身体を表示するかどうか。falseの場合、ボタンを押す手だけが表示されます。</param>
+    /// <param name="ignoreReporterDeath">通報者が死亡していても会議を開くかどうか。</param>
+    void RequestEmergencyMeeting(bool canInvokeInSabo = false, bool consumeEmergencyButton = true, bool showReporterBody = true, bool ignoreReporterDeath = false);
+    /// <summary>
+    /// 既存のアドオンとの互換性のために残しているオーバーロードです。
+    /// </summary>
+    void RequestEmergencyMeeting(bool canInvokeInSabo, bool consumeEmergencyButton) => RequestEmergencyMeeting(canInvokeInSabo, consumeEmergencyButton, true);
 
 
     // AttributeAPI
@@ -597,6 +640,11 @@ public interface Player : ICommandExecutor, IArchivedPlayer, IPlayerlike
     /// </summary>
     /// <returns></returns>
     IEnumerable<(IPlayerAttribute attribute, float percentage)> GetAttributes();
+
+    /// <summary>
+    /// 現在のプレイヤーサイズを取得します。
+    /// </summary>
+    Virial.Compat.Vector2 Size { get; }
 
 
 
@@ -692,7 +740,6 @@ public interface Player : ICommandExecutor, IArchivedPlayer, IPlayerlike
     /// 全ての能力を返します。
     /// </summary>
     IEnumerable<IPlayerAbility> AllAbilities => AllAssigned().Select(a => a.MyAbilities).Smooth()!.Concat(NonAssignableAbilities);
-
 
     /// <summary>
     /// アビリティを付与します。

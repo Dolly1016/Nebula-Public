@@ -38,4 +38,7 @@
 "achievement.seer.challenge2.cond" : "スキップ票および白票投票をした場合クリア不可+投票回数: 3回以上"
 "achievement.seer.challenge2.splitted.1" : "見る"
 
+"achievement.seer.common2.title" : "刹那を見る者"
+"achievement.seer.common2.goal" : "通算で100回、フラッシュを見る。"
+
 "stats.seer.flash" : "フラッシュを見た回数"

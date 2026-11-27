@@ -172,14 +172,22 @@ public class Reaper : DefinedRoleTemplate, DefinedRole, IAssignableDocument
                     break;
                 case 5:
                     //Fungle
+                    int inMapId = NebulaAsset.GetInMapId(5);
+
                     GetVent("NorthWestJungleVent")!.Center = activate ? GetVent("SouthWestJungleVent") : null;
                     GetVent("SouthWestJungleVent")!.Center = activate ? GetVent("NorthWestJungleVent") : null;
 
-                    GetVent("NorthEastJungleVent")!.Center = activate ? GetVent("SouthEastJungleVent") : null;
-                    GetVent("SouthEastJungleVent")!.Center = activate ? GetVent("NorthEastJungleVent") : null;
+                    if (inMapId != 4 && inMapId != 5)
+                    {
+                        GetVent("NorthEastJungleVent")!.Center = activate ? GetVent("SouthEastJungleVent") : null;
+                        GetVent("SouthEastJungleVent")!.Center = activate ? GetVent("NorthEastJungleVent") : null;
+                    }
 
-                    GetVent("StorageVent")!.Center = activate ? GetVent("LookoutVent") : null;
-                    GetVent("LookoutVent")!.Center = activate ? GetVent("StorageVent") : null;
+                    if (inMapId < 4)
+                    {
+                        GetVent("StorageVent")!.Center = activate ? GetVent("LookoutVent") : null;
+                        GetVent("LookoutVent")!.Center = activate ? GetVent("StorageVent") : null;
+                    }
 
                     if (GetVent("MiningPitVent") != null && GetVent("GemVent") != null)
                     {

@@ -70,6 +70,13 @@ public class Camouflager : DefinedSingleAbilityRoleTemplate<Camouflager.Ability>
                     if (camouflageButton.IsInEffect) RpcCamouflage.Invoke(new(MyPlayer.PlayerId, false));
                 }, camouflageButton);
                 GameOperatorManager.Instance?.Subscribe<PlayerMurderedEvent>(ev => acTokenChallenge.Value.killed++, this);
+                //カモフラージュ中、キルされたプレイヤーと自身を含めて5人以上が集まる場所でキルする
+                GameOperatorManager.Instance?.Subscribe<PlayerKillPlayerEvent>(ev =>
+                {
+                    if (ev.Murderer != MyPlayer || !camouflageButton.IsInEffect) return;
+                    var killPos = ev.Dead.Position;
+                    if (GamePlayer.AllPlayers.Count(p => (!p.IsDead || p == ev.Dead) && p.Position.Distance(killPos) < 2.5f) >= 5) new StaticAchievementToken("camouflager.common2");
+                }, this);
             }
         }
 

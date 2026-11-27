@@ -42,10 +42,5 @@ static internal class SkeldModification
         fan.gameObject.layer = LayerExpansion.GetShipLayer();
 
         for (int i = 0; i < ship.AllDoors.Count; i++) ship.AllDoors[i].Id = i;
-
-        if (GeneralConfigurations.UseVoiceChatOption)
-        {
-            CameraVC.Activate((new(-7.15f, 1.67f), 0), (new(-17.67f, -4.54f), 0), (new(0.54f, -6.18f), 0), (new(13.12f, -3.81f), 0));
-        }
     }
 }

@@ -35,10 +35,6 @@
 			<Link>LinkedResources\nebula_asset</Link>
 			<LogicalName>Nebula.Resources.Assets.nebula_asset</LogicalName>
 		</EmbeddedResource>
-		<EmbeddedResource Include="$(AmongUsRelease)\Interstellar.dll">
-			<Link>LinkedResources\Interstellar.dll</Link>
-			<LogicalName>Nebula.Resources.Interstellar.dll</LogicalName>
-		</EmbeddedResource>
 	</ItemGroup>
 
 	<Target Name="RenameEmbeddedResources" AfterTargets="Build">

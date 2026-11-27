@@ -18,7 +18,7 @@ namespace Nebula.Roles.Impostor;
 [NebulaRPCHolder]
 public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitation, DefinedRole, IAssignableDocument
 {
-    private Sniper() : base("sniper", VColor.ImpostorColor, RoleCategory.ImpostorRole, Impostor.MyTeam, [SnipeCoolDownOption, ShotSizeOption,ShotEffectiveRangeOption,ShotNoticeRangeOption,StoreRifleOnFireOption,StoreRifleOnUsingUtilityOption,CanSeeRifleInShadowOption,CanKillHidingPlayerOption,AimAssistOption,DelayInAimAssistOption, CanKillImpostorOption]) {
+    private Sniper() : base("sniper", VColor.ImpostorColor, RoleCategory.ImpostorRole, Impostor.MyTeam, [SnipeCoolDownOption, ShotSizeOption,ShotEffectiveRangeOption,ShotNoticeRangeOption,StoreRifleOnFireOption,StoreRifleOnUsingUtilityOption,CanSeeRifleInShadowOption,CanKillHidingPlayerOption,CanKillInvisiblePlayerOption,AimAssistOption,DelayInAimAssistOption, CanKillImpostorOption]) {
         ConfigurationHolder?.AddTags(ConfigurationTags.TagFunny, ConfigurationTags.TagDifficult);
         ConfigurationHolder!.Illustration = new NebulaSpriteLoader("Assets/NebulaAssets/Sprites/Configurations/Sniper.png");
 
@@ -38,6 +38,7 @@ public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitat
     static private BoolConfiguration StoreRifleOnUsingUtilityOption = NebulaAPI.Configurations.Configuration("options.role.sniper.storeRifleOnUsingUtility", false);
     static private BoolConfiguration CanSeeRifleInShadowOption = NebulaAPI.Configurations.Configuration("options.role.sniper.canSeeRifleInShadow", false);
     static private BoolConfiguration CanKillHidingPlayerOption = NebulaAPI.Configurations.Configuration("options.role.sniper.canKillHidingPlayer", false);
+    static private BoolConfiguration CanKillInvisiblePlayerOption = NebulaAPI.Configurations.Configuration("options.role.sniper.canKillInvisiblePlayer", false);
     static private BoolConfiguration AimAssistOption = NebulaAPI.Configurations.Configuration("options.role.sniper.aimAssist", false);
     static private FloatConfiguration DelayInAimAssistOption = NebulaAPI.Configurations.Configuration("options.role.sniper.delayInAimAssistActivation", (0f, 20f, 1f), 3f, FloatConfigurationDecorator.Second, () => AimAssistOption);
     static private BoolConfiguration CanKillImpostorOption = NebulaAPI.Configurations.Configuration("options.role.sniper.canKillImpostor", false);
@@ -90,7 +91,7 @@ public class Sniper : DefinedSingleAbilityRoleTemplate<Sniper.Ability>, HasCitat
                 //吹っ飛ばされているプレイヤーは無視しない
 
                 //不可視なプレイヤーは無視
-                if (p.IsInvisible || p.WillDie) continue;
+                if ((!CanKillInvisiblePlayerOption && p.IsInvisible) || p.WillDie) continue;
 
                 var pos = p.TruePosition;
                 VVector2 diff = pos - (VVector2)rendererTransform.GetPositionFast();

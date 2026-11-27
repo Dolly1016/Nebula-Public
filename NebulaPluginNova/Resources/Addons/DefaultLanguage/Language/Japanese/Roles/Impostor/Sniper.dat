@@ -31,6 +31,7 @@
 "options.role.sniper.aimAssist.detail" : "オンにすると、プレイヤーの位置を示すガイド線が表示されるようになります。"
 "options.role.sniper.delayInAimAssistActivation" : "エイムアシスト有効化までの遅延"
 "options.role.sniper.canKillImpostor" : "フレンドリーファイア"
+"options.role.sniper.canKillInvisiblePlayer" : "透明なプレイヤーをキル可能"
 
 # Game
 
@@ -65,8 +66,8 @@
 "achievement.sniper.another1.goal" : "発砲直後の会議で追放されるか推測されて死亡する。"
 
 "achievement.sniper.common2.title" : "空は我が手中にあり"
-"achievement.sniper.common2.goal" : "吹っ飛ばされているプレイヤーをキルする。"
-"achievement.sniper.common2.cond" : "プレイヤーの吹っ飛ばしはカノンの固有能力です。"
+"achievement.sniper.common2.goal" : "フックショット使用中、あるいは吹っ飛ばされている<br>プレイヤーをキルする。"
+"achievement.sniper.common2.cond" : "フックショットはクライマーの固有能力、およびパークの能力+プレイヤーの吹っ飛ばしはカノンの固有能力"
 "achievement.sniper.common2.splitted.0" : "空は"
 
 "achievement.sniper.challenge.title" : "狙撃の名手"

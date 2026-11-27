@@ -31,6 +31,7 @@
 "options.role.sniper.aimAssist.detail" : "When turned on, a guide line indicating the player's position will be displayed."
 "options.role.sniper.delayInAimAssistActivation" : "Delay In Aim Assist Activation"
 "options.role.sniper.canKillImpostor" : "Can Kill Impostor"
+"options.role.sniper.canKillInvisiblePlayer" : "Can Kill Invisible Player"
 
 # Game
 

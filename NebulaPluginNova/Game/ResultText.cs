@@ -59,10 +59,12 @@ internal static class ResultText
     /// <summary>タスクの進み具合。タスクを持たない場合と切断した場合は空。</summary>
     public static string TaskText(GamePlayer player)
     {
-        if (player.IsDisconnected || player.Tasks.Quota <= 0) return "";
+        var tasks = player.Tasks.Unbox();
+        //ノルマが減算されて0になった場合も、減算の経緯が分かるように表示する。
+        if (player.IsDisconnected || (tasks.Quota <= 0 && tasks.QuotaReductionAmount == 0)) return "";
 
         //色でクルーメイトのタスクか偽のタスクかを見分けられるようにする。
-        return $"({player.Tasks.Unbox().ToString(true)})"
+        return $"({tasks.ToResultString()})"
             .Color(player.Tasks.IsCrewmateTask ? PlayerModInfo.CrewTaskColor : PlayerModInfo.FakeTaskColor);
     }
 }
